@@ -1,7 +1,5 @@
 # Multimodal Desktop GUI Agent
 
-## English
-
 ### Project Overview
 
 This is a focused on developing and optimizing a desktop GUI agent powered by multimodal large language models. The agent is expected to understand natural-language instructions, perceive text and interface elements on the screen, plan task steps, and perform desktop operations through mouse and keyboard controls.
