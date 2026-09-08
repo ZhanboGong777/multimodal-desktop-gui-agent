@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "multimodal-desktop-gui-agent"
+version = "0.1.0"
+description = "A multimodal LLM-powered desktop GUI agent prototype."
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

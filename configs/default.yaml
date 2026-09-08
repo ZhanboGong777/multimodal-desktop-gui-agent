@@ -1,0 +1,14 @@
+runtime:
+  device: auto
+
+perception:
+  screenshot_backend: mss
+  ocr_engine: tesseract
+
+control:
+  pyautogui_failsafe: true
+  action_delay_seconds: 0.2
+
+logging:
+  level: INFO
+  directory: outputs/logs
