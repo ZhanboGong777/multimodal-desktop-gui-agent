@@ -86,16 +86,7 @@ Based on the project objective, the initial prototype can adopt a modular design
 
 During the first stage, UI-TARS, the Claude Computer Use Demo, and ScreenAgent should be studied and tested first. OSWorld, SeeClick, OmniParser, Mind2Web, and WebArena can then be used as references during evaluation and optimization.
 
-## 5. Recommended Reading Order
-
-1. UI-TARS: understand the overall technical approach of a visual GUI agent.
-2. Claude Computer Use: understand the interaction loop between a model and desktop-control tools.
-3. ScreenAgent: study planning, execution, reflection, and trajectory recording.
-4. SeeClick and OmniParser: study UI element grounding and screenshot parsing.
-5. OSWorld, Mind2Web, and WebArena: study dataset formats, task design, and evaluation methods.
-
 ---
 
 Research date: 7 September 2026  
-Note: All links in this document point to original papers, official technical documentation, or official project repositories.
 
