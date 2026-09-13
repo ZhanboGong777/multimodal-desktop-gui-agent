@@ -1,12 +1,29 @@
-"""Safely check macOS mouse and keyboard automation support."""
+"""Safely check mouse and keyboard automation support (cross-platform)."""
 
 from __future__ import annotations
 
 import argparse
+import platform
+import sys
 import time
 
 import pyautogui
-from ApplicationServices import AXIsProcessTrusted
+
+IS_MACOS = sys.platform == "darwin"
+
+
+def accessibility_trusted() -> bool | None:
+    """Return macOS Accessibility trust, or None on other platforms."""
+    if not IS_MACOS:
+        return None
+    try:
+        from ApplicationServices import AXIsProcessTrusted
+    except ImportError as exc:
+        raise SystemExit(
+            "pyobjc is required on macOS to read the Accessibility permission.\n"
+            "Install it with: pip install pyobjc-framework-ApplicationServices"
+        ) from exc
+    return bool(AXIsProcessTrusted())
 
 
 def parse_args() -> argparse.Namespace:
@@ -32,19 +49,23 @@ def main() -> int:
 
     screen_width, screen_height = pyautogui.size()
     original_x, original_y = pyautogui.position()
-    trusted = bool(AXIsProcessTrusted())
+    trusted = accessibility_trusted()
 
+    print(f"Platform: {platform.platform()}")
     print(f"Screen size: {screen_width} x {screen_height}")
     print(f"Current mouse position: ({original_x}, {original_y})")
-    print(f"macOS Accessibility permission: {trusted}")
+    if trusted is None:
+        print("macOS Accessibility permission: N/A (not macOS)")
+    else:
+        print(f"macOS Accessibility permission: {trusted}")
 
     if not args.execute:
         print("Dry run completed; no mouse or keyboard action was performed.")
         print("Run again with --execute to perform the reversible control test.")
         return 0
 
-    if not trusted:
-        print("Enable Accessibility permission for Visual Studio Code, then restart it.")
+    if trusted is False:
+        print("Enable Accessibility permission for your terminal or editor, then restart it.")
         return 1
 
     target_x, target_y = nearby_point(
