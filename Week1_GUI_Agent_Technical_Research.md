@@ -1,92 +1,100 @@
-# Week 1 Technical Research: Multimodal LLM-Powered Desktop GUI Agents
+# Week 1 GUI Agent Technical Research Report
 
-## 1. Research Objective
+This week, I reviewed papers, technical documentation, and open-source implementations related to multimodal large language model powered desktop GUI agents. The review focused on UI-TARS, Claude Computer Use, and ScreenAgent. Although their implementation details differ, all three approaches require screen understanding, task planning, action execution, and result feedback. The project should first establish stable screenshot capture, OCR, and mouse and keyboard control modules before connecting a local model or an API-based model.
 
-This research focuses on desktop GUI agents powered by multimodal large language models. The main objective is to understand how these agents perform screen perception, UI element grounding, task decomposition and planning, mouse and keyboard control, result verification, and error recovery. Relevant datasets, evaluation environments, and open-source implementations are also reviewed to support the selection of a technical approach for subsequent development.
+## 1. Research Objectives
 
-## 2. Related Papers and Technical Resources
+This research addresses three questions: which modules form a desktop GUI agent, how existing systems connect multimodal models to desktop-control tools, and which implementation sequence is suitable for this eight-week project. The primary scope follows the project outline and covers UI-TARS, Claude Computer Use, and ScreenAgent, with additional work on interface grounding, datasets, and evaluation.
 
-### 2.1 UI-TARS: Pioneering Automated GUI Interaction with Native Agents
+## 2. Basic Architecture of a GUI Agent
 
-- Paper: [UI-TARS on arXiv](https://arxiv.org/abs/2501.12326)
-- GitHub: [bytedance/UI-TARS](https://github.com/bytedance/UI-TARS)
+A GUI agent receives a user task and the current screen state, then produces mouse or keyboard actions that a local program can execute. After each action, the system captures a new screenshot and checks whether the interface changed as expected. This creates a closed loop:
 
-UI-TARS is a native visual GUI agent that understands interfaces from screenshots and generates mouse and keyboard actions. The paper discusses unified action representation, task reasoning, GUI element grounding, and iterative improvement through interaction trajectories. It is closely aligned with the objective of this project and is particularly useful for studying model input and output formats, action parsing, and coordinate processing.
+**User instruction -> screen perception -> task planning -> action execution -> result feedback**
 
-### 2.2 Claude Computer Use
+1. **Screen perception** captures screenshots and identifies interface elements such as text, buttons, input fields, and icons.
+2. **Task planning** generates the next action from the user instruction and current interface, including clicking, typing, scrolling, and waiting.
+3. **Control** converts model output into mouse and keyboard operations while constraining the action range and execution order.
+4. **Feedback** checks the new screenshot, replans when an action fails or the interface changes unexpectedly, and records the interaction log.
 
-- Official documentation: [Claude Computer Use Tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/computer-use-tool)
-- Official example: [Anthropic Computer Use Demo](https://github.com/anthropics/anthropic-quickstarts/tree/main/computer-use-demo)
+## 3. Representative Technical Approaches
 
-Claude Computer Use controls a desktop through a loop in which the model requests an action, the local application executes it, and an updated screenshot is returned to the model. The official example includes an agent loop, screenshot capture, mouse and keyboard tools, and a container-based isolated environment. It is useful for understanding the interface between a multimodal model and local control tools, as well as security considerations such as environment isolation, confirmation of sensitive actions, and prompt-injection protection.
+### 3.1 UI-TARS
 
-### 2.3 ScreenAgent: A Vision Language Model-driven Computer Control Agent
+UI-TARS directly interprets and grounds interface elements from screenshots, then generates mouse and keyboard actions. It combines perception, reasoning, and action generation in one model, reducing its dependence on the DOM or accessibility tree. Its coordinate representation, action format, and interaction-trajectory training are closely related to this project's desktop-control objective. Related implementations include UI-TARS Desktop and Midscene for browser automation.
 
-- Paper: [ScreenAgent on arXiv](https://arxiv.org/abs/2402.07945)
-- GitHub: [niuzaisheng/ScreenAgent](https://github.com/niuzaisheng/ScreenAgent)
+- GitHub: https://github.com/bytedance/UI-TARS
+- Paper: https://arxiv.org/abs/2501.12326
+- Desktop implementation: https://github.com/bytedance/UI-TARS-desktop
+- Browser automation: https://github.com/web-infra-dev/midscene
 
-ScreenAgent uses screenshots as input and performs computer tasks through mouse and keyboard actions. Its main workflow includes planning, action execution, and reflection. The open-source project provides data, model services, and a desktop control client. It is useful for studying prototype architecture, interaction trajectory recording, and adjustment of future actions based on execution results.
+### 3.2 Claude Computer Use
 
-### 2.4 OSWorld: Benchmarking Multimodal Agents for Open-Ended Tasks in Real Computer Environments
+Claude Computer Use follows a loop between the model and local tools. The model reads a screenshot and requests an action, the local program executes the action, and a new screenshot is returned until the task is complete. This approach clearly separates the model from the executor and emphasizes confirmation for sensitive actions, environment isolation, and prompt-injection protection.
 
-- Paper: [OSWorld on arXiv](https://arxiv.org/abs/2404.07972)
-- GitHub: [xlang-ai/OSWorld](https://github.com/xlang-ai/OSWorld)
+- GitHub: https://github.com/anthropics/claude-quickstarts/tree/main/computer-use-demo
+- Official documentation: https://platform.claude.com/docs/en/agents-and-tools/tool-use/computer-use-tool
 
-OSWorld provides desktop tasks, environment initialization, and automated evaluation in real computer environments. Its tasks cover web applications, office software, file operations, and cross-application workflows. It is useful for designing later test tasks and for studying evaluation based on task success, execution behaviour, and final environment state.
+### 3.3 ScreenAgent
 
-### 2.5 SeeClick: Harnessing GUI Grounding for Advanced Visual GUI Agents
+ScreenAgent divides computer control into planning, execution, and reflection and records the complete interaction trajectory. The open-source project provides model services, data, and a desktop-control client. Its trajectory records preserve screenshots, actions, and results at each step, which helps identify the cause of a failed task.
 
-- Paper: [SeeClick on arXiv](https://arxiv.org/abs/2401.10935)
-- GitHub: [njucckevin/SeeClick](https://github.com/njucckevin/SeeClick)
+- GitHub: https://github.com/niuzaisheng/ScreenAgent
+- Paper: https://arxiv.org/abs/2402.07945
 
-SeeClick treats GUI grounding - locating the correct interface element from a natural-language instruction - as a key capability of visual GUI agents. The project also introduces the ScreenSpot benchmark, which includes desktop, web, and mobile interfaces. This work is relevant to coordinate prediction and grounding-accuracy evaluation for buttons, input fields, icons, and other UI elements.
+### 3.4 Comparison
 
-### 2.6 OmniParser for Pure Vision Based GUI Agent
+| Approach | Interface Understanding | Action Execution | Main Strength |
+| --- | --- | --- | --- |
+| UI-TARS | Direct screenshot understanding and element grounding | The model generates coordinates and actions | End-to-end visual operation |
+| Claude Computer Use | Screenshots are provided as model input | Local tools execute actions in a loop | Clear interface and safety mechanisms |
+| ScreenAgent | Screenshots and interaction history | Planning, execution, and reflection | Modular design and complete trajectory records |
 
-- Paper: [OmniParser on arXiv](https://arxiv.org/abs/2408.00203)
-- GitHub: [microsoft/OmniParser](https://github.com/microsoft/OmniParser)
+## 4. Interface Grounding and Evaluation
 
-OmniParser converts interface screenshots into structured interactive regions with semantic descriptions, helping multimodal models understand and locate screen elements more accurately. It can complement OCR-based perception and can be used to compare a screenshot-only approach with an approach that augments screenshots with structured UI information.
+Interface grounding determines whether an agent can click the correct location. SeeClick treats GUI grounding as a separate task and predicts control coordinates from a textual instruction. OmniParser first converts a screenshot into semantic interactive regions and then provides the parsed result to a planning model. These approaches represent direct coordinate prediction and structured interface parsing and can support later grounding experiments.
 
-### 2.7 Mind2Web: Towards a Generalist Agent for the Web
+- OmniParser paper: https://arxiv.org/abs/2408.00203
+- OmniParser GitHub: https://github.com/microsoft/OmniParser
+- SeeClick paper: https://arxiv.org/abs/2401.10935
+- SeeClick GitHub: https://github.com/njucckevin/SeeClick
 
-- Paper: [Mind2Web on arXiv](https://arxiv.org/abs/2306.06070)
-- GitHub: [OSU-NLP-Group/Mind2Web](https://github.com/OSU-NLP-Group/Mind2Web)
+For evaluation, OSWorld provides tasks and automated validation in real desktop environments. Mind2Web provides natural-language web tasks and human action trajectories. WebArena provides a reproducible web environment and evaluates whether a task is complete from the final environment state. These projects show that a GUI agent should be evaluated on successful task completion, not merely on whether it produced a click action.
 
-Mind2Web is a dataset and evaluation project for general-purpose web agents. It contains natural-language tasks and human action trajectories collected from a wide range of real websites. Although it focuses on web environments, its task descriptions, action sequences, and dataset organization provide useful references for GUI dataset processing and simple task decomposition in this project.
+- OSWorld paper: https://arxiv.org/abs/2404.07972
+- OSWorld GitHub: https://github.com/xlang-ai/OSWorld
+- Mind2Web paper: https://arxiv.org/abs/2306.06070
+- Mind2Web GitHub: https://github.com/OSU-NLP-Group/Mind2Web
+- WebArena paper: https://arxiv.org/abs/2307.13854
+- WebArena GitHub: https://github.com/web-arena-x/webarena
 
-### 2.8 WebArena: A Realistic Web Environment for Building Autonomous Agents
+## 5. Current Technical Challenges
 
-- Paper: [WebArena on arXiv](https://arxiv.org/abs/2307.13854)
-- GitHub: [web-arena-x/webarena](https://github.com/web-arena-x/webarena)
+- Screenshots contain text, icons, and visually similar buttons, so the model must understand both semantics and coordinates.
+- Long tasks contain multiple intermediate states, and one failed action can affect all later steps.
+- Window scaling, screen resolution, and operating-system differences change element positions and require consistent coordinate and screenshot processing.
+- Page loading, pop-up windows, and input focus introduce uncertainty and require waiting, detection, and retry logic.
+- Desktop control can affect real files and accounts, so high-risk actions must be restricted and execution records must be retained.
 
-WebArena provides a reproducible web-interaction environment with long-horizon tasks and evaluates completion using the final state of the environment. Its main value to this project is its evaluation design: an agent should be assessed not only on whether it performed a click, but also on whether the resulting state actually satisfies the user's objective.
+## 6. Initial Technical Route
 
-## 3. Key GitHub Repositories
+The first prototype will use a modular architecture. The perception layer will capture screenshots with MSS and use OpenCV and OCR to extract text and interface regions. The planning layer will define a common model interface that converts the user instruction and interface state into structured actions. The execution layer will use PyAutoGUI and Pynput for mouse and keyboard operations. The feedback and logging module will record each screenshot, action, execution time, and result. Tesseract is used for the initial OCR pipeline test; PaddleOCR will be introduced later for comparison and optimization on Chinese and English desktop interfaces.
 
-| Repository | Main Content | Relevance to This Project |
-| --- | --- | --- |
-| [bytedance/UI-TARS](https://github.com/bytedance/UI-TARS) | GUI agent models, inference deployment, action parsing, and coordinate processing | Reference for model invocation and action output formats |
-| [bytedance/UI-TARS-desktop](https://github.com/bytedance/UI-TARS-desktop) | A desktop application for controlling local computers and browsers | Reference for overall desktop architecture and user interaction |
-| [anthropics/anthropic-quickstarts](https://github.com/anthropics/anthropic-quickstarts/tree/main/computer-use-demo) | Claude Computer Use desktop-control example | Reference for the agent loop, tool wrappers, and environment isolation |
-| [niuzaisheng/ScreenAgent](https://github.com/niuzaisheng/ScreenAgent) | Planning, action, reflection, datasets, and control client | Reference for modular design and trajectory recording |
-| [xlang-ai/OSWorld](https://github.com/xlang-ai/OSWorld) | Real desktop environments, task sets, and automated evaluation | Reference for test design and evaluation metrics |
-| [microsoft/OmniParser](https://github.com/microsoft/OmniParser) | Screenshot parsing, interactive-region detection, and icon understanding | Reference for screen perception and UI element parsing |
-| [njucckevin/SeeClick](https://github.com/njucckevin/SeeClick) | GUI grounding model, training data, and ScreenSpot benchmark | Reference for UI coordinate grounding and accuracy evaluation |
-| [OSU-NLP-Group/Mind2Web](https://github.com/OSU-NLP-Group/Mind2Web) | Real-world web tasks, action trajectories, and evaluation code | Reference for GUI dataset structure and task decomposition |
-| [web-arena-x/webarena](https://github.com/web-arena-x/webarena) | Reproducible web environment and end-to-end task evaluation | Reference for result verification and long-horizon task testing |
+The model interface will support both local deployment and cloud APIs so that the project is not tied to a single model provider. The MacBook will be used for daily development and MPS tests, while the Windows GPU machine will be used for CUDA inference and small-scale LoRA experiments. After the basic closed loop is complete, a fixed task set will be used to compare task success rates across perception methods and models.
 
-## 4. Initial Findings
+For cross-platform support, the perception layer will represent positions with logical coordinates and convert them to global coordinates using the target display's origin offset. The macOS control layer requires Accessibility and Screen Recording permissions, while the Windows implementation must account for display scaling. Platform-specific permissions and dependencies will be checked through delayed imports so that the same codebase can run on macOS and Windows. Linux support remains a later objective.
 
-Most current GUI agents follow the closed-loop workflow below:
+## 7. Research Conclusions
 
-**User instruction -> screen capture and interface parsing -> task decomposition and action planning -> mouse and keyboard execution -> updated screen and result feedback -> error detection and retry**
+The review confirms that a desktop GUI agent depends on a continuous perception, planning, execution, and feedback loop. UI-TARS demonstrates end-to-end visual operation, Claude Computer Use provides a clear interface between a model and local tools, and ScreenAgent demonstrates planning, reflection, and trajectory recording. These findings support a modular prototype with interchangeable model backends, local desktop execution, and detailed logging.
 
-Based on the project objective, the initial prototype can adopt a modular design. Screenshot capture and OCR/interface parsing can provide screen perception; a multimodal large language model can perform task planning and action generation; mouse and keyboard tools can execute the actions; and a unified logging module can record screenshots, actions, execution time, results, and errors at each step.
+## References
 
-During the first stage, UI-TARS, the Claude Computer Use Demo, and ScreenAgent should be studied and tested first. OSWorld, SeeClick, OmniParser, Mind2Web, and WebArena can then be used as references during evaluation and optimization.
-
----
-
-Research date: 7 September 2026  
-
+1. UI-TARS: Pioneering Automated GUI Interaction with Native Agents. Paper: https://arxiv.org/abs/2501.12326; GitHub: https://github.com/bytedance/UI-TARS
+2. Claude Computer Use. Documentation: https://platform.claude.com/docs/en/agents-and-tools/tool-use/computer-use-tool; Example: https://github.com/anthropics/claude-quickstarts/tree/main/computer-use-demo
+3. ScreenAgent: A Vision Language Model-driven Computer Control Agent. Paper: https://arxiv.org/abs/2402.07945; GitHub: https://github.com/niuzaisheng/ScreenAgent
+4. SeeClick: Harnessing GUI Grounding for Advanced Visual GUI Agents. Paper: https://arxiv.org/abs/2401.10935; GitHub: https://github.com/njucckevin/SeeClick
+5. OmniParser for Pure Vision Based GUI Agent. Paper: https://arxiv.org/abs/2408.00203; GitHub: https://github.com/microsoft/OmniParser
+6. OSWorld: Benchmarking Multimodal Agents for Open-Ended Tasks in Real Computer Environments. Paper: https://arxiv.org/abs/2404.07972; GitHub: https://github.com/xlang-ai/OSWorld
+7. Mind2Web: Towards a Generalist Agent for the Web. Paper: https://arxiv.org/abs/2306.06070; GitHub: https://github.com/OSU-NLP-Group/Mind2Web
+8. WebArena: A Realistic Web Environment for Building Autonomous Agents. Paper: https://arxiv.org/abs/2307.13854; GitHub: https://github.com/web-arena-x/webarena
