@@ -1,0 +1,13 @@
+# Week 2 primary OCR backend - CPU build (macOS development machine).
+#
+# Installed separately from the base requirements so that a failure here can
+# never break the Tesseract fallback.
+#
+# PaddleOCR also needs a PaddlePaddle engine, and importing paddleocr succeeds
+# even when the engine is missing, so the engine is listed explicitly.
+#
+# On a CUDA machine use requirements-ocr-gpu.txt instead. Never install
+# "paddlepaddle" and "paddlepaddle-gpu" together: both provide the "paddle"
+# module and the environment breaks.
+paddleocr>=3.0
+paddlepaddle>=3.0
