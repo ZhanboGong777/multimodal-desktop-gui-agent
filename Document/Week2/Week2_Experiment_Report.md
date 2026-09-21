@@ -66,15 +66,16 @@ Both machines ran the environment check and the smoke tests:
 | Image processing smoke test | passed | passed |
 | Control dry run | passed | passed |
 | GPU acceleration | MPS available | **CUDA available: True**, CUDA op PASSED |
-| Unit tests | 165 passed | 148 passed (recorded before the hardening pass) |
+| Unit tests | 165 passed | **165 passed** |
 | Ruff | clean | clean |
 
-The test count matched exactly on both machines before the hardening pass, which
-shows the code carries no platform-dependent branches that change behaviour.
+**The test count matches exactly on both machines (165)**, which shows the code
+carries no platform-dependent branches that change behaviour.
 
-> The Windows figures in this table were recorded before the final hardening pass.
-> Re-running the suite there after pulling that commit is still outstanding; the
-> Mac column already shows the final state (165 tests, 88% coverage).
+> On Windows the first re-run hit 12 `PermissionError`s from pytest's temporary
+> directory being locked - a transient environment problem, since the code under
+> test never ran. The very next run passed completely. See section 2 of
+> `Week2_Windows验证结果.md`.
 
 ## 4. Implementation process
 
@@ -399,7 +400,7 @@ should become a config switch rather than a code change.
 | Ruff | clean |
 | Week 1 scripts still run | all four exit 0 |
 | Platform differences handled | yes; macOS and Windows both verified, plus a Windows display at 150% scaling |
-| Windows node | 148 tests passed before the hardening pass, ruff clean, all demos run, GPU OCR at about 1 080 ms |
+| Windows node | 165 tests passed, ruff clean, all demos run, GPU OCR at about 1 080 ms |
 
 ## 13. Deliverables
 
