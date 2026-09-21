@@ -14,11 +14,12 @@ from gui_agent.perception import capture as capture_module
 from gui_agent.perception.capture import (
     CaptureError,
     CaptureRegion,
-    approximate_fps,
     average_capture_ms,
     capture_frames,
     capture_monitor,
+    capture_only_fps,
     capture_region,
+    effective_sequence_fps,
     list_monitors,
 )
 
@@ -131,9 +132,9 @@ def test_capture_frames_returns_the_requested_count(fake_mss: None) -> None:
 def test_capture_frames_statistics(fake_mss: None) -> None:
     frames = capture_frames(3, 0.0, monitor_index=1)
     assert average_capture_ms(frames) > 0.0
-    assert approximate_fps(frames) > 0.0
+    assert capture_only_fps(frames) > 0.0
     assert average_capture_ms([]) == 0.0
-    assert approximate_fps([]) == 0.0
+    assert capture_only_fps([]) == 0.0
 
 
 @pytest.mark.parametrize(
@@ -143,3 +144,40 @@ def test_capture_frames_statistics(fake_mss: None) -> None:
 def test_capture_frames_rejects_bad_parameters(fake_mss: None, count: int, interval: float) -> None:
     with pytest.raises(CaptureError):
         capture_frames(count, interval)
+
+
+def test_capture_sequence_reports_the_gaps_between_frames(fake_mss: None) -> None:
+    """The reported rate must include the interval, not just the capture cost."""
+    frames = capture_frames(4, 0.02, monitor_index=1)
+
+    # Capture-only throughput ignores the 20 ms wait and is therefore much higher.
+    assert frames.effective_fps < frames.capture_only_fps
+    assert frames.effective_fps == pytest.approx(4 / frames.elapsed_seconds)
+    assert frames.average_capture_ms == pytest.approx(average_capture_ms(frames.frames))
+
+
+def test_capture_sequence_behaves_like_a_list(fake_mss: None) -> None:
+    frames = capture_frames(3, 0.0, monitor_index=1)
+    assert len(frames) == 3
+    assert frames[0].metadata["frame_index"] == 0
+    assert [frame.metadata["frame_index"] for frame in frames] == [0, 1, 2]
+
+
+@pytest.mark.parametrize(
+    ("count", "elapsed", "expected"),
+    [(0, 1.0, 0.0), (5, 0.0, 0.0), (5, 1.0, 5.0), (10, 2.5, 4.0)],
+)
+def test_effective_sequence_fps_formula(count: int, elapsed: float, expected: float) -> None:
+    assert effective_sequence_fps(count, elapsed) == pytest.approx(expected)
+
+
+def test_capture_frames_accepts_a_region(fake_mss: None) -> None:
+    """A sequence can be limited to a region, and keeps the monitor offset."""
+    frames = capture_frames(2, 0.0, monitor_index=1, region=CaptureRegion(10, 20, 40, 30))
+
+    assert len(frames) == 2
+    assert frames[0].image.size == (40, 30)
+    # The region offset is preserved, so a coordinate measured inside the region
+    # still maps back to the right place on the screen.
+    info = frames[0].screen_info
+    assert (info.monitor_left, info.monitor_top) == (10, 20)

@@ -69,3 +69,25 @@ def test_containment_of_disjoint_boxes_is_zero() -> None:
 def test_max_candidates_caps_the_result() -> None:
     candidates = detect_ui_candidates(synthetic_image(), min_area=100, max_candidates=1)
     assert len(candidates) <= 1
+
+
+def test_candidates_inside_excluded_regions_are_dropped() -> None:
+    """Contour candidates must not re-frame text OCR has already located."""
+    image = synthetic_image()  # existing helper in this module
+
+    unfiltered = detect_ui_candidates(image, min_rectangularity=0.0)
+    assert unfiltered, "the synthetic image should produce candidates at all"
+
+    first = unfiltered[0].bounding_box
+    filtered = detect_ui_candidates(
+        image, min_rectangularity=0.0, exclude=[first], exclusion_threshold=0.5
+    )
+    assert len(filtered) < len(unfiltered)
+
+
+def test_rectangularity_filter_can_be_disabled() -> None:
+    """The default is off, because the useful value depends on the screen theme."""
+    image = synthetic_image()
+    assert len(detect_ui_candidates(image, min_rectangularity=0.0)) >= len(
+        detect_ui_candidates(image, min_rectangularity=0.9)
+    )

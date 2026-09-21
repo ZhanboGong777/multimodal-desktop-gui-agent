@@ -5,8 +5,9 @@
 # which is why the extra index is declared here.
 #
 # Adjust the index to match the installed CUDA runtime (cu126 for CUDA 12.6).
-# On Windows use requirements-ocr.txt (CPU) instead. Never install both
-# "paddlepaddle" and "paddlepaddle-gpu".
+# Use this file on any machine with a CUDA GPU, Windows included - the Windows
+# node installs from here successfully. Use requirements-ocr.txt only on machines
+# without a usable GPU. Never install both "paddlepaddle" and "paddlepaddle-gpu".
 --extra-index-url https://www.paddlepaddle.org.cn/packages/stable/cu126/
 paddleocr>=3.0
 paddlepaddle-gpu==3.3.1

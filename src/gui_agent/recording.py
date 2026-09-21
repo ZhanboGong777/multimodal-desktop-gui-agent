@@ -15,6 +15,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from .control.safety import redact_action, redact_result
 from .schemas import ActionResult, DesktopAction, PerceptionResult, UIElement
 
 WEEK2_OUTPUT_DIR = Path("outputs/week2")
@@ -68,9 +69,10 @@ class RunSession:
         return self.save_json(PERCEPTION_FILE, result.model_dump(mode="json"))
 
     def save_action(self, action: DesktopAction, result: ActionResult) -> Path:
+        # Redact on the way out: a typed credential must never reach the file.
         payload = {
-            "action": action.model_dump(mode="json", exclude_none=True),
-            "result": result.model_dump(mode="json", exclude_none=True),
+            "action": redact_action(action),
+            "result": redact_result(result),
         }
         return self.save_json(ACTION_FILE, payload)
 
@@ -96,11 +98,9 @@ def build_run_summary(
         "timestamp": datetime.now(UTC).astimezone().isoformat(timespec="seconds"),
         "platform": platform.platform(),
         "selected_target": selected_target,
-        "action": action.model_dump(mode="json", exclude_none=True) if action else None,
+        "action": redact_action(action) if action else None,
         "dry_run": None if result is None else result.dry_run,
-        "execution_result": None
-        if result is None
-        else result.model_dump(mode="json", exclude_none=True),
+        "execution_result": None if result is None else redact_result(result),
         "capture_time_ms": round(capture_time_ms, 3),
         "ocr_time_ms": round(ocr_time_ms, 3),
         "total_time_ms": round(total_time_ms, 3),

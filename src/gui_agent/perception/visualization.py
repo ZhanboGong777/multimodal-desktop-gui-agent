@@ -6,7 +6,7 @@ visual evidence that OCR text and contour candidates were located correctly.
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Sequence
+from collections.abc import Collection, Iterable, Sequence
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
@@ -67,12 +67,19 @@ def draw_bounding_boxes(
     elements: Iterable[UIElement],
     *,
     show_labels: bool = True,
+    label_sources: Collection[str] = ("ocr",),
     show_confidence: bool = False,
     show_index: bool = False,
     line_width: int = DEFAULT_LINE_WIDTH,
     font: ImageFont.ImageFont | None = None,
 ) -> Image.Image:
-    """Return a new annotated image; the input image is never modified."""
+    """Return a new annotated image; the input image is never modified.
+
+    Labels are drawn only for elements whose ``source`` is in ``label_sources``,
+    which defaults to OCR. Contour candidates carry no text, and a full screen
+    produces a couple of hundred of them, so labelling every one buries the image
+    under overlapping tags. Their boxes are still drawn.
+    """
     canvas = image.convert("RGB").copy()
     draw = ImageDraw.Draw(canvas)
     label_font = font or load_label_font()
@@ -81,7 +88,7 @@ def draw_bounding_boxes(
         box = element.bounding_box
         color = color_for(element)
         draw.rectangle((box.left, box.top, box.right, box.bottom), outline=color, width=line_width)
-        if not show_labels:
+        if not show_labels or element.source not in label_sources:
             continue
         text = label_for(
             element,

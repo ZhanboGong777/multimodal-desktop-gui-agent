@@ -99,6 +99,21 @@ def make_element(
     )
 
 
+def first_present(page: Any, *keys: str) -> Any:
+    """Return the first value that is not ``None``, otherwise an empty list.
+
+    ``page.get(key) or fallback`` would be shorter but ``or`` evaluates
+    ``bool(value)``, and PaddleOCR hands back NumPy arrays for some result
+    shapes: ``bool(array)`` raises ``ValueError`` as soon as the array holds
+    more than one element.
+    """
+    for key in keys:
+        value = page.get(key)
+        if value is not None:
+            return value
+    return []
+
+
 def box_to_bounds(box: Sequence[Sequence[float]]) -> tuple[int, int, int, int]:
     """Convert a 4-point polygon (PaddleOCR style) into integer bounds."""
     xs = [float(point[0]) for point in box]
@@ -298,9 +313,9 @@ class PaddleOCREngine(OCREngine):
             if page is None:
                 continue
             if hasattr(page, "get"):
-                texts = page.get("rec_texts") or []
-                scores = page.get("rec_scores") or []
-                boxes = page.get("rec_polys") or page.get("dt_polys") or []
+                texts = first_present(page, "rec_texts")
+                scores = first_present(page, "rec_scores")
+                boxes = first_present(page, "rec_polys", "dt_polys")
                 triples = zip(texts, scores, boxes)
             else:
                 triples = (

@@ -8,6 +8,7 @@ callers can map coordinates through :mod:`gui_agent.coordinates`.
 from __future__ import annotations
 
 import time
+from collections.abc import Iterator, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
@@ -251,18 +252,58 @@ def capture_region(
     )
 
 
+@dataclass
+class CaptureSequence:
+    """A burst of frames plus how long the whole burst actually took.
+
+    Iterating, indexing and ``len()`` behave exactly like the plain list this
+    replaced, so callers that only want the frames are unaffected.
+    """
+
+    frames: list[CaptureResult]
+    elapsed_seconds: float
+
+    def __len__(self) -> int:
+        return len(self.frames)
+
+    def __iter__(self) -> Iterator[CaptureResult]:
+        return iter(self.frames)
+
+    def __getitem__(self, index: int) -> CaptureResult:
+        return self.frames[index]
+
+    @property
+    def average_capture_ms(self) -> float:
+        """Mean time spent inside the capture call itself."""
+        return average_capture_ms(self.frames)
+
+    @property
+    def capture_only_fps(self) -> float:
+        """Throughput of the capture call alone, ignoring the gaps between frames."""
+        return capture_only_fps(self.frames)
+
+    @property
+    def effective_fps(self) -> float:
+        """Frame rate the sequence actually achieved, gaps included."""
+        return effective_sequence_fps(len(self.frames), self.elapsed_seconds)
+
+
 def capture_frames(
     frame_count: int = 10,
     interval_seconds: float = 0.2,
     *,
     monitor_index: int = 1,
+    region: CaptureRegion | None = None,
     output_directory: Path | None = None,
     save_frames: bool = False,
-) -> list[CaptureResult]:
+) -> CaptureSequence:
     """Capture a short sequence to prove continuous, near real-time capture.
 
-    Frame delay is recorded per frame; the caller can derive average latency and
-    an approximate FPS from :attr:`CaptureResult.capture_time_ms`.
+    Per-frame latency is recorded on each :class:`CaptureResult`, and the burst
+    as a whole is timed so callers can report both the capture-only throughput
+    and the rate the sequence really ran at. Those two numbers differ a lot:
+    with a 0.2 s interval the burst advances about four times per second even
+    though each individual capture only costs tens of milliseconds.
     """
     if frame_count < 1:
         raise CaptureError(f"frame_count must be at least 1, got {frame_count}")
@@ -271,29 +312,51 @@ def capture_frames(
 
     control_size = _control_size()
     frames: list[CaptureResult] = []
+    started = time.perf_counter()
     for index in range(frame_count):
-        frame = capture_monitor(
-            monitor_index,
-            output_directory=output_directory,
-            save=save_frames,
-            control_size=control_size,
+        frame = (
+            capture_region(
+                region,
+                monitor_index=monitor_index,
+                output_directory=output_directory,
+                save=save_frames,
+                control_size=control_size,
+            )
+            if region is not None
+            else capture_monitor(
+                monitor_index,
+                output_directory=output_directory,
+                save=save_frames,
+                control_size=control_size,
+            )
         )
         frame.metadata["frame_index"] = index
         frames.append(frame)
         if index < frame_count - 1 and interval_seconds > 0:
             time.sleep(interval_seconds)
-    return frames
+    return CaptureSequence(frames=frames, elapsed_seconds=time.perf_counter() - started)
 
 
-def average_capture_ms(frames: list[CaptureResult]) -> float:
+def average_capture_ms(frames: Sequence[CaptureResult]) -> float:
     if not frames:
         return 0.0
     return sum(frame.capture_time_ms for frame in frames) / len(frames)
 
 
-def approximate_fps(frames: list[CaptureResult]) -> float:
-    """Approximate FPS from the mean per-frame capture latency."""
+def capture_only_fps(frames: Sequence[CaptureResult]) -> float:
+    """Throughput of the capture call alone, ignoring the wait between frames.
+
+    This is a ceiling rather than the rate a sequence ran at. Use
+    :func:`effective_sequence_fps` for the recorded rate.
+    """
     average = average_capture_ms(frames)
     if average <= 0:
         return 0.0
     return 1000.0 / average
+
+
+def effective_sequence_fps(frame_count: int, elapsed_seconds: float) -> float:
+    """Frame rate actually achieved, including the wait between frames."""
+    if frame_count <= 0 or elapsed_seconds <= 0:
+        return 0.0
+    return frame_count / elapsed_seconds

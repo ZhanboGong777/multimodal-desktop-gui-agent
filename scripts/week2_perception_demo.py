@@ -3,6 +3,7 @@
 Example:
     python scripts/week2_perception_demo.py
     python scripts/week2_perception_demo.py --region 0 0 800 600 --save-intermediate
+    python scripts/week2_perception_demo.py --frames 10 --interval 0.2
 """
 
 from __future__ import annotations
@@ -19,6 +20,8 @@ from gui_agent.config import Config, load_config
 from gui_agent.perception.capture import (
     CaptureRegion,
     CaptureResult,
+    CaptureSequence,
+    capture_frames,
     capture_monitor,
     capture_region,
 )
@@ -59,19 +62,55 @@ def parse_args() -> argparse.Namespace:
         "--save-intermediate", action="store_true", help="also store the preprocessed image"
     )
     parser.add_argument("--no-ui-detection", action="store_true")
+    parser.add_argument(
+        "--max-ui-candidates",
+        type=int,
+        default=None,
+        help="cap the number of contour candidates (default from config)",
+    )
+    parser.add_argument(
+        "--label-all",
+        action="store_true",
+        help="label every element, including contour candidates (clutters the image)",
+    )
     parser.add_argument("--session-id", default=None)
+    parser.add_argument(
+        "--frames",
+        type=int,
+        default=1,
+        help="capture a sequence of this many frames and work on the last one",
+    )
+    parser.add_argument(
+        "--interval",
+        type=float,
+        default=None,
+        help="seconds between frames (default from config; only used with --frames > 1)",
+    )
     return parser.parse_args()
 
 
-def capture(config: Config, args: argparse.Namespace) -> CaptureResult:
+def capture(
+    config: Config, args: argparse.Namespace
+) -> tuple[CaptureResult, CaptureSequence | None]:
+    """Capture one frame, or a short sequence when ``--frames`` asks for more.
+
+    Returns the frame the perception pipeline should work on (the most recent
+    one) plus the sequence itself when more than one frame was requested, so its
+    timing can be reported.
+    """
     monitor_index = args.monitor if args.monitor is not None else config.perception.monitor_index
-    if args.region:
-        left, top, width, height = args.region
-        return capture_region(
-            CaptureRegion(left=left, top=top, width=width, height=height),
-            monitor_index=monitor_index,
-        )
-    return capture_monitor(monitor_index)
+    region = CaptureRegion(*args.region) if args.region else None
+
+    if args.frames <= 1:
+        if region is not None:
+            return capture_region(region, monitor_index=monitor_index), None
+        return capture_monitor(monitor_index), None
+
+    interval = (
+        args.interval if args.interval is not None else config.perception.capture.interval_seconds
+    )
+    sequence = capture_frames(args.frames, interval, monitor_index=monitor_index, region=region)
+    return sequence[-1], sequence
 
 
 def main() -> int:
@@ -86,6 +125,9 @@ def main() -> int:
     if args.no_ui_detection:
         config.perception.ui_detection.enabled = False
 
+    interval = (
+        args.interval if args.interval is not None else config.perception.capture.interval_seconds
+    )
     started = time.perf_counter()
     session = RunSession.create(config.perception.output_directory, args.session_id)
     log: list[str] = []
@@ -95,7 +137,16 @@ def main() -> int:
         log.append(message)
 
     note(f"session directory: {session.directory}")
-    frame = capture(config, args)
+    frame, sequence = capture(config, args)
+    if sequence is not None:
+        note(
+            f"captured {len(sequence)} frames in {sequence.elapsed_seconds:.2f} s "
+            f"(interval {interval:.2f} s); working on the last one"
+        )
+        note(
+            f"capture-only throughput {sequence.capture_only_fps:.1f} FPS, "
+            f"effective sequence rate {sequence.effective_fps:.2f} FPS"
+        )
     note(f"captured {frame.image.width}x{frame.image.height} in {frame.capture_time_ms:.1f} ms")
     note(f"screen info: {frame.screen_info.model_dump_json()}")
 
@@ -135,6 +186,15 @@ def main() -> int:
             frame.image,
             min_area=config.perception.ui_detection.min_area,
             max_area_ratio=config.perception.ui_detection.max_area_ratio,
+            min_rectangularity=config.perception.ui_detection.min_rectangularity,
+            max_candidates=(
+                args.max_ui_candidates
+                if args.max_ui_candidates is not None
+                else config.perception.ui_detection.max_candidates
+            ),
+            # Do not re-frame text that OCR has already located.
+            exclude=[element.bounding_box for element in ocr_output.elements],
+            exclusion_threshold=config.perception.ui_detection.exclusion_threshold,
         )
         note(f"contour detection proposed {len(candidates)} non-text candidates")
         elements.extend(candidates)
@@ -148,7 +208,12 @@ def main() -> int:
     if len(elements) > 15:
         note(f"  ... {len(elements) - 15} more")
 
-    annotated = draw_bounding_boxes(frame.image, elements, show_confidence=True, show_index=True)
+    annotated = draw_bounding_boxes(
+        frame.image,
+        elements,
+        label_sources=("contour", "ocr", "manual") if args.label_all else ("ocr",),
+        show_confidence=True,
+    )
     annotated_path = save_annotated_image(annotated, session.path_for(ANNOTATED_IMAGE))
     note(f"annotated image: {annotated_path}")
 

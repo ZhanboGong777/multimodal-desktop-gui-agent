@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from ..coordinates import is_inside_screen
-from ..schemas import DesktopAction, ScreenInfo
+from ..schemas import ActionResult, DesktopAction, ScreenInfo
 
 # Modifier keys that would leak into other applications if they stayed pressed.
 STICKY_KEYS = ("shift", "ctrl", "control", "alt", "option", "cmd", "command", "win", "super")
@@ -45,11 +47,36 @@ def validate_action(action: DesktopAction, screen: ScreenInfo) -> None:
         raise SafetyError(f"duration must not be negative, got {action.duration}")
 
 
-def redact_action(action: DesktopAction) -> dict[str, object]:
+def redact_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    """Blank out typed or credential-like text in a serialised action.
+
+    Returns a copy, so the action object the caller still holds is untouched.
+    Every ``type_text`` payload is masked because a bare password or token value
+    usually contains no reliable keyword that would identify it as sensitive.
+    """
+    text = payload.get("text")
+    if isinstance(text, str) and (
+        payload.get("action_type") == "type_text" or is_sensitive_text(text)
+    ):
+        return {**payload, "text": REDACTED}
+    return dict(payload)
+
+
+def redact_action(action: DesktopAction) -> dict[str, Any]:
     """Serialise an action for logging without leaking credentials."""
-    payload = action.model_dump(mode="json", exclude_none=True)
-    if is_sensitive_text(action.text):
-        payload["text"] = REDACTED
+    return redact_payload(action.model_dump(mode="json", exclude_none=True))
+
+
+def redact_result(result: ActionResult) -> dict[str, Any]:
+    """Serialise an action result, redacting the action nested inside it.
+
+    ``ActionResult`` carries its own ``DesktopAction``, so redacting only the
+    top-level action would still write the credential to disk.
+    """
+    payload = result.model_dump(mode="json", exclude_none=True)
+    nested = payload.get("action")
+    if isinstance(nested, dict):
+        payload["action"] = redact_payload(nested)
     return payload
 
 
@@ -62,7 +89,9 @@ def describe_action(action: DesktopAction) -> str:
         parts.append(f"from=({action.start.x},{action.start.y})")
         parts.append(f"to=({action.end.x},{action.end.y})")
     if action.text is not None:
-        parts.append(f"text={REDACTED if is_sensitive_text(action.text) else action.text!r}")
+        # The console description also ends up in run.log, so mask typed text here too.
+        typed = action.action_type == "type_text"
+        parts.append(f"text={REDACTED if typed or is_sensitive_text(action.text) else action.text!r}")
     if action.key:
         parts.append(f"key={action.key}")
     if action.keys:

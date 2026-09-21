@@ -215,15 +215,15 @@ def test_sensitive_text_is_detected() -> None:
 
 
 def test_redaction_hides_credentials_in_logs() -> None:
-    action = DesktopAction(action_type="type_text", text="password hunter2")
+    action = DesktopAction(action_type="type_text", text="hunter2")
     payload = redact_action(action)
     assert payload["text"] == "<redacted>"
     assert "hunter2" not in describe_action(action)
 
 
-def test_describe_action_keeps_ordinary_text() -> None:
+def test_describe_action_redacts_all_typed_text() -> None:
     action = DesktopAction(action_type="type_text", text="hello")
-    assert "hello" in describe_action(action)
+    assert "hello" not in describe_action(action)
 
 
 def test_describe_action_includes_drag_endpoints() -> None:

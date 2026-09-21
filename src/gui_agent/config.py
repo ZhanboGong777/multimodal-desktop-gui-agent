@@ -50,6 +50,17 @@ class UiDetectionConfig(ConfigModel):
     enabled: bool = True
     min_area: int = Field(default=100, ge=0)
     max_area_ratio: float = Field(default=0.5, gt=0.0, le=1.0)
+    # How much of its bounding box a contour must fill to count as a rectangle.
+    # Off by default: the right value depends heavily on the theme behind the
+    # screen (0.55 removes almost nothing on a light UI and about 85% of the
+    # candidates on a dark one), so it is a tuning knob, not a safe default.
+    min_rectangularity: float = Field(default=0.0, ge=0.0, le=1.0)
+    # Keep the largest N candidates; the detector sorts by area first, so a lower
+    # cap drops the small noisy boxes and keeps the meaningful ones. This is the
+    # portable way to make the annotated image readable.
+    max_candidates: int = Field(default=200, gt=0)
+    # Drop candidates that overlap an OCR region by this fraction of the smaller box.
+    exclusion_threshold: float = Field(default=0.5, ge=0.0, le=1.0)
 
 
 class PerceptionConfig(ConfigModel):

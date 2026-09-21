@@ -107,10 +107,13 @@ def benchmark_engine(
     config.perception.ocr.min_confidence = min_confidence
 
     try:
-        engine = create_ocr_engine(config.perception.ocr).engine
+        selection = create_ocr_engine(config.perception.ocr)
     except OcrError as exc:
         print(f"  {name:<10} unavailable: {exc}")
         return None
+    for notice in selection.notices:
+        print(f"  {name:<10} notice: {notice}")
+    engine = selection.engine
 
     times: list[float] = []
     regions = 0

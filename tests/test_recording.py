@@ -155,3 +155,59 @@ def test_log_file_is_written(tmp_path: Path) -> None:
     session = RunSession.create(tmp_path, "run")
     path = session.save_log(["first", "second"])
     assert path.read_text(encoding="utf-8") == "first\nsecond\n"
+
+
+def test_save_action_redacts_sensitive_text(tmp_path: Path) -> None:
+    session = RunSession.create(tmp_path, "run")
+    action = DesktopAction(action_type="type_text", text="hunter2")
+    result = ActionResult(success=True, dry_run=True, action=action)
+
+    raw = session.save_action(action, result).read_text(encoding="utf-8")
+    assert "hunter2" not in raw
+
+    payload = json.loads(raw)
+    assert payload["action"]["text"] == "<redacted>"
+    # The action nested inside the result must be redacted too.
+    assert payload["result"]["action"]["text"] == "<redacted>"
+
+
+def test_run_summary_redacts_sensitive_text() -> None:
+    action = DesktopAction(action_type="type_text", text="api_key=demo-secret")
+    result = ActionResult(success=False, dry_run=False, action=action, error="refused")
+
+    summary = build_run_summary(
+        selected_target=None,
+        action=action,
+        result=result,
+        capture_time_ms=1.0,
+        ocr_time_ms=2.0,
+        total_time_ms=3.0,
+    )
+
+    assert "demo-secret" not in json.dumps(summary)
+    assert summary["action"]["text"] == "<redacted>"
+    assert summary["execution_result"]["action"]["text"] == "<redacted>"
+
+
+def test_ordinary_typed_text_is_also_redacted(tmp_path: Path) -> None:
+    """A bare value carries no keyword, so every type_text payload is masked."""
+    session = RunSession.create(tmp_path, "run")
+    action = DesktopAction(action_type="type_text", text="hello world")
+    result = ActionResult(success=True, dry_run=True, action=action)
+
+    payload = json.loads(session.save_action(action, result).read_text(encoding="utf-8"))
+    assert payload["action"]["text"] == "<redacted>"
+    assert payload["result"]["action"]["text"] == "<redacted>"
+
+
+def test_redaction_does_not_mutate_the_caller_objects(tmp_path: Path) -> None:
+    session = RunSession.create(tmp_path, "run")
+    action = DesktopAction(action_type="type_text", text="token=abc123")
+    result = ActionResult(success=True, dry_run=True, action=action)
+
+    session.save_action(action, result)
+
+    # Only the copy written to disk is masked.
+    assert action.text == "token=abc123"
+    assert result.action is not None
+    assert result.action.text == "token=abc123"

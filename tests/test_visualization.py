@@ -93,3 +93,44 @@ def test_source_summary_counts_elements() -> None:
     summary = summarize_sources([make_element(), make_element(), make_element(source="contour")])
     assert summary == {"ocr": 2, "contour": 1}
     assert summarize_sources([]) == {}
+
+
+def test_labels_are_drawn_for_ocr_only_by_default() -> None:
+    """Contour candidates carry no text, so labelling them only adds clutter."""
+    image = Image.new("RGB", (120, 60), "white")
+    ocr = UIElement(
+        text="Save",
+        bounding_box=BoundingBox(left=5, top=5, right=45, bottom=20),
+        confidence=0.9,
+        source="ocr",
+    )
+    contour = UIElement(
+        text="",
+        bounding_box=BoundingBox(left=60, top=5, right=110, bottom=50),
+        confidence=0.5,
+        source="contour",
+    )
+
+    default = draw_bounding_boxes(image, [ocr, contour])
+    explicit = draw_bounding_boxes(image, [ocr], label_sources=("ocr",))
+
+    # Same picture whether or not the unlabelled candidate is present, because the
+    # candidate contributes only its outline in both cases.
+    assert default.tobytes() != Image.new("RGB", (120, 60), "white").tobytes()
+    assert default.size == explicit.size
+
+
+def test_label_sources_can_opt_contours_back_in() -> None:
+    image = Image.new("RGB", (120, 60), "white")
+    contour = UIElement(
+        text="box",
+        bounding_box=BoundingBox(left=10, top=20, right=100, bottom=50),
+        confidence=0.5,
+        source="contour",
+    )
+
+    without = draw_bounding_boxes(image, [contour])
+    with_label = draw_bounding_boxes(image, [contour], label_sources=("contour",))
+
+    # Labelling draws a filled background, so the two images must differ.
+    assert without.tobytes() != with_label.tobytes()

@@ -50,6 +50,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--candidate-index", type=int, default=None)
     parser.add_argument("--min-confidence", type=float, default=None)
+    parser.add_argument("--ocr-engine", choices=["paddleocr", "tesseract"], default=None)
     parser.add_argument(
         "--move-only", action="store_true", help="move the pointer instead of clicking"
     )
@@ -63,6 +64,8 @@ def main() -> int:
     config = load_config(args.config)
     if args.min_confidence is not None:
         config.perception.ocr.min_confidence = args.min_confidence
+    if args.ocr_engine:
+        config.perception.ocr.engine = args.ocr_engine
 
     started = time.perf_counter()
     session = RunSession.create(config.perception.output_directory, args.session_id)
