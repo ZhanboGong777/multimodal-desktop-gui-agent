@@ -7,7 +7,9 @@ degrades to Tesseract and reports what happened.
 
 from __future__ import annotations
 
+import os
 import re
+import sys
 import time
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Sequence
@@ -211,23 +213,75 @@ class PaddleOCREngine(OCREngine):
         self,
         default_languages: Iterable[str] = DEFAULT_LANGUAGES,
         default_min_confidence: float = DEFAULT_MIN_CONFIDENCE,
+        notices: list[str] | None = None,
+        use_doc_preprocessing: bool = False,
     ) -> None:
         super().__init__(default_languages, default_min_confidence)
+        self.notices: list[str] = notices if notices is not None else []
+        self.use_doc_preprocessing = use_doc_preprocessing
+        self._prepare_platform()
         try:
             from paddleocr import PaddleOCR
-        except Exception as exc:  # pragma: no cover - depends on the environment
+        except Exception as exc:
+            # Report the underlying error: "not installed" would be misleading when
+            # the package is present but fails to import (missing dependency, a CUDA
+            # DLL that will not load, or a renamed symbol).
             raise OcrError(
-                "PaddleOCR is not installed. Install it with: pip install -r requirements-ocr.txt"
+                f"PaddleOCR could not be imported ({type(exc).__name__}: {exc}). "
+                "Install or repair it with: pip install -r requirements-ocr.txt"
             ) from exc
         self._factory = PaddleOCR
         self._engines: dict[str, Any] = {}
 
+    def _prepare_platform(self) -> None:
+        """Apply the Windows-only workarounds PaddleOCR needs in order to start.
+
+        Both were found by reproducing the failures on a Windows GPU node; the
+        experiment report carries the full traces.
+        """
+        if sys.platform != "win32":
+            return
+
+        # 1. paddleocr -> paddlex -> modelscope imports Torch. Torch ships cuDNN
+        #    9.5 while PaddlePaddle 3.3 is built against 9.9, so once Torch has
+        #    loaded its copy PaddlePaddle's own load dies with
+        #    "OSError: [WinError 127] ... cudnn_cnn64_9.dll". The two CUDA stacks
+        #    cannot share a process, and whichever loads first wins.
+        if sys.modules.get("torch") is not None:
+            self.notices.append(
+                "torch was already imported, so PaddleOCR may fail to load its cuDNN "
+                "libraries. Create the OCR engine before importing torch."
+            )
+        else:
+            sys.modules["torch"] = None
+            self.notices.append(
+                "torch is blocked in this process to keep its cuDNN build from "
+                "clashing with PaddlePaddle."
+            )
+
+        # 2. PaddleX's C++ predictor cannot read a model config from a non-ASCII
+        #    path, so a Chinese Windows account name makes create_predictor fail
+        #    with "json parse error ... attempting to parse an empty input".
+        if not os.environ.get("PADDLE_PDX_CACHE_HOME"):
+            home = os.path.expanduser("~")
+            if home and not home.isascii():
+                self.notices.append(
+                    f"home directory {home!r} contains non-ASCII characters and "
+                    "PADDLE_PDX_CACHE_HOME is unset; PaddleX may fail to read its model "
+                    "config. Set PADDLE_PDX_CACHE_HOME to an ASCII path, for example: "
+                    r"set PADDLE_PDX_CACHE_HOME=D:\paddlex_cache"
+                )
+
     def _engine_for(self, language: str) -> Any:
         if language not in self._engines:
-            try:
-                self._engines[language] = self._factory(lang=language)
-            except TypeError:
-                self._engines[language] = self._factory(lang=language, use_angle_cls=True)
+            options: dict[str, Any] = {"lang": language}
+            if not self.use_doc_preprocessing:
+                options.update(
+                    use_doc_orientation_classify=False,
+                    use_doc_unwarping=False,
+                    use_textline_orientation=False,
+                )
+            self._engines[language] = self._factory(**options)
         return self._engines[language]
 
     def _run(self, engine: Any, array: np.ndarray) -> Any:
@@ -315,6 +369,11 @@ class FallbackOCREngine(OCREngine):
     def using_fallback(self) -> bool:
         return self._primary is None
 
+    @property
+    def primary(self) -> OCREngine | None:
+        """The wrapped engine, for diagnostics and tests."""
+        return self._primary
+
     def recognize(
         self,
         image: Image.Image | np.ndarray,
@@ -343,13 +402,15 @@ def create_ocr_engine(config: OcrConfig | None = None) -> EngineSelection:
         "default_languages": config.languages,
         "default_min_confidence": config.min_confidence,
     }
+    # Only PaddleOCR has a document pipeline; Tesseract must not receive this.
+    paddle_settings = {**settings, "use_doc_preprocessing": config.use_doc_preprocessing}
     notices: list[str] = []
 
     if config.engine == "tesseract":
         return EngineSelection(TesseractOCREngine(**settings), notices)
 
     try:
-        primary = PaddleOCREngine(**settings)
+        primary = PaddleOCREngine(notices=notices, **paddle_settings)
     except OcrError as exc:
         notices.append(f"PaddleOCR unavailable ({exc}); falling back to Tesseract.")
         if config.fallback_engine == "none":

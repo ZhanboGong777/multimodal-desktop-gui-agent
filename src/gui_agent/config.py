@@ -39,6 +39,11 @@ class OcrConfig(ConfigModel):
     fallback_engine: Literal["paddleocr", "tesseract", "none"] = "tesseract"
     languages: list[str] = Field(default_factory=lambda: ["en"])
     min_confidence: float = Field(default=0.5, ge=0.0, le=1.0)
+    # PaddleOCR's document pipeline (orientation, unwarping, textline angle) is
+    # built for photographed paper. A screen capture is already flat and upright,
+    # so it adds model downloads and can distort the image; keep it off unless a
+    # task really needs it.
+    use_doc_preprocessing: bool = False
 
 
 class UiDetectionConfig(ConfigModel):

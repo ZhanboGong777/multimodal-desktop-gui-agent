@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import statistics
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -53,21 +54,39 @@ def latest_screenshot() -> Path | None:
     return candidates[0] if candidates else None
 
 
+# Running the probe in a child process is not paranoia. Importing PaddlePaddle
+# loads its CUDA and cuDNN libraries into the interpreter, and PaddleOCR pulls
+# Torch in transitively (PaddleX -> ModelScope). On a Windows node with both
+# GPU builds installed the two cuDNN copies collide and Torch then fails with
+# "WinError 127 ... cudnn_cnn64_9.dll". Keeping the probe out of process means
+# the benchmark can still import PaddleOCR afterwards.
+PADDLE_PROBE = (
+    "import paddle; "
+    "print('device=%s cuda_build=%s version=%s' % ("
+    "paddle.device.get_device(), "
+    "paddle.device.is_compiled_with_cuda(), "
+    "paddle.__version__))"
+)
+
+
 def describe_paddle_device() -> str:
-    """Report whether PaddlePaddle is a CPU or CUDA build, and what it will use."""
+    """Report the PaddlePaddle build without importing it into this process."""
     try:
-        import paddle
-    except Exception:  # noqa: BLE001 - any import failure means the backend is unusable
-        return "paddlepaddle not installed (paddleocr cannot run)"
-    try:
-        return (
-            f"device={paddle.device.get_device()} "
-            f"cuda_build={paddle.device.is_compiled_with_cuda()} "
-            f"version={paddle.__version__}"
+        completed = subprocess.run(
+            [sys.executable, "-c", PADDLE_PROBE],
+            capture_output=True,
+            text=True,
+            timeout=180,
+            check=False,
         )
-    except Exception as exc:  # noqa: BLE001 - probe only, never fatal
-        # pragma: no cover - depends on the local build
-        return f"unknown ({type(exc).__name__}: {exc})"
+    except Exception as exc:  # noqa: BLE001 - the probe must never break the run
+        return f"probe failed ({type(exc).__name__}: {exc})"
+
+    output = (completed.stdout or "").strip()
+    if output:
+        return output
+    detail = (completed.stderr or "").strip().splitlines()
+    return f"probe failed ({detail[-1] if detail else 'no output'})"
 
 
 def benchmark_engine(
