@@ -17,4 +17,13 @@ This is a focused on developing and optimizing a desktop GUI agent powered by mu
 | Week 7 | System evaluation and performance analysis |
 | Week 8 | Code cleanup, technical report, and system demonstration |
 
-The project is currently in Week 1. Progress and project deliverables will be updated throughout the development process.
+### Current Status
+
+The project has completed Week 2. The repository now contains reusable screen
+capture, image preprocessing, two OCR backends (PaddleOCR with a Tesseract
+fallback), non-text UI candidate detection, bounding-box annotation, text
+grounding, screenshot-to-control coordinate mapping, dry-run-first desktop
+control with drag support, per-run recording, and 165 unit tests at 88% coverage.
+
+Progress and project deliverables will be updated throughout the development
+process.

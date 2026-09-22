@@ -1,0 +1,13 @@
+# Week 2 primary OCR backend - CUDA build (Windows GPU node / Linux CUDA box).
+#
+# The GPU build is not on PyPI: PyPI still ships the outdated 2.6.2 build of
+# paddlepaddle-gpu. PaddlePaddle publishes current CUDA builds on its own index,
+# which is why the extra index is declared here.
+#
+# Adjust the index to match the installed CUDA runtime (cu126 for CUDA 12.6).
+# Use this file on any machine with a CUDA GPU, Windows included - the Windows
+# node installs from here successfully. Use requirements-ocr.txt only on machines
+# without a usable GPU. Never install both "paddlepaddle" and "paddlepaddle-gpu".
+--extra-index-url https://www.paddlepaddle.org.cn/packages/stable/cu126/
+paddleocr>=3.0
+paddlepaddle-gpu==3.3.1
