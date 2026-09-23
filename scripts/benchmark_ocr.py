@@ -1,17 +1,19 @@
 """Benchmark the OCR backends on one image.
 
-Built so the same measurement can be repeated on macOS and on the Windows GPU
-node, and so it is obvious whether PaddleOCR is really running on the GPU.
+Repeated runs per engine, reported as mean, standard deviation, P95, min and max
+over the warm runs. The first call in a process pays for model loading and warm-up
+caches, so it is timed and shown separately as the cold start.
 
 Examples:
     python scripts/benchmark_ocr.py
-    python scripts/benchmark_ocr.py --image outputs/week2/<session>/before.png --repeat 3
-    python scripts/benchmark_ocr.py --engines tesseract paddleocr --language ch_sim
+    python scripts/benchmark_ocr.py --repeat 20
+    python scripts/benchmark_ocr.py --engines tesseract --image outputs/week1/screenshot_test.png
 """
 
 from __future__ import annotations
 
 import argparse
+import math
 import statistics
 import subprocess
 import sys
@@ -25,6 +27,20 @@ from PIL import Image
 
 from gui_agent.config import load_config
 from gui_agent.perception.ocr import OcrError, create_ocr_engine
+
+# Running the probe in a child process is not paranoia. Importing PaddlePaddle
+# loads its CUDA and cuDNN libraries into the interpreter, and PaddleOCR pulls
+# Torch in transitively (PaddleX -> ModelScope). On a Windows node with both GPU
+# builds installed the two cuDNN copies collide and Torch then fails with
+# "WinError 127 ... cudnn_cnn64_9.dll". Keeping the probe out of process means the
+# benchmark can still import PaddleOCR afterwards.
+PADDLE_PROBE = (
+    "import paddle; "
+    "print('device=%s cuda_build=%s version=%s' % ("
+    "paddle.device.get_device(), "
+    "paddle.device.is_compiled_with_cuda(), "
+    "paddle.__version__))"
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -40,7 +56,9 @@ def parse_args() -> argparse.Namespace:
         "--language", action="append", default=None, help="repeatable language code"
     )
     parser.add_argument("--min-confidence", type=float, default=0.5)
-    parser.add_argument("--repeat", type=int, default=2, help="timed runs per engine")
+    parser.add_argument(
+        "--repeat", type=int, default=10, help="timed runs per engine; the first is the cold start"
+    )
     return parser.parse_args()
 
 
@@ -52,21 +70,6 @@ def latest_screenshot() -> Path | None:
         root.glob("*/before.png"), key=lambda path: path.stat().st_mtime, reverse=True
     )
     return candidates[0] if candidates else None
-
-
-# Running the probe in a child process is not paranoia. Importing PaddlePaddle
-# loads its CUDA and cuDNN libraries into the interpreter, and PaddleOCR pulls
-# Torch in transitively (PaddleX -> ModelScope). On a Windows node with both
-# GPU builds installed the two cuDNN copies collide and Torch then fails with
-# "WinError 127 ... cudnn_cnn64_9.dll". Keeping the probe out of process means
-# the benchmark can still import PaddleOCR afterwards.
-PADDLE_PROBE = (
-    "import paddle; "
-    "print('device=%s cuda_build=%s version=%s' % ("
-    "paddle.device.get_device(), "
-    "paddle.device.is_compiled_with_cuda(), "
-    "paddle.__version__))"
-)
 
 
 def describe_paddle_device() -> str:
@@ -87,6 +90,24 @@ def describe_paddle_device() -> str:
         return output
     detail = (completed.stderr or "").strip().splitlines()
     return f"probe failed ({detail[-1] if detail else 'no output'})"
+
+
+def describe_timings(times: list[float]) -> dict[str, float]:
+    """Mean, standard deviation, P95, min and max over the warm runs.
+
+    P95 uses the nearest-rank method, so with 10 samples it equals the maximum;
+    use more repetitions when the tail matters.
+    """
+    ordered = sorted(times)
+    count = len(ordered)
+    return {
+        "count": float(count),
+        "min": ordered[0],
+        "max": ordered[-1],
+        "mean": statistics.fmean(ordered),
+        "stdev": statistics.stdev(ordered) if count > 1 else 0.0,
+        "p95": ordered[max(0, math.ceil(0.95 * count) - 1)],
+    }
 
 
 def benchmark_engine(
@@ -115,10 +136,15 @@ def benchmark_engine(
         print(f"  {name:<10} notice: {notice}")
     engine = selection.engine
 
-    times: list[float] = []
+    runs = max(1, repeat)
+    cold_ms: float | None = None
+    warm: list[float] = []
     regions = 0
     error: str | None = None
-    for _ in range(max(1, repeat)):
+
+    # The first call in a process pays for model loading and warm-up caches, so it
+    # is timed and reported separately instead of polluting the steady-state set.
+    for index in range(runs):
         try:
             started = time.perf_counter()
             output = engine.recognize(
@@ -126,22 +152,26 @@ def benchmark_engine(
                 languages=config.perception.ocr.languages,
                 min_confidence=config.perception.ocr.min_confidence,
             )
-            times.append((time.perf_counter() - started) * 1000.0)
+            elapsed = (time.perf_counter() - started) * 1000.0
+            if index == 0:
+                cold_ms = elapsed
+            else:
+                warm.append(elapsed)
             regions = len(output.elements)
         except OcrError as exc:
             error = str(exc)
             break
 
-    if error is not None or not times:
-        print(f"  {name:<10} failed: {error or 'no result'}")
+    if error is not None or not warm:
+        print(f"  {name:<10} failed: {error or 'no warm run completed'}")
         return None
 
     return {
         "engine": name,
         "regions": regions,
-        "runs": times,
-        "mean_ms": statistics.fmean(times),
-        "min_ms": min(times),
+        "cold_ms": cold_ms,
+        "warm": warm,
+        **describe_timings(warm),
     }
 
 
@@ -157,6 +187,7 @@ def main() -> int:
     print(f"image      : {image_path}")
     print(f"size       : {image.width}x{image.height}")
     print(f"paddle     : {describe_paddle_device()}")
+    print(f"repeat     : {args.repeat} per engine (1 cold start + {max(0, args.repeat - 1)} warm)")
     print()
 
     results = []
@@ -172,13 +203,22 @@ def main() -> int:
         return 1
 
     print()
-    print(f"  {'engine':<12}{'regions':>8}{'runs (ms)':>28}{'mean ms':>12}")
-    print(f"  {'-' * 60}")
+    print("  Warm runs only; each engine's first call is listed separately as cold start.")
+    print()
+    header = (
+        f"  {'engine':<12}{'regions':>8}{'n':>4}{'min':>9}{'mean':>9}"
+        f"{'stdev':>8}{'p95':>9}{'max':>9}{'cold':>9}"
+    )
+    print(header)
+    print(f"  {'-' * (len(header) - 2)}")
     for result in results:
-        runs = ", ".join(f"{value:.0f}" for value in result["runs"])  # type: ignore[union-attr]
         print(
-            f"  {result['engine']:<12}{result['regions']:>8}{runs:>28}{result['mean_ms']:>12.0f}"  # type: ignore[arg-type]
+            f"  {result['engine']:<12}{result['regions']:>8}{int(result['count']):>4}"
+            f"{result['min']:>9.0f}{result['mean']:>9.0f}{result['stdev']:>8.0f}"
+            f"{result['p95']:>9.0f}{result['max']:>9.0f}{(result['cold_ms'] or 0.0):>9.0f}"
         )
+    print()
+    print("  all figures in milliseconds")
     return 0
 
 
