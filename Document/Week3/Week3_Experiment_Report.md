@@ -130,6 +130,21 @@ archive uses others. See section 9.
 | `MockModelClient` | no | no | yes | tests, both demos, offline runs |
 | `OpenAICompatibleClient` | yes | `GUI_AGENT_API_KEY` | no | a real model, hosted or local |
 
+**Screenshots are sent as real image data.** The payload uses the OpenAI vision
+shape - a `text` block plus an `image_url` block holding a base64 `data:` URL -
+attached to the last user turn. An earlier version embedded the image *path* in
+the text payload, so the model received a filename and no picture. That failure
+mode is the dangerous kind: the request succeeds and the model answers about
+nothing. The client now raises instead when an image is missing, empty, of an
+unknown type, or larger than 20 MB.
+
+This also makes a split setup practical, which suits the available hardware: the
+model runs on the Windows GPU node behind an OpenAI-compatible endpoint and the
+Mac, which has no discrete GPU, only issues HTTP requests. The hand-off asks for
+exactly this ("call it through a separate service process") and it removes the
+PaddlePaddle/PyTorch conflict entirely, since the two stacks no longer share a
+process - or a machine.
+
 Measured on the mock backend, which performs no inference:
 
 | Measurement | Value |
@@ -181,14 +196,14 @@ Both machines, same suite:
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **254 passed**, 89% coverage, ruff clean |
-| Lenovo Y9000P (Windows) | **254 passed** in 9.46 s |
+| MacBook Air M2 | **263 passed**, 89% coverage, ruff clean |
+| Lenovo Y9000P (Windows) | **254 passed** in 9.46 s (before the vision payload) |
 
 The counts match exactly, which is the point of running both: two defects only
 appeared on the second machine.
 
 ```text
-pytest      : 254 passed
+pytest      : 263 passed
 coverage    : 89% over src/gui_agent
 ruff        : All checks passed!
 ```

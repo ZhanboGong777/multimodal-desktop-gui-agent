@@ -10,7 +10,7 @@ Branch: `week3-dataset-agent`.
 | New source modules | 17 (`datasets/` 8, `models/` 4, `planning/` 5) |
 | New scripts | 3 |
 | New test files | 6 |
-| Tests | 245 passed |
+| Tests | 263 passed |
 | Ruff | clean |
 | Week 1 + Week 2 regression | all previous tests still pass |
 
@@ -75,6 +75,14 @@ Two backends:
 - `OpenAICompatibleClient` - any OpenAI-compatible endpoint. Credentials come from
   `GUI_AGENT_API_KEY` / `GUI_AGENT_BASE_URL` / `GUI_AGENT_MODEL` and never from the
   config file.
+
+  A screenshot is sent as a real vision block: the file is read, base64-encoded and
+  attached to the last user turn as `{"type": "image_url", "image_url": {"url":
+  "data:image/png;base64,..."}}`. The first version put the *path* in the text
+  payload instead, which meant the model could not see the image at all - a
+  multimodal backend that silently answers about nothing is worse than one that
+  fails. Unknown suffixes, empty files and images above 20 MB are refused with a
+  clear error rather than dropped from the request.
 
 Retries are bounded, and a failed call returns a `ModelResponse` with `error` set
 rather than raising into the caller.
