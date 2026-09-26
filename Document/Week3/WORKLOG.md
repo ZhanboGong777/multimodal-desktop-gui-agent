@@ -125,6 +125,24 @@ none. It now converts 200/200, with the four real `action_type` families mapped 
 `EvaluateSubTaskAction` excluded from the trajectory. WebArena converted 20/20 on
 the first attempt. Details are in the dataset notes.
 
+**The `.gitignore` was hiding an entire package.** A bare `models/` in the
+template ignore file matches a directory of that name at *any* depth, so it also
+matched `src/gui_agent/models/` - and Git never reported it, because ignored files
+do not appear in `git status`. Every test passed on the machine that created the
+files and every clean clone failed at import with
+`ModuleNotFoundError: No module named 'gui_agent.models'`. The generated-output
+patterns are now anchored to the repository root with a leading slash.
+
+**pytest could not create its temporary directory on Windows.** The default base
+directory is `%TEMP%/pytest-of-<user>`. On the Windows machine, whose account name
+is not ASCII, that folder twice came back as `WinError 5 拒绝访问` before a single
+test ran: a locked or half-removed directory pytest could not rotate. First seen
+in Week 2 with 12 errors, then again here with 27. `pyproject.toml` now sets
+`--basetemp=.pytest-tmp`, a gitignored directory inside the repository.
+
+Both were found by running the suite on the second machine, not by reading the
+code. The first would have shipped a repository that could not be cloned and used.
+
 ## Known limitations
 
 - ScreenAgent and WebArena have now been exercised against the real archives.

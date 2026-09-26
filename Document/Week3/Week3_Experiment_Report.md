@@ -177,9 +177,19 @@ one.
 
 ## 8. Test results
 
+Both machines, same suite:
+
+| Machine | Result |
+| --- | --- |
+| MacBook Air M2 | **254 passed**, 89% coverage, ruff clean |
+| Lenovo Y9000P (Windows) | **254 passed** in 9.46 s |
+
+The counts match exactly, which is the point of running both: two defects only
+appeared on the second machine.
+
 ```text
-pytest      : 245 passed
-coverage    : 88% over src/gui_agent
+pytest      : 254 passed
+coverage    : 89% over src/gui_agent
 ruff        : All checks passed!
 ```
 
@@ -206,6 +216,21 @@ Automated tests never touch the network, the desktop or a real API key.
 The Mind2Web adapter is therefore covered by fixtures only. The other two sources
 were validated against their real archives; this one was not, and the report says
 so rather than implying otherwise.
+
+**The `.gitignore` silently excluded the whole model layer.** A bare `models/`
+matches at any depth, so `src/gui_agent/models/` was never committed. Ignored
+files do not appear in `git status`, so the Mac reported a clean tree while every
+clone failed with `ModuleNotFoundError: No module named 'gui_agent.models'`. Caught
+only when the Windows machine pulled the branch. Fixed by anchoring the
+generated-output patterns to the repository root.
+
+**pytest could not create its temporary directory on Windows.** `WinError 5` on
+`%TEMP%/pytest-of-<user>` stopped 27 tests before any of them ran. The account name
+is not ASCII and the folder had been left locked or half-removed; the same thing
+happened in Week 2 with 12 errors. `--basetemp` now points inside the repository.
+
+Neither defect was visible from the code, and neither would have been found on a
+single machine.
 
 ## 9. Problems and handling
 
