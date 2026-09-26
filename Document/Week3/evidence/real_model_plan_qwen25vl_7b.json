@@ -1,0 +1,76 @@
+{
+  "plan": {
+    "task_id": "t1",
+    "instruction": "Open the browser and search for multimodal GUI agents",
+    "summary": "Search for multimodal GUI agents in browser",
+    "steps": [
+      {
+        "step_id": "step-1",
+        "description": "Open the browser",
+        "action_type": "click",
+        "target_text": "browser",
+        "arguments": {},
+        "expected_result": "Browser is open",
+        "status": "pending"
+      },
+      {
+        "step_id": "step-2",
+        "description": "Type 'multimodal GUI agents' in the search bar",
+        "action_type": "type_text",
+        "target_text": "search bar",
+        "arguments": {},
+        "expected_result": "Search term is entered",
+        "status": "pending"
+      },
+      {
+        "step_id": "step-3",
+        "description": "Press Enter to search",
+        "action_type": "key_press",
+        "target_text": "search bar",
+        "arguments": {
+          "key": "enter"
+        },
+        "expected_result": "Search results are displayed",
+        "status": "pending"
+      },
+      {
+        "step_id": "step-4",
+        "description": "Click on the first search result",
+        "action_type": "click",
+        "target_text": "first search result",
+        "arguments": {},
+        "expected_result": "Navigated to the search result page",
+        "status": "pending"
+      },
+      {
+        "step_id": "step-5",
+        "description": "Finish the task",
+        "action_type": "finish",
+        "target_text": "browser",
+        "arguments": {},
+        "expected_result": "Task is completed",
+        "status": "pending"
+      }
+    ],
+    "assumptions": [
+      "Ambiguous search term"
+    ],
+    "requires_confirmation": true,
+    "errors": []
+  },
+  "model": {
+    "provider": "openai_compatible",
+    "model_name": "qwen2.5vl:7b",
+    "latency_ms": 83802.127,
+    "usage": {
+      "prompt_tokens": 2601,
+      "completion_tokens": 408,
+      "total_tokens": 3009
+    },
+    "error": null,
+    "content_length": 1578
+  },
+  "elapsed_ms": 83803.628,
+  "attempts": 1,
+  "allow_real_execution": false
+}

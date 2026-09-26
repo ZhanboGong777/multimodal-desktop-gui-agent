@@ -15,45 +15,29 @@ from typing import Any
 
 from .schemas import PLAN_ACTION_TYPES
 
-_JSON_EXAMPLE = """{
-  "task_id": "task-1",
-  "instruction": "the original instruction",
-  "summary": "one sentence describing the approach",
-  "steps": [
-    {
-      "step_id": "step-1",
-      "description": "what this step does, in plain language",
-      "action_type": "one of the allowed verbs",
-      "target_text": "text visible on screen to act on, or null",
-      "arguments": {},
-      "expected_result": "what should be true afterwards",
-      "status": "pending"
-    }
-  ],
-  "assumptions": ["anything you had to assume"],
-  "requires_confirmation": true,
-  "errors": []
-}"""
+# Kept deliberately short. A small local vision model rambles when the prompt is
+# long - and a rambling answer gets truncated, which loses the JSON entirely. The
+# full field list is still stated; only the prose around it was cut.
+_JSON_EXAMPLE = (
+    '{"task_id":"t1","instruction":"...","summary":"...",'
+    '"steps":[{"step_id":"step-1","description":"...","action_type":"click",'
+    '"target_text":"...","arguments":{},"expected_result":"...","status":"pending"}],'
+    '"assumptions":[],"requires_confirmation":true,"errors":[]}'
+)
 
 SYSTEM_PROMPT = "\n".join(
     [
-        "You are the planning module of a desktop GUI agent.",
+        "You plan desktop GUI actions. Reply with ONE JSON object: no prose, no markdown fence.",
         "",
-        "You receive a user instruction plus optional context about what is currently",
-        "on screen. You reply with ONE JSON object and nothing else: no prose, no",
-        "markdown fence.",
-        "",
-        "Required shape:",
         _JSON_EXAMPLE,
         "",
         "Rules:",
-        "- Allowed action_type values: " + ", ".join(PLAN_ACTION_TYPES),
-        '- Use "finish" as the LAST step to end the plan.',
-        "- Keep the plan under 10 steps.",
-        "- Never invent screen coordinates. Identify targets by the text visible on",
-        "  screen.",
-        "- If the instruction is ambiguous, record the ambiguity in assumptions and",
-        "  still return a plan.",
+        "- action_type must be one of: " + ", ".join(PLAN_ACTION_TYPES),
+        '- The LAST step must use action_type "finish".',
+        "- Use at most 3 steps unless the task clearly needs more.",
+        "- Keep every string under 60 characters.",
+        "- Never invent screen coordinates; name targets by the text visible on screen.",
+        "- If the instruction is ambiguous, note it in assumptions and still return a plan.",
     ]
 )
 

@@ -247,6 +247,44 @@ happened in Week 2 with 12 errors. `--basetemp` now points inside the repository
 Neither defect was visible from the code, and neither would have been found on a
 single machine.
 
+### The real model, end to end
+
+The model runs on the Windows GPU node and the Mac only issues HTTP requests. The
+final configuration is `qwen2.5vl:7b` behind Ollama on the RTX 4060, reached at
+`http://172.16.114.104:11434/v1`.
+
+A real instruction against a real screenshot produced a valid, sensible plan:
+
+```text
+instruction: Open the browser and search for multimodal GUI agents
+model      : qwen2.5vl:7b   (100% GPU, 7887 of 8188 MiB)
+
+  step-1  click       browser        Open the browser
+  step-2  type_text   search bar     Type 'multimodal GUI agents' in the search bar
+  step-3  key_press   search bar     Press Enter to search
+  step-4  click       first result   Click on the first search result
+  step-5  finish      browser        Finish the task          (terminal)
+
+assumptions            : ["Ambiguous search term"]
+requires_confirmation  : True
+executed               : nothing
+```
+
+The plan is semantically correct, ends with the terminal verb, records its own
+assumption and is saved to `outputs/week3/plans/<task_id>.json`. The raw artefact
+is kept in `Document/Week3/evidence/real_model_plan_qwen25vl_7b.json`.
+
+**A prompt problem, found only against a real model.** The first attempts failed
+with "no JSON object found in the response" even though the reply visibly began
+with `{`. The cause was the prompt, not the parser: the system prompt was long
+enough that a 7B model kept talking past the point where the JSON ended, and the
+response was truncated mid-object. Cutting the prompt from about 1200 to about 600
+characters - keeping the field list, dropping the prose - fixed it immediately, and
+the first attempt then succeeded.
+
+The Mock backend could never have surfaced this: it returns a fixed dictionary, so
+prompt length has no effect on it.
+
 ### The real model, split across two machines
 
 The model runs on the Windows GPU node and the Mac only issues HTTP requests, which
