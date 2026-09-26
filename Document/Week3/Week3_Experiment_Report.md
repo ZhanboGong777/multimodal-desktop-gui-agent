@@ -247,6 +247,49 @@ happened in Week 2 with 12 errors. `--basetemp` now points inside the repository
 Neither defect was visible from the code, and neither would have been found on a
 single machine.
 
+### The real model, split across two machines
+
+The model runs on the Windows GPU node and the Mac only issues HTTP requests, which
+suits the available hardware and removes the PaddlePaddle/PyTorch conflict entirely.
+The Mac reached the endpoint on the first attempt, on the same subnet:
+
+```text
+Mac 172.16.114.87/26  ->  Windows 172.16.114.104/26
+GET /v1/models        ->  {"data": [{"id": "qwen2.5vl:3b", ...}]}
+```
+
+A real multimodal call then succeeded through the project's own client:
+
+| Measurement | Value |
+| --- | --- |
+| Image | 520 x 160 PNG, synthetic, text `SAVE-BUTTON-913` |
+| Model answer | `SAVE-BUTTON-913` |
+| Latency | 2.9 s, including base64 encoding |
+| Result | correct |
+
+**The 3B model cannot read a real desktop screenshot.** The same endpoint fails
+with `500 prediction aborted, token repeat limit reached` on a 1920 x 1080 desktop
+capture. The failure was isolated deliberately:
+
+| Variation | Result |
+| --- | --- |
+| Text-only planning, simple instruction | valid JSON, 5 steps |
+| Text-only planning, compound instruction | valid JSON, 5 steps |
+| Synthetic 520 x 160 image | correct reading |
+| Real 1920 x 1080 screenshot | 500 |
+| Same screenshot downscaled to 1024 / 768 / 512 | 500 |
+| Same screenshot with `num_ctx` 8192 / 16384 | 500 |
+
+Image size and context window are therefore not the cause: the model is simply not
+capable enough for a cluttered full-screen capture. A larger vision model
+(`llava:7b`, 4.7 GB) is the next thing to try, and the parameter is a one-line
+change in the configuration.
+
+This is a result, not a blocker, and it is worth recording plainly: **a small
+vision model can pass a synthetic smoke test and still be unusable on real
+screens.** The synthetic verification the Windows machine ran was necessary but
+not sufficient.
+
 ## 9. Problems and handling
 
 **The record reader shredded pretty-printed JSON.** It switched to line-by-line
