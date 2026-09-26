@@ -213,11 +213,13 @@ tempCodeRunnerFile.py
 .DS_Store
 .idea/
 
-# Project-generated files
-outputs/
-logs/
-models/
-checkpoints/
+# Project-generated files.
+# Anchored with a leading slash on purpose: a bare "models/" also matches
+# src/gui_agent/models/, which silently kept the Week 3 model layer out of Git.
+/outputs/
+/logs/
+/models/
+/checkpoints/
 
 # Marimo
 marimo/_static/
