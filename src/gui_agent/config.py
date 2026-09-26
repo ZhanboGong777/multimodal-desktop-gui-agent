@@ -95,12 +95,45 @@ class LoggingConfig(ConfigModel):
     directory: Path = Path("outputs/week2")
 
 
+class DatasetConfig(ConfigModel):
+    """Where a preparation run reads from and writes to."""
+
+    name: Literal["screenagent", "mind2web", "webarena"] = "screenagent"
+    split: str = "train"
+    sample_limit: int = Field(default=20, ge=1)
+    raw_directory: str = "data/raw"
+    processed_directory: str = "data/processed"
+
+
+class ModelConfig(ConfigModel):
+    """Which multimodal backend to talk to, and how to reach it."""
+
+    provider: Literal["mock", "openai_compatible"] = "mock"
+    model_name: str = "mock-vision-model"
+    # Credentials never live here: they are read from the environment.
+    base_url: str | None = None
+    timeout_seconds: float = Field(default=60.0, gt=0.0)
+    temperature: float = Field(default=0.0, ge=0.0, le=2.0)
+    max_retries: int = Field(default=1, ge=0)
+
+
+class PlanningConfig(ConfigModel):
+    """Limits the planner enforces before a plan may leave the module."""
+
+    max_steps: int = Field(default=10, ge=1)
+    require_structured_output: bool = True
+    allow_real_execution: bool = False
+
+
 class Config(ConfigModel):
     runtime: RuntimeConfig = Field(default_factory=RuntimeConfig)
     perception: PerceptionConfig = Field(default_factory=PerceptionConfig)
     control: ControlConfig = Field(default_factory=ControlConfig)
     output: OutputConfig = Field(default_factory=OutputConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
+    dataset: DatasetConfig = Field(default_factory=DatasetConfig)
+    model: ModelConfig = Field(default_factory=ModelConfig)
+    planning: PlanningConfig = Field(default_factory=PlanningConfig)
 
 
 def load_config(path: str | Path = DEFAULT_CONFIG_PATH) -> Config:

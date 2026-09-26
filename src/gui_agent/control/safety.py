@@ -91,7 +91,9 @@ def describe_action(action: DesktopAction) -> str:
     if action.text is not None:
         # The console description also ends up in run.log, so mask typed text here too.
         typed = action.action_type == "type_text"
-        parts.append(f"text={REDACTED if typed or is_sensitive_text(action.text) else action.text!r}")
+        parts.append(
+            f"text={REDACTED if typed or is_sensitive_text(action.text) else action.text!r}"
+        )
     if action.key:
         parts.append(f"key={action.key}")
     if action.keys:

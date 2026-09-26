@@ -51,3 +51,23 @@ output:
 logging:
   level: INFO
   directory: outputs/week2
+
+dataset:
+  name: screenagent
+  split: train
+  sample_limit: 20
+  raw_directory: data/raw
+  processed_directory: data/processed
+
+model:
+  provider: mock
+  model_name: mock-vision-model
+  base_url: null
+  timeout_seconds: 60
+  temperature: 0.0
+  max_retries: 1
+
+planning:
+  max_steps: 10
+  require_structured_output: true
+  allow_real_execution: false
