@@ -149,6 +149,16 @@ fixture had been passing for a week. The fixture could not have found them: it u
 the invented shape `"CLICK [Submit]"`, which is what the adapter assumed. **A fixture
 written by the same person from the same belief cannot falsify that belief.**
 
+**Parquet input was read as text, so the documented Mind2Web command did nothing.**
+Validating the adapter directly gave 268/268. The same file handed to
+`scripts/week3_prepare_dataset.py` was decoded as UTF-8, yielding six lines of
+mojibake, zero conversions, an empty output file - and **exit code 0**. A command
+that reports success while writing nothing is worse than one that fails. `read_records()`
+now reads Parquet in batches, and the CLI consumes that iterator lazily instead of
+wrapping it in `list()` - which had quietly undone the batching one line later. Only
+`--shuffle` still materialises the input, because shuffling needs every record. An
+export that produced no samples exits 1. Three regression tests cover both halves.
+
 **The record reader shredded pretty-printed JSON.** The first version switched to
 line-by-line parsing whenever the text contained a newline. A formatted JSON file
 is not JSONL, so every inner line carried a trailing comma and was dropped: a
@@ -200,16 +210,20 @@ code. The first would have shipped a repository that could not be cloned and use
 - The LangChain backend has now been exercised against the real `qwen2.5vl:7b` on
   the Windows node, and the two remote backends returned byte-identical plans for
   the same instruction and screenshot. What remains unmeasured is not correctness
-  but comfort: `qwen2.5vl:7b` does not fit in 8 GB of VRAM, so about 26% of its
-  layers run on the CPU and one planning call takes 12-14 s once loaded (74 s
-  cold). Whether that is fast enough for Week 4's interactive loop is an open
-  question, not a defect.
+  but comfort: a cold call takes 8-10 s when the machine has memory free and about
+  72 s when it does not, because the vision encoder then pages to disk. The 74 s
+  first seen was that, not model loading - see the experiment recorded below.
+  Whether 8-10 s is fast enough for Week 4's interactive loop is an open question,
+  not a defect.
 - The coverage figure depends on `pytest-cov`, which lives in
   `requirements-dev.txt` and not in `requirements-agent.txt`. A machine that
   follows the agent requirements alone cannot reproduce `--cov`; the Windows node
   hit exactly this and had to install it separately.
-- The real-model path needs `GUI_AGENT_API_KEY`; it cannot be exercised in
-  automated tests, so the mock backend is the one the test suite proves.
+- The real-model path needs `GUI_AGENT_API_KEY` and a live model service, so week 3
+  did not put it in the default suite - the mock backend is what the suite proves.
+  It could be an opt-in test skipped by environment variable; that was not done here.
+- Three integration tests do open a socket, on 127.0.0.1 only. "No network" would be
+  the wrong way to describe the suite.
 - The suite takes about 62 s on the Windows node against 8 s on the Mac. The ratio
   has held across every revision, so it is a property of the machine - antivirus
   scanning and process startup are the likely causes - rather than a regression.

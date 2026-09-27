@@ -68,8 +68,11 @@ mouse actions and 74 keyboard actions.
 | `value` | `input_text` |
 | `website`, `domain`, `subdomain` | `metadata` |
 
-`action_reprs` entries look like `CLICK [Submit]`; the verb is split off and the
-bracketed text becomes the target.
+One row is one **step**, not one task: `action_reprs` holds the whole task and
+`target_action_index` selects which step the row is. An entry reads
+`[textbox]  US City,State or Zip Code -> TYPE: 08817` - an element tag, the element
+text, then the operation at the *end*. Splitting on the first space makes the tag the
+verb, which is exactly what the first version of this adapter did.
 
 ### WebArena
 
@@ -83,9 +86,10 @@ bracketed text becomes the target.
 
 ## Limits found
 
-1. **Mind2Web is too large to download casually.** 13.6 GB with screenshots. Week 3
-   streams a handful of samples instead; the preparation script takes `--limit` for
-   exactly this reason.
+1. **Mind2Web is too large to download casually.** 13.6 GB with screenshots, and
+   streaming is slower than the size suggests (see 6). One Parquet shard fetched
+   directly - 296 MB, 268 rows over 36 tasks - is enough to validate the adapter, and
+   is what Week 3 used. The preparation script takes `--limit` for the same reason.
 2. **WebArena's value is its evaluation format, not its screenshots.** It defines
    tasks, start pages and expected outcomes; running it needs a full Dockerised
    website stack, which Week 3 explicitly does not deploy.
@@ -114,12 +118,20 @@ bracketed text becomes the target.
    | `osunlp/Multimodal-Mind2Web` | `train`, `test_domain`, `test_task`, `test_website` |
 
    Streaming `test_task` did not deliver its first record within five minutes: the
-   archive is sharded, and a shard has to arrive before the iterator yields
-   anything. The adapter therefore remains **fixture-tested only**, and this is a
-   real gap rather than an oversight. The hand-off's own warning - do not download
-   the whole dataset first - is confirmed, and the practical route is a short
-   one-off download of a single shard, or `Mind2Web` (6.74 GB) rather than
-   `Multimodal-Mind2Web` (13.6 GB).
+   archive is sharded, and a shard has to arrive before the iterator yields anything.
+   Downloading one shard directly sidesteps this entirely, and that is what closed the
+   gap: **268/268 rows converted, 0 validation issues**. Running it also exposed three
+   adapter defects the fixture had been agreeing with - the verb read from the wrong
+   end, one row treated as a whole task, and the `screenshot` struct dropped - all
+   fixed, with five regression tests pinning the real format.
+
+7. **Parquet is binary, and the reader treated every input as text.** Validating the
+   adapter directly gave 268/268. Handing the same file to
+   `scripts/week3_prepare_dataset.py` read six lines of mojibake, converted nothing,
+   wrote an empty file **and still exited 0** - so the documented command looked like
+   it worked. `read_records()` now reads Parquet in batches, and an export that
+   produced no samples exits 1. Adapter-level and command-level results now agree,
+   which is the only reason the command can be handed to someone else.
 
 ## Local layout
 

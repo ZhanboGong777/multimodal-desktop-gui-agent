@@ -148,3 +148,82 @@ def test_zero_limit_is_rejected(source: Path, tmp_path: Path) -> None:
     )
     assert result.returncode == 2
     assert "--limit" in result.stderr
+
+
+# ─────────────────── Parquet input (the Mind2Web case) ───────────────────
+def _write_parquet(path: Path, records: list[dict[str, object]]) -> None:
+    """Smallest real Parquet file, so the reader is tested on the real format."""
+    pyarrow = pytest.importorskip("pyarrow")
+    import pyarrow.parquet as pq
+
+    table = pyarrow.table(
+        {
+            "annotation_id": [r["annotation_id"] for r in records],
+            "confirmed_task": [r["confirmed_task"] for r in records],
+            "action_reprs": [r["action_reprs"] for r in records],
+            "target_action_index": [r["target_action_index"] for r in records],
+        }
+    )
+    pq.write_table(table, path)
+
+
+def test_reads_a_parquet_shard(tmp_path: Path) -> None:
+    """Mind2Web ships as Parquet, which is binary.
+
+    Reading it as text produced a few lines of mojibake, converted nothing, wrote an
+    empty file and still exited zero - so the documented Mind2Web command appeared to
+    work. This is the regression test for that.
+    """
+    from gui_agent.datasets.base import read_records
+
+    shard = tmp_path / "shard.parquet"
+    _write_parquet(
+        shard,
+        [
+            {
+                "annotation_id": "m2w-1",
+                "confirmed_task": "Rent a truck",
+                "action_reprs": ["[link]  Budget Truck -> CLICK"],
+                "target_action_index": "0",
+            }
+        ],
+    )
+
+    records = list(read_records(shard))
+
+    assert len(records) == 1
+    assert records[0]["confirmed_task"] == "Rent a truck"
+
+
+def test_parquet_flows_through_the_cli(tmp_path: Path) -> None:
+    shard = tmp_path / "shard.parquet"
+    _write_parquet(
+        shard,
+        [
+            {
+                "annotation_id": "m2w-1",
+                "confirmed_task": "Rent a truck",
+                "action_reprs": ["[link]  Budget Truck -> CLICK"],
+                "target_action_index": "0",
+            }
+        ],
+    )
+    out = tmp_path / "out.jsonl"
+
+    result = run_cli("--dataset", "mind2web", "--input", str(shard), "--output", str(out))
+
+    assert result.returncode == 0, result.stderr
+    assert "成功转换数: 1" in result.stdout
+    assert len(out.read_text(encoding="utf-8").strip().splitlines()) == 1
+
+
+def test_a_run_that_converts_nothing_fails(tmp_path: Path) -> None:
+    """Exit zero on an empty export reads as success to whoever ran the command."""
+    source = tmp_path / "wrong.json"
+    source.write_text(json.dumps({"unrelated": True}), encoding="utf-8")
+    out = tmp_path / "out.jsonl"
+
+    result = run_cli("--dataset", "mind2web", "--input", str(source), "--output", str(out))
+
+    assert result.returncode == 1
+    assert "no samples were written" in result.stderr

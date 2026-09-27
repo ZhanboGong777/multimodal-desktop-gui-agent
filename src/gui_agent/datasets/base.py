@@ -40,14 +40,20 @@ class DatasetAdapter(ABC):
 
 
 def read_records(source: Path | str) -> Iterator[dict[str, Any]]:
-    """Yield raw records from a JSON file, a JSONL file, or a zip of them.
+    """Yield raw records from JSON, JSONL, Parquet, or a zip of JSON files.
 
-    Used for fixtures and for the smaller real sources (ScreenAgent's ``test.zip``
-    and WebArena's ``test.raw.json``). HuggingFace-backed sources stream instead.
+    Covers every real source used this week: ScreenAgent's ``test.zip``,
+    WebArena's ``test.raw.json`` and Mind2Web's Parquet shards. HuggingFace-backed
+    sources can stream as well, but reading one shard from disk is both faster and
+    reproducible, which is what the documented command needs.
     """
     path = Path(source)
     if not path.exists():
         raise DatasetError(f"source does not exist: {path}")
+
+    if path.suffix == ".parquet":
+        yield from _parse_parquet(path)
+        return
 
     if path.suffix == ".zip":
         with zipfile.ZipFile(path) as archive:
@@ -59,6 +65,33 @@ def read_records(source: Path | str) -> Iterator[dict[str, Any]]:
         return
 
     yield from _parse_bytes(path.read_bytes(), str(path))
+
+
+def _parse_parquet(path: Path) -> Iterator[dict[str, Any]]:
+    """Read a Parquet shard, one batch at a time.
+
+    Parquet is binary. Decoding it as UTF-8 produced a handful of mojibake lines,
+    every one of which failed, and a run that converted nothing still exited zero -
+    so the documented Mind2Web command looked like it worked while writing an empty
+    file. Batches are yielded lazily, so a caller that stops early never loads the
+    whole shard - but that only holds if the caller does not materialise the
+    iterator first.
+    """
+    try:
+        import pyarrow.parquet as pq
+    except ImportError as exc:  # pragma: no cover - depends on the environment
+        raise DatasetError(
+            f"reading {path.name} needs pyarrow ({exc}); install it with: "
+            "pip install -r requirements-agent.txt"
+        ) from exc
+
+    try:
+        handle = pq.ParquetFile(path)
+    except Exception as exc:
+        raise DatasetError(f"cannot read {path}: {exc}") from exc
+
+    for batch in handle.iter_batches():
+        yield from batch.to_pylist()
 
 
 def _parse_bytes(payload: bytes, label: str) -> Iterator[dict[str, Any]]:

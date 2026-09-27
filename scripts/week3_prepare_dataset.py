@@ -13,7 +13,9 @@ import argparse
 import json
 import random
 import sys
+from collections.abc import Iterable
 from pathlib import Path
+from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "src"))
@@ -58,23 +60,35 @@ def main() -> int:
         return 2
 
     try:
-        records = list(read_records(args.input))
+        # Keep this lazy. Wrapping the reader in list() pulled a whole shard into
+        # memory and quietly undid the batched Parquet reading underneath, which made
+        # the "streams in batches" claim false at the only level a user sees.
+        # Shuffling genuinely needs every record, so it is the one case that
+        # materialises the input.
+        if args.shuffle:
+            records: Iterable[dict[str, Any]] = list(read_records(args.input))
+            random.Random(args.seed).shuffle(records)  # type: ignore[arg-type]
+        else:
+            records = read_records(args.input)
     except DatasetError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
 
-    if args.shuffle:
-        random.Random(args.seed).shuffle(records)
-
     samples: list[GUITaskSample] = []
     errors: list[str] = []
-    for index, record in enumerate(records):
-        if len(samples) >= args.limit:
-            break
-        try:
-            samples.append(adapter.to_sample(record, split=args.split))
-        except Exception as exc:  # noqa: BLE001 - one bad record must not stop the run
-            errors.append(f"record {index}: {type(exc).__name__}: {exc}")
+    try:
+        for index, record in enumerate(records):
+            if len(samples) >= args.limit:
+                break
+            try:
+                samples.append(adapter.to_sample(record, split=args.split))
+            except Exception as exc:  # noqa: BLE001 - one bad record must not stop the run
+                errors.append(f"record {index}: {type(exc).__name__}: {exc}")
+    except DatasetError as exc:
+        # A generator does not run until it is first advanced, so a missing or
+        # unreadable source surfaces here rather than at the call above.
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
 
     stats = collect_stats(samples)
     stats.total += len(errors)  # records that never became samples
@@ -112,6 +126,13 @@ def main() -> int:
         print(f"error: the export does not read back: {exc}", file=sys.stderr)
         return 1
     print(f"回读验证: {len(reloaded)} 个样本通过 Schema 校验")
+
+    # An empty export is a failure, not a success with nothing in it. The Mind2Web
+    # parquet used to be read as text, converted zero records, wrote an empty file
+    # and still exited 0 - which reads as "it worked" to anyone running the command.
+    if not reloaded:
+        print("error: no samples were written", file=sys.stderr)
+        return 1
     return 0
 
 

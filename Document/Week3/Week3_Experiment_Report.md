@@ -236,25 +236,52 @@ screenshot (VS Code, 1707x1067) went through both backends:
 
 | Backend | attempts | steps | Plan | Latency |
 | --- | --- | --- | --- | --- |
-| `langchain` | 1 | 3 (3 executable) | `click 浏览器` / `type_text GUI agents` / `click First search` | 74 110 ms (cold) |
+| `langchain` | 1 | 3 (3 executable) | `click 浏览器` / `type_text GUI agents` / `click First search` | 74 110 ms (see below) |
 | `openai_compatible` | 1 | 3 (3 executable) | byte-for-byte identical | 11 868 ms |
 
 The plans are identical. That is the claim worth testing here - not "LangChain
 works", which was never in doubt, but "the backends are interchangeable and the
 planner cannot tell them apart".
 
-The 74 s is not wrapper overhead: it is the first call loading a 6 GB model into
-VRAM. Re-running with the model resident gave 14 082 ms, the same order as the
-direct backend's 11 868 ms.
+The 74 s was first read as the cost of loading a 6 GB model into VRAM. A dedicated
+experiment on the Windows node showed that reading to be wrong, and the real cause
+to be more useful:
 
-One hardware characteristic is worth recording, because it bounds what this setup
-can do. `qwen2.5vl:7b` (6 GB) does **not** fit entirely in the RTX 4060's 8 GB:
-`ollama ps` reports `5.9 GB  26%/74% CPU/GPU`, so roughly a quarter of the layers
-run on the CPU. Setting `num_ctx` anywhere between 1024 and 8192 did not change
-the allocation - Ollama still reported `CONTEXT 4096` - which makes this a hard
-constraint of model size against VRAM rather than a tuning mistake. Throughput
-settles at about 30 tok/s, putting one planning call at 12-14 s. No thermal or
-power throttling was active (50 C, 7.78 W, `SW Power Cap: Not Active`).
+| Metric | Memory free | Memory exhausted |
+| --- | --- | --- |
+| `load_duration` | 6.89 s | 6.89 s |
+| `prompt_eval_duration` | 3.19 s | **65.22 s** |
+| `eval_duration` | 0.47 s | 0.47 s |
+| wall clock | 10.38 s | 72.72 s |
+
+Loading is about 7 s either way. What grew twentyfold was `prompt_eval_duration` -
+the step that encodes the screenshot into vision tokens. Three `llama-server`
+processes were resident, one of them an orphan still holding 4120 MB after its
+model had been unloaded; free memory stood at 3.0 GB of 23.7 GB. Ending the
+orphans took it to 9.3 GB and cold calls returned to 8 s immediately.
+
+Five repeated cold calls each way make a point one measurement could not:
+8.28 / 8.04 / 8.29 / 8.05 / 8.26 s with memory free, against 71.80 / 71.84 /
+72.84 / 72.22 / 73.76 s with it exhausted. Had the experiment been run once, either
+set of numbers would have supported a confident and wrong conclusion - which is
+also why the first hypothesis about this (a 60 s timeout followed by a retry whose
+arithmetic happened to fit to within 29 ms) was abandoned on the evidence.
+
+`timeout_seconds: 60` therefore stays as it is, but its margin belongs to the
+machine's memory rather than to the timeout logic, and under memory pressure a
+cold call exceeds it every time. Week 4's loop has to check for orphaned
+`llama-server` processes and warm the model before it starts.
+
+The VRAM split is still unsettled. Two readings disagree, both from the same
+machine: the model-upgrade step reported `5.5 GB  100% GPU`, the LangChain review
+reported `5.9 GB  26%/74% CPU/GPU`. Setting `num_ctx` anywhere between 1024 and
+8192 did not change the allocation, so it is not a tuning mistake. If that split
+is accurate then about a quarter of the model - roughly 1.6 GB of its 6.17 GB -
+is not in VRAM at all, which would explain why memory pressure reaches this
+workload first. An earlier draft put the range at 1.6-4.5 GB, which double-counted
+the GPU share: 74% of 6.17 GB is 4.5 GB, and that part is in VRAM. The split is
+also the one thing two measurements disagree about, so it stays an inference. No thermal or power throttling was active
+(50 C, 7.78 W, `SW Power Cap: Not Active`).
 
 ## 7. Planning results
 
@@ -294,7 +321,7 @@ Both machines, same suite:
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **285 passed**, 89% coverage, ruff clean |
+| MacBook Air M2 | **288 passed**, 89% coverage, ruff clean |
 | Lenovo Y9000P (Windows) | **285 passed** in 62.15 s, ruff clean |
 
 Both machines now pass the same 285 tests on the same revision. Getting there took
@@ -311,7 +338,7 @@ Agreement is the point of running both, because two defects only ever appeared o
 the second machine - and neither would have been found by reading the code.
 
 ```text
-pytest      : 285 passed
+pytest      : 288 passed
 coverage    : 89% over src/gui_agent
 ruff        : All checks passed!
 ```
@@ -403,7 +430,7 @@ A real instruction against a real screenshot produced a valid, sensible plan:
 
 ```text
 instruction: Open the browser and search for multimodal GUI agents
-model      : qwen2.5vl:7b   (100% GPU, 7887 of 8188 MiB)
+model      : qwen2.5vl:7b
 
   step-1  click       browser        Open the browser
   step-2  type_text   search bar     Type 'multimodal GUI agents' in the search bar
@@ -486,6 +513,14 @@ not sufficient.
 
 ## 9. Problems and handling
 
+**Parquet was read as text, so the documented Mind2Web command silently did nothing.**
+Calling the adapter directly on the shard gave 268/268. Passing the same file to
+`scripts/week3_prepare_dataset.py` decoded it as UTF-8, produced six lines of
+mojibake, converted nothing, wrote an empty file and exited 0. `read_records()` now
+reads Parquet in batches and an empty export exits 1; three regression tests pin both.
+The gap mattered because the adapter-level result was the one in this report while the
+command-level one was the one a reader would run.
+
 **The record reader shredded pretty-printed JSON.** It switched to line-by-line
 parsing whenever the text contained a newline. A formatted JSON file is not JSONL,
 so every inner line carried a trailing comma and was dropped: a six-record fixture
@@ -534,7 +569,7 @@ over the real archive found in minutes what the fixtures would never have found.
 | Instruction becomes a structured TaskPlan | yes |
 | Plan validated and never executed | yes |
 | Framework built on LangChain, per the outline | yes, `LangChainClient`, same `ModelClient` |
-| New and existing tests pass, Ruff clean | 285 passed, ruff clean |
+| New and existing tests pass, Ruff clean | 288 passed, ruff clean |
 | README, WORKLOG and report updated | yes |
 
 ## 11. Deliverables
