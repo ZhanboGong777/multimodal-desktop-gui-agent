@@ -18,14 +18,14 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from gui_agent.config import load_config
-from gui_agent.models import create_model_client
+from gui_agent.models import CLIENTS, create_model_client
 from gui_agent.planning import TaskPlanner
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default=str(REPO_ROOT / "configs" / "default.yaml"))
-    parser.add_argument("--provider", choices=["mock", "openai_compatible"], default=None)
+    parser.add_argument("--provider", choices=sorted(CLIENTS), default=None)
     parser.add_argument("--model", default=None)
     parser.add_argument("--instruction", required=True)
     parser.add_argument("--image", default=None, help="screenshot to include as context")

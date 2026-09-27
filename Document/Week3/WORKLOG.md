@@ -7,10 +7,10 @@ Branch: `week3-dataset-agent`.
 
 | Item | Result |
 | --- | --- |
-| New source modules | 17 (`datasets/` 8, `models/` 4, `planning/` 5) |
+| New source modules | 18 (`datasets/` 8, `models/` 5, `planning/` 5) |
 | New scripts | 3 |
-| New test files | 6 |
-| Tests | 263 passed |
+| New test files | 8 |
+| Tests | 281 passed |
 | Ruff | clean |
 | Week 1 + Week 2 regression | all previous tests still pass |
 
@@ -105,6 +105,28 @@ nothing.
 - `scripts/week3_planning_demo.py` - instruction to validated plan, saved under
   `outputs/week3/plans/`.
 
+Both demos take `--provider` from `sorted(CLIENTS)` rather than a hard-coded
+list, so registering a backend is enough to make it selectable. The list was
+hard-coded and went stale the moment a third backend appeared.
+
+### 8. LangChain backend (`src/gui_agent/models/langchain_adapter.py`)
+
+The outline asks for the framework to be built on LangChain/LlamaIndex. The first
+cut of this week satisfied the architectural half of that - a provider-independent
+`ModelClient` - but not the literal one: `langchain` sat in
+`requirements-agent.txt` and was never imported. This adapter closes the gap.
+
+- Registered as provider `langchain`; `create_model_client` now calls
+  `factory(**common, base_url=...)` instead of branching on two hard-coded types.
+- Wraps `langchain_openai.ChatOpenAI`. Credentials, environment variables and the
+  vision payload are shared with the direct backend, not re-implemented: the
+  adapter calls `OpenAICompatibleClient.to_vision_messages()` and only converts
+  the resulting dicts into `SystemMessage` / `HumanMessage` / `AIMessage`.
+- `max_retries=0` is set on `ChatOpenAI` so `ModelClient` keeps ownership of the
+  retry policy and the two remote backends stay comparable.
+- Every LangChain exception is re-raised as `ModelError`; no LangChain type leaks
+  past this module, and nothing in `planning/` or `datasets/` imports it.
+
 ## Bugs found and fixed while building
 
 **The record reader shredded pretty-printed JSON.** The first version switched to
@@ -156,8 +178,10 @@ code. The first would have shipped a repository that could not be cloned and use
 - ScreenAgent and WebArena have now been exercised against the real archives.
   Mind2Web has not: streaming it needs the `datasets` package, which is not
   installed yet, so that adapter is still fixture-only.
-- `langchain_adapter.py` is not implemented. The interface is deliberately
-  provider-independent, so LangChain can be added as one more `ModelClient`
-  without touching the planner.
+- The LangChain backend has not been pointed at the real `qwen2.5vl:7b`: the GPU
+  node was offline when it was written. It is verified against a real
+  OpenAI-compatible server on localhost with the genuine `langchain-openai`
+  client, and through the CLI, but "works over HTTP" is not the same claim as
+  "works against that model". One command settles it when the node is back.
 - The real-model path needs `GUI_AGENT_API_KEY`; it cannot be exercised in
   automated tests, so the mock backend is the one the test suite proves.

@@ -59,6 +59,8 @@ dataset:
   raw_directory: data/raw
   processed_directory: data/processed
 
+# provider: mock (offline) | openai_compatible (direct HTTP) | langchain (LangChain wrapper)
+# The three are interchangeable: they implement the same ModelClient interface.
 model:
   provider: mock
   model_name: mock-vision-model

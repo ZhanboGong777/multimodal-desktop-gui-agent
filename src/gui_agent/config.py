@@ -108,7 +108,7 @@ class DatasetConfig(ConfigModel):
 class ModelConfig(ConfigModel):
     """Which multimodal backend to talk to, and how to reach it."""
 
-    provider: Literal["mock", "openai_compatible"] = "mock"
+    provider: Literal["mock", "openai_compatible", "langchain"] = "mock"
     model_name: str = "mock-vision-model"
     # Credentials never live here: they are read from the environment.
     base_url: str | None = None

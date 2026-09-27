@@ -26,7 +26,8 @@ src/gui_agent/
 ├── models/
 │   ├── base.py           ModelClient, ModelRequest, ModelResponse
 │   ├── mock.py           deterministic offline backend
-│   └── openai_compatible.py  any OpenAI-compatible endpoint
+│   ├── openai_compatible.py  any OpenAI-compatible endpoint
+│   └── langchain_adapter.py  the same endpoint, through LangChain
 └── planning/
     ├── schemas.py        TaskPlan, PlanStep, PLAN_ACTION_TYPES
     ├── prompts.py        system prompt and user turn
@@ -129,6 +130,7 @@ archive uses others. See section 9.
 | --- | --- | --- | --- | --- |
 | `MockModelClient` | no | no | yes | tests, both demos, offline runs |
 | `OpenAICompatibleClient` | yes | `GUI_AGENT_API_KEY` | no | a real model, hosted or local |
+| `LangChainClient` | yes | `GUI_AGENT_API_KEY` | no | the same models, called through LangChain |
 
 **Screenshots are sent as real image data.** The payload uses the OpenAI vision
 shape - a `text` block plus an `image_url` block holding a base64 `data:` URL -
@@ -157,6 +159,79 @@ The honest reading: the mock's latency measures the plumbing, not a model. The
 real backend is exercised by a single controlled call; a full measurement would
 need a paid endpoint or a locally served vision model, which the hand-off does not
 require this week.
+
+### The LangChain backend
+
+The outline asks for the framework to be built "on LangChain/LlamaIndex". The
+first version of this week satisfied the architectural half of that requirement -
+a provider-independent `ModelClient` - but not the literal one: `langchain` was
+listed in `requirements-agent.txt` and never imported. `LangChainClient` closes
+that gap without weakening the abstraction.
+
+The design rule is that LangChain stays a *backend*, not a dependency of the
+system. Only `langchain_adapter.py` imports it; `planning/`, `datasets/` and the
+CLI continue to see `ModelClient` and nothing else. A LangChain upgrade, or its
+removal, cannot reach the planner, which is exactly why the interface exists.
+
+| Aspect | Choice |
+| --- | --- |
+| Provider name | `langchain` (`--provider langchain`) |
+| Underlying wrapper | `langchain_openai.ChatOpenAI` |
+| Credentials | identical to the direct backend: `GUI_AGENT_API_KEY`, `GUI_AGENT_BASE_URL` |
+| Vision payload | built by the shared `to_vision_messages()`, then wrapped in `HumanMessage` |
+| Retries | `max_retries=0` on `ChatOpenAI`; `ModelClient` owns the retry policy so both backends behave identically |
+| Errors | any LangChain exception becomes a `ModelError`, never a raw traceback |
+
+Two details are worth recording. First, the vision payload is not re-implemented:
+the adapter reuses the OpenAI client's encoder and only translates the resulting
+messages into LangChain objects, so the two backends cannot drift apart on how an
+image is attached. Second, `ChatOpenAI` is constructed lazily, on the first call,
+which is what lets `--provider langchain` fail with "`GUI_AGENT_API_KEY` is not
+set" instead of a connection error.
+
+**How it was verified.** The Windows GPU node was offline when this was written,
+so the backend was not checked against `qwen2.5vl:7b`. Instead the whole path was
+exercised against a real OpenAI-compatible server running on localhost, with the
+genuine `langchain-openai` client on the other side of a real socket:
+
+```text
+tests/test_langchain_integration.py::test_langchain_sends_a_real_vision_request
+tests/test_langchain_integration.py::test_usage_is_reported_back
+tests/test_langchain_integration.py::test_the_planner_runs_unchanged_on_the_langchain_backend
+3 passed
+```
+
+The assertions are about bytes that crossed the socket, not about a stub's
+arguments: the request carries `model: qwen2.5vl:7b`, a `system` turn, and an
+`image_url` block holding a `data:image/png;base64,` URL, and the raw file path
+does not appear anywhere in the payload. The third test runs `TaskPlanner`
+unchanged on the LangChain backend and gets a validated plan back, which is the
+claim that matters - the planner does not know which backend it is talking to.
+
+The CLI was checked the same way, against the same kind of local server:
+
+```text
+$ python scripts/week3_planning_demo.py --provider langchain --model qwen2.5vl:7b \
+    --instruction "Open the browser and search for GUI agents"
+
+provider   : langchain (qwen2.5vl:7b)
+attempts   : 1
+steps      : 5 (4 executable)
+confirm    : True
+
+  step    action      target        description
+  step-1  click       browser icon  Click the browser icon on the desk
+  step-2  click       address bar   Click the address bar
+  step-3  type_text   address bar   Type the search query
+  step-4  key_press   address bar   Press Enter
+  step-5  finish      -             Done  (terminal)
+nothing was executed: Week 3 produces plans, Week 4 executes them
+```
+
+`langchain_adapter.py` is at 100% statement coverage. The honest limitation is
+that a real vision model has not yet been called *through* LangChain; that is a
+one-command check once the GPU node is back on, and it is listed in the next-week
+plan rather than claimed here.
 
 ## 7. Planning results
 
@@ -196,14 +271,14 @@ Both machines, same suite:
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **263 passed**, 89% coverage, ruff clean |
+| MacBook Air M2 | **281 passed**, 89% coverage, ruff clean |
 | Lenovo Y9000P (Windows) | **254 passed** in 9.46 s (before the vision payload) |
 
 The counts match exactly, which is the point of running both: two defects only
 appeared on the second machine.
 
 ```text
-pytest      : 263 passed
+pytest      : 281 passed
 coverage    : 89% over src/gui_agent
 ruff        : All checks passed!
 ```
@@ -217,6 +292,8 @@ ruff        : All checks passed!
 | `test_model_config.py` | provider selection, credentials from the environment |
 | `test_plan_parser.py` | JSON recovery, unknown verbs, step limits |
 | `test_planner.py` | end-to-end planning, determinism, failure paths |
+| `test_langchain_adapter.py` | message conversion, credentials, error mapping |
+| `test_langchain_integration.py` | the LangChain backend over a real HTTP socket |
 
 Automated tests never touch the network, the desktop or a real API key.
 
@@ -377,14 +454,15 @@ over the real archive found in minutes what the fixtures would never have found.
 | One real multimodal backend | implemented; a live call needs `GUI_AGENT_API_KEY` |
 | Instruction becomes a structured TaskPlan | yes |
 | Plan validated and never executed | yes |
-| New and existing tests pass, Ruff clean | 245 passed, ruff clean |
+| Framework built on LangChain, per the outline | yes, `LangChainClient`, same `ModelClient` |
+| New and existing tests pass, Ruff clean | 281 passed, ruff clean |
 | README, WORKLOG and report updated | yes |
 
 ## 11. Deliverables
 
 Code: the dataset adapters and schema, the preparation CLI, the model interface
-with both backends, the planning module, three demonstration scripts, six test
-files and updated configuration.
+with three interchangeable backends, the planning module, three demonstration
+scripts, eight test files and updated configuration.
 
 Documents: this report, `Document/Week3/WORKLOG.md` and
 `Document/Week3/Week3_Dataset_Notes.md`.
@@ -396,5 +474,6 @@ Documents: this report, `Document/Week3/WORKLOG.md` and
 2. Run the adapters over the official ScreenAgent and WebArena archives and
    correct any field variants the fixtures did not cover.
 3. Complete the single real-model call and record its latency and output.
-4. Add the LangChain adapter as one more `ModelClient`; the planner needs no change.
+4. Re-run the LangChain backend against the real `qwen2.5vl:7b` on the GPU node and
+   record the latency alongside the direct backend, now that the node is off.
 5. Keep the dataset sample limit small until Week 5 needs training splits.

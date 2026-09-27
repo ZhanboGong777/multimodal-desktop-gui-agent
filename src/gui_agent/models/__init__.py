@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from ..config import ModelConfig
 from .base import ModelClient, ModelConfigError, ModelError, ModelRequest, ModelResponse
+from .langchain_adapter import LangChainClient
 from .mock import MockModelClient
 from .openai_compatible import OpenAICompatibleClient
 
@@ -11,6 +12,7 @@ from .openai_compatible import OpenAICompatibleClient
 CLIENTS: dict[str, type[ModelClient]] = {
     MockModelClient.name: MockModelClient,
     OpenAICompatibleClient.name: OpenAICompatibleClient,
+    LangChainClient.name: LangChainClient,
 }
 
 
@@ -30,11 +32,13 @@ def create_model_client(config: ModelConfig) -> ModelClient:
     }
     if factory is MockModelClient:
         return MockModelClient(**common)
-    return OpenAICompatibleClient(**common, base_url=config.base_url)
+    # Both remote backends take the endpoint as a normal keyword argument.
+    return factory(**common, base_url=config.base_url)
 
 
 __all__ = [
     "CLIENTS",
+    "LangChainClient",
     "MockModelClient",
     "ModelClient",
     "ModelConfigError",
