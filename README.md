@@ -25,7 +25,7 @@ machine that has the GPU.
 | Week 7 | System evaluation and performance analysis |
 | Week 8 | Code cleanup, technical report, and system demonstration |
 
-### Current Status
+### Week 3
 
 The project has completed Week 3. The Week 3 deliverables - the dataset preparation
 script and the base Agent framework - are on `main`.
