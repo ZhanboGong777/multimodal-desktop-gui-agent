@@ -2,7 +2,15 @@
 
 ### Project Overview
 
-This is a focused on developing and optimizing a desktop GUI agent powered by multimodal large language models. The agent is expected to understand natural-language instructions, perceive text and interface elements on the screen, plan task steps, and perform desktop operations through mouse and keyboard controls.
+This project develops and optimizes a desktop GUI agent powered by multimodal large
+language models. The agent is expected to understand natural-language instructions,
+perceive text and interface elements on the screen, plan task steps, and perform
+desktop operations through mouse and keyboard controls.
+
+Work is split across two machines: an Apple-silicon laptop for development and a
+Windows laptop with an NVIDIA GPU for model serving. The two communicate only over
+HTTP through an OpenAI-compatible endpoint, which keeps the CUDA stacks on the
+machine that has the GPU.
 
 ### Expected Development Progress
 
@@ -19,13 +27,41 @@ This is a focused on developing and optimizing a desktop GUI agent powered by mu
 
 ### Current Status
 
-The project has completed Week 3. On top of the Week 2 perception and control
-modules, the repository now contains adapters that normalise the ScreenAgent,
-Mind2Web and WebArena datasets into one `GUITaskSample` format with a validated
-JSONL export, a provider-independent multimodal model interface with an offline
-mock backend and an OpenAI-compatible client, and a planner that turns an
-instruction into a Pydantic-validated `TaskPlan`. Nothing in Week 3 executes a
-plan; that is Week 4.
+The project has completed Week 3. The Week 3 deliverables - the dataset preparation
+script and the base Agent framework - are on `main`.
+
+**Datasets.** Three adapters normalise ScreenAgent, Mind2Web and WebArena into one
+`GUITaskSample`, each validated against its real archive rather than against a
+fixture:
+
+| Source | Converted |
+|---|---|
+| ScreenAgent (`test.zip`) | 200 / 200 |
+| WebArena (`test.raw.json`) | 20 / 20 |
+| Mind2Web (Parquet shard, 36 tasks) | 268 / 268 |
+
+`scripts/week3_prepare_dataset.py` reads JSON, JSONL, Parquet and zip, writes a
+validated JSONL export, and exits non-zero when the export is empty.
+
+**Model interface.** One `ModelClient` contract with three interchangeable backends:
+
+| Provider | Needs a key | Use |
+|---|---|---|
+| `mock` | no | tests, demos, offline runs |
+| `openai_compatible` | `GUI_AGENT_API_KEY` | a real model, hosted or local |
+| `langchain` | `GUI_AGENT_API_KEY` | the same models, through LangChain |
+
+Only the LangChain adapter imports LangChain. Nothing in `planning/` or `datasets/`
+does, so the framework cannot become a dependency of the rest of the code.
+
+**Planning.** `TaskPlanner` turns an instruction plus screen context into a
+Pydantic-validated `TaskPlan`. `finish` is a planning verb only and is excluded from
+the executable steps, so a terminal marker cannot reach an executor. Nothing is
+executed in Week 3; the closed loop is Week 4.
+
+Verified with `qwen2.5vl:7b` served by Ollama on the Windows machine and driven from
+the Mac over HTTP. The same instruction and screenshot sent through both remote
+backends returned byte-identical plans, which is the point of the abstraction.
 
 ```bash
 python scripts/week3_prepare_dataset.py --dataset webarena \
@@ -33,6 +69,13 @@ python scripts/week3_prepare_dataset.py --dataset webarena \
 python scripts/week3_model_demo.py --provider mock
 python scripts/week3_planning_demo.py --provider mock --instruction "Open the browser"
 ```
+
+288 tests at 89% coverage, ruff clean. Dataset and model dependencies live in
+`requirements-agent.txt`, deliberately separate from the base requirements so that a
+failure there cannot break the Week 2 perception and control modules.
+
+Reports and evidence for the week are under `Document/Week3/`, including the work
+log, dataset notes and the raw JSON from the real model calls.
 
 ### Week 2
 
