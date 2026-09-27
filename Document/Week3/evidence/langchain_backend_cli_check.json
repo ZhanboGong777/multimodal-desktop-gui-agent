@@ -1,0 +1,79 @@
+{
+  "what": "LangChain backend, end-to-end through the CLI",
+  "why_not_the_real_model": "The Windows GPU node was offline, so the request went to a minimal OpenAI-compatible server on 127.0.0.1 instead. The langchain-openai client and the transport are real; the answering model is a stub.",
+  "command": "python scripts/week3_planning_demo.py --provider langchain --model qwen2.5vl:7b --instruction 'Open the browser and search for GUI agents'",
+  "request_observed_by_the_server": {
+    "model": "qwen2.5vl:7b",
+    "roles": [
+      "system",
+      "user"
+    ],
+    "message_count": 2,
+    "last_user_content_is_vision_blocks": false
+  },
+  "plan": {
+    "task_id": "task-1",
+    "instruction": "Open the browser and search for GUI agents",
+    "summary": "Open the browser, search for GUI agents, and read the first result.",
+    "steps": [
+      {
+        "step_id": "step-1",
+        "description": "Click the browser icon on the desktop",
+        "action_type": "click",
+        "target_text": "browser icon",
+        "arguments": {},
+        "expected_result": "The browser window opens.",
+        "status": "pending"
+      },
+      {
+        "step_id": "step-2",
+        "description": "Click the address bar",
+        "action_type": "click",
+        "target_text": "address bar",
+        "arguments": {},
+        "expected_result": "The address bar is focused.",
+        "status": "pending"
+      },
+      {
+        "step_id": "step-3",
+        "description": "Type the search query",
+        "action_type": "type_text",
+        "target_text": "address bar",
+        "arguments": {
+          "text": "GUI agents"
+        },
+        "expected_result": "The query is entered.",
+        "status": "pending"
+      },
+      {
+        "step_id": "step-4",
+        "description": "Press Enter",
+        "action_type": "key_press",
+        "target_text": "address bar",
+        "arguments": {
+          "key": "enter"
+        },
+        "expected_result": "Results are shown.",
+        "status": "pending"
+      },
+      {
+        "step_id": "step-5",
+        "description": "Done",
+        "action_type": "finish",
+        "target_text": null,
+        "arguments": {},
+        "expected_result": "The task is complete.",
+        "status": "pending"
+      }
+    ],
+    "assumptions": [
+      "The desktop is visible."
+    ],
+    "requires_confirmation": true,
+    "errors": []
+  },
+  "plan_steps": 5,
+  "executable_steps": 4,
+  "provider_reported_by_the_plan": "langchain",
+  "allow_real_execution": false
+}

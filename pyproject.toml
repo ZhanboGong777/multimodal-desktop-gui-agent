@@ -13,6 +13,14 @@ requires-python = ">=3.11,<3.14"
 where = ["src"]
 
 [tool.pytest.ini_options]
+# Keep test scratch space inside the repository.
+#
+# The default is %TEMP%/pytest-of-<user>, and on a Windows machine whose account
+# name is not ASCII that directory has repeatedly come back "Access is denied"
+# (WinError 5) before a single test runs - a locked or half-removed folder that
+# pytest cannot rotate. A project-local base directory sidesteps it, and it is
+# ignored by Git either way.
+addopts = "--basetemp=.pytest-tmp"
 testpaths = ["tests"]
 pythonpath = ["src"]
 

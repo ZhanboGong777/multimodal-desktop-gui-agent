@@ -1,0 +1,77 @@
+{
+  "what": "Mind2Web adapter validated against the real archive",
+  "why_it_matters": "This adapter was the last one still verified only by a hand-written fixture. Running it on real data found two defects the fixture could not, because the fixture was written from the same wrong assumption as the adapter.",
+  "source": {
+    "dataset": "osunlp/Multimodal-Mind2Web",
+    "file": "data/test_task-00000-of-00005-431389419142b606.parquet",
+    "how": "downloaded as a single parquet shard; streaming was too slow to use",
+    "rows_in_shard": 268
+  },
+  "result": {
+    "converted": 268,
+    "failed": 0,
+    "validation_issues": {},
+    "actions_per_sample": 1.0,
+    "action_types": {
+      "click": 218,
+      "type_text": 44,
+      "move": 4,
+      "enter": 2
+    },
+    "unique_instructions": 36,
+    "unique_annotation_ids": 36,
+    "with_screenshot_path": 268,
+    "total_screenshot_bytes": 317407969
+  },
+  "bugs_found": [
+    {
+      "name": "the verb is the last field, not the first",
+      "before": "action_type was the HTML tag: [button] x600, [link] x427, [input] x262",
+      "after": "action_type is the operation: click x218, type_text x44, move x4, enter x2",
+      "cause": "The repr is '[textbox]  US City,State or Zip Code -> TYPE: 08817'. Splitting on the first space made '[textbox]' the verb and 'US City,State or Zip Code -> TYPE: 08817' the target.",
+      "why_the_fixture_missed_it": "The fixture used the invented shape 'CLICK [Submit]' - verb first - which is what the adapter assumed, so both agreed and both were wrong."
+    },
+    {
+      "name": "one row is one step, not one task",
+      "before": "every row expanded its whole action_reprs list, 14 steps per sample",
+      "after": "target_action_index selects the single step the row represents",
+      "cause": "action_reprs holds the entire task; target_action_index says which step this row is. Treating the list as the trajectory multiplied each task by the length of its own action list."
+    },
+    {
+      "name": "the screenshot struct was dropped",
+      "before": "image_path was None: clean_text() was applied to a struct",
+      "after": "image_path is the real filename, and the embedded byte count is kept",
+      "cause": "screenshot is struct<bytes: binary, path: string>, not a string."
+    }
+  ],
+  "sample_rows": [
+    {
+      "sample_id": "91695df8-f256-47c9-8c37-06e8d0fc758f-step0",
+      "instruction": "Rent a truck with the lowest rent with two dozen furniture p",
+      "action_type": "move",
+      "target_text": "Reservations",
+      "input_text": null
+    },
+    {
+      "sample_id": "91695df8-f256-47c9-8c37-06e8d0fc758f-step1",
+      "instruction": "Rent a truck with the lowest rent with two dozen furniture p",
+      "action_type": "click",
+      "target_text": "Budget Truck",
+      "input_text": null
+    },
+    {
+      "sample_id": "91695df8-f256-47c9-8c37-06e8d0fc758f-step2",
+      "instruction": "Rent a truck with the lowest rent with two dozen furniture p",
+      "action_type": "type_text",
+      "target_text": "US City,State or Zip Code",
+      "input_text": "08817"
+    },
+    {
+      "sample_id": "91695df8-f256-47c9-8c37-06e8d0fc758f-step3",
+      "instruction": "Rent a truck with the lowest rent with two dozen furniture p",
+      "action_type": "click",
+      "target_text": "mm/dd/yyyy",
+      "input_text": null
+    }
+  ]
+}
