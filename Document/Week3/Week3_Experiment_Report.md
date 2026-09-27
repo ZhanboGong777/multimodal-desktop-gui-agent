@@ -295,16 +295,17 @@ Both machines, same suite:
 | Machine | Result |
 | --- | --- |
 | MacBook Air M2 | **285 passed**, 89% coverage, ruff clean |
-| Lenovo Y9000P (Windows) | **281 passed** in 47.75 s, ruff clean (at `73e65dd`) |
+| Lenovo Y9000P (Windows) | **285 passed** in 62.15 s, ruff clean |
 
-The two machines agreed exactly at `73e65dd`: 281 each. The Mac then closed the
-Mind2Web gap and added four regression tests, moving to 285. Those four have not
-been re-run on Windows, and that is stated rather than left for a reader to spot.
+Both machines now pass the same 285 tests on the same revision. Getting there took
+three runs: the Windows node stood at 254 while it predated the vision payload and
+the LangChain backend, then at 281 once those landed, and at 285 after the Mind2Web
+regression tests. The intermediate numbers were points on the same line rather than
+disagreements, but they are recorded because a table that only shows the final
+figure hides how much of the work was spent getting the two machines to agree.
 
-Getting to agreement is itself part of the record. The Windows run stood at 254 for
-a while, because it predated the vision payload and the LangChain backend. That was
-a point on the same line, not a disagreement - but it is exactly the kind of gap
-that gets quietly smoothed over in a report, so it is stated instead.
+The suite takes 62 s on Windows against 8 s on the Mac - the same ratio seen at
+254 and 281, so it is a property of the machine rather than of any one change.
 
 Agreement is the point of running both, because two defects only ever appeared on
 the second machine - and neither would have been found by reading the code.

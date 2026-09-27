@@ -123,12 +123,17 @@ bracketed text becomes the target.
 
 ## Local layout
 
-Raw downloads and exports live outside the repository:
+Raw downloads and exports live inside the repository under `data/`, which Git
+ignores (see the anchored `/data/raw/` and `/data/processed/` rules):
 
 ```text
-Mac:     /Users/caleb/Datasets/gui-agent-week3/{screenagent,mind2web,webarena}/
-Windows: D:\Datasets\gui-agent-week3\{screenagent,mind2web,webarena}\
+<repo>/data/raw/{screenagent,mind2web,webarena}/
+<repo>/data/processed/*.jsonl
 ```
 
-If a project-local layout is preferred, `data/raw/` and `data/processed/` are
-already ignored by Git.
+An earlier version of this note proposed a shared directory outside the
+repository (`~/Datasets/gui-agent-week3/` and `D:\Datasets\gui-agent-week3\`).
+That layout was never used: every byte of Week 3 data was written under `data/`,
+and neither external directory exists. It is mentioned here only so the mistake
+is not repeated - a second machine reading the old note would have downloaded
+48 MB into a directory nothing else looks at.

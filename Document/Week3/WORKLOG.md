@@ -210,3 +210,6 @@ code. The first would have shipped a repository that could not be cloned and use
   hit exactly this and had to install it separately.
 - The real-model path needs `GUI_AGENT_API_KEY`; it cannot be exercised in
   automated tests, so the mock backend is the one the test suite proves.
+- The suite takes about 62 s on the Windows node against 8 s on the Mac. The ratio
+  has held across every revision, so it is a property of the machine - antivirus
+  scanning and process startup are the likely causes - rather than a regression.

@@ -231,8 +231,10 @@ __marimo__/
 
 # Week 3 datasets: raw downloads and processed exports stay out of the repo.
 # Only hand-made fixtures under tests/fixtures/week3/ are committed.
-data/raw/
-data/processed/
+# Anchored for the same reason as the block above: a bare "data/raw/" would
+# also match any nested directory of that name.
+/data/raw/
+/data/processed/
 
 # pytest base temp directory (see [tool.pytest.ini_options])
 /.pytest-tmp/
