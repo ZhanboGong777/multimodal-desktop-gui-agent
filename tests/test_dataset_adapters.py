@@ -151,12 +151,98 @@ def test_mind2web_maps_steps_and_website() -> None:
     assert sample.actions[1].input_text == "Paris"
 
 
-def test_mind2web_accepts_string_action_reprs() -> None:
+#: A real ``action_reprs`` list, copied from
+#: ``osunlp/Multimodal-Mind2Web`` (split ``test_task``). The shape matters: tag,
+#: element text, then the operation at the *end*.
+REAL_REPRS = [
+    "[button]  Reservations -> HOVER",
+    "[link]  Budget Truck -> CLICK",
+    "[textbox]  US City,State or Zip Code -> TYPE: 08817",
+    "[select]  Select Pick-up Time -> SELECT: 02:30 PM",
+]
+
+
+def test_mind2web_reads_the_real_action_repr_format() -> None:
+    """The verb is the last field, not the first.
+
+    The first version split on the first space, so ``action_type`` came out as the
+    HTML tag (``[button]``, ``[link]``, ``[textbox]``) and the target absorbed the
+    operation text. A fixture written by hand agreed with the bug, because it was
+    written from the same assumption.
+    """
     sample = Mind2WebAdapter().to_sample(
-        {"confirmed_task": "Do something", "action_reprs": ["CLICK [Submit]", "TYPE [Paris]"]}
+        {
+            "confirmed_task": "Rent a truck",
+            "action_reprs": REAL_REPRS,
+            "target_action_index": "2",
+        }
     )
-    assert [s.action_type for s in sample.actions] == ["click", "type_text"]
-    assert sample.actions[0].target_text == "Submit"
+    step = sample.actions[0]
+
+    assert step.action_type == "type_text"
+    assert step.target_text == "US City,State or Zip Code"
+    assert step.input_text == "08817"
+    assert step.raw_action["element_tag"] == "textbox"
+    assert step.raw_action["operation"] == "TYPE"
+
+
+def test_mind2web_takes_one_step_per_row_not_the_whole_task() -> None:
+    """One row is one step, and ``target_action_index`` selects it.
+
+    Treating ``action_reprs`` as the trajectory turned each row into a copy of the
+    entire task: 268 real rows became thousands of fabricated steps.
+    """
+    sample = Mind2WebAdapter().to_sample(
+        {
+            "annotation_id": "m2w-2",
+            "confirmed_task": "Rent a truck",
+            "action_reprs": REAL_REPRS,
+            "target_action_index": "1",
+        }
+    )
+
+    assert sample.step_count == 1
+    assert sample.actions[0].action_type == "click"
+    assert sample.actions[0].target_text == "Budget Truck"
+    # The step index keeps the rows of one task apart.
+    assert sample.sample_id == "m2w-2-step1"
+
+
+def test_mind2web_maps_every_real_operation() -> None:
+    """Every operation in the real archive folds onto the project vocabulary."""
+    mapped = {}
+    for index, raw in enumerate(REAL_REPRS):
+        sample = Mind2WebAdapter().to_sample(
+            {"confirmed_task": "t", "action_reprs": REAL_REPRS, "target_action_index": str(index)}
+        )
+        mapped[raw] = sample.actions[0].action_type
+
+    assert mapped["[button]  Reservations -> HOVER"] == "move"
+    assert mapped["[link]  Budget Truck -> CLICK"] == "click"
+    assert mapped["[select]  Select Pick-up Time -> SELECT: 02:30 PM"] == "click"
+
+
+def test_mind2web_reads_the_embedded_screenshot_path() -> None:
+    """``screenshot`` is a struct, not a string; its bytes must not be lost."""
+    sample = Mind2WebAdapter().to_sample(
+        {
+            "confirmed_task": "Do something",
+            "action_reprs": REAL_REPRS,
+            "target_action_index": "0",
+            "screenshot": {"bytes": b"\xff\xd8\xff" * 10, "path": "abc.jpg"},
+        }
+    )
+    assert sample.image_path == "abc.jpg"
+    assert sample.metadata["screenshot_bytes"] == 30
+
+
+def test_mind2web_survives_a_repr_with_no_operation() -> None:
+    """A malformed repr keeps its text instead of becoming an unreadable step."""
+    sample = Mind2WebAdapter().to_sample(
+        {"confirmed_task": "t", "action_reprs": ["just some text"], "target_action_index": "0"}
+    )
+    assert sample.actions[0].action_type == "unknown"
+    assert sample.actions[0].target_text == "just some text"
 
 
 # ───────────────────────── WebArena ─────────────────────────

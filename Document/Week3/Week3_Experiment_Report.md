@@ -228,10 +228,33 @@ confirm    : True
 nothing was executed: Week 3 produces plans, Week 4 executes them
 ```
 
-`langchain_adapter.py` is at 100% statement coverage. The honest limitation is
-that a real vision model has not yet been called *through* LangChain; that is a
-one-command check once the GPU node is back on, and it is listed in the next-week
-plan rather than claimed here.
+`langchain_adapter.py` is at 100% statement coverage on both machines.
+
+**The real-model check was then run on the Windows node**, and it produced the
+result that actually matters for this design. One instruction and one real
+screenshot (VS Code, 1707x1067) went through both backends:
+
+| Backend | attempts | steps | Plan | Latency |
+| --- | --- | --- | --- | --- |
+| `langchain` | 1 | 3 (3 executable) | `click 浏览器` / `type_text GUI agents` / `click First search` | 74 110 ms (cold) |
+| `openai_compatible` | 1 | 3 (3 executable) | byte-for-byte identical | 11 868 ms |
+
+The plans are identical. That is the claim worth testing here - not "LangChain
+works", which was never in doubt, but "the backends are interchangeable and the
+planner cannot tell them apart".
+
+The 74 s is not wrapper overhead: it is the first call loading a 6 GB model into
+VRAM. Re-running with the model resident gave 14 082 ms, the same order as the
+direct backend's 11 868 ms.
+
+One hardware characteristic is worth recording, because it bounds what this setup
+can do. `qwen2.5vl:7b` (6 GB) does **not** fit entirely in the RTX 4060's 8 GB:
+`ollama ps` reports `5.9 GB  26%/74% CPU/GPU`, so roughly a quarter of the layers
+run on the CPU. Setting `num_ctx` anywhere between 1024 and 8192 did not change
+the allocation - Ollama still reported `CONTEXT 4096` - which makes this a hard
+constraint of model size against VRAM rather than a tuning mistake. Throughput
+settles at about 30 tok/s, putting one planning call at 12-14 s. No thermal or
+power throttling was active (50 C, 7.78 W, `SW Power Cap: Not Active`).
 
 ## 7. Planning results
 
@@ -271,14 +294,23 @@ Both machines, same suite:
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **281 passed**, 89% coverage, ruff clean |
-| Lenovo Y9000P (Windows) | **254 passed** in 9.46 s (before the vision payload) |
+| MacBook Air M2 | **285 passed**, 89% coverage, ruff clean |
+| Lenovo Y9000P (Windows) | **281 passed** in 47.75 s, ruff clean (at `73e65dd`) |
 
-The counts match exactly, which is the point of running both: two defects only
-appeared on the second machine.
+The two machines agreed exactly at `73e65dd`: 281 each. The Mac then closed the
+Mind2Web gap and added four regression tests, moving to 285. Those four have not
+been re-run on Windows, and that is stated rather than left for a reader to spot.
+
+Getting to agreement is itself part of the record. The Windows run stood at 254 for
+a while, because it predated the vision payload and the LangChain backend. That was
+a point on the same line, not a disagreement - but it is exactly the kind of gap
+that gets quietly smoothed over in a report, so it is stated instead.
+
+Agreement is the point of running both, because two defects only ever appeared on
+the second machine - and neither would have been found by reading the code.
 
 ```text
-pytest      : 281 passed
+pytest      : 285 passed
 coverage    : 89% over src/gui_agent
 ruff        : All checks passed!
 ```
@@ -292,6 +324,7 @@ ruff        : All checks passed!
 | `test_model_config.py` | provider selection, credentials from the environment |
 | `test_plan_parser.py` | JSON recovery, unknown verbs, step limits |
 | `test_planner.py` | end-to-end planning, determinism, failure paths |
+| `test_prepare_dataset_cli.py` | the preparation CLI, its flags and its output files |
 | `test_langchain_adapter.py` | message conversion, credentials, error mapping |
 | `test_langchain_integration.py` | the LangChain backend over a real HTTP socket |
 
@@ -304,10 +337,45 @@ Automated tests never touch the network, the desktop or a real API key.
 | `osunlp/Mind2Web`, split `test` | rejected: available splits are `['train']` |
 | `osunlp/Multimodal-Mind2Web`, split `test` | rejected: available splits are `train`, `test_domain`, `test_task`, `test_website` |
 | `osunlp/Multimodal-Mind2Web`, split `test_task`, streaming | no record within five minutes |
+| `osunlp/Multimodal-Mind2Web`, split `test_task`, **one parquet shard fetched directly** | **268/268 rows converted, 0 validation issues** |
 
-The Mind2Web adapter is therefore covered by fixtures only. The other two sources
-were validated against their real archives; this one was not, and the report says
-so rather than implying otherwise.
+Streaming was the wrong tool. The archive is stored as parquet shards, so a single
+shard can be fetched on its own (296 MB) and read locally in seconds - no streaming,
+no 13.6 GB download. This closed the last gap in the dataset work, and it did more
+than that: running the adapter on real rows found two defects that the fixture could
+not, and a third piece of missing data.
+
+**Defect 1: the verb is the last field, not the first.** A real repr reads
+`"[textbox]  US City,State or Zip Code -> TYPE: 08817"` - tag, element text, then
+the operation. Splitting on the first space made the HTML tag the verb and the rest
+the target:
+
+| | `action_type` values across the shard |
+| --- | --- |
+| Before | `[button]` 600, `[link]` 427, `[input]` 262, `[span]` 247 ... |
+| After | `click` 218, `type_text` 44, `move` 4, `enter` 2 |
+
+Every action type was an HTML tag name. The schema accepted them, because
+`normalize_action` deliberately passes unknown verbs through rather than rejecting
+them - so validation reported 268/268 valid on data where not one action had a
+usable verb.
+
+**Defect 2: one row is one step, not one task.** `action_reprs` holds the entire
+task; `target_action_index` says which of those steps the row is. Treating the list
+as the trajectory multiplied every task by the length of its own action list. The
+shard is 268 rows covering 36 tasks, so the adapter was emitting whole trajectories
+per row - about 14 fabricated steps per sample.
+
+**Defect 3: the screenshot struct was dropped.** `screenshot` is
+`struct<bytes: binary, path: string>`, not a string, so `image_path` came out
+`None`. The shard alone carries 302.7 MB of embedded JPEGs that were being discarded.
+
+The lesson is sharper than "run the adapter on real data". A hand-written fixture
+encodes the author's *belief* about the schema, so it cannot find the case where
+that belief is wrong: the Mind2Web fixture used the invented shape `"CLICK
+[Submit]"` - verb first - which is precisely what the adapter assumed. The two
+agreed, and both were wrong. Only the archive could settle it. Five regression tests
+now pin the real format, including one that reads the shard's actual reprs.
 
 **The `.gitignore` silently excluded the whole model layer.** A bare `models/`
 matches at any depth, so `src/gui_agent/models/` was never committed. Ignored
@@ -355,9 +423,9 @@ is kept in `Document/Week3/evidence/real_model_plan_qwen25vl_7b.json`.
 with "no JSON object found in the response" even though the reply visibly began
 with `{`. The cause was the prompt, not the parser: the system prompt was long
 enough that a 7B model kept talking past the point where the JSON ended, and the
-response was truncated mid-object. Cutting the prompt from about 1200 to about 600
-characters - keeping the field list, dropping the prose - fixed it immediately, and
-the first attempt then succeeded.
+response was truncated mid-object. Cutting `SYSTEM_PROMPT` from 1199 to 792
+characters - keeping the field list and the JSON example, dropping the prose around
+them - fixed it immediately, and the first attempt then succeeded.
 
 The Mock backend could never have surfaced this: it returns a fixed dictionary, so
 prompt length has no effect on it.
@@ -396,9 +464,19 @@ capture. The failure was isolated deliberately:
 | Same screenshot with `num_ctx` 8192 / 16384 | 500 |
 
 Image size and context window are therefore not the cause: the model is simply not
-capable enough for a cluttered full-screen capture. A larger vision model
-(`llava:7b`, 4.7 GB) is the next thing to try, and the parameter is a one-line
-change in the configuration.
+capable enough for a cluttered full-screen capture.
+
+The obvious next step - a larger vision model - was taken on the Windows machine,
+and the result is recorded here because it was not the expected one. `llava:7b`
+(4.7 GB, the manual's first choice) reads text off a screenshot (PASS, 3.1 s) and
+describes it accurately (PASS, 4.4 s), yet it does not emit structured output at
+all. Shown a prompt containing a JSON example, it treated that example as
+something *in the picture* and narrated it - "The interface is displaying a JSON
+object with a task ID, instruction, summary, steps..." - and it kept doing so when
+told to output only a JSON object with no prose. The reply's first character was
+not `{` and `json.loads()` failed outright. Larger is not the same as more
+obedient: `qwen2.5vl:7b` was chosen because it follows the format instruction, not
+because it is the biggest model available.
 
 This is a result, not a blocker, and it is worth recording plainly: **a small
 vision model can pass a synthetic smoke test and still be unusable on real
@@ -446,7 +524,7 @@ over the real archive found in minutes what the fixtures would never have found.
 
 | Criterion | Result |
 | --- | --- |
-| Three adapters with minimal sample tests | yes |
+| Three adapters validated against their real archives | yes, 268/268 for Mind2Web |
 | One validated JSONL export | yes, round-trips through the schema |
 | `--limit` supported, no full download by default | yes, default 20 |
 | Raw data and images kept out of Git | yes, `data/` ignored |
@@ -455,14 +533,14 @@ over the real archive found in minutes what the fixtures would never have found.
 | Instruction becomes a structured TaskPlan | yes |
 | Plan validated and never executed | yes |
 | Framework built on LangChain, per the outline | yes, `LangChainClient`, same `ModelClient` |
-| New and existing tests pass, Ruff clean | 281 passed, ruff clean |
+| New and existing tests pass, Ruff clean | 285 passed, ruff clean |
 | README, WORKLOG and report updated | yes |
 
 ## 11. Deliverables
 
 Code: the dataset adapters and schema, the preparation CLI, the model interface
 with three interchangeable backends, the planning module, three demonstration
-scripts, eight test files and updated configuration.
+scripts, ten test files and updated configuration.
 
 Documents: this report, `Document/Week3/WORKLOG.md` and
 `Document/Week3/Week3_Dataset_Notes.md`.
@@ -473,7 +551,8 @@ Documents: this report, `Document/Week3/WORKLOG.md` and
    confirmation flag, completing the Week 4 loop.
 2. Run the adapters over the official ScreenAgent and WebArena archives and
    correct any field variants the fixtures did not cover.
-3. Complete the single real-model call and record its latency and output.
-4. Re-run the LangChain backend against the real `qwen2.5vl:7b` on the GPU node and
-   record the latency alongside the direct backend, now that the node is off.
+3. Decide how to store the Mind2Web screenshots: one shard alone carries 302.7 MB
+   of embedded JPEGs, and Week 5 will need them on disk.
+4. Decide whether the 26% CPU spill of `qwen2.5vl:7b` is acceptable for Week 4's
+   interactive loop, or whether to trial `minicpm-v` (5.5 GB) as a smaller fit.
 5. Keep the dataset sample limit small until Week 5 needs training splits.

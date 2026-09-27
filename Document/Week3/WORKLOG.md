@@ -9,7 +9,7 @@ Branch: `week3-dataset-agent`.
 | --- | --- |
 | New source modules | 18 (`datasets/` 8, `models/` 5, `planning/` 5) |
 | New scripts | 3 |
-| New test files | 8 |
+| New test files | 10 |
 | Tests | 281 passed |
 | Ruff | clean |
 | Week 1 + Week 2 regression | all previous tests still pass |
@@ -129,6 +129,26 @@ cut of this week satisfied the architectural half of that - a provider-independe
 
 ## Bugs found and fixed while building
 
+**The Mind2Web adapter read the verb from the wrong end of the string.** A real
+`action_reprs` entry is `"[textbox]  US City,State or Zip Code -> TYPE: 08817"`:
+tag, element text, then the operation. Splitting on the first space made the HTML tag
+the verb, so every `action_type` in the shard came out as `[button]`, `[link]`,
+`[input]`. Validation still reported 268/268 valid, because `normalize_action` passes
+unknown verbs through by design - a green result over data with no usable verbs.
+
+**The Mind2Web adapter treated one row as one task.** `action_reprs` is the whole
+task and `target_action_index` selects the step the row actually is. Expanding the
+list multiplied every task by its own action count: the shard's 268 rows cover 36
+tasks, and the adapter emitted whole trajectories per row.
+
+**`screenshot` is a struct, not a string.** `struct<bytes: binary, path: string>`, so
+`image_path` came out `None` and 302.7 MB of embedded JPEGs in one shard were dropped.
+
+All three were found by running the adapter over a real parquet shard, after the
+fixture had been passing for a week. The fixture could not have found them: it used
+the invented shape `"CLICK [Submit]"`, which is what the adapter assumed. **A fixture
+written by the same person from the same belief cannot falsify that belief.**
+
 **The record reader shredded pretty-printed JSON.** The first version switched to
 line-by-line parsing whenever the text contained a newline. A formatted JSON file
 is not JSONL, so every inner line carried a trailing comma and was dropped: a
@@ -175,13 +195,18 @@ code. The first would have shipped a repository that could not be cloned and use
 
 ## Known limitations
 
-- ScreenAgent and WebArena have now been exercised against the real archives.
-  Mind2Web has not: streaming it needs the `datasets` package, which is not
-  installed yet, so that adapter is still fixture-only.
-- The LangChain backend has not been pointed at the real `qwen2.5vl:7b`: the GPU
-  node was offline when it was written. It is verified against a real
-  OpenAI-compatible server on localhost with the genuine `langchain-openai`
-  client, and through the CLI, but "works over HTTP" is not the same claim as
-  "works against that model". One command settles it when the node is back.
+- All three adapters have now been exercised against their real archives. Mind2Web
+  was the last to be closed and the most informative: see the bugs below.
+- The LangChain backend has now been exercised against the real `qwen2.5vl:7b` on
+  the Windows node, and the two remote backends returned byte-identical plans for
+  the same instruction and screenshot. What remains unmeasured is not correctness
+  but comfort: `qwen2.5vl:7b` does not fit in 8 GB of VRAM, so about 26% of its
+  layers run on the CPU and one planning call takes 12-14 s once loaded (74 s
+  cold). Whether that is fast enough for Week 4's interactive loop is an open
+  question, not a defect.
+- The coverage figure depends on `pytest-cov`, which lives in
+  `requirements-dev.txt` and not in `requirements-agent.txt`. A machine that
+  follows the agent requirements alone cannot reproduce `--cov`; the Windows node
+  hit exactly this and had to install it separately.
 - The real-model path needs `GUI_AGENT_API_KEY`; it cannot be exercised in
   automated tests, so the mock backend is the one the test suite proves.
