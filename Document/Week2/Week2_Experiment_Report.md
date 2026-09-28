@@ -107,6 +107,28 @@ With a 0.2 s interval a frame costs only 37 ms to capture, but the burst still
 waits 200 ms between frames, so it advances at **4.52 FPS** rather than 27.1. The
 two figures only converge when frames are captured back to back.
 
+**Distribution over repeated runs.** The rows above are single sequences. Each
+platform was measured three times with 30 frames per run, the first frame of each
+run being the MSS session initialisation:
+
+| Platform (screen) | Run | n | min | mean | **stdev** | **P95** | max | **cold** |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Mac, 1920 x 1080 | 1 | 29 | 31.4 | 35.3 | 2.0 | 37.7 | 38.1 | **472.7** |
+| Mac, 1920 x 1080 | 2 | 29 | 30.2 | 38.4 | 6.9 | 54.6 | 55.5 | **744.9** |
+| Mac, 1920 x 1080 | 3 | 29 | 30.0 | 39.0 | 5.1 | 47.7 | 49.5 | **350.5** |
+| Windows, 2560 x 1600 | 1 | 29 | 44.0 | 49.1 | 4.0 | 54.6 | 62.3 | **4 611.8** |
+| Windows, 2560 x 1600 | 2 | 29 | 44.5 | 50.5 | 4.3 | 60.9 | 65.2 | **593.8** |
+| Windows, 2560 x 1600 | 3 | 29 | 47.1 | 49.1 | 1.5 | 51.8 | 54.2 | **349.9** |
+
+All figures in milliseconds. The warm mean is stable across runs (35-39 ms on the
+Mac, 49-51 ms on Windows) while the cold start ranges from 350 ms to 4.6 s - it
+tracks whatever else the machine was doing at that moment, which is a second reason
+to report it separately rather than average it in.
+
+```bash
+python scripts/benchmark_capture.py --frames 30
+```
+
 A sequence can be produced straight from the command line (one frame by default,
 so a plain run does not pay for OCR on every frame):
 
@@ -169,9 +191,29 @@ Two cautions when reading this table. The box counts are **not comparable**:
 Tesseract reports one box per word and PaddleOCR one per text line, so 263 against
 86 says nothing about recall. The timings are comparable, and they say PaddleOCR is
 about 36x faster on the RTX 4060 than on the Mac's CPU (1 080 ms against 43 200 ms)
-and about 25% faster than Tesseract on the same Windows screen. The first timed run
-of each engine includes model initialisation (about 3.8 s for PaddleOCR) and should
-be ignored; the figures above are the second run.
+and about 25% faster than Tesseract on the same Windows screen.
+
+**Distribution over repeated runs.** The rows above are single runs, and an earlier
+version of this section said the first run "should be ignored" because it includes
+model initialisation. Discarding a sample is not a substitute for measuring the
+spread. Each backend was instead called 10 times, with the first call reported
+separately as the cold start and the remaining 9 giving the distribution:
+
+| Platform | Backend | Regions | n | min | mean | **stdev** | **P95** | max | **cold** |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| MacBook M2, CPU | Tesseract | 196 | 9 | 1 590 | 1 603 | 12 | 1 621 | 1 621 | **2 227** |
+| MacBook M2, CPU | PaddleOCR | 114 | 9 | 42 642 | 44 676 | 1 883 | 48 353 | 48 353 | **44 547** |
+| Windows, RTX 4060 | Tesseract | 263 | 9 | 1 377 | 1 411 | 23 | 1 444 | 1 444 | **1 909** |
+| Windows, RTX 4060 | PaddleOCR | 86 | 9 | 1 046 | 1 095 | 44 | 1 173 | 1 173 | **6 128** |
+
+All figures in milliseconds. P95 equals the maximum because the nearest-rank method
+over nine samples takes the largest order statistic; more samples would separate
+them. The cold start is dominated by model loading - 6.1 s for PaddleOCR on Windows
+against a 1.1 s warm mean - which is exactly why it does not belong in the average.
+
+```bash
+python scripts/benchmark_ocr.py --repeat 10
+```
 
 On macOS the arm64 PaddlePaddle build is CPU-only, so the Mac stays on Tesseract -
 the fallback the acceptance criteria allow. Starting PaddleOCR on Windows needed
