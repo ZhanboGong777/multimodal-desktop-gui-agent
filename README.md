@@ -70,7 +70,10 @@ python scripts/week3_model_demo.py --provider mock
 python scripts/week3_planning_demo.py --provider mock --instruction "Open the browser"
 ```
 
-288 tests at 89% coverage, ruff clean. Dataset and model dependencies live in
+300 tests at 89% coverage, ruff clean. The model client's retry, timeout and
+error-classification paths are covered, along with the four vision-payload
+failure modes (missing, empty, oversized, unknown type) and the TaskPlan
+schema boundaries. Dataset and model dependencies live in
 `requirements-agent.txt`, deliberately separate from the base requirements so that a
 failure there cannot break the Week 2 perception and control modules.
 

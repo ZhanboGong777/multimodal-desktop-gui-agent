@@ -88,3 +88,45 @@ def test_finish_is_not_executable() -> None:
     assert "finish" in PLAN_ACTION_TYPES
     assert "finish" not in EXECUTABLE_ACTION_TYPES
     assert [s.action_type for s in plan.executable_steps] == ["click"]
+
+
+# ───────────────────── schema boundaries ─────────────────────
+@pytest.mark.parametrize("field", ["task_id", "instruction"])
+def test_a_blank_plan_level_field_is_rejected(field: str) -> None:
+    """task_id and instruction are required text, not just present keys."""
+    payload = {**VALID, field: "   "}
+    with pytest.raises(PlanParseError):
+        parse_plan(json.dumps(payload), instruction="open the browser")
+
+
+@pytest.mark.parametrize("field", ["step_id", "description"])
+def test_a_blank_step_level_field_is_rejected(field: str) -> None:
+    step = {"step_id": "step-1", "description": "open it", "action_type": "click"}
+    step[field] = "\t\n"
+    payload = {**VALID, "steps": [step]}
+    with pytest.raises(PlanParseError):
+        parse_plan(json.dumps(payload), instruction="open the browser")
+
+
+def test_an_unknown_field_on_the_plan_is_rejected() -> None:
+    """The schema is strict on purpose: a typo must not be silently dropped."""
+    with pytest.raises(PlanParseError):
+        parse_plan(json.dumps({**VALID, "confidence": 0.9}), instruction="open the browser")
+
+
+def test_an_unknown_field_on_a_step_is_rejected() -> None:
+    step = {"step_id": "step-1", "description": "open it", "action_type": "click", "bbox": [0, 0]}
+    with pytest.raises(PlanParseError):
+        parse_plan(json.dumps({**VALID, "steps": [step]}), instruction="open the browser")
+
+
+def test_arguments_default_to_an_empty_mapping() -> None:
+    """A step without arguments is valid and gets an empty dict, never None."""
+    plan = parse_plan(json.dumps(VALID), instruction="open the browser")
+    assert all(step.arguments == {} for step in plan.steps)
+
+
+def test_confirmation_is_required_by_default() -> None:
+    """Nothing may execute unless the flag is explicitly turned off."""
+    plan = parse_plan(json.dumps(VALID), instruction="open the browser")
+    assert plan.requires_confirmation is True

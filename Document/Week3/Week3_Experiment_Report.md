@@ -321,7 +321,7 @@ Both machines, same suite:
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **288 passed**, 89% coverage, ruff clean |
+| MacBook Air M2 | **300 passed**, 89% coverage, ruff clean |
 | Lenovo Y9000P (Windows) | **285 passed** in 62.15 s, ruff clean |
 
 Both machines now pass the same 285 tests on the same revision. Getting there took
@@ -338,7 +338,7 @@ Agreement is the point of running both, because two defects only ever appeared o
 the second machine - and neither would have been found by reading the code.
 
 ```text
-pytest      : 288 passed
+pytest      : 300 passed
 coverage    : 89% over src/gui_agent
 ruff        : All checks passed!
 ```
@@ -569,7 +569,7 @@ over the real archive found in minutes what the fixtures would never have found.
 | Instruction becomes a structured TaskPlan | yes |
 | Plan validated and never executed | yes |
 | Framework built on LangChain, per the outline | yes, `LangChainClient`, same `ModelClient` |
-| New and existing tests pass, Ruff clean | 288 passed, ruff clean |
+| New and existing tests pass, Ruff clean | 300 passed, ruff clean |
 | README, WORKLOG and report updated | yes |
 
 ## 11. Deliverables

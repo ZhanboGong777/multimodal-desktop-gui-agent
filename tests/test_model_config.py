@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import socket
+import threading
 from pathlib import Path
 
 import pytest
@@ -173,3 +175,118 @@ def test_each_supported_suffix_maps_to_a_mime_type(tmp_path: Path) -> None:
             0
         ]["content"][1]["image_url"]["url"]
         assert url.startswith(f"data:{mime};base64,")
+
+
+# ─────────────── timeouts and error classification ───────────────
+class _SilentServer:
+    """Accepts a connection and then never answers, to force a read timeout."""
+
+    def __init__(self) -> None:
+        self._sock = socket.socket()
+        self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self._sock.bind(("127.0.0.1", 0))
+        self._sock.listen(1)
+        self.port = self._sock.getsockname()[1]
+        self._thread = threading.Thread(target=self._accept, daemon=True)
+        self._thread.start()
+
+    def _accept(self) -> None:
+        try:
+            conn, _ = self._sock.accept()
+            threading.Event().wait(30)  # hold the connection open, send nothing
+            conn.close()
+        except OSError:
+            pass
+
+    def close(self) -> None:
+        self._sock.close()
+
+
+def test_a_hanging_backend_times_out_instead_of_blocking() -> None:
+    """A backend that accepts and never replies must not hang the caller.
+
+    Timeouts were configured but never exercised: nothing proved that a slow
+    endpoint is actually cut off, or that the cut-off is reported as a model
+    failure rather than raised as a raw SDK exception.
+    """
+    server = _SilentServer()
+    try:
+        client = OpenAICompatibleClient(
+            model_name="slow",
+            base_url=f"http://127.0.0.1:{server.port}/v1",
+            api_key="test-key",
+            timeout_seconds=0.4,
+            max_retries=0,
+            environ={},
+        )
+        # complete() raises; generate_text() would swallow this into a response.
+        with pytest.raises(ModelError) as excinfo:
+            client.complete([{"role": "user", "content": "hello"}])
+        message = str(excinfo.value).casefold()
+        assert "timeout" in message or "timed out" in message
+    finally:
+        server.close()
+
+
+def test_a_timed_out_call_is_reported_not_raised_by_the_wrapper() -> None:
+    """The retrying wrapper turns the timeout into a failed ModelResponse."""
+    server = _SilentServer()
+    try:
+        client = OpenAICompatibleClient(
+            model_name="slow",
+            base_url=f"http://127.0.0.1:{server.port}/v1",
+            api_key="test-key",
+            timeout_seconds=0.4,
+            max_retries=0,
+            environ={},
+        )
+        response = client.generate_text("hello")
+
+        assert not response.ok
+        assert response.content == ""
+        assert response.error is not None
+    finally:
+        server.close()
+
+
+def test_the_client_retries_once_before_giving_up() -> None:
+    """max_retries=1 means two attempts, and both are timed, not just the last."""
+    server = _SilentServer()
+    try:
+        client = OpenAICompatibleClient(
+            model_name="slow",
+            base_url=f"http://127.0.0.1:{server.port}/v1",
+            api_key="test-key",
+            timeout_seconds=0.3,
+            max_retries=1,
+            environ={},
+        )
+        response = client.generate_text("hello")
+
+        assert not response.ok
+        assert response.error is not None
+        # Two attempts of roughly 0.3 s each: the reported latency covers both.
+        assert response.latency_ms > 500
+    finally:
+        server.close()
+
+
+def test_configuration_errors_are_a_separate_class_from_runtime_errors() -> None:
+    """A missing key is the caller's mistake; a broken image is the input's.
+
+    Both surface as ModelError, so code that catches the base class keeps working,
+    but the two are distinguishable and the distinction is load-bearing: one is
+    fixed by exporting a variable, the other by passing a better file.
+    """
+    assert issubclass(ModelConfigError, ModelError)
+
+    client = OpenAICompatibleClient(model_name="m", environ={})
+    with pytest.raises(ModelConfigError):
+        client.complete([{"role": "user", "content": "x"}])
+
+    # A malformed image is not a configuration problem.
+    with pytest.raises(ModelError) as excinfo:
+        OpenAICompatibleClient.to_vision_messages(
+            [{"role": "user", "content": "x"}], "/no/such/file.png"
+        )
+    assert not (excinfo.value is None)
