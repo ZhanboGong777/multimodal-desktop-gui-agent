@@ -98,9 +98,9 @@ Tesseract is 23x faster on this machine, matching the Week 2 conclusion.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **368 passed**, ruff clean |
+| MacBook Air M2 | **371 passed**, ruff clean |
 
-Week 3 ended at 300 tests. Week 4 adds 68:
+Week 3 ended at 300 tests. Week 4 adds 71:
 
 | Test file | Covers |
 | --- | --- |
@@ -200,7 +200,7 @@ values but had no test. Four cases were added in Week 3's follow-up.
 - `scripts/week4_agent_cli.py` - the command-line entry point.
 - `scripts/week4_offline_demo.py` - the loop against scripted frames.
 - `configs/week4.yaml` - Week 4 limits, with `AgentConfig` added to `config.py`.
-- 68 new tests across 7 files.
+- 71 new tests across 7 files.
 - `Document/Week4/Week4_Usage.md` - flags, the safety model, the record layout.
 - `Document/Week4/Week4_Troubleshooting.md` - fifteen symptoms with what to check
   and what the code actually does about each.

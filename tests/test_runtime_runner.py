@@ -382,3 +382,67 @@ def test_a_dry_run_reports_inconclusive_not_failed(tmp_path: Path) -> None:
     assert "nothing was dispatched" in result.verification.detail
     # the rule's own verdict is kept, so the operator can see what would have happened
     assert result.verification.evidence["would_be"] == "failed"
+
+
+# ─────────────── the confirmation gate, both answers ───────────────
+def _approval_case(tmp_path: Path):
+    frames = [_frame("obs-0001", ("Target",)), _frame("obs-0002", ("Target",))]
+    plan = _plan(
+        PlanStep(step_id="s1", description="click", action_type="click", target_text="Target")
+    )
+    task = TaskSpec(case_id="T", instruction="x", expect_text=["Target"], success_rules=["r"])
+    executor = FakeExecutor()
+    runner, _ = _runner(tmp_path, FakeObserver(frames), FakePlanner(plan), executor)
+    return runner, executor, task, plan
+
+
+def test_accepting_the_confirmation_proceeds(tmp_path: Path) -> None:
+    """The decline path had a test; the accept path did not.
+
+    Without this, inverting the condition would cancel every approved run and the
+    suite would still be green.
+    """
+    runner, executor, task, plan = _approval_case(tmp_path)
+    seen: list[object] = []
+
+    def approve(received) -> bool:
+        seen.append(received)
+        return True
+
+    result = runner.run(task, ExecutionOptions(execute=True, confirm=True), confirm=approve)
+
+    assert seen == [plan], "the operator must be shown the plan that will run"
+    assert len(executor.actions) == 1, "an approved run must act"
+    assert result.status != "cancelled"
+
+
+def test_the_countdown_runs_once_before_the_first_real_action(tmp_path: Path) -> None:
+    runner, executor, task, _plan_obj = _approval_case(tmp_path)
+    calls: list[int] = []
+
+    runner.run(
+        task,
+        ExecutionOptions(execute=True, confirm=False),
+        countdown=calls.append,
+    )
+
+    assert calls == [3], "one countdown, before acting - not one per step"
+    assert len(executor.actions) == 1
+
+
+def test_a_dry_run_never_counts_down_or_asks(tmp_path: Path) -> None:
+    """Nothing will be dispatched, so there is nothing to warn about or approve."""
+    runner, _executor, task, _plan_obj = _approval_case(tmp_path)
+    asked: list[object] = []
+    counted: list[int] = []
+
+    result = runner.run(
+        task,
+        ExecutionOptions(execute=False),
+        confirm=lambda p: asked.append(p) or True,
+        countdown=counted.append,
+    )
+
+    assert asked == []
+    assert counted == []
+    assert result.status == "dry_run_completed"
