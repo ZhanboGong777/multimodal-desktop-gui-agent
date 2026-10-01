@@ -186,6 +186,21 @@ is a Week 2 suite that gained 2 cases, `test_runtime_recording.py` is a Week 4 f
 that gained 12 - and the first correction had them backwards. Both are now measured
 rather than reasoned about.
 
+**A failure with two causes, one of which the guide's fix could not touch.** Running
+the manual's commands in a clean clone - the check that treats the document as
+instructions rather than prose - stopped the CLI smoke and the T01 dry run with
+`monitor_index 1 is out of range (available 1..0)`. The diagnostic guide attributed
+that message to a sleeping or locked display. It appears just as often when the
+process cannot see any screen at all, which on macOS means the terminal lacks
+Screen Recording permission, and there the prescribed fix does nothing: an operator
+would wake a display that was already awake and be no further along.
+
+The tell is in the message and is measurable - only the aggregate pseudo-monitor at
+index 0 exists and it reports `0x0`, so nothing is visible to the process - and the
+row now names both causes, which fix belongs to which, and that a remote session
+reports the same thing because there is no local display to capture. The run's own
+behaviour needed no change: blocked, nothing dispatched, exit 2, no traceback.
+
 | Test file | Covers |
 | --- | --- |
 | `test_action_adapter.py` | 34 cases: unique, ambiguous, missing and stale targets, a target split across word-level elements, parameter errors including wrong types, out-of-range coordinates, key whitelist, platform hotkeys, coordinate scaling, `finish` refusal |
