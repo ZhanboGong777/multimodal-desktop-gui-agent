@@ -111,9 +111,9 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **527 passed**, ruff clean |
+| MacBook Air M2 | **532 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 227: 169 in the ten
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 232: 174 in the ten
 files below, and 58 spread across the other suites -
 `test_control_safety.py` 15, `test_model_mock.py` 14, `test_ocr.py` 7 (five of them
 the Windows-only OCR workarounds), `test_config.py` 7 (a new file),
@@ -194,7 +194,7 @@ rather than reasoned about.
 | `test_runtime_observation.py` | 9 cases: the whole of `observe()` against a prepared frame - ids, geometry, the OCR-failure record, the element cap - plus what a prompt line carries |
 | `test_runtime_recording.py` | 12 cases: redaction, append-only steps, per-frame files, summary, and where the provenance comes from |
 | `test_week4_cli.py` | 15 cases: argument errors, no `--yes`, dry-run default, summary always written, `--execute` refused without a terminal, the callback set an execute run hands over, `.env` loading, the flag/environment/YAML precedence, and the numeric limits |
-| `test_week4_integration.py` | 5 cases: the loop against a real OpenAI-compatible server over a real socket, which reads the element ids out of the prompt it receives |
+| `test_week4_integration.py` | 10 cases: the loop against a real OpenAI-compatible server over a real socket, which reads the element ids out of the prompt it receives; plus the four that read the request body itself - the screenshot arrives as pixels and not as a path, it is the frame the plan was written from, and a missing or mislabelled file blocks the run rather than blinding the model |
 | `test_week4_prompts.py` | 10 cases: the prompt fits its budget, describes element targeting and every action's arguments, and the user turn is the JSON envelope the planner actually sends |
 | `test_week4_cases.py` | 12 cases: the invariants the five case definitions must hold - a machine-checkable rule, a declared precondition, a distinctive marker, a copy handed back by `get_case`, and the fresh marker a send-message run is given |
 | `test_week4_evidence.py` | 12 cases: what the evidence collector copies, what it refuses to copy, which run `--latest` picks, and its error paths |
@@ -672,7 +672,7 @@ existed and was pointed at less than the claim.
   `Document/Week4/evidence/`, so a run id in the test report resolves inside the
   repository rather than only on the machine that produced it.
 - `configs/week4.yaml` - Week 4 limits, with `ExecutionConfig` added to `config.py`.
-- 102 new tests.
+- 232 new tests.
 - `Document/Week4/Week4_Usage.md` - flags, the safety model, the record layout.
 - `Document/Week4/Week4_Troubleshooting.md` - forty-two symptoms with what to check
   and what the code actually does about each.

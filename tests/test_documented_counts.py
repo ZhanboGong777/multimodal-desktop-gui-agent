@@ -24,6 +24,10 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 README = REPO_ROOT / "README.md"
 REPORT = REPO_ROOT / "Document" / "Week4" / "Week4_Experiment_Report.md"
 
+#: The suite Week 3 handed over, counted on d67de1f. A historical fact about a
+#: commit rather than a property of this tree, so it is stated instead of measured.
+WEEK3_TOTAL = 300
+
 
 @pytest.fixture(scope="module")
 def collected() -> dict[str, int]:
@@ -71,6 +75,16 @@ def test_the_report_states_the_size_of_the_suite_it_describes(
     assert claimed, "the report no longer states a test count"
     assert claimed == {str(total)}, f"the report says {sorted(claimed)}; the suite has {total}"
 
+    # The deliverables list states the same fact a second way, as a count of what
+    # the week added. Nothing checked it, and it had drifted by more than a
+    # hundred tests while every other number in the report stayed current.
+    delivered = re.search(r"^- (\d+) new tests\.$", REPORT.read_text(encoding="utf-8"), re.MULTILINE)
+    assert delivered, "the deliverables list no longer says how many tests Week 4 added"
+    assert int(delivered.group(1)) == total - WEEK3_TOTAL, (
+        f"the deliverables list says {delivered.group(1)} new tests; "
+        f"the suite grew by {total - WEEK3_TOTAL} from the {WEEK3_TOTAL} Week 3 handed over"
+    )
+
 
 def test_the_per_file_table_names_the_counts_those_files_have(
     collected: dict[str, int],
@@ -110,6 +124,7 @@ def test_the_other_suites_the_sentence_lists_have_the_counts_it_gives(
     a commit rather than a property of this tree, so they are stated here instead
     of measured.
     """
+    # Week 3 ended at WEEK3_TOTAL; these are the eight files it already had.
     week3 = {
         "test_control_safety.py": 20,
         "test_model_mock.py": 10,
