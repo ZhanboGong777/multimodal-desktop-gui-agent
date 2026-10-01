@@ -454,3 +454,28 @@ def test_an_env_file_that_was_read_is_named(tmp_path: Path) -> None:
 
     assert "env file   : ./.env" in result.stdout
     assert "from-dotenv" in result.stdout, "the value in the file has to be the one in use"
+
+
+def test_the_frames_are_written_inside_the_run_that_took_them(tmp_path: Path) -> None:
+    """`obs-NNNN.json` names the image a coordinate was measured on.
+
+    That image was written to the directory the session folders live in, so every
+    run's screenshots piled up beside the runs and each record pointed outside its
+    own folder: moving or archiving a session broke the traceability the module is
+    built around, and 14.1 asks for the frames to be kept with the step.
+    """
+    import argparse
+
+    from gui_agent.config import Config
+    from gui_agent.recording import RunSession
+
+    cli = _load_cli()
+    output = tmp_path / "week4"
+    session = RunSession.create(output, session_id="T01_20261001_120000")
+
+    service = cli._observer_for(Config(), session, output)
+
+    assert service.output_directory == session.directory / "frames"
+    assert output in service.output_directory.parents, "still under the run tree"
+    assert service.output_directory != output, "not beside the sessions"
+    assert argparse is not None  # keep the import honest for the signature above

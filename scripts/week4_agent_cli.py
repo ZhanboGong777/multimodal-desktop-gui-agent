@@ -97,6 +97,21 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _observer_for(config, session, output_directory: Path) -> ObservationService:
+    """The observation service, with its frames inside the run they belong to.
+
+    `obs-NNNN.json` names the image each coordinate was measured on, so the image
+    has to be where the record says it is - or the traceability the module is built
+    around ends at the edge of the session folder. The directory is the run's own
+    `frames/`; `output_directory` is still accepted so the fallback stays in one
+    place if a session is ever created without one.
+    """
+    frames = Path(getattr(session, "directory", output_directory)) / "frames"
+    return ObservationService(
+        config, max_elements=config.execution.max_elements, output_directory=frames
+    )
+
+
 def _show_plan(plan) -> None:
     """Print what a dry run would do: 12.2.2's summary, steps, text and targets.
 
@@ -320,17 +335,18 @@ def main() -> int:
         require_structured_output=config.planning.require_structured_output,
         allow_real_execution=config.execution.require_success_rules and args.execute,
     )
-    observer = ObservationService(
-        config, max_elements=config.execution.max_elements, output_directory=output_directory
-    )
-    adapter = ActionAdapter(max_wait_seconds=config.execution.max_wait_seconds)
-    executor = ActionExecutor(config.control)
-    verifier = Verifier(poll_interval_seconds=config.execution.verification_poll_interval_seconds)
     # RunSession keys its directory by session id; prefixing with the case id
     # keeps the five task runs distinguishable in the output tree.
     stamp = __import__("datetime").datetime.now().astimezone().strftime("%Y%m%d_%H%M%S")
     session = RunSession.create(output_directory, session_id=f"{task.case_id}_{stamp}")
     recorder = TaskRecorder(session)
+    # The frames belong to the run that took them. They used to be written to the
+    # directory the sessions live in, so every run's screenshots piled up beside the
+    # session folders and each `obs-NNNN.json` pointed outside its own run.
+    observer = _observer_for(config, session, output_directory)
+    adapter = ActionAdapter(max_wait_seconds=config.execution.max_wait_seconds)
+    executor = ActionExecutor(config.control)
+    verifier = Verifier(poll_interval_seconds=config.execution.verification_poll_interval_seconds)
     # 14.1: the effective configuration travels with the run. The summary carries
     # the model and the limits; this is everything else the frames depended on.
     recorder.save_config(config.model_dump(mode="json"))

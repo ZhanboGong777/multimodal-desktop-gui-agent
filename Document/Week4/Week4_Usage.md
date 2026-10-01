@@ -98,6 +98,8 @@ level that triggers it lives in the runner, not in the CLI.
 
 ```
 outputs/week4/<case>_<timestamp>/
+├── frames/
+│   └── monitor1_<timestamp>.png   # one screenshot per observation, never overwritten
 ├── obs-0001.json        # elements, geometry and timing for one frame
 ├── obs-0002.json        # ... one file per observation, never overwritten
 ├── steps.jsonl          # one line per step, appended
@@ -105,6 +107,12 @@ outputs/week4/<case>_<timestamp>/
 ├── task_summary.json    # status, verification, action count, timings, provenance
 └── warmup.json          # the warmup that preceded this run, copied in when there is one
 ```
+
+The screenshots live inside the run that took them, because `obs-NNNN.json` names
+the image its coordinates were measured on: a record pointing outside its own
+folder stops being traceable the moment the folder is moved. They are not copied
+into the repository by the evidence collector - a screenshot is a picture of the
+whole desktop, and `frames/` is why a session folder is large.
 
 `run_config.json` is the configuration the frames in front of you were produced
 with - element cap, OCR engine, verification timeouts, planning limits - because

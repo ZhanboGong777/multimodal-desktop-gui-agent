@@ -195,8 +195,11 @@ def main(argv: list[str] | None = None) -> int:
     captured: Path | None = None
     if image is None:
         try:
+            # Its own folder, not the directory the sessions live in: the probe
+            # frame belongs to no run, and dropping it among the session folders
+            # made the output tree read as though a run had produced it.
             captured = _screenshot(
-                REPO_ROOT / "outputs" / "week4", config.perception.monitor_index
+                REPO_ROOT / "outputs" / "week4" / "warmup", config.perception.monitor_index
             )
         except Exception as exc:  # noqa: BLE001 - any capture failure is the same answer
             print(f"warmup     : could not capture the screen ({type(exc).__name__}: {exc})")
