@@ -527,3 +527,54 @@ def test_the_environment_check_notices_a_screen_it_cannot_see(monkeypatch, capsy
     assert problems == ["screen capture"]
     assert "NO DISPLAY VISIBLE" in printed
     assert "Screen Recording" in printed or not module.IS_MACOS
+
+
+# ───────── the guard that decides whether consent can be asked for ─────────
+def test_a_windows_child_given_nul_cannot_be_asked_for_consent() -> None:
+    """`sys.stdin.isatty()` is not a terminal check on Windows.
+
+    NUL is a character device there, so a child started with `subprocess.DEVNULL`
+    looks like a terminal: the guard passed, the run proceeded to the
+    confirmation, the prompt hit EOF, and the run was reported `cancelled` - which
+    says the operator declined. Nobody declined; there was no way to ask. Found on
+    the Windows review machine, where the suite's own test for this failed.
+    """
+    cli = _load_cli()
+
+    assert cli._has_interactive_stdin("win32", lambda: False) is False
+    assert cli._has_interactive_stdin("win32", lambda: True) is True
+    # A check that cannot run at all is not permission to start.
+    assert cli._has_interactive_stdin("win32", lambda: 1 / 0) is False
+    # And off Windows the ordinary answer still decides.
+    assert cli._has_interactive_stdin("darwin") is False, "pytest's stdin is not a terminal"
+
+
+def test_the_execute_refusal_happens_before_any_run_directory(tmp_path: Path) -> None:
+    """12.2.5 with the guard now working: blocked, not cancelled, and no debris.
+
+    Exit 2 rather than 130 is the whole point of the check. A refusal that leaves
+    an empty session behind is indistinguishable from a run that died early, and
+    the evidence collector would later pick it up as "the latest run".
+    """
+    destination = tmp_path / "records"
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts" / "week4_agent_cli.py"),
+            "--case",
+            "T01",
+            "--execute",
+            "--output-directory",
+            str(destination),
+        ],
+        cwd=REPO_ROOT,
+        stdin=subprocess.DEVNULL,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=300,
+    )
+
+    assert result.returncode == 2, result.stdout
+    assert "interactive terminal" in result.stderr
+    assert not destination.exists() or not any(destination.iterdir())

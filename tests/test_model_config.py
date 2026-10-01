@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import json
 import socket
 import threading
@@ -326,6 +327,36 @@ def test_an_unknown_provider_is_caught_even_when_it_bypasses_validation() -> Non
         create_model_client(config)
 
 
+def _read_request(conn: socket.socket) -> bytes:
+    """Read one HTTP request completely - headers and body.
+
+    Draining the body is the point. The OpenAI client sends a JSON body, and a
+    server that replies and closes after reading only the headers leaves data
+    unread on its side; Windows turns that close into an RST and the client sees
+    `APIConnectionError` rather than the response it was sent.
+    """
+    conn.settimeout(5.0)
+    data = b""
+    while b"\r\n\r\n" not in data:
+        chunk = conn.recv(65536)
+        if not chunk:
+            return data
+        data += chunk
+    head, _, body = data.partition(b"\r\n\r\n")
+    length = 0
+    for line in head.split(b"\r\n"):
+        name, _, value = line.partition(b":")
+        if name.strip().lower() == b"content-length":
+            with contextlib.suppress(ValueError):
+                length = int(value.strip() or 0)
+    while len(body) < length:
+        chunk = conn.recv(65536)
+        if not chunk:
+            break
+        body += chunk
+    return head + b"\r\n\r\n" + body
+
+
 class _AnsweringServer:
     """One-shot HTTP server that always replies with the same JSON body.
 
@@ -349,13 +380,21 @@ class _AnsweringServer:
         except OSError:
             return
         with conn:
-            conn.recv(65536)
+            _read_request(conn)
             head = (
-                b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: "
+                b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n"
+                b"Connection: close\r\nContent-Length: "
                 + str(len(self._payload)).encode()
                 + b"\r\n\r\n"
             )
             conn.sendall(head + self._payload)
+            # Send FIN before the close, and let the close be ordinary. A server
+            # that answers while the client is still sending gets an abortive
+            # close on Windows, and the client then reports a connection error
+            # instead of reading the reply - which is how these two tests failed
+            # on the Windows review machine and passed here.
+            with contextlib.suppress(OSError):
+                conn.shutdown(socket.SHUT_WR)
 
     def close(self) -> None:
         self._sock.close()

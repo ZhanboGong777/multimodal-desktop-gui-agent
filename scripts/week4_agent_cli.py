@@ -52,6 +52,45 @@ _STATUS_TO_EXIT = {
 }
 
 
+def _windows_console_attached(stream=None) -> bool:
+    """Windows' own answer to "is a person able to type here?".
+
+    `GetConsoleMode` fails for anything that is not a console - including NUL,
+    which `sys.stdin.isatty()` accepts because NUL is a character device.
+    """
+    import ctypes
+    import msvcrt
+
+    handle = msvcrt.get_osfhandle((stream or sys.stdin).fileno())
+    mode = ctypes.c_ulong()
+    return bool(ctypes.windll.kernel32.GetConsoleMode(handle, ctypes.byref(mode)))
+
+
+def _has_interactive_stdin(platform: str | None = None, console_check=None) -> bool:
+    """Whether consent can actually be asked for in this process.
+
+    `sys.stdin.isatty()` is not enough on Windows. NUL is a character device
+    there, so a child started with `subprocess.DEVNULL` looks like a terminal:
+    the guard passes, the run proceeds to the confirmation, the prompt hits EOF
+    and refuses - and the run is then reported `cancelled`, which says the
+    operator declined. Nobody declined; there was no way to ask. That is the
+    difference between exit 2 and exit 130, and the Windows review machine is
+    where it showed.
+
+    The two arguments exist so the Windows answer can be tested from a machine
+    that is not Windows; production callers pass neither.
+    """
+    if (platform or sys.platform) == "win32":
+        try:
+            return bool((console_check or _windows_console_attached)())
+        except Exception:  # noqa: BLE001 - any failure means "cannot ask"
+            return False
+    try:
+        return sys.stdin.isatty()
+    except Exception:  # noqa: BLE001
+        return False
+
+
 def _positive_int(value: str) -> int:
     """argparse type for a limit that has to be greater than zero.
 
@@ -310,7 +349,7 @@ def main() -> int:
         print("  note: --instruction without --case defines no success rule;")
         print("        the run will be reported blocked unless you add one.")
 
-    if args.execute and not sys.stdin.isatty():
+    if args.execute and not _has_interactive_stdin():
         # 12.2.5: with no terminal there is no way to ask, and consent is never
         # assumed. Reported as blocked rather than cancelled - the operator did not
         # decline, the confirmation could not be obtained at all.
