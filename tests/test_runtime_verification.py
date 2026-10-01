@@ -180,3 +180,62 @@ def test_the_screen_going_away_while_polling_is_inconclusive() -> None:
     assert "could not look at the screen" in verdict.detail
     assert "monitor_index 1 is out of range" in verdict.detail
     assert latest is None
+
+
+def test_a_changed_screen_with_nothing_to_check_is_not_a_pass() -> None:
+    """11.1.5's one prohibition: a changed screenshot is not success.
+
+    The code did the opposite while its own docstring said otherwise, so this was
+    a claim the module made about itself and did not keep. There is no test that
+    would have failed: the changed-screen branch was unexercised.
+    """
+    action = DesktopAction(action_type="click", x=1, y=1)
+    result = Verifier().check_step(
+        expected_result=None,
+        before=_frame("o1", ("start",)),
+        after=_frame("o2", ("something else entirely",)),
+        action_result=ActionResult(action=action, success=True, dry_run=False),
+        action_type="click",
+    )
+
+    assert result.outcome == "inconclusive"
+    assert "not evidence" in result.detail
+    # The frame did change, and that stays in the record - it just is not a pass.
+    assert result.evidence["changed"] is True
+
+
+def test_a_move_or_wait_is_verified_by_its_own_completion() -> None:
+    """11.1.6: these do not change the screen, so a screen check has nothing to say.
+
+    Verified by the action having completed, and reported as exactly that rather
+    than as an observation of a result.
+    """
+    for action_type in ("move", "wait"):
+        action = DesktopAction(action_type=action_type, x=1, y=1, duration=0.1)
+        result = Verifier().check_step(
+            expected_result=None,
+            before=_frame("o1", ("start",)),
+            after=_frame("o1", ("start",)),
+            action_result=ActionResult(action=action, success=True, dry_run=False),
+            action_type=action_type,
+        )
+        assert result.outcome == "passed", action_type
+        assert "own completion" in result.detail
+        assert "not an observation of a result" in result.detail
+
+
+def test_a_move_that_failed_is_still_a_failure() -> None:
+    """Its own completion is the check, so a failed one cannot pass."""
+    action = DesktopAction(action_type="move", x=1, y=1)
+    result = Verifier().check_step(
+        expected_result=None,
+        before=_frame("o1", ("start",)),
+        after=_frame("o2", ("moved",)),
+        action_result=ActionResult(
+            action=action, success=False, dry_run=False, error="pointer refused"
+        ),
+        action_type="move",
+    )
+
+    assert result.outcome == "failed"
+    assert "pointer refused" in result.detail

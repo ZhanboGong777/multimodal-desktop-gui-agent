@@ -101,7 +101,8 @@ outputs/week4/<case>_<timestamp>/
 ├── obs-0001.json        # elements, geometry and timing for one frame
 ├── obs-0002.json        # ... one file per observation, never overwritten
 ├── steps.jsonl          # one line per step, appended
-└── task_summary.json    # status, verification, action count, timings, provenance
+├── task_summary.json    # status, verification, action count, timings, provenance
+└── warmup.json          # the warmup that preceded this run, copied in when there is one
 ```
 
 `task_summary.json` also carries where and when the run happened - commit,
@@ -124,15 +125,21 @@ nothing anywhere but this machine. To make one travel with the repository:
 
 ```bash
 python scripts/week4_collect_evidence.py --latest T01
-# -> Document/Week4/evidence/T01_<timestamp>/{task_summary.json,steps.jsonl}
+# -> Document/Week4/evidence/T01_<timestamp>/{task_summary.json,steps.jsonl,warmup.json}
 ```
 
-The collector copies those two text records and nothing else. The screenshots and
-the observation files are a picture of the whole desktop; `--no-steps` narrows it
-to the summary alone.
+The collector copies those text records and nothing else - three of them when the
+run has a warmup record, two when it does not. The screenshots and the observation
+files are a picture of the whole desktop; `--no-steps` narrows it to the summary
+alone.
 
 Typed text is redacted in the step log: the record notes that something was
-typed and how long it was, never what it said.
+typed and how long it was, never what it said. This covers the action's own
+arguments. It does **not** cover what OCR read off the screen, which is written to
+`obs-NNNN.json` verbatim - on-screen text is the observation the run is built on,
+and redacting it would make the record unreadable. Treat an evidence bundle as
+containing whatever was on the screen, and use a desktop you are willing to have
+recorded.
 
 ## When something goes wrong
 

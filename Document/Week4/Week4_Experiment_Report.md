@@ -111,9 +111,9 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **543 passed**, ruff clean |
+| MacBook Air M2 | **552 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 243: 185 in the
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 252: 194 in the
 eleven files below, and 58 spread across the other suites -
 `test_control_safety.py` 15, `test_model_mock.py` 14, `test_ocr.py` 7 (five of them
 the Windows-only OCR workarounds), `test_config.py` 7 (a new file),
@@ -204,13 +204,13 @@ behaviour needed no change: blocked, nothing dispatched, exit 2, no traceback.
 | Test file | Covers |
 | --- | --- |
 | `test_action_adapter.py` | 34 cases: unique, ambiguous, missing and stale targets, a target split across word-level elements, parameter errors including wrong types, out-of-range coordinates, key whitelist, platform hotkeys, coordinate scaling, `finish` refusal |
-| `test_runtime_runner.py` | 48 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, the guard that refuses to start a real run whose goal already holds, the second confirmation a risky task must get, the provenance the summary carries, and the note a frame with no readable text leaves |
-| `test_runtime_verification.py` | 12 cases: rule matching, forbidden text, unverifiable tasks, degraded observations, the two case rules that have to tell a real result from a lookalike, and the screen going away while polling |
+| `test_runtime_runner.py` | 49 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, the guard that refuses to start a real run whose goal already holds, the second confirmation a risky task must get, the provenance the summary carries, and the note a frame with no readable text leaves |
+| `test_runtime_verification.py` | 15 cases: rule matching, forbidden text, unverifiable tasks, degraded observations, the two case rules that have to tell a real result from a lookalike, and the screen going away while polling |
 | `test_runtime_observation.py` | 9 cases: the whole of `observe()` against a prepared frame - ids, geometry, the OCR-failure record, the element cap - plus what a prompt line carries |
-| `test_runtime_recording.py` | 12 cases: redaction, append-only steps, per-frame files, summary, and where the provenance comes from |
+| `test_runtime_recording.py` | 13 cases: redaction, append-only steps, per-frame files, summary, and where the provenance comes from |
 | `test_week4_cli.py` | 19 cases: argument errors, no `--yes`, dry-run default, summary always written, `--execute` refused without a terminal, the callback set an execute run hands over, `.env` loading, the flag/environment/YAML precedence, the numeric limits, and the warmup record the run copies in and warns about when it is missing |
 | `test_week4_integration.py` | 10 cases: the loop against a real OpenAI-compatible server over a real socket, which reads the element ids out of the prompt it receives; plus the four that read the request body itself - the screenshot arrives as pixels and not as a path, it is the frame the plan was written from, and a missing or mislabelled file blocks the run rather than blinding the model |
-| `test_week4_prompts.py` | 10 cases: the prompt fits its budget, describes element targeting and every action's arguments, and the user turn is the JSON envelope the planner actually sends |
+| `test_week4_prompts.py` | 14 cases: the prompt fits its budget, describes element targeting and every action's arguments, and the user turn is the JSON envelope the planner actually sends |
 | `test_week4_cases.py` | 12 cases: the invariants the five case definitions must hold - a machine-checkable rule, a declared precondition, a distinctive marker, a copy handed back by `get_case`, and the fresh marker a send-message run is given |
 | `test_week4_warmup.py` | 6 cases: the warmup 13.4 asks for and nothing provided - it probes text and then a real screenshot through the project's client, records cold/warm state, memory, per-request time, the classifier's verdict and the configured retries, and writes the record the operator keeps |
 | `test_week4_evidence.py` | 13 cases: what the evidence collector copies, what it refuses to copy, which run `--latest` picks, and its error paths |
@@ -784,7 +784,7 @@ the cold and warm latencies.
   `Document/Week4/evidence/`, so a run id in the test report resolves inside the
   repository rather than only on the machine that produced it.
 - `configs/week4.yaml` - Week 4 limits, with `ExecutionConfig` added to `config.py`.
-- 243 new tests.
+- 252 new tests.
 - `Document/Week4/Week4_Usage.md` - flags, the safety model, the record layout.
 - `Document/Week4/Week4_Troubleshooting.md` - forty-two symptoms with what to check
   and what the code actually does about each.

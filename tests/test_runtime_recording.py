@@ -203,3 +203,43 @@ def test_the_troubleshooting_guide_counts_its_own_rows() -> None:
     ]
     header = lines[2]
     assert _spell(len(rows)) in header, f"{len(rows)} rows, header says: {header!r}"
+
+
+def test_a_password_on_screen_does_not_reach_the_frame_dump(tmp_path: Path) -> None:
+    """16.2 asks for sensitive text to be kept out of the records.
+
+    Typed text was already masked by the action redactor; this is the other way a
+    credential reaches a file, which is OCR reading it off the screen. Found by
+    writing a password into a frame and reading back what the recorder wrote.
+    """
+    from gui_agent.control.safety import REDACTED
+
+    snapshot = _frame("obs-0001").model_copy(
+        update={
+            "elements": [
+                ElementRef(
+                    element_id="obs-0001-e000",
+                    text="Sign in",
+                    bounding_box=BoundingBox(left=0, top=0, right=5, bottom=5),
+                    center=Point(x=2, y=2),
+                ),
+                ElementRef(
+                    element_id="obs-0001-e001",
+                    text="Password: hunter2-secret",
+                    bounding_box=BoundingBox(left=0, top=0, right=5, bottom=5),
+                    center=Point(x=2, y=2),
+                ),
+            ]
+        }
+    )
+    recorder = TaskRecorder(RunSession.create(tmp_path, session_id="r1"))
+    recorder.save_observation(snapshot)
+
+    written = json.loads((tmp_path / "r1" / "obs-0001.json").read_text(encoding="utf-8"))
+    texts = [element["text"] for element in written["elements"]]
+
+    assert REDACTED in texts
+    assert not any("hunter2" in text for text in texts)
+    # Ordinary interface text is untouched: the element list is what traces a
+    # coordinate back to the words it came from.
+    assert "Sign in" in texts

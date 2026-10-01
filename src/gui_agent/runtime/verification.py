@@ -23,6 +23,13 @@ def _missing(needles: list[str], haystack: str) -> list[str]:
     return [needle for needle in needles if needle.casefold() not in haystack]
 
 
+#: Actions that are not meant to change the screen. 11.1.6 allows them to be
+#: verified by their own execution condition and forbids reading a page change as
+#: their success; there is nothing else to check, and saying so is the honest
+#: answer rather than implying the screen confirmed anything.
+_DISPATCH_ONLY_ACTIONS = frozenset({"move", "wait"})
+
+
 class Verifier:
     """Checks steps and tasks against what is actually on screen."""
 
@@ -37,18 +44,41 @@ class Verifier:
         before: ObservationSnapshot | None,
         after: ObservationSnapshot | None,
         action_result: ActionResult | None,
+        action_type: str | None = None,
     ) -> VerificationResult:
         """Judge a single step.
 
-        A step is never "passed" merely because the action returned success. When
-        there is no observable expectation to check, the honest answer is
-        ``inconclusive``, which the runner treats as "do not claim progress".
+        A step is never "passed" merely because the action returned success, and
+        never because the screen changed - 11.1.5 names that inference as the one
+        thing a step check must not make. With no expectation to look for, the
+        answer is ``inconclusive``: the frame did move, and that is recorded, but
+        nothing here can say the step did what it intended.
+
+        ``move`` and ``wait`` are the exception 11.1.6 allows: they are not meant
+        to change the screen at all, so their verification is the action's own
+        completion, reported as such rather than as a screen observation.
         """
         if action_result is not None and not action_result.success:
             return VerificationResult(
                 outcome="failed",
                 detail=f"action failed: {action_result.error or 'unknown error'}",
                 evidence={"error": action_result.error},
+            )
+
+        when = _DISPATCH_ONLY_ACTIONS if action_type in _DISPATCH_ONLY_ACTIONS else None
+        if when is not None and not (expected_result or "").strip():
+            if action_result is None:
+                return VerificationResult(
+                    outcome="inconclusive",
+                    detail=f"{action_type}: no result recorded for the action",
+                )
+            return VerificationResult(
+                outcome="passed",
+                detail=(
+                    f"{action_type} completed; it does not change the screen, so this is "
+                    "the action's own completion and not an observation of a result"
+                ),
+                evidence={"action_type": action_type},
             )
 
         if after is None:
@@ -94,8 +124,16 @@ class Verifier:
                 )
 
         if changed:
+            # 11.1.5: a changed screenshot is not success. It is worth recording -
+            # the action did have some effect - but it does not say the step did
+            # what it was for, and no expectation was given to check it against.
             return VerificationResult(
-                outcome="passed", detail="the screen changed after the action", evidence=evidence
+                outcome="inconclusive",
+                detail=(
+                    "the screen changed after the action, which is not evidence that the "
+                    "step did what it intended; no expected result was supplied to check"
+                ),
+                evidence=evidence,
             )
         return VerificationResult(
             outcome="inconclusive",

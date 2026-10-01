@@ -1201,3 +1201,48 @@ def test_the_summary_carries_the_operating_system(tmp_path: Path) -> None:
     assert result.os_version, "the summary has to say which machine this was"
     written = json.loads((recorder.directory / "task_summary.json").read_text(encoding="utf-8"))
     assert written["os_version"] == result.os_version
+
+
+def test_an_interrupted_run_still_writes_a_readable_summary(tmp_path: Path) -> None:
+    """14.2.3: an interrupt saves a summary too, not only a failure does.
+
+    Ctrl+C arrives wherever the interpreter happens to be, so the in-memory step
+    list is whatever the unwinding left behind. The summary is rebuilt from the
+    step log, which is appended as the run goes - the interrupted run happened, and
+    a report with no row for it is how an attempt disappears from a success rate.
+    """
+    class InterruptingExecutor(FakeExecutor):
+        def execute(self, action, *, dry_run=None, screen=None) -> ActionResult:
+            # One action completes - and is therefore on disk - and the next one is
+            # interrupted, which is the case that loses in-memory state.
+            if self.actions:
+                raise KeyboardInterrupt
+            return super().execute(action, dry_run=dry_run, screen=screen)
+
+    frames = [_frame("obs-0001", ("Start",)), _frame("obs-0002", ("Start",))]
+    plan = _plan(
+        PlanStep(step_id="s1", description="click", action_type="click", target_text="Start"),
+        PlanStep(step_id="s2", description="click", action_type="click", target_text="Start"),
+    )
+    executor = InterruptingExecutor()
+    runner, recorder = _runner(
+        tmp_path, FakeObserver(frames), FakePlanner(plan), executor
+    )
+    task = TaskSpec(
+        case_id="T", instruction="x", expect_text=["Start"], success_rules=["r"]
+    )
+    result = runner.run(
+        task, ExecutionOptions(execute=True, confirm=True), confirm=lambda _plan: True
+    )
+
+    assert result.status == "cancelled"
+    assert "interrupted by the operator" in result.stop_reason
+    assert len(result.steps) == 1, "the step that completed is in the summary"
+
+    written = json.loads(
+        (recorder.directory / "task_summary.json").read_text(encoding="utf-8")
+    )
+    assert written["status"] == "cancelled"
+    assert written["run_id"]
+    assert written["finished_at"]
+    assert written["evidence_directory"]

@@ -12,10 +12,9 @@ import json
 from pathlib import Path
 from typing import Any
 
+from ..control.safety import REDACTED, is_sensitive_text  # the same marker the action log uses
 from ..recording import RunSession
 from .schemas import ObservationSnapshot, StepRecord, TaskRunResult
-
-REDACTED = "<redacted>"
 
 #: Argument keys whose values must never reach the log.
 SENSITIVE_KEYS = frozenset({"text", "clipboard", "password", "message", "content"})
@@ -36,6 +35,18 @@ def redact(arguments: dict[str, Any] | None) -> dict[str, Any]:
         else:
             safe[key] = value
     return safe
+
+
+def _mask(text: str | None) -> str | None:
+    """Blank credential-shaped on-screen text, and leave everything else alone.
+
+    Deliberately narrow: the element list is how a resolved coordinate is traced
+    back to the frame it came from, so masking ordinary interface text would cost
+    the record its purpose. A password field's contents are the case this is for.
+    """
+    if text and is_sensitive_text(text):
+        return REDACTED
+    return text
 
 
 class TaskRecorder:
@@ -70,7 +81,15 @@ class TaskRecorder:
                     "ocr_engine": snapshot.ocr_engine,
                     "processing_time_ms": round(snapshot.processing_time_ms, 3),
                     "errors": snapshot.errors,
-                    "elements": [item.model_dump() for item in snapshot.elements],
+                    # 16.2 asks for sensitive text to be kept out of the records.
+                    # Typed text is masked by the action redactor; this is the other
+                    # way a credential reaches a file - OCR reading it off the
+                    # screen. Only credential-shaped text is masked, so the element
+                    # list still traces a coordinate back to the words it came from.
+                    "elements": [
+                        {**item.model_dump(), "text": _mask(item.text)}
+                        for item in snapshot.elements
+                    ],
                 },
                 ensure_ascii=False,
                 indent=2,

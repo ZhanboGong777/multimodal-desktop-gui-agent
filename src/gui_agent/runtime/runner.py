@@ -16,6 +16,7 @@ Design decisions worth stating, because each rules out an easier wrong version:
 
 from __future__ import annotations
 
+import contextlib
 import re
 import time
 from collections.abc import Callable
@@ -161,7 +162,30 @@ class TaskRunner:
         countdown: Callable[[int], None] | None = None,
         high_risk_confirm: Callable[[TaskPlan], bool] | None = None,
     ) -> TaskRunResult:
+        """Run one task, and leave a readable record whatever happens.
+
+        14.2.3 asks for a summary on interruption as well as on failure. Ctrl+C
+        arrives as a KeyboardInterrupt at whatever line is executing, which is
+        usually inside a step or a model call, so the in-memory step list is
+        whatever the unwinding happened to leave behind. What is trustworthy is
+        what was already appended to the log, and that is what the summary is
+        rebuilt from.
+        """
         started = self.clock()
+        try:
+            return self._run(task, options, started, confirm, countdown, high_risk_confirm)
+        except KeyboardInterrupt:
+            return self._abandon(task, options, started)
+
+    def _run(
+        self,
+        task: TaskSpec,
+        options: ExecutionOptions,
+        started: float,
+        confirm: Callable[[TaskPlan], bool] | None,
+        countdown: Callable[[int], None] | None,
+        high_risk_confirm: Callable[[TaskPlan], bool] | None,
+    ) -> TaskRunResult:
         timings = Timings(started=started)
         notes: list[str] = []
 
@@ -419,6 +443,7 @@ class TaskRunner:
 
             record.verification = self.verifier.check_step(
                 expected_result=step.expected_result,
+                action_type=step.action_type,
                 before=before,
                 after=after if after is not None else (before if not options.execute else None),
                 action_result=action_result,
@@ -586,6 +611,29 @@ class TaskRunner:
         )
         self.recorder.write_summary(result)
         return result
+
+    def _abandon(self, task: TaskSpec, options: ExecutionOptions, started: float) -> TaskRunResult:
+        """Close out a run the operator interrupted.
+
+        The steps are read back from the step log rather than from memory: they are
+        appended as they happen, so the file is the record of what was actually
+        done. An interrupted run is a run that happened, and a report with no row
+        for it is how a failed attempt disappears from a success rate.
+        """
+        records: list[StepRecord] = []
+        for entry in self.recorder.read_steps():
+            # A torn last line is possible when the interrupt landed mid-write, and
+            # it must not cost the summary every step before it.
+            with contextlib.suppress(Exception):
+                records.append(StepRecord.model_validate(entry))
+        return self._finish(
+            task,
+            options,
+            "cancelled",
+            started,
+            ["interrupted by the operator; nothing further was executed"],
+            records,
+        )
 
     def _blocked(
         self,
