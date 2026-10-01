@@ -7,6 +7,8 @@ import platform
 from datetime import UTC, datetime
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
 from gui_agent.recording import RunSession
 from gui_agent.runtime.recorder import TaskRecorder, redact
 from gui_agent.runtime.schemas import (
@@ -162,3 +164,42 @@ def test_the_summary_names_the_operating_system_and_its_build() -> None:
     assert described
     assert described == platform.platform(), "the build, not just the family"
     assert len(described.split()) == 1, "one token, so it survives a table cell"
+
+
+# ───────── the documents' own claims ─────────
+def _spell(number: int) -> str:
+    ones = [
+        "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
+        "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
+        "sixteen", "seventeen", "eighteen", "nineteen",
+    ]
+    tens = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"]
+    if number < 20:
+        return ones[number].capitalize()
+    word = tens[number // 10]
+    if number % 10:
+        word += "-" + ones[number % 10]
+    return word.capitalize()
+
+
+def test_the_troubleshooting_guide_counts_its_own_rows() -> None:
+    """The header said twenty-eight while the tables held forty-two.
+
+    It was hand-maintained and bumped only in the rounds where someone remembered,
+    so it drifted by fourteen without anything noticing. A count that a reader is
+    invited to trust has to be checked by something other than the person editing
+    it - which is the same reason the test counts in the report are now measured
+    rather than carried forward.
+    """
+    guide = REPO_ROOT / "Document" / "Week4" / "Week4_Troubleshooting.md"
+    lines = guide.read_text(encoding="utf-8").splitlines()
+
+    rows = [
+        line
+        for line in lines
+        if line.startswith("| ")
+        and not line.startswith("| ---")
+        and not line.startswith("| Symptom")
+    ]
+    header = lines[2]
+    assert _spell(len(rows)) in header, f"{len(rows)} rows, header says: {header!r}"

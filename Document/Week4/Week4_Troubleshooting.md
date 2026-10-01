@@ -1,6 +1,6 @@
 # Week 4 troubleshooting
 
-Twenty-eight situations the closed loop can run into, in the order they tend to appear.
+Forty-two situations the closed loop can run into, in the order they tend to appear.
 Each row says what to check first, and what this implementation actually does —
 the second column matters, because a diagnostic guide that describes behaviour the
 code does not have is worse than none.
