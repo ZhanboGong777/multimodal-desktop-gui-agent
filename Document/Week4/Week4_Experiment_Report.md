@@ -104,17 +104,17 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **438 passed**, ruff clean |
+| MacBook Air M2 | **444 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 138: 124 in the nine
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 144: 125 in the nine
 files below, 10 in `test_model_mock.py`, 2 in `test_ocr.py` for the label-merging
-fix described in section 7, and 2 in `test_plan_parser.py` for the step-status
-vocabulary.
+fix described in section 7, and 7 in `test_plan_parser.py` for the step-status
+vocabulary and the plan-ordering rules.
 
 | Test file | Covers |
 | --- | --- |
 | `test_action_adapter.py` | 27 cases: unique, ambiguous, missing and stale targets, a target split across word-level elements, parameter errors including wrong types, out-of-range coordinates, key whitelist, platform hotkeys, coordinate scaling, `finish` refusal |
-| `test_runtime_runner.py` | 35 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, the guard that refuses to start a real run whose goal already holds, the second confirmation a risky task must get, the provenance the summary carries, and the note a frame with no readable text leaves |
+| `test_runtime_runner.py` | 36 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, the guard that refuses to start a real run whose goal already holds, the second confirmation a risky task must get, the provenance the summary carries, and the note a frame with no readable text leaves |
 | `test_runtime_verification.py` | 8 cases: rule matching, forbidden text, unverifiable tasks, degraded observations |
 | `test_runtime_recording.py` | 6 cases: redaction, append-only steps, per-frame files, summary |
 | `test_week4_cli.py` | 13 cases: argument errors, no `--yes`, dry-run default, summary always written, `--execute` refused without a terminal, the callback set an execute run hands over, `.env` loading, and the flag/environment/YAML precedence |
@@ -373,6 +373,25 @@ in `_resolve_wait`, so the configured value could not have had any effect. There
 still no `max_replans`: nothing implements re-planning yet, and adding a knob no
 code reads would repeat the mistake that `require_preconditions` was.
 
+**Three of the plan-validation rules were not enforced.** 8.3 lists what a plan
+has to satisfy before it may run; three of them were missing, and two of those
+mattered. A step *after* `finish` was executed, because `is_executable` looks only
+at the verb - so a plan that said "stop" and then added one more click had that
+click dispatched. A plan with a non-empty `errors` list ran anyway, which reads the
+model's "I could not work this out" as "go ahead"; the field existed and nothing
+read it. Duplicate `step_id`s were accepted, which leaves two steps sharing one
+address in the record. All three are refused at parse time now, except `errors`,
+which is a decision for the runner rather than a malformed plan.
+
+**Two runs inside one second shared a directory.** 14.1 warns about a name made
+only of a seconds-precision timestamp, and `RunSession.create` called `mkdir(...,
+exist_ok=True)`: the second run silently reused the first's directory, appending to
+its step log and overwriting its summary. That is not a theoretical race - a run
+that is blocked before it captures anything finishes in well under a second, and
+the five-case loop is exactly the kind of thing that produces them back to back.
+`create` now opens a fresh directory, suffixing `_2`, `_3` and keeping the session
+id equal to the directory name so the recorder's run id cannot disagree with it.
+
 ## 8. Deliverables
 
 - `src/gui_agent/runtime/` - the run layer (8 modules).
@@ -384,7 +403,7 @@ code reads would repeat the mistake that `require_preconditions` was.
 - `configs/week4.yaml` - Week 4 limits, with `ExecutionConfig` added to `config.py`.
 - 102 new tests.
 - `Document/Week4/Week4_Usage.md` - flags, the safety model, the record layout.
-- `Document/Week4/Week4_Troubleshooting.md` - twenty-four symptoms with what to check
+- `Document/Week4/Week4_Troubleshooting.md` - twenty-six symptoms with what to check
   and what the code actually does about each.
 - `Document/Week4/Week4_Basic_Task_Test_Report.md` - the five results, one row per
   case, with the precondition, the attempt and success counts, the verification
@@ -394,7 +413,7 @@ code reads would repeat the mistake that `require_preconditions` was.
 **W4-13 diagnostic guide.** The hand-off asks for a table of fifteen situations -
 connection, model, perception, resolution, execution, verification and recording -
 each with what to check and how it is handled. That is
-`Document/Week4/Week4_Troubleshooting.md`, grown to twenty-four as the Windows review
+`Document/Week4/Week4_Troubleshooting.md`, grown to twenty-six as the Windows review
 added situations the first pass had not met. Each row states the behaviour this
 code has, not the behaviour it ought to have; a diagnostic guide describing
 behaviour the implementation does not have would be worse than none.

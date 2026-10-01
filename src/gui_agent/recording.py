@@ -41,10 +41,24 @@ class RunSession:
         root: str | Path = WEEK2_OUTPUT_DIR,
         session_id: str | None = None,
     ) -> RunSession:
-        identifier = session_id or datetime.now(UTC).astimezone().strftime("%Y%m%d_%H%M%S")
-        directory = Path(root) / identifier
-        directory.mkdir(parents=True, exist_ok=True)
-        return cls(session_id=identifier, directory=directory)
+        """Open a fresh session directory, never one that already exists.
+
+        14.1 warns about a name made only of a seconds-precision timestamp: two
+        runs inside the same second would land in the same directory, and the
+        second would append to the first's step log and overwrite its summary. A
+        run that stops early finishes in milliseconds, so this is not hypothetical
+        - one that is blocked before it captures anything is over in under a second.
+        """
+        base = session_id or datetime.now(UTC).astimezone().strftime("%Y%m%d_%H%M%S")
+        directory = Path(root) / base
+        suffix = 2
+        while directory.exists():
+            directory = Path(root) / f"{base}_{suffix}"
+            suffix += 1
+        directory.mkdir(parents=True)
+        # The id follows the directory: the recorder takes the run id from the
+        # directory name, so the two must not disagree.
+        return cls(session_id=directory.name, directory=directory)
 
     def path_for(self, name: str) -> Path:
         return self.directory / name

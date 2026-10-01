@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Any, Literal, get_args
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 
 from ..schemas import ActionType, SchemaModel
 
@@ -90,6 +90,34 @@ class TaskPlan(SchemaModel):
         if not cleaned:
             raise ValueError("must not be empty")
         return cleaned
+
+    @model_validator(mode="after")
+    def _check_step_order(self) -> TaskPlan:
+        """8.3.2 and 8.3.3: unique ids, and nothing after the terminal step.
+
+        A step after ``finish`` is the dangerous one: ``is_executable`` looks only
+        at the verb, so a plan that says "stop" and then adds one more click would
+        have that click executed. Refusing the plan is the only safe reading of
+        "nothing may run after the terminal step".
+        """
+        seen: set[str] = set()
+        for step in self.steps:
+            if step.step_id in seen:
+                raise ValueError(f"duplicate step_id {step.step_id!r}")
+            seen.add(step.step_id)
+
+        endings = [
+            index for index, step in enumerate(self.steps) if step.action_type == "finish"
+        ]
+        if len(endings) > 1:
+            raise ValueError(f"{len(endings)} finish steps; a plan ends once")
+        if endings and endings[0] != len(self.steps) - 1:
+            trailing = len(self.steps) - endings[0] - 1
+            raise ValueError(
+                f"step {self.steps[endings[0]].step_id!r} is finish but {trailing} "
+                "step(s) follow it"
+            )
+        return self
 
     @property
     def executable_steps(self) -> list[PlanStep]:

@@ -1,6 +1,6 @@
 # Week 4 troubleshooting
 
-Twenty-four situations the closed loop can run into, in the order they tend to appear.
+Twenty-six situations the closed loop can run into, in the order they tend to appear.
 Each row says what to check first, and what this implementation actually does —
 the second column matters, because a diagnostic guide that describes behaviour the
 code does not have is worse than none.
@@ -30,6 +30,8 @@ in disguise.
 | `... N further elements omitted to fit the prompt` | How much text is on screen, and `execution.max_elements` | Not an error. The element list is trimmed one **whole** element at a time — an id with half its text would be unusable — and the prompt says how many were dropped. Raise `execution.max_elements` or the server's context window to keep more |
 | Reply truncated mid-JSON | Finish reason, response length, **prompt length**, number of steps | `PlanParseError`; the planner retries the format once, then reports `blocked`. A partial plan is never executed |
 | Plan is valid JSON but the steps do not fit the screen | Whether the prompt carried the element list | The adapter refuses at resolution time; nothing is clicked |
+| `duplicate step_id` / `... is finish but N step(s) follow it` | The plan's step ids, and where `finish` sits | The plan is rejected at parse time and never executed. A step after the terminal step would otherwise be dispatched, because executability looks only at the verb |
+| `the plan reports errors and will not be executed` | What the model put in the plan's `errors` list | `blocked` before any action. The model uses that field to say it could not work the task out, and running it would read "I am not sure" as "go ahead" |
 | `no element matches '...'` | Take a fresh screenshot; check the OCR language and threshold; is the page still loading? | The step fails and the run stops. It does **not** click a default position, and it does not retry with a guessed target |
 | `... is not from observation ... and the step names no text target` | Whether the model gave a `target_text` alongside an element id | A bare stale id cannot be re-located, so the run stops. A plan that gives both is re-bound automatically |
 

@@ -168,3 +168,43 @@ def test_an_unknown_step_status_is_still_rejected() -> None:
 
     with pytest.raises(PlanParseError):
         parse_plan(json.dumps(payload), instruction="ignored")
+
+
+def test_a_duplicate_step_id_is_rejected() -> None:
+    """8.3.2: an id addresses a step, so two steps sharing one address nothing."""
+    payload = dict(VALID)
+    payload["steps"] = [
+        {"step_id": "step-1", "description": "first", "action_type": "click"},
+        {"step_id": "step-1", "description": "second", "action_type": "click"},
+    ]
+
+    with pytest.raises(PlanParseError, match="duplicate step_id"):
+        parse_plan(json.dumps(payload), instruction="ignored")
+
+
+def test_a_step_after_finish_is_rejected() -> None:
+    """8.3.3: nothing may run after the terminal step.
+
+    `is_executable` looks only at the verb, so a plan that says "stop" and then
+    adds one more click would have that click executed.
+    """
+    payload = dict(VALID)
+    payload["steps"] = [
+        {"step_id": "step-1", "description": "stop", "action_type": "finish"},
+        {"step_id": "step-2", "description": "one more click", "action_type": "click"},
+    ]
+
+    with pytest.raises(PlanParseError, match="follow it"):
+        parse_plan(json.dumps(payload), instruction="ignored")
+
+
+def test_two_finish_steps_are_rejected() -> None:
+    payload = dict(VALID)
+    payload["steps"] = [
+        {"step_id": "step-1", "description": "a", "action_type": "click"},
+        {"step_id": "step-2", "description": "stop", "action_type": "finish"},
+        {"step_id": "step-3", "description": "stop again", "action_type": "finish"},
+    ]
+
+    with pytest.raises(PlanParseError, match="finish steps"):
+        parse_plan(json.dumps(payload), instruction="ignored")

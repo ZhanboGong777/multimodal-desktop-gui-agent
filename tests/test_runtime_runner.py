@@ -817,3 +817,34 @@ def test_a_free_text_error_is_not_reported_as_a_class_name() -> None:
     assert _error_type("no element matches 'x' in obs-0002") == ""
     assert _error_type("") == ""
     assert _error_type(None) == ""
+
+
+def test_a_plan_that_reports_errors_is_not_executed(tmp_path: Path) -> None:
+    """8.3.5: `errors` is the model saying it could not work the task out.
+
+    Running such a plan would be reading "I am not sure" as "go ahead". The field
+    existed and nothing read it, which is how a plan the model had already flagged
+    would have been dispatched anyway.
+    """
+    plan = TaskPlan(
+        task_id="t1",
+        instruction="open the browser",
+        steps=[
+            PlanStep(step_id="s1", description="click", action_type="click", target_text="Desktop")
+        ],
+        errors=["I cannot tell which window is the test application"],
+    )
+    executor = FakeExecutor()
+    task = TaskSpec(case_id="T", instruction="x", expect_text=["Done"], success_rules=["r"])
+    runner, _recorder = _runner(
+        tmp_path,
+        FakeObserver([_frame("obs-0001", ("Desktop",))]),
+        FakePlanner(plan),
+        executor,
+    )
+
+    result = runner.run(task, ExecutionOptions(execute=False))
+
+    assert result.status == "blocked"
+    assert executor.actions == []
+    assert "reports errors" in result.notes[0]

@@ -211,3 +211,28 @@ def test_redaction_does_not_mutate_the_caller_objects(tmp_path: Path) -> None:
     assert action.text == "token=abc123"
     assert result.action is not None
     assert result.action.text == "token=abc123"
+
+
+def test_two_sessions_in_the_same_second_do_not_share_a_directory(tmp_path: Path) -> None:
+    """14.1: a seconds-precision name collides, and the second run wins.
+
+    The runner's own directory is `<case>_<timestamp>`. Sharing one would mean the
+    second run appends to the first's step log and overwrites its summary - and a
+    run blocked before it captures anything finishes well inside a second.
+    """
+    first = RunSession.create(tmp_path, "T01_20261001_120000")
+    second = RunSession.create(tmp_path, "T01_20261001_120000")
+
+    assert first.directory != second.directory
+    assert second.session_id == second.directory.name, "the id must match the directory"
+    first.save_json("task_summary.json", {"run": 1})
+    second.save_json("task_summary.json", {"run": 2})
+    assert json.loads((first.directory / "task_summary.json").read_text())["run"] == 1
+    assert json.loads((second.directory / "task_summary.json").read_text())["run"] == 2
+
+
+def test_a_third_session_keeps_counting(tmp_path: Path) -> None:
+    names = [
+        RunSession.create(tmp_path, "T01_20261001_120000").directory.name for _ in range(3)
+    ]
+    assert names == ["T01_20261001_120000", "T01_20261001_120000_2", "T01_20261001_120000_3"]

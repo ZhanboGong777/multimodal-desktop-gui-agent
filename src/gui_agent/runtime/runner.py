@@ -196,6 +196,18 @@ class TaskRunner:
         planning_attempts = int(plan_result.attempts or 0)
         notes.append(f"planned {len(plan.steps)} steps from {initial.observation_id}")
 
+        # 8.3.5: a plan that reports errors is not executed. The model uses this
+        # field to say it could not work the task out, and running it anyway would
+        # be reading "I am not sure" as "go ahead".
+        if plan.errors:
+            return self._blocked(
+                task,
+                options,
+                "the plan reports errors and will not be executed: "
+                + "; ".join(plan.errors[:3]),
+                snapshot=initial,
+            )
+
         # 3. budget check before anything is dispatched
         if len(plan.executable_steps) > options.max_actions:
             return self._blocked(
