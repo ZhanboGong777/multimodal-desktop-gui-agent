@@ -247,7 +247,7 @@ def _attach_warmup(session, record: Path) -> Path | None:
 def main() -> int:
     # Read the file `.env.example` tells the operator to create, before anything
     # looks at the environment. Values already exported in the shell win.
-    load_environment()
+    dotenv_loaded = load_environment()
 
     args = parse_args()
 
@@ -348,6 +348,15 @@ def main() -> int:
     if not args.quiet:
         print(f"  platform   : {sys.platform}")
         print(f"  provider   : {client.name} ({client.model_name})")
+        # `load_environment` returns whether it read a file and the answer was
+        # thrown away. Settings come from four places; when the endpoint is wrong,
+        # "was my .env even read?" is the first question, and `./` means the
+        # process's working directory - a run started elsewhere silently skips it.
+        print(
+            "  env file   : ./.env"
+            if dotenv_loaded
+            else "  env file   : none in this directory (flags, environment and YAML only)"
+        )
         print(f"  mode       : {'EXECUTE (real desktop actions)' if args.execute else 'dry run'}")
         print(f"  case       : {task.case_id}  risk={task.risk}")
         if message_marker:

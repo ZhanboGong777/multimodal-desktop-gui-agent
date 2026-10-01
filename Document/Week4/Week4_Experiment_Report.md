@@ -111,9 +111,9 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **564 passed**, ruff clean |
+| MacBook Air M2 | **566 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 264: 206 in the
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 266: 208 in the
 eleven files below, and 58 spread across the other suites -
 `test_control_safety.py` 15, `test_model_mock.py` 14, `test_ocr.py` 7 (five of them
 the Windows-only OCR workarounds), `test_config.py` 7 (a new file),
@@ -208,7 +208,7 @@ behaviour needed no change: blocked, nothing dispatched, exit 2, no traceback.
 | `test_runtime_verification.py` | 15 cases: rule matching, forbidden text, unverifiable tasks, degraded observations, the two case rules that have to tell a real result from a lookalike, and the screen going away while polling |
 | `test_runtime_observation.py` | 11 cases: the whole of `observe()` against a prepared frame - ids, geometry, the OCR-failure record, the element cap - plus what a prompt line carries |
 | `test_runtime_recording.py` | 15 cases: redaction, append-only steps, per-frame files, summary, and where the provenance comes from |
-| `test_week4_cli.py` | 21 cases: argument errors, no `--yes`, dry-run default, summary always written, `--execute` refused without a terminal, the callback set an execute run hands over, `.env` loading, the flag/environment/YAML precedence, the numeric limits, and the warmup record the run copies in and warns about when it is missing |
+| `test_week4_cli.py` | 23 cases: argument errors, no `--yes`, dry-run default, summary always written, `--execute` refused without a terminal, the callback set an execute run hands over, `.env` loading, the flag/environment/YAML precedence, the numeric limits, and the warmup record the run copies in and warns about when it is missing |
 | `test_week4_integration.py` | 10 cases: the loop against a real OpenAI-compatible server over a real socket, which reads the element ids out of the prompt it receives; plus the four that read the request body itself - the screenshot arrives as pixels and not as a path, it is the frame the plan was written from, and a missing or mislabelled file blocks the run rather than blinding the model |
 | `test_week4_prompts.py` | 14 cases: the prompt fits its budget, describes element targeting and every action's arguments, and the user turn is the JSON envelope the planner actually sends |
 | `test_week4_cases.py` | 12 cases: the invariants the five case definitions must hold - a machine-checkable rule, a declared precondition, a distinctive marker, a copy handed back by `get_case`, and the fresh marker a send-message run is given |
@@ -879,6 +879,29 @@ This is the second time a correct-looking failure message sent the operator to t
 wrong cause; the first was the capture permission in §7. Both were found by
 running the manual's own instructions rather than reading them.
 
+**A test guard that was never real, and a returned value nobody read.** Two rounds
+ago the warmup tests were given a subprocess environment containing
+`GUI_AGENT_DISABLE_DOTENV=1`, on the assumption that it stopped the child from
+reading a `.env`. It stops nothing: the variable appears in no file under `src/` or
+`scripts/`. What actually keeps a real `.env` out is the working directory, since
+both entry points load `./.env` relative to the process's cwd - and with the
+children running in the repository root, a reviewer who had created `.env` as the
+usage guide tells them to would have had it loaded. The tests passed anyway,
+because every one of them passes `--base-url` explicitly and the flag wins, so the
+guard was decorative and nothing failed.
+
+The environment handed to those children was also built from nothing rather than
+copied, which is not portable: Windows needs `SystemRoot` for socket setup, and
+`PATH=/usr/bin:/bin` means nothing there. They now run in a temporary directory
+with a copy of the ambient environment and the `GUI_AGENT_*` variables removed,
+and both properties are demonstrated rather than asserted - a `.env` placed in the
+child's directory is shown being read, and shown losing to the flag.
+
+`load_environment` returns whether it read a file, and both callers discarded the
+answer. Settings arrive from four places; when the endpoint turns out to be wrong,
+"was my `.env` read at all?" is the first question, and the answer depends on where
+the process was started. Both entry points now print which it was.
+
 ## 8. Deliverables
 
 - `src/gui_agent/runtime/` - the run layer (8 modules).
@@ -890,7 +913,7 @@ running the manual's own instructions rather than reading them.
   `Document/Week4/evidence/`, so a run id in the test report resolves inside the
   repository rather than only on the machine that produced it.
 - `configs/week4.yaml` - Week 4 limits, with `ExecutionConfig` added to `config.py`.
-- 264 new tests.
+- 266 new tests.
 - `Document/Week4/Week4_Usage.md` - flags, the safety model, the record layout.
 - `Document/Week4/Week4_Troubleshooting.md` - forty-two symptoms with what to check
   and what the code actually does about each.

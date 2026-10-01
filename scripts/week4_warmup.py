@@ -180,7 +180,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def main(argv: list[str] | None = None) -> int:
-    load_environment()
+    dotenv_loaded = load_environment()
     args = parse_args(argv)
 
     config: Config = load_config(args.config)
@@ -210,6 +210,7 @@ def main(argv: list[str] | None = None) -> int:
 
     print("warmup     : 13.4 - run this before the week's tasks, not as part of them")
     print(f"provider   : {client.name}")
+    print("env file   : ./.env" if dotenv_loaded else "env file   : none in this directory")
     print(f"model      : {client.model_name}")
     print(f"base_url   : {getattr(client, 'base_url', None) or '(provider default)'}")
     print(f"screenshot : {image}")

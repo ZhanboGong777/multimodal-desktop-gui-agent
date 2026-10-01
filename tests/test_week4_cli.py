@@ -410,3 +410,47 @@ def test_the_runner_hands_the_plan_over_before_deciding_anything(tmp_path) -> No
 
     assert len(seen) == 1, "the plan is shown once, not per step"
     assert seen[0].summary == plan.summary
+
+
+def test_a_missing_env_file_is_reported_rather_than_assumed(tmp_path: Path) -> None:
+    """`load_environment` returned whether it read a file; both callers dropped it.
+
+    Settings arrive from four places, and when the endpoint is wrong the first
+    question is whether `./.env` was read at all. `./` is the process's working
+    directory, so a run started from somewhere else skips the file silently - the
+    operator then sees YAML defaults and has nothing to tell them why.
+    """
+    result = run_cli("--case", "T01", "--output-directory", str(tmp_path))
+
+    assert "env file   : none in this directory" in result.stdout
+
+
+def test_an_env_file_that_was_read_is_named(tmp_path: Path) -> None:
+    """And when it is read, the fact is stated rather than left to be inferred."""
+    import os
+    import subprocess
+    import sys
+
+    (tmp_path / ".env").write_text("GUI_AGENT_MODEL=from-dotenv\n", encoding="utf-8")
+    env = {key: value for key, value in os.environ.items() if not key.startswith("GUI_AGENT_")}
+    env["GUI_AGENT_API_KEY"] = "test-key"
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts" / "week4_agent_cli.py"),
+            "--case",
+            "T01",
+            "--output-directory",
+            str(tmp_path / "runs"),
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        timeout=300,
+        check=False,
+        env=env,
+    )
+
+    assert "env file   : ./.env" in result.stdout
+    assert "from-dotenv" in result.stdout, "the value in the file has to be the one in use"

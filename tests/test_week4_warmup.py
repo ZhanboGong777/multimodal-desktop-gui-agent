@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import base64
 import json
+import os
 import subprocess
 import sys
 import threading
@@ -86,6 +87,25 @@ class _RefusingHandler(_Handler):
         self.wfile.write(body)
 
 
+def _env(**extra: str) -> dict[str, str]:
+    """The ambient environment, with anything GUI_AGENT_* taken out of it.
+
+    Copied rather than built from nothing. A stripped environment is not a portable
+    one: Windows needs SystemRoot for socket setup, and the interpreter looks for
+    TEMP under names this test has no business guessing. What the test actually
+    needs is that a stray GUI_AGENT_BASE_URL or a real key cannot reach the child.
+
+    `GUI_AGENT_DISABLE_DOTENV` used to be set here. Nothing reads it - it appears
+    nowhere in src/ or scripts/ - so it did nothing at all while looking like it
+    made the child hermetic. What does that is the working directory: both entry
+    points load `./.env` relative to the process's cwd, so running the child in a
+    temporary directory is what actually keeps a real `.env` out.
+    """
+    env = {key: value for key, value in os.environ.items() if not key.startswith("GUI_AGENT_")}
+    env.update(extra)
+    return env
+
+
 @pytest.fixture
 def server() -> Iterator[str]:
     _Handler.requests = []
@@ -117,17 +137,12 @@ def _run_warmup(server_url: str, tmp_path: Path, *extra: str) -> subprocess.Comp
             str(tmp_path / "warmup.json"),
             *extra,
         ],
-        cwd=REPO_ROOT,
+        cwd=tmp_path,
         capture_output=True,
         text=True,
         check=False,
         timeout=120,
-        env={
-            "PATH": "/usr/bin:/bin",
-            "HOME": str(tmp_path),
-            "GUI_AGENT_API_KEY": "test-key",
-            "GUI_AGENT_DISABLE_DOTENV": "1",
-        },
+        env=_env(GUI_AGENT_API_KEY="test-key"),
     )
 
 
@@ -253,17 +268,12 @@ def test_an_unreachable_backend_is_reported_rather_than_raised(tmp_path: Path) -
             "--json",
             str(tmp_path / "warmup.json"),
         ],
-        cwd=REPO_ROOT,
+        cwd=tmp_path,
         capture_output=True,
         text=True,
         check=False,
         timeout=120,
-        env={
-            "PATH": "/usr/bin:/bin",
-            "HOME": str(tmp_path),
-            "GUI_AGENT_API_KEY": "test-key",
-            "GUI_AGENT_DISABLE_DOTENV": "1",
-        },
+        env=_env(GUI_AGENT_API_KEY="test-key"),
     )
 
     assert result.returncode == 1, result.stdout
@@ -294,18 +304,16 @@ def test_the_warmup_reaches_the_same_backend_the_tasks_will(
             "--image",
             str(shot),
         ],
-        cwd=REPO_ROOT,
+        cwd=tmp_path,
         capture_output=True,
         text=True,
         check=False,
         timeout=120,
-        env={
-            "PATH": "/usr/bin:/bin",
-            "HOME": str(tmp_path),
-            "GUI_AGENT_API_KEY": "test-key",
-            "GUI_AGENT_BASE_URL": "http://127.0.0.1:9/v1",
-            "GUI_AGENT_DISABLE_DOTENV": "1",
-        },
+        env=_env(
+            GUI_AGENT_API_KEY="test-key",
+            # Deliberately stale: the flag has to beat it (13.1.1).
+            GUI_AGENT_BASE_URL="http://127.0.0.1:9/v1",
+        ),
     )
 
     assert result.returncode == 0, result.stdout + result.stderr
