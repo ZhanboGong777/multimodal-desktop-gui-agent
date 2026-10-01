@@ -1376,8 +1376,10 @@ def test_a_missing_ocr_binary_is_named_in_the_run_notes(tmp_path: Path) -> None:
         update={
             "elements": [],
             "errors": [
-                "ocr unavailable: Tesseract failed: tesseract is not installed or "
-                "it's not in your PATH"
+                (
+                    "ocr unavailable: Tesseract failed: tesseract is not installed or "
+                    "it's not in your PATH"
+                )
             ],
         }
     )
