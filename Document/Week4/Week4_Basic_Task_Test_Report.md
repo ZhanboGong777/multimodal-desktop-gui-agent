@@ -38,7 +38,7 @@ failure is two attempts, and only the runs whose summary reads `succeeded` with
 
 | Case | Task | Preconditions before the run | Attempts | Successes | Status | Verification method | Timing basis | Evidence |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| T01 | open the browser | desktop visible and launch entry uncovered; **no browser window open** | 0 | 0 | not run | automatic: `http` and `search` both on screen | from the confirmation gate to the final verdict (`execution_ms`); the summary also keeps `planning_ms`, `confirmation_ms` and the whole-run `elapsed_ms` | — |
+| T01 | open the browser | desktop visible and launch entry uncovered; **no browser window open** | 0 | 0 | not run | automatic: `http` and `search` both on screen | from the confirmation gate to the final verdict (`execution_ms`); the summary also keeps `planning_ms`, `confirmation_ms` and the whole-run `elapsed_ms`, and the run directory keeps `warmup.json` for the cold and warm numbers, which are deliberately not part of any of them | — |
 | T02 | search the web | a browser window is open and focused | 0 | 0 | not run | automatic: the query text is on screen | as above | — |
 | T03 | open a specified file | `week4_sample.txt` exists in the week4 test folder (`~/Desktop/week4_test`, or `%USERPROFILE%\Desktop\week4_test`); no file of that name is open | 0 | 0 | not run | automatic: `WEEK4-OPEN-FILE-OK` on screen | as above | — |
 | T04 | send a message | the test conversation is open and holds no earlier message with **this run's** marker; the operator agreed a real message may be sent | 0 | 0 | not run | automatic: this run's marker on screen (the CLI prints it as `marker`) | as above | — |
@@ -124,7 +124,8 @@ column says which field, so a row can be checked instead of trusted.
 | Model and endpoint | | `provider` and `model_name` |
 | Context window (`OLLAMA_CONTEXT_LENGTH`) | | set on the server; not recorded, so write it down here |
 | `timeout_seconds` | | `model.timeout_seconds` in the config the run used |
-| Free memory before the run | | measured before the run; not recorded |
+| Free memory before the run | | `memory_available_mb_before` in the run's `warmup.json` |
+| Warmup: cold probe and warm repeat | | the `latency_ms` of the `cold-or-idle` and `warm` probes in the same file; 16.5.4 keeps it beside the run's timings and 13.4.1 keeps it out of them |
 | Python | | `python_version` |
 
 ## Failure notes

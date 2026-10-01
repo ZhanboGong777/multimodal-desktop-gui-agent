@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import sys
 from pathlib import Path
 
@@ -197,6 +198,32 @@ def _apply_environment(config, args) -> None:
     )
 
 
+#: The name `week4_warmup.py` writes by default, inside the output directory the
+#: runs use. Looked for there rather than relative to the working directory, so a
+#: run and its warmup record always come from the same tree.
+WARMUP_RECORD_NAME = "warmup.json"
+
+
+def _attach_warmup(session, record: Path) -> Path | None:
+    """Put the warmup record this run follows into the run's own directory.
+
+    16.5.4 asks for the warmup time to be kept beside the run's own timings, and
+    13.4.1 asks that it be kept out of them. Both are satisfied by copying the
+    record in rather than adding its number to anything: the run directory then
+    holds the warmup that preceded it, `week4_collect_evidence.py` carries it into
+    the repository with the rest of the evidence, and no task timing changes.
+
+    A copy, not a move, and no timestamp arithmetic: whether a warmup "belongs" to
+    a run is the operator's reading of two timestamps, not something this can know.
+    """
+    source = Path(record)
+    if not source.is_file():
+        return None
+    destination = Path(session.directory) / "warmup.json"
+    shutil.copy2(source, destination)
+    return destination
+
+
 def main() -> int:
     # Read the file `.env.example` tells the operator to create, before anything
     # looks at the environment. Values already exported in the shell win.
@@ -284,6 +311,7 @@ def main() -> int:
     stamp = __import__("datetime").datetime.now().astimezone().strftime("%Y%m%d_%H%M%S")
     session = RunSession.create(output_directory, session_id=f"{task.case_id}_{stamp}")
     recorder = TaskRecorder(session)
+    warmup_record = _attach_warmup(session, output_directory / WARMUP_RECORD_NAME)
 
     options = ExecutionOptions(
         execute=args.execute,
@@ -307,6 +335,16 @@ def main() -> int:
             f"  limits     : {options.max_actions} actions, {options.task_timeout_seconds:g}s budget"
         )
         print(f"  records    : {session.directory}")
+        if warmup_record is not None:
+            print(f"  warmup     : {warmup_record.name} copied from {warmup_record.parent}")
+        else:
+            # Both modes, because both record planning_ms: a cold model inflates a
+            # dry run's planning number exactly as much as a real one's, and that
+            # number is what the report quotes.
+            print(
+                f"  warmup     : none in {output_directory} - run scripts/week4_warmup.py "
+                "first, or the cold start lands in this run's planning time"
+            )
 
     callbacks = _execute_callbacks(args, task)
 

@@ -267,3 +267,78 @@ def test_the_smallest_valid_limit_is_applied_rather_than_ignored(tmp_path: Path)
     )
 
     assert "1 actions, 7s budget" in result.stdout, result.stdout
+
+
+# ───────── the warmup record travels with the run ─────────
+def test_the_warmup_record_is_copied_into_the_run_directory(tmp_path: Path) -> None:
+    """16.5.4 wants the warmup time kept beside the run's own timings.
+
+    Keeping it *out* of them is 13.4.1, so the record is copied in rather than
+    merged: the run directory holds the warmup that preceded it, and no task
+    timing changes. `week4_collect_evidence.py` then carries it into the
+    repository with the rest of the evidence.
+    """
+    import argparse
+    import json
+
+    cli = _load_cli()
+    record = tmp_path / "warmup.json"
+    record.write_text(json.dumps({"ready": True}), encoding="utf-8")
+
+    class _Session:
+        directory = tmp_path / "T01_20261001_120000"
+
+    _Session.directory.mkdir()
+    copied = cli._attach_warmup(_Session, record)
+
+    assert copied == _Session.directory / "warmup.json"
+    assert json.loads(copied.read_text(encoding="utf-8")) == {"ready": True}
+    assert record.is_file(), "the original stays where the warmup wrote it"
+    assert argparse is not None  # the module imports argparse; keep the name used
+
+
+def test_no_warmup_record_is_not_an_error(tmp_path: Path) -> None:
+    """A dry run on a machine that never warmed anything must still work."""
+    cli = _load_cli()
+
+    class _Session:
+        directory = tmp_path / "T01_20261001_120000"
+
+    _Session.directory.mkdir()
+    assert cli._attach_warmup(_Session, tmp_path / "absent.json") is None
+    assert list(_Session.directory.iterdir()) == []
+
+
+def test_a_run_with_no_warmup_record_says_so(tmp_path: Path) -> None:
+    """13.4.1's nudge, at the moment it matters.
+
+    The next number this run writes is its `planning_ms`. If the model is cold,
+    that number includes loading it, and the week's first evidence point becomes
+    the one figure nobody can interpret. Warned about in both modes, because both
+    record it - the status differs, the timing does not.
+    """
+    result = run_cli("--case", "T01", "--output-directory", str(tmp_path))
+    assert "warmup     : none in" in result.stdout
+    assert "week4_warmup.py" in result.stdout
+
+
+def test_a_run_finds_the_warmup_record_in_its_own_output_directory(tmp_path: Path) -> None:
+    """The record is looked for where the runs write, not where the shell is.
+
+    A run and the warmup that preceded it then always come from the same tree: a
+    stray `outputs/week4/warmup.json` in the working directory cannot be attached
+    to a run whose records are going somewhere else.
+    """
+    import json
+
+    (tmp_path / "warmup.json").write_text(
+        json.dumps({"ready": True, "probes": []}), encoding="utf-8"
+    )
+    result = run_cli("--case", "T01", "--output-directory", str(tmp_path))
+
+    assert "warmup     : warmup.json copied from" in result.stdout
+    sessions = [path for path in tmp_path.iterdir() if path.is_dir()]
+    assert len(sessions) == 1, sessions
+    copied = sessions[0] / "warmup.json"
+    assert copied.is_file(), "the record has to land in the run directory"
+    assert json.loads(copied.read_text(encoding="utf-8"))["ready"] is True

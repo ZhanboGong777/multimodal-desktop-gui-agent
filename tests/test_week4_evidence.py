@@ -71,6 +71,27 @@ def test_collect_leaves_the_screen_behind(tmp_path: Path) -> None:
     assert not any(name.startswith("obs-") for name in written)
 
 
+def test_the_warmup_record_travels_with_the_run(tmp_path: Path) -> None:
+    """16.5.4 keeps the warmup time beside the run's timings; the CLI puts the
+    record in the session, and the collector is what makes it out of the machine
+    that produced it. It carries no screen content - it is numbers and probe text.
+    """
+    import json
+
+    session = _session(tmp_path / "outputs")
+    (session / "warmup.json").write_text(
+        json.dumps({"ready": True, "probes": [{"kind": "image", "ok": True}]}), encoding="utf-8"
+    )
+    destination = tmp_path / "evidence"
+
+    copied = evidence.collect(session, destination)
+
+    names = [path.name for path in copied]
+    assert "warmup.json" in names
+    carried = json.loads((destination / session.name / "warmup.json").read_text(encoding="utf-8"))
+    assert carried["ready"] is True
+
+
 def test_collect_can_skip_the_step_log(tmp_path: Path) -> None:
     session = _session(tmp_path / "outputs")
     destination = tmp_path / "evidence"
