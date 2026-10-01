@@ -34,7 +34,7 @@ from gui_agent.runtime import (
     TaskSpec,
     Verifier,
 )
-from gui_agent.runtime.tasks import case_ids, get_case
+from gui_agent.runtime.tasks import case_ids, get_case, get_case_for_run
 
 EXIT_OK = 0
 EXIT_FAILED = 1
@@ -229,8 +229,9 @@ def main() -> int:
         config.execution.task_timeout_seconds = args.task_timeout
 
     # ── the task ───────────────────────────────────────────────────────
+    message_marker = ""
     if args.case:
-        task = get_case(args.case)
+        task, message_marker = get_case_for_run(args.case)
         if task is None:
             print(
                 f"error: unknown case {args.case!r}; known: {', '.join(case_ids())}",
@@ -297,6 +298,10 @@ def main() -> int:
         print(f"  provider   : {client.name} ({client.model_name})")
         print(f"  mode       : {'EXECUTE (real desktop actions)' if args.execute else 'dry run'}")
         print(f"  case       : {task.case_id}  risk={task.risk}")
+        if message_marker:
+            # 15.4: the marker changes every run, so the operator has to be
+            # told which one this run is looking for.
+            print(f"  marker     : {message_marker}")
         print(
             f"  limits     : {options.max_actions} actions, {options.task_timeout_seconds:.0f}s budget"
         )

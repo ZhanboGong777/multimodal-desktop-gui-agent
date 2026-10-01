@@ -8,7 +8,17 @@ a number that means nothing.
 
 from __future__ import annotations
 
-from gui_agent.runtime.tasks import CASES, MESSAGE_MARKER, SAMPLE_FILE, case_ids, get_case
+from datetime import UTC, datetime
+
+from gui_agent.runtime.tasks import (
+    CASES,
+    MESSAGE_MARKER,
+    SAMPLE_FILE,
+    case_ids,
+    get_case,
+    get_case_for_run,
+    new_message_marker,
+)
 
 
 def test_the_five_cases_are_present() -> None:
@@ -64,3 +74,48 @@ def test_get_case_hands_back_a_copy() -> None:
     assert "mutated" not in CASES["T01"].expect_text
     assert CASES["T01"].preconditions
     assert get_case("T99") is None
+
+
+def test_a_run_of_the_send_message_case_gets_a_fresh_marker() -> None:
+    """15.4 asks for a new identifier on every run, and a fixed one breaks T04.
+
+    After one attempt the previous message is still in the conversation, so the
+    rule is already satisfied and the precondition - which requires no earlier
+    message carrying the marker - refuses the retry. The case becomes single-use.
+    """
+    first, first_marker = get_case_for_run("T04")
+    second, second_marker = get_case_for_run(
+        "T04", now=datetime(2026, 10, 2, 9, 0, 0, tzinfo=UTC)
+    )
+
+    assert first is not None and second is not None
+    assert first_marker and second_marker
+    assert first_marker != second_marker
+    assert first.expect_text == [first_marker]
+    assert first_marker in first.instruction
+    assert MESSAGE_MARKER not in first.expect_text
+    # The preconditions speak of "this marker", so they read correctly for any
+    # marker; what guards the retry is the rule, which now carries the fresh one.
+    assert first.preconditions == CASES["T04"].preconditions
+
+
+def test_the_marker_is_not_left_in_the_shared_definition() -> None:
+    """`get_case` hands back a copy; the minted marker must not leak into CASES."""
+    get_case_for_run("T04")
+    assert CASES["T04"].expect_text == [MESSAGE_MARKER]
+
+
+def test_the_other_cases_are_handed_back_untouched() -> None:
+    task, marker = get_case_for_run("T01")
+
+    assert marker == ""
+    assert task is not None
+    assert task.expect_text == CASES["T01"].expect_text
+    assert task.instruction == CASES["T01"].instruction
+
+
+def test_the_marker_carries_the_time_it_was_minted() -> None:
+    marker = new_message_marker(datetime(2026, 10, 2, 9, 30, 15, tzinfo=UTC))
+
+    assert marker.startswith("WEEK4_MESSAGE_CHECK_")
+    assert "20261002" in marker

@@ -11,10 +11,18 @@ for a string that only this run could have produced does.
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
 from .schemas import TaskSpec
 
-#: Unique marker for the send-message case. Changing it changes the evidence.
-MESSAGE_MARKER = "WEEK4_MESSAGE_CHECK_001"
+#: Prefix of the send-message marker. The full marker carries a timestamp, because
+#: 15.4 asks for a new identifier on every run - and a fixed one breaks the case
+#: after a single attempt: the previous run's message is still in the conversation,
+#: so the rule is already satisfied and the precondition ("holds no earlier message
+#: with this marker") refuses the retry. `MESSAGE_MARKER` stays as the marker the
+#: case is defined with, for `--list-cases` and for tests.
+MESSAGE_MARKER_PREFIX = "WEEK4_MESSAGE_CHECK_"
+MESSAGE_MARKER = f"{MESSAGE_MARKER_PREFIX}001"
 
 #: Sample file used by the open-file case; created by the test setup.
 SAMPLE_FILE = "week4_sample.txt"
@@ -120,3 +128,30 @@ def get_case(case_id: str) -> TaskSpec | None:
 
 def case_ids() -> list[str]:
     return sorted(CASES)
+
+
+def new_message_marker(now: datetime | None = None) -> str:
+    """A marker no earlier run could have used."""
+    stamp = (now or datetime.now(UTC)).astimezone().strftime("%Y%m%d_%H%M%S")
+    return f"{MESSAGE_MARKER_PREFIX}{stamp}"
+
+
+def get_case_for_run(case_id: str, now: datetime | None = None) -> tuple[TaskSpec | None, str]:
+    """A case ready for one run, plus the message marker it will use.
+
+    15.4 asks for a fresh identifier on every run, and a fixed one breaks the case
+    after a single attempt: the previous run's message is still in the conversation,
+    so T04's rule is already satisfied and its own precondition - which requires no
+    earlier message with that marker - refuses the retry. Only the send-message case
+    is touched; the marker is returned so the CLI can show what to look for.
+    """
+    task = get_case(case_id)
+    if task is None or MESSAGE_MARKER not in task.expect_text:
+        return task, ""
+    marker = new_message_marker(now)
+    task.expect_text = [marker if text == MESSAGE_MARKER else text for text in task.expect_text]
+    task.instruction = task.instruction.replace(MESSAGE_MARKER, marker)
+    # The preconditions say "this marker" rather than naming the literal, so they
+    # read correctly for any marker and need no rewriting. What guards a retry is
+    # `check_task` against `expect_text`, which now carries the fresh one.
+    return task, marker
