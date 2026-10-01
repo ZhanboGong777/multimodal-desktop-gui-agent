@@ -104,17 +104,17 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **424 passed**, ruff clean |
+| MacBook Air M2 | **431 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 124: 112 in the nine
-files below, 8 in `test_model_mock.py`, 2 in `test_ocr.py` for the label-merging
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 131: 117 in the nine
+files below, 10 in `test_model_mock.py`, 2 in `test_ocr.py` for the label-merging
 fix described in section 7, and 2 in `test_plan_parser.py` for the step-status
 vocabulary.
 
 | Test file | Covers |
 | --- | --- |
 | `test_action_adapter.py` | 26 cases: unique, ambiguous, missing and stale targets, a target split across word-level elements, parameter errors including wrong types, out-of-range coordinates, key whitelist, platform hotkeys, coordinate scaling, `finish` refusal |
-| `test_runtime_runner.py` | 30 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, the guard that refuses to start a real run whose goal already holds, the second confirmation a risky task must get, and the note a frame with no readable text leaves |
+| `test_runtime_runner.py` | 35 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, the guard that refuses to start a real run whose goal already holds, the second confirmation a risky task must get, the provenance the summary carries, and the note a frame with no readable text leaves |
 | `test_runtime_verification.py` | 8 cases: rule matching, forbidden text, unverifiable tasks, degraded observations |
 | `test_runtime_recording.py` | 6 cases: redaction, append-only steps, per-frame files, summary |
 | `test_week4_cli.py` | 9 cases: argument errors, no `--yes`, dry-run default, summary always written, `--execute` refused without a terminal, and the callback set an execute run hands over |
@@ -323,6 +323,20 @@ the wiring itself has a test. The prompt also prints the text the plan will
 actually type, which is what 12.2.6 asks to be shown before a message goes out.
 The same pass implemented 12.2.5: `--execute` without a terminal returns `blocked`
 (exit 2) rather than reading the missing answer as consent.
+
+**The run summary did not carry enough to read it elsewhere.** 14.2 lists what a
+summary must contain - commit, platform, Python version, screenshot and control
+geometry, start and finish times, planning attempts, model requests, the evidence
+directory, the failing step - and ours had 13 fields, most of that list absent. The
+basic task report's environment table asks the operator for the same facts, so both
+were being filled in from memory, which is how a report ends up quoting a revision
+the run did not use. They are recorded now. `planning_attempts` and
+`model_requests` are deliberately two counters: 14.2.1 asks for that, and the
+distinction is real - one plan can cost several transport attempts, and the request
+count is taken in `ModelClient._with_retries`, the single place a request leaves
+the process, so retries are included. Geometry is worth its line for a different
+reason: a click that landed wrong cannot be re-read afterwards without knowing
+which scale it was mapped through.
 
 ## 8. Deliverables
 

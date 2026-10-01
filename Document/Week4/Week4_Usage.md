@@ -83,8 +83,14 @@ outputs/week4/<case>_<timestamp>/
 ├── obs-0001.json        # elements, geometry and timing for one frame
 ├── obs-0002.json        # ... one file per observation, never overwritten
 ├── steps.jsonl          # one line per step, appended
-└── task_summary.json    # status, verification, action count, timings
+└── task_summary.json    # status, verification, action count, timings, provenance
 ```
+
+`task_summary.json` also carries where and when the run happened - commit,
+platform, Python version, screenshot and control geometry, start and finish times,
+planning attempts, transport requests and the failing step - so a row in the test
+report can be read without asking the machine it came from. `planning_attempts` and
+`model_requests` are separate counters: one plan can cost several requests.
 
 Each observation file records the frame-local element ids, so a coordinate in
 `steps.jsonl` can be traced back to the frame it was resolved from.
