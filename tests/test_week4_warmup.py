@@ -234,7 +234,7 @@ def test_a_context_overflow_is_classified_not_just_reported(tmp_path: Path) -> N
     assert "not ready" in result.stdout
 
 
-def test_an_unreachable_backend_is_a_configuration_error(tmp_path: Path) -> None:
+def test_an_unreachable_backend_is_reported_rather_than_raised(tmp_path: Path) -> None:
     """Nothing to talk to is exit 1 with the reason, never a traceback.
 
     Port 9 is the discard port: open on the loopback of a machine that has
