@@ -139,13 +139,25 @@ run has a warmup record, two when it does not. The screenshots and the observati
 files are a picture of the whole desktop; `--no-steps` narrows it to the summary
 alone.
 
-Typed text is redacted in the step log: the record notes that something was
-typed and how long it was, never what it said. This covers the action's own
-arguments. It does **not** cover what OCR read off the screen, which is written to
-`obs-NNNN.json` verbatim - on-screen text is the observation the run is built on,
-and redacting it would make the record unreadable. Treat an evidence bundle as
-containing whatever was on the screen, and use a desktop you are willing to have
-recorded.
+Typed text is redacted everywhere a step record carries it - the record notes that
+something was typed and how long it was, never what it said. Both copies of the
+action are masked: the one the adapter resolved and the one the executor was
+handed. A step record names the action twice, and for two rounds only one of them
+went through the redactor, so `steps.jsonl` and the summary beside it both stored
+the text while this paragraph said they did not. `test_runtime_runner.py` now
+asserts the string is absent from both files rather than from the object in memory.
+
+Two things in a run are **not** masked, and both are deliberate:
+
+- **What OCR read off the screen**, written to `obs-NNNN.json`. On-screen text is
+  the observation the run is built on and redacting it would make the record
+  unreadable. Credential-shaped element text is the exception and is masked.
+- **The instruction you gave and the task's success rule**, stored as written.
+  They are what the run was asked to do and how it was judged; a record without
+  them cannot be checked. For T02 the query is both.
+
+Treat an evidence bundle as containing whatever was on the screen, and use a
+desktop you are willing to have recorded.
 
 ## When something goes wrong
 

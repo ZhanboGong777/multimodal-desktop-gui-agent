@@ -1438,3 +1438,42 @@ def test_the_written_summary_of_a_dry_run_carries_it_too(tmp_path: Path) -> None
 
     assert written["verification"]["outcome"] == "inconclusive"
     assert "dry run" in written["verification"]["detail"]
+
+
+def test_typed_text_is_masked_in_every_artefact_that_carries_it(tmp_path: Path) -> None:
+    """A step names its action twice, and only one copy was masked.
+
+    `resolved` is what the adapter decided; `action_result` is what the executor
+    was handed. Only the second went through the redactor, so the raw text was
+    written to steps.jsonl - and to the summary that embeds the same records -
+    while the usage guide said typed text is never stored. Found by reading the
+    files a real run produced instead of the object the code returned.
+    """
+    secret = "correct-horse-battery-staple"
+    frames = [_frame("obs-0001", ("Start",)), _frame("obs-0002", ("Start",))]
+    plan = _plan(
+        PlanStep(
+            step_id="s1",
+            description="type the passphrase",
+            action_type="type_text",
+            arguments={"text": secret},
+        )
+    )
+    runner, recorder = _runner(tmp_path, FakeObserver(frames), FakePlanner(plan), FakeExecutor())
+    task = TaskSpec(case_id="T", instruction="x", expect_text=["Start"], success_rules=["r"])
+
+    runner.run(
+        task, ExecutionOptions(execute=True, confirm=True), confirm=lambda _plan: True
+    )
+
+    steps_file = (recorder.directory / "steps.jsonl").read_text(encoding="utf-8")
+    summary_file = (recorder.directory / "task_summary.json").read_text(encoding="utf-8")
+
+    assert secret not in steps_file, "the step log stored the typed text"
+    assert secret not in summary_file, "the summary stored the typed text"
+    record = json.loads(steps_file.splitlines()[0])
+    assert record["resolved"]["action"]["text"].startswith("<redacted>")
+    assert record["action_result"]["action"]["text"].startswith("<redacted>")
+    assert f"({len(secret)} chars)" in record["resolved"]["action"]["text"], (
+        "the length is kept so a failed step can still be diagnosed"
+    )

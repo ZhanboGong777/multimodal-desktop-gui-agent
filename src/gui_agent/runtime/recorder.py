@@ -66,6 +66,24 @@ def _mask_config(payload: Any) -> Any:
     return payload
 
 
+def _mask_step(payload: dict[str, Any]) -> dict[str, Any]:
+    """Mask typed text wherever one step record carries it.
+
+    A step record names the action twice: ``resolved`` is what the adapter decided
+    to do, ``action_result`` is what the executor was handed. Only the second was
+    masked, so the raw text was written to ``steps.jsonl`` - and to the summary
+    that embeds the same records - while the usage guide said typed text is never
+    stored. Found by reading the file a real run produced rather than the object
+    the code returned.
+    """
+    masked = dict(payload)
+    for key in ("resolved", "action_result"):
+        block = masked.get(key)
+        if isinstance(block, Mapping) and isinstance(block.get("action"), Mapping):
+            masked[key] = {**block, "action": redact(dict(block["action"]))}
+    return masked
+
+
 class TaskRecorder:
     """Owns the output directory for one task run."""
 
@@ -140,8 +158,9 @@ class TaskRecorder:
     # ── steps ──────────────────────────────────────────────────────────
     def append_step(self, record: StepRecord) -> None:
         """Append one line; steps are never rewritten, so a crash keeps the history."""
+        payload = _mask_step(record.model_dump(mode="json"))
         with self._step_log.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps(record.model_dump(mode="json"), ensure_ascii=False) + "\n")
+            handle.write(json.dumps(payload, ensure_ascii=False) + "\n")
 
     def read_steps(self) -> list[dict[str, Any]]:
         if not self._step_log.exists():
@@ -156,6 +175,9 @@ class TaskRecorder:
     def write_summary(self, result: TaskRunResult) -> Path:
         target = self.directory / "task_summary.json"
         payload = result.model_dump(mode="json")
+        # The summary embeds the same step records, so it needs the same masking -
+        # and it is the file the evidence collector copies into the repository.
+        payload["steps"] = [_mask_step(step) for step in payload.get("steps", [])]
         payload["action_count"] = result.action_count
         target.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
         return target
