@@ -39,16 +39,20 @@ class EvidenceError(RuntimeError):
 
 
 def latest_session(case_id: str, root: Path = DEFAULT_SESSION_ROOT) -> Path:
-    """Newest session directory for a case.
+    """Newest *finished* session directory for a case.
 
     Session names are ``<case>_<timestamp>``, so lexical order is chronological
-    order and the last one is the most recent run.
+    order. A directory with no summary is a run that stopped before it could write
+    one, and it must not shadow the last run that actually produced evidence - so
+    finished sessions win. An unfinished one is still returned when it is all there
+    is, where :func:`collect` explains what is missing.
     """
     root = Path(root)
     candidates = sorted(path for path in root.glob(f"{case_id.upper()}_*") if path.is_dir())
     if not candidates:
         raise EvidenceError(f"no {case_id.upper()} session under {root}")
-    return candidates[-1]
+    finished = [path for path in candidates if (path / "task_summary.json").is_file()]
+    return (finished or candidates)[-1]
 
 
 def run_id_of(session: Path) -> str:

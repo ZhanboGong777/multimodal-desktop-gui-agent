@@ -103,6 +103,31 @@ def test_latest_session_picks_the_newest_for_that_case(tmp_path: Path) -> None:
     assert evidence.latest_session("t01", root) == newest
 
 
+def test_latest_session_prefers_a_run_that_finished(tmp_path: Path) -> None:
+    """An unfinished run must not shadow the last one that produced evidence.
+
+    A refused ``--execute`` used to leave its session directory behind, and it
+    sorts later than the real run precisely because it happened later.
+    """
+    root = tmp_path / "outputs"
+    real = _session(root, "T01_20260101_000000")
+    orphan = root / "T01_20260202_000000"
+    orphan.mkdir(parents=True)
+
+    assert evidence.latest_session("T01", root) == real
+
+
+def test_latest_session_falls_back_to_an_unfinished_run(tmp_path: Path) -> None:
+    """When it is all there is, the caller's error should explain what is missing."""
+    root = tmp_path / "outputs"
+    orphan = root / "T01_20260202_000000"
+    orphan.mkdir(parents=True)
+
+    assert evidence.latest_session("T01", root) == orphan
+    with pytest.raises(evidence.EvidenceError, match="did not finish"):
+        evidence.collect(orphan, tmp_path / "evidence")
+
+
 def test_latest_session_says_so_when_there_is_nothing(tmp_path: Path) -> None:
     with pytest.raises(evidence.EvidenceError, match="no T03 session"):
         evidence.latest_session("T03", tmp_path)

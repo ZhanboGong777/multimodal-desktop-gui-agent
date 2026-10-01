@@ -194,6 +194,21 @@ def main() -> int:
         print("  note: --instruction without --case defines no success rule;")
         print("        the run will be reported blocked unless you add one.")
 
+    if args.execute and not sys.stdin.isatty():
+        # 12.2.5: with no terminal there is no way to ask, and consent is never
+        # assumed. Reported as blocked rather than cancelled - the operator did not
+        # decline, the confirmation could not be obtained at all.
+        #
+        # Checked before the run directory is created: a refusal that leaves an
+        # empty session behind is indistinguishable from a run that died early, and
+        # the evidence collector would later pick it up as "the latest run".
+        print(
+            "  --execute needs an interactive terminal: the confirmation cannot be "
+            "asked for here, and consent is never assumed.",
+            file=sys.stderr,
+        )
+        return EXIT_BLOCKED
+
     output_directory = Path(args.output_directory or config.output.directory)
 
     # ── wire the loop ──────────────────────────────────────────────────
@@ -234,17 +249,6 @@ def main() -> int:
             f"  limits     : {options.max_actions} actions, {options.task_timeout_seconds:.0f}s budget"
         )
         print(f"  records    : {session.directory}")
-
-    if args.execute and not sys.stdin.isatty():
-        # 12.2.5: with no terminal there is no way to ask, and consent is never
-        # assumed. Reported as blocked rather than cancelled - the operator did not
-        # decline, the confirmation could not be obtained at all.
-        print(
-            "  --execute needs an interactive terminal: the confirmation cannot be "
-            "asked for here, and consent is never assumed.",
-            file=sys.stderr,
-        )
-        return EXIT_BLOCKED
 
     callbacks = _execute_callbacks(args, task)
 

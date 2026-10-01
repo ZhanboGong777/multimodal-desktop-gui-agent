@@ -76,11 +76,13 @@ def test_a_free_form_instruction_is_flagged_as_unverifiable(tmp_path: Path) -> N
     assert "defines no success rule" in result.stdout
 
 
-def test_execute_without_a_terminal_is_blocked_rather_than_assumed() -> None:
+def test_execute_without_a_terminal_is_blocked_rather_than_assumed(tmp_path: Path) -> None:
     """12.2.5: with no terminal there is nobody to ask, so consent is not assumed.
 
-    The refusal happens before the capture, so this is fast and needs no desktop.
+    The refusal happens before the capture and before the run directory is created,
+    so it is fast, needs no desktop, and leaves nothing behind.
     """
+    destination = tmp_path / "records"
     result = subprocess.run(
         [
             sys.executable,
@@ -88,6 +90,8 @@ def test_execute_without_a_terminal_is_blocked_rather_than_assumed() -> None:
             "--case",
             "T01",
             "--execute",
+            "--output-directory",
+            str(destination),
         ],
         capture_output=True,
         text=True,
@@ -99,6 +103,9 @@ def test_execute_without_a_terminal_is_blocked_rather_than_assumed() -> None:
 
     assert result.returncode == 2, result.stdout
     assert "interactive terminal" in result.stderr
+    # Refused before the run directory exists: an empty session left behind is
+    # indistinguishable from a run that died early.
+    assert not destination.exists() or not any(destination.iterdir())
 
 
 def _load_cli():
