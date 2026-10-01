@@ -11,6 +11,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+from typing import ClassVar
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -502,7 +503,9 @@ def test_the_environment_check_notices_a_screen_it_cannot_see(monkeypatch, capsy
     spec.loader.exec_module(module)
 
     class _Session:
-        monitors = [{"left": 0, "top": 0, "width": 0, "height": 0}]
+        monitors: ClassVar[list[dict[str, int]]] = [
+            {"left": 0, "top": 0, "width": 0, "height": 0}
+        ]
         width = 0
         height = 0
 
