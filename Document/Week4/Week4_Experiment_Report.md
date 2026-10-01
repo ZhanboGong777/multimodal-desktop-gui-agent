@@ -111,9 +111,9 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **573 passed**, ruff clean |
+| MacBook Air M2 | **574 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 273: 215 in the
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 274: 216 in the
 twelve files below, and 58 spread across the other suites -
 `test_control_safety.py` 15, `test_model_mock.py` 14, `test_ocr.py` 7 (five of them
 the Windows-only OCR workarounds), `test_config.py` 7 (a new file),
@@ -214,7 +214,7 @@ behaviour needed no change: blocked, nothing dispatched, exit 2, no traceback.
 | `test_week4_cases.py` | 12 cases: the invariants the five case definitions must hold - a machine-checkable rule, a declared precondition, a distinctive marker, a copy handed back by `get_case`, and the fresh marker a send-message run is given |
 | `test_week4_demo.py` | 3 cases: the runnable demonstration, run - it completes with four dispatched actions and `verification: passed`, leaves the records a finished run leaves, and fails on purpose when asked |
 | `test_week4_warmup.py` | 6 cases: the warmup 13.4 asks for and nothing provided - it probes text and then a real screenshot through the project's client, records cold/warm state, memory, per-request time, the classifier's verdict and the configured retries, and writes the record the operator keeps |
-| `test_week4_evidence.py` | 14 cases: what the evidence collector copies, what it refuses to copy, which run `--latest` picks, and its error paths |
+| `test_week4_evidence.py` | 15 cases: what the evidence collector copies, what it refuses to copy, which run `--latest` picks, and its error paths |
 
 ### The offline closed loop
 
@@ -962,6 +962,22 @@ belongs to no run at all - in `outputs/week4/warmup/`, so the output tree reads 
 runs and nothing else. The evidence collector still copies text only: a screenshot
 is a picture of the whole desktop, and that is what the frames directory is for.
 
+**The template the reviewer fills in described an evidence bundle from two rounds
+ago.** It said the collector copies "the two text records - `task_summary.json` and
+`steps.jsonl`", while the collector had been copying four for two rounds. The two
+additions - the configuration the frames were produced with, and the warmup that
+preceded the run - arrived in the repository unannounced, so a reviewer reading the
+bundle would have found two files the instructions did not account for and no
+reason to open either. It also lacked the warmup command, which 13.4.1 wants run
+before any task, so the first row's timing would have included a cold start.
+
+The list is asserted against the collector's own now, so a fifth record cannot be
+added quietly either. This is the third document to fall out of step with the
+artefacts in as many rounds - the usage guide's run-directory listing and its
+redaction paragraph were the others - and all three were found by reading the
+document against the files a run actually produces rather than against the code
+that writes them.
+
 ## 8. Deliverables
 
 - `src/gui_agent/runtime/` - the run layer (8 modules).
@@ -973,7 +989,7 @@ is a picture of the whole desktop, and that is what the frames directory is for.
   `Document/Week4/evidence/`, so a run id in the test report resolves inside the
   repository rather than only on the machine that produced it.
 - `configs/week4.yaml` - Week 4 limits, with `ExecutionConfig` added to `config.py`.
-- 273 new tests.
+- 274 new tests.
 - `Document/Week4/Week4_Usage.md` - flags, the safety model, the record layout.
 - `Document/Week4/Week4_Troubleshooting.md` - forty-two symptoms with what to check
   and what the code actually does about each.

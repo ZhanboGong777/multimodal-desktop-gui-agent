@@ -230,3 +230,20 @@ def test_the_command_line_reports_nothing_to_collect(tmp_path: Path) -> None:
 
     assert result.returncode == 2
     assert "no T04 session" in result.stderr
+
+
+def test_the_test_report_names_every_record_the_collector_copies() -> None:
+    """A record the template does not name is one the reviewer will not look for.
+
+    The template told the reviewer the collector copies "the two text records" for
+    two rounds after it had started copying four, so the two newest - the config
+    the frames were produced with, and the warmup that preceded the run - arrived
+    in the repository unannounced. Asserting against the collector's own list means
+    a fifth record cannot be added quietly either.
+    """
+    report = (
+        REPO_ROOT / "Document" / "Week4" / "Week4_Basic_Task_Test_Report.md"
+    ).read_text(encoding="utf-8")
+
+    for name in evidence.RECORDS:
+        assert name in report, f"the test report never mentions {name}"

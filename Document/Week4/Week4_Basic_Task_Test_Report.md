@@ -11,6 +11,13 @@ export GUI_AGENT_API_KEY=ollama
 export GUI_AGENT_BASE_URL=http://<windows-host>:11434/v1
 export OLLAMA_CONTEXT_LENGTH=16384        # before the server starts
 
+# Warm the model first, and separately. The first request a cold server sees costs
+# seconds to a minute, and a task that pays it records a model load as its own
+# planning time - the first number in the table would be the one nobody can read.
+python scripts/week4_warmup.py \
+    --provider openai_compatible --model qwen2.5vl:7b \
+    --json outputs/week4/warmup.json --repeat 2
+
 python scripts/week4_agent_cli.py --case T01 \
     --provider openai_compatible --model qwen2.5vl:7b --execute
 ```
@@ -22,10 +29,12 @@ python scripts/week4_collect_evidence.py --latest T01
 ```
 
 `outputs/` is not tracked, so a run id on its own resolves to nothing on any other
-machine. The collector copies the two text records - `task_summary.json` and
-`steps.jsonl` - into `Document/Week4/evidence/<run id>/`, and deliberately leaves
-the screenshots and per-frame observations behind: they are a picture of the whole
-desktop.
+machine. The collector copies the text records into
+`Document/Week4/evidence/<run id>/`: `task_summary.json` (the verdict and timings),
+`steps.jsonl` (one line per step), `run_config.json` (the settings the frames were
+produced with) and `warmup.json` when the run has one. It deliberately leaves the
+screenshots and the per-frame observation files behind - they are a picture of the
+whole desktop, and on-screen text is in them verbatim.
 
 `status=succeeded` **and** `execute=true` are both required before a task counts as
 a real success.
