@@ -16,7 +16,7 @@ from gui_agent.planning.schemas import PlanStep, TaskPlan
 from gui_agent.recording import RunSession
 from gui_agent.runtime.action_adapter import ActionAdapter
 from gui_agent.runtime.recorder import TaskRecorder
-from gui_agent.runtime.runner import TaskRunner
+from gui_agent.runtime.runner import TaskRunner, explain_model_failure
 from gui_agent.runtime.schemas import (
     ElementRef,
     ExecutionOptions,
@@ -446,3 +446,125 @@ def test_a_dry_run_never_counts_down_or_asks(tmp_path: Path) -> None:
     assert asked == []
     assert counted == []
     assert result.status == "dry_run_completed"
+
+
+def test_a_context_overflow_failure_names_the_deployment_fix() -> None:
+    """The Windows review hit this verbatim: `400 ... exceeds the available
+    context size (4096 tokens)` for a 7517-token request.
+
+    The provider names the numbers but not the remedy, and the remedy is a server
+    setting, not something the code can change.
+    """
+    message = (
+        "ModelError: BadRequestError: Error code: 400 - request (7517 tokens) "
+        "exceeds the available context size (4096 tokens)"
+    )
+    explained = explain_model_failure(message)
+
+    assert message in explained
+    assert "OLLAMA_CONTEXT_LENGTH=16384" in explained
+
+
+def test_a_failure_that_is_not_a_context_overflow_is_left_alone() -> None:
+    """The hint must never be attached to an unrelated failure."""
+    assert explain_model_failure("APIConnectionError: Connection error.") == (
+        "APIConnectionError: Connection error."
+    )
+
+
+# ───────── a run may not be credited with a state it did not create ─────────
+def _void_task() -> TaskSpec:
+    """A task with T05's shape: the rule asks only that a marker be gone."""
+    return TaskSpec(
+        case_id="T05",
+        instruction="close the week4 test application",
+        preconditions=["the week4 test application is open and focused"],
+        success_rules=["the application's window is gone"],
+        forbid_text=["WEEK4-OPEN-FILE-OK"],
+    )
+
+
+def _void_case(tmp_path: Path):
+    observer = FakeObserver([_frame("obs-0001", ("Desktop", "Other window"))])
+    executor = FakeExecutor()
+    planner = FakePlanner(
+        _plan(
+            PlanStep(
+                step_id="s1", description="click the close box", action_type="click",
+                target_text="Desktop",
+            )
+        )
+    )
+    runner, _recorder = _runner(tmp_path, observer, planner, executor)
+    return runner, executor, planner
+
+
+def test_a_real_run_is_blocked_when_the_goal_already_holds(tmp_path: Path) -> None:
+    """T05's rule is satisfied by an untouched screen, and so is T01's.
+
+    T05 only asks that the marker be gone, so a window that was never opened - or
+    was minimised - passes it; T01 looks for text any open browser already carries.
+    Without this guard a run that clicked and missed would still be reported as
+    succeeded, because the state it claims to have created was already there.
+    """
+    runner, executor, planner = _void_case(tmp_path)
+
+    result = runner.run(_void_task(), ExecutionOptions(execute=True, confirm=False))
+
+    assert result.status == "blocked"
+    assert executor.actions == [], "nothing may be dispatched once the run is void"
+    assert planner.contexts == [], "there is no reason to spend a model call either"
+    assert "already holds" in result.notes[0]
+
+
+def test_a_dry_run_still_proceeds_when_the_goal_already_holds(tmp_path: Path) -> None:
+    """A dry run dispatches nothing, so there is no state to credit it with.
+
+    Its verdict is forced to inconclusive anyway, which means the guard would only
+    stop the pipeline check the dry run exists to perform.
+    """
+    runner, _executor, _planner = _void_case(tmp_path)
+
+    result = runner.run(_void_task(), ExecutionOptions(execute=False))
+
+    assert result.status == "dry_run_completed"
+    assert result.verification is not None
+    assert result.verification.outcome == "inconclusive"
+
+
+def test_the_precondition_guard_can_be_switched_off(tmp_path: Path) -> None:
+    """`require_preconditions=False` restores the unguarded behaviour.
+
+    Recorded as a test so the risk is explicit: with the guard off this run reports
+    ``succeeded`` while the only screen state it ever saw was the one it started
+    with.
+    """
+    runner, executor, _planner = _void_case(tmp_path)
+
+    result = runner.run(
+        _void_task(),
+        ExecutionOptions(execute=True, confirm=False, require_preconditions=False),
+    )
+
+    assert result.status == "succeeded"
+    assert len(executor.actions) == 1
+
+
+def test_a_task_that_declares_no_preconditions_is_not_guarded(tmp_path: Path) -> None:
+    """Declaring preconditions is how a task says it assumes a starting state.
+
+    A task that declares none makes no such assumption, so its run is not refused
+    even when its rule happens to hold already.
+    """
+    runner, executor, _planner = _void_case(tmp_path)
+    task = TaskSpec(
+        case_id="T99",
+        instruction="x",
+        success_rules=["r"],
+        forbid_text=["WEEK4-OPEN-FILE-OK"],
+    )
+
+    result = runner.run(task, ExecutionOptions(execute=True, confirm=False))
+
+    assert result.status == "succeeded"
+    assert len(executor.actions) == 1

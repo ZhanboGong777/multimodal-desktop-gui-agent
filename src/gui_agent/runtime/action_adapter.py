@@ -14,13 +14,15 @@ Two rules carry most of the weight:
 
 from __future__ import annotations
 
+import re
 import sys
+from collections.abc import Sequence
 from typing import Any
 
 from ..coordinates import is_inside_screen, screenshot_to_control
 from ..perception.grounding import find_text
 from ..planning import PlanStep
-from ..schemas import DesktopAction, Point
+from ..schemas import BoundingBox, DesktopAction, Point
 from .schemas import ElementRef, ObservationSnapshot, ResolvedAction
 
 
@@ -95,6 +97,77 @@ _DEFAULT_MODIFIERS = _MODIFIER_ALIASES["win32"]
 
 #: Actions whose target is a point on screen.
 _POINT_ACTIONS = frozenset({"move", "click", "double_click", "right_click", "scroll"})
+
+_TOKEN = re.compile(r"[0-9a-z_]+")
+
+#: A one-word query is not enough to anchor a run ("to" appears everywhere), and
+#: the run search exists for targets that span more than one element.
+_MIN_RUN_TOKENS = 2
+
+
+def _tokens(text: str) -> list[str]:
+    """Word tokens of a label, so 'Summary (required)' -> ['summary', 'required']."""
+    return _TOKEN.findall(text.casefold())
+
+
+def _reading_order(elements: Sequence[ElementRef]) -> list[ElementRef]:
+    """Top to bottom, then left to right.
+
+    The observation stores elements ranked by confidence, which is the right order
+    for the prompt's truncation cap and the wrong one for "next to each other".
+    """
+    return sorted(elements, key=lambda item: (item.bounding_box.top, item.bounding_box.left))
+
+
+def _join_run(run: Sequence[ElementRef]) -> ElementRef:
+    """Present a run of elements as the single target the step asked for."""
+    box = BoundingBox(
+        left=min(item.bounding_box.left for item in run),
+        top=min(item.bounding_box.top for item in run),
+        right=max(item.bounding_box.right for item in run),
+        bottom=max(item.bounding_box.bottom for item in run),
+    )
+    return ElementRef(
+        element_id="+".join(item.element_id for item in run),
+        text=" ".join(item.text for item in run),
+        bounding_box=box,
+        center=box.center,
+        confidence=min(item.confidence for item in run),
+        source=run[0].source,
+    )
+
+
+def _match_adjacent_runs(
+    elements: Sequence[ElementRef], query: str, min_confidence: float
+) -> list[list[ElementRef]]:
+    """Find runs of neighbouring elements that together spell out ``query``.
+
+    A word-level OCR backend splits "Summary (required)" into two elements, and a
+    plan may also name two adjacent labels as one target. Both are invisible to an
+    exact-text search, so the query's tokens are matched against a run of
+    consecutive elements. The run has to consume the query exactly - no partial or
+    loose matches - and every match is returned so the caller can still refuse an
+    ambiguous one.
+    """
+    wanted = _tokens(query)
+    if len(wanted) < _MIN_RUN_TOKENS:
+        return []
+    ordered = [
+        item
+        for item in _reading_order(elements)
+        if item.text.strip() and item.confidence >= min_confidence
+    ]
+    runs: list[list[ElementRef]] = []
+    for start in range(len(ordered)):
+        collected: list[str] = []
+        for end in range(start, len(ordered)):
+            collected.extend(_tokens(ordered[end].text))
+            if len(collected) > len(wanted):
+                break
+            if collected == wanted:
+                runs.append(list(ordered[start : end + 1]))
+                break
+    return runs
 
 
 def platform_name() -> str:
@@ -193,9 +266,27 @@ class ActionAdapter:
                 note += f" (re-bound from {rebound_from} in an earlier frame)"
             return ref.center, ref, note
         if not matches:
-            raise ActionResolutionError(
-                f"no element matches {query!r} in {observation.observation_id}"
-            )
+            # A word-level backend, or a plan that names two adjacent labels as one
+            # target, reaches here with a query that is genuinely on screen but is
+            # not any single element's text.
+            runs = _match_adjacent_runs(observation.elements, query, self.min_confidence)
+            if not runs:
+                raise ActionResolutionError(
+                    f"no element matches {query!r} in {observation.observation_id}"
+                )
+            if len(runs) > 1:
+                listed = ", ".join("+".join(item.element_id for item in run) for run in runs[:5])
+                raise ActionResolutionError(
+                    f"{len(runs)} element runs match {query!r} ({listed}); "
+                    "refusing to pick one arbitrarily"
+                )
+            ref = _join_run(runs[0])
+            note = f"text {query!r} -> {ref.element_id}"
+            if len(runs[0]) > 1:
+                note += f" (joined from {len(runs[0])} adjacent elements)"
+            if rebound_from:
+                note += f" (re-bound from {rebound_from} in an earlier frame)"
+            return ref.center, ref, note
         listed = ", ".join(f"{m.element.element_id}:{m.element.text!r}" for m in matches[:5])
         raise ActionResolutionError(
             f"{len(matches)} elements match {query!r} ({listed}); refusing to pick one arbitrarily"

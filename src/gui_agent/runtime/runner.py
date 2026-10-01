@@ -16,6 +16,7 @@ Design decisions worth stating, because each rules out an easier wrong version:
 
 from __future__ import annotations
 
+import re
 import time
 from collections.abc import Callable
 from typing import Any, Protocol
@@ -48,6 +49,30 @@ class Planner(Protocol):
         image_path: str | None = None,
         task_id: str = ...,
     ) -> PlanResult: ...
+
+
+#: Providers each describe an over-long prompt in their own words; there is no
+#: shared error code for it. Matching on the wording only ever *adds* advice to a
+#: failure that has already happened, so a miss costs nothing.
+_CONTEXT_OVERFLOW = re.compile(
+    r"context (?:size|length|window)|context_length_exceeded|maximum context", re.IGNORECASE
+)
+
+
+def explain_model_failure(message: str) -> str:
+    """Append the deployment fix when a failure looks like a context overflow.
+
+    A full-screen screenshot plus the element list measured 7 517 tokens on a
+    2560x1600 display, and Ollama serves 4096 by default. The provider's error
+    names the numbers but not what to do about them.
+    """
+    if not _CONTEXT_OVERFLOW.search(message):
+        return message
+    return (
+        f"{message}\n  hint: the screenshot plus the element list did not fit the "
+        "server's context window. Raise it before retrying "
+        "(Ollama: OLLAMA_CONTEXT_LENGTH=16384), or lower agent.max_elements."
+    )
 
 
 class RunnerError(RuntimeError):
@@ -100,6 +125,29 @@ class TaskRunner:
             return self._blocked(task, options, f"initial observation failed: {exc}")
         self.recorder.save_observation(initial)
 
+        # 1b. A real run must not start from a screen where the goal already holds.
+        # T01 and T05 are both satisfiable by doing nothing: a browser that was
+        # already open carries the text T01 looks for, and T05's rule only asks that
+        # the marker be gone, so a window that was never opened - or was minimised -
+        # satisfies it. A run cannot be credited with a state it did not create.
+        #
+        # A dry run is exempt on purpose: it dispatches nothing and its verdict is
+        # already forced to inconclusive, so the guard would only stop the pipeline
+        # check it exists to perform.
+        #
+        # Only a task that declares preconditions is checked. Declaring them is how
+        # the spec says "this task assumes a starting state"; a task that declares
+        # none is making no such assumption.
+        if options.execute and options.require_preconditions and task.preconditions:
+            precondition = self.verifier.check_task(task, initial)
+            if precondition.outcome == "passed":
+                return self._blocked(
+                    task,
+                    options,
+                    "the success rule already holds on the untouched screen "
+                    f"({precondition.detail}); this run cannot be credited with it",
+                )
+
         # 2. plan from that observation
         plan_result = self.planner.plan(
             task.instruction,
@@ -109,7 +157,9 @@ class TaskRunner:
         )
         if not plan_result.ok or plan_result.plan is None:
             return self._blocked(
-                task, options, f"planning failed: {plan_result.error or 'no plan produced'}"
+                task,
+                options,
+                f"planning failed: {explain_model_failure(plan_result.error or 'no plan produced')}",
             )
         plan = plan_result.plan
         notes.append(f"planned {len(plan.steps)} steps from {initial.observation_id}")

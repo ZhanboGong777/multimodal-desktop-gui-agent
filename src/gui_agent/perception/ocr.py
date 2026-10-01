@@ -14,7 +14,7 @@ import time
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, NamedTuple
 
 import numpy as np
 from PIL import Image
@@ -123,6 +123,102 @@ def box_to_bounds(box: Sequence[Sequence[float]]) -> tuple[int, int, int, int]:
     return left, top, max(1, right - left), max(1, bottom - top)
 
 
+#: Tesseract reports one row per *word*. A vision model reading the same
+#: screenshot describes whole labels instead ("Fetch origin", "Summary
+#: (required)"), so the words are merged back into the lines a reader would see.
+#: The ratio is the second half of that rule: a gap wider than this fraction of
+#: the line height means Tesseract put two separate controls on one text row, and
+#: merging those would aim the click at the empty space between them.
+LINE_GAP_RATIO = 1.2
+
+
+class WordRow(NamedTuple):
+    """One Tesseract word, tagged with the line Tesseract assigned it to."""
+
+    line_key: object
+    text: str
+    left: int
+    top: int
+    width: int
+    height: int
+    confidence: float
+
+
+class TextLine(NamedTuple):
+    """A whole line of text, as a reader - or a vision model - would see it."""
+
+    text: str
+    left: int
+    top: int
+    width: int
+    height: int
+    confidence: float
+
+
+def tesseract_line_key(data: dict[str, Any], index: int) -> object:
+    """Tesseract's own line assignment for one word row.
+
+    When the columns are missing the key falls back to one unique value per row,
+    which degrades to the old one-element-per-word behaviour rather than merging
+    the whole screen into a single element.
+    """
+    try:
+        return (
+            int(data["block_num"][index]),
+            int(data["par_num"][index]),
+            int(data["line_num"][index]),
+        )
+    except (KeyError, IndexError, TypeError, ValueError):
+        return ("word", index)
+
+
+def merge_words_into_lines(
+    rows: Sequence[WordRow], *, gap_ratio: float = LINE_GAP_RATIO
+) -> list[TextLine]:
+    """Merge consecutive word rows back into lines.
+
+    Two rows are merged only when Tesseract put them on the same line *and* they
+    sit closer together than ``gap_ratio`` times the line height. Without the
+    second rule a menu bar reads as one element ("File  Edit  View") whose centre
+    is a patch of empty pixels between two menus.
+    """
+    lines: list[TextLine] = []
+    current: list[WordRow] = []
+
+    def flush() -> None:
+        if not current:
+            return
+        left = min(row.left for row in current)
+        top = min(row.top for row in current)
+        right = max(row.left + row.width for row in current)
+        bottom = max(row.top + row.height for row in current)
+        lines.append(
+            TextLine(
+                text=" ".join(row.text for row in current),
+                left=left,
+                top=top,
+                # No clamping: a degenerate box has to reach make_element intact,
+                # which is what drops it.
+                width=right - left,
+                height=bottom - top,
+                # The weakest word sets the line's confidence: a line is not more
+                # trustworthy than the worst piece of it.
+                confidence=min(row.confidence for row in current),
+            )
+        )
+        current.clear()
+
+    for row in rows:
+        if current:
+            previous = current[-1]
+            gap = row.left - (previous.left + previous.width)
+            if row.line_key != previous.line_key or gap > gap_ratio * max(previous.height, 1):
+                flush()
+        current.append(row)
+    flush()
+    return lines
+
+
 class OCREngine(ABC):
     """Common interface for every OCR backend."""
 
@@ -186,7 +282,7 @@ class TesseractOCREngine(OCREngine):
         except Exception as exc:
             raise OcrError(f"Tesseract failed: {exc}") from exc
 
-        elements: list[UIElement] = []
+        rows: list[WordRow] = []
         texts = data.get("text", [])
         for index in range(len(texts)):
             text = clean_text(texts[index])
@@ -201,13 +297,29 @@ class TesseractOCREngine(OCREngine):
             confidence = min(1.0, raw_confidence / 100.0)
             if confidence < threshold:
                 continue
+            try:
+                left = int(data["left"][index])
+                top = int(data["top"][index])
+                width = int(data["width"][index])
+                height = int(data["height"][index])
+            except (KeyError, IndexError, TypeError, ValueError):
+                continue
+            rows.append(
+                WordRow(
+                    line_key=tesseract_line_key(data, index),
+                    text=text,
+                    left=left,
+                    top=top,
+                    width=width,
+                    height=height,
+                    confidence=confidence,
+                )
+            )
+
+        elements: list[UIElement] = []
+        for line in merge_words_into_lines(rows):
             element = make_element(
-                text,
-                int(data["left"][index]),
-                int(data["top"][index]),
-                int(data["width"][index]),
-                int(data["height"][index]),
-                confidence,
+                line.text, line.left, line.top, line.width, line.height, line.confidence
             )
             if element is not None:
                 elements.append(element)

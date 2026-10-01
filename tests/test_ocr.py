@@ -270,3 +270,67 @@ def test_paddle_v3_parser_handles_missing_polygons() -> None:
     # rec_polys explicitly None and dt_polys absent.
     assert engine._parse([{"rec_texts": np.array(["x"]), "rec_polys": None}], 0.5) == []
     assert engine._parse([{"rec_texts": ["x"]}], 0.5) == []
+
+
+def test_tesseract_words_are_merged_back_into_lines(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The backend must hand back labels, not words.
+
+    A vision model reading the screenshot describes "Summary (required)"; a
+    word-level element list can never match that, which is what stopped every
+    Week 4 target from resolving on the Windows review machine.
+    """
+    import pytesseract
+
+    payload = {
+        "text": ["Fetch", "origin", "Summary", "(required)", "File", "Edit"],
+        "conf": ["95", "93", "90", "92", "97", "96"],
+        "left": [10, 70, 10, 120, 400, 560],
+        "top": [10, 10, 40, 40, 70, 70],
+        "width": [50, 60, 100, 80, 40, 40],
+        "height": [20, 20, 20, 20, 20, 20],
+        "block_num": [1, 1, 1, 1, 2, 2],
+        "par_num": [1, 1, 1, 1, 1, 1],
+        "line_num": [1, 1, 2, 2, 1, 1],
+    }
+    monkeypatch.setattr(pytesseract, "image_to_data", lambda *a, **k: payload)
+
+    output = TesseractOCREngine(default_min_confidence=0.5).recognize(
+        Image.new("RGB", (700, 100), "white")
+    )
+
+    assert [element.text for element in output.elements] == [
+        "Fetch origin",
+        "Summary (required)",
+        "File",
+        "Edit",
+    ]
+    merged = output.elements[0]
+    assert (merged.bounding_box.left, merged.bounding_box.right) == (10, 130)
+    # The weakest word sets the line's confidence.
+    assert merged.confidence == pytest.approx(0.93)
+
+
+def test_a_wide_gap_on_one_text_row_stays_two_controls(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Tesseract puts unrelated controls on one text row; merging them would aim
+    the click at the empty space between them."""
+    import pytesseract
+
+    payload = {
+        "text": ["File", "Edit"],
+        "conf": ["97", "96"],
+        "left": [10, 300],
+        "top": [10, 10],
+        "width": [40, 40],
+        "height": [20, 20],
+        "block_num": [1, 1],
+        "par_num": [1, 1],
+        "line_num": [1, 1],
+    }
+    monkeypatch.setattr(pytesseract, "image_to_data", lambda *a, **k: payload)
+
+    output = TesseractOCREngine(default_min_confidence=0.5).recognize(
+        Image.new("RGB", (400, 40), "white")
+    )
+    assert [element.text for element in output.elements] == ["File", "Edit"]

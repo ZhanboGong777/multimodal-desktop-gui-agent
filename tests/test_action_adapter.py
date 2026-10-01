@@ -14,7 +14,7 @@ import pytest
 from gui_agent.planning.schemas import PlanStep
 from gui_agent.runtime.action_adapter import ActionAdapter, ActionResolutionError
 from gui_agent.runtime.schemas import ElementRef, ObservationSnapshot
-from gui_agent.schemas import BoundingBox, ScreenInfo
+from gui_agent.schemas import BoundingBox, Point, ScreenInfo
 
 
 def _snapshot(
@@ -180,3 +180,80 @@ def test_a_stale_id_without_a_text_target_is_still_refused(adapter: ActionAdapte
     step = _step(arguments={"element_id": "obs-0001-e001"})
     with pytest.raises(ActionResolutionError, match="names no text target"):
         adapter.resolve(step, _snapshot("obs-0002"))
+
+
+def _word_snapshot(
+    observation_id: str = "obs-0002",
+    words: tuple[tuple[str, int, int], ...] = (),
+) -> ObservationSnapshot:
+    """A frame whose elements are word-sized, the way a word-level backend emits them."""
+    elements = [
+        ElementRef(
+            element_id=f"{observation_id}-e{index:03d}",
+            text=text,
+            bounding_box=BoundingBox(left=left, top=top, right=left + 60, bottom=top + 20),
+            center=Point(x=left + 30, y=top + 10),
+            confidence=0.9,
+        )
+        for index, (text, left, top) in enumerate(words)
+    ]
+    return ObservationSnapshot(
+        observation_id=observation_id,
+        captured_at=datetime.now(UTC),
+        screen_info=ScreenInfo(
+            screenshot_width=1470, screenshot_height=956, control_width=1470, control_height=956
+        ),
+        elements=elements,
+    )
+
+
+def test_a_target_split_across_word_elements_is_joined(adapter: ActionAdapter) -> None:
+    """Word-level OCR never produces the multi-word label a model asks for.
+
+    "Summary (required)" arrives as two elements, so an exact-text search finds
+    nothing even though the label is plainly on screen. This is what stopped every
+    real target from resolving on the Windows review machine.
+    """
+    snapshot = _word_snapshot(words=(("Summary", 10, 40), ("(required)", 80, 40)))
+    resolved = adapter.resolve(_step(target_text="Summary (required)"), snapshot)
+    assert resolved.element_id == "obs-0002-e000+obs-0002-e001"
+    assert "joined from 2 adjacent elements" in resolved.note
+
+
+def test_the_joined_target_is_centred_on_the_whole_label(adapter: ActionAdapter) -> None:
+    snapshot = _word_snapshot(words=(("Current", 10, 10), ("repository", 80, 10)))
+    resolved = adapter.resolve(_step(target_text="Current repository"), snapshot)
+    # Union box is (10,10)-(140,30), so the click lands at its centre.
+    assert (resolved.screenshot_point.x, resolved.screenshot_point.y) == (75, 20)
+
+
+def test_a_stale_id_split_across_words_is_rebound_to_the_joined_target(
+    adapter: ActionAdapter,
+) -> None:
+    """Both repairs have to work at once: planning ids go stale by design."""
+    snapshot = _word_snapshot(words=(("Fetch", 10, 10), ("origin", 80, 10)))
+    step = _step(arguments={"element_id": "obs-0001-e003"}, target_text="Fetch origin")
+    resolved = adapter.resolve(step, snapshot)
+    assert resolved.element_id == "obs-0002-e000+obs-0002-e001"
+    assert "re-bound from obs-0001-e003" in resolved.note
+
+
+def test_two_matching_runs_are_refused(adapter: ActionAdapter) -> None:
+    """The same label twice on screen is an ambiguity, not a reason to take the first."""
+    snapshot = _word_snapshot(
+        words=(
+            ("Current", 10, 10),
+            ("repository", 80, 10),
+            ("Current", 10, 100),
+            ("repository", 80, 100),
+        )
+    )
+    with pytest.raises(ActionResolutionError, match="element runs match"):
+        adapter.resolve(_step(target_text="Current repository"), snapshot)
+
+
+def test_a_run_must_consume_the_whole_query(adapter: ActionAdapter) -> None:
+    """A run that only covers part of the query is not a match."""
+    snapshot = _word_snapshot(words=(("Current", 10, 10), ("repository", 80, 10)))
+    with pytest.raises(ActionResolutionError, match="no element matches"):
+        adapter.resolve(_step(target_text="Current repository main"), snapshot)

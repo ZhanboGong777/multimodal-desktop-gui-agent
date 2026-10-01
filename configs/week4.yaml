@@ -3,6 +3,12 @@
 # This file does not change Week 2 or Week 3 defaults; it adds the execution
 # limits and the observation settings the closed loop needs. Load it with
 # `--config configs/week4.yaml`.
+#
+# Before a real model run, check the server's context window. A full-screen
+# screenshot plus the element list measured 7 517 tokens on a 2560x1600 display,
+# and Ollama serves 4096 by default, which fails with HTTP 400. Raise it, e.g.
+#   OLLAMA_CONTEXT_LENGTH=16384
+# before starting the server. The Mock provider is unaffected.
 
 runtime:
   device: auto
@@ -24,9 +30,11 @@ perception:
     otsu_threshold: false
 
   ocr:
-    # Tesseract on the development machine: measured at 241 ms per frame against
-    # PaddleOCR's 5 525 ms on the same 1470x956 screen. The GPU node keeps
-    # PaddleOCR, where it is the faster of the two.
+    # Both backends now return whole labels, so this is a per-machine speed
+    # choice rather than a correctness one. Mac (1470x956): Tesseract 241 ms
+    # against PaddleOCR's 5 525 ms. Windows review machine (2560x1600) is much
+    # closer - 738 ms against 982 ms - and configs/default.yaml selects PaddleOCR
+    # if you prefer it there. Measured with the engine instance reused.
     engine: tesseract
     fallback_engine: tesseract
     languages:

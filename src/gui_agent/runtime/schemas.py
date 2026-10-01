@@ -132,6 +132,12 @@ class ExecutionOptions(SchemaModel):
     verification_timeout_seconds: float = Field(default=10.0, ge=0.0)
     verification_poll_interval_seconds: float = Field(default=0.5, ge=0.0)
     confirm: bool = True
+    #: When True, a real run checks the screen before planning and refuses to start
+    #: when the success rule already holds there. The prose preconditions on
+    #: TaskSpec say the same thing in words; this is the machine-checkable half, and
+    #: it is what stops T01 or T05 being credited for a state that was already true.
+    #: Only tasks that declare preconditions are checked - declaring them is how a
+    #: task says it assumes a starting state. Dry runs are never checked.
     require_preconditions: bool = True
 
 

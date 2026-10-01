@@ -149,3 +149,53 @@ def test_the_mock_records_what_it_was_given() -> None:
         "x", context={"visible_text": "obs-0001-e000  'Browser'  conf=0.9  center=(1,2)"}
     )
     assert client.calls[-1]["elements"] == [("obs-0001-e000", "Browser")]
+
+
+def test_the_mock_avoids_a_target_the_adapter_would_call_ambiguous() -> None:
+    """A text contained in another element cannot resolve to a single target.
+
+    Reproduced from the Windows review machine: the mock picked a word-level
+    element ("the") that also occurred inside five other elements, so the adapter
+    refused with `6 elements match 'the'` and the dry run stopped for a reason that
+    had nothing to do with the pipeline.
+    """
+    client = MockModelClient()
+    response = client.generate_multimodal(
+        "the search",
+        context={
+            "visible_text": (
+                "obs-0002-e000  'the'  conf=0.91  center=(1,1)\n"
+                "obs-0002-e001  'Other'  conf=0.93  center=(2,2)\n"
+                "obs-0002-e002  'the search box'  conf=0.94  center=(3,3)"
+            )
+        },
+    )
+    step = json.loads(response.content)["steps"][0]
+
+    # The adapter looks a target up with a substring match, so the chosen text has
+    # to occur in exactly one element. Which unambiguous element it lands on is the
+    # mock's business; not creating an ambiguity is the point.
+    chosen = step["target_text"]
+    texts = ["the", "Other", "the search box"]
+    assert sum(1 for text in texts if chosen in text) == 1
+    assert step["arguments"]["element_id"] != "obs-0002-e000"
+
+
+def test_the_mock_still_aims_somewhere_when_every_element_overlaps() -> None:
+    """With nothing unambiguous the first element is as good as any other.
+
+    A dry run that stops on a genuinely ambiguous screen is the correct outcome and
+    the adapter's own tests cover it. What must not happen is a crash.
+    """
+    client = MockModelClient()
+    response = client.generate_multimodal(
+        "Open the browser",
+        context={
+            "visible_text": (
+                "obs-0002-e000  'Open'  conf=0.91  center=(1,1)\n"
+                "obs-0002-e001  'Open the browser'  conf=0.93  center=(2,2)"
+            )
+        },
+    )
+    step = json.loads(response.content)["steps"][0]
+    assert step["arguments"]["element_id"].startswith("obs-0002-e")

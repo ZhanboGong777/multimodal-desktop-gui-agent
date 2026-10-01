@@ -32,6 +32,24 @@ _SPLIT = re.compile(r"\s*(?:,|;|then|and then|然后|接着|再)\s*", re.IGNOREC
 _ELEMENT_LINE = re.compile(r"(obs-\d+-e\d+)\s+'([^']*)'")
 
 
+def _unambiguous(elements: Sequence[tuple[str, str]]) -> list[tuple[str, str]]:
+    """The elements whose text is contained in no other element's text.
+
+    The adapter looks a target up with a substring match, so "main" is not a
+    unique target when "Commit to main" is also on screen. When nothing is
+    unambiguous the original list is returned: a dry run that stops on a genuinely
+    ambiguous screen is the correct outcome, and the adapter's own tests cover it.
+    """
+    lowered = [(element_id, text.casefold()) for element_id, text in elements]
+    unique = [
+        (element_id, text)
+        for element_id, text in elements
+        if text.strip()
+        and sum(1 for _, other in lowered if text.casefold() in other) == 1
+    ]
+    return unique or list(elements)
+
+
 class MockModelClient(ModelClient):
     """Deterministic, network-free, free-of-charge."""
 
@@ -102,18 +120,26 @@ class MockModelClient(ModelClient):
     def _pick_target(
         self, clause: str, elements: Sequence[tuple[str, str]]
     ) -> tuple[str, str] | None:
-        """The element this clause is most likely about, or the first labelled one."""
+        """The element this clause is most likely about, or the first labelled one.
+
+        The text has to resolve uniquely later: the adapter refuses an ambiguous
+        target, so choosing a word like "the" - which also occurs inside half the
+        other elements - stops the run for a reason that has nothing to do with the
+        pipeline. Candidates are therefore narrowed to the elements whose text
+        occurs in no other element before anything is picked from them.
+        """
         if not elements:
             return None
         lowered = clause.casefold()
-        for element_id, text in elements:
+        candidates = _unambiguous(elements)
+        for element_id, text in candidates:
             if text.casefold() in lowered:
                 return element_id, text
         head = re.findall(r"[A-Za-z]{3,}", clause)
-        for element_id, text in elements:
+        for element_id, text in candidates:
             if any(word.casefold() in text.casefold() for word in head):
                 return element_id, text
-        return elements[0]
+        return candidates[0]
 
     def _plan_for(
         self,
