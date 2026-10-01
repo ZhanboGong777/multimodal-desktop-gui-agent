@@ -11,6 +11,7 @@ for a string that only this run could have produced does.
 
 from __future__ import annotations
 
+import sys
 from datetime import UTC, datetime
 
 from .schemas import TaskSpec
@@ -32,6 +33,17 @@ SAMPLE_DIRECTORY = {
     "darwin": "~/Desktop/week4_test",
     "win32": r"%USERPROFILE%\Desktop\week4_test",
 }
+
+
+def sample_directory(platform: str | None = None) -> str:
+    """Where the sample file lives on this machine.
+
+    The case definitions are read by the operator as much as by the code, so T03's
+    precondition names the actual folder rather than "the week4 test folder". The
+    constant was defined and read by nothing at all before this.
+    """
+    key = platform or ("darwin" if sys.platform == "darwin" else "win32")
+    return SAMPLE_DIRECTORY[key]
 
 
 def _cases() -> dict[str, TaskSpec]:
@@ -71,7 +83,7 @@ def _cases() -> dict[str, TaskSpec]:
             instruction=f"Open the file {SAMPLE_FILE} from the week4 test folder",
             target_app="text editor",
             preconditions=[
-                f"{SAMPLE_FILE} exists in the week4 test folder",
+                f"{SAMPLE_FILE} exists in {sample_directory()}",
                 "no file with the same name is open already",
             ],
             success_rules=[

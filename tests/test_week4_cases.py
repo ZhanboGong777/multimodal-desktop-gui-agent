@@ -18,6 +18,7 @@ from gui_agent.runtime.tasks import (
     get_case,
     get_case_for_run,
     new_message_marker,
+    sample_directory,
 )
 
 
@@ -119,3 +120,23 @@ def test_the_marker_carries_the_time_it_was_minted() -> None:
 
     assert marker.startswith("WEEK4_MESSAGE_CHECK_")
     assert "20261002" in marker
+
+
+def test_the_sample_directory_is_named_for_each_platform() -> None:
+    """The fold the operator has to create, not a description of it.
+
+    `SAMPLE_DIRECTORY` was defined and read by nothing, so the constant that knows
+    where the file goes never reached the precondition that tells the operator.
+    """
+    assert sample_directory("darwin") == "~/Desktop/week4_test"
+    assert sample_directory("win32") == r"%USERPROFILE%\Desktop\week4_test"
+
+
+def test_the_open_file_case_names_where_the_file_must_be() -> None:
+    """T03 cannot start without the file, so its precondition says where to put it."""
+    task = get_case("T03")
+    assert task is not None
+
+    first = task.preconditions[0]
+    assert SAMPLE_FILE in first
+    assert sample_directory() in first, first

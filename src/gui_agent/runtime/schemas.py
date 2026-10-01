@@ -68,10 +68,6 @@ class ObservationSnapshot(SchemaModel):
                 return item
         return None
 
-    @property
-    def texts(self) -> set[str]:
-        return {item.text.casefold() for item in self.elements if item.text}
-
 
 class ResolvedAction(SchemaModel):
     """A plan step turned into something the executor can run.

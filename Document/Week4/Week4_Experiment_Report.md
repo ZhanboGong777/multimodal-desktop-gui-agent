@@ -111,9 +111,9 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **493 passed**, ruff clean |
+| MacBook Air M2 | **495 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 193: 166 in the ten
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 195: 168 in the ten
 files below, 10 in `test_model_mock.py`, 7 in `test_config.py` for the
 configuration surface, 7 in `test_plan_parser.py` for the step-status vocabulary
 and the plan-ordering rules, 2 in `test_ocr.py` for the label-merging fix, and 1
@@ -130,7 +130,7 @@ in `test_model_config.py` for the retry policy.
 | `test_week4_cli.py` | 15 cases: argument errors, no `--yes`, dry-run default, summary always written, `--execute` refused without a terminal, the callback set an execute run hands over, `.env` loading, the flag/environment/YAML precedence, and the numeric limits |
 | `test_week4_integration.py` | 5 cases: the loop against a real OpenAI-compatible server over a real socket, which reads the element ids out of the prompt it receives |
 | `test_week4_prompts.py` | 12 cases: the prompt fits its budget, describes element targeting and every action's arguments, carries the platform, trims the element list by whole lines, and keeps markers verbatim |
-| `test_week4_cases.py` | 10 cases: the invariants the five case definitions must hold - a machine-checkable rule, a declared precondition, a distinctive marker, a copy handed back by `get_case`, and the fresh marker a send-message run is given |
+| `test_week4_cases.py` | 12 cases: the invariants the five case definitions must hold - a machine-checkable rule, a declared precondition, a distinctive marker, a copy handed back by `get_case`, and the fresh marker a send-message run is given |
 | `test_week4_evidence.py` | 12 cases: what the evidence collector copies, what it refuses to copy, which run `--latest` picks, and its error paths |
 
 ### The offline closed loop
@@ -483,6 +483,16 @@ look at.
 The same pass covered a whole action type that had no success path under test
 (`drag` was only ever exercised by its error branches) and the provenance
 override that lets a checkout without git metadata record a commit.
+
+**A constant that knew where the sample file goes, and told nobody.**
+`SAMPLE_DIRECTORY` held the per-platform path for T03's test file and was read by
+nothing - not the code, not the tests, not a document. T03's precondition said "the
+week4 test folder", which is a description rather than an instruction: the operator
+still had to work out where to put the file. The precondition names the actual
+folder now, which is what the constant was for. A sweep for the same pattern across
+the runtime, planning and models packages found no others; the four schema fields
+that are written but never read are records - they go into the JSON evidence for a
+person to read, which is what a record is for.
 
 **All five exit codes are now verified end to end.** The table in 12.2 had only
 ever been read, not exercised. Driving the CLI against stand-in endpoints covered

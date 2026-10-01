@@ -40,7 +40,7 @@ failure is two attempts, and only the runs whose summary reads `succeeded` with
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | T01 | open the browser | desktop visible and launch entry uncovered; **no browser window open** | 0 | 0 | not run | automatic: `http` and `search` both on screen | from the confirmation gate to the final verdict (`execution_ms`); the summary also keeps `planning_ms`, `confirmation_ms` and the whole-run `elapsed_ms` | — |
 | T02 | search the web | a browser window is open and focused | 0 | 0 | not run | automatic: the query text is on screen | as above | — |
-| T03 | open a specified file | `week4_sample.txt` exists in the week4 test folder; no file of that name is open | 0 | 0 | not run | automatic: `WEEK4-OPEN-FILE-OK` on screen | as above | — |
+| T03 | open a specified file | `week4_sample.txt` exists in the week4 test folder (`~/Desktop/week4_test`, or `%USERPROFILE%\Desktop\week4_test`); no file of that name is open | 0 | 0 | not run | automatic: `WEEK4-OPEN-FILE-OK` on screen | as above | — |
 | T04 | send a message | the test conversation is open and holds no earlier message with **this run's** marker; the operator agreed a real message may be sent | 0 | 0 | not run | automatic: this run's marker on screen (the CLI prints it as `marker`) | as above | — |
 | T05 | close the application | `week4_sample.txt` is open in the test application, so the marker is on screen; window focused | 0 | 0 | not run | automatic: `WEEK4-OPEN-FILE-OK` **gone** | as above | — |
 
