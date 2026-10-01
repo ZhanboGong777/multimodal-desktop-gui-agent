@@ -211,6 +211,34 @@ only `succeeded` because the task rule matched.
 `test_a_changed_screen_that_does_not_match_the_rule_fails` covers the dangerous
 near miss: the screen did change, the action did succeed, and the task still fails.
 
+### What the suite refuses to let happen
+
+A passing suite says the code works; it does not say the tests would notice if it
+stopped. The difference was measured by deleting one load-bearing behaviour at a
+time and running the whole suite against the deletion. Each row below was applied
+on its own to a clean tree at `80f9835` and reverted; the third column names a test
+that fails because of it, and the last row is why this pass exists.
+
+| Behaviour removed | Where | What notices |
+| --- | --- | --- |
+| the task verifier returns `succeeded` with no rule to check | `verification.py` | `test_a_task_with_no_rule_is_inconclusive_never_passed` |
+| the runner acts on the plan without re-observing | `runner.py` | `test_the_coordinate_comes_from_the_current_frame_not_the_plan`, and eight more |
+| the step log opens for writing instead of appending | `recorder.py` | `test_steps_accumulate_instead_of_overwriting` |
+| a bare element id from an earlier frame is accepted | `action_adapter.py` | `test_a_stale_id_without_a_text_target_is_still_refused` |
+| a step after `finish` is allowed to run | `planning/schemas.py` | `test_a_step_after_finish_is_rejected` |
+| duplicate step ids are accepted | `planning/schemas.py` | `test_a_duplicate_step_id_is_rejected` |
+| the precondition guard is switched off | `runner.py` | `test_a_real_run_is_blocked_when_the_goal_already_holds` |
+| a risky task skips its second confirmation | `runner.py` | `test_a_risky_task_is_confirmed_a_second_time_before_acting` |
+| a dry run dispatches for real | `runner.py` | `test_a_dry_run_dispatches_nothing_and_is_not_a_success` |
+| a task is called `succeeded` without its rule passing | `runner.py` | `test_a_changed_screen_that_does_not_match_the_rule_fails` |
+| **the screenshot is dropped from the request to the model** | `models/openai_compatible.py` | **nothing, until this pass** - see §7 |
+
+Every one of the three decisions in §2 is in that table, which is the point: they
+are the properties worth breaking on purpose, and ten of the eleven were already
+guarded by a test that fails for the right reason. The eleventh is the subject of
+the finding in §7 - the week's defining behaviour, unverified at the only layer
+where it means anything.
+
 ### A runnable demonstration
 
 ```bash
