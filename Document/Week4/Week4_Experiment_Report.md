@@ -104,9 +104,9 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **444 passed**, ruff clean |
+| MacBook Air M2 | **448 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 144: 125 in the nine
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 148: 129 in the nine
 files below, 10 in `test_model_mock.py`, 2 in `test_ocr.py` for the label-merging
 fix described in section 7, and 7 in `test_plan_parser.py` for the step-status
 vocabulary and the plan-ordering rules.
@@ -120,7 +120,7 @@ vocabulary and the plan-ordering rules.
 | `test_week4_cli.py` | 13 cases: argument errors, no `--yes`, dry-run default, summary always written, `--execute` refused without a terminal, the callback set an execute run hands over, `.env` loading, and the flag/environment/YAML precedence |
 | `test_week4_integration.py` | 5 cases: the loop against a real OpenAI-compatible server over a real socket, which reads the element ids out of the prompt it receives |
 | `test_week4_prompts.py` | 12 cases: the prompt fits its budget, describes element targeting and every action's arguments, carries the platform, trims the element list by whole lines, and keeps markers verbatim |
-| `test_week4_cases.py` | 6 cases: the invariants the five case definitions must hold - a machine-checkable rule, a declared precondition, a distinctive marker, a copy handed back by `get_case` |
+| `test_week4_cases.py` | 10 cases: the invariants the five case definitions must hold - a machine-checkable rule, a declared precondition, a distinctive marker, a copy handed back by `get_case`, and the fresh marker a send-message run is given |
 | `test_week4_evidence.py` | 12 cases: what the evidence collector copies, what it refuses to copy, which run `--latest` picks, and its error paths |
 
 ### The offline closed loop
@@ -391,6 +391,16 @@ that is blocked before it captures anything finishes in well under a second, and
 the five-case loop is exactly the kind of thing that produces them back to back.
 `create` now opens a fresh directory, suffixing `_2`, `_3` and keeping the session
 id equal to the directory name so the recorder's run id cannot disagree with it.
+
+**T04 could only ever be run once.** 15.4 asks for a fresh message identifier on
+every run, and the case was defined with a fixed one. That makes the case
+single-use in two ways at once: after one attempt the previous message is still in
+the conversation, so the rule - "the marker is on screen" - is already satisfied,
+and the precondition that requires no earlier message carrying that marker refuses
+the retry. The marker is minted per run now and printed as `marker` so the operator
+knows what this run is looking for. The preconditions were left alone because they
+say "this marker" rather than naming the literal; an earlier draft rewrote them and
+that code was a no-op, which is the kind of thing that reads as if it works.
 
 ## 8. Deliverables
 

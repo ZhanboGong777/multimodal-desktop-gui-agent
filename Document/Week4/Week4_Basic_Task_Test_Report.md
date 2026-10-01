@@ -41,7 +41,7 @@ failure is two attempts, and only the runs whose summary reads `succeeded` with
 | T01 | open the browser | desktop visible and launch entry uncovered; **no browser window open** | 0 | 0 | not run | automatic: `http` and `search` both on screen | whole run, first observation to final verdict, including the confirmation prompt (`elapsed_ms`) | — |
 | T02 | search the web | a browser window is open and focused | 0 | 0 | not run | automatic: the query text is on screen | as above | — |
 | T03 | open a specified file | `week4_sample.txt` exists in the week4 test folder; no file of that name is open | 0 | 0 | not run | automatic: `WEEK4-OPEN-FILE-OK` on screen | as above | — |
-| T04 | send a message | the test conversation is open and holds no earlier message with the marker; the operator agreed a real message may be sent | 0 | 0 | not run | automatic: `WEEK4_MESSAGE_CHECK_001` on screen | as above | — |
+| T04 | send a message | the test conversation is open and holds no earlier message with **this run's** marker; the operator agreed a real message may be sent | 0 | 0 | not run | automatic: this run's marker on screen (the CLI prints it as `marker`) | as above | — |
 | T05 | close the application | `week4_sample.txt` is open in the test application, so the marker is on screen; window focused | 0 | 0 | not run | automatic: `WEEK4-OPEN-FILE-OK` **gone** | as above | — |
 
 ### Why the preconditions are not optional
@@ -55,6 +55,12 @@ and no model call is made and no click is dispatched.
 
 That is a correct outcome, not a failure: it means the screen could not have shown
 whether this run did the work. Set the precondition up and run it again.
+
+T04's marker is minted per run (`WEEK4_MESSAGE_CHECK_<timestamp>`) and printed as
+`marker`, because 15.4 asks for a fresh identifier every time. A fixed one would
+make the case single-use: the previous run's message is still in the conversation,
+so the rule would already be satisfied and the run would be refused over a message
+it did not send.
 
 ## Per-case success rules
 
