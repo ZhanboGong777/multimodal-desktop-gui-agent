@@ -1362,3 +1362,33 @@ def test_a_dry_run_does_not_stop_on_an_unobserved_expectation(tmp_path: Path) ->
     assert result.status == "dry_run_completed"
     assert len(executor.actions) == 2, "the whole plan is walked through"
     assert result.steps[0].verification.outcome == "failed", "and the mismatch is still recorded"
+
+
+def test_a_missing_ocr_binary_is_named_in_the_run_notes(tmp_path: Path) -> None:
+    """A fresh machine has no `tesseract`, and every task would fail for it.
+
+    The engine wraps the failure into an OcrError, `observe()` records it on the
+    frame, and the operate saw only "no readable text" - which reads as a locked or
+    dark screen, and the hand-back manual says exactly that. The cause sat in
+    obs-0001.json, a file the operator has no reason to open while diagnosing.
+    """
+    frame = _frame("obs-0001", ("Start",)).model_copy(
+        update={
+            "elements": [],
+            "errors": [
+                "ocr unavailable: Tesseract failed: tesseract is not installed or "
+                "it's not in your PATH"
+            ],
+        }
+    )
+    runner, _ = _runner(
+        tmp_path, FakeObserver([frame]), FakePlanner(_plan()), FakeExecutor()
+    )
+    task = TaskSpec(case_id="T", instruction="x", expect_text=["Start"], success_rules=["r"])
+
+    result = runner.run(task, ExecutionOptions(confirm=False))
+
+    notes = " ".join(result.notes)
+    assert "not installed or it's not in your PATH" in notes, notes
+    assert "no readable text" in notes
+    assert "missing `tesseract` binary" in notes, "the note points at the wrong cause"

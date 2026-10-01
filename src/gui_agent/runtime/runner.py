@@ -213,14 +213,28 @@ class TaskRunner:
         for notice in getattr(initial, "notices", []):
             notes.append(f"ocr: {notice}")
 
+        # What the frame said went wrong, in the run's own notes. The OCR engine's
+        # account of a failure was written to obs-0001.json and nowhere else, so the
+        # operator saw "no readable text" - which reads as "wake the screen" - while
+        # the actual cause, a missing `tesseract` binary on a fresh machine, sat in a
+        # file they had no reason to open.
+        for problem in getattr(initial, "errors", [])[:3]:
+            notes.append(f"observation: {problem}")
+
         # A frame with no readable text is not an error - OCR cannot read a locked,
         # dark or mostly-empty screen - but it makes every text target unresolvable.
         # Saying so here turns a bare "no element matches '...'" into something the
         # operator can act on.
         if not any(item.text.strip() for item in initial.elements):
+            hint = (
+                " (the observation above names the cause; a missing `tesseract` binary "
+                "reads the same way as a locked screen)"
+                if initial.errors
+                else ""
+            )
             notes.append(
                 "the first frame had no readable text: OCR returned no labels, so no "
-                "text target can resolve against it"
+                f"text target can resolve against it{hint}"
             )
 
         # 1b. A real run must not start from a screen where the goal already holds.

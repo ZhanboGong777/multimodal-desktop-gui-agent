@@ -111,9 +111,9 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **563 passed**, ruff clean |
+| MacBook Air M2 | **564 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 263: 205 in the
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 264: 206 in the
 eleven files below, and 58 spread across the other suites -
 `test_control_safety.py` 15, `test_model_mock.py` 14, `test_ocr.py` 7 (five of them
 the Windows-only OCR workarounds), `test_config.py` 7 (a new file),
@@ -204,7 +204,7 @@ behaviour needed no change: blocked, nothing dispatched, exit 2, no traceback.
 | Test file | Covers |
 | --- | --- |
 | `test_action_adapter.py` | 34 cases: unique, ambiguous, missing and stale targets, a target split across word-level elements, parameter errors including wrong types, out-of-range coordinates, key whitelist, platform hotkeys, coordinate scaling, `finish` refusal |
-| `test_runtime_runner.py` | 53 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, the guard that refuses to start a real run whose goal already holds, the second confirmation a risky task must get, the provenance the summary carries, and the note a frame with no readable text leaves |
+| `test_runtime_runner.py` | 54 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, the guard that refuses to start a real run whose goal already holds, the second confirmation a risky task must get, the provenance the summary carries, and the note a frame with no readable text leaves |
 | `test_runtime_verification.py` | 15 cases: rule matching, forbidden text, unverifiable tasks, degraded observations, the two case rules that have to tell a real result from a lookalike, and the screen going away while polling |
 | `test_runtime_observation.py` | 11 cases: the whole of `observe()` against a prepared frame - ids, geometry, the OCR-failure record, the element cap - plus what a prompt line carries |
 | `test_runtime_recording.py` | 15 cases: redaction, append-only steps, per-frame files, summary, and where the provenance comes from |
@@ -856,6 +856,29 @@ run used", which is that file. It is written with every run now, credential-shap
 values masked by key name rather than trusted to be absent, because the record is
 copied into the repository by the evidence collector.
 
+**The five tasks would have failed on a fresh Windows machine for a reason no
+document mentioned.** `configs/week4.yaml` selects `ocr.engine: tesseract`; step 1
+of the hand-back manual installs `requirements-agent.txt` and
+`requirements-dev.txt` and nothing else. `pytesseract` arrives with those - it is
+the wrapper. The `tesseract` executable does not, and the manual never mentioned
+it. Every observation on a machine without it reads zero labels, so every text
+target fails to resolve and all five cases fail with a message about
+localisation.
+
+The failure was reported, which is why this is a documentation defect rather than
+a silent one: the engine wraps it into an `OcrError`, the frame records
+`ocr unavailable: Tesseract failed: tesseract is not installed or it's not in your
+PATH`, and the run says the first frame had no readable text. But that last
+sentence is the one the manual explains, and the manual explains it as a locked or
+dark screen - so the operator would have woken a display that was already awake.
+The run now repeats the observation's own errors above that line and says outright
+that a missing binary reads the same way as a locked screen, step 1 installs the
+binary, and the diagnostic row carries the distinction.
+
+This is the second time a correct-looking failure message sent the operator to the
+wrong cause; the first was the capture permission in §7. Both were found by
+running the manual's own instructions rather than reading them.
+
 ## 8. Deliverables
 
 - `src/gui_agent/runtime/` - the run layer (8 modules).
@@ -867,7 +890,7 @@ copied into the repository by the evidence collector.
   `Document/Week4/evidence/`, so a run id in the test report resolves inside the
   repository rather than only on the machine that produced it.
 - `configs/week4.yaml` - Week 4 limits, with `ExecutionConfig` added to `config.py`.
-- 263 new tests.
+- 264 new tests.
 - `Document/Week4/Week4_Usage.md` - flags, the safety model, the record layout.
 - `Document/Week4/Week4_Troubleshooting.md` - forty-two symptoms with what to check
   and what the code actually does about each.
