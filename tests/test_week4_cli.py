@@ -336,7 +336,9 @@ def test_a_run_finds_the_warmup_record_in_its_own_output_directory(tmp_path: Pat
     )
     result = run_cli("--case", "T01", "--output-directory", str(tmp_path))
 
-    assert "warmup     : warmup.json copied from" in result.stdout
+    # The source, not the copy: naming the session directory here told the operator
+    # where the record had just been written, not where it came from.
+    assert f"warmup     : warmup.json copied from {tmp_path}" in result.stdout
     sessions = [path for path in tmp_path.iterdir() if path.is_dir()]
     assert len(sessions) == 1, sessions
     copied = sessions[0] / "warmup.json"

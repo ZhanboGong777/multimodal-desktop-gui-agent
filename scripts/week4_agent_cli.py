@@ -336,7 +336,7 @@ def main() -> int:
         )
         print(f"  records    : {session.directory}")
         if warmup_record is not None:
-            print(f"  warmup     : {warmup_record.name} copied from {warmup_record.parent}")
+            print(f"  warmup     : {warmup_record.name} copied from {output_directory}")
         else:
             # Both modes, because both record planning_ms: a cold model inflates a
             # dry run's planning number exactly as much as a real one's, and that
@@ -377,8 +377,8 @@ def main() -> int:
         print(f"  error       : {result.error}")
     for note in result.notes:
         print(f"  note        : {note}")
-    print(f"  records     : {session.directory}")
-    print(f"  summary     : {Path(session.directory) / 'task_summary.json'}")
+    print(f"  records    : {session.directory}")
+    print(f"  summary    : {Path(session.directory) / 'task_summary.json'}")
 
     if not args.quiet:
         print()
