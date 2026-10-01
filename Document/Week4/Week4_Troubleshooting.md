@@ -1,6 +1,6 @@
 # Week 4 troubleshooting
 
-Eighteen situations the closed loop can run into, in the order they tend to appear.
+Twenty-two situations the closed loop can run into, in the order they tend to appear.
 Each row says what to check first, and what this implementation actually does —
 the second column matters, because a diagnostic guide that describes behaviour the
 code does not have is worse than none.
@@ -27,6 +27,7 @@ in disguise.
 | --- | --- | --- |
 | HTTP 500 | Service log, model and memory state, the request body | Reported as `ModelError` with the underlying exception name. **Kept separate from a timeout and from a truncated reply** — the three have different causes |
 | `400 ... request (N tokens) exceeds the available context size (M tokens)` | The server's context window against the prompt size. A 2560x1600 screenshot plus the element list measured 7 517 tokens; Ollama serves 4096 by default | `blocked` before any action. The message has the fix appended: raise `OLLAMA_CONTEXT_LENGTH` (16384 worked on the review machine) or lower `agent.max_elements`. This is a server setting, not a code path — nothing in the run can change it |
+| `... N further elements omitted to fit the prompt` | How much text is on screen, and `agent.max_elements` | Not an error. The element list is trimmed one **whole** element at a time — an id with half its text would be unusable — and the prompt says how many were dropped. Raise `agent.max_elements` or the server's context window to keep more |
 | Reply truncated mid-JSON | Finish reason, response length, **prompt length**, number of steps | `PlanParseError`; the planner retries the format once, then reports `blocked`. A partial plan is never executed |
 | Plan is valid JSON but the steps do not fit the screen | Whether the prompt carried the element list | The adapter refuses at resolution time; nothing is clicked |
 | `no element matches '...'` | Take a fresh screenshot; check the OCR language and threshold; is the page still loading? | The step fails and the run stops. It does **not** click a default position, and it does not retry with a guessed target |
@@ -40,6 +41,7 @@ in disguise.
 | Clicks land slightly off | Screenshot-to-control scale, any preprocessing resize, monitor offset | Coordinates go through `screenshot_to_control` and then an in-bounds check. **No per-task pixel offset is ever added** |
 | OCR finds nothing on a clearly readable screen | Engine (`tesseract` vs `paddleocr`), language code, `min_confidence` | Measured on this machine: Tesseract 241 ms vs PaddleOCR 5 525 ms on the same frame. `configs/week4.yaml` selects Tesseract |
 | OCR returns a fallback notice | Whether the primary engine started | The notice is recorded on the observation, and `ocr_engine` says which one actually ran |
+| `the first frame had no readable text` | Whether the screen is locked, asleep or showing something with no text in it | Recorded as a note, not a failure: the capture worked and contour detection still found boxes, but OCR returned no labels, so no text target can resolve against that frame. Wake the screen and re-run |
 
 ## Resolution
 
@@ -48,6 +50,8 @@ in disguise.
 | `N elements match '...'` | Element ids, whether a region or context could disambiguate | The run stops and lists the candidates. **It never takes the first match** |
 | `no element matches '...'` although the label is plainly on screen | Whether the backend returned words instead of lines — check the element texts in the observation JSON | Tesseract rows are merged back into lines, so `Summary (required)` is one element. If a phrase still spans two elements, the adapter matches the query's tokens against a run of neighbouring elements and refuses when more than one run matches |
 | `N element runs match '...'` | How many places on screen carry that phrase | The run stops and lists the runs, same policy as an ambiguous single element |
+| `scroll_amount must be a number` / `duration must be a number` | What the plan put in the argument | `ActionResolutionError`, so the run records a failed step. A bare `ValueError` here would have escaped the runner entirely and ended the run as a traceback |
+| A dry run fails with `no element matches '...'` while you are using the computer | Whether the desktop changed between the two observations | Correct, and not a defect: the plan is written from one frame and every step is re-resolved against the next, so a target that scrolled away, closed or was covered is refused. Run the dry runs on a desktop you are not touching |
 | A step resolves to a point outside the monitor | The screenshot size against the control size | `ActionResolutionError`; the point is refused, not clamped to the edge |
 | `key '...' is not in the allowed key set` | The key name the plan used | Only a fixed key list is accepted. This is deliberate: the model must not be able to drive a shell through `type_text` or `key_press` |
 

@@ -104,21 +104,22 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **402 passed**, ruff clean |
+| MacBook Air M2 | **417 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 102: 94 in the nine
-files below, 6 in `test_model_mock.py`, and 2 in `test_ocr.py` for the
-label-merging fix described in section 7.
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 117: 105 in the nine
+files below, 8 in `test_model_mock.py`, 2 in `test_ocr.py` for the label-merging
+fix described in section 7, and 2 in `test_plan_parser.py` for the step-status
+vocabulary.
 
 | Test file | Covers |
 | --- | --- |
-| `test_action_adapter.py` | 23 cases: unique, ambiguous, missing and stale targets, a target split across word-level elements, parameter errors, key whitelist, platform hotkeys, coordinate scaling, `finish` refusal |
-| `test_runtime_runner.py` | 22 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, and the guard that refuses to start a real run whose goal already holds |
+| `test_action_adapter.py` | 26 cases: unique, ambiguous, missing and stale targets, a target split across word-level elements, parameter errors including wrong types, out-of-range coordinates, key whitelist, platform hotkeys, coordinate scaling, `finish` refusal |
+| `test_runtime_runner.py` | 26 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, the guard that refuses to start a real run whose goal already holds, and the note a frame with no readable text leaves |
 | `test_runtime_verification.py` | 8 cases: rule matching, forbidden text, unverifiable tasks, degraded observations |
 | `test_runtime_recording.py` | 6 cases: redaction, append-only steps, per-frame files, summary |
 | `test_week4_cli.py` | 6 cases: argument errors, no `--yes`, dry-run default, summary always written |
 | `test_week4_integration.py` | 5 cases: the loop against a real OpenAI-compatible server over a real socket, which reads the element ids out of the prompt it receives |
-| `test_week4_prompts.py` | 8 cases: the prompt fits its budget, describes element targeting and every action's arguments, and the user turn carries the platform |
+| `test_week4_prompts.py` | 12 cases: the prompt fits its budget, describes element targeting and every action's arguments, carries the platform, trims the element list by whole lines, and keeps markers verbatim |
 | `test_week4_cases.py` | 6 cases: the invariants the five case definitions must hold - a machine-checkable rule, a declared precondition, a distinctive marker, a copy handed back by `get_case` |
 | `test_week4_evidence.py` | 10 cases: what the evidence collector copies, what it refuses to copy, and its error paths |
 
@@ -266,6 +267,43 @@ invariants a case must satisfy to be runnable at all - a machine-checkable rule 
 a declared precondition - because a case missing either is not "not yet measured",
 it is unrunnable, and its row in the report would mean nothing.
 
+**The prompt truncated the observation mid-field.** `build_user_prompt` rendered
+the whole context as JSON and cut it at 4 000 characters, which is what 8.2.10
+forbids: the cut lands inside the element list, leaving an element id with half its
+text. The list is now trimmed one whole element at a time and the prompt says how
+many were left out; the short bounded fields beside it are serialized in full. The
+same pass fixed the system prompt's blanket "keep every string under 60
+characters", which 8.2.3 rules out - it invites the model to abbreviate the very
+marker the task is verified against. It now limits `description` and `summary`
+only, and says to copy text exactly. 8.1.7 asks for the execution limits as well
+as the step cap, so the planner's context now carries "at most N actions and T s
+for the whole task" rather than letting the model discover the budget by having
+its plan refused.
+
+**A wrong-typed argument escaped as a traceback.** `int(scroll_amount)` and
+`float(duration)` raised bare `ValueError`. The runner catches
+`ActionResolutionError`, so a malformed plan would have left the run as an
+unhandled exception instead of a recorded failure - and 8.3.4 asks for parameters
+that are complete *and* correctly typed. Both conversions now raise the module's
+own error. `test_action_adapter.py` also gained the two cases 9.4 lists and the
+first pass had missed: an out-of-range coordinate and a wrong-typed argument.
+
+**The hand-off's own step vocabulary was rejected.** 10.5.3 names
+`pending_runtime_resolution` for a step whose page is not open yet. This runner
+resolves every step against a fresh frame, so it never writes that value - but the
+schema's `Literal` did not contain it, which means a model that followed the
+hand-off would have had its entire plan rejected as invalid. The value is accepted
+now; an invented one still is not.
+
+**A screen with no readable text failed silently.** The desktop went to sleep
+mid-round: capture still returned a 1920x1080 frame and contour detection still
+found 60 boxes, but OCR returned no text at all, so every text target became
+unresolvable and the run stopped with a bare `no element matches '@'`. The run now
+records "the first frame had no readable text" as a note. Diagnosing that by hand
+took longer than writing the note did. In the same area, the mock no longer aims
+at OCR fragments like `@` or `HO`: they are gone by the next frame, so a dry run
+that dies on one says nothing about the pipeline.
+
 ## 8. Deliverables
 
 - `src/gui_agent/runtime/` - the run layer (8 modules).
@@ -277,7 +315,7 @@ it is unrunnable, and its row in the report would mean nothing.
 - `configs/week4.yaml` - Week 4 limits, with `AgentConfig` added to `config.py`.
 - 102 new tests.
 - `Document/Week4/Week4_Usage.md` - flags, the safety model, the record layout.
-- `Document/Week4/Week4_Troubleshooting.md` - eighteen symptoms with what to check
+- `Document/Week4/Week4_Troubleshooting.md` - twenty-two symptoms with what to check
   and what the code actually does about each.
 - `Document/Week4/Week4_Basic_Task_Test_Report.md` - the five results, one row per
   case, with the precondition, the attempt and success counts, the verification
@@ -287,7 +325,7 @@ it is unrunnable, and its row in the report would mean nothing.
 **W4-13 diagnostic guide.** The hand-off asks for a table of fifteen situations -
 connection, model, perception, resolution, execution, verification and recording -
 each with what to check and how it is handled. That is
-`Document/Week4/Week4_Troubleshooting.md`, grown to eighteen as the Windows review
+`Document/Week4/Week4_Troubleshooting.md`, grown to twenty-two as the Windows review
 added situations the first pass had not met. Each row states the behaviour this
 code has, not the behaviour it ought to have; a diagnostic guide describing
 behaviour the implementation does not have would be worse than none.
