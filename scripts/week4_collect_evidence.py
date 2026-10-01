@@ -5,8 +5,9 @@ nothing as soon as the report is read anywhere but the machine that produced it.
 The hand-off asks for a report whose run ids can be traced back to their evidence,
 which means the evidence has to travel with the repository.
 
-Three files are copied when present: ``task_summary.json`` (the verdict, timings
-and notes), ``steps.jsonl`` (one line per step) and ``warmup.json`` - the warmup
+Four files are copied when present: ``task_summary.json`` (the verdict, timings
+and notes), ``steps.jsonl`` (one line per step), ``run_config.json`` (the effective
+configuration, credential-shaped values masked) and ``warmup.json`` - the warmup
 record the CLI puts in the session, which is how 16.5.4's warmup time travels with
 the run it belongs to. The screenshots and the per-frame observation
 files are deliberately left behind - they are a picture of the whole desktop, and
@@ -31,7 +32,7 @@ DEFAULT_DESTINATION = REPO_ROOT / "Document" / "Week4" / "evidence"
 #: Copied verbatim when present. Anything else in the session directory - images,
 #: ``obs-NNNN.json`` - is screen content and stays out. ``warmup.json`` carries no
 #: screen content: it is the probe record and the numbers 16.5.4 asks to keep.
-RECORDS = ("task_summary.json", "steps.jsonl", "warmup.json")
+RECORDS = ("task_summary.json", "steps.jsonl", "warmup.json", "run_config.json")
 
 EXIT_OK = 0
 EXIT_ERROR = 2

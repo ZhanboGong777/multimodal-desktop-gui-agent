@@ -9,6 +9,7 @@ single step log instead.
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
@@ -47,6 +48,22 @@ def _mask(text: str | None) -> str | None:
     if text and is_sensitive_text(text):
         return REDACTED
     return text
+
+
+#: Keys whose value is a credential wherever it appears in the configuration.
+_SECRET_KEYS = frozenset({"api_key", "apikey", "key", "token", "secret", "password"})
+
+
+def _mask_config(payload: Any) -> Any:
+    """Recursively mask anything whose key name says it is a credential."""
+    if isinstance(payload, Mapping):
+        return {
+            key: (REDACTED if str(key).casefold() in _SECRET_KEYS else _mask_config(value))
+            for key, value in payload.items()
+        }
+    if isinstance(payload, list):
+        return [_mask_config(item) for item in payload]
+    return payload
 
 
 class TaskRecorder:
@@ -95,6 +112,27 @@ class TaskRecorder:
                 ensure_ascii=False,
                 indent=2,
             ),
+            encoding="utf-8",
+        )
+        return target
+
+    def save_config(self, config: Mapping[str, Any]) -> Path:
+        """Write the effective configuration this run used, with values masked.
+
+        14.1 names ``run_config.json`` and nothing wrote it: a run recorded the
+        model name and the limits in its summary, so a reader could not tell which
+        ``max_elements``, OCR engine or verification timeouts produced the frames
+        in front of them. The environment table in the test report then asks for
+        `timeout_seconds` "in the config the run used", which is this file.
+
+        Values are masked by key name rather than trusted to be safe: the model
+        config holds no credential by design - it is read from the environment -
+        but a key pasted into a YAML field would otherwise be written to disk and
+        then copied into the repository by the evidence collector.
+        """
+        target = self.directory / "run_config.json"
+        target.write_text(
+            json.dumps(_mask_config(config), indent=2, ensure_ascii=False, sort_keys=True) + "\n",
             encoding="utf-8",
         )
         return target

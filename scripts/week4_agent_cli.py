@@ -331,6 +331,9 @@ def main() -> int:
     stamp = __import__("datetime").datetime.now().astimezone().strftime("%Y%m%d_%H%M%S")
     session = RunSession.create(output_directory, session_id=f"{task.case_id}_{stamp}")
     recorder = TaskRecorder(session)
+    # 14.1: the effective configuration travels with the run. The summary carries
+    # the model and the limits; this is everything else the frames depended on.
+    recorder.save_config(config.model_dump(mode="json"))
     warmup_record = _attach_warmup(session, output_directory / WARMUP_RECORD_NAME)
 
     options = ExecutionOptions(

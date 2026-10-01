@@ -101,9 +101,15 @@ outputs/week4/<case>_<timestamp>/
 ├── obs-0001.json        # elements, geometry and timing for one frame
 ├── obs-0002.json        # ... one file per observation, never overwritten
 ├── steps.jsonl          # one line per step, appended
+├── run_config.json      # the effective configuration, credential-shaped values masked
 ├── task_summary.json    # status, verification, action count, timings, provenance
 └── warmup.json          # the warmup that preceded this run, copied in when there is one
 ```
+
+`run_config.json` is the configuration the frames in front of you were produced
+with - element cap, OCR engine, verification timeouts, planning limits - because
+the summary names only the model and the run's own limits, and "which settings
+made this run" should not have to be reconstructed from memory.
 
 `task_summary.json` also carries where and when the run happened - commit,
 platform, Python version, screenshot and control geometry, start and finish times,

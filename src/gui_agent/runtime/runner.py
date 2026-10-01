@@ -483,6 +483,32 @@ class TaskRunner:
                     timings=timings,
                 )
 
+            # 10.1.12: continue when the expectation is met, and stop when the
+            # result does not match it. The mismatch was computed and then never
+            # read, so a step that plainly did not do what it was for was recorded
+            # and the plan carried on typing into a screen that had not responded.
+            #
+            # Only for a real run. Nothing is dispatched in a dry run, so a screen
+            # that did not change is the expected outcome rather than a mismatch -
+            # stopping there would truncate the one mode whose purpose is to walk
+            # the whole plan and show it.
+            if options.execute and record.verification.outcome == "failed":
+                notes.append(
+                    f"{step.step_id}: {record.verification.detail}; stopping rather than "
+                    "continuing from a step whose result was not observed"
+                )
+                return self._finish(
+                    task,
+                    options,
+                    "failed",
+                    started,
+                    notes,
+                    steps,
+                    snapshot=initial,
+                    planning_attempts=planning_attempts,
+                    timings=timings,
+                )
+
             if after is not None:
                 current = after
 

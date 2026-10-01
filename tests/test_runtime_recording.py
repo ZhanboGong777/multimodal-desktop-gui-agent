@@ -243,3 +243,43 @@ def test_a_password_on_screen_does_not_reach_the_frame_dump(tmp_path: Path) -> N
     # Ordinary interface text is untouched: the element list is what traces a
     # coordinate back to the words it came from.
     assert "Sign in" in texts
+
+
+def test_the_effective_config_travels_with_the_run(tmp_path: Path) -> None:
+    """14.1 names run_config.json and nothing wrote it.
+
+    The summary carried the model name and the limits, so a reader could not tell
+    which `max_elements`, OCR engine or verification timeouts produced the frames
+    in front of them - and the test report's environment table asks for
+    `timeout_seconds` "in the config the run used".
+    """
+    from gui_agent.config import Config
+
+    recorder = TaskRecorder(RunSession.create(tmp_path, session_id="r1"))
+    written = recorder.save_config(Config().model_dump(mode="json"))
+
+    assert written.name == "run_config.json"
+    payload = json.loads(written.read_text(encoding="utf-8"))
+    assert payload["execution"]["max_elements"] >= 1
+    assert payload["perception"]["ocr"]["engine"]
+    assert payload["model"]["timeout_seconds"] > 0
+
+
+def test_a_credential_in_the_config_is_masked(tmp_path: Path) -> None:
+    """The model config holds no key by design; a pasted one must not be written.
+
+    Written to disk and then copied into the repository by the evidence
+    collector, so masking by key name rather than trusting the model is the only
+    safe direction.
+    """
+    from gui_agent.control.safety import REDACTED
+
+    recorder = TaskRecorder(RunSession.create(tmp_path, session_id="r1"))
+    written = recorder.save_config(
+        {"model": {"api_key": "sk-live-12345", "model_name": "qwen2.5vl:7b"}}
+    )
+    payload = json.loads(written.read_text(encoding="utf-8"))
+
+    assert payload["model"]["api_key"] == REDACTED
+    assert "sk-live-12345" not in written.read_text(encoding="utf-8")
+    assert payload["model"]["model_name"] == "qwen2.5vl:7b", "ordinary settings are untouched"

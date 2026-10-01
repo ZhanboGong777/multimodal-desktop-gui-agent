@@ -71,6 +71,29 @@ def test_collect_leaves_the_screen_behind(tmp_path: Path) -> None:
     assert not any(name.startswith("obs-") for name in written)
 
 
+def test_the_config_that_produced_the_run_travels_with_it(tmp_path: Path) -> None:
+    """14.1's run_config.json, which is what makes a run reproducible later.
+
+    A reviewer asking "which element cap and which OCR engine made these frames"
+    should read it, not guess it.
+    """
+    import json
+
+    session = _session(tmp_path / "outputs")
+    (session / "run_config.json").write_text(
+        json.dumps({"execution": {"max_elements": 60}}), encoding="utf-8"
+    )
+    destination = tmp_path / "evidence"
+
+    copied = evidence.collect(session, destination)
+
+    assert "run_config.json" in [path.name for path in copied]
+    carried = json.loads(
+        (destination / session.name / "run_config.json").read_text(encoding="utf-8")
+    )
+    assert carried["execution"]["max_elements"] == 60
+
+
 def test_the_warmup_record_travels_with_the_run(tmp_path: Path) -> None:
     """16.5.4 keeps the warmup time beside the run's timings; the CLI puts the
     record in the session, and the collector is what makes it out of the machine

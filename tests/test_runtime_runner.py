@@ -1294,3 +1294,71 @@ def test_the_key_list_is_the_one_the_adapter_enforces(tmp_path: Path) -> None:
 
     assert _MODIFIER_ALIASES["darwin"]["ctrl"] == "command"
     assert _MODIFIER_ALIASES["win32"]["command"] == "ctrl"
+
+
+def test_a_step_whose_result_was_not_observed_stops_the_run(tmp_path: Path) -> None:
+    """10.1.12: continue when the expectation holds, stop when the result does not match.
+
+    The mismatch was computed and then never read, so a step that plainly had not
+    done what it was for was recorded and the plan carried on - typing the rest of
+    a query into a window that never took focus, for instance. No test failed,
+    because no test asked what happened after a step verification came back
+    `failed`.
+    """
+    frames = [
+        _frame("obs-0001", ("Start",)),
+        _frame("obs-0002", ("Start",)),
+        _frame("obs-0003", ("Start",)),
+        _frame("obs-0004", ("Start",)),
+    ]
+    plan = _plan(
+        PlanStep(
+            step_id="s1",
+            description="type the query",
+            action_type="type_text",
+            arguments={"text": "hello"},
+            expected_result="the query appears in the box",
+        ),
+        PlanStep(step_id="s2", description="click", action_type="click", target_text="Start"),
+    )
+    executor = FakeExecutor()
+    runner, _ = _runner(tmp_path, FakeObserver(frames), FakePlanner(plan), executor)
+    task = TaskSpec(case_id="T", instruction="x", expect_text=["Start"], success_rules=["r"])
+
+    result = runner.run(
+        task, ExecutionOptions(execute=True, confirm=True), confirm=lambda _plan: True
+    )
+
+    assert result.status == "failed"
+    assert len(executor.actions) == 1, "the second step must not be dispatched"
+    assert result.steps[0].verification.outcome == "failed"
+    assert "stopping rather than continuing" in result.stop_reason
+
+
+def test_a_dry_run_does_not_stop_on_an_unobserved_expectation(tmp_path: Path) -> None:
+    """Nothing is dispatched in a dry run, so an unchanged screen is the expectation.
+
+    Stopping there would truncate the one mode whose purpose is to walk the whole
+    plan: the operator would be shown the first step and told the run had failed,
+    for the reason that nothing had happened - which is what a dry run is.
+    """
+    frames = [_frame("obs-0001", ("Start",)), _frame("obs-0002", ("Start",))]
+    plan = _plan(
+        PlanStep(
+            step_id="s1",
+            description="type the query",
+            action_type="type_text",
+            arguments={"text": "hello"},
+            expected_result="the query appears in the box",
+        ),
+        PlanStep(step_id="s2", description="click", action_type="click", target_text="Start"),
+    )
+    executor = FakeExecutor()
+    runner, _ = _runner(tmp_path, FakeObserver(frames), FakePlanner(plan), executor)
+    task = TaskSpec(case_id="T", instruction="x", expect_text=["Start"], success_rules=["r"])
+
+    result = runner.run(task, ExecutionOptions(execute=False, confirm=False))
+
+    assert result.status == "dry_run_completed"
+    assert len(executor.actions) == 2, "the whole plan is walked through"
+    assert result.steps[0].verification.outcome == "failed", "and the mismatch is still recorded"
