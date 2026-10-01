@@ -104,9 +104,9 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **431 passed**, ruff clean |
+| MacBook Air M2 | **433 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 131: 117 in the nine
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 133: 119 in the nine
 files below, 10 in `test_model_mock.py`, 2 in `test_ocr.py` for the label-merging
 fix described in section 7, and 2 in `test_plan_parser.py` for the step-status
 vocabulary.
@@ -121,7 +121,7 @@ vocabulary.
 | `test_week4_integration.py` | 5 cases: the loop against a real OpenAI-compatible server over a real socket, which reads the element ids out of the prompt it receives |
 | `test_week4_prompts.py` | 12 cases: the prompt fits its budget, describes element targeting and every action's arguments, carries the platform, trims the element list by whole lines, and keeps markers verbatim |
 | `test_week4_cases.py` | 6 cases: the invariants the five case definitions must hold - a machine-checkable rule, a declared precondition, a distinctive marker, a copy handed back by `get_case` |
-| `test_week4_evidence.py` | 10 cases: what the evidence collector copies, what it refuses to copy, and its error paths |
+| `test_week4_evidence.py` | 12 cases: what the evidence collector copies, what it refuses to copy, which run `--latest` picks, and its error paths |
 
 ### The offline closed loop
 
@@ -337,6 +337,18 @@ count is taken in `ModelClient._with_retries`, the single place a request leaves
 the process, so retries are included. Geometry is worth its line for a different
 reason: a click that landed wrong cannot be re-read afterwards without knowing
 which scale it was mapped through.
+
+**A refused run left an empty session behind.** The non-interactive refusal added
+for 12.2.5 was checked *after* the run directory had been created, so every refused
+`--execute` left an orphan `outputs/week4/<case>_<timestamp>/` with no summary in
+it. Nothing in the repository could notice - `outputs/` is not tracked - but the
+evidence collector's `--latest` sorts by name, so a later orphan shadows the last
+run that actually produced evidence, and the operator is told "the run did not
+finish" about a run they never started. It surfaced by cloning the repository and
+running the whole suite inside the clone: a clean checkout should have no `outputs/`
+at all, and it had one. The check now runs before the directory is created, and
+`latest_session` prefers a session that has a summary over one that merely sorts
+later.
 
 ## 8. Deliverables
 
