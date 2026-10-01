@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import socket
 import threading
 from pathlib import Path
@@ -309,3 +310,102 @@ def test_the_sdk_retry_policy_is_ours_not_its_own() -> None:
         model_name="m", api_key="k", base_url="http://127.0.0.1:1/v1", max_retries=3
     )
     assert retrying._ensure_client().max_retries == 3
+
+
+def test_an_unknown_provider_is_caught_even_when_it_bypasses_validation() -> None:
+    """`ModelConfig.provider` is a Literal, so pydantic rejects a bad value.
+
+    Assignment is not validated, though, and the factory can also be handed a
+    config built some other way - so it still has to say which providers exist
+    rather than raising a bare KeyError.
+    """
+    config = ModelConfig()
+    config.provider = "nonsense"  # type: ignore[assignment]
+
+    with pytest.raises(ModelConfigError, match="known:"):
+        create_model_client(config)
+
+
+class _AnsweringServer:
+    """One-shot HTTP server that always replies with the same JSON body.
+
+    `_SilentServer` covers the endpoint that never answers; this covers the one
+    that answers with something unusable, which is the other way a local model can
+    disappoint.
+    """
+
+    def __init__(self, payload: dict) -> None:
+        self._payload = json.dumps(payload).encode()
+        self._sock = socket.socket()
+        self._sock.bind(("127.0.0.1", 0))
+        self._sock.listen(1)
+        self.port = self._sock.getsockname()[1]
+        self._thread = threading.Thread(target=self._accept, daemon=True)
+        self._thread.start()
+
+    def _accept(self) -> None:
+        try:
+            conn, _ = self._sock.accept()
+        except OSError:
+            return
+        with conn:
+            conn.recv(65536)
+            head = (
+                b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: "
+                + str(len(self._payload)).encode()
+                + b"\r\n\r\n"
+            )
+            conn.sendall(head + self._payload)
+
+    def close(self) -> None:
+        self._sock.close()
+
+
+def _client_for(server: _AnsweringServer) -> OpenAICompatibleClient:
+    return OpenAICompatibleClient(
+        model_name="m",
+        api_key="k",
+        base_url=f"http://127.0.0.1:{server.port}/v1",
+        max_retries=0,
+    )
+
+
+def _completion(choices: list[dict]) -> dict:
+    return {
+        "id": "chatcmpl-1",
+        "object": "chat.completion",
+        "created": 0,
+        "model": "m",
+        "choices": choices,
+    }
+
+
+def test_an_endpoint_that_answers_with_no_choices_says_so() -> None:
+    """Otherwise the caller gets an IndexError from deep inside the SDK."""
+    server = _AnsweringServer(_completion([]))
+    try:
+        with pytest.raises(ModelError, match="no choices"):
+            _client_for(server).complete([{"role": "user", "content": "hi"}])
+    finally:
+        server.close()
+
+
+def test_an_endpoint_that_answers_with_nothing_says_so() -> None:
+    """A 200 with a blank message is not a plan, and parsing it would fail later
+    with a message about JSON rather than about the endpoint."""
+    server = _AnsweringServer(
+        _completion(
+            [
+                {
+                    "index": 0,
+                    "finish_reason": "stop",
+                    "message": {"role": "assistant", "content": "   "},
+                }
+            ]
+        )
+    )
+    try:
+        with pytest.raises(ModelError, match="empty response"):
+            _client_for(server).complete([{"role": "user", "content": "hi"}])
+    finally:
+        server.close()

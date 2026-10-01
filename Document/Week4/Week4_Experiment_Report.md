@@ -111,14 +111,33 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **510 passed**, ruff clean |
+| MacBook Air M2 | **517 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 210: 168 in the ten
-files below, 15 in `test_control_safety.py` for the executor's dispatch and the real
-backend, 10 in `test_model_mock.py`, 7 in `test_config.py` for the configuration
-surface, 7 in `test_plan_parser.py` for the step-status vocabulary and the
-plan-ordering rules, 2 in `test_ocr.py` for the label-merging fix, and 1 in
-`test_model_config.py` for the retry policy.
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 217: 168 in the ten
+files below, and 49 spread across the older suites it extended -
+`test_control_safety.py` 15, `test_model_mock.py` 14, `test_config.py` 7 (a new
+file), `test_plan_parser.py` 5, `test_model_config.py` 4, `test_ocr.py` 2 and
+`test_recording.py` 2.
+
+Every number here is a collected count taken on `d67de1f` in a worktree and on the
+current commit, per file - not a running total. The previous version of this
+sentence had drifted: it still described deltas from several rounds earlier and had
+never counted `test_recording.py` at all.
+
+**The mock never types for any of the five cases.** All five task instructions
+produce a single `click` step, because the intent rules match substrings and
+"research" contains "search" - so T02's plan is a click, not a click-and-type. The
+mock can produce `type_text` (an instruction like "Enter the query" does), and
+nothing pinned that either; it does now. Nothing is wrong with the plan T02 gets:
+the smoke double's job is a valid, resolvable plan, and the typing path is covered
+by the scripted offline demo and by the executor's own tests. But someone reading
+the five dry runs should not conclude that typing was exercised, and that is worth
+one line here rather than an inference.
+
+The same pass covered what happens when a local endpoint answers with something
+unusable - a 200 with no choices, and a 200 with a blank message. Both raise a
+`ModelError` that names the problem rather than letting an `IndexError` surface from
+inside the SDK, and neither had ever been reached.
 
 | Test file | Covers |
 | --- | --- |

@@ -248,3 +248,58 @@ def test_a_retry_is_counted_as_another_request() -> None:
     client.generate_text("hello")
 
     assert client.request_count == 3, "one initial attempt plus two retries"
+
+
+# ───────── what the mock can and cannot produce ─────────
+def test_the_mock_can_produce_a_typing_step() -> None:
+    """It reaches `type_text` and carries the clause as the text to enter.
+
+    Nothing pinned this, and none of the five task instructions trigger it either:
+    "Search the web for GUI agent research" hits the click rule first, because the
+    rules match substrings and "research" contains "search". So T02's dry-run plan
+    is a single click, and someone reading that output should not conclude the mock
+    exercised typing. The offline demo covers typing with a scripted plan instead.
+    """
+    plan = json.loads(MockModelClient().generate_multimodal("Enter the query").content)
+
+    assert [step["action_type"] for step in plan["steps"]] == ["type_text", "finish"]
+    assert plan["steps"][0]["arguments"]["text"] == "Enter the query"
+
+
+def test_the_mock_splits_a_clause_into_more_than_one_action() -> None:
+    """A conjunction produces one step per clause, not one per instruction."""
+    plan = json.loads(MockModelClient().generate_multimodal("Type the address, then wait").content)
+
+    assert [step["action_type"] for step in plan["steps"]] == ["type_text", "wait", "finish"]
+
+
+def test_generate_text_can_carry_a_system_turn() -> None:
+    """The planner does not use this, but the client advertises it and nothing
+    had ever passed a `system=` argument."""
+    client = MockModelClient()
+
+    response = client.generate_text("hello", system="You plan desktop actions.")
+
+    assert response.ok
+    assert client.calls[-1]["messages"][0] == {
+        "role": "system",
+        "content": "You plan desktop actions.",
+    }
+
+
+class _Exploding(ModelClient):
+    """Fails with something that is not a ModelError, which `_with_retries` does
+    not catch."""
+
+    name = "exploding"
+
+    def __init__(self, **kwargs: object) -> None:
+        super().__init__(model_name="exploding", **kwargs)  # type: ignore[arg-type]
+
+    def complete(self, messages: object, **kwargs: object) -> ModelResponse:
+        raise RuntimeError("the client itself is broken")
+
+
+def test_health_check_swallows_even_an_unexpected_failure() -> None:
+    """It promises never to raise, and a broken client is exactly when it is asked."""
+    assert _Exploding().health_check() is False  # type: ignore[arg-type]
