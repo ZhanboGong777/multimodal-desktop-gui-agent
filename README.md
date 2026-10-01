@@ -54,6 +54,11 @@ Three properties the loop is built around:
 552 tests, ruff clean. See `Document/Week4/Week4_Usage.md` for the flags, the
 safety model and the record layout.
 
+The Chinese deliverables - `Week4_中文实验报告.(md|docx)`, `Week4_Windows复核手册.md`
+and the `sync_report_numbers.py` tool that keeps their numbers in step with this
+tree - are delivered alongside the repository rather than inside it, so a citation
+to one of those filenames will not resolve here.
+
 The five basic task runs still have to be performed on a real desktop; their
 results go in `Document/Week4/Week4_Basic_Task_Test_Report.md`.
 

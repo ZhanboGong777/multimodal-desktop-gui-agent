@@ -801,6 +801,16 @@ added situations the first pass had not met. Each row states the behaviour this
 code has, not the behaviour it ought to have; a diagnostic guide describing
 behaviour the implementation does not have would be worse than none.
 
+**Where the Chinese deliverables live.** Three files this report refers to are
+delivered alongside the repository rather than inside it, because they are written
+for the person doing the Windows review and are maintained in the same folder as
+the Chinese report they belong to: `Week4_中文实验报告.md` and its `.docx`,
+`Week4_Windows复核手册.md`, and `sync_report_numbers.py`, the tool that keeps the
+numbers in both of them in step with this repository. They sit in the week 4
+document folder of the internship deliverables, with the hand-back notes they were
+written against. A reader who follows a citation to one of those filenames and
+does not find it in the tree has not hit a missing document.
+
 ## 9. Limits
 
 - **The five basic tasks have not been run for real.** Everything above is offline
