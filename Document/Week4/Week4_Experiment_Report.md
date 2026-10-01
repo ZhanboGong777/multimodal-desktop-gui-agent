@@ -748,6 +748,15 @@ Its failures go through the runtime's own classifier, so a warmup that dies on t
 context window prints the same hint a task run would. The manual gained a step that
 runs it before the first task, and the usage guide gained it in the quick start.
 
+16.5.4 asks for the warmup time to be kept *beside* the run's timings while 13.4.1
+keeps it *out* of them. Both hold because the CLI copies the record into the run's
+own directory and the evidence collector carries it into the repository with the
+summary and the step log: the four task timings are untouched, and a run whose
+output directory has no record says so in its header - in both modes, because a
+dry run records `planning_ms` too and a cold model inflates that number just as
+much. The result template gained the two rows this needs, for free memory and for
+the cold and warm latencies.
+
 
 ## 8. Deliverables
 
