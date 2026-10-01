@@ -201,7 +201,17 @@ values but had no test. Four cases were added in Week 3's follow-up.
 - `scripts/week4_offline_demo.py` - the loop against scripted frames.
 - `configs/week4.yaml` - Week 4 limits, with `AgentConfig` added to `config.py`.
 - 68 new tests across 7 files.
-- `Document/Week4/Week4_Usage.md`, this report, and the basic task test report.
+- `Document/Week4/Week4_Usage.md` - flags, the safety model, the record layout.
+- `Document/Week4/Week4_Troubleshooting.md` - fifteen symptoms with what to check
+  and what the code actually does about each.
+- This report and the basic task test report.
+
+**W4-13 diagnostic guide.** The hand-off asks for a table of fifteen situations -
+connection, model, perception, resolution, execution, verification and recording -
+each with what to check and how it is handled. That is
+`Document/Week4/Week4_Troubleshooting.md`. Each row states the behaviour this code
+has, not the behaviour it ought to have; a diagnostic guide describing behaviour
+the implementation does not have would be worse than none.
 
 ## 9. Limits
 

@@ -87,6 +87,17 @@ Each observation file records the frame-local element ids, so a coordinate in
 Typed text is redacted in the step log: the record notes that something was
 typed and how long it was, never what it said.
 
+## When something goes wrong
+
+`Document/Week4/Week4_Troubleshooting.md` lists fifteen symptoms - from a refused
+connection to a save-changes dialog - with what to check first and what the code
+does about each. The two most common while setting up:
+
+- `monitor_index 1 is out of range (available 1..0)` - the display is asleep. The
+  run reports `blocked` and dispatches nothing; wake the screen and re-run.
+- `no element matches '...'` - the model named text that is not on the screen. The
+  step fails and the run stops rather than clicking a default position.
+
 ## Safety
 
 - Nothing is dispatched unless `--execute` is passed, and the confirmation prompt
