@@ -111,9 +111,9 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **510 passed**, ruff clean |
+| MacBook Air M2 | **508 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 210: 168 in the ten
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 208: 166 in the ten
 files below, 15 in `test_control_safety.py` for the executor's dispatch and the real
 backend, 10 in `test_model_mock.py`, 7 in `test_config.py` for the configuration
 surface, 7 in `test_plan_parser.py` for the step-status vocabulary and the
@@ -130,7 +130,7 @@ plan-ordering rules, 2 in `test_ocr.py` for the label-merging fix, and 1 in
 | `test_runtime_recording.py` | 10 cases: redaction, append-only steps, per-frame files, summary, and where the provenance comes from |
 | `test_week4_cli.py` | 15 cases: argument errors, no `--yes`, dry-run default, summary always written, `--execute` refused without a terminal, the callback set an execute run hands over, `.env` loading, the flag/environment/YAML precedence, and the numeric limits |
 | `test_week4_integration.py` | 5 cases: the loop against a real OpenAI-compatible server over a real socket, which reads the element ids out of the prompt it receives |
-| `test_week4_prompts.py` | 12 cases: the prompt fits its budget, describes element targeting and every action's arguments, carries the platform, trims the element list by whole lines, and keeps markers verbatim |
+| `test_week4_prompts.py` | 10 cases: the prompt fits its budget, describes element targeting and every action's arguments, and the user turn is the JSON envelope the planner actually sends |
 | `test_week4_cases.py` | 12 cases: the invariants the five case definitions must hold - a machine-checkable rule, a declared precondition, a distinctive marker, a copy handed back by `get_case`, and the fresh marker a send-message run is given |
 | `test_week4_evidence.py` | 12 cases: what the evidence collector copies, what it refuses to copy, which run `--latest` picks, and its error paths |
 
@@ -278,18 +278,28 @@ invariants a case must satisfy to be runnable at all - a machine-checkable rule 
 a declared precondition - because a case missing either is not "not yet measured",
 it is unrunnable, and its row in the report would mean nothing.
 
-**The prompt truncated the observation mid-field.** `build_user_prompt` rendered
-the whole context as JSON and cut it at 4 000 characters, which is what 8.2.10
-forbids: the cut lands inside the element list, leaving an element id with half its
-text. The list is now trimmed one whole element at a time and the prompt says how
-many were left out; the short bounded fields beside it are serialized in full. The
-same pass fixed the system prompt's blanket "keep every string under 60
-characters", which 8.2.3 rules out - it invites the model to abbreviate the very
-marker the task is verified against. It now limits `description` and `summary`
-only, and says to copy text exactly. 8.1.7 asks for the execution limits as well
-as the step cap, so the planner's context now carries "at most N actions and T s
-for the whole task" rather than letting the model discover the budget by having
-its plan refused.
+**Two prompt rules were wrong, and one "fix" went to a function nobody called.**
+The system prompt said "keep every string under 60 characters", which 8.2.3 rules
+out - it invites the model to abbreviate the very marker the task is verified
+against. It limits `description` and `summary` now and says to copy text exactly.
+8.1.7 asks for the execution limits as well as the step cap, so the planner's
+context carries "at most N actions and T s for the whole task" rather than letting
+the model discover the budget by having its plan refused. Both of those are live.
+
+The third finding was not. `build_user_prompt` cut the serialized context at 4 000
+characters, which would have been a 8.2.10 violation - and it was fixed, and
+described here, before anyone checked whether the function was on the path. It was
+not: the planner goes through `ModelRequest.to_messages`, which sends a compact
+JSON envelope, and nothing in `src/` or `scripts/` ever called `build_user_prompt`.
+The live path never truncated anything; the list is capped structurally by
+`execution.max_elements`. The function and its twelve tests are gone, its helper
+with them, and the tests now pin the envelope the planner actually sends - through
+the planner's own call, so the two cannot drift apart again. A stale comment in the
+mock that named the dead function is corrected too.
+
+The lesson is the one this report keeps meeting from a new angle: the fix was
+tested and the tests passed, which felt like evidence. What was missing was the
+question the tests could not ask - whether the code being tested is ever reached.
 
 **A wrong-typed argument escaped as a traceback.** `int(scroll_amount)` and
 `float(duration)` raised bare `ValueError`. The runner catches

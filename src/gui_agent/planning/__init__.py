@@ -7,7 +7,7 @@ accepted, and stops there.
 
 from .parser import PlanParseError, extract_json_object, parse_plan
 from .planner import PlanResult, TaskPlanner
-from .prompts import SYSTEM_PROMPT, build_user_prompt
+from .prompts import SYSTEM_PROMPT
 from .schemas import EXECUTABLE_ACTION_TYPES, PLAN_ACTION_TYPES, PlanStep, TaskPlan
 
 __all__ = [
@@ -19,7 +19,6 @@ __all__ = [
     "PlanStep",
     "TaskPlan",
     "TaskPlanner",
-    "build_user_prompt",
     "extract_json_object",
     "parse_plan",
 ]

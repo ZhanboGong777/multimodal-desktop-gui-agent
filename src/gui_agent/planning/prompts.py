@@ -4,14 +4,15 @@ The prompt states the allowed verbs and the exact JSON shape, because the parser
 downstream is strict: a plan that does not validate is rejected rather than
 patched up.
 
-The example is kept as a plain string and the prompt is assembled by
+The example is kept as a plain string and the system prompt is assembled by
 concatenation; ``str.format`` would treat the braces of that JSON as placeholders.
+
+The user turn is not built here. It is the JSON envelope ``ModelRequest.to_messages``
+produces from the instruction, the screen context and the image path, so that a
+backend sees one object rather than a rendered template.
 """
 
 from __future__ import annotations
-
-import json
-from typing import Any
 
 from .schemas import PLAN_ACTION_TYPES
 
@@ -43,52 +44,3 @@ SYSTEM_PROMPT = "\n".join(
         "- If it is ambiguous, say so in assumptions and still return a plan.",
     ]
 )
-
-#: The element list is the one part of the context that runs to thousands of
-#: characters on a text-heavy screen, and it is the part the model aims with. It is
-#: trimmed by whole element lines: cutting the serialized JSON instead leaves an
-#: element id with half its text, which is worse than not listing that element.
-ELEMENT_BUDGET_CHARS = 4000
-
-
-def _trim_element_lines(block: str, budget: int) -> str:
-    """Keep whole element lines, up to ``budget`` characters, and say what went."""
-    lines = [line for line in block.splitlines() if line.strip()]
-    kept: list[str] = []
-    used = 0
-    for line in lines:
-        if kept and used + len(line) + 1 > budget:
-            break
-        kept.append(line)
-        used += len(line) + 1
-    dropped = len(lines) - len(kept)
-    if dropped:
-        kept.append(f"... {dropped} further elements omitted to fit the prompt")
-    return "\n".join(kept)
-
-
-def build_user_prompt(
-    instruction: str,
-    *,
-    context: dict[str, Any] | None = None,
-    image_path: str | None = None,
-    max_steps: int = 10,
-) -> str:
-    """Assemble the user turn: instruction, screen context and the hard limits.
-
-    The context is split rather than dumped as one blob: the element list is
-    trimmed by whole lines, and the rest - short and bounded - is serialized whole.
-    """
-    data = dict(context or {})
-    parts = [f"Instruction: {instruction}", f"Maximum steps: {max_steps}"]
-    platform = data.pop("platform", None)
-    if platform:
-        parts.append(f"Platform: {platform}")
-    if image_path:
-        parts.append(f"Screenshot: {image_path}")
-    elements = str(data.pop("visible_text", "") or "")
-    if data:
-        parts.append("Screen context:\n" + json.dumps(data, ensure_ascii=False, indent=2))
-    if elements.strip():
-        parts.append("Screen elements:\n" + _trim_element_lines(elements, ELEMENT_BUDGET_CHARS))
-    return "\n\n".join(parts)

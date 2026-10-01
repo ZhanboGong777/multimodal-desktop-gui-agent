@@ -92,8 +92,8 @@ class MockModelClient(ModelClient):
             try:
                 payload = json.loads(raw)
             except json.JSONDecodeError:
-                # build_user_prompt emits plain text, not JSON: pull the
-                # instruction line out rather than feeding the whole prompt back.
+                # A caller that rendered its own plain-text prompt: pull the
+                # instruction line out rather than feeding the whole turn back.
                 for line in raw.splitlines():
                     if line.strip().casefold().startswith("instruction:"):
                         return line.split(":", 1)[1].strip()

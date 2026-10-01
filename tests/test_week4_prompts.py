@@ -4,13 +4,20 @@ Week 3's prompt named no arguments and no element ids, so a plan could be valid
 JSON and still be unresolvable against the frame. These checks pin the parts the
 runtime depends on, and pin the length: a prompt that grows back past the point
 where the 7B model truncates its own answer would break the loop again.
+
+They also pin the *shape* of the user turn. A function that rendered a plain-text
+turn lived here for a while and nothing called it - the planner goes through
+`ModelRequest.to_messages` - so the tests were guarding a prompt no model ever
+saw. The checks below go through the objects the planner actually uses.
 """
 
 from __future__ import annotations
 
-import re
+import json
 
-from gui_agent.planning.prompts import SYSTEM_PROMPT, build_user_prompt
+from gui_agent.models import MockModelClient, ModelRequest
+from gui_agent.planning import TaskPlanner
+from gui_agent.planning.prompts import SYSTEM_PROMPT
 
 #: The prompt that caused truncated replies measured 1 199 characters; the one
 #: that worked measured 792. Stay near the working end.
@@ -46,13 +53,63 @@ def test_the_prompt_points_at_this_platform_s_keys() -> None:
     assert "platform" in SYSTEM_PROMPT, "the model must not hard-code another OS's shortcuts"
 
 
-def test_the_user_turn_carries_the_platform_when_it_is_known() -> None:
-    rendered = build_user_prompt("open it", context={"platform": "darwin"}, max_steps=10)
-    assert "Platform: darwin" in rendered
+def test_the_user_turn_is_one_json_object() -> None:
+    """The shape a backend receives: instruction, context and image in one turn."""
+    payload = json.loads(
+        ModelRequest(
+            instruction="open it",
+            context={"platform": "darwin", "visible_text": "obs-0001-e000  'Browser'"},
+            image_path="/tmp/shot.png",
+        )
+        .to_messages()[0]["content"]
+    )
+
+    assert payload["instruction"] == "open it"
+    assert payload["context"]["platform"] == "darwin"
+    assert payload["image_path"] == "/tmp/shot.png"
 
 
-def test_the_user_turn_still_works_without_a_platform() -> None:
-    assert "Platform:" not in build_user_prompt("open it", max_steps=5)
+def test_nothing_is_omitted_when_there_is_nothing_to_say() -> None:
+    """A run with no context or image sends the instruction and nothing else."""
+    payload = json.loads(ModelRequest(instruction="go").to_messages()[0]["content"])
+
+    assert payload == {"instruction": "go"}
+
+
+def test_the_element_list_reaches_the_model_whole() -> None:
+    """8.2.10: the observation is filtered structurally, never cut mid-field.
+
+    There is no length truncation anywhere on this path - the list is capped by
+    `execution.max_elements`, one whole element at a time.
+    """
+    elements = "\n".join(_element_line(index) for index in range(200))
+
+    payload = json.loads(
+        ModelRequest(instruction="go", context={"visible_text": elements})
+        .to_messages()[0]["content"]
+    )
+
+    assert payload["context"]["visible_text"] == elements
+
+
+def test_the_planner_sends_that_shape_and_not_a_rendered_template() -> None:
+    """Through the planner's own call, so the two cannot drift apart again."""
+    client = MockModelClient()
+    planner = TaskPlanner(client, max_steps=7)
+
+    planner.plan(
+        "Open the browser",
+        context={"visible_text": "obs-0001-e000  'Browser'"},
+        image_path="/tmp/s.png",
+        task_id="T01",
+    )
+
+    sent = client.calls[-1]["messages"]
+    payload = json.loads(sent[-1]["content"])
+    assert [message["role"] for message in sent] == ["system", "user"]
+    assert payload["instruction"] == "Open the browser"
+    assert payload["context"]["max_steps"] == 7, "8.2.9: the cap travels with the task"
+    assert payload["image_path"] == "/tmp/s.png"
 
 
 def _element_line(index: int) -> str:
@@ -60,54 +117,3 @@ def _element_line(index: int) -> str:
         f"obs-0002-e{index:03d}  'Element {index} with a reasonably long label'  "
         f"conf=0.90  center=(100,{20 * index})  box=(10,10,400,40)"
     )
-
-
-def test_the_element_list_reaches_the_model_whole() -> None:
-    line = _element_line(7)
-    rendered = build_user_prompt("do it", context={"visible_text": line})
-    assert line in rendered
-
-
-def test_a_long_element_list_is_trimmed_by_whole_lines() -> None:
-    """8.2.10 forbids cutting the serialized observation mid-field.
-
-    An element id with half its text is unusable in both directions: the model
-    cannot copy a label it cannot read, and the adapter cannot match one that was
-    chopped. So the list is trimmed a whole element at a time, and the prompt says
-    how many were left out.
-    """
-    elements = "\n".join(_element_line(index) for index in range(200))
-    rendered = build_user_prompt("do it", context={"visible_text": elements})
-    block = rendered.split("Screen elements:\n", 1)[1]
-
-    assert len(block) < 4400, "the element block is not bounded"
-    assert "further elements omitted" in block
-
-    for line in block.splitlines():
-        if line.startswith("..."):
-            continue
-        assert re.fullmatch(r"obs-\d+-e\d+\s+'[^']*'\s+conf=.*", line), line
-
-
-def test_a_short_element_list_is_passed_through_whole() -> None:
-    elements = "\n".join(_element_line(index) for index in range(3))
-    rendered = build_user_prompt("do it", context={"visible_text": elements})
-
-    for index in range(3):
-        assert f"obs-0002-e{index:03d}" in rendered
-    assert "omitted" not in rendered
-
-
-def test_only_the_descriptive_fields_are_length_limited() -> None:
-    """8.2.3: typed text, file paths and test markers are preserved verbatim.
-
-    A blanket "every string under 60 characters" rule invites the model to
-    abbreviate the very marker the task is verified against.
-    """
-    assert "Keep every string under 60 characters" not in SYSTEM_PROMPT
-    assert "description and summary under 60 chars" in SYSTEM_PROMPT
-
-    marker = "WEEK4-OPEN-FILE-OK-with-a-deliberately-long-tail-so-it-exceeds-sixty"
-    rendered = build_user_prompt(f"open {marker}", context={"platform": "win32"})
-    assert marker in rendered
-    assert len(marker) > 60
