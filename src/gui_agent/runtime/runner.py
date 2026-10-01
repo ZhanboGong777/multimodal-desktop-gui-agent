@@ -261,32 +261,45 @@ class TaskRunner:
 
         # 4. confirmation gate — before any real input event
         if options.execute:
-            if options.confirm and confirm is not None and not confirm(plan):
-                result = self._finish(
-                    task, options, "cancelled", started, notes, snapshot=initial, timings=timings
-                )
-                result.verification = None
-                return result
-            # A risky task gets a second, separate confirmation. The policy lives
-            # here, next to the risk it is about, rather than in each caller: a
-            # caller that forgets to ask is the failure this gate exists to stop,
-            # and one already did - the CLI built the prompt and never passed it.
-            if (
+            # Both prompts are asked in order, and a refusal at either ends the run.
+            # The short-circuit is the point: a plan the operator just declined must
+            # not then be put to them a second time.
+            #
+            # A risky task gets the second, separate confirmation, and the policy
+            # lives here rather than in each caller - a caller that forgets to ask is
+            # the failure this gate exists to stop, and one already did: the CLI
+            # built the prompt and never passed it on.
+            declined = (
+                options.confirm and confirm is not None and not confirm(plan)
+            ) or (
                 options.confirm
                 and high_risk_confirm is not None
                 and task.risk in _RISKY_RISKS
                 and not high_risk_confirm(plan)
-            ):
+            )
+            if declined:
+                # The gate is over, so time a person spent reading the plan belongs
+                # to confirmation_ms. Without this the wait landed in execution_ms,
+                # which made a hesitant operator look like a slow system.
+                timings.confirmed = self.clock()
                 result = self._finish(
-                    task, options, "cancelled", started, notes, snapshot=initial, timings=timings
+                    task,
+                    options,
+                    "cancelled",
+                    started,
+                    notes,
+                    snapshot=initial,
+                    planning_attempts=planning_attempts,
+                    timings=timings,
                 )
                 result.verification = None
                 return result
             if countdown is not None:
                 countdown(3)
+            # Everything from here is the system working, not a person reading - the
+            # countdown included, since it is a warning addressed to the operator.
+            timings.confirmed = self.clock()
 
-        # Everything after this point is the system working, not a person reading.
-        timings.confirmed = self.clock()
         return self._execute_plan(
             task, plan, options, initial, started, notes, planning_attempts, timings=timings
         )

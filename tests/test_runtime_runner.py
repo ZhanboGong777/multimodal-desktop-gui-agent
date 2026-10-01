@@ -959,3 +959,55 @@ def test_the_timing_phases_partition_the_run(tmp_path: Path) -> None:
     assert result.elapsed_ms == pytest.approx(
         result.planning_ms + result.confirmation_ms + result.execution_ms
     )
+
+
+def test_a_declined_run_records_the_planning_it_did_and_the_wait_it_caused(tmp_path: Path) -> None:
+    """A refusal is still a run, and its record has to say what happened.
+
+    Driving the CLI through a real terminal showed two wrong numbers on the
+    cancelled path: `planning_attempts` read 0 although the notes said a plan had
+    been made, and the operator's reading time was counted as `execution_ms`. The
+    second is the misattribution 16.5.4 exists to prevent - a hesitant person
+    looking like a slow model.
+    """
+    frames = [_frame("obs-0001", ("Start",)), _frame("obs-0002", ("Target",))]
+    plan = _plan(
+        PlanStep(step_id="s1", description="click", action_type="click", target_text="Target")
+    )
+    task = TaskSpec(case_id="T", instruction="x", expect_text=["Done"], success_rules=["r"])
+    executor = FakeExecutor()
+    runner, _recorder = _runner(
+        tmp_path, FakeObserver(frames), FakePlanner(plan), executor, clock=_StepClock()
+    )
+
+    result = runner.run(
+        task,
+        ExecutionOptions(execute=True, confirm=True),
+        confirm=lambda _plan: False,
+        countdown=lambda _seconds: None,
+    )
+
+    assert result.status == "cancelled"
+    assert executor.actions == []
+    assert result.planning_attempts == 1, "a plan was made, and the record should say so"
+    assert result.confirmation_ms > 0, "the refusal took time, and it was the operator's"
+    assert result.elapsed_ms == pytest.approx(
+        result.planning_ms + result.confirmation_ms + result.execution_ms
+    )
+
+
+def test_a_refused_plan_is_not_put_to_the_operator_twice(tmp_path: Path) -> None:
+    """Declining the first prompt must not lead to the second one."""
+    runner, executor, _planner = _void_case(tmp_path)
+    asked: list[object] = []
+
+    result = runner.run(
+        _risky_task(),
+        ExecutionOptions(execute=True, confirm=True),
+        confirm=lambda _plan: False,
+        high_risk_confirm=lambda plan: asked.append(plan) or True,
+    )
+
+    assert result.status == "cancelled"
+    assert asked == [], "the second prompt appeared after the first was already refused"
+    assert executor.actions == []

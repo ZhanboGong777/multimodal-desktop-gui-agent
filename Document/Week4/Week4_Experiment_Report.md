@@ -57,7 +57,14 @@ arguments and no element ids, so a plan could be valid JSON and still be
 unresolvable against the frame. The prompt now shows the `{"element_id": ...}`
 form, lists the argument each action needs, and asks for this platform's key
 names. It was 1 199 characters when the 7B model truncated its own replies and 792
-when it stopped; the new one is **959**, and a test pins it under 1 000.
+when it stopped; the current one is **979**, and a test pins it under 1 000.
+
+**The model is called synchronously.** 10.3.7 warns that stopping a thread
+which is waiting on a model does not cancel the HTTP request underneath it,
+and that a reply arriving afterwards must be discarded. There is no such
+thread here: `TaskPlanner.plan` runs inside the run, so a cancelled or timed
+out run has nothing left in flight to be revived by. The per-request limit is
+`model.timeout_seconds`; the run's own budget is separate.
 
 **Screenshots changing is not success.** `ActionResult.success` only means
 PyAutoGUI dispatched an event. Only `Verifier.check_task` can return `succeeded`,
@@ -104,18 +111,20 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **456 passed**, ruff clean |
+| MacBook Air M2 | **465 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 156: 137 in the ten
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 165: 139 in the ten
 files below, 10 in `test_model_mock.py`, 2 in `test_ocr.py` for the label-merging
-fix described in section 7, and 7 in `test_plan_parser.py` for the step-status
-vocabulary and the plan-ordering rules.
+fix described in section 7, 7 in `test_plan_parser.py` for the step-status
+vocabulary and the plan-ordering rules, and 7 in `test_config.py` for the
+configuration surface.
 
 | Test file | Covers |
 | --- | --- |
 | `test_action_adapter.py` | 27 cases: unique, ambiguous, missing and stale targets, a target split across word-level elements, parameter errors including wrong types, out-of-range coordinates, key whitelist, platform hotkeys, coordinate scaling, `finish` refusal |
-| `test_runtime_runner.py` | 39 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, the guard that refuses to start a real run whose goal already holds, the second confirmation a risky task must get, the provenance the summary carries, and the note a frame with no readable text leaves |
+| `test_runtime_runner.py` | 41 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, the guard that refuses to start a real run whose goal already holds, the second confirmation a risky task must get, the provenance the summary carries, and the note a frame with no readable text leaves |
 | `test_runtime_verification.py` | 10 cases: rule matching, forbidden text, unverifiable tasks, degraded observations, and the two case rules that have to tell a real result from a lookalike |
+| `test_config.py` | 7 cases: an unknown key is refused at the top level and inside a section, out-of-range limits are refused, and the defaults are the safe mode |
 | `test_runtime_observation.py` | 3 cases: frame-local ids do not repeat, unlabelled contours are not offered as targets, and a prompt line carries what a step needs to aim |
 | `test_runtime_recording.py` | 6 cases: redaction, append-only steps, per-frame files, summary |
 | `test_week4_cli.py` | 13 cases: argument errors, no `--yes`, dry-run default, summary always written, `--execute` refused without a terminal, the callback set an execute run hands over, `.env` loading, and the flag/environment/YAML precedence |
@@ -417,6 +426,21 @@ before giving up. That is the case the Windows review actually hit: its T01
 reported a 400 after a long wait, and the summary it left behind said the run took
 no time at all.
 
+**Driving a real terminal found two more wrong numbers.** The unit tests pass a
+`confirm=` callback straight to the runner, so nothing had ever exercised the CLI's
+own interaction - and the first time one did, through a pty, the cancelled path
+turned out to report `planning_attempts: 0` although the notes said a plan had been
+made, and to put the operator's reading time into `execution_ms`. The second is the
+misattribution 16.5.4 exists to prevent: a hesitant person looking like a slow
+model. Both are fixed. The same run now records one planning attempt, the wait in
+`confirmation_ms`, and `execution_ms` at zero - which is right, because a refused
+plan costs the system nothing.
+
+That exercise is also the only time the second confirmation has actually run. A T04
+driven through a pty shows two prompts, and declining the second cancels with
+nothing dispatched. The path had been wired but never executed end to end, which is
+how it came to be left unwired in the first place.
+
 ## 8. Deliverables
 
 - `src/gui_agent/runtime/` - the run layer (8 modules).
@@ -451,6 +475,15 @@ behaviour the implementation does not have would be worse than none.
 - `type_text` uses `pyautogui.typewrite`, so ASCII only; Unicode input is not
   claimed.
 - There is no re-planning. A failed step stops the run; recovery is Week 6.
+- **There is no automatic focus check.** Targets are resolved against a fresh frame
+  and the adapter refuses an absent or ambiguous one, but nothing reads the
+  foreground window to confirm that the intended application has keyboard focus
+  before a typing or send step. 11.3 asks for that to be written down when
+  cross-platform foreground detection is not implemented, and it is not. The
+  mitigation is procedural rather than automatic: a `medium` or `high` risk task is
+  confirmed a second time with the text the plan will type, which is why a T04 row
+  cannot be credited unless the operator saw that prompt. Nothing here prevents
+  every mis-typed character, and no claim to the contrary is made.
 - **Merging OCR words into lines trades a little precision for resolvability.** A
   target that names one word inside a longer mixed line - "main" in "Current branch
   main" - now resolves to the centre of the whole line, because the element no
