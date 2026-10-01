@@ -111,13 +111,18 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **518 passed**, ruff clean |
+| MacBook Air M2 | **521 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 218: 169 in the ten
-files below, and 49 spread across the older suites it extended -
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 221: 169 in the ten
+files below, and 52 spread across the other suites -
 `test_control_safety.py` 15, `test_model_mock.py` 14, `test_config.py` 7 (a new
-file), `test_plan_parser.py` 5, `test_model_config.py` 4, `test_ocr.py` 2 and
-`test_recording.py` 2.
+file), `test_plan_parser.py` 5, `test_model_config.py` 4, `test_ocr.py` 2,
+`test_recording.py` 2 and `test_documented_counts.py` 3 (a new file).
+
+Those numbers are checked rather than maintained: `test_documented_counts.py`
+collects the suite in a subprocess and asserts that the totals here and in the
+README, and every row of the table below, still describe the code they sit next
+to.
 
 Every number here is a collected count taken on `d67de1f` in a worktree and on the
 current commit, per file - not a running total. The previous version of this
