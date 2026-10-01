@@ -1394,3 +1394,47 @@ def test_a_missing_ocr_binary_is_named_in_the_run_notes(tmp_path: Path) -> None:
     assert "not installed or it's not in your PATH" in notes, notes
     assert "no readable text" in notes
     assert "missing `tesseract` binary" in notes, "the note points at the wrong cause"
+
+
+def test_the_written_summary_carries_the_verification(tmp_path: Path) -> None:
+    """`_finish` writes the file; a field attached after it returned was written null.
+
+    Every run's task_summary.json said `"verification": null` while the returned
+    object carried the verdict the CLI printed, so the record the reviewer reads -
+    and the evidence collector ships to the repository - said the task had no
+    verification at all. The test report's result table has a column for it.
+    """
+    frames = [_frame("obs-0001", ("Results ready",)), _frame("obs-0002", ("Results ready",))]
+    plan = _plan(
+        PlanStep(step_id="s1", description="click", action_type="click", target_text="Results")
+    )
+    runner, recorder = _runner(tmp_path, FakeObserver(frames), FakePlanner(plan), FakeExecutor())
+    task = TaskSpec(
+        case_id="T", instruction="x", expect_text=["Results ready"], success_rules=["r"]
+    )
+
+    result = runner.run(
+        task, ExecutionOptions(execute=True, confirm=True), confirm=lambda _plan: True
+    )
+    written = json.loads((recorder.directory / "task_summary.json").read_text(encoding="utf-8"))
+
+    assert result.verification is not None, "the returned object still carries it"
+    assert written["verification"] is not None, "and so does the file"
+    assert written["verification"]["outcome"] == result.verification.outcome
+    assert written["verification"]["method"] == result.verification.method
+
+
+def test_the_written_summary_of_a_dry_run_carries_it_too(tmp_path: Path) -> None:
+    """The dry-run path attached its verdict the same way, and lost it the same way."""
+    frames = [_frame("obs-0001", ("Start",)), _frame("obs-0002", ("Start",))]
+    plan = _plan(
+        PlanStep(step_id="s1", description="click", action_type="click", target_text="Start")
+    )
+    runner, recorder = _runner(tmp_path, FakeObserver(frames), FakePlanner(plan), FakeExecutor())
+    task = TaskSpec(case_id="T", instruction="x", expect_text=["Start"], success_rules=["r"])
+
+    runner.run(task, ExecutionOptions(confirm=False))
+    written = json.loads((recorder.directory / "task_summary.json").read_text(encoding="utf-8"))
+
+    assert written["verification"]["outcome"] == "inconclusive"
+    assert "dry run" in written["verification"]["detail"]

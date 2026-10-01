@@ -172,7 +172,9 @@ def main() -> int:
         frame("obs-0002", ["Browser", "Search the web", "Bookmarks"]),  # before step 1
         frame("obs-0003", ["Browser", "Search the web", "Bookmarks"]),  # after step 1
         frame("obs-0004", ["Browser", "Search the web", "Bookmarks"]),  # before step 2
-        frame("obs-0005", ["Browser", "Search the web", "Bookmarks"]),  # after step 2
+        # Step 2 clicks the search field and expects it focused; a frame that shows
+        # no sign of that makes the demo stop at its own second step.
+        frame("obs-0005", ["Browser", "Search the web", "Cursor in field"]),  # after step 2
         frame("obs-0006", ["Browser", "Search the web", "Bookmarks"]),  # steps 3 and 4
         frame("obs-0007", ["GUI agent research - Results", "Papers", "Videos"]),  # the goal appears
     ]

@@ -347,7 +347,6 @@ class TaskRunner:
                     planning_attempts=planning_attempts,
                     timings=timings,
                 )
-                result.verification = None
                 return result
             if countdown is not None:
                 countdown(3)
@@ -528,7 +527,11 @@ class TaskRunner:
 
         # ── the plan is done; only the task verifier may call it a success ──
         if not options.execute:
-            result = self._finish(
+            # A dry run dispatched nothing, so the task rule cannot have been met -
+            # but reporting it as "failed" would say the run went wrong, and it did
+            # not. The rule's own verdict is kept as evidence, not as the outcome.
+            would_be = self.verifier.check_task(task, current)
+            return self._finish(
                 task,
                 options,
                 "dry_run_completed",
@@ -538,21 +541,17 @@ class TaskRunner:
                 snapshot=initial,
                 planning_attempts=planning_attempts,
                 timings=timings,
-            )
-            # A dry run dispatched nothing, so the task rule cannot have been met -
-            # but reporting it as "failed" would say the run went wrong, and it did
-            # not. The rule's own verdict is kept as evidence, not as the outcome.
-            would_be = self.verifier.check_task(task, current)
-            result.verification = VerificationResult(
-                outcome="inconclusive",
-                method=task.verification,
-                detail=(
-                    "dry run: actions were resolved and validated but nothing was dispatched, "
-                    f"so the task goal was not attempted (the rule would read {would_be.outcome})"
+                verification=VerificationResult(
+                    outcome="inconclusive",
+                    method=task.verification,
+                    detail=(
+                        "dry run: actions were resolved and validated but nothing was "
+                        f"dispatched, so the task goal was not attempted "
+                        f"(the rule would read {would_be.outcome})"
+                    ),
+                    evidence={"would_be": would_be.outcome, "rule_detail": would_be.detail},
                 ),
-                evidence={"would_be": would_be.outcome, "rule_detail": would_be.detail},
             )
-            return result
 
         verification, final = self.verifier.check_task_with_polling(
             task,
@@ -574,8 +573,8 @@ class TaskRunner:
             snapshot=initial,
             planning_attempts=planning_attempts,
             timings=timings,
+            verification=verification,
         )
-        result.verification = verification
         if final is not None:
             self.recorder.save_observation(final)
         return result
@@ -623,6 +622,7 @@ class TaskRunner:
         snapshot: ObservationSnapshot | None = None,
         planning_attempts: int = 0,
         timings: Timings | None = None,
+        verification: VerificationResult | None = None,
     ) -> TaskRunResult:
         client = getattr(self.planner, "client", None)
         records = steps or []
@@ -638,6 +638,12 @@ class TaskRunner:
             instruction=task.instruction,
             status=status,  # type: ignore[arg-type]
             steps=records,
+            # Passed in rather than attached to the returned object afterwards:
+            # `_finish` is what writes task_summary.json, so a field set after it
+            # returned was written as null. Every run's record on disk - the one the
+            # reviewer reads and the evidence collector ships - said the task had no
+            # verification at all.
+            verification=verification,
             elapsed_ms=elapsed_ms,
             execute=options.execute,
             model_name=getattr(client, "model_name", ""),
