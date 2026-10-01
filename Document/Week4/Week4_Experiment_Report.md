@@ -903,6 +903,34 @@ answer. Settings arrive from four places; when the endpoint turns out to be wron
 "was my `.env` read at all?" is the first question, and the answer depends on where
 the process was started. Both entry points now print which it was.
 
+**Every run's record said it had no verification.** `_finish` is what writes
+`task_summary.json`, and both callers attached the verification to the returned
+object after it returned:
+
+    result = self._finish(..., status)
+    result.verification = verification
+
+So the object the CLI printed from carried `passed`, and the file on disk - the one
+the reviewer reads, the one the evidence collector copies into the repository, the
+one the results table in `Week4_Basic_Task_Test_Report.md` has a column for - said
+`"verification": null`, for every run this project has produced. The dry-run path
+lost its verdict the same way. `_finish` takes the verification now, so it is
+written before the summary is serialised.
+
+It was found by running the hand-back manual's step 3 rather than reading it, and
+by writing a test that reads the file instead of the returned object. That
+distinction is the whole episode: a test asserting on `result.verification` would
+have passed throughout.
+
+**The demonstration had quietly stopped working.** Step 3 promises four dispatched
+actions, `succeeded` and `verification: passed`. The demo was stopping at its own
+second step: its scripted screens did not contain the words its scripted plan
+expected, and real runs began stopping on an unobserved expectation two rounds ago.
+Nothing ran the demo - the suite covers the loop with its own frames - so nothing
+failed. Its frames agree with its plan now, and `test_week4_demo.py` runs the
+script and asserts what the operator is promised, including that `--fail-at` still
+fails.
+
 ## 8. Deliverables
 
 - `src/gui_agent/runtime/` - the run layer (8 modules).
