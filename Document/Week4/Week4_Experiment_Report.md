@@ -111,18 +111,18 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **465 passed**, ruff clean |
+| MacBook Air M2 | **467 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 165: 139 in the ten
-files below, 10 in `test_model_mock.py`, 2 in `test_ocr.py` for the label-merging
-fix described in section 7, 7 in `test_plan_parser.py` for the step-status
-vocabulary and the plan-ordering rules, and 7 in `test_config.py` for the
-configuration surface.
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 167: 140 in the ten
+files below, 10 in `test_model_mock.py`, 7 in `test_config.py` for the
+configuration surface, 7 in `test_plan_parser.py` for the step-status vocabulary
+and the plan-ordering rules, 2 in `test_ocr.py` for the label-merging fix, and 1
+in `test_model_config.py` for the retry policy.
 
 | Test file | Covers |
 | --- | --- |
 | `test_action_adapter.py` | 27 cases: unique, ambiguous, missing and stale targets, a target split across word-level elements, parameter errors including wrong types, out-of-range coordinates, key whitelist, platform hotkeys, coordinate scaling, `finish` refusal |
-| `test_runtime_runner.py` | 41 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, the guard that refuses to start a real run whose goal already holds, the second confirmation a risky task must get, the provenance the summary carries, and the note a frame with no readable text leaves |
+| `test_runtime_runner.py` | 42 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, the guard that refuses to start a real run whose goal already holds, the second confirmation a risky task must get, the provenance the summary carries, and the note a frame with no readable text leaves |
 | `test_runtime_verification.py` | 10 cases: rule matching, forbidden text, unverifiable tasks, degraded observations, and the two case rules that have to tell a real result from a lookalike |
 | `test_config.py` | 7 cases: an unknown key is refused at the top level and inside a section, out-of-range limits are refused, and the defaults are the safe mode |
 | `test_runtime_observation.py` | 3 cases: frame-local ids do not repeat, unlabelled contours are not offered as targets, and a prompt line carries what a step needs to aim |
@@ -441,6 +441,27 @@ driven through a pty shows two prompts, and declining the second cancels with
 nothing dispatched. The path had been wired but never executed end to end, which is
 how it came to be left unwired in the first place.
 
+**A failing endpoint was attempted three times, and the record said one.** The
+OpenAI SDK retries twice on its own, and `max_retries` was never passed to it - so
+`model.max_retries: 0`, which 10.3.4 asks for on the first real loop, did not mean
+"one attempt". Measured against a deliberately hanging endpoint with
+`timeout_seconds: 3`: the call took twelve seconds, and the summary recorded one
+model request. That is the multi-layer stacking the spec warns about, and it made
+`model_requests` an undercount rather than a measurement - the one thing a
+provenance field must not be. The SDK is now given our retry count, the same call
+takes five seconds, and the test suite itself got eight seconds faster because the
+tests that exercise failing endpoints stopped retrying three times each.
+
+**Planning that failed was reported as execution.** The `planned` stamp was set
+only after a plan succeeded, so a model call that failed after two seconds reported
+`planning_ms: 0` and put those seconds into `execution_ms` - a blocked run looking
+like one that had been busy acting. This is the shape the Windows review hit
+exactly: its 400 arrived after a long wait. Both paths were verified end to end
+through the CLI against a stand-in endpoint that reproduces the review's error
+verbatim: the 400 now reports `planning_ms: 2087.5` with `execution_ms: 0.0`, and a
+hanging endpoint reports `APITimeoutError` as its own class rather than as a
+generic failure.
+
 ## 8. Deliverables
 
 - `src/gui_agent/runtime/` - the run layer (8 modules).
@@ -452,7 +473,7 @@ how it came to be left unwired in the first place.
 - `configs/week4.yaml` - Week 4 limits, with `ExecutionConfig` added to `config.py`.
 - 102 new tests.
 - `Document/Week4/Week4_Usage.md` - flags, the safety model, the record layout.
-- `Document/Week4/Week4_Troubleshooting.md` - twenty-six symptoms with what to check
+- `Document/Week4/Week4_Troubleshooting.md` - twenty-seven symptoms with what to check
   and what the code actually does about each.
 - `Document/Week4/Week4_Basic_Task_Test_Report.md` - the five results, one row per
   case, with the precondition, the attempt and success counts, the verification
@@ -462,7 +483,7 @@ how it came to be left unwired in the first place.
 **W4-13 diagnostic guide.** The hand-off asks for a table of fifteen situations -
 connection, model, perception, resolution, execution, verification and recording -
 each with what to check and how it is handled. That is
-`Document/Week4/Week4_Troubleshooting.md`, grown to twenty-six as the Windows review
+`Document/Week4/Week4_Troubleshooting.md`, grown to twenty-seven as the Windows review
 added situations the first pass had not met. Each row states the behaviour this
 code has, not the behaviour it ought to have; a diagnostic guide describing
 behaviour the implementation does not have would be worse than none.

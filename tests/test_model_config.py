@@ -290,3 +290,22 @@ def test_configuration_errors_are_a_separate_class_from_runtime_errors() -> None
             [{"role": "user", "content": "x"}], "/no/such/file.png"
         )
     assert not (excinfo.value is None)
+
+
+def test_the_sdk_retry_policy_is_ours_not_its_own() -> None:
+    """10.3.4: stacked retries have to be prevented, not documented.
+
+    The SDK retries twice by default. Ours does too, so a failing endpoint was
+    attempted three times inside a single `complete()` call while our loop counted
+    one - which meant `model.max_retries: 0` did not actually mean "one attempt",
+    and `model_requests` under-reported the real traffic by up to 3x.
+    """
+    patient = OpenAICompatibleClient(
+        model_name="m", api_key="k", base_url="http://127.0.0.1:1/v1", max_retries=0
+    )
+    assert patient._ensure_client().max_retries == 0
+
+    retrying = OpenAICompatibleClient(
+        model_name="m", api_key="k", base_url="http://127.0.0.1:1/v1", max_retries=3
+    )
+    assert retrying._ensure_client().max_retries == 3

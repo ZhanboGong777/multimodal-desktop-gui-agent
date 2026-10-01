@@ -1,6 +1,6 @@
 # Week 4 troubleshooting
 
-Twenty-six situations the closed loop can run into, in the order they tend to appear.
+Twenty-seven situations the closed loop can run into, in the order they tend to appear.
 Each row says what to check first, and what this implementation actually does —
 the second column matters, because a diagnostic guide that describes behaviour the
 code does not have is worse than none.
@@ -26,6 +26,7 @@ in disguise.
 | Symptom | Check first | What this code does |
 | --- | --- | --- |
 | HTTP 500 | Service log, model and memory state, the request body | Reported as `ModelError` with the underlying exception name. **Kept separate from a timeout and from a truncated reply** — the three have different causes |
+| A failing request takes about three times its `timeout_seconds` | The SDK's own retry policy as well as `model.max_retries` | The SDK is given `model.max_retries` now, so `0` means one attempt rather than one attempt plus two the SDK added on its own. `model_requests` counts what actually left the process |
 | `400 ... request (N tokens) exceeds the available context size (M tokens)` | The server's context window against the prompt size. A 2560x1600 screenshot plus the element list measured 7 517 tokens; Ollama serves 4096 by default | `blocked` before any action. The message has the fix appended: raise `OLLAMA_CONTEXT_LENGTH` (16384 worked on the review machine) or lower `execution.max_elements`. This is a server setting, not a code path — nothing in the run can change it |
 | `... N further elements omitted to fit the prompt` | How much text is on screen, and `execution.max_elements` | Not an error. The element list is trimmed one **whole** element at a time — an id with half its text would be unusable — and the prompt says how many were dropped. Raise `execution.max_elements` or the server's context window to keep more |
 | Reply truncated mid-JSON | Finish reason, response length, **prompt length**, number of steps | `PlanParseError`; the planner retries the format once, then reports `blocked`. A partial plan is never executed |

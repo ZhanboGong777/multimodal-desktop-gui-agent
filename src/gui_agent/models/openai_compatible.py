@@ -108,6 +108,13 @@ class OpenAICompatibleClient(ModelClient):
             api_key=self.api_key,
             base_url=self.base_url,
             timeout=self.timeout_seconds,
+            # The SDK retries twice on its own by default. Left unset, a failing
+            # endpoint was attempted three times inside `complete()` while our own
+            # loop counted one - so `model.max_retries: 0` did not mean "one
+            # attempt", and `model_requests` under-reported the real traffic by up
+            # to 3x. 10.3.4 asks for exactly this stacking to be prevented rather
+            # than documented.
+            max_retries=self.max_retries,
         )
         return self._client
 

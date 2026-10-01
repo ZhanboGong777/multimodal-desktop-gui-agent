@@ -1011,3 +1011,29 @@ def test_a_refused_plan_is_not_put_to_the_operator_twice(tmp_path: Path) -> None
     assert result.status == "cancelled"
     assert asked == [], "the second prompt appeared after the first was already refused"
     assert executor.actions == []
+
+
+def test_a_failed_planning_call_is_still_counted_as_planning_time(tmp_path: Path) -> None:
+    """The stamp used to be set only after a plan succeeded.
+
+    So a model call that failed after two seconds reported `planning_ms: 0` and put
+    those seconds in `execution_ms` - and a blocked run looked like one that had
+    been busy acting. This is the shape the Windows review hit: a 400 after a long
+    wait, whose summary would have claimed the time was spent executing.
+    """
+    task = TaskSpec(case_id="T", instruction="x", expect_text=["Done"], success_rules=["r"])
+    runner, _recorder = _runner(
+        tmp_path,
+        FakeObserver([_frame("obs-0001", ("Start",))]),
+        FakePlanner(None, error="BadRequestError: context size exceeded"),
+        FakeExecutor(),
+        clock=_StepClock(),
+    )
+
+    result = runner.run(task, ExecutionOptions(execute=False))
+
+    assert result.status == "blocked"
+    assert result.planning_ms > 0, "the call took time, and it was planning"
+    # Before the fix this was the other way round: planning 0, execution everything.
+    assert result.execution_ms <= result.planning_ms, "the wait belongs to planning"
+    assert result.elapsed_ms == pytest.approx(result.planning_ms + result.execution_ms)

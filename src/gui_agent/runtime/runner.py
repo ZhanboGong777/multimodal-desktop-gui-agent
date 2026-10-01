@@ -224,6 +224,11 @@ class TaskRunner:
             image_path=initial.image_path,
             task_id=task.case_id,
         )
+        # Stamped whether or not the plan worked out. A planning call that fails
+        # after two seconds still spent those two seconds planning, and leaving the
+        # stamp unset reported them as `execution_ms` - which is the direction that
+        # misleads, because a blocked run then looks like one that was busy acting.
+        timings.planned = self.clock()
         if not plan_result.ok or plan_result.plan is None:
             return self._blocked(
                 task,
@@ -233,7 +238,6 @@ class TaskRunner:
             )
         plan = plan_result.plan
         planning_attempts = int(plan_result.attempts or 0)
-        timings.planned = self.clock()
         notes.append(f"planned {len(plan.steps)} steps from {initial.observation_id}")
 
         # 8.3.5: a plan that reports errors is not executed. The model uses this
