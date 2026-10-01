@@ -31,6 +31,11 @@ _SPLIT = re.compile(r"\s*(?:,|;|then|and then|然后|接着|再)\s*", re.IGNOREC
 #:   obs-0002-e001  'Browser'  conf=0.90  center=(250,78)  box=(100,60,400,96)
 _ELEMENT_LINE = re.compile(r"(obs-\d+-e\d+)\s+'([^']*)'")
 
+#: OCR on a busy or low-contrast screen returns fragments like "@" or "HO". They
+#: are real elements, but aiming at one makes the dry run die on a token that is
+#: gone by the next frame, which says nothing about the pipeline.
+_WORDLIKE = re.compile(r"[A-Za-z]{3,}")
+
 
 def _unambiguous(elements: Sequence[tuple[str, str]]) -> list[tuple[str, str]]:
     """The elements whose text is contained in no other element's text.
@@ -132,6 +137,8 @@ class MockModelClient(ModelClient):
             return None
         lowered = clause.casefold()
         candidates = _unambiguous(elements)
+        readable = [item for item in candidates if _WORDLIKE.search(item[1])]
+        candidates = readable or candidates
         for element_id, text in candidates:
             if text.casefold() in lowered:
                 return element_id, text

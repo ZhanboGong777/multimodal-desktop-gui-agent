@@ -19,7 +19,19 @@ PLAN_ACTION_TYPES: tuple[str, ...] = (*get_args(ActionType), "finish")
 #: Verbs that are executed on the desktop; ``finish`` is deliberately excluded.
 EXECUTABLE_ACTION_TYPES: frozenset[str] = frozenset(get_args(ActionType))
 
-StepStatus = Literal["pending", "planned", "skipped", "done", "failed"]
+#: ``pending_runtime_resolution`` is the hand-off's name for a step whose target is
+#: not on screen yet: the element cannot be named from this frame and has to be
+#: resolved against a fresh observation when the step is reached. This runner
+#: resolves every step that way, but the value still has to be accepted - a plan
+#: written in the hand-off's own vocabulary must not be rejected as invalid.
+StepStatus = Literal[
+    "pending",
+    "planned",
+    "skipped",
+    "done",
+    "failed",
+    "pending_runtime_resolution",
+]
 
 
 class PlanStep(SchemaModel):

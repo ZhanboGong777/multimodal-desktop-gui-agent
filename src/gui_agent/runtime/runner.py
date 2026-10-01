@@ -125,6 +125,16 @@ class TaskRunner:
             return self._blocked(task, options, f"initial observation failed: {exc}")
         self.recorder.save_observation(initial)
 
+        # A frame with no readable text is not an error - OCR cannot read a locked,
+        # dark or mostly-empty screen - but it makes every text target unresolvable.
+        # Saying so here turns a bare "no element matches '...'" into something the
+        # operator can act on.
+        if not any(item.text.strip() for item in initial.elements):
+            notes.append(
+                "the first frame had no readable text: OCR returned no labels, so no "
+                "text target can resolve against it"
+            )
+
         # 1b. A real run must not start from a screen where the goal already holds.
         # T01 and T05 are both satisfiable by doing nothing: a browser that was
         # already open carries the text T01 looks for, and T05's rule only asks that
@@ -151,7 +161,7 @@ class TaskRunner:
         # 2. plan from that observation
         plan_result = self.planner.plan(
             task.instruction,
-            context=self._context(initial, task),
+            context=self._context(initial, task, options),
             image_path=initial.image_path,
             task_id=task.case_id,
         )
@@ -321,7 +331,9 @@ class TaskRunner:
         self.recorder.save_observation(snapshot)
         return snapshot
 
-    def _context(self, snapshot: ObservationSnapshot, task: TaskSpec) -> dict[str, Any]:
+    def _context(
+        self, snapshot: ObservationSnapshot, task: TaskSpec, options: ExecutionOptions
+    ) -> dict[str, Any]:
         from .observation import describe_elements
 
         return {
@@ -331,6 +343,13 @@ class TaskRunner:
                 f"{snapshot.screen_info.screenshot_width}x{snapshot.screen_info.screenshot_height}"
             ),
             "target_app": task.target_app,
+            # A plan that overshoots the budget is refused before anything is
+            # dispatched, so the model is told the budget it is planning against
+            # rather than discovering it by having its plan rejected.
+            "limits": (
+                f"at most {options.max_actions} actions and "
+                f"{options.task_timeout_seconds:g} s for the whole task"
+            ),
             "visible_text": describe_elements(snapshot),
             "success_rules": task.success_rules,
         }

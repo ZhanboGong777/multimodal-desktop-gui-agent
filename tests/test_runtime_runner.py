@@ -568,3 +568,74 @@ def test_a_task_that_declares_no_preconditions_is_not_guarded(tmp_path: Path) ->
 
     assert result.status == "succeeded"
     assert len(executor.actions) == 1
+
+
+def test_the_planner_is_told_the_budget_it_plans_against(tmp_path: Path) -> None:
+    """8.1.7 asks for the execution limits, not just the step cap.
+
+    A plan that overshoots the budget is refused before anything is dispatched, so
+    the model is told the budget up front rather than learning it by rejection.
+    """
+    plan = _plan(PlanStep(step_id="s1", description="stop", action_type="finish"))
+    planner = FakePlanner(plan)
+    task = TaskSpec(case_id="T", instruction="x", expect_text=["Done"], success_rules=["r"])
+    runner, _recorder = _runner(
+        tmp_path, FakeObserver([_frame("obs-0001", ("Start",))]), planner, FakeExecutor()
+    )
+
+    runner.run(task, ExecutionOptions(execute=False, max_actions=7, task_timeout_seconds=42))
+
+    limits = planner.contexts[0]["limits"]
+    assert "7 actions" in limits
+    assert "42 s" in limits
+
+
+def test_the_planner_is_given_the_frame_it_is_planning_from(tmp_path: Path) -> None:
+    """8.1.4: the observation id, the screen size and the element list."""
+    plan = _plan(PlanStep(step_id="s1", description="stop", action_type="finish"))
+    planner = FakePlanner(plan)
+    task = TaskSpec(case_id="T", instruction="x", expect_text=["Done"], success_rules=["r"])
+    runner, _recorder = _runner(
+        tmp_path, FakeObserver([_frame("obs-0001", ("Start",))]), planner, FakeExecutor()
+    )
+
+    runner.run(task, ExecutionOptions(execute=False))
+
+    context = planner.contexts[0]
+    assert context["observation_id"] == "obs-0001"
+    assert context["screen"] == "1470x956"
+    assert "obs-0001-e000" in context["visible_text"]
+    assert context["success_rules"] == ["r"]
+
+
+def test_a_frame_with_no_readable_text_says_so(tmp_path: Path) -> None:
+    """The screen was captured but OCR found nothing to aim at.
+
+    That is what a locked, dark or mostly-empty screen looks like from here, and it
+    makes every text target unresolvable. The run says so rather than leaving the
+    operator to infer it from a bare "no element matches".
+    """
+    plan = _plan(PlanStep(step_id="s1", description="stop", action_type="finish"))
+    task = TaskSpec(case_id="T", instruction="x", expect_text=["Done"], success_rules=["r"])
+    runner, _recorder = _runner(
+        tmp_path, FakeObserver([_frame("obs-0001", ("", ""))]), FakePlanner(plan), FakeExecutor()
+    )
+
+    result = runner.run(task, ExecutionOptions(execute=False))
+
+    assert any("no readable text" in note for note in result.notes), result.notes
+
+
+def test_a_readable_frame_does_not_carry_that_note(tmp_path: Path) -> None:
+    plan = _plan(PlanStep(step_id="s1", description="stop", action_type="finish"))
+    task = TaskSpec(case_id="T", instruction="x", expect_text=["Done"], success_rules=["r"])
+    runner, _recorder = _runner(
+        tmp_path,
+        FakeObserver([_frame("obs-0001", ("Start",))]),
+        FakePlanner(plan),
+        FakeExecutor(),
+    )
+
+    result = runner.run(task, ExecutionOptions(execute=False))
+
+    assert not any("no readable text" in note for note in result.notes), result.notes

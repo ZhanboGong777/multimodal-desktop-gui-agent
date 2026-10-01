@@ -8,6 +8,8 @@ where the 7B model truncates its own answer would break the loop again.
 
 from __future__ import annotations
 
+import re
+
 from gui_agent.planning.prompts import SYSTEM_PROMPT, build_user_prompt
 
 #: The prompt that caused truncated replies measured 1 199 characters; the one
@@ -51,3 +53,61 @@ def test_the_user_turn_carries_the_platform_when_it_is_known() -> None:
 
 def test_the_user_turn_still_works_without_a_platform() -> None:
     assert "Platform:" not in build_user_prompt("open it", max_steps=5)
+
+
+def _element_line(index: int) -> str:
+    return (
+        f"obs-0002-e{index:03d}  'Element {index} with a reasonably long label'  "
+        f"conf=0.90  center=(100,{20 * index})  box=(10,10,400,40)"
+    )
+
+
+def test_the_element_list_reaches_the_model_whole() -> None:
+    line = _element_line(7)
+    rendered = build_user_prompt("do it", context={"visible_text": line})
+    assert line in rendered
+
+
+def test_a_long_element_list_is_trimmed_by_whole_lines() -> None:
+    """8.2.10 forbids cutting the serialized observation mid-field.
+
+    An element id with half its text is unusable in both directions: the model
+    cannot copy a label it cannot read, and the adapter cannot match one that was
+    chopped. So the list is trimmed a whole element at a time, and the prompt says
+    how many were left out.
+    """
+    elements = "\n".join(_element_line(index) for index in range(200))
+    rendered = build_user_prompt("do it", context={"visible_text": elements})
+    block = rendered.split("Screen elements:\n", 1)[1]
+
+    assert len(block) < 4400, "the element block is not bounded"
+    assert "further elements omitted" in block
+
+    for line in block.splitlines():
+        if line.startswith("..."):
+            continue
+        assert re.fullmatch(r"obs-\d+-e\d+\s+'[^']*'\s+conf=.*", line), line
+
+
+def test_a_short_element_list_is_passed_through_whole() -> None:
+    elements = "\n".join(_element_line(index) for index in range(3))
+    rendered = build_user_prompt("do it", context={"visible_text": elements})
+
+    for index in range(3):
+        assert f"obs-0002-e{index:03d}" in rendered
+    assert "omitted" not in rendered
+
+
+def test_only_the_descriptive_fields_are_length_limited() -> None:
+    """8.2.3: typed text, file paths and test markers are preserved verbatim.
+
+    A blanket "every string under 60 characters" rule invites the model to
+    abbreviate the very marker the task is verified against.
+    """
+    assert "Keep every string under 60 characters" not in SYSTEM_PROMPT
+    assert "description and summary under 60 chars" in SYSTEM_PROMPT
+
+    marker = "WEEK4-OPEN-FILE-OK-with-a-deliberately-long-tail-so-it-exceeds-sixty"
+    rendered = build_user_prompt(f"open {marker}", context={"platform": "win32"})
+    assert marker in rendered
+    assert len(marker) > 60

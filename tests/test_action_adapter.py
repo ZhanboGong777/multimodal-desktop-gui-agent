@@ -257,3 +257,63 @@ def test_a_run_must_consume_the_whole_query(adapter: ActionAdapter) -> None:
     snapshot = _word_snapshot(words=(("Current", 10, 10), ("repository", 80, 10)))
     with pytest.raises(ActionResolutionError, match="no element matches"):
         adapter.resolve(_step(target_text="Current repository main"), snapshot)
+
+
+def test_a_target_that_maps_outside_the_monitor_is_refused(adapter: ActionAdapter) -> None:
+    """7.3.6: an illegal coordinate is refused, never clamped to the edge.
+
+    The realistic shape of this is a screenshot whose scale was never applied: the
+    element sits well inside the image, and the control point lands past the edge of
+    the monitor. Clamping would still click something - just not the thing asked for.
+    """
+    snapshot = ObservationSnapshot(
+        observation_id="obs-0001",
+        captured_at=datetime.now(UTC),
+        screen_info=ScreenInfo(
+            screenshot_width=2940,
+            screenshot_height=1912,
+            control_width=1470,
+            control_height=956,
+            scale_x=1.0,
+            scale_y=1.0,
+        ),
+        elements=[
+            ElementRef(
+                element_id="obs-0001-e000",
+                text="Far away",
+                bounding_box=BoundingBox(left=2000, top=100, right=2060, bottom=120),
+                center=Point(x=2030, y=110),
+                confidence=0.9,
+            )
+        ],
+    )
+
+    with pytest.raises(ActionResolutionError, match="outside the captured monitor"):
+        adapter.resolve(_step(target_text="Far away"), snapshot)
+
+
+def test_a_scroll_amount_of_the_wrong_type_is_refused(adapter: ActionAdapter) -> None:
+    """8.3.4 wants parameters complete *and* correctly typed.
+
+    int() on a non-numeric string raises ValueError, and the runner catches
+    ActionResolutionError - so an unguarded conversion would leave the run as a
+    traceback instead of a recorded failure.
+    """
+    step = _step(action_type="scroll", target_text="Edit", arguments={"scroll_amount": "lots"})
+
+    with pytest.raises(ActionResolutionError, match="must be a number"):
+        adapter.resolve(step, _snapshot())
+
+
+def test_a_drag_duration_of_the_wrong_type_is_refused(adapter: ActionAdapter) -> None:
+    step = _step(
+        action_type="drag",
+        arguments={
+            "start_element_id": "obs-0001-e000",
+            "end_element_id": "obs-0001-e001",
+            "duration": "slowly",
+        },
+    )
+
+    with pytest.raises(ActionResolutionError, match="must be a number"):
+        adapter.resolve(step, _snapshot())

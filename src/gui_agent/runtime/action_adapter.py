@@ -312,7 +312,15 @@ class ActionAdapter:
             )
             if amount is None:
                 raise ActionResolutionError("scroll requires arguments.scroll_amount")
-            kwargs["scroll_amount"] = int(amount)
+            # A wrong-typed amount has to leave as the module's own error: the
+            # runner catches ActionResolutionError and records it, so a bare
+            # ValueError from int() would escape the run as a traceback instead.
+            try:
+                kwargs["scroll_amount"] = int(amount)
+            except (TypeError, ValueError) as exc:
+                raise ActionResolutionError(
+                    f"scroll_amount must be a number, got {amount!r}"
+                ) from exc
         action = DesktopAction(
             action_type=step.action_type,  # type: ignore[arg-type]
             target_description=step.target_text,
@@ -344,7 +352,12 @@ class ActionAdapter:
             )
         control_start = self._to_control(start.center, observation)
         control_end = self._to_control(end.center, observation)
-        duration = float(arguments.get("duration", 0.5))
+        try:
+            duration = float(arguments.get("duration", 0.5))
+        except (TypeError, ValueError) as exc:
+            raise ActionResolutionError(
+                f"drag duration must be a number, got {arguments.get('duration')!r}"
+            ) from exc
         action = DesktopAction(
             action_type="drag",
             start=control_start,

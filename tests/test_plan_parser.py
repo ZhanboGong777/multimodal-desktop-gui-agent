@@ -130,3 +130,41 @@ def test_confirmation_is_required_by_default() -> None:
     """Nothing may execute unless the flag is explicitly turned off."""
     plan = parse_plan(json.dumps(VALID), instruction="open the browser")
     assert plan.requires_confirmation is True
+
+
+def test_a_step_may_be_marked_pending_runtime_resolution() -> None:
+    """The hand-off's own vocabulary has to parse.
+
+    10.5.3 names ``pending_runtime_resolution`` for a step whose page is not open
+    yet. This runner resolves every step against a fresh frame, so it never writes
+    the value itself - but a model that follows the hand-off would have its whole
+    plan rejected as invalid if the parser did not accept it.
+    """
+    payload = dict(VALID)
+    payload["steps"] = [
+        {
+            "step_id": "step-1",
+            "description": "search once the page is up",
+            "action_type": "click",
+            "target_text": "Search",
+            "status": "pending_runtime_resolution",
+        },
+        {"step_id": "step-2", "description": "stop", "action_type": "finish"},
+    ]
+
+    plan = parse_plan(json.dumps(payload), instruction="ignored")
+
+    assert plan.steps[0].status == "pending_runtime_resolution"
+    assert plan.steps[0].is_executable, "the status is a label, not an instruction to skip"
+
+
+def test_an_unknown_step_status_is_still_rejected() -> None:
+    """Accepting one more value must not mean accepting any value."""
+    payload = dict(VALID)
+    payload["steps"] = [
+        {"step_id": "step-1", "description": "x", "action_type": "click", "status": "vibing"},
+        {"step_id": "step-2", "description": "stop", "action_type": "finish"},
+    ]
+
+    with pytest.raises(PlanParseError):
+        parse_plan(json.dumps(payload), instruction="ignored")

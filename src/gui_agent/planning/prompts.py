@@ -39,10 +39,32 @@ SYSTEM_PROMPT = "\n".join(
         + 'scroll {"scroll_amount"}; wait {"duration"}.',
         "- Use this platform's key names.",
         '- The LAST step is "finish", only once the goal is reached.',
-        "- Keep every string under 60 characters.",
+        "- description and summary under 60 chars; copy text exactly.",
         "- If it is ambiguous, say so in assumptions and still return a plan.",
     ]
 )
+
+#: The element list is the one part of the context that runs to thousands of
+#: characters on a text-heavy screen, and it is the part the model aims with. It is
+#: trimmed by whole element lines: cutting the serialized JSON instead leaves an
+#: element id with half its text, which is worse than not listing that element.
+ELEMENT_BUDGET_CHARS = 4000
+
+
+def _trim_element_lines(block: str, budget: int) -> str:
+    """Keep whole element lines, up to ``budget`` characters, and say what went."""
+    lines = [line for line in block.splitlines() if line.strip()]
+    kept: list[str] = []
+    used = 0
+    for line in lines:
+        if kept and used + len(line) + 1 > budget:
+            break
+        kept.append(line)
+        used += len(line) + 1
+    dropped = len(lines) - len(kept)
+    if dropped:
+        kept.append(f"... {dropped} further elements omitted to fit the prompt")
+    return "\n".join(kept)
 
 
 def build_user_prompt(
@@ -52,14 +74,21 @@ def build_user_prompt(
     image_path: str | None = None,
     max_steps: int = 10,
 ) -> str:
-    """Assemble the user turn: instruction, screen context and the hard limits."""
+    """Assemble the user turn: instruction, screen context and the hard limits.
+
+    The context is split rather than dumped as one blob: the element list is
+    trimmed by whole lines, and the rest - short and bounded - is serialized whole.
+    """
+    data = dict(context or {})
     parts = [f"Instruction: {instruction}", f"Maximum steps: {max_steps}"]
-    platform = (context or {}).get("platform")
+    platform = data.pop("platform", None)
     if platform:
         parts.append(f"Platform: {platform}")
     if image_path:
         parts.append(f"Screenshot: {image_path}")
-    if context:
-        rendered = json.dumps(context, ensure_ascii=False, indent=2)[:4000]
-        parts.append(f"Screen context:\n{rendered}")
+    elements = str(data.pop("visible_text", "") or "")
+    if data:
+        parts.append("Screen context:\n" + json.dumps(data, ensure_ascii=False, indent=2))
+    if elements.strip():
+        parts.append("Screen elements:\n" + _trim_element_lines(elements, ELEMENT_BUDGET_CHARS))
     return "\n\n".join(parts)

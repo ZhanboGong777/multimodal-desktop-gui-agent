@@ -199,3 +199,34 @@ def test_the_mock_still_aims_somewhere_when_every_element_overlaps() -> None:
     )
     step = json.loads(response.content)["steps"][0]
     assert step["arguments"]["element_id"].startswith("obs-0002-e")
+
+
+def test_the_mock_prefers_a_readable_target_over_ocr_noise() -> None:
+    """Aiming at "@" makes a dry run die on a token that is gone by the next frame.
+
+    That says nothing about the pipeline, so a candidate with real letters in it
+    wins. The noise is still used when there is nothing else on screen.
+    """
+    client = MockModelClient()
+    response = client.generate_multimodal(
+        "Open the browser",
+        context={
+            "visible_text": (
+                "obs-0002-e000  '@'  conf=0.91  center=(1,1)\n"
+                "obs-0002-e001  'HO'  conf=0.93  center=(2,2)\n"
+                "obs-0002-e002  'Browser'  conf=0.88  center=(3,3)"
+            )
+        },
+    )
+    step = json.loads(response.content)["steps"][0]
+    assert step["arguments"]["element_id"] == "obs-0002-e002"
+
+
+def test_the_mock_still_uses_noise_when_that_is_all_there_is() -> None:
+    client = MockModelClient()
+    response = client.generate_multimodal(
+        "Open it",
+        context={"visible_text": "obs-0002-e000  '@'  conf=0.91  center=(1,1)"},
+    )
+    step = json.loads(response.content)["steps"][0]
+    assert step["arguments"]["element_id"] == "obs-0002-e000"
