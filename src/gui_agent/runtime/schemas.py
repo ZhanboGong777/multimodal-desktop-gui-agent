@@ -189,6 +189,13 @@ class TaskRunResult(SchemaModel):
     #: from planning_attempts: one plan can cost several requests, and one request
     #: can produce several parse attempts.
     model_requests: int = 0
+    #: Wall clock, split so a slow operator cannot look like a slow model. 16.5.4
+    #: asks for the phases separately and quotes `execution_ms` as the primary
+    #: measure: from the moment the run was authorised to the final verdict.
+    #: `elapsed_ms` stays as the whole run, confirmation prompt included.
+    planning_ms: float = 0.0
+    confirmation_ms: float = 0.0
+    execution_ms: float = 0.0
     evidence_directory: str = ""
     #: Why the run stopped, in one line, when it did not simply succeed.
     stop_reason: str = ""

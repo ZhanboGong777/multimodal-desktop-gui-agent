@@ -13,6 +13,8 @@ import re
 from datetime import UTC, datetime
 from pathlib import Path
 
+import pytest
+
 from gui_agent.planning.planner import PlanResult
 from gui_agent.planning.schemas import PlanStep, TaskPlan
 from gui_agent.recording import RunSession
@@ -486,7 +488,7 @@ def _void_task() -> TaskSpec:
     )
 
 
-def _void_case(tmp_path: Path):
+def _void_case(tmp_path: Path, **kwargs):
     observer = FakeObserver([_frame("obs-0001", ("Desktop", "Other window"))])
     executor = FakeExecutor()
     planner = FakePlanner(
@@ -497,7 +499,7 @@ def _void_case(tmp_path: Path):
             )
         )
     )
-    runner, _recorder = _runner(tmp_path, observer, planner, executor)
+    runner, _recorder = _runner(tmp_path, observer, planner, executor, **kwargs)
     return runner, executor, planner
 
 
@@ -848,3 +850,112 @@ def test_a_plan_that_reports_errors_is_not_executed(tmp_path: Path) -> None:
     assert result.status == "blocked"
     assert executor.actions == []
     assert "reports errors" in result.notes[0]
+
+
+# ───────── 16.3's negative case ─────────
+def test_a_wrong_page_stops_the_run_before_it_types_anything(tmp_path: Path) -> None:
+    """16.3: change the second frame to an error page and the type must not happen.
+
+    The plan is click-then-type. When the run re-observes, the search box is gone -
+    so the click cannot be resolved, and continuing would type the query into
+    whatever happens to be on screen instead. A wrong page is exactly when that is
+    worst, so the run has to stop at the step it could not resolve.
+    """
+    frames = [
+        _frame("obs-0001", ("Search box",)),  # the frame the plan is written from
+        _frame("obs-0002", ("Service unavailable",)),  # the page went wrong
+    ]
+    plan = _plan(
+        PlanStep(
+            step_id="s1", description="click search", action_type="click",
+            target_text="Search box",
+        ),
+        PlanStep(
+            step_id="s2", description="type the query", action_type="type_text",
+            target_text="Search box", arguments={"text": "GUI agent research"},
+        ),
+        PlanStep(step_id="s3", description="stop", action_type="finish"),
+    )
+    task = TaskSpec(
+        case_id="T", instruction="search", expect_text=["Results ready"], success_rules=["r"]
+    )
+    executor = FakeExecutor()
+    runner, _recorder = _runner(tmp_path, FakeObserver(frames), FakePlanner(plan), executor)
+
+    result = runner.run(task, ExecutionOptions(execute=True, confirm=False))
+
+    assert result.status == "failed"
+    assert executor.actions == [], "nothing may be dispatched once the target is gone"
+    assert [step.step_id for step in result.steps] == ["s1"], "the later steps were never reached"
+    assert "no element matches" in (result.steps[0].error or "")
+
+
+# ───────── where the wall clock went ─────────
+class _StepClock:
+    """A monotonic clock that advances a fixed amount on every reading."""
+
+    def __init__(self, step: float = 1.0) -> None:
+        self.now = 0.0
+        self.step = step
+
+    def __call__(self) -> float:
+        self.now += self.step
+        return self.now
+
+
+def test_a_blocked_run_still_records_how_long_it_took(tmp_path: Path) -> None:
+    """`_blocked` used to pass `self.clock()` as the start time.
+
+    Every blocked run therefore recorded 0.0 ms - including one that spent twenty
+    seconds inside a model call before giving up, which is the case the Windows
+    review actually hit. The phases come from the run's own start now.
+    """
+    runner, _executor, _planner = _void_case(tmp_path, clock=_StepClock(step=2.5))
+
+    result = runner.run(_void_task(), ExecutionOptions(execute=True, confirm=False))
+
+    assert result.status == "blocked"
+    assert result.elapsed_ms == 2500.0, "one reading of a 2.5 s clock, not zero"
+
+
+def test_the_timing_phases_partition_the_run(tmp_path: Path) -> None:
+    """16.5.4's phases have to add up to the whole, or one of them is lying.
+
+    A slow operator must not look like a slow model, which is why the report quotes
+    `execution_ms` - the part after the confirmation gate - rather than the total.
+    """
+    frames = [
+        _frame("obs-0001", ("Start",)),
+        _frame("obs-0002", ("Target",)),
+        _frame("obs-0003", ("Results ready",)),
+    ]
+    plan = _plan(
+        PlanStep(
+            step_id="s1", description="click", action_type="click", target_text="Target",
+            expected_result="results appear",
+        ),
+        PlanStep(step_id="s2", description="stop", action_type="finish"),
+    )
+    task = TaskSpec(
+        case_id="T", instruction="search", expect_text=["Results ready"], success_rules=["r"]
+    )
+    runner, _recorder = _runner(
+        tmp_path,
+        FakeObserver(frames),
+        FakePlanner(plan),
+        FakeExecutor(),
+        clock=_StepClock(),
+    )
+
+    result = runner.run(
+        task,
+        ExecutionOptions(execute=True, confirm=True),
+        confirm=lambda _plan: True,
+        countdown=lambda _seconds: None,
+    )
+
+    assert result.planning_ms > 0
+    assert result.confirmation_ms > 0, "the gate took a reading between plan and action"
+    assert result.elapsed_ms == pytest.approx(
+        result.planning_ms + result.confirmation_ms + result.execution_ms
+    )

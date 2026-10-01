@@ -19,6 +19,7 @@ from __future__ import annotations
 import re
 import time
 from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any, Protocol
 
@@ -83,6 +84,37 @@ def explain_model_failure(message: str) -> str:
 _RISKY_RISKS = frozenset({"medium", "high"})
 
 
+@dataclass
+class Timings:
+    """Where one run's wall clock went.
+
+    16.5.4 asks for the phases separately rather than one number, and the phase
+    that matters most is the one a person occupies: the confirmation prompt and the
+    countdown sit inside the run's wall clock, so counting them as system time
+    would make a slow operator look like a slow model. `execution_ms` is the
+    measure the report quotes - from the moment the operator let it run to the
+    final verdict.
+    """
+
+    started: float
+    planned: float | None = None
+    confirmed: float | None = None
+
+    def breakdown(self, ended: float) -> dict[str, float]:
+        planned = self.planned if self.planned is not None else self.started
+        base = self.confirmed if self.confirmed is not None else planned
+        return {
+            "elapsed_ms": (ended - self.started) * 1000.0,
+            "planning_ms": (planned - self.started) * 1000.0,
+            "confirmation_ms": (
+                (self.confirmed - self.planned) * 1000.0
+                if self.confirmed is not None and self.planned is not None
+                else 0.0
+            ),
+            "execution_ms": (ended - base) * 1000.0,
+        }
+
+
 def _error_type(message: str | None) -> str:
     """The exception class a step recorded, when its message starts with one.
 
@@ -134,16 +166,21 @@ class TaskRunner:
         high_risk_confirm: Callable[[TaskPlan], bool] | None = None,
     ) -> TaskRunResult:
         started = self.clock()
+        timings = Timings(started=started)
         notes: list[str] = []
 
         if not task.success_rules and not task.expect_text and not task.forbid_text:
-            return self._blocked(task, options, "the task defines no verifiable success rule")
+            return self._blocked(
+                task, options, "the task defines no verifiable success rule", timings=timings
+            )
 
         # 1. first look at the screen
         try:
             initial = self.observer.observe()
         except Exception as exc:  # noqa: BLE001 - a failed first look ends the run
-            return self._blocked(task, options, f"initial observation failed: {exc}")
+            return self._blocked(
+                task, options, f"initial observation failed: {exc}", timings=timings
+            )
         self.recorder.save_observation(initial)
 
         # A frame with no readable text is not an error - OCR cannot read a locked,
@@ -177,6 +214,7 @@ class TaskRunner:
                     options,
                     "the success rule already holds on the untouched screen "
                     f"({precondition.detail}); this run cannot be credited with it",
+                    timings=timings,
                 )
 
         # 2. plan from that observation
@@ -191,9 +229,11 @@ class TaskRunner:
                 task,
                 options,
                 f"planning failed: {explain_model_failure(plan_result.error or 'no plan produced')}",
+                timings=timings,
             )
         plan = plan_result.plan
         planning_attempts = int(plan_result.attempts or 0)
+        timings.planned = self.clock()
         notes.append(f"planned {len(plan.steps)} steps from {initial.observation_id}")
 
         # 8.3.5: a plan that reports errors is not executed. The model uses this
@@ -206,6 +246,7 @@ class TaskRunner:
                 "the plan reports errors and will not be executed: "
                 + "; ".join(plan.errors[:3]),
                 snapshot=initial,
+                timings=timings,
             )
 
         # 3. budget check before anything is dispatched
@@ -215,12 +256,15 @@ class TaskRunner:
                 options,
                 f"the plan wants {len(plan.executable_steps)} actions, above the "
                 f"{options.max_actions} allowed",
+                timings=timings,
             )
 
         # 4. confirmation gate — before any real input event
         if options.execute:
             if options.confirm and confirm is not None and not confirm(plan):
-                result = self._finish(task, options, "cancelled", started, notes, snapshot=initial)
+                result = self._finish(
+                    task, options, "cancelled", started, notes, snapshot=initial, timings=timings
+                )
                 result.verification = None
                 return result
             # A risky task gets a second, separate confirmation. The policy lives
@@ -233,14 +277,18 @@ class TaskRunner:
                 and task.risk in _RISKY_RISKS
                 and not high_risk_confirm(plan)
             ):
-                result = self._finish(task, options, "cancelled", started, notes, snapshot=initial)
+                result = self._finish(
+                    task, options, "cancelled", started, notes, snapshot=initial, timings=timings
+                )
                 result.verification = None
                 return result
             if countdown is not None:
                 countdown(3)
 
+        # Everything after this point is the system working, not a person reading.
+        timings.confirmed = self.clock()
         return self._execute_plan(
-            task, plan, options, initial, started, notes, planning_attempts
+            task, plan, options, initial, started, notes, planning_attempts, timings=timings
         )
 
     # ── the loop ───────────────────────────────────────────────────────
@@ -253,6 +301,8 @@ class TaskRunner:
         started: float,
         notes: list[str],
         planning_attempts: int = 0,
+        *,
+        timings: Timings | None = None,
     ) -> TaskRunResult:
         steps: list[StepRecord] = []
         current = initial
@@ -268,6 +318,7 @@ class TaskRunner:
                     steps,
                     snapshot=initial,
                     planning_attempts=planning_attempts,
+                    timings=timings,
                 )
 
             record = StepRecord(
@@ -306,6 +357,7 @@ class TaskRunner:
                     steps,
                     snapshot=initial,
                     planning_attempts=planning_attempts,
+                    timings=timings,
                 )
 
             record.observation_id = before.observation_id
@@ -327,6 +379,7 @@ class TaskRunner:
                     steps,
                     snapshot=initial,
                     planning_attempts=planning_attempts,
+                    timings=timings,
                 )
 
             record.resolved = resolved
@@ -372,6 +425,7 @@ class TaskRunner:
                     steps,
                     snapshot=initial,
                     planning_attempts=planning_attempts,
+                    timings=timings,
                 )
 
             if after is not None:
@@ -388,6 +442,7 @@ class TaskRunner:
                 steps,
                 snapshot=initial,
                 planning_attempts=planning_attempts,
+                timings=timings,
             )
             # A dry run dispatched nothing, so the task rule cannot have been met -
             # but reporting it as "failed" would say the run went wrong, and it did
@@ -423,6 +478,7 @@ class TaskRunner:
             steps,
             snapshot=initial,
             planning_attempts=planning_attempts,
+            timings=timings,
         )
         result.verification = verification
         if final is not None:
@@ -469,11 +525,15 @@ class TaskRunner:
         *,
         snapshot: ObservationSnapshot | None = None,
         planning_attempts: int = 0,
+        timings: Timings | None = None,
     ) -> TaskRunResult:
         client = getattr(self.planner, "client", None)
         records = steps or []
         failed = next((record for record in records if record.error), None)
-        elapsed_ms = (self.clock() - started) * 1000.0
+        # 16.5.4 wants the phases apart, so the clock is read once and split rather
+        # than sampled twice with a different meaning each time.
+        phases = (timings or Timings(started=started)).breakdown(self.clock())
+        elapsed_ms = phases["elapsed_ms"]
         finished_at = datetime.now(UTC)
         result = TaskRunResult(
             run_id=self.recorder.run_id,
@@ -500,6 +560,9 @@ class TaskRunner:
             finished_at=finished_at,
             planning_attempts=planning_attempts,
             model_requests=int(getattr(client, "request_count", 0)),
+            planning_ms=phases["planning_ms"],
+            confirmation_ms=phases["confirmation_ms"],
+            execution_ms=phases["execution_ms"],
             evidence_directory=str(self.recorder.directory),
             stop_reason=(
                 notes[-1] if notes and status not in {"succeeded", "dry_run_completed"} else ""
@@ -516,6 +579,11 @@ class TaskRunner:
         options: ExecutionOptions,
         reason: str,
         *,
+        timings: Timings,
         snapshot: ObservationSnapshot | None = None,
     ) -> TaskRunResult:
-        return self._finish(task, options, "blocked", self.clock(), [reason], snapshot=snapshot)
+        # `timings.started`, not `self.clock()`: a blocked run that spent twenty
+        # seconds inside a model call before giving up used to record 0.0 ms.
+        return self._finish(
+            task, options, "blocked", timings.started, [reason], snapshot=snapshot, timings=timings
+        )

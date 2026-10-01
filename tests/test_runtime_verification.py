@@ -111,3 +111,40 @@ def test_step_verification_matches_on_expected_result_words() -> None:
         action_result=ActionResult(action=action, success=True, dry_run=False),
     )
     assert result.outcome == "passed"
+
+
+# ───── the five cases' rules against the screens that must not count ─────
+def test_a_selected_file_does_not_satisfy_the_open_file_case() -> None:
+    """16.2's "file merely selected" case, and T03's rule does distinguish it.
+
+    The rule looks for the file's *contents*. A file list shows the name, not the
+    contents, so a run that only managed to select the file does not pass.
+    """
+    from gui_agent.runtime.tasks import get_case
+
+    task = get_case("T03")
+    assert task is not None
+
+    verdict = Verifier().check_task(
+        task, _frame("o1", ("week4_sample.txt", "Desktop", "week4_test"))
+    )
+
+    assert verdict.outcome == "failed"
+    assert "WEEK4-OPEN-FILE-OK" in verdict.detail
+
+
+def test_the_close_case_only_proves_the_marker_is_gone() -> None:
+    """16.2's "closed the window but the app is still running" case.
+
+    T05's rule asks that the marker be gone, and a minimised window satisfies that
+    just as a closed one does. The case does not claim the process exited - 15.5
+    says such a claim needs separate process evidence - so the honest thing is to
+    pin what the rule can and cannot see rather than imply more.
+    """
+    from gui_agent.runtime.tasks import get_case
+
+    task = get_case("T05")
+    assert task is not None
+
+    assert Verifier().check_task(task, _frame("o1", ("Desktop", "Other window"))).passed
+    assert Verifier().check_task(task, _frame("o1", ("WEEK4-OPEN-FILE-OK",))).outcome == "failed"
