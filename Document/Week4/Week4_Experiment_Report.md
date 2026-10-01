@@ -650,6 +650,19 @@ instead. Both are validated at parse time now, which puts them where the table s
 they belong: exit 2, with the offending value in the message. The header also
 printed a sub-second budget as `0s`, which read as "no budget at all".
 
+**A table was allowed to contradict itself.** The count sentence in §5 had been
+guarded for two rounds - a test collects the suite and checks it - but only for the
+half it tabulates. The other half names eight suites in prose, states a total for
+them and a delta for each, and every one of those numbers was still maintained by
+hand. Adding five OCR tests moved the list and not the total: the Chinese version
+of that table read 52 in its own total column while the eight numbers beside it
+added up to 57, and the suite stayed green because it was only looking at the
+other half of the sentence. The check now derives all nine numbers and asserts both
+sums, and `Week4_Windows复核手册.md` is under the same tool - a reviewer running its
+commands against a stale `expected N passed` reads a correct tree as a broken one.
+This is the same failure as the dead `build_user_prompt`, one layer out: the check
+existed and was pointed at less than the claim.
+
 ## 8. Deliverables
 
 - `src/gui_agent/runtime/` - the run layer (8 modules).
