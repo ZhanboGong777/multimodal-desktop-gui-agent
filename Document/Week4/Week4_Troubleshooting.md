@@ -40,7 +40,7 @@ in disguise.
 
 | Symptom | Check first | What this code does |
 | --- | --- | --- |
-| `monitor_index 1 is out of range (available 1..0)` | Whether the display is asleep or locked | The run is `blocked` with that message and dispatches nothing. Wake the screen and re-run |
+| `monitor_index 1 is out of range (available 1..0)` | Two causes, and the fix for one does nothing for the other. **Asleep or locked display** - wake it and re-run. **The process cannot see the screen at all**, which on macOS means the terminal running the command has no Screen Recording permission | The run is `blocked` with that message, dispatches nothing, and exits 2 - it does not crash. `available 1..0` is the tell: only the aggregate pseudo-monitor at index 0 exists and it measures 0x0, i.e. no display is visible to this process. Waking the screen does not fix that; grant the terminal Screen Recording permission in System Settings -> Privacy & Security and restart it. A remote session reports the same thing, since there is no local display to capture |
 | Clicks land slightly off | Screenshot-to-control scale, any preprocessing resize, monitor offset | Coordinates go through `screenshot_to_control` and then an in-bounds check. **No per-task pixel offset is ever added** |
 | OCR finds nothing on a clearly readable screen | Engine (`tesseract` vs `paddleocr`), language code, `min_confidence` | Measured on this machine: Tesseract 241 ms vs PaddleOCR 5 525 ms on the same frame. `configs/week4.yaml` selects Tesseract |
 | OCR returns a fallback notice | Whether the primary engine started | The notice is recorded on the observation, and `ocr_engine` says which one actually ran |
