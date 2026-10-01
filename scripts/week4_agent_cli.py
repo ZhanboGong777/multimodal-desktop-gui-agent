@@ -166,33 +166,20 @@ def _execute_callbacks(args, task: TaskSpec) -> dict[str, object]:
     }
 
 
-def _load_dotenv(path: Path) -> int:
-    """Set variables from a `.env` file, never overriding the environment.
+def load_environment(path: Path = Path(".env")) -> bool:
+    """Read `./.env` into the environment, never overriding what is already set.
 
-    `override=False` is the whole point: a value exported in the shell is a
-    decision made later than the file, and silently replacing it is how "it worked
-    yesterday" happens. The format is the small subset a template needs - blank
-    lines, `#` comments, an optional `export`, `KEY=VALUE`, optional quotes.
-    Returns how many variables were actually set.
+    `override=False` is the whole point: a value exported in the shell is a decision
+    made later than the file, and silently replacing it is how "it worked
+    yesterday" happens. The parsing is `python-dotenv`'s, which is already a
+    declared dependency - a hand-rolled subset of it lived here first, from before
+    anyone checked whether the project already had one.
+
+    Returns whether a file was read. A missing `.env` is normal, not an error.
     """
-    if not path.is_file():
-        return 0
-    applied = 0
-    for raw in path.read_text(encoding="utf-8").splitlines():
-        line = raw.strip()
-        if not line or line.startswith("#"):
-            continue
-        if line.startswith("export "):
-            line = line[len("export ") :].lstrip()
-        key, separator, value = line.partition("=")
-        key = key.strip()
-        if not separator or not key.replace("_", "").isalnum():
-            continue
-        if key in os.environ:
-            continue
-        os.environ[key] = value.strip().strip('"').strip("'")
-        applied += 1
-    return applied
+    from dotenv import load_dotenv
+
+    return bool(load_dotenv(path, override=False))
 
 
 def _apply_environment(config, args) -> None:
@@ -221,7 +208,7 @@ def _apply_environment(config, args) -> None:
 def main() -> int:
     # Read the file `.env.example` tells the operator to create, before anything
     # looks at the environment. Values already exported in the shell win.
-    _load_dotenv(Path(".env"))
+    load_environment()
 
     args = parse_args()
 

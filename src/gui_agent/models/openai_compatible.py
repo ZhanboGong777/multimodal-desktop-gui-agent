@@ -102,7 +102,9 @@ class OpenAICompatibleClient(ModelClient):
         except ImportError as exc:  # pragma: no cover - depends on the environment
             raise ModelError(
                 f"the openai package is required for this backend ({exc}). "
-                "Install it with: pip install -r requirements-agent.txt"
+                "Install it with: pip install -r requirements.txt "
+                "(requirements-agent.txt does not list it - it only arrives there "
+                "transitively, through langchain-openai)"
             ) from exc
         self._client = OpenAI(
             api_key=self.api_key,

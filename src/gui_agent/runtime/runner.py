@@ -127,10 +127,6 @@ def _error_type(message: str | None) -> str:
     return head if separator and head.isidentifier() else ""
 
 
-class RunnerError(RuntimeError):
-    """Raised when the run cannot even start."""
-
-
 class TaskRunner:
     """Executes one task under explicit limits."""
 

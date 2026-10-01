@@ -205,22 +205,21 @@ def test_a_dotenv_file_does_not_override_the_shell(monkeypatch, tmp_path: Path) 
         "# a comment\n"
         "\n"
         "GUI_AGENT_MODEL=from-file\n"
-        "export GUI_AGENT_BASE_URL='http://from-file:11434/v1'\n"
-        "not a variable line\n"
+        'export GUI_AGENT_BASE_URL="http://from-file:11434/v1"\n'
     )
 
-    applied = cli._load_dotenv(path)
+    assert cli.load_environment(path) is True
 
-    assert applied == 1, "only the variable that was not already set"
     assert fake_environ["GUI_AGENT_MODEL"] == "from-shell"
     assert fake_environ["GUI_AGENT_BASE_URL"] == "http://from-file:11434/v1"
 
 
 def test_a_missing_dotenv_is_not_an_error(monkeypatch, tmp_path: Path) -> None:
+    """Most machines will not have one, and that is not a failure."""
     cli = _load_cli()
     monkeypatch.setattr(os, "environ", {})
 
-    assert cli._load_dotenv(tmp_path / "nope.env") == 0
+    assert cli.load_environment(tmp_path / "nope.env") is False
 
 
 def test_the_week4_config_carries_the_run_limits() -> None:

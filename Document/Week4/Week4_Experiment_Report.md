@@ -522,6 +522,27 @@ week's API surface, not this week's, so they are recorded here rather than prune
 removing another week's public functions during Week 4 is the kind of tidy-up that
 looks harmless and is not.
 
+**A hand-rolled `.env` parser, next to a declared library that does the same job.**
+`python-dotenv` has been in `requirements.txt` all along and nothing imported it;
+when `.env` loading was added to the CLI in this week, it was written from scratch
+instead. The CLI uses `load_dotenv(path, override=False)` now - one call, the same
+guarantee, and one fewer thing to maintain. The behaviour it was written for is
+unchanged and still checked end to end: a value exported in the shell beats the
+file.
+
+Asking the same reachability question of the dependency list turned up four more
+declarations nothing imports - `anthropic`, `httpx` and `pynput` in the base
+requirements, and `datasets` and `langchain` in the Week 3 set (`langchain-openai`
+is imported; `langchain` itself is not). They are other weeks' dependency
+decisions and are recorded here rather than pruned, for the same reason as the
+functions above.
+
+One message was outright wrong and is fixed: the OpenAI backend's "install it with
+`pip install -r requirements-agent.txt`" named a file that does not list `openai`.
+It arrives there only transitively, through `langchain-openai`, so the instruction
+happened to work. It names `requirements.txt` now. `RunnerError`, a class defined in
+the runner, never raised, never caught and not exported, went with it.
+
 **Half the executor's vocabulary had never been dispatched.** The runtime tests use
 a fake executor and the control tests stopped at `click` and `drag`, so the real
 `ActionExecutor` had never dispatched `type_text`, `key_press`, `hotkey`, `scroll`
