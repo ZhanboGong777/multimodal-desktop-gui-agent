@@ -144,7 +144,19 @@ class ObservationService:
             ocr_engine=engine_name,
             processing_time_ms=(time.perf_counter() - started) * 1000.0,
             errors=errors,
+            notices=self._engine_notices(),
         )
+
+    def _engine_notices(self) -> list[str]:
+        """What the OCR engine reported about itself when it was built.
+
+        These are produced once, at construction, and were read by nothing: a run
+        that fell back from PaddleOCR to Tesseract recorded `tesseract` and lost
+        the reason. 7.1.4 asks for the fallback to be kept.
+        """
+        if self._selection is None:
+            return []
+        return list(getattr(self._selection, "notices", []))
 
     def _select(self, elements: list[UIElement]) -> list[UIElement]:
         """Keep the most useful elements, text before contours.

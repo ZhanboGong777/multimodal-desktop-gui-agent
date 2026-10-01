@@ -1246,3 +1246,51 @@ def test_an_interrupted_run_still_writes_a_readable_summary(tmp_path: Path) -> N
     assert written["run_id"]
     assert written["finished_at"]
     assert written["evidence_directory"]
+
+
+def test_the_model_is_told_which_keys_it_may_use(tmp_path: Path) -> None:
+    """8.1.2 asks for the platform and the allowed key names.
+
+    The prompt said "use this platform's key names" and never listed one, so a
+    plan could name a key the adapter then refused - an error the model had no way
+    to avoid, on a task whose whole point may be a shortcut.
+    """
+    frames = [_frame("obs-0001", ("Start",)), _frame("obs-0002", ("Start",))]
+    plan = _plan(PlanStep(step_id="s1", description="click", action_type="click", target_text="Start"))
+    planner = FakePlanner(plan)
+    runner, _ = _runner(tmp_path, FakeObserver(frames), planner, FakeExecutor())
+
+    task = TaskSpec(case_id="T", instruction="x", expect_text=["Start"], success_rules=["r"])
+    runner.run(task, ExecutionOptions(confirm=False))
+
+    sent = planner.contexts[0]
+    assert "allowed_keys" in sent, "the whitelist never reached the model"
+    assert "enter" in sent["allowed_keys"]["keys"]
+    assert "escape" in sent["allowed_keys"]["keys"]
+    # The modifier names the adapter accepts. They are the same set on both
+    # platforms - what differs is what each one presses, which the adapter
+    # resolves. Advertising the names is what stops a plan naming a key that
+    # resolves to nothing.
+    assert {"command", "ctrl", "shift", "alt"} <= set(sent["allowed_keys"]["modifiers"])
+    assert sent["allowed_keys"]["hotkey_separator"] == "+"
+
+
+def test_the_key_list_is_the_one_the_adapter_enforces(tmp_path: Path) -> None:
+    """Two lists that must agree are one list too many, so there is only one.
+
+    A model told about a key the adapter then refuses would fail for a reason the
+    prompt invented; a key the adapter accepts but never mentions is one the model
+    will not use.
+    """
+    from gui_agent.runtime.action_adapter import ALLOWED_KEYS, keys_for_platform
+
+    advertised = keys_for_platform("win32")
+
+    assert set(advertised["keys"]) == set(ALLOWED_KEYS)
+    assert keys_for_platform(None) == keys_for_platform("win32"), "unknown platforms fall back"
+    # The names are shared; the meaning is not. `ctrl` is command on a Mac and
+    # ctrl on Windows, which is the difference 9.3.2 is about.
+    from gui_agent.runtime.action_adapter import _MODIFIER_ALIASES
+
+    assert _MODIFIER_ALIASES["darwin"]["ctrl"] == "command"
+    assert _MODIFIER_ALIASES["win32"]["command"] == "ctrl"

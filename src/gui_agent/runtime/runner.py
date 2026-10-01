@@ -27,7 +27,7 @@ from typing import Any, Protocol
 from ..control.executor import ActionExecutor
 from ..planning import PlanResult, TaskPlan, TaskPlanner
 from . import provenance
-from .action_adapter import ActionAdapter, ActionResolutionError
+from .action_adapter import ActionAdapter, ActionResolutionError, keys_for_platform
 from .recorder import TaskRecorder, redact
 from .schemas import (
     ExecutionOptions,
@@ -161,6 +161,7 @@ class TaskRunner:
         confirm: Callable[[TaskPlan], bool] | None = None,
         countdown: Callable[[int], None] | None = None,
         high_risk_confirm: Callable[[TaskPlan], bool] | None = None,
+        on_plan: Callable[[TaskPlan], None] | None = None,
     ) -> TaskRunResult:
         """Run one task, and leave a readable record whatever happens.
 
@@ -173,7 +174,9 @@ class TaskRunner:
         """
         started = self.clock()
         try:
-            return self._run(task, options, started, confirm, countdown, high_risk_confirm)
+            return self._run(
+                task, options, started, confirm, countdown, high_risk_confirm, on_plan
+            )
         except KeyboardInterrupt:
             return self._abandon(task, options, started)
 
@@ -185,6 +188,7 @@ class TaskRunner:
         confirm: Callable[[TaskPlan], bool] | None,
         countdown: Callable[[int], None] | None,
         high_risk_confirm: Callable[[TaskPlan], bool] | None,
+        on_plan: Callable[[TaskPlan], None] | None,
     ) -> TaskRunResult:
         timings = Timings(started=started)
         notes: list[str] = []
@@ -202,6 +206,12 @@ class TaskRunner:
                 task, options, f"initial observation failed: {exc}", timings=timings
             )
         self.recorder.save_observation(initial)
+        # 7.1.4: the engine's own account of itself belongs in the run, not only in
+        # the frame file. If OCR fell back, that explains a slow frame or a poorer
+        # text pass, and the operator should hear it while the run is happening
+        # rather than by reading obs-0001.json afterwards.
+        for notice in getattr(initial, "notices", []):
+            notes.append(f"ocr: {notice}")
 
         # A frame with no readable text is not an error - OCR cannot read a locked,
         # dark or mostly-empty screen - but it makes every text target unresolvable.
@@ -282,6 +292,13 @@ class TaskRunner:
                 f"{options.max_actions} allowed",
                 timings=timings,
             )
+
+        # 12.2.2 wants the plan shown with its steps, the text it would type, the
+        # targets and the risk. It was shown only inside the execute-mode
+        # confirmation, so the default mode - a dry run, whose entire purpose is to
+        # let the operator see what would happen - printed none of it.
+        if on_plan is not None:
+            on_plan(plan)
 
         # 4. confirmation gate — before any real input event
         if options.execute:
@@ -544,6 +561,8 @@ class TaskRunner:
             # A plan that overshoots the budget is refused before anything is
             # dispatched, so the model is told the budget it is planning against
             # rather than discovering it by having its plan rejected.
+            # 8.1.2: the whitelist itself, not just the advice to respect it.
+            "allowed_keys": keys_for_platform(self.adapter.platform),
             "limits": (
                 f"at most {options.max_actions} actions and "
                 f"{options.task_timeout_seconds:g} s for the whole task"

@@ -344,3 +344,69 @@ def test_a_run_finds_the_warmup_record_in_its_own_output_directory(tmp_path: Pat
     copied = sessions[0] / "warmup.json"
     assert copied.is_file(), "the record has to land in the run directory"
     assert json.loads(copied.read_text(encoding="utf-8"))["ready"] is True
+
+
+# ───────── 12.2.2: what the plan would do, in the mode that exists to show it ─────────
+def test_a_dry_run_is_told_to_display_the_plan(capsys) -> None:
+    """The display lived only inside the execute-mode confirmation.
+
+    So the default mode - a dry run, whose entire purpose is to let the operator
+    see the plan before agreeing to it - printed no steps, no targets and no text.
+    """
+    import argparse
+
+    from gui_agent.runtime.tasks import get_case
+
+    cli = _load_cli()
+    callbacks = cli._execute_callbacks(argparse.Namespace(execute=False), get_case("T04"))
+    assert callbacks == {}, "a dry run asks nothing"
+
+    from gui_agent.planning.schemas import PlanStep, TaskPlan
+
+    plan = TaskPlan(
+        task_id="t1",
+        instruction="search",
+        summary="Search in the browser",
+        steps=[
+            PlanStep(step_id="step-1", description="type", action_type="type_text",
+                     arguments={"text": "GUI agent research"}),
+            PlanStep(step_id="step-2", description="stop", action_type="finish"),
+        ],
+    )
+    cli._show_plan(plan)
+    printed = capsys.readouterr().out
+
+    assert "Search in the browser" in printed
+    assert "step-1" in printed and "type_text" in printed
+    assert "GUI agent research" in printed, "the text it would type is the part that matters"
+
+
+def test_the_runner_hands_the_plan_over_before_deciding_anything(tmp_path) -> None:
+    """The hook fires after validation and before the confirmation gate."""
+    import sys
+
+    sys.path.insert(0, str(REPO_ROOT / "tests"))
+    from test_runtime_runner import (
+        FakeExecutor,
+        FakeObserver,
+        FakePlanner,
+        _frame,
+        _plan,
+        _runner,
+    )
+
+    from gui_agent.planning.schemas import PlanStep
+    from gui_agent.runtime import ExecutionOptions, TaskSpec
+
+    seen = []
+    frames = [_frame("obs-0001", ("Start",)), _frame("obs-0002", ("Start",))]
+    plan = _plan(
+        PlanStep(step_id="s1", description="click", action_type="click", target_text="Start")
+    )
+    runner, _ = _runner(tmp_path, FakeObserver(frames), FakePlanner(plan), FakeExecutor())
+    task = TaskSpec(case_id="T", instruction="x", expect_text=["Start"], success_rules=["r"])
+
+    runner.run(task, ExecutionOptions(confirm=False), on_plan=seen.append)
+
+    assert len(seen) == 1, "the plan is shown once, not per step"
+    assert seen[0].summary == plan.summary

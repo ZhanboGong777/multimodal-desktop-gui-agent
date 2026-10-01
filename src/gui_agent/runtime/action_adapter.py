@@ -95,6 +95,23 @@ _MODIFIER_ALIASES = {
 }
 _DEFAULT_MODIFIERS = _MODIFIER_ALIASES["win32"]
 
+def keys_for_platform(platform: str | None = None) -> dict[str, list[str]]:
+    """The key names a plan may use on this platform, in the form the prompt sends.
+
+    8.1.2 asks for the platform *and the allowed key names* to reach the model. The
+    prompt told it to "use this platform's key names" and never said which, so a
+    plan could name a key the adapter then refused - a resolution error the model
+    had no way to avoid. Read from the same constants the adapter checks against,
+    so the two cannot disagree.
+    """
+    modifiers = sorted(_MODIFIER_ALIASES.get(platform or "", _DEFAULT_MODIFIERS))
+    return {
+        "keys": sorted(ALLOWED_KEYS),
+        "modifiers": modifiers,
+        "hotkey_separator": "+",
+    }
+
+
 #: Actions whose target is a point on screen.
 _POINT_ACTIONS = frozenset({"move", "click", "double_click", "right_click", "scroll"})
 

@@ -151,10 +151,14 @@ def _element(text: str, index: int = 0) -> UIElement:
     )
 
 
-def _patch(monkeypatch: pytest.MonkeyPatch, engine: _StubEngine) -> None:
+def _patch(
+    monkeypatch: pytest.MonkeyPatch, engine: _StubEngine, *, notices: list[str] | None = None
+) -> None:
     monkeypatch.setattr(observation, "capture_monitor", lambda *a, **k: _PreparedCapture())
     monkeypatch.setattr(
-        observation, "create_ocr_engine", lambda config: EngineSelection(engine=engine)
+        observation,
+        "create_ocr_engine",
+        lambda config: EngineSelection(engine=engine, notices=list(notices or [])),
     )
 
 
@@ -255,3 +259,39 @@ def test_a_contour_failure_is_recorded_and_the_frame_survives(
 
     assert any("ui detection failed" in error for error in snapshot.errors), snapshot.errors
     assert [item.text for item in snapshot.elements if item.text] == ["Browser"]
+
+
+def test_a_fallback_engine_says_so_in_the_frame_it_produced(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """7.1.4 asks for the fallback engine to be recorded, not only its name.
+
+    The engine selection produces a notice when PaddleOCR is unavailable and
+    Tesseract takes over. `ObservationService` copied those into a `notices`
+    property that nothing in the runtime read, so a run recorded
+    `ocr_engine: tesseract` and lost the reason - which is the half that explains
+    a slow or poor frame.
+    """
+    _patch(
+        monkeypatch,
+        _StubEngine([_element("Fetch origin")]),
+        notices=["PaddleOCR unavailable (no module); falling back to Tesseract."],
+    )
+
+    snapshot = ObservationService(Config()).observe()
+
+    assert snapshot.notices == [
+        "PaddleOCR unavailable (no module); falling back to Tesseract."
+    ]
+    # A fallback that worked is not a degraded frame. `errors` is what makes the
+    # verifier refuse to judge an observation, and this must not land there.
+    assert snapshot.errors == []
+
+
+def test_a_frame_from_an_engine_that_reported_nothing_carries_no_notices(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The common case stays quiet, so a notice in a record means something."""
+    _patch(monkeypatch, _StubEngine([_element("Browser")]))
+
+    assert ObservationService(Config()).observe().notices == []

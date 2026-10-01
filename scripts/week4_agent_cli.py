@@ -97,6 +97,26 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _show_plan(plan) -> None:
+    """Print what a dry run would do: 12.2.2's summary, steps, text and targets.
+
+    The default mode is a dry run, and its whole purpose is to let the operator
+    see the plan before deciding to execute it. This display lived only inside the
+    execute-mode confirmation, so the mode that exists to show the plan was the
+    one mode that never showed it.
+    """
+    print()
+    print(f"  plan       : {plan.summary or '(no summary)'}")
+    for step in plan.steps:
+        target = f" -> {step.target_text}" if step.target_text else ""
+        print(f"    {step.step_id:<8} {step.action_type:<12}{target}")
+        typed = step.arguments.get("text") if isinstance(step.arguments, dict) else None
+        if typed:
+            # The operator is deciding whether to let this run; what it would type
+            # is the part that matters most, and it was only visible in execute mode.
+            print(f"             would type: {typed}")
+
+
 def _confirm(plan) -> bool:
     """Ask once, and treat anything that is not an explicit yes as no."""
     print()
@@ -347,6 +367,9 @@ def main() -> int:
             )
 
     callbacks = _execute_callbacks(args, task)
+    if not args.execute:
+        # Not a confirmation: nothing is dispatched, so nothing is being authorised.
+        callbacks["on_plan"] = _show_plan
 
     runner = TaskRunner(
         observer=observer,

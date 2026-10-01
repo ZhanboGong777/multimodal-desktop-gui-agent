@@ -60,6 +60,13 @@ class ObservationSnapshot(SchemaModel):
     ocr_engine: str = "none"
     processing_time_ms: float = 0.0
     errors: list[str] = Field(default_factory=list)
+    #: What the OCR engine said about itself: a fallback to another engine, a
+    #: missing cache directory, a suppressed Windows workaround. Kept separate
+    #: from ``errors`` on purpose - 7.1.4 asks for the fallback engine to be
+    #: recorded, and a frame produced by a working fallback is not a degraded
+    #: frame, so putting this in ``errors`` would make the verifier refuse to
+    #: judge any observation taken after one.
+    notices: list[str] = Field(default_factory=list)
 
     def element(self, element_id: str) -> ElementRef | None:
         """Return the element with this id, or None when the id is not from this frame."""

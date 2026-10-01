@@ -81,6 +81,7 @@ class TaskRecorder:
                     "ocr_engine": snapshot.ocr_engine,
                     "processing_time_ms": round(snapshot.processing_time_ms, 3),
                     "errors": snapshot.errors,
+                    "ocr_notices": snapshot.notices,
                     # 16.2 asks for sensitive text to be kept out of the records.
                     # Typed text is masked by the action redactor; this is the other
                     # way a credential reaches a file - OCR reading it off the
