@@ -111,13 +111,14 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **495 passed**, ruff clean |
+| MacBook Air M2 | **510 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 195: 168 in the ten
-files below, 10 in `test_model_mock.py`, 7 in `test_config.py` for the
-configuration surface, 7 in `test_plan_parser.py` for the step-status vocabulary
-and the plan-ordering rules, 2 in `test_ocr.py` for the label-merging fix, and 1
-in `test_model_config.py` for the retry policy.
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 210: 168 in the ten
+files below, 15 in `test_control_safety.py` for the executor's dispatch and the real
+backend, 10 in `test_model_mock.py`, 7 in `test_config.py` for the configuration
+surface, 7 in `test_plan_parser.py` for the step-status vocabulary and the
+plan-ordering rules, 2 in `test_ocr.py` for the label-merging fix, and 1 in
+`test_model_config.py` for the retry policy.
 
 | Test file | Covers |
 | --- | --- |
@@ -493,6 +494,30 @@ folder now, which is what the constant was for. A sweep for the same pattern acr
 the runtime, planning and models packages found no others; the four schema fields
 that are written but never read are records - they go into the JSON evidence for a
 person to read, which is what a record is for.
+
+**Half the executor's vocabulary had never been dispatched.** The runtime tests use
+a fake executor and the control tests stopped at `click` and `drag`, so the real
+`ActionExecutor` had never dispatched `type_text`, `key_press`, `hotkey`, `scroll`
+or `wait` - and T02 is a type-then-submit task. All five are covered now, along
+with `move`, `double_click` and `right_click`, the countdown ordering and the
+action delay.
+
+The same pass reached the layer underneath, which had no test at all:
+`PyAutoGUIBackend`, the wrapper that actually drives the machine. It is testable
+without moving a mouse - the constructor imports pyautogui, so a stub module in
+`sys.modules` takes its place and every primitive can be checked for the call it
+forwards to. That matters because a wrapper typo is invisible everywhere except on
+the real desktop: a `double_click` dispatched as a single click looks like a
+sluggish application, not a bug. `control/actions.py` went from 55% to 100% and the
+control package from 81% to 95%.
+
+One thing the wrapper's tests document rather than fix: `_release_modifiers` tries
+nine key names after every action, and three of them - `control`, `cmd`, `super` -
+are not in PyAutoGUI's key list on any platform, so those releases always raise and
+are always swallowed. That is deliberate and correct (the remaining six still cover
+a genuinely stuck key, and the release also runs when the action itself failed),
+but an operator reading a log full of caught exceptions should know it is
+expected.
 
 **All five exit codes are now verified end to end.** The table in 12.2 had only
 ever been read, not exercised. Driving the CLI against stand-in endpoints covered
