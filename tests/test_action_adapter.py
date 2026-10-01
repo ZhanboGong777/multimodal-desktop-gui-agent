@@ -160,3 +160,23 @@ def test_coordinates_are_scaled_into_control_space(adapter: ActionAdapter) -> No
     # element centre is (45,30) in a 2940-wide screenshot -> (22,15) in control space
     assert (resolved.control_point.x, resolved.control_point.y) == (22, 15)
     assert (resolved.screenshot_point.x, resolved.screenshot_point.y) == (45, 30)
+
+
+def test_a_stale_id_with_a_text_target_is_rebound_in_the_new_frame(adapter: ActionAdapter) -> None:
+    """A plan is written from one frame and executed after another.
+
+    Refusing every stale id would make element targeting unusable, since the
+    runner always re-observes before acting. The spec allows a re-bind when the
+    step also says, in words, what it is aiming at.
+    """
+    step = _step(arguments={"element_id": "obs-0001-e001"}, target_text="Edit")
+    resolved = adapter.resolve(step, _snapshot("obs-0002"))
+    assert resolved.element_id == "obs-0002-e001"
+    assert "re-bound from obs-0001-e001" in resolved.note
+
+
+def test_a_stale_id_without_a_text_target_is_still_refused(adapter: ActionAdapter) -> None:
+    """Nothing to re-locate against: guessing would be worse than stopping."""
+    step = _step(arguments={"element_id": "obs-0001-e001"})
+    with pytest.raises(ActionResolutionError, match="names no text target"):
+        adapter.resolve(step, _snapshot("obs-0002"))

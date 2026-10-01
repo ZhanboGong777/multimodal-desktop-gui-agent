@@ -43,6 +43,15 @@ screenshot is not a licence to click through a page that has since changed. Befo
 each action the target is looked up in the newest observation; an element id from
 an earlier frame is refused rather than rebound.
 
+**A stale element id had to become re-bindable.** A plan is written from one
+frame and executed after another, so every element id in it is already stale by
+the time the runner acts. The first version of the adapter refused any id that was
+not in the current frame, which made element targeting unusable: the integration
+test failed with `names no text target`. The spec allows a re-bind when the step
+also names its target in words, so the adapter now re-locates by text and records
+`re-bound from obs-0001-e001`. A bare stale id is still refused - there is nothing
+to re-locate against, and guessing is worse than stopping.
+
 **The prompt tells the model how to aim.** Week 3's system prompt named no
 arguments and no element ids, so a plan could be valid JSON and still be
 unresolvable against the frame. The prompt now shows the `{"element_id": ...}`
@@ -89,9 +98,9 @@ Tesseract is 23x faster on this machine, matching the Week 2 conclusion.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **356 passed**, ruff clean |
+| MacBook Air M2 | **363 passed**, ruff clean |
 
-Week 3 ended at 300 tests. Week 4 adds 56:
+Week 3 ended at 300 tests. Week 4 adds 63:
 
 | Test file | Covers |
 | --- | --- |
@@ -100,6 +109,7 @@ Week 3 ended at 300 tests. Week 4 adds 56:
 | `test_runtime_verification.py` | 8 cases: rule matching, forbidden text, unverifiable tasks, degraded observations |
 | `test_runtime_recording.py` | 6 cases: redaction, append-only steps, per-frame files, summary |
 | `test_week4_cli.py` | 6 cases: argument errors, no `--yes`, dry-run default, summary always written |
+| `test_week4_integration.py` | 5 cases: the loop against a real OpenAI-compatible server over a real socket, which reads the element ids out of the prompt it receives |
 | `test_week4_prompts.py` | 8 cases: the prompt fits its budget, describes element targeting and every action's arguments, and the user turn carries the platform |
 
 ### The offline closed loop
@@ -160,6 +170,13 @@ means a rule-based mock cannot demonstrate the loop. Handled by adding
 `scripts/week4_offline_demo.py` with scripted frames, which exercises the whole
 path without a model.
 
+**The integration test proved the prompt carries the observation.** The first
+version targeted an element id the model could not have known, and the test failed
+in a way that turned out to be a design bug rather than a test bug: element ids
+from the planning frame are always stale by the time the action runs. That is now
+covered by two adapter tests and asserted in the integration test, which checks
+that the step acted against `obs-0002` while the plan was written from `obs-0001`.
+
 **The screen went to sleep mid-run.** Two cases returned
 `capture failed: CaptureError: monitor_index 1 is out of range (available 1..0)`
 once the display slept. The run reported `blocked` with that reason and dispatched
@@ -183,7 +200,7 @@ values but had no test. Four cases were added in Week 3's follow-up.
 - `scripts/week4_agent_cli.py` - the command-line entry point.
 - `scripts/week4_offline_demo.py` - the loop against scripted frames.
 - `configs/week4.yaml` - Week 4 limits, with `AgentConfig` added to `config.py`.
-- 56 new tests across 6 files.
+- 63 new tests across 7 files.
 - `Document/Week4/Week4_Usage.md`, this report, and the basic task test report.
 
 ## 9. Limits

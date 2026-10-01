@@ -156,16 +156,25 @@ class ActionAdapter:
         """
         arguments: dict[str, Any] = dict(step.arguments or {})
         element_id = arguments.get("element_id") or arguments.get("target_element")
+        query = (step.target_text or arguments.get("target") or "").strip()
+        rebound_from: str | None = None
+
         if isinstance(element_id, str) and element_id:
             found = observation.element(element_id)
-            if found is None:
+            if found is not None:
+                return found.center, found, f"element {element_id}"
+            # The id belongs to an earlier frame. A plan is written from one
+            # observation and executed after another, so this is the normal case,
+            # not an error - as long as the step also said what it is aiming at in
+            # words. A bare stale id has nothing to re-locate and is refused.
+            if not query:
                 raise ActionResolutionError(
                     f"element id {element_id!r} is not from observation "
-                    f"{observation.observation_id}; re-observe before using it"
+                    f"{observation.observation_id} and the step names no text target "
+                    "to re-locate"
                 )
-            return found.center, found, f"element {element_id}"
+            rebound_from = element_id
 
-        query = (step.target_text or arguments.get("target") or "").strip()
         if not query:
             raise ActionResolutionError(
                 f"{step.action_type} needs target_text or arguments.element_id to locate a target"
@@ -179,7 +188,10 @@ class ActionAdapter:
         if len(matches) == 1:
             chosen = observation.element(matches[0].element.element_id) or matches[0].element
             ref = _as_ref(chosen, observation)
-            return ref.center, ref, f"text {query!r} -> {ref.element_id}"
+            note = f"text {query!r} -> {ref.element_id}"
+            if rebound_from:
+                note += f" (re-bound from {rebound_from} in an earlier frame)"
+            return ref.center, ref, note
         if not matches:
             raise ActionResolutionError(
                 f"no element matches {query!r} in {observation.observation_id}"
