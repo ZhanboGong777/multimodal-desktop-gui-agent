@@ -682,5 +682,7 @@ behaviour the implementation does not have would be worse than none.
   The gap rule exists to keep that rare.
 - **The success rules for T01 and T05 are weaker than the written standard.** They
   can only look for text on screen, so they cannot tell "I closed it" from "it was
-  never open". The precondition check covers that half for a real run, but a run
-  started with `require_preconditions=false` proves nothing about either case.
+  never open". The precondition check covers that half for a real run, and from the
+  command line it cannot be switched off: `require_preconditions` is an `ExecutionOptions`
+  field with no CLI flag and no config key. A run started from Python with it set to false
+  proves nothing about either case.
