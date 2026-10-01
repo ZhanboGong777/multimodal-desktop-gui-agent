@@ -717,6 +717,38 @@ note - because a model asked to plan from nothing returns a confident plan about
 screen it never saw. Re-running the same deletion against the new tests fails four
 of them.
 
+**A P0 requirement with no implementation, no test and no record.** 13.4 asks for
+four things before the week's real tasks: warm the model up, keep that time out of
+a warm-start task's timing, prove the vision path rather than only the text path,
+and record cold/warm state, memory, the request time, a failure classification and
+the retry count. There was no warmup of any kind. The manual told the operator to
+run `ollama run qwen2.5vl:7b "ok"` - the text-only warmup that the same section
+says is not enough - and nothing recorded what it cost.
+
+Nothing failed, and nothing could have: this is the one class of gap a test suite
+does not see, because a requirement that was never implemented has no code to be
+uncovered and no assertion to be wrong. It was found by reading the acceptance
+list against the tree rather than by running anything, which is also how the
+`require_preconditions` wiring and the missing `test_runtime_observation.py` in the
+manual's own command had been found. Three of the week's P0 items were missing
+pieces that only a line-by-line check against the hand-back notes surfaced.
+
+The cost of not having it was concrete rather than theoretical: the first T01 run
+on the Windows box would have paid for loading the weights and warming the vision
+encoder, and recorded it as the plan's own latency - on a machine where that has
+been measured at 8-10 s cold and about 72 s with memory tight. The first data point
+of the week's real evidence would have been wrong, and wrong in the direction that
+looks like a model problem.
+
+`scripts/week4_warmup.py` sends a text probe and then a real screenshot through the
+project's own client, because 13.4.6 is explicit that a long-timeout probe
+succeeding says nothing about the client the tasks use; labels the session's first
+request as the cold one; and writes a record with every field the section names.
+Its failures go through the runtime's own classifier, so a warmup that dies on the
+context window prints the same hint a task run would. The manual gained a step that
+runs it before the first task, and the usage guide gained it in the quick start.
+
+
 ## 8. Deliverables
 
 - `src/gui_agent/runtime/` - the run layer (8 modules).
