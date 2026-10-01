@@ -111,9 +111,9 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **467 passed**, ruff clean |
+| MacBook Air M2 | **469 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 167: 140 in the ten
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 169: 142 in the ten
 files below, 10 in `test_model_mock.py`, 7 in `test_config.py` for the
 configuration surface, 7 in `test_plan_parser.py` for the step-status vocabulary
 and the plan-ordering rules, 2 in `test_ocr.py` for the label-merging fix, and 1
@@ -127,7 +127,7 @@ in `test_model_config.py` for the retry policy.
 | `test_config.py` | 7 cases: an unknown key is refused at the top level and inside a section, out-of-range limits are refused, and the defaults are the safe mode |
 | `test_runtime_observation.py` | 3 cases: frame-local ids do not repeat, unlabelled contours are not offered as targets, and a prompt line carries what a step needs to aim |
 | `test_runtime_recording.py` | 6 cases: redaction, append-only steps, per-frame files, summary |
-| `test_week4_cli.py` | 13 cases: argument errors, no `--yes`, dry-run default, summary always written, `--execute` refused without a terminal, the callback set an execute run hands over, `.env` loading, and the flag/environment/YAML precedence |
+| `test_week4_cli.py` | 15 cases: argument errors, no `--yes`, dry-run default, summary always written, `--execute` refused without a terminal, the callback set an execute run hands over, `.env` loading, the flag/environment/YAML precedence, and the numeric limits |
 | `test_week4_integration.py` | 5 cases: the loop against a real OpenAI-compatible server over a real socket, which reads the element ids out of the prompt it receives |
 | `test_week4_prompts.py` | 12 cases: the prompt fits its budget, describes element targeting and every action's arguments, carries the platform, trims the element list by whole lines, and keeps markers verbatim |
 | `test_week4_cases.py` | 10 cases: the invariants the five case definitions must hold - a machine-checkable rule, a declared precondition, a distinctive marker, a copy handed back by `get_case`, and the fresh marker a send-message run is given |
@@ -461,6 +461,24 @@ through the CLI against a stand-in endpoint that reproduces the review's error
 verbatim: the 400 now reports `planning_ms: 2087.5` with `execution_ms: 0.0`, and a
 hanging endpoint reports `APITimeoutError` as its own class rather than as a
 generic failure.
+
+**All five exit codes are now verified end to end.** The table in 12.2 had only
+ever been read, not exercised. Driving the CLI against stand-in endpoints covered
+the rest: a successful answer exits 0; a plan naming a target that is not on screen
+exits 1 with `failed`; the context overflow and an exhausted budget exit 2; a
+budget that expires between steps exits 3 with `timed_out`; and answering `n` at
+the confirmation exits 130. The stand-in reproduces the review's own 400 verbatim,
+so the path its T01 took is now covered by something repeatable.
+
+**Two numeric flags did not behave as their help text reads.** `--task-timeout -5`
+reached `ExecutionOptions`, whose pydantic error escaped as a traceback and exited
+1 - the code the table reserves for "the run failed", so an operator would read a
+typing mistake as a task that had been attempted. And `--max-actions 0` was
+silently dropped, because the assignment tested truthiness rather than `is not
+None`; an operator asking for the most restrictive setting got the default twenty
+instead. Both are validated at parse time now, which puts them where the table says
+they belong: exit 2, with the offending value in the message. The header also
+printed a sub-second budget as `0s`, which read as "no budget at all".
 
 ## 8. Deliverables
 

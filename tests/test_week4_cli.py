@@ -239,3 +239,32 @@ def test_the_week4_config_carries_the_run_limits() -> None:
     assert config.execution.verification_poll_interval_seconds == 0.5
     assert config.execution.max_wait_seconds == 5
     assert config.execution.require_success_rules is True
+
+
+def test_a_bad_limit_is_a_usage_error_not_a_traceback(tmp_path: Path) -> None:
+    """12.2's exit-code table puts argument errors at 2.
+
+    A negative budget used to reach `ExecutionOptions`, whose pydantic error
+    escaped as a traceback and exited 1 - the code the table reserves for "the run
+    failed". An operator reading that would think the task had been attempted.
+    """
+    for extra in (("--task-timeout", "-5"), ("--task-timeout", "0"), ("--max-actions", "0")):
+        result = run_cli("--case", "T01", *extra, "--output-directory", str(tmp_path / "x"))
+
+        assert result.returncode == 2, (extra, result.stdout)
+        assert "must be greater than 0" in result.stderr
+
+
+def test_the_smallest_valid_limit_is_applied_rather_than_ignored(tmp_path: Path) -> None:
+    """`if args.max_actions:` dropped falsy values.
+
+    Nothing here can be zero - the model forbids it - so truthiness was never the
+    right test, and an operator asking for the most restrictive setting silently
+    got the default instead. The header prints what was actually applied.
+    """
+    result = run_cli(
+        "--case", "T01", "--max-actions", "1", "--task-timeout", "7",
+        "--output-directory", str(tmp_path / "records"),
+    )
+
+    assert "1 actions, 7s budget" in result.stdout, result.stdout

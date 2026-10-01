@@ -52,6 +52,26 @@ _STATUS_TO_EXIT = {
 }
 
 
+def _positive_int(value: str) -> int:
+    """argparse type for a limit that has to be greater than zero.
+
+    Validated here rather than left to `ExecutionOptions`: the model's own error is
+    a pydantic traceback, and an uncaught one exits 1 - which the exit-code table
+    reserves for "the run failed", not "you typed the arguments wrong".
+    """
+    number = int(value)
+    if number <= 0:
+        raise argparse.ArgumentTypeError(f"must be greater than 0, got {value}")
+    return number
+
+
+def _positive_float(value: str) -> float:
+    number = float(value)
+    if number <= 0:
+        raise argparse.ArgumentTypeError(f"must be greater than 0, got {value}")
+    return number
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=__doc__,
@@ -70,8 +90,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model", default=None)
     parser.add_argument("--base-url", default=None)
     parser.add_argument("--execute", action="store_true", help="allow real desktop actions")
-    parser.add_argument("--max-actions", type=int, default=None)
-    parser.add_argument("--task-timeout", type=float, default=None)
+    parser.add_argument("--max-actions", type=_positive_int, default=None)
+    parser.add_argument("--task-timeout", type=_positive_float, default=None)
     parser.add_argument("--output-directory", default=None)
     parser.add_argument("--quiet", action="store_true")
     return parser.parse_args()
@@ -223,9 +243,11 @@ def main() -> int:
         return EXIT_BLOCKED
 
     _apply_environment(config, args)
-    if args.max_actions:
+    # `is not None`, not truthiness: the old test silently dropped a value the
+    # operator had deliberately chosen, and no value here can be zero anyway.
+    if args.max_actions is not None:
         config.execution.max_actions = args.max_actions
-    if args.task_timeout:
+    if args.task_timeout is not None:
         config.execution.task_timeout_seconds = args.task_timeout
 
     # ── the task ───────────────────────────────────────────────────────
@@ -303,7 +325,7 @@ def main() -> int:
             # told which one this run is looking for.
             print(f"  marker     : {message_marker}")
         print(
-            f"  limits     : {options.max_actions} actions, {options.task_timeout_seconds:.0f}s budget"
+            f"  limits     : {options.max_actions} actions, {options.task_timeout_seconds:g}s budget"
         )
         print(f"  records    : {session.directory}")
 
