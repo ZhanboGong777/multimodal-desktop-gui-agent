@@ -1,0 +1,127 @@
+{
+  "run_id": "T01_20261001_215642",
+  "case_id": "T01",
+  "instruction": "Open the web browser from the desktop",
+  "status": "dry_run_completed",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "step-1",
+      "description": "Open the web browser from the desktop",
+      "action_type": "click",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "step-1",
+        "action": {
+          "action_type": "click",
+          "x": 70,
+          "y": 15,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Edge"
+        },
+        "element_id": "obs-0002-e000",
+        "screenshot_point": {
+          "x": 70,
+          "y": 15
+        },
+        "control_point": {
+          "x": 70,
+          "y": 15
+        },
+        "note": "text 'Edge' -> obs-0002-e000 (re-bound from obs-0001-e000 in an earlier frame)"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": true,
+        "error": null,
+        "action": {
+          "action_type": "click",
+          "x": 70,
+          "y": 15,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Edge"
+        }
+      },
+      "verification": {
+        "outcome": "failed",
+        "method": "automatic",
+        "detail": "expected result not observed: 'search step completed'",
+        "evidence": {
+          "observation_id": "obs-0002",
+          "changed": false,
+          "element_count": 60,
+          "expectation_tokens": [
+            "search",
+            "step",
+            "completed"
+          ],
+          "expectation_hits": []
+        }
+      },
+      "error": null,
+      "elapsed_ms": 652.8056249953806,
+      "after_observation_id": null
+    },
+    {
+      "index": 2,
+      "step_id": "step-2",
+      "description": "report the result and stop",
+      "action_type": "finish",
+      "observation_id": "obs-0001",
+      "resolved": null,
+      "action_result": null,
+      "verification": null,
+      "error": null,
+      "elapsed_ms": 0.003708992153406143,
+      "after_observation_id": null
+    }
+  ],
+  "verification": {
+    "outcome": "inconclusive",
+    "method": "automatic",
+    "detail": "dry run: actions were resolved and validated but nothing was dispatched, so the task goal was not attempted (the rule would read failed)",
+    "evidence": {
+      "would_be": "failed",
+      "rule_detail": "expected on screen but not found: http, search"
+    }
+  },
+  "error": null,
+  "elapsed_ms": 2168.473624973558,
+  "execute": false,
+  "model_name": "mock-vision-model",
+  "provider": "mock",
+  "notes": [
+    "planned 2 steps from obs-0001",
+    "step-2: finish reached"
+  ],
+  "task_id": "T01",
+  "commit": "2eb4392",
+  "platform": "darwin",
+  "os_version": "macOS-26.3.1-arm64-arm-64bit",
+  "python_version": "3.12.10",
+  "screen": "screenshot 1920x1080, control 1920x1080",
+  "started_at": "2026-10-01T11:56:42.103067Z",
+  "finished_at": "2026-10-01T11:56:44.271541Z",
+  "planning_attempts": 1,
+  "model_requests": 1,
+  "planning_ms": 1515.2338340412825,
+  "confirmation_ms": 0.0,
+  "execution_ms": 653.2397909322754,
+  "evidence_directory": "/tmp/w4real/T01_20261001_215642",
+  "stop_reason": "",
+  "error_type": "",
+  "failed_step_id": null,
+  "action_count": 1
+}
