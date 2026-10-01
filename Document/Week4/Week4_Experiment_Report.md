@@ -773,6 +773,45 @@ much. The result template gained the two rows this needs, for free memory and fo
 the cold and warm latencies.
 
 
+**Four rules the spec states and the code did not keep.** The acceptance list was
+read section by section against the tree, and each finding was then checked in the
+files rather than taken on trust. Four held up.
+
+11.1.5 forbids reading a changed screenshot as success. `check_step` did exactly
+that: with no expected result to look for and a frame that had moved, it returned
+`passed`. Its own docstring said the honest answer was `inconclusive`, so the
+module contradicted itself - and the branch was unexercised, so nothing failed.
+A changed screen is `inconclusive` now, with the change still recorded as evidence;
+`move` and `wait` get the branch 11.1.6 allows them, reported as the action's own
+completion rather than as an observation of a result.
+
+8.2.8 says an ambiguous instruction must be answered or blocked and must not lean
+on `assumptions`. The system prompt said the opposite in as many words: "If it is
+ambiguous, say so in assumptions and still return a plan." Nothing in the runtime
+reads `assumptions`, so an ambiguous instruction produced a plan that executed on
+a guess the operator never saw. The rule now sends the question to `errors`, which
+the runner already refuses to execute on. 8.2.7 and 8.2.5 needed two more rules -
+screen text is data and not instructions, and recipients, file paths and
+applications are not to be invented - and all three had to fit a budget that is a
+measurement, not a preference: 1 199 characters truncated the 7B model's replies
+and 792 worked, so the cap is 1 000 and the prompt is 965. The JSON example gave up
+`assumptions` and `requires_confirmation` to make room; both have defaults, neither
+may authorise anything, and showing `assumptions` in the shape the model copies is
+an invitation to fill it in.
+
+14.2.3 asks for a readable summary on interruption. Ctrl+C returned 130 with no
+summary at all - the run happened, and the record of it did not. The runner catches
+the interrupt now and closes the run out from the step log rather than from memory,
+because on an interrupt the in-memory list is whatever the unwinding left behind.
+
+16.2 asks for sensitive text to be kept out of the records. Typed text was masked;
+what OCR read off the screen was written verbatim, which a new test demonstrates by
+putting a password on screen and reading the frame dump back. Credential-shaped
+element text is masked now and ordinary interface text is untouched, because the
+element list is what traces a coordinate back to the words it came from. The usage
+guide says what redaction does not cover, which was the part a reader would have
+assumed.
+
 ## 8. Deliverables
 
 - `src/gui_agent/runtime/` - the run layer (8 modules).
