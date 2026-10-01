@@ -111,9 +111,9 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **469 passed**, ruff clean |
+| MacBook Air M2 | **493 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 169: 142 in the ten
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 193: 166 in the ten
 files below, 10 in `test_model_mock.py`, 7 in `test_config.py` for the
 configuration surface, 7 in `test_plan_parser.py` for the step-status vocabulary
 and the plan-ordering rules, 2 in `test_ocr.py` for the label-merging fix, and 1
@@ -121,12 +121,12 @@ in `test_model_config.py` for the retry policy.
 
 | Test file | Covers |
 | --- | --- |
-| `test_action_adapter.py` | 27 cases: unique, ambiguous, missing and stale targets, a target split across word-level elements, parameter errors including wrong types, out-of-range coordinates, key whitelist, platform hotkeys, coordinate scaling, `finish` refusal |
-| `test_runtime_runner.py` | 42 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, the guard that refuses to start a real run whose goal already holds, the second confirmation a risky task must get, the provenance the summary carries, and the note a frame with no readable text leaves |
-| `test_runtime_verification.py` | 10 cases: rule matching, forbidden text, unverifiable tasks, degraded observations, and the two case rules that have to tell a real result from a lookalike |
+| `test_action_adapter.py` | 34 cases: unique, ambiguous, missing and stale targets, a target split across word-level elements, parameter errors including wrong types, out-of-range coordinates, key whitelist, platform hotkeys, coordinate scaling, `finish` refusal |
+| `test_runtime_runner.py` | 47 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, the guard that refuses to start a real run whose goal already holds, the second confirmation a risky task must get, the provenance the summary carries, and the note a frame with no readable text leaves |
+| `test_runtime_verification.py` | 12 cases: rule matching, forbidden text, unverifiable tasks, degraded observations, the two case rules that have to tell a real result from a lookalike, and the screen going away while polling |
 | `test_config.py` | 7 cases: an unknown key is refused at the top level and inside a section, out-of-range limits are refused, and the defaults are the safe mode |
-| `test_runtime_observation.py` | 3 cases: frame-local ids do not repeat, unlabelled contours are not offered as targets, and a prompt line carries what a step needs to aim |
-| `test_runtime_recording.py` | 6 cases: redaction, append-only steps, per-frame files, summary |
+| `test_runtime_observation.py` | 9 cases: the whole of `observe()` against a prepared frame - ids, geometry, the OCR-failure record, the element cap - plus what a prompt line carries |
+| `test_runtime_recording.py` | 10 cases: redaction, append-only steps, per-frame files, summary, and where the provenance comes from |
 | `test_week4_cli.py` | 15 cases: argument errors, no `--yes`, dry-run default, summary always written, `--execute` refused without a terminal, the callback set an execute run hands over, `.env` loading, the flag/environment/YAML precedence, and the numeric limits |
 | `test_week4_integration.py` | 5 cases: the loop against a real OpenAI-compatible server over a real socket, which reads the element ids out of the prompt it receives |
 | `test_week4_prompts.py` | 12 cases: the prompt fits its budget, describes element targeting and every action's arguments, carries the platform, trims the element list by whole lines, and keeps markers verbatim |
@@ -462,6 +462,28 @@ verbatim: the 400 now reports `planning_ms: 2087.5` with `execution_ms: 0.0`, an
 hanging endpoint reports `APITimeoutError` as its own class rather than as a
 generic failure.
 
+**A screen that went away during the final verdict ended the run as a traceback.**
+Measuring coverage rather than guessing at what was untested showed that the whole
+of `ObservationService.observe()` had never been executed by the suite - it needs a
+screen, and the suite is deliberately not allowed to take one. 16.1 asks for
+*prepared* screenshots instead, and with a prepared frame plus a stubbed backend
+the method runs for real: ids, geometry, the OCR-failure record, the element cap.
+`observe()` went from 54% covered to 99% and the runtime total from 90% to 98%,
+with `runner.py`, `verification.py`, `recorder.py` and `tasks.py` at 100%.
+
+Writing those tests is what found the crash. `check_task_with_polling` is the one
+observer call the runner does not wrap, so a display that slept between the last
+action and the verdict let the exception out of `run()` entirely - and the CLI
+catches only `KeyboardInterrupt`, so the operator got a traceback instead of a
+result. Sleeping displays are the single most common environmental event in this
+project; this was the one place it was still fatal. The polling loop now reports
+`inconclusive` with the reason, which is the honest verdict for a screen nobody can
+look at.
+
+The same pass covered a whole action type that had no success path under test
+(`drag` was only ever exercised by its error branches) and the provenance
+override that lets a checkout without git metadata record a commit.
+
 **All five exit codes are now verified end to end.** The table in 12.2 had only
 ever been read, not exercised. Driving the CLI against stand-in endpoints covered
 the rest: a successful answer exits 0; a plan naming a target that is not on screen
@@ -491,7 +513,7 @@ printed a sub-second budget as `0s`, which read as "no budget at all".
 - `configs/week4.yaml` - Week 4 limits, with `ExecutionConfig` added to `config.py`.
 - 102 new tests.
 - `Document/Week4/Week4_Usage.md` - flags, the safety model, the record layout.
-- `Document/Week4/Week4_Troubleshooting.md` - twenty-seven symptoms with what to check
+- `Document/Week4/Week4_Troubleshooting.md` - twenty-eight symptoms with what to check
   and what the code actually does about each.
 - `Document/Week4/Week4_Basic_Task_Test_Report.md` - the five results, one row per
   case, with the precondition, the attempt and success counts, the verification
@@ -501,7 +523,7 @@ printed a sub-second budget as `0s`, which read as "no budget at all".
 **W4-13 diagnostic guide.** The hand-off asks for a table of fifteen situations -
 connection, model, perception, resolution, execution, verification and recording -
 each with what to check and how it is handled. That is
-`Document/Week4/Week4_Troubleshooting.md`, grown to twenty-seven as the Windows review
+`Document/Week4/Week4_Troubleshooting.md`, grown to twenty-eight as the Windows review
 added situations the first pass had not met. Each row states the behaviour this
 code has, not the behaviour it ought to have; a diagnostic guide describing
 behaviour the implementation does not have would be worse than none.

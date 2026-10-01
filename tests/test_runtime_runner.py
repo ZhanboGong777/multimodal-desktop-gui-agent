@@ -1037,3 +1037,151 @@ def test_a_failed_planning_call_is_still_counted_as_planning_time(tmp_path: Path
     # Before the fix this was the other way round: planning 0, execution everything.
     assert result.execution_ms <= result.planning_ms, "the wait belongs to planning"
     assert result.elapsed_ms == pytest.approx(result.planning_ms + result.execution_ms)
+
+
+# ───────── the screen going away mid-run ─────────
+class _FailingObserver:
+    """Serves prepared frames, then starts raising - the display went to sleep."""
+
+    def __init__(self, frames: list[ObservationSnapshot], fail_from: int) -> None:
+        self.frames = frames
+        self.fail_from = fail_from
+        self.calls = 0
+
+    def observe(self, *, observation_id: str | None = None) -> ObservationSnapshot:
+        self.calls += 1
+        if self.calls >= self.fail_from:
+            raise RuntimeError("monitor_index 1 is out of range (available 1..0)")
+        return self.frames[min(self.calls - 1, len(self.frames) - 1)]
+
+
+def test_a_failed_first_look_blocks_before_planning(tmp_path: Path) -> None:
+    """The path a sleeping display takes, and nothing is planned or dispatched.
+
+    A run with no screen is not a run: there is nothing to plan against, so the
+    model is not called and no action is considered.
+    """
+    plan = _plan(PlanStep(step_id="s1", description="stop", action_type="finish"))
+    planner = FakePlanner(plan)
+    executor = FakeExecutor()
+    task = TaskSpec(case_id="T", instruction="x", expect_text=["Done"], success_rules=["r"])
+    runner, _recorder = _runner(tmp_path, _FailingObserver([], fail_from=1), planner, executor)
+
+    result = runner.run(task, ExecutionOptions(execute=False))
+
+    assert result.status == "blocked"
+    assert "initial observation failed" in result.notes[0]
+    assert planner.contexts == [], "there is nothing to plan against"
+    assert executor.actions == []
+
+
+def test_the_run_stops_when_the_screen_goes_away_before_a_step(tmp_path: Path) -> None:
+    """The fresh look is what resolves the target, so without it the step stops.
+
+    Carrying on would mean acting on the frame the plan was written from, which is
+    the one thing the re-observation exists to prevent.
+    """
+    frames = [_frame("obs-0001", ("Target",))]
+    plan = _plan(
+        PlanStep(step_id="s1", description="click", action_type="click", target_text="Target")
+    )
+    executor = FakeExecutor()
+    task = TaskSpec(case_id="T", instruction="x", expect_text=["Done"], success_rules=["r"])
+    runner, _recorder = _runner(tmp_path, _FailingObserver(frames, fail_from=2), FakePlanner(plan), executor)
+
+    result = runner.run(task, ExecutionOptions(execute=False))
+
+    assert result.status == "failed"
+    assert "observation failed" in (result.steps[0].error or "")
+    assert executor.actions == []
+
+
+def test_the_screen_going_away_after_an_action_does_not_crash_the_run(tmp_path: Path) -> None:
+    """The action was dispatched; only the look afterwards failed.
+
+    The run has to record that and carry on to a verdict. Letting the exception out
+    would turn a screen going to sleep into a traceback, and the CLI only catches
+    KeyboardInterrupt.
+    """
+    frames = [
+        _frame("obs-0001", ("Target",)),
+        _frame("obs-0002", ("Target",)),
+    ]
+    plan = _plan(
+        PlanStep(step_id="s1", description="click", action_type="click", target_text="Target"),
+        PlanStep(step_id="s2", description="stop", action_type="finish"),
+    )
+    executor = FakeExecutor()
+    task = TaskSpec(case_id="T", instruction="x", expect_text=["Done"], success_rules=["r"])
+    runner, _recorder = _runner(
+        tmp_path, _FailingObserver(frames, fail_from=3), FakePlanner(plan), executor
+    )
+
+    result = runner.run(
+        task, ExecutionOptions(execute=True, confirm=False, verification_timeout_seconds=0)
+    )
+
+    assert len(executor.actions) == 1, "the action itself did succeed"
+    assert "post-action observation failed" in (result.steps[0].error or "")
+    assert result.status in {"failed", "blocked"}, "it still reaches a verdict"
+
+
+def test_the_screen_going_away_during_final_verification_does_not_crash_the_run(
+    tmp_path: Path,
+) -> None:
+    """The display can sleep between the last action and the verdict.
+
+    The polling helper calls back into the observer with nothing catching a
+    failure, so the exception left `run()` entirely - for the one environmental
+    thing that has happened most often in this project.
+    """
+    frames = [
+        _frame("obs-0001", ("Target",)),
+        _frame("obs-0002", ("Target",)),
+        _frame("obs-0003", ("Target", "Results ready")),
+    ]
+    plan = _plan(
+        PlanStep(step_id="s1", description="click", action_type="click", target_text="Target"),
+        PlanStep(step_id="s2", description="stop", action_type="finish"),
+    )
+    executor = FakeExecutor()
+    task = TaskSpec(
+        case_id="T", instruction="x", expect_text=["Results ready"], success_rules=["r"]
+    )
+    runner, _recorder = _runner(
+        tmp_path, _FailingObserver(frames, fail_from=4), FakePlanner(plan), executor
+    )
+
+    result = runner.run(
+        task, ExecutionOptions(execute=True, confirm=False, verification_timeout_seconds=0)
+    )
+
+    assert result.status in {"failed", "blocked"}
+    assert result.verification is not None
+    assert result.verification.outcome != "passed", "no screen, no verdict"
+
+
+def test_the_task_budget_stops_the_run_between_steps(tmp_path: Path) -> None:
+    """12.2 maps this to exit code 3, and the check is between steps.
+
+    A single long model call is therefore bounded by `model.timeout_seconds` rather
+    than by this budget - which is worth knowing before reading a `timed_out` as
+    "the whole run took too long".
+    """
+    frames = [_frame("obs-0001", ("Target",)), _frame("obs-0002", ("Target",))]
+    plan = _plan(
+        PlanStep(step_id="s1", description="click", action_type="click", target_text="Target"),
+        PlanStep(step_id="s2", description="stop", action_type="finish"),
+    )
+    executor = FakeExecutor()
+    task = TaskSpec(case_id="T", instruction="x", expect_text=["Done"], success_rules=["r"])
+    runner, _recorder = _runner(
+        tmp_path, FakeObserver(frames), FakePlanner(plan), executor, clock=_StepClock(step=100.0)
+    )
+
+    result = runner.run(task, ExecutionOptions(execute=False, task_timeout_seconds=50))
+
+    assert result.status == "timed_out"
+    assert "timed_out" == result.status
+    assert result.stop_reason == "" or "timed" not in result.stop_reason.lower()
+    assert executor.actions == []

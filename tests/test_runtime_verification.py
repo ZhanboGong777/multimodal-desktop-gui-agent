@@ -148,3 +148,35 @@ def test_the_close_case_only_proves_the_marker_is_gone() -> None:
 
     assert Verifier().check_task(task, _frame("o1", ("Desktop", "Other window"))).passed
     assert Verifier().check_task(task, _frame("o1", ("WEEK4-OPEN-FILE-OK",))).outcome == "failed"
+
+
+def test_no_observation_is_inconclusive_rather_than_failed() -> None:
+    """Nothing to look at is not the same as looking and finding the goal unmet.
+
+    Reporting `failed` would say the task was attempted and did not work; the truth
+    is that nobody looked.
+    """
+    verdict = Verifier().check_task(TASK, None)
+
+    assert verdict.outcome == "inconclusive"
+    assert "no observation" in verdict.detail
+
+
+def test_the_screen_going_away_while_polling_is_inconclusive() -> None:
+    """The polling loop is the one observer call the runner does not guard.
+
+    Before this it let the exception out of `run()` entirely, so a display that
+    slept between the last action and the verdict ended the run as a traceback.
+    """
+
+    def blind() -> ObservationSnapshot:
+        raise RuntimeError("monitor_index 1 is out of range (available 1..0)")
+
+    verdict, latest = Verifier().check_task_with_polling(
+        TASK, blind, deadline_seconds=10.0, sleep=lambda _s: None, clock=lambda: 0.0
+    )
+
+    assert verdict.outcome == "inconclusive"
+    assert "could not look at the screen" in verdict.detail
+    assert "monitor_index 1 is out of range" in verdict.detail
+    assert latest is None

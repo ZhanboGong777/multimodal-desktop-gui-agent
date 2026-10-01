@@ -1,6 +1,6 @@
 # Week 4 troubleshooting
 
-Twenty-seven situations the closed loop can run into, in the order they tend to appear.
+Twenty-eight situations the closed loop can run into, in the order they tend to appear.
 Each row says what to check first, and what this implementation actually does —
 the second column matters, because a diagnostic guide that describes behaviour the
 code does not have is worse than none.
@@ -55,6 +55,7 @@ in disguise.
 | `N element runs match '...'` | How many places on screen carry that phrase | The run stops and lists the runs, same policy as an ambiguous single element |
 | `scroll_amount must be a number` / `duration must be a number` | What the plan put in the argument | `ActionResolutionError`, so the run records a failed step. A bare `ValueError` here would have escaped the runner entirely and ended the run as a traceback |
 | A dry run fails with `no element matches '...'` while you are using the computer | Whether the desktop changed between the two observations | Correct, and not a defect: the plan is written from one frame and every step is re-resolved against the next, so a target that scrolled away, closed or was covered is refused. Run the dry runs on a desktop you are not touching |
+| The screen sleeps between the last action and the verdict | Whether the display went off | `inconclusive`, with `could not look at the screen to verify` as the reason. Nothing is claimed either way — a screen nobody can look at is not a passed task *or* a failed one |
 | A step resolves to a point outside the monitor | The screenshot size against the control size | `ActionResolutionError`; the point is refused, not clamped to the edge |
 | `key '...' is not in the allowed key set` | The key name the plan used | Only a fixed key list is accepted. This is deliberate: the model must not be able to drive a shell through `type_text` or `key_press` |
 

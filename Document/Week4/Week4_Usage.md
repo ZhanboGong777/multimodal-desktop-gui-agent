@@ -126,7 +126,7 @@ typed and how long it was, never what it said.
 
 ## When something goes wrong
 
-`Document/Week4/Week4_Troubleshooting.md` lists twenty-seven symptoms - from a refused
+`Document/Week4/Week4_Troubleshooting.md` lists twenty-eight symptoms - from a refused
 connection to a save-changes dialog - with what to check first and what the code
 does about each. The two most common while setting up:
 

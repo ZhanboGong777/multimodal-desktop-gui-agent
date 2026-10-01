@@ -169,12 +169,29 @@ class Verifier:
     ) -> tuple[VerificationResult, ObservationSnapshot | None]:
         """Re-observe until the task passes or the verification budget runs out.
 
-        Interfaces are injected so the loop can be tested without a screen.
+        Interfaces are injected so the loop can be tested without a screen. A
+        failure to observe is not a failure of the task: the screen went away, and
+        the honest verdict for a screen nobody can look at is ``inconclusive``.
+        Letting that exception out ended the whole run as a traceback, which is what
+        a sleeping display used to do to a run that had otherwise finished.
         """
         started = clock()
         latest: ObservationSnapshot | None = None
         while True:
-            latest = observe()
+            try:
+                latest = observe()
+            except Exception as exc:  # noqa: BLE001 - the screen went away
+                return (
+                    VerificationResult(
+                        outcome="inconclusive",
+                        method=task.verification,
+                        detail=(
+                            "could not look at the screen to verify: "
+                            f"{type(exc).__name__}: {exc}"
+                        ),
+                    ),
+                    latest,
+                )
             result = self.check_task(task, latest)
             if result.outcome == "passed":
                 return result, latest

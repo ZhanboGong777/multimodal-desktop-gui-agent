@@ -332,3 +332,64 @@ def test_a_drag_duration_of_the_wrong_type_is_refused(adapter: ActionAdapter) ->
 
     with pytest.raises(ActionResolutionError, match="must be a number"):
         adapter.resolve(step, _snapshot())
+
+
+def test_a_drag_resolves_to_both_endpoints(adapter: ActionAdapter) -> None:
+    """A whole action type had no success path under test.
+
+    `_resolve_drag` was only ever exercised by its error branches, so a drag that
+    actually resolves had never been checked end to end - including that both
+    points go through the coordinate mapping.
+    """
+    step = _step(
+        action_type="drag",
+        arguments={"start_element_id": "obs-0001-e000", "end_element_id": "obs-0001-e002"},
+    )
+
+    resolved = adapter.resolve(step, _snapshot())
+
+    assert resolved.action.action_type == "drag"
+    assert (resolved.action.start.x, resolved.action.start.y) == (45, 30)
+    assert (resolved.action.end.x, resolved.action.end.y) == (245, 30)
+    assert resolved.action.duration == 0.5, "the default, when the plan names none"
+
+
+def test_a_drag_naming_an_element_from_nowhere_is_refused(adapter: ActionAdapter) -> None:
+    step = _step(
+        action_type="drag",
+        arguments={"start_element_id": "obs-0001-e000", "end_element_id": "obs-0009-e000"},
+    )
+
+    with pytest.raises(ActionResolutionError, match="not from observation"):
+        adapter.resolve(step, _snapshot())
+
+
+def test_a_hotkey_without_any_keys_is_refused(adapter: ActionAdapter) -> None:
+    with pytest.raises(ActionResolutionError, match="non-empty arguments.keys"):
+        adapter.resolve(_step(action_type="hotkey", arguments={}), _snapshot())
+
+
+def test_a_hotkey_token_outside_the_whitelist_is_refused(adapter: ActionAdapter) -> None:
+    """The whitelist is what stops the model from driving a shell through a chord."""
+    step = _step(action_type="hotkey", arguments={"keys": ["ctrl", "rm"]})
+
+    with pytest.raises(ActionResolutionError, match="not allowed"):
+        adapter.resolve(step, _snapshot())
+
+
+def test_blank_hotkey_tokens_are_skipped(adapter: ActionAdapter) -> None:
+    step = _step(action_type="hotkey", arguments={"keys": ["", "  ", "c"]})
+
+    assert adapter.resolve(step, _snapshot()).action.keys == ["c"]
+
+
+def test_a_hotkey_that_boils_down_to_nothing_is_refused(adapter: ActionAdapter) -> None:
+    step = _step(action_type="hotkey", arguments={"keys": ["", "   "]})
+
+    with pytest.raises(ActionResolutionError, match="empty key list"):
+        adapter.resolve(step, _snapshot())
+
+
+def test_key_press_without_a_key_is_refused(adapter: ActionAdapter) -> None:
+    with pytest.raises(ActionResolutionError, match="requires arguments.key"):
+        adapter.resolve(_step(action_type="key_press", arguments={}), _snapshot())

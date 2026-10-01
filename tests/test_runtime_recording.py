@@ -93,3 +93,55 @@ def test_the_summary_is_written_and_readable(tmp_path: Path) -> None:
     assert payload["execute"] is True
     assert payload["action_count"] == 0
     assert ExecutionOptions().max_actions == 20
+
+
+def test_reading_steps_from_a_run_that_never_acted_is_empty(tmp_path: Path) -> None:
+    """A run blocked before its first action has no step log at all.
+
+    Reading one must return nothing rather than raise: the evidence collector reads
+    these, and a blocked run is exactly the kind of run whose record gets shipped.
+    """
+    session = RunSession.create(tmp_path, "blocked-run")
+    recorder = TaskRecorder(session)
+
+    assert recorder.read_steps() == []
+
+
+# ───────── where the summary's provenance comes from ─────────
+def test_the_commit_can_be_supplied_by_the_environment(monkeypatch) -> None:
+    """A checkout with no git metadata records nothing otherwise.
+
+    A copy unpacked onto the Windows node has no `.git`, and a provenance field
+    that silently reads "" is worse than one the operator can set.
+    """
+    from gui_agent.runtime import provenance
+
+    monkeypatch.setenv(provenance.COMMIT_ENV, "deadbee")
+
+    assert provenance.git_commit() == "deadbee"
+
+
+def test_a_screen_description_of_no_frame_is_empty() -> None:
+    """A run blocked before it captured anything still has to build a summary."""
+    from gui_agent.runtime import provenance
+
+    assert provenance.screen_description(None) == ""
+
+
+def test_the_screen_description_carries_both_coordinate_spaces() -> None:
+    """A click that landed wrong cannot be re-read without knowing the scale."""
+    from gui_agent.runtime import provenance
+    from gui_agent.runtime.schemas import ObservationSnapshot
+    from gui_agent.schemas import ScreenInfo
+
+    snapshot = ObservationSnapshot(
+        observation_id="obs-0001",
+        captured_at=datetime.now(UTC),
+        screen_info=ScreenInfo(
+            screenshot_width=2940, screenshot_height=1912, control_width=1470, control_height=956
+        ),
+    )
+
+    assert provenance.screen_description(snapshot) == (
+        "screenshot 2940x1912, control 1470x956"
+    )
