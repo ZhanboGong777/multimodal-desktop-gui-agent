@@ -663,6 +663,31 @@ commands against a stale `expected N passed` reads a correct tree as a broken on
 This is the same failure as the dead `build_user_prompt`, one layer out: the check
 existed and was pointed at less than the claim.
 
+**The image was assumed to be arriving.** §8.1 warns in as many words that a
+screenshot path in the prompt is not the same as the model seeing the picture, and
+says acceptance should look at the request. Nothing did. The encoder has thorough
+tests - format, size limit, missing file, empty file, five MIME types - but they
+call `to_vision_messages` themselves; the runner test asserts the planner received
+a *path*; the prompt test asserts the planner passed a *path* on. Every one of them
+would keep passing if the helper were never called in production.
+
+That is not a hypothetical, so it was measured rather than argued: the image was
+removed from every outgoing request and the suite ran. **All of it passed.** The
+single defining property of the week - the model is shown the screen - was
+unverified at the only layer where it means anything, and the tests that looked
+like they covered it were covering the two hops of Python around it.
+
+Four tests now read the body that a real server received over a real socket. The
+screenshot arrives as base64 image data and decodes to the bytes of the file the
+observation captured, not merely to something image-shaped; it is the *first*
+frame's image, matching the element ids listed in that same request, so image and
+element list describe one screen; a frame whose capture produced no file sends a
+text-only request rather than a malformed block; and a missing or mislabelled file
+blocks the run before any request leaves the machine, with the filename in the
+note - because a model asked to plan from nothing returns a confident plan about a
+screen it never saw. Re-running the same deletion against the new tests fails four
+of them.
+
 ## 8. Deliverables
 
 - `src/gui_agent/runtime/` - the run layer (8 modules).
