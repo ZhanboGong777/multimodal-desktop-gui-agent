@@ -27,6 +27,10 @@ _INTENT_RULES: tuple[tuple[tuple[str, ...], str, str], ...] = (
 
 _SPLIT = re.compile(r"\s*(?:,|;|then|and then|然后|接着|再)\s*", re.IGNORECASE)
 
+#: One line of the element list the runtime puts in the user turn:
+#:   obs-0002-e001  'Browser'  conf=0.90  center=(250,78)  box=(100,60,400,96)
+_ELEMENT_LINE = re.compile(r"(obs-\d+-e\d+)\s+'([^']*)'")
+
 
 class MockModelClient(ModelClient):
     """Deterministic, network-free, free-of-charge."""
@@ -40,8 +44,15 @@ class MockModelClient(ModelClient):
 
     def complete(self, messages: Sequence[Mapping[str, Any]], **kwargs: Any) -> ModelResponse:
         instruction = self._instruction_from(messages)
-        self.calls.append({"messages": [dict(m) for m in messages], "instruction": instruction})
-        plan = self._plan_for(instruction, kwargs.get("image_path"))
+        elements = self._elements_from(messages)
+        self.calls.append(
+            {
+                "messages": [dict(m) for m in messages],
+                "instruction": instruction,
+                "elements": elements,
+            }
+        )
+        plan = self._plan_for(instruction, kwargs.get("image_path"), elements)
         return ModelResponse(
             content=json.dumps(plan, ensure_ascii=False),
             model_name=self.model_name,
@@ -69,7 +80,47 @@ class MockModelClient(ModelClient):
             return raw.strip()
         return ""
 
-    def _plan_for(self, instruction: str, image_path: str | None) -> dict[str, Any]:
+    @staticmethod
+    def _elements_from(messages: Sequence[Mapping[str, Any]]) -> list[tuple[str, str]]:
+        """Pull the frame's ``(element_id, text)`` pairs out of the user turn.
+
+        The runtime lists the current observation there so a model can aim at
+        something that exists. A rule-based backend that ignored that list produced
+        plans naming elements which were not on screen, which the adapter then
+        refused - correct, but it made every dry run stop at step one.
+        """
+        found: list[tuple[str, str]] = []
+        for message in messages:
+            content = message.get("content")
+            if not isinstance(content, str):
+                continue
+            for element_id, text in _ELEMENT_LINE.findall(content):
+                if text.strip():
+                    found.append((element_id, text.strip()))
+        return found
+
+    def _pick_target(
+        self, clause: str, elements: Sequence[tuple[str, str]]
+    ) -> tuple[str, str] | None:
+        """The element this clause is most likely about, or the first labelled one."""
+        if not elements:
+            return None
+        lowered = clause.casefold()
+        for element_id, text in elements:
+            if text.casefold() in lowered:
+                return element_id, text
+        head = re.findall(r"[A-Za-z]{3,}", clause)
+        for element_id, text in elements:
+            if any(word.casefold() in text.casefold() for word in head):
+                return element_id, text
+        return elements[0]
+
+    def _plan_for(
+        self,
+        instruction: str,
+        image_path: str | None,
+        elements: Sequence[tuple[str, str]] = (),
+    ) -> dict[str, Any]:
         # Only keys TaskPlan declares: the schema forbids extras on purpose, so
         # a backend that invents fields is rejected rather than quietly trusted.
         del image_path
@@ -85,13 +136,26 @@ class MockModelClient(ModelClient):
                 if any(word in lowered for word in words):
                     action_type, verb = candidate_action, candidate_verb
                     break
+            # Aim at something that is actually on screen. When the runtime sent
+            # no element list there is nothing honest to aim at, so fall back to
+            # the clause's own words and let the adapter refuse them.
+            picked = self._pick_target(clause, elements)
+            arguments: dict[str, Any] = {}
+            if picked is not None:
+                target_text = picked[1]
+                arguments["element_id"] = picked[0]
+            else:
+                target_text = self._target_for(clause)
+            if action_type == "type_text":
+                arguments["text"] = clause
+
             steps.append(
                 {
                     "step_id": f"step-{index + 1}",
                     "description": clause,
                     "action_type": action_type,
-                    "target_text": self._target_for(clause),
-                    "arguments": {} if action_type != "type_text" else {"text": clause},
+                    "target_text": target_text,
+                    "arguments": arguments,
                     "expected_result": f"{verb} step completed",
                     "status": "pending",
                 }

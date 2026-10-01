@@ -92,3 +92,60 @@ def test_generate_multimodal_carries_the_image_path() -> None:
     payload = json.loads(client.calls[-1]["messages"][0]["content"])
     assert payload["image_path"] == "shots/a.png"
     assert payload["instruction"] == "Close the window"
+
+
+# ───────── the mock reads the observation it is given ─────────
+def _prompt_with_elements(*pairs: tuple[str, str]) -> list[dict[str, str]]:
+    lines = "\n".join(
+        f"{element_id}  '{text}'  conf=0.90  center=(250,78)  box=(100,60,400,96)"
+        for element_id, text in pairs
+    )
+    return [
+        {"role": "system", "content": "You plan desktop GUI actions."},
+        {"role": "user", "content": f"Instruction: Open the browser\n\nScreen context:\n{lines}"},
+    ]
+
+
+def test_the_mock_aims_at_an_element_that_is_really_on_screen() -> None:
+    """A rule-based backend that ignores the frame names elements that do not exist.
+
+    That is what made every dry run stop at step one: the adapter refused a target
+    the mock had invented. Reading the supplied element list fixes the mock without
+    pretending it understands the screen.
+    """
+    client = MockModelClient()
+    response = client.generate_multimodal(
+        "Open the browser",
+        context={"visible_text": "obs-0001-e000  'Browser'  conf=0.90  center=(250,78)"},
+    )
+    plan = json.loads(response.content)
+    click = next(step for step in plan["steps"] if step["action_type"] != "finish")
+    assert click["arguments"]["element_id"] == "obs-0001-e000"
+    assert click["target_text"] == "Browser"
+
+
+def test_the_mock_prefers_the_element_the_clause_names() -> None:
+    client = MockModelClient()
+    rendered = "\n".join(
+        f"{i}  '{t}'  conf=0.9  center=(1,2)"
+        for i, t in (("obs-0001-e000", "Files"), ("obs-0001-e001", "Browser"))
+    )
+    response = client.generate_multimodal("Click Browser", context={"visible_text": rendered})
+    plan = json.loads(response.content)
+    assert plan["steps"][0]["arguments"]["element_id"] == "obs-0001-e001"
+
+
+def test_the_mock_still_works_with_no_observation() -> None:
+    """Nothing to aim at: fall back to the clause's words rather than inventing an id."""
+    client = MockModelClient()
+    plan = json.loads(client.generate_multimodal("Open the browser").content)
+    assert "element_id" not in plan["steps"][0]["arguments"]
+    assert plan["steps"][0]["target_text"]
+
+
+def test_the_mock_records_what_it_was_given() -> None:
+    client = MockModelClient()
+    client.generate_multimodal(
+        "x", context={"visible_text": "obs-0001-e000  'Browser'  conf=0.9  center=(1,2)"}
+    )
+    assert client.calls[-1]["elements"] == [("obs-0001-e000", "Browser")]

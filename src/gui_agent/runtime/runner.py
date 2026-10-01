@@ -30,6 +30,7 @@ from .schemas import (
     StepRecord,
     TaskRunResult,
     TaskSpec,
+    VerificationResult,
 )
 from .verification import Verifier
 
@@ -233,9 +234,18 @@ class TaskRunner:
         # ── the plan is done; only the task verifier may call it a success ──
         if not options.execute:
             result = self._finish(task, options, "dry_run_completed", started, notes, steps)
-            result.verification = self.verifier.check_task(task, current)
-            result.verification.detail = (
-                "dry run: actions were resolved and validated but nothing was dispatched"
+            # A dry run dispatched nothing, so the task rule cannot have been met -
+            # but reporting it as "failed" would say the run went wrong, and it did
+            # not. The rule's own verdict is kept as evidence, not as the outcome.
+            would_be = self.verifier.check_task(task, current)
+            result.verification = VerificationResult(
+                outcome="inconclusive",
+                method=task.verification,
+                detail=(
+                    "dry run: actions were resolved and validated but nothing was dispatched, "
+                    f"so the task goal was not attempted (the rule would read {would_be.outcome})"
+                ),
+                evidence={"would_be": would_be.outcome, "rule_detail": would_be.detail},
             )
             return result
 

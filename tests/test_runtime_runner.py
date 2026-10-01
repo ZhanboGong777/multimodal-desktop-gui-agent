@@ -360,3 +360,25 @@ def test_the_plan_is_built_from_a_real_screenshot_path(tmp_path: Path) -> None:
 
     assert planner.image_paths == ["/tmp/shot.png"]
     assert "Target" in planner.contexts[0]["visible_text"]
+
+
+def test_a_dry_run_reports_inconclusive_not_failed(tmp_path: Path) -> None:
+    """Nothing was dispatched, so the rule cannot have passed - but the run did not
+    go wrong either. Calling that "failed" would misreport a clean rehearsal."""
+    frames = [_frame("obs-0001", ("Target",))]
+    plan = _plan(
+        PlanStep(step_id="s1", description="click", action_type="click", target_text="Target")
+    )
+    task = TaskSpec(
+        case_id="T", instruction="x", expect_text=["Never on screen"], success_rules=["r"]
+    )
+    runner, _ = _runner(tmp_path, FakeObserver(frames), FakePlanner(plan), FakeExecutor())
+
+    result = runner.run(task, ExecutionOptions(execute=False))
+
+    assert result.status == "dry_run_completed"
+    assert result.verification is not None
+    assert result.verification.outcome == "inconclusive"
+    assert "nothing was dispatched" in result.verification.detail
+    # the rule's own verdict is kept, so the operator can see what would have happened
+    assert result.verification.evidence["would_be"] == "failed"
