@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Literal
 
@@ -172,3 +174,45 @@ def load_config(path: str | Path = DEFAULT_CONFIG_PATH) -> Config:
     with Path(path).open("r", encoding="utf-8") as handle:
         raw = yaml.safe_load(handle) or {}
     return Config.model_validate(raw)
+
+
+#: The variables that override the YAML for the model settings, and the field each
+#: one sets. ``GUI_AGENT_API_KEY`` is deliberately absent: a key is not a setting.
+MODEL_ENVIRONMENT = (
+    ("GUI_AGENT_MODEL", "model_name"),
+    ("GUI_AGENT_BASE_URL", "base_url"),
+)
+
+
+def resolve_model_config(
+    config: Config,
+    *,
+    provider: str | None = None,
+    model: str | None = None,
+    base_url: str | None = None,
+    environ: Mapping[str, str] | None = None,
+) -> Config:
+    """Apply 13.1.1's order to the model settings: flag, then environment, then YAML.
+
+    The default is whatever the YAML already holds, so "default" needs no branch.
+
+    This lives in the package rather than in the command-line entry point it was
+    written for, because a second entry point needs the same answer: the warmup
+    probe has to talk to the same backend the run will talk to, and a warmup that
+    resolved its settings differently would warm the wrong service. Two copies of
+    a precedence rule is one copy too many - the CLI's own tests caught the
+    original version of this bug, where the client's non-empty default meant
+    ``GUI_AGENT_MODEL`` changed nothing at all.
+    """
+    env = os.environ if environ is None else environ
+    for variable, attribute in MODEL_ENVIRONMENT:
+        value = env.get(variable, "").strip()
+        if value:
+            setattr(config.model, attribute, value)
+    if provider:
+        config.model.provider = provider
+    if model:
+        config.model.model_name = model
+    if base_url:
+        config.model.base_url = base_url
+    return config

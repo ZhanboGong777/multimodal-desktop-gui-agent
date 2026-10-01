@@ -111,10 +111,10 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **532 passed**, ruff clean |
+| MacBook Air M2 | **538 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 232: 174 in the ten
-files below, and 58 spread across the other suites -
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 238: 180 in the
+eleven files below, and 58 spread across the other suites -
 `test_control_safety.py` 15, `test_model_mock.py` 14, `test_ocr.py` 7 (five of them
 the Windows-only OCR workarounds), `test_config.py` 7 (a new file),
 `test_plan_parser.py` 5, `test_model_config.py` 4, `test_documented_counts.py` 4
@@ -141,7 +141,7 @@ is: each named file is compared against its own count minus its Week 3 baseline,
 the eight must add up to the total the sentence gives, and that total plus the
 tabulated ten must equal the figure the sentence claims overall. The same pass
 brought `Week4_Windows复核手册.md` under the sync tool - it restates the suite
-total and the ten-file total, and a reviewer running its commands against a stale
+total and the tabulated-file total, and a reviewer running its commands against a stale
 expectation would read a correct tree as a broken one.
 
 **The mock never types for any of the five cases.** All five task instructions
@@ -164,7 +164,7 @@ nine files and expected `168 passed`; running it verbatim gives **159**, because
 `test_runtime_observation.py` was missing from the list. The reviewer would have run
 the documented command, seen a number that did not match its stated expectation, and
 had to work out which of the two was wrong. The command is corrected, and the
-expectation now itemises the ten files so a mismatch points at the file rather than
+expectation now itemises those files so a mismatch points at the file rather than
 at the total.
 
 Every number that had drifted this round was a hand-maintained count. Three were
@@ -180,7 +180,7 @@ should be verified by something other than the person editing it.
 
 Correcting those numbers introduced one of my own, which the clean-clone check
 caught: the test added to guard the troubleshooting header also added a case to
-`test_runtime_recording.py`, so the ten-file total moved from 168 to 169 while the
+`test_runtime_recording.py`, so the tabulated total moved from 168 to 169 while the
 sentence still said 168. The two files are also easy to confuse - `test_recording.py`
 is a Week 2 suite that gained 2 cases, `test_runtime_recording.py` is a Week 4 file
 that gained 12 - and the first correction had them backwards. Both are now measured
@@ -197,6 +197,7 @@ rather than reasoned about.
 | `test_week4_integration.py` | 10 cases: the loop against a real OpenAI-compatible server over a real socket, which reads the element ids out of the prompt it receives; plus the four that read the request body itself - the screenshot arrives as pixels and not as a path, it is the frame the plan was written from, and a missing or mislabelled file blocks the run rather than blinding the model |
 | `test_week4_prompts.py` | 10 cases: the prompt fits its budget, describes element targeting and every action's arguments, and the user turn is the JSON envelope the planner actually sends |
 | `test_week4_cases.py` | 12 cases: the invariants the five case definitions must hold - a machine-checkable rule, a declared precondition, a distinctive marker, a copy handed back by `get_case`, and the fresh marker a send-message run is given |
+| `test_week4_warmup.py` | 6 cases: the warmup 13.4 asks for and nothing provided - it probes text and then a real screenshot through the project's client, records cold/warm state, memory, per-request time, the classifier's verdict and the configured retries, and writes the record the operator keeps |
 | `test_week4_evidence.py` | 12 cases: what the evidence collector copies, what it refuses to copy, which run `--latest` picks, and its error paths |
 
 ### The offline closed loop
@@ -720,12 +721,14 @@ of them.
 
 - `src/gui_agent/runtime/` - the run layer (8 modules).
 - `scripts/week4_agent_cli.py` - the command-line entry point.
+- `scripts/week4_warmup.py` - the warmup 13.4 asks for: a text probe and a real
+  screenshot through the project's own client, with the cold/warm record the operator keeps.
 - `scripts/week4_offline_demo.py` - the loop against scripted frames.
 - `scripts/week4_collect_evidence.py` - copies a finished run's text records into
   `Document/Week4/evidence/`, so a run id in the test report resolves inside the
   repository rather than only on the machine that produced it.
 - `configs/week4.yaml` - Week 4 limits, with `ExecutionConfig` added to `config.py`.
-- 232 new tests.
+- 238 new tests.
 - `Document/Week4/Week4_Usage.md` - flags, the safety model, the record layout.
 - `Document/Week4/Week4_Troubleshooting.md` - forty-two symptoms with what to check
   and what the code actually does about each.

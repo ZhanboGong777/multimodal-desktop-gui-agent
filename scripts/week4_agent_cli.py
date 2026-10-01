@@ -13,14 +13,13 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from gui_agent.config import load_config
+from gui_agent.config import load_config, resolve_model_config
 from gui_agent.control.executor import ActionExecutor
 from gui_agent.models import CLIENTS, create_model_client
 from gui_agent.planning import TaskPlanner
@@ -186,23 +185,16 @@ def _apply_environment(config, args) -> None:
     """Resolve model settings: CLI flag, then environment, then YAML, then default.
 
     13.1.1 asks for that order and names this entry point as the place to enforce
-    it. It cannot be left to the client: ``ModelConfig.model_name`` has a
-    non-empty default, so the client's own environment fallback is never reached -
-    setting ``GUI_AGENT_MODEL`` used to change nothing at all.
+    it. The rule itself lives in `gui_agent.config`, because the warmup probe has
+    to reach the same backend this does, and two copies of a precedence rule is
+    how the two drift apart.
     """
-    for variable, attribute in (
-        ("GUI_AGENT_MODEL", "model_name"),
-        ("GUI_AGENT_BASE_URL", "base_url"),
-    ):
-        value = os.environ.get(variable, "").strip()
-        if value:
-            setattr(config.model, attribute, value)
-    if args.provider:
-        config.model.provider = args.provider
-    if args.model:
-        config.model.model_name = args.model
-    if args.base_url:
-        config.model.base_url = args.base_url
+    resolve_model_config(
+        config,
+        provider=args.provider,
+        model=args.model,
+        base_url=args.base_url,
+    )
 
 
 def main() -> int:

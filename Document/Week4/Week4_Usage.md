@@ -31,6 +31,16 @@ export GUI_AGENT_API_KEY=ollama
 export GUI_AGENT_BASE_URL=http://<windows-host>:11434/v1
 export OLLAMA_CONTEXT_LENGTH=16384     # set before the server starts
 
+# Warm the model first, and not as part of a task. The first request a cold server
+# sees costs about 8 s with memory free and about 72 s with it tight; a task that
+# pays that records a model load as its own planning time. This sends a text probe
+# and then a real screenshot through the same client the tasks use, and writes the
+# record: cold/warm state, memory, per-request time, the classifier's verdict and
+# the configured retries.
+python scripts/week4_warmup.py \
+    --provider openai_compatible --model qwen2.5vl:7b \
+    --json outputs/week4/warmup.json --repeat 2
+
 python scripts/week4_agent_cli.py --case T01 \
     --provider openai_compatible --model qwen2.5vl:7b \
     --execute

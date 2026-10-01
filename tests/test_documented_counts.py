@@ -92,17 +92,17 @@ def test_the_per_file_table_names_the_counts_those_files_have(
     """Both the rows and the sentence above them, because the two disagreed once.
 
     The table had drifted file by file while only the total was kept up to date,
-    and the sentence counted eleven files as ten for a while.
+    and the sentence miscounted the files for a while.
     """
     report = REPORT.read_text(encoding="utf-8")
     rows = re.findall(r"^\| `(test_[a-z0-9_]+\.py)` \| (\d+) cases", report, re.MULTILINE)
 
-    assert len(rows) == 10, f"the table lists {len(rows)} files, not the ten it claims"
+    assert len(rows) == 11, f"the table lists {len(rows)} files, not the eleven it claims"
     for name, claimed in rows:
         actual = collected.get(f"tests/{name}", 0)
         assert int(claimed) == actual, f"{name}: the table says {claimed}, the file has {actual}"
 
-    prose = re.search(r"Week 4 adds (\d+): (\d+) in the ten", report)
+    prose = re.search(r"Week 4 adds (\d+): (\d+) in the\s+eleven", report)
     assert prose, "the sentence stating the totals has moved or changed shape"
     assert sum(int(count) for _, count in rows) == int(prose.group(2)), (
         "the table does not add up to the number the sentence gives for it"
@@ -149,7 +149,9 @@ def test_the_other_suites_the_sentence_lists_have_the_counts_it_gives(
             f"the file has {collected.get(f'tests/{name}', 0)} against a baseline of {week3[name]}"
         )
 
-    prose = re.search(r"Week 4 adds (\d+): (\d+) in the ten\s+files below, and (\d+) spread", report)
+    prose = re.search(
+        r"Week 4 adds (\d+): (\d+) in the\s+eleven\s+files below, and (\d+) spread", report
+    )
     assert prose, "the sentence stating the totals has moved or changed shape"
     total_added, tabulated, spread = (int(group) for group in prose.groups())
     assert sum(int(count) for _, count in listed) == spread, (
