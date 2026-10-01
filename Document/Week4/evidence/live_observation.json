@@ -1,0 +1,83 @@
+{
+  "what": "Live observation on the development machine",
+  "why": "Shows the observation path works on a real screen, independent of any model.",
+  "machine": {
+    "platform": "darwin",
+    "configured_ocr": "tesseract"
+  },
+  "observation": {
+    "id": "obs-0001",
+    "screenshot": "1920x1080",
+    "control": "1920x1080",
+    "scale_x": 1.0,
+    "ocr_engine": "tesseract",
+    "elements": 40,
+    "elements_with_text": 2,
+    "processing_time_ms": 1266.2,
+    "errors": []
+  },
+  "sample_elements": [
+    {
+      "element_id": "obs-0001-e000",
+      "text": "@",
+      "center": [
+        27,
+        14
+      ],
+      "confidence": 0.69
+    },
+    {
+      "element_id": "obs-0001-e001",
+      "text": "Edge",
+      "center": [
+        70,
+        15
+      ],
+      "confidence": 0.59
+    }
+  ],
+  "task_cases": {
+    "T01": {
+      "instruction": "Open the web browser from the desktop",
+      "risk": "low",
+      "expect_text": [
+        "http",
+        "search"
+      ],
+      "forbid_text": []
+    },
+    "T02": {
+      "instruction": "Search the web for GUI agent research",
+      "risk": "low",
+      "expect_text": [
+        "GUI agent research"
+      ],
+      "forbid_text": []
+    },
+    "T03": {
+      "instruction": "Open the file week4_sample.txt from the week4 test folder",
+      "risk": "low",
+      "expect_text": [
+        "WEEK4-OPEN-FILE-OK"
+      ],
+      "forbid_text": []
+    },
+    "T04": {
+      "instruction": "Send WEEK4_MESSAGE_CHECK_001 to the week4 test conversation",
+      "risk": "high",
+      "expect_text": [
+        "WEEK4_MESSAGE_CHECK_001"
+      ],
+      "forbid_text": []
+    },
+    "T05": {
+      "instruction": "Close the week4 test application without affecting other applications",
+      "risk": "medium",
+      "expect_text": [],
+      "forbid_text": [
+        "WEEK4-OPEN-FILE-OK"
+      ]
+    }
+  },
+  "not_yet_measured": "The five task runs need a reachable vision model. The GPU node was offline when this was recorded, so no real planning call was made and no task has been attempted for real."
+}

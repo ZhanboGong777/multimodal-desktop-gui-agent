@@ -25,6 +25,37 @@ machine that has the GPU.
 | Week 7 | System evaluation and performance analysis |
 | Week 8 | Code cleanup, technical report, and system demonstration |
 
+### Week 4
+
+The project has completed Week 4. `scripts/week4_agent_cli.py` runs one task
+through the closed loop: observe, plan, resolve each step against the *current*
+frame, act, observe again, verify.
+
+**Dry run is the default.** Real desktop actions need `--execute` and an
+interactive confirmation, and there is deliberately no `--yes`.
+
+```bash
+python scripts/week4_agent_cli.py --list-cases      # the five task cases
+python scripts/week4_agent_cli.py --case T01        # dry run: dispatches nothing
+python scripts/week4_offline_demo.py                # the loop, scripted, no desktop
+```
+
+Three properties the loop is built around:
+
+- **One plan, then step-by-step re-observation.** The model is not called per
+  click, so a 20-action task fits a 240 s budget.
+- **A screenshot changing is not success.** Only the task's own success rule can
+  return `succeeded`; `finish` and a run out of steps cannot.
+- **Refusal beats guessing.** An ambiguous target, a stale element id, a missing
+  parameter or an out-of-range coordinate stops the run instead of clicking
+  something plausible.
+
+356 tests, ruff clean. See `Document/Week4/Week4_Usage.md` for the flags, the
+safety model and the record layout.
+
+The five basic task runs still have to be performed on a real desktop; their
+results go in `Document/Week4/Week4_Basic_Task_Test_Report.md`.
+
 ### Week 3
 
 The project has completed Week 3. The Week 3 deliverables - the dataset preparation
@@ -70,7 +101,7 @@ python scripts/week3_model_demo.py --provider mock
 python scripts/week3_planning_demo.py --provider mock --instruction "Open the browser"
 ```
 
-300 tests at 89% coverage, ruff clean. The model client's retry, timeout and
+356 tests, ruff clean. The model client's retry, timeout and
 error-classification paths are covered, along with the four vision-payload
 failure modes (missing, empty, oversized, unknown type) and the TaskPlan
 schema boundaries. Dataset and model dependencies live in

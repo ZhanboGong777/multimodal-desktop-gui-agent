@@ -125,6 +125,28 @@ class PlanningConfig(ConfigModel):
     allow_real_execution: bool = False
 
 
+class AgentConfig(ConfigModel):
+    """Limits for the Week 4 closed loop.
+
+    Separate from ``planning`` on purpose: ``planning.allow_real_execution`` has
+    always been a record of intent, never a switch that gates execution. These
+    values are the ones the runner actually enforces.
+    """
+
+    #: Cap on how many elements reach the model, text first.
+    max_elements: int = Field(default=60, gt=0)
+    #: Desktop actions allowed in one task, excluding the terminal ``finish``.
+    max_actions: int = Field(default=20, gt=0)
+    #: Wall-clock budget for one task.
+    task_timeout_seconds: float = Field(default=240.0, gt=0.0)
+    #: How long the task verifier keeps re-observing before giving up.
+    verification_timeout_seconds: float = Field(default=10.0, ge=0.0)
+    verification_poll_interval_seconds: float = Field(default=0.5, ge=0.0)
+    #: When true, a task with no verifiable success rule is reported ``blocked``
+    #: instead of being treated as complete when the plan runs out.
+    require_success_rules: bool = True
+
+
 class Config(ConfigModel):
     runtime: RuntimeConfig = Field(default_factory=RuntimeConfig)
     perception: PerceptionConfig = Field(default_factory=PerceptionConfig)
@@ -134,6 +156,7 @@ class Config(ConfigModel):
     dataset: DatasetConfig = Field(default_factory=DatasetConfig)
     model: ModelConfig = Field(default_factory=ModelConfig)
     planning: PlanningConfig = Field(default_factory=PlanningConfig)
+    agent: AgentConfig = Field(default_factory=AgentConfig)
 
 
 def load_config(path: str | Path = DEFAULT_CONFIG_PATH) -> Config:

@@ -1,0 +1,95 @@
+# Week 4 runtime configuration.
+#
+# This file does not change Week 2 or Week 3 defaults; it adds the execution
+# limits and the observation settings the closed loop needs. Load it with
+# `--config configs/week4.yaml`.
+
+runtime:
+  device: auto
+
+perception:
+  screenshot_backend: mss
+  monitor_index: 1
+  output_directory: outputs/week4
+
+  capture:
+    frame_count: 1
+    interval_seconds: 0.0
+    save_frames: false
+
+  preprocessing:
+    grayscale: false
+    resize_scale: 1.0
+    gaussian_blur: false
+    otsu_threshold: false
+
+  ocr:
+    # Tesseract on the development machine: measured at 241 ms per frame against
+    # PaddleOCR's 5 525 ms on the same 1470x956 screen. The GPU node keeps
+    # PaddleOCR, where it is the faster of the two.
+    engine: tesseract
+    fallback_engine: tesseract
+    languages:
+      - en
+    min_confidence: 0.5
+    use_doc_preprocessing: false
+
+  ui_detection:
+    enabled: true
+    min_area: 100
+    max_area_ratio: 0.5
+    min_rectangularity: 0.0
+    max_candidates: 200
+    exclusion_threshold: 0.5
+
+control:
+  # The runtime passes an explicit dry_run per action; this stays true so that
+  # any code path which forgets to decide still does nothing.
+  dry_run: true
+  pyautogui_failsafe: true
+  action_delay_seconds: 0.2
+  countdown_seconds: 3
+  move_duration_seconds: 0.3
+  drag_duration_seconds: 0.5
+
+output:
+  directory: outputs/week4
+  save_before_image: true
+  save_after_image: true
+  save_annotated_image: false
+  save_run_summary: true
+
+logging:
+  level: INFO
+  directory: outputs/week4
+
+dataset:
+  name: screenagent
+  split: train
+  sample_limit: 20
+  raw_directory: data/raw
+  processed_directory: data/processed
+
+model:
+  provider: mock
+  model_name: mock-vision-model
+  base_url: null
+  timeout_seconds: 120
+  temperature: 0.0
+  max_retries: 0
+
+planning:
+  max_steps: 10
+  require_structured_output: true
+  allow_real_execution: false
+
+# ── Week 4 additions ────────────────────────────────────────────────
+agent:
+  max_elements: 60
+  max_actions: 20
+  task_timeout_seconds: 240
+  verification_timeout_seconds: 10
+  verification_poll_interval_seconds: 0.5
+  # A task with no verifiable success rule is reported blocked rather than
+  # treated as complete when the plan runs out.
+  require_success_rules: true

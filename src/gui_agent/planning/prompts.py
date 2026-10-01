@@ -32,12 +32,15 @@ SYSTEM_PROMPT = "\n".join(
         _JSON_EXAMPLE,
         "",
         "Rules:",
-        "- action_type must be one of: " + ", ".join(PLAN_ACTION_TYPES),
-        '- The LAST step must use action_type "finish".',
-        "- Use at most 3 steps unless the task clearly needs more.",
+        "- action_type is one of: " + ", ".join(PLAN_ACTION_TYPES),
+        '- Target an element id from the screen list: {"element_id":"obs-0001-e003"}.',
+        "- target_text must be copied exactly from the screen; never invent coordinates.",
+        '- Arguments: type_text {"text"}; key_press {"key"}; hotkey {"keys":[...]}; '
+        + 'scroll {"scroll_amount"}; wait {"duration"}.',
+        "- Use this platform's key names.",
+        '- The LAST step is "finish", only once the goal is reached.',
         "- Keep every string under 60 characters.",
-        "- Never invent screen coordinates; name targets by the text visible on screen.",
-        "- If the instruction is ambiguous, note it in assumptions and still return a plan.",
+        "- If it is ambiguous, say so in assumptions and still return a plan.",
     ]
 )
 
@@ -51,6 +54,9 @@ def build_user_prompt(
 ) -> str:
     """Assemble the user turn: instruction, screen context and the hard limits."""
     parts = [f"Instruction: {instruction}", f"Maximum steps: {max_steps}"]
+    platform = (context or {}).get("platform")
+    if platform:
+        parts.append(f"Platform: {platform}")
     if image_path:
         parts.append(f"Screenshot: {image_path}")
     if context:

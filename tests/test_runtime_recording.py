@@ -1,0 +1,95 @@
+"""Recording must survive a long run without losing or leaking anything."""
+
+from __future__ import annotations
+
+import json
+from datetime import UTC, datetime
+from pathlib import Path
+
+from gui_agent.recording import RunSession
+from gui_agent.runtime.recorder import TaskRecorder, redact
+from gui_agent.runtime.schemas import (
+    ElementRef,
+    ExecutionOptions,
+    ObservationSnapshot,
+    StepRecord,
+    TaskRunResult,
+)
+from gui_agent.schemas import BoundingBox, Point, ScreenInfo
+
+
+def _frame(observation_id: str) -> ObservationSnapshot:
+    return ObservationSnapshot(
+        observation_id=observation_id,
+        captured_at=datetime.now(UTC),
+        screen_info=ScreenInfo(
+            screenshot_width=10, screenshot_height=10, control_width=10, control_height=10
+        ),
+        elements=[
+            ElementRef(
+                element_id=f"{observation_id}-e000",
+                text="hi",
+                bounding_box=BoundingBox(left=0, top=0, right=5, bottom=5),
+                center=Point(x=2, y=2),
+            )
+        ],
+    )
+
+
+def test_typed_text_is_redacted_before_it_is_written() -> None:
+    """The log records that something was typed, not what."""
+    safe = redact({"text": "hunter2", "key": "enter"})
+    assert safe["text"] == "<redacted>(7 chars)"
+    assert safe["key"] == "enter"
+
+
+def test_redaction_handles_an_empty_argument_mapping() -> None:
+    assert redact(None) == {}
+    assert redact({}) == {}
+
+
+def test_steps_accumulate_instead_of_overwriting(tmp_path: Path) -> None:
+    recorder = TaskRecorder(RunSession.create(tmp_path, session_id="r1"))
+    for index in range(3):
+        recorder.append_step(
+            StepRecord(index=index, step_id=f"s{index}", description="d", action_type="click")
+        )
+    steps = recorder.read_steps()
+    assert [s["step_id"] for s in steps] == ["s0", "s1", "s2"]
+
+
+def test_each_observation_gets_its_own_file(tmp_path: Path) -> None:
+    """RunSession writes one before/after pair; twenty steps would clobber it."""
+    recorder = TaskRecorder(RunSession.create(tmp_path, session_id="r1"))
+    for index in range(5):
+        recorder.save_observation(_frame(f"obs-{index:04d}"))
+    written = sorted(p.name for p in (tmp_path / "r1").glob("obs-*.json"))
+    assert written == [f"obs-{i:04d}.json" for i in range(5)]
+
+
+def test_an_observation_without_an_image_is_still_recorded(tmp_path: Path) -> None:
+    """The element list is what makes a coordinate traceable; keep it regardless."""
+    recorder = TaskRecorder(RunSession.create(tmp_path, session_id="r1"))
+    path = recorder.save_observation(_frame("obs-0001"))
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    assert payload["observation_id"] == "obs-0001"
+    assert payload["image_path"] is None
+    assert payload["elements"][0]["element_id"] == "obs-0001-e000"
+
+
+def test_the_summary_is_written_and_readable(tmp_path: Path) -> None:
+    recorder = TaskRecorder(RunSession.create(tmp_path, session_id="r1"))
+    result = TaskRunResult(
+        run_id="r1",
+        case_id="T01",
+        instruction="open it",
+        status="failed",
+        execute=True,
+        elapsed_ms=12.5,
+    )
+    path = recorder.write_summary(result)
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    assert payload["status"] == "failed"
+    assert payload["execute"] is True
+    assert payload["action_count"] == 0
+    assert ExecutionOptions().max_actions == 20
