@@ -479,3 +479,48 @@ def test_the_frames_are_written_inside_the_run_that_took_them(tmp_path: Path) ->
     assert output in service.output_directory.parents, "still under the run tree"
     assert service.output_directory != output, "not beside the sessions"
     assert argparse is not None  # keep the import honest for the signature above
+
+
+def test_the_environment_check_notices_a_screen_it_cannot_see(monkeypatch, capsys) -> None:
+    """5.1.4 asks the environment check to cover capture, and it covered everything else.
+
+    It confirmed the packages, the Tesseract binary and the macOS Accessibility
+    permission - and said "environment is ready" on a machine where `mss` sees a
+    single zero-sized pseudo-monitor and every run stops at its first observation
+    with `monitor_index 1 is out of range`. Importing mss is not the check: it
+    imports perfectly well without Screen Recording permission.
+    """
+    import importlib.util
+    import sys
+    import types
+
+    spec = importlib.util.spec_from_file_location(
+        "check_environment", REPO_ROOT / "scripts" / "check_environment.py"
+    )
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    class _Session:
+        monitors = [{"left": 0, "top": 0, "width": 0, "height": 0}]
+        width = 0
+        height = 0
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+        def grab(self, monitor):  # pragma: no cover - the branch under test returns first
+            raise AssertionError("nothing should be captured when no display is visible")
+
+    stub = types.SimpleNamespace(mss=lambda: _Session())
+    monkeypatch.setitem(sys.modules, "mss", stub)
+
+    problems = module.report_screen_capture()
+    printed = capsys.readouterr().out
+
+    assert problems == ["screen capture"]
+    assert "NO DISPLAY VISIBLE" in printed
+    assert "Screen Recording" in printed or not module.IS_MACOS

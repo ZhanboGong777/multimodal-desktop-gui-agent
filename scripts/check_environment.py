@@ -98,6 +98,50 @@ def report_macos_permission() -> None:
         print("[WARNING] Enable Accessibility permission before running control tests.")
 
 
+def report_screen_capture() -> list[str]:
+    """Try an actual capture, because that is the permission that stops every run.
+
+    The check above covers Accessibility, which control needs. Nothing covered
+    Screen Recording, which *capture* needs - and without it `mss` reports a single
+    zero-sized pseudo-monitor, every observation fails, and the run stops before it
+    plans anything. The operator then reads `monitor_index 1 is out of range
+    (available 1..0)`, which names neither the permission nor the fix.
+
+    Importing mss is not the check: it imports perfectly well without permission.
+    Returns the problem list, empty when a frame came back.
+    """
+    try:
+        import mss
+    except ImportError:
+        print("Screen capture: mss not installed")
+        return ["mss"]
+
+    try:
+        with mss.mss() as session:
+            monitors = session.monitors
+            if len(monitors) <= 1:
+                print(
+                    "Screen capture: NO DISPLAY VISIBLE - only the aggregate monitor "
+                    f"exists ({monitors[0]['width']}x{monitors[0]['height']})"
+                )
+                if IS_MACOS:
+                    print(
+                        "[WARNING] On macOS this is the Screen Recording permission. "
+                        "Grant it to the terminal in System Settings -> Privacy & "
+                        "Security -> Screen Recording, then restart the terminal. "
+                        "Waking the screen does not help."
+                    )
+                else:
+                    print("[WARNING] No display is visible to this process (remote session?)")
+                return ["screen capture"]
+            frame = session.grab(monitors[1])
+            print(f"Screen capture: OK ({frame.width}x{frame.height})")
+    except Exception as exc:  # noqa: BLE001 - any failure here is the same answer
+        print(f"Screen capture: FAILED ({type(exc).__name__}: {exc})")
+        return ["screen capture"]
+    return []
+
+
 def report_nvidia_smi() -> None:
     """Print NVIDIA driver information when the command is available."""
     executable = shutil.which("nvidia-smi")
@@ -144,6 +188,7 @@ def main() -> int:
         problems.append("Tesseract CLI")
 
     report_macos_permission()
+    problems.extend(report_screen_capture())
     problems.extend(check_torch(require_gpu=args.gpu))
 
     if args.gpu:
