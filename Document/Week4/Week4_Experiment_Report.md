@@ -113,11 +113,11 @@ label a vision model asks for.
 | --- | --- |
 | MacBook Air M2 | **518 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 218: 168 in the ten
-files below, and 50 spread across the older suites it extended -
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 218: 169 in the ten
+files below, and 49 spread across the older suites it extended -
 `test_control_safety.py` 15, `test_model_mock.py` 14, `test_config.py` 7 (a new
 file), `test_plan_parser.py` 5, `test_model_config.py` 4, `test_ocr.py` 2 and
-`test_recording.py` 3.
+`test_recording.py` 2.
 
 Every number here is a collected count taken on `d67de1f` in a worktree and on the
 current commit, per file - not a running total. The previous version of this
@@ -158,13 +158,21 @@ It is checked by a test now rather than by attention: the test counts the guide'
 table rows and asserts the header agrees. A count a reader is invited to trust
 should be verified by something other than the person editing it.
 
+Correcting those numbers introduced one of my own, which the clean-clone check
+caught: the test added to guard the troubleshooting header also added a case to
+`test_runtime_recording.py`, so the ten-file total moved from 168 to 169 while the
+sentence still said 168. The two files are also easy to confuse - `test_recording.py`
+is a Week 2 suite that gained 2 cases, `test_runtime_recording.py` is a Week 4 file
+that gained 12 - and the first correction had them backwards. Both are now measured
+rather than reasoned about.
+
 | Test file | Covers |
 | --- | --- |
 | `test_action_adapter.py` | 34 cases: unique, ambiguous, missing and stale targets, a target split across word-level elements, parameter errors including wrong types, out-of-range coordinates, key whitelist, platform hotkeys, coordinate scaling, `finish` refusal |
 | `test_runtime_runner.py` | 48 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, the guard that refuses to start a real run whose goal already holds, the second confirmation a risky task must get, the provenance the summary carries, and the note a frame with no readable text leaves |
 | `test_runtime_verification.py` | 12 cases: rule matching, forbidden text, unverifiable tasks, degraded observations, the two case rules that have to tell a real result from a lookalike, and the screen going away while polling |
 | `test_runtime_observation.py` | 9 cases: the whole of `observe()` against a prepared frame - ids, geometry, the OCR-failure record, the element cap - plus what a prompt line carries |
-| `test_runtime_recording.py` | 11 cases: redaction, append-only steps, per-frame files, summary, and where the provenance comes from |
+| `test_runtime_recording.py` | 12 cases: redaction, append-only steps, per-frame files, summary, and where the provenance comes from |
 | `test_week4_cli.py` | 15 cases: argument errors, no `--yes`, dry-run default, summary always written, `--execute` refused without a terminal, the callback set an execute run hands over, `.env` loading, the flag/environment/YAML precedence, and the numeric limits |
 | `test_week4_integration.py` | 5 cases: the loop against a real OpenAI-compatible server over a real socket, which reads the element ids out of the prompt it receives |
 | `test_week4_prompts.py` | 10 cases: the prompt fits its budget, describes element targeting and every action's arguments, and the user turn is the JSON envelope the planner actually sends |
