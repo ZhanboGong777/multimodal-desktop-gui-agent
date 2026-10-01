@@ -89,14 +89,22 @@ typed and how long it was, never what it said.
 
 ## When something goes wrong
 
-`Document/Week4/Week4_Troubleshooting.md` lists fifteen symptoms - from a refused
+`Document/Week4/Week4_Troubleshooting.md` lists eighteen symptoms - from a refused
 connection to a save-changes dialog - with what to check first and what the code
 does about each. The two most common while setting up:
 
 - `monitor_index 1 is out of range (available 1..0)` - the display is asleep. The
   run reports `blocked` and dispatches nothing; wake the screen and re-run.
-- `no element matches '...'` - the model named text that is not on the screen. The
-  step fails and the run stops rather than clicking a default position.
+- `400 ... exceeds the available context size` - the screenshot plus the element
+  list did not fit the server's window. This is a server setting, not a code path:
+  raise it (Ollama: `OLLAMA_CONTEXT_LENGTH=16384`) before starting the server. The
+  failure message carries the same instruction.
+- `the success rule already holds on the untouched screen` - the task's goal is
+  true before anything ran, so the run is `blocked` without a model call. Set the
+  task's precondition up first; see the safety note below.
+- `no element matches '...'` - either the text really is not on the screen, or it
+  arrived split across elements. The step fails and the run stops rather than
+  clicking a default position.
 
 ## Safety
 
@@ -112,3 +120,8 @@ does about each. The two most common while setting up:
   on `Ctrl+C`.
 - A changed screenshot is not success. Only the task's own success rule can mark
   a run `succeeded`.
+- A real run refuses to start when its success rule already holds on the untouched
+  first frame, so a task cannot be credited with a state it did not create. This
+  matters for T01 and T05, whose rules are satisfiable without doing anything.
+  Only tasks that declare preconditions are checked, and dry runs are exempt
+  because their verdict is inconclusive by construction.

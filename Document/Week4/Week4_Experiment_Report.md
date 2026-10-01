@@ -249,18 +249,19 @@ pipeline check they exist to perform.
 - `scripts/week4_agent_cli.py` - the command-line entry point.
 - `scripts/week4_offline_demo.py` - the loop against scripted frames.
 - `configs/week4.yaml` - Week 4 limits, with `AgentConfig` added to `config.py`.
-- 71 new tests across 7 files.
+- 86 new tests.
 - `Document/Week4/Week4_Usage.md` - flags, the safety model, the record layout.
-- `Document/Week4/Week4_Troubleshooting.md` - fifteen symptoms with what to check
+- `Document/Week4/Week4_Troubleshooting.md` - eighteen symptoms with what to check
   and what the code actually does about each.
 - This report and the basic task test report.
 
 **W4-13 diagnostic guide.** The hand-off asks for a table of fifteen situations -
 connection, model, perception, resolution, execution, verification and recording -
 each with what to check and how it is handled. That is
-`Document/Week4/Week4_Troubleshooting.md`. Each row states the behaviour this code
-has, not the behaviour it ought to have; a diagnostic guide describing behaviour
-the implementation does not have would be worse than none.
+`Document/Week4/Week4_Troubleshooting.md`, grown to eighteen as the Windows review
+added situations the first pass had not met. Each row states the behaviour this
+code has, not the behaviour it ought to have; a diagnostic guide describing
+behaviour the implementation does not have would be worse than none.
 
 ## 9. Limits
 
@@ -270,3 +271,14 @@ the implementation does not have would be worse than none.
 - `type_text` uses `pyautogui.typewrite`, so ASCII only; Unicode input is not
   claimed.
 - There is no re-planning. A failed step stops the run; recovery is Week 6.
+- **Merging OCR words into lines trades a little precision for resolvability.** A
+  target that names one word inside a longer mixed line - "main" in "Current branch
+  main" - now resolves to the centre of the whole line, because the element no
+  longer carries the individual word boxes. Before the merge that target resolved
+  to nothing at all, so this is the better half of the trade, but a click meant for
+  a control that shares a text row with unrelated text can land on the neighbour.
+  The gap rule exists to keep that rare.
+- **The success rules for T01 and T05 are weaker than the written standard.** They
+  can only look for text on screen, so they cannot tell "I closed it" from "it was
+  never open". The precondition check covers that half for a real run, but a run
+  started with `require_preconditions=false` proves nothing about either case.
