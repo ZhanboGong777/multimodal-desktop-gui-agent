@@ -125,12 +125,18 @@ class PlanningConfig(ConfigModel):
     allow_real_execution: bool = False
 
 
-class AgentConfig(ConfigModel):
+class ExecutionConfig(ConfigModel):
     """Limits for the Week 4 closed loop.
 
-    Separate from ``planning`` on purpose: ``planning.allow_real_execution`` has
-    always been a record of intent, never a switch that gates execution. These
-    values are the ones the runner actually enforces.
+    Named ``execution`` because that is what 13.2 calls it, and kept separate from
+    ``planning`` on purpose: ``planning.allow_real_execution`` has always been a
+    record of intent, never a switch that gates execution. These values are the
+    ones the runner actually enforces.
+
+    There is deliberately no ``max_replans``. Nothing implements re-planning yet,
+    and a knob that no code reads is a claim without a mechanism - the same mistake
+    as the ``require_preconditions`` field that sat unread until it was wired up.
+    Re-planning arrives in Week 6, and the setting can arrive with it.
     """
 
     #: Cap on how many elements reach the model, text first.
@@ -142,6 +148,8 @@ class AgentConfig(ConfigModel):
     #: How long the task verifier keeps re-observing before giving up.
     verification_timeout_seconds: float = Field(default=10.0, ge=0.0)
     verification_poll_interval_seconds: float = Field(default=0.5, ge=0.0)
+    #: Longest single ``wait`` step the action adapter will accept.
+    max_wait_seconds: float = Field(default=5.0, gt=0.0)
     #: When true, a task with no verifiable success rule is reported ``blocked``
     #: instead of being treated as complete when the plan runs out.
     require_success_rules: bool = True
@@ -156,7 +164,7 @@ class Config(ConfigModel):
     dataset: DatasetConfig = Field(default_factory=DatasetConfig)
     model: ModelConfig = Field(default_factory=ModelConfig)
     planning: PlanningConfig = Field(default_factory=PlanningConfig)
-    agent: AgentConfig = Field(default_factory=AgentConfig)
+    execution: ExecutionConfig = Field(default_factory=ExecutionConfig)
 
 
 def load_config(path: str | Path = DEFAULT_CONFIG_PATH) -> Config:

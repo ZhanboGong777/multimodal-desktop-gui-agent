@@ -133,8 +133,23 @@ def test_a_hotkey_is_translated_for_the_platform() -> None:
 
 
 def test_an_out_of_range_wait_is_refused(adapter: ActionAdapter) -> None:
-    with pytest.raises(ActionResolutionError, match="0-10"):
+    with pytest.raises(ActionResolutionError, match="0-5"):
         adapter.resolve(_step(action_type="wait", arguments={"duration": 600}), _snapshot())
+
+
+def test_the_wait_bound_comes_from_the_run_configuration() -> None:
+    """10.3 suggests max_wait_seconds = 5, and the run's own limit is what applies.
+
+    Hard-coding it meant the configured value could not have any effect - the same
+    trap as a config key nothing reads.
+    """
+    strict = ActionAdapter(platform="darwin", max_wait_seconds=2)
+
+    with pytest.raises(ActionResolutionError, match="0-2"):
+        strict.resolve(_step(action_type="wait", arguments={"duration": 3}), _snapshot())
+
+    allowed = strict.resolve(_step(action_type="wait", arguments={"duration": 2}), _snapshot())
+    assert allowed.action.action_type == "wait"
 
 
 def test_finish_is_never_turned_into_an_action(adapter: ActionAdapter) -> None:

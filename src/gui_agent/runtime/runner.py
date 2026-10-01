@@ -73,7 +73,7 @@ def explain_model_failure(message: str) -> str:
     return (
         f"{message}\n  hint: the screenshot plus the element list did not fit the "
         "server's context window. Raise it before retrying "
-        "(Ollama: OLLAMA_CONTEXT_LENGTH=16384), or lower agent.max_elements."
+        "(Ollama: OLLAMA_CONTEXT_LENGTH=16384), or lower execution.max_elements."
     )
 
 

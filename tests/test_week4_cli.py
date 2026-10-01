@@ -7,6 +7,7 @@ must never dispatch.
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -150,3 +151,91 @@ def test_a_dry_run_hands_over_no_callbacks() -> None:
     cli = _load_cli()
 
     assert cli._execute_callbacks(argparse.Namespace(execute=False), get_case("T04")) == {}
+
+
+# ───────── where the model settings come from ─────────
+def test_the_environment_sits_between_the_flag_and_the_yaml(monkeypatch) -> None:
+    """13.1.1's order: CLI flag, then GUI_AGENT_*, then YAML, then the default.
+
+    Enforced in the CLI because ModelConfig.model_name has a non-empty default -
+    the client's own environment fallback is never reached, so setting
+    GUI_AGENT_MODEL used to change nothing at all.
+    """
+    import argparse
+
+    from gui_agent.config import load_config
+
+    cli = _load_cli()
+    monkeypatch.setenv("GUI_AGENT_MODEL", "from-env")
+    monkeypatch.setenv("GUI_AGENT_BASE_URL", "http://from-env:11434/v1")
+
+    config = load_config(REPO_ROOT / "configs" / "week4.yaml")
+    yaml_model = config.model.model_name
+    args = argparse.Namespace(provider=None, model=None, base_url=None)
+
+    cli._apply_environment(config, args)
+    assert config.model.model_name == "from-env"
+    assert config.model.base_url == "http://from-env:11434/v1"
+
+    args.model = "from-flag"
+    args.base_url = "http://from-flag:11434/v1"
+    cli._apply_environment(config, args)
+    assert config.model.model_name == "from-flag"
+    assert config.model.base_url == "http://from-flag:11434/v1"
+
+    monkeypatch.delenv("GUI_AGENT_MODEL")
+    monkeypatch.delenv("GUI_AGENT_BASE_URL")
+    # A run applies this once, to a freshly loaded config, so that is what the
+    # "nothing is set" case has to look at: the function edits the config in place.
+    fresh = load_config(REPO_ROOT / "configs" / "week4.yaml")
+    cli._apply_environment(fresh, argparse.Namespace(provider=None, model=None, base_url=None))
+    assert fresh.model.model_name == yaml_model, "with nothing set, the YAML stands"
+
+
+def test_a_dotenv_file_does_not_override_the_shell(monkeypatch, tmp_path: Path) -> None:
+    """13.1.2 asks for override=False, and this is what that buys.
+
+    A value exported in the shell is a decision made after the file was written.
+    """
+    cli = _load_cli()
+    fake_environ = {"GUI_AGENT_MODEL": "from-shell"}
+    monkeypatch.setattr(os, "environ", fake_environ)
+    path = tmp_path / ".env"
+    path.write_text(
+        "# a comment\n"
+        "\n"
+        "GUI_AGENT_MODEL=from-file\n"
+        "export GUI_AGENT_BASE_URL='http://from-file:11434/v1'\n"
+        "not a variable line\n"
+    )
+
+    applied = cli._load_dotenv(path)
+
+    assert applied == 1, "only the variable that was not already set"
+    assert fake_environ["GUI_AGENT_MODEL"] == "from-shell"
+    assert fake_environ["GUI_AGENT_BASE_URL"] == "http://from-file:11434/v1"
+
+
+def test_a_missing_dotenv_is_not_an_error(monkeypatch, tmp_path: Path) -> None:
+    cli = _load_cli()
+    monkeypatch.setattr(os, "environ", {})
+
+    assert cli._load_dotenv(tmp_path / "nope.env") == 0
+
+
+def test_the_week4_config_carries_the_run_limits() -> None:
+    """13.2's execution section, checked as the file rather than the model default.
+
+    A config file that drifts from the model it is loaded into is silent: the run
+    just uses the default and nobody notices.
+    """
+    from gui_agent.config import load_config
+
+    config = load_config(REPO_ROOT / "configs" / "week4.yaml")
+
+    assert config.execution.max_actions == 20
+    assert config.execution.task_timeout_seconds == 240
+    assert config.execution.verification_timeout_seconds == 10
+    assert config.execution.verification_poll_interval_seconds == 0.5
+    assert config.execution.max_wait_seconds == 5
+    assert config.execution.require_success_rules is True

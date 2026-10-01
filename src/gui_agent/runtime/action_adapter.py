@@ -104,6 +104,10 @@ _TOKEN = re.compile(r"[0-9a-z_]+")
 #: the run search exists for targets that span more than one element.
 _MIN_RUN_TOKENS = 2
 
+#: Longest single ``wait`` step accepted by default. The run's own limit comes from
+#: ``execution.max_wait_seconds``; this is what a directly constructed adapter uses.
+DEFAULT_MAX_WAIT_SECONDS = 5.0
+
 
 def _tokens(text: str) -> list[str]:
     """Word tokens of a label, so 'Summary (required)' -> ['summary', 'required']."""
@@ -190,9 +194,16 @@ def _as_ref(element: Any, observation: ObservationSnapshot) -> ElementRef:
 class ActionAdapter:
     """Resolves plan steps against the current observation."""
 
-    def __init__(self, *, platform: str | None = None, min_confidence: float = 0.35) -> None:
+    def __init__(
+        self,
+        *,
+        platform: str | None = None,
+        min_confidence: float = 0.35,
+        max_wait_seconds: float = DEFAULT_MAX_WAIT_SECONDS,
+    ) -> None:
         self.platform = platform or platform_name()
         self.min_confidence = min_confidence
+        self.max_wait_seconds = float(max_wait_seconds)
 
     # ── public entry point ─────────────────────────────────────────────
     def resolve(self, step: PlanStep, observation: ObservationSnapshot) -> ResolvedAction:
@@ -429,9 +440,10 @@ class ActionAdapter:
             raise ActionResolutionError(
                 f"wait duration must be a number, got {duration!r}"
             ) from exc
-        if not 0 < seconds <= 10:
+        if not 0 < seconds <= self.max_wait_seconds:
             raise ActionResolutionError(
-                f"wait duration {seconds} is outside the allowed 0-10 s range"
+                f"wait duration {seconds} is outside the allowed "
+                f"0-{self.max_wait_seconds:g} s range"
             )
         action = DesktopAction(
             action_type="wait", duration=seconds, target_description=step.target_text

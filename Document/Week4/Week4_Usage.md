@@ -29,11 +29,19 @@ Real execution, once the desktop is in a known state:
 ```bash
 export GUI_AGENT_API_KEY=ollama
 export GUI_AGENT_BASE_URL=http://<windows-host>:11434/v1
+export OLLAMA_CONTEXT_LENGTH=16384     # set before the server starts
 
 python scripts/week4_agent_cli.py --case T01 \
     --provider openai_compatible --model qwen2.5vl:7b \
     --execute
 ```
+
+Instead of exporting them, copy `.env.example` to `.env` and fill it in: the CLI
+reads `./.env` itself. A variable already exported in the shell wins over the file.
+The order is explicit flag, then the environment (including `.env`), then the YAML,
+then the built-in default - so `GUI_AGENT_MODEL` does override `model_name` in the
+config. The Week 2 and Week 3 scripts do not read `.env`; for those, export the
+variables or source the file.
 
 ## Command line
 

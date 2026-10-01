@@ -104,20 +104,20 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **433 passed**, ruff clean |
+| MacBook Air M2 | **438 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 133: 119 in the nine
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 138: 124 in the nine
 files below, 10 in `test_model_mock.py`, 2 in `test_ocr.py` for the label-merging
 fix described in section 7, and 2 in `test_plan_parser.py` for the step-status
 vocabulary.
 
 | Test file | Covers |
 | --- | --- |
-| `test_action_adapter.py` | 26 cases: unique, ambiguous, missing and stale targets, a target split across word-level elements, parameter errors including wrong types, out-of-range coordinates, key whitelist, platform hotkeys, coordinate scaling, `finish` refusal |
+| `test_action_adapter.py` | 27 cases: unique, ambiguous, missing and stale targets, a target split across word-level elements, parameter errors including wrong types, out-of-range coordinates, key whitelist, platform hotkeys, coordinate scaling, `finish` refusal |
 | `test_runtime_runner.py` | 35 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, the guard that refuses to start a real run whose goal already holds, the second confirmation a risky task must get, the provenance the summary carries, and the note a frame with no readable text leaves |
 | `test_runtime_verification.py` | 8 cases: rule matching, forbidden text, unverifiable tasks, degraded observations |
 | `test_runtime_recording.py` | 6 cases: redaction, append-only steps, per-frame files, summary |
-| `test_week4_cli.py` | 9 cases: argument errors, no `--yes`, dry-run default, summary always written, `--execute` refused without a terminal, and the callback set an execute run hands over |
+| `test_week4_cli.py` | 13 cases: argument errors, no `--yes`, dry-run default, summary always written, `--execute` refused without a terminal, the callback set an execute run hands over, `.env` loading, and the flag/environment/YAML precedence |
 | `test_week4_integration.py` | 5 cases: the loop against a real OpenAI-compatible server over a real socket, which reads the element ids out of the prompt it receives |
 | `test_week4_prompts.py` | 12 cases: the prompt fits its budget, describes element targeting and every action's arguments, carries the platform, trims the element list by whole lines, and keeps markers verbatim |
 | `test_week4_cases.py` | 6 cases: the invariants the five case definitions must hold - a machine-checkable rule, a declared precondition, a distinctive marker, a copy handed back by `get_case` |
@@ -350,6 +350,29 @@ at all, and it had one. The check now runs before the directory is created, and
 `latest_session` prefers a session that has a summary over one that merely sorts
 later.
 
+**`GUI_AGENT_MODEL` changed nothing at all.** 13.1.1 asks for the order "explicit
+flag, then `GUI_AGENT_*`, then YAML, then default", and the environment leg was
+dead: `ModelConfig.model_name` always has a value, `create_model_client` always
+passes it, and the client's own `model_name or env.get(GUI_AGENT_MODEL)` fallback
+therefore never ran. Following `.env.example` produced a client on the wrong model
+with no error. The CLI resolves the order itself now, and `_apply_environment` is a
+named function so the order has a test rather than a comment.
+
+The same file told the operator to copy it to `.env`, and nothing read `.env`
+either. 13.1.2 asks the CLI to load it with `override=False`, so the CLI does -
+shell first, file second, because a value exported in the shell is a decision made
+later than the file. The Week 2 and Week 3 entry points still do not read it, and
+`.env.example` now says which is which instead of implying that both work.
+
+**The run limits were configured under a name the hand-off does not use.** 13.2
+proposes an `execution:` section holding the run-layer limits; this had them under
+`agent:`. Renamed, since a reader with the hand-off open should not have to work
+out that the two are the same thing. `max_wait_seconds` was added with it and
+actually wired into the action adapter - the wait bound had been the literal `10`
+in `_resolve_wait`, so the configured value could not have had any effect. There is
+still no `max_replans`: nothing implements re-planning yet, and adding a knob no
+code reads would repeat the mistake that `require_preconditions` was.
+
 ## 8. Deliverables
 
 - `src/gui_agent/runtime/` - the run layer (8 modules).
@@ -358,7 +381,7 @@ later.
 - `scripts/week4_collect_evidence.py` - copies a finished run's text records into
   `Document/Week4/evidence/`, so a run id in the test report resolves inside the
   repository rather than only on the machine that produced it.
-- `configs/week4.yaml` - Week 4 limits, with `AgentConfig` added to `config.py`.
+- `configs/week4.yaml` - Week 4 limits, with `ExecutionConfig` added to `config.py`.
 - 102 new tests.
 - `Document/Week4/Week4_Usage.md` - flags, the safety model, the record layout.
 - `Document/Week4/Week4_Troubleshooting.md` - twenty-four symptoms with what to check

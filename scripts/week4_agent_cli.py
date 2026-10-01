@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -145,7 +146,63 @@ def _execute_callbacks(args, task: TaskSpec) -> dict[str, object]:
     }
 
 
+def _load_dotenv(path: Path) -> int:
+    """Set variables from a `.env` file, never overriding the environment.
+
+    `override=False` is the whole point: a value exported in the shell is a
+    decision made later than the file, and silently replacing it is how "it worked
+    yesterday" happens. The format is the small subset a template needs - blank
+    lines, `#` comments, an optional `export`, `KEY=VALUE`, optional quotes.
+    Returns how many variables were actually set.
+    """
+    if not path.is_file():
+        return 0
+    applied = 0
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("export "):
+            line = line[len("export ") :].lstrip()
+        key, separator, value = line.partition("=")
+        key = key.strip()
+        if not separator or not key.replace("_", "").isalnum():
+            continue
+        if key in os.environ:
+            continue
+        os.environ[key] = value.strip().strip('"').strip("'")
+        applied += 1
+    return applied
+
+
+def _apply_environment(config, args) -> None:
+    """Resolve model settings: CLI flag, then environment, then YAML, then default.
+
+    13.1.1 asks for that order and names this entry point as the place to enforce
+    it. It cannot be left to the client: ``ModelConfig.model_name`` has a
+    non-empty default, so the client's own environment fallback is never reached -
+    setting ``GUI_AGENT_MODEL`` used to change nothing at all.
+    """
+    for variable, attribute in (
+        ("GUI_AGENT_MODEL", "model_name"),
+        ("GUI_AGENT_BASE_URL", "base_url"),
+    ):
+        value = os.environ.get(variable, "").strip()
+        if value:
+            setattr(config.model, attribute, value)
+    if args.provider:
+        config.model.provider = args.provider
+    if args.model:
+        config.model.model_name = args.model
+    if args.base_url:
+        config.model.base_url = args.base_url
+
+
 def main() -> int:
+    # Read the file `.env.example` tells the operator to create, before anything
+    # looks at the environment. Values already exported in the shell win.
+    _load_dotenv(Path(".env"))
+
     args = parse_args()
 
     if args.list_cases:
@@ -165,16 +222,11 @@ def main() -> int:
         print(f"error: cannot load config: {exc}", file=sys.stderr)
         return EXIT_BLOCKED
 
-    if args.provider:
-        config.model.provider = args.provider
-    if args.model:
-        config.model.model_name = args.model
-    if args.base_url:
-        config.model.base_url = args.base_url
+    _apply_environment(config, args)
     if args.max_actions:
-        config.agent.max_actions = args.max_actions
+        config.execution.max_actions = args.max_actions
     if args.task_timeout:
-        config.agent.task_timeout_seconds = args.task_timeout
+        config.execution.task_timeout_seconds = args.task_timeout
 
     # ── the task ───────────────────────────────────────────────────────
     if args.case:
@@ -217,14 +269,14 @@ def main() -> int:
         client,
         max_steps=config.planning.max_steps,
         require_structured_output=config.planning.require_structured_output,
-        allow_real_execution=config.agent.require_success_rules and args.execute,
+        allow_real_execution=config.execution.require_success_rules and args.execute,
     )
     observer = ObservationService(
-        config, max_elements=config.agent.max_elements, output_directory=output_directory
+        config, max_elements=config.execution.max_elements, output_directory=output_directory
     )
-    adapter = ActionAdapter()
+    adapter = ActionAdapter(max_wait_seconds=config.execution.max_wait_seconds)
     executor = ActionExecutor(config.control)
-    verifier = Verifier(poll_interval_seconds=config.agent.verification_poll_interval_seconds)
+    verifier = Verifier(poll_interval_seconds=config.execution.verification_poll_interval_seconds)
     # RunSession keys its directory by session id; prefixing with the case id
     # keeps the five task runs distinguishable in the output tree.
     stamp = __import__("datetime").datetime.now().astimezone().strftime("%Y%m%d_%H%M%S")
@@ -233,10 +285,10 @@ def main() -> int:
 
     options = ExecutionOptions(
         execute=args.execute,
-        max_actions=config.agent.max_actions,
-        task_timeout_seconds=config.agent.task_timeout_seconds,
-        verification_timeout_seconds=config.agent.verification_timeout_seconds,
-        verification_poll_interval_seconds=config.agent.verification_poll_interval_seconds,
+        max_actions=config.execution.max_actions,
+        task_timeout_seconds=config.execution.task_timeout_seconds,
+        verification_timeout_seconds=config.execution.verification_timeout_seconds,
+        verification_poll_interval_seconds=config.execution.verification_poll_interval_seconds,
         confirm=True,
     )
 

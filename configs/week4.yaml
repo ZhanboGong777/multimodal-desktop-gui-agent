@@ -92,12 +92,16 @@ planning:
   allow_real_execution: false
 
 # ── Week 4 additions ────────────────────────────────────────────────
-agent:
+# Named `execution` to match 13.2. There is no max_replans: nothing implements
+# re-planning yet, and a knob no code reads is a claim without a mechanism.
+execution:
   max_elements: 60
   max_actions: 20
   task_timeout_seconds: 240
   verification_timeout_seconds: 10
   verification_poll_interval_seconds: 0.5
+  # Longest single `wait` step the action adapter will accept.
+  max_wait_seconds: 5
   # A task with no verifiable success rule is reported blocked rather than
   # treated as complete when the plan runs out.
   require_success_rules: true
