@@ -72,15 +72,21 @@ perception and control paths are exercised for real for the first time.
 
 ### OCR backend choice
 
-Measured on the same 1470x956 frame:
+Measured on the same 1470x956 frame, with the engine instance reused:
 
 | Backend | Elements found | Time |
 | --- | --- | --- |
 | Tesseract | 4 | **241 ms** |
 | PaddleOCR (medium) | 2 | 5 525 ms |
 
-Tesseract is 23x faster on this machine, matching the Week 2 conclusion.
-`configs/week4.yaml` selects it, and the GPU node keeps PaddleOCR.
+Tesseract is 23x faster on this machine, matching the Week 2 conclusion, so
+`configs/week4.yaml` selects it.
+
+The Windows review machine measures a different picture - Tesseract 738 ms against
+PaddleOCR's 982 ms on a 2560x1600 frame - so this is a per-machine speed choice,
+not a correctness one. It only became a free choice after the fix in section 7:
+Tesseract reports one row per *word*, and a word list cannot match the multi-word
+label a vision model asks for.
 
 ## 4. Implementation process
 
@@ -98,14 +104,16 @@ Tesseract is 23x faster on this machine, matching the Week 2 conclusion.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **371 passed**, ruff clean |
+| MacBook Air M2 | **386 passed**, ruff clean |
 
-Week 3 ended at 300 tests. Week 4 adds 71:
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 86: 78 in the
+seven files below, 6 in `test_model_mock.py`, and 2 in `test_ocr.py` for the
+label-merging fix described in section 7.
 
 | Test file | Covers |
 | --- | --- |
-| `test_action_adapter.py` | 16 cases: unique, ambiguous, missing and stale targets, parameter errors, key whitelist, platform hotkeys, coordinate scaling, `finish` refusal |
-| `test_runtime_runner.py` | 12 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording |
+| `test_action_adapter.py` | 23 cases: unique, ambiguous, missing and stale targets, a target split across word-level elements, parameter errors, key whitelist, platform hotkeys, coordinate scaling, `finish` refusal |
+| `test_runtime_runner.py` | 22 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, and the guard that refuses to start a real run whose goal already holds |
 | `test_runtime_verification.py` | 8 cases: rule matching, forbidden text, unverifiable tasks, degraded observations |
 | `test_runtime_recording.py` | 6 cases: redaction, append-only steps, per-frame files, summary |
 | `test_week4_cli.py` | 6 cases: argument errors, no `--yes`, dry-run default, summary always written |
@@ -193,6 +201,47 @@ a coordinate traceable. It now always writes the JSON; only the image is optiona
 **A blank coordinator field was not tested.** Adding the Week 4 tests surfaced that
 `task_id`, `instruction`, `step_id` and `description` are validated for blank
 values but had no test. Four cases were added in Week 3's follow-up.
+
+**Word-level OCR made every real target unresolvable.** The Windows review found
+that `TesseractOCREngine` emitted one element per word, so a step asking for
+`Summary (required)` - a label plainly visible on the screen - stopped the run with
+`no element matches`. The mock planner had hidden this: it only ever picks an
+element that is already in the list, so it never asks for a phrase, and the Mac dry
+runs passed while the real model could not resolve a single target. Fixed in
+`merge_words_into_lines`: `image_to_data` already carries `block_num`, `par_num`
+and `line_num` for every word, so the words are merged back into the line a reader
+sees. A gap wider than 1.2 line heights splits them again, so two controls sharing
+one text row ("File  Edit  View") do not become a single target whose centre is a
+patch of empty pixels. Verified against the real Tesseract binary on rendered
+labels, not only against mocked payloads.
+
+**A phrase can still span two elements.** A plan may name two adjacent labels as
+one target, which no single element's text matches. `ActionAdapter._locate` now
+falls back to matching the query's tokens against a run of neighbouring elements -
+neighbours in *reading* order, which is not the order the observation stores them
+in, since `_select` ranks by confidence - and still refuses when more than one run
+matches.
+
+**The prompt did not fit the server's context window.** A 2560x1600 screenshot plus
+the element list measured 7 517 tokens against Ollama's 4096 default, so planning
+failed with HTTP 400 before any action was dispatched. The fix is a server setting
+(`OLLAMA_CONTEXT_LENGTH=16384`), documented in `configs/week4.yaml`. The runner now
+recognises that failure and appends the setting to the message instead of leaving
+the raw provider error, and `configs/week4.yaml` states the requirement up front.
+
+**Two of the five rules could be satisfied by doing nothing.** Found while checking
+why T05's dry run reported that its rule *would read passed* on a screen where the
+test application was not open. T05 only requires the marker text to be gone, so a
+window that was never opened - or was minimised - satisfies it; T01 looks for
+`http` and `search`, which any browser that was already running already carries.
+Both are named in the manual's own table as results that must **not** count. A real
+run now evaluates its rule against the untouched first frame and is `blocked` when
+it already holds, with the reason recorded. `ExecutionOptions.require_preconditions`
+- a field that until now was declared and never read - is what switches this on,
+and only a task that declares preconditions is checked, since declaring them is how
+a task says it assumes a starting state. Dry runs are exempt: they dispatch nothing
+and their verdict is forced to inconclusive, so the guard would only stop the
+pipeline check they exist to perform.
 
 ## 8. Deliverables
 

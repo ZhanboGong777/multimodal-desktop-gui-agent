@@ -1,6 +1,6 @@
 # Week 4 troubleshooting
 
-Fifteen situations the closed loop can run into, in the order they tend to appear.
+Eighteen situations the closed loop can run into, in the order they tend to appear.
 Each row says what to check first, and what this implementation actually does —
 the second column matters, because a diagnostic guide that describes behaviour the
 code does not have is worse than none.
@@ -26,6 +26,7 @@ in disguise.
 | Symptom | Check first | What this code does |
 | --- | --- | --- |
 | HTTP 500 | Service log, model and memory state, the request body | Reported as `ModelError` with the underlying exception name. **Kept separate from a timeout and from a truncated reply** — the three have different causes |
+| `400 ... request (N tokens) exceeds the available context size (M tokens)` | The server's context window against the prompt size. A 2560x1600 screenshot plus the element list measured 7 517 tokens; Ollama serves 4096 by default | `blocked` before any action. The message has the fix appended: raise `OLLAMA_CONTEXT_LENGTH` (16384 worked on the review machine) or lower `agent.max_elements`. This is a server setting, not a code path — nothing in the run can change it |
 | Reply truncated mid-JSON | Finish reason, response length, **prompt length**, number of steps | `PlanParseError`; the planner retries the format once, then reports `blocked`. A partial plan is never executed |
 | Plan is valid JSON but the steps do not fit the screen | Whether the prompt carried the element list | The adapter refuses at resolution time; nothing is clicked |
 | `no element matches '...'` | Take a fresh screenshot; check the OCR language and threshold; is the page still loading? | The step fails and the run stops. It does **not** click a default position, and it does not retry with a guessed target |
@@ -45,6 +46,8 @@ in disguise.
 | Symptom | Check first | What this code does |
 | --- | --- | --- |
 | `N elements match '...'` | Element ids, whether a region or context could disambiguate | The run stops and lists the candidates. **It never takes the first match** |
+| `no element matches '...'` although the label is plainly on screen | Whether the backend returned words instead of lines — check the element texts in the observation JSON | Tesseract rows are merged back into lines, so `Summary (required)` is one element. If a phrase still spans two elements, the adapter matches the query's tokens against a run of neighbouring elements and refuses when more than one run matches |
+| `N element runs match '...'` | How many places on screen carry that phrase | The run stops and lists the runs, same policy as an ambiguous single element |
 | A step resolves to a point outside the monitor | The screenshot size against the control size | `ActionResolutionError`; the point is refused, not clamped to the edge |
 | `key '...' is not in the allowed key set` | The key name the plan used | Only a fixed key list is accepted. This is deliberate: the model must not be able to drive a shell through `type_text` or `key_press` |
 
@@ -64,6 +67,7 @@ in disguise.
 | The model says it finished but the task did not | The verifier's evidence, the case's success rule | `finish` cannot mark a task complete. Only `Verifier.check_task` can, and only against the rule |
 | A dry run reports `inconclusive` | Whether `--execute` was passed | Correct: nothing was dispatched. The rule's own verdict is kept in the evidence |
 | A task with no success rule | Whether `--case` was used | `blocked` before any action. A free-form `--instruction` defines no rule |
+| A real run stops with `the success rule already holds on the untouched screen` | Whether the screen is already in the goal state | `blocked` before planning, so no model call and no click. T05 only needs its marker gone, and T01 only needs `http` and `search` visible, so both are satisfiable without doing anything. Set the task's precondition up first. `require_preconditions=False` accepts the risk and is recorded in the run |
 | A browser captcha or consent wall appears | The new screenshot | The run stops and records the obstacle. **No evasion step is ever added** |
 | A "save changes?" dialog appears on close | Whether the test window holds unsaved content | T05's rule requires the window gone and other applications untouched. The run stops rather than discarding content |
 
