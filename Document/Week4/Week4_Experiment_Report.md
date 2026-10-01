@@ -104,9 +104,9 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **417 passed**, ruff clean |
+| MacBook Air M2 | **424 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 117: 105 in the nine
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 124: 112 in the nine
 files below, 8 in `test_model_mock.py`, 2 in `test_ocr.py` for the label-merging
 fix described in section 7, and 2 in `test_plan_parser.py` for the step-status
 vocabulary.
@@ -114,10 +114,10 @@ vocabulary.
 | Test file | Covers |
 | --- | --- |
 | `test_action_adapter.py` | 26 cases: unique, ambiguous, missing and stale targets, a target split across word-level elements, parameter errors including wrong types, out-of-range coordinates, key whitelist, platform hotkeys, coordinate scaling, `finish` refusal |
-| `test_runtime_runner.py` | 26 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, the guard that refuses to start a real run whose goal already holds, and the note a frame with no readable text leaves |
+| `test_runtime_runner.py` | 30 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, the guard that refuses to start a real run whose goal already holds, the second confirmation a risky task must get, and the note a frame with no readable text leaves |
 | `test_runtime_verification.py` | 8 cases: rule matching, forbidden text, unverifiable tasks, degraded observations |
 | `test_runtime_recording.py` | 6 cases: redaction, append-only steps, per-frame files, summary |
-| `test_week4_cli.py` | 6 cases: argument errors, no `--yes`, dry-run default, summary always written |
+| `test_week4_cli.py` | 9 cases: argument errors, no `--yes`, dry-run default, summary always written, `--execute` refused without a terminal, and the callback set an execute run hands over |
 | `test_week4_integration.py` | 5 cases: the loop against a real OpenAI-compatible server over a real socket, which reads the element ids out of the prompt it receives |
 | `test_week4_prompts.py` | 12 cases: the prompt fits its budget, describes element targeting and every action's arguments, carries the platform, trims the element list by whole lines, and keeps markers verbatim |
 | `test_week4_cases.py` | 6 cases: the invariants the five case definitions must hold - a machine-checkable rule, a declared precondition, a distinctive marker, a copy handed back by `get_case` |
@@ -304,6 +304,26 @@ took longer than writing the note did. In the same area, the mock no longer aims
 at OCR fragments like `@` or `HO`: they are gone by the next frame, so a dry run
 that dies on one says nothing about the pipeline.
 
+**The second confirmation for a risky task was never wired up.** The CLI built
+`high_risk_fn` and never passed it to the runner, and `TaskRunner.run` had no
+parameter to receive it - so T04, the one case that really sends a message, ran on a
+single confirmation while the CLI's own `--help`, the usage guide and the
+troubleshooting guide all stated it got a second, separate one. 8.3.6 and 12.2.6
+ask for it by name. This is the defect pattern worth naming: the claim was in three
+places and the code was in none, and nothing could catch it because no test asked
+whether the prompt was ever reached - the CLI tests covered argument errors and the
+dry-run default, and none of them ran with `--execute`.
+
+`run()` now takes `high_risk_confirm` and calls it for `medium` and `high` tasks,
+after the first confirmation and before the countdown; the risk policy sits in the
+runner so a caller cannot forget it. The CLI hands its callbacks over as a splatted
+dict, so a callback the runner does not accept is a `TypeError` instead of a safety
+prompt that silently never fires, and `_execute_callbacks` is a named function so
+the wiring itself has a test. The prompt also prints the text the plan will
+actually type, which is what 12.2.6 asks to be shown before a message goes out.
+The same pass implemented 12.2.5: `--execute` without a terminal returns `blocked`
+(exit 2) rather than reading the missing answer as consent.
+
 ## 8. Deliverables
 
 - `src/gui_agent/runtime/` - the run layer (8 modules).
@@ -315,7 +335,7 @@ that dies on one says nothing about the pipeline.
 - `configs/week4.yaml` - Week 4 limits, with `AgentConfig` added to `config.py`.
 - 102 new tests.
 - `Document/Week4/Week4_Usage.md` - flags, the safety model, the record layout.
-- `Document/Week4/Week4_Troubleshooting.md` - twenty-two symptoms with what to check
+- `Document/Week4/Week4_Troubleshooting.md` - twenty-four symptoms with what to check
   and what the code actually does about each.
 - `Document/Week4/Week4_Basic_Task_Test_Report.md` - the five results, one row per
   case, with the precondition, the attempt and success counts, the verification
@@ -325,7 +345,7 @@ that dies on one says nothing about the pipeline.
 **W4-13 diagnostic guide.** The hand-off asks for a table of fifteen situations -
 connection, model, perception, resolution, execution, verification and recording -
 each with what to check and how it is handled. That is
-`Document/Week4/Week4_Troubleshooting.md`, grown to twenty-two as the Windows review
+`Document/Week4/Week4_Troubleshooting.md`, grown to twenty-four as the Windows review
 added situations the first pass had not met. Each row states the behaviour this
 code has, not the behaviour it ought to have; a diagnostic guide describing
 behaviour the implementation does not have would be worse than none.

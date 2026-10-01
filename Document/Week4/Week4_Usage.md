@@ -69,7 +69,12 @@ reported `blocked` rather than treated as finished, and `--instruction` without
 `--case` defines no rule at all.
 
 `T04` and `T05` ask for a second, separate confirmation because they are not
-reversible by looking at the screen.
+reversible by looking at the screen. It prints the text the plan will actually
+type, so the decision is about the message and not about the instruction. The risk
+level that triggers it lives in the runner, not in the CLI.
+
+`--execute` needs a terminal. With nobody to ask, the run is `blocked` (exit code
+2) before anything is captured: a missing answer is never read as consent.
 
 ## What a run leaves behind
 
@@ -101,7 +106,7 @@ typed and how long it was, never what it said.
 
 ## When something goes wrong
 
-`Document/Week4/Week4_Troubleshooting.md` lists twenty-two symptoms - from a refused
+`Document/Week4/Week4_Troubleshooting.md` lists twenty-four symptoms - from a refused
 connection to a save-changes dialog - with what to check first and what the code
 does about each. The two most common while setting up:
 

@@ -1,6 +1,6 @@
 # Week 4 troubleshooting
 
-Twenty-two situations the closed loop can run into, in the order they tend to appear.
+Twenty-four situations the closed loop can run into, in the order they tend to appear.
 Each row says what to check first, and what this implementation actually does —
 the second column matters, because a diagnostic guide that describes behaviour the
 code does not have is worse than none.
@@ -62,7 +62,8 @@ in disguise.
 | Text lands in the wrong field | Which element the step targeted, and the focus after the preceding click | The action fails and the run stops. It does not continue typing, and it does not press Enter |
 | Typing does not submit | Whether the plan contains the submit step, and what it defines as the trigger | A draft is not success. T02 requires the results page, not text in the box |
 | Chinese or other non-ASCII input fails | `pyautogui.typewrite` and the current input method | Not supported and not claimed. `type_text` is ASCII-only; a clipboard-based path would need its own dependency and tests |
-| The model presses something destructive | The plan, and the task's risk level | `medium` and `high` tasks ask for a second, separate confirmation. There is no `--yes` |
+| The model presses something destructive | The plan, and the task's risk level | `medium` and `high` tasks ask for a second, separate confirmation, and it prints the text the plan will actually type. The risk policy is in the runner, so a caller cannot drop the prompt. There is no `--yes` |
+| `--execute needs an interactive terminal` | Whether stdin is a terminal | `blocked`, exit code 2, before anything is captured. With nobody to ask, consent is not assumed. Run it from a terminal, or leave `--execute` off for a dry run |
 
 ## Verification
 
