@@ -104,9 +104,9 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **448 passed**, ruff clean |
+| MacBook Air M2 | **456 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 148: 129 in the nine
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 156: 137 in the ten
 files below, 10 in `test_model_mock.py`, 2 in `test_ocr.py` for the label-merging
 fix described in section 7, and 7 in `test_plan_parser.py` for the step-status
 vocabulary and the plan-ordering rules.
@@ -114,8 +114,9 @@ vocabulary and the plan-ordering rules.
 | Test file | Covers |
 | --- | --- |
 | `test_action_adapter.py` | 27 cases: unique, ambiguous, missing and stale targets, a target split across word-level elements, parameter errors including wrong types, out-of-range coordinates, key whitelist, platform hotkeys, coordinate scaling, `finish` refusal |
-| `test_runtime_runner.py` | 36 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, the guard that refuses to start a real run whose goal already holds, the second confirmation a risky task must get, the provenance the summary carries, and the note a frame with no readable text leaves |
-| `test_runtime_verification.py` | 8 cases: rule matching, forbidden text, unverifiable tasks, degraded observations |
+| `test_runtime_runner.py` | 39 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, the guard that refuses to start a real run whose goal already holds, the second confirmation a risky task must get, the provenance the summary carries, and the note a frame with no readable text leaves |
+| `test_runtime_verification.py` | 10 cases: rule matching, forbidden text, unverifiable tasks, degraded observations, and the two case rules that have to tell a real result from a lookalike |
+| `test_runtime_observation.py` | 3 cases: frame-local ids do not repeat, unlabelled contours are not offered as targets, and a prompt line carries what a step needs to aim |
 | `test_runtime_recording.py` | 6 cases: redaction, append-only steps, per-frame files, summary |
 | `test_week4_cli.py` | 13 cases: argument errors, no `--yes`, dry-run default, summary always written, `--execute` refused without a terminal, the callback set an execute run hands over, `.env` loading, and the flag/environment/YAML precedence |
 | `test_week4_integration.py` | 5 cases: the loop against a real OpenAI-compatible server over a real socket, which reads the element ids out of the prompt it receives |
@@ -401,6 +402,20 @@ the retry. The marker is minted per run now and printed as `marker` so the opera
 knows what this run is looking for. The preconditions were left alone because they
 say "this marker" rather than naming the literal; an earlier draft rewrote them and
 that code was a no-op, which is the kind of thing that reads as if it works.
+
+**The run summary had one timing number, and it was wrong for blocked runs.**
+16.5.4 asks for the phases separately: the confirmation prompt is a person reading
+the plan, and counting it as system time makes a slow operator look like a slow
+model. `execution_ms` is now the primary measure - from the gate to the final
+verdict - with `planning_ms`, `confirmation_ms` and the whole-run `elapsed_ms`
+beside it, and the three phases add up to the whole by construction.
+
+Splitting them exposed a worse problem underneath. `_blocked` passed
+`self.clock()` as the run's start time, so **every** blocked run recorded
+`elapsed_ms` of 0.0 - including one that spent twenty seconds inside a model call
+before giving up. That is the case the Windows review actually hit: its T01
+reported a 400 after a long wait, and the summary it left behind said the run took
+no time at all.
 
 ## 8. Deliverables
 

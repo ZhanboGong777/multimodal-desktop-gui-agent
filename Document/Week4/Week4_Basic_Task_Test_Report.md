@@ -38,7 +38,7 @@ failure is two attempts, and only the runs whose summary reads `succeeded` with
 
 | Case | Task | Preconditions before the run | Attempts | Successes | Status | Verification method | Timing basis | Evidence |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| T01 | open the browser | desktop visible and launch entry uncovered; **no browser window open** | 0 | 0 | not run | automatic: `http` and `search` both on screen | whole run, first observation to final verdict, including the confirmation prompt (`elapsed_ms`) | — |
+| T01 | open the browser | desktop visible and launch entry uncovered; **no browser window open** | 0 | 0 | not run | automatic: `http` and `search` both on screen | from the confirmation gate to the final verdict (`execution_ms`); the summary also keeps `planning_ms`, `confirmation_ms` and the whole-run `elapsed_ms` | — |
 | T02 | search the web | a browser window is open and focused | 0 | 0 | not run | automatic: the query text is on screen | as above | — |
 | T03 | open a specified file | `week4_sample.txt` exists in the week4 test folder; no file of that name is open | 0 | 0 | not run | automatic: `WEEK4-OPEN-FILE-OK` on screen | as above | — |
 | T04 | send a message | the test conversation is open and holds no earlier message with **this run's** marker; the operator agreed a real message may be sent | 0 | 0 | not run | automatic: this run's marker on screen (the CLI prints it as `marker`) | as above | — |
@@ -61,6 +61,36 @@ T04's marker is minted per run (`WEEK4_MESSAGE_CHECK_<timestamp>`) and printed a
 make the case single-use: the previous run's message is still in the conversation,
 so the rule would already be satisfied and the run would be refused over a message
 it did not send.
+
+## Metrics
+
+The definitions from the hand-off, so a reader does not have to guess what the
+counts above mean:
+
+```text
+real-task success rate = runs whose goal rule passed / formal real attempts
+
+mean execution time of successful tasks = sum(execution_ms of successes) / successes
+
+mean time over all attempts = sum(execution_ms of all formal attempts) / attempts
+```
+
+1. Dry runs and scripted runs are counted separately and never enter these
+   numbers. `task_summary.json` records `execute`, so the split is checkable
+   rather than remembered.
+2. A case stopped by its own precondition is listed separately. It did not run, so
+   it is not an attempt - and it is not quietly dropped either.
+3. A run that started and then failed, timed out or was cancelled **is** a formal
+   attempt, and is classified by its `status`.
+4. `execution_ms` is the primary measure: from the confirmation gate to the final
+   verdict. The operator's reading time is kept apart in `confirmation_ms`,
+   planning in `planning_ms`, and the whole run in `elapsed_ms`, because counting a
+   slow operator as a slow model is the easiest way to publish a meaningless
+   average.
+5. An action success rate, if quoted, has the number of actions actually dispatched
+   as its denominator - not the number of tasks.
+6. These are five controlled tasks on two machines, not a benchmark. Scale
+   evaluation is Week 7.
 
 ## Per-case success rules
 

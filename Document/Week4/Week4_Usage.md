@@ -100,6 +100,12 @@ planning attempts, transport requests and the failing step - so a row in the tes
 report can be read without asking the machine it came from. `planning_attempts` and
 `model_requests` are separate counters: one plan can cost several requests.
 
+The timing is split for the same reason. `execution_ms` runs from the confirmation
+gate to the final verdict and is the number to quote; `planning_ms` and
+`confirmation_ms` sit beside it, and `elapsed_ms` is the whole run including the
+prompt. Reading the plan takes as long as it takes, and that is not the system
+being slow.
+
 Each observation file records the frame-local element ids, so a coordinate in
 `steps.jsonl` can be traced back to the frame it was resolved from.
 
