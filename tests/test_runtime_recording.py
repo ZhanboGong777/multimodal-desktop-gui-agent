@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import platform
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -145,3 +146,19 @@ def test_the_screen_description_carries_both_coordinate_spaces() -> None:
     assert provenance.screen_description(snapshot) == (
         "screenshot 2940x1912, control 1470x956"
     )
+
+
+def test_the_summary_names_the_operating_system_and_its_build() -> None:
+    """`os_description` was written and never wired: the field it was for did not
+    exist, so the function was reachable only from its own test.
+
+    The task report's environment table asks for the OS, and this is where that
+    row can come from instead of the operator typing it in afterwards.
+    """
+    from gui_agent.runtime import provenance
+
+    described = provenance.os_description()
+
+    assert described
+    assert described == platform.platform(), "the build, not just the family"
+    assert len(described.split()) == 1, "one token, so it survives a table cell"

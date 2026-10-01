@@ -1185,3 +1185,19 @@ def test_the_task_budget_stops_the_run_between_steps(tmp_path: Path) -> None:
     assert "timed_out" == result.status
     assert result.stop_reason == "" or "timed" not in result.stop_reason.lower()
     assert executor.actions == []
+
+
+def test_the_summary_carries_the_operating_system(tmp_path: Path) -> None:
+    """Alongside the commit and the Python version, so a row in the task report
+    can be read off the evidence rather than remembered."""
+    plan = _plan(PlanStep(step_id="s1", description="stop", action_type="finish"))
+    task = TaskSpec(case_id="T", instruction="x", expect_text=["Done"], success_rules=["r"])
+    runner, recorder = _runner(
+        tmp_path, FakeObserver([_frame("obs-0001", ("Start",))]), FakePlanner(plan), FakeExecutor()
+    )
+
+    result = runner.run(task, ExecutionOptions(execute=False))
+
+    assert result.os_version, "the summary has to say which machine this was"
+    written = json.loads((recorder.directory / "task_summary.json").read_text(encoding="utf-8"))
+    assert written["os_version"] == result.os_version

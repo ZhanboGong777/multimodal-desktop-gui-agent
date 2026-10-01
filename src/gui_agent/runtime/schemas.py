@@ -175,6 +175,10 @@ class TaskRunResult(SchemaModel):
     task_id: str = ""
     commit: str = ""
     platform: str = ""
+    #: `platform.platform()` - the OS *and* its build. The task report's
+    #: environment table asks for the OS, and this is where it can come from
+    #: instead of the operator typing it in afterwards.
+    os_version: str = ""
     python_version: str = ""
     screen: str = ""
     started_at: datetime | None = None

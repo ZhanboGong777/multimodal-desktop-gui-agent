@@ -111,9 +111,9 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **508 passed**, ruff clean |
+| MacBook Air M2 | **510 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 208: 166 in the ten
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 210: 168 in the ten
 files below, 15 in `test_control_safety.py` for the executor's dispatch and the real
 backend, 10 in `test_model_mock.py`, 7 in `test_config.py` for the configuration
 surface, 7 in `test_plan_parser.py` for the step-status vocabulary and the
@@ -504,6 +504,23 @@ folder now, which is what the constant was for. A sweep for the same pattern acr
 the runtime, planning and models packages found no others; the four schema fields
 that are written but never read are records - they go into the JSON evidence for a
 person to read, which is what a record is for.
+
+That sweep looked at constants. Running the same question over every *function* -
+is it referenced anywhere in `src/` or `scripts/`? - turned up
+`provenance.os_description`, written in this week's provenance pass and never
+wired, because the field it was for did not exist. It is wired now: the summary
+carries `os_version`, and it reports `platform.platform()` rather than the OS family
+alone, since `platform.release()` answers "10" on Windows 11 and the build number is
+what actually identifies the machine. The basic task report's environment table now
+says which summary field each of its rows comes from, so the operator checks rather
+than remembers.
+
+The same sweep lists a handful of Week 2 and Week 3 helpers that no production path
+calls either - `capture_fullscreen`, `crop_region`, `sharpen_image`,
+`elements_to_payload`, `update_screen`, `planner.system_prompt`. They are that
+week's API surface, not this week's, so they are recorded here rather than pruned:
+removing another week's public functions during Week 4 is the kind of tidy-up that
+looks harmless and is not.
 
 **Half the executor's vocabulary had never been dispatched.** The runtime tests use
 a fake executor and the control tests stopped at `click` and `drag`, so the real

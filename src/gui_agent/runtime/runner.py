@@ -571,6 +571,7 @@ class TaskRunner:
             task_id=task.case_id,
             commit=provenance.git_commit(),
             platform=self.adapter.platform,
+            os_version=provenance.os_description(),
             python_version=provenance.python_version(),
             screen=provenance.screen_description(snapshot),
             started_at=finished_at - timedelta(milliseconds=elapsed_ms),

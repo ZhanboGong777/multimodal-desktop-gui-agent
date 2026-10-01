@@ -38,7 +38,13 @@ def platform_name() -> str:
 
 
 def os_description() -> str:
-    return f"{platform.system()} {platform.release()}"
+    """The operating system and its build, for the summary.
+
+    `platform.platform()` rather than `system()` plus `release()`: on Windows the
+    latter reports "10" for Windows 11, and the build number is what actually
+    identifies the machine a run happened on.
+    """
+    return platform.platform()
 
 
 def git_commit(repo_root: Path | None = None) -> str:

@@ -113,15 +113,19 @@ notes. An automatic check that did not run is not an automatic pass.
 
 ## Environment
 
-| Item | Value |
-| --- | --- |
-| Machine | |
-| OS and display | |
-| Commit | |
-| Model and endpoint | |
-| Context window (`OLLAMA_CONTEXT_LENGTH`) | |
-| `timeout_seconds` | |
-| Free memory before the run | |
+Most of this is read off `task_summary.json` rather than remembered - the second
+column says which field, so a row can be checked instead of trusted.
+
+| Item | Value | Where it comes from |
+| --- | --- | --- |
+| Machine | | the summary's `platform` (`darwin` / `win32`) |
+| OS and display | | `os_version` and `screen` |
+| Commit | | `commit` |
+| Model and endpoint | | `provider` and `model_name` |
+| Context window (`OLLAMA_CONTEXT_LENGTH`) | | set on the server; not recorded, so write it down here |
+| `timeout_seconds` | | `model.timeout_seconds` in the config the run used |
+| Free memory before the run | | measured before the run; not recorded |
+| Python | | `python_version` |
 
 ## Failure notes
 
