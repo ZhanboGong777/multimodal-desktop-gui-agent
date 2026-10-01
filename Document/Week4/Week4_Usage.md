@@ -84,6 +84,18 @@ outputs/week4/<case>_<timestamp>/
 Each observation file records the frame-local element ids, so a coordinate in
 `steps.jsonl` can be traced back to the frame it was resolved from.
 
+Nothing under `outputs/` is tracked, so a run id quoted in a report resolves to
+nothing anywhere but this machine. To make one travel with the repository:
+
+```bash
+python scripts/week4_collect_evidence.py --latest T01
+# -> Document/Week4/evidence/T01_<timestamp>/{task_summary.json,steps.jsonl}
+```
+
+The collector copies those two text records and nothing else. The screenshots and
+the observation files are a picture of the whole desktop; `--no-steps` narrows it
+to the summary alone.
+
 Typed text is redacted in the step log: the record notes that something was
 typed and how long it was, never what it said.
 

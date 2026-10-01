@@ -104,10 +104,10 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **386 passed**, ruff clean |
+| MacBook Air M2 | **402 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 86: 78 in the
-seven files below, 6 in `test_model_mock.py`, and 2 in `test_ocr.py` for the
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 102: 94 in the nine
+files below, 6 in `test_model_mock.py`, and 2 in `test_ocr.py` for the
 label-merging fix described in section 7.
 
 | Test file | Covers |
@@ -119,6 +119,8 @@ label-merging fix described in section 7.
 | `test_week4_cli.py` | 6 cases: argument errors, no `--yes`, dry-run default, summary always written |
 | `test_week4_integration.py` | 5 cases: the loop against a real OpenAI-compatible server over a real socket, which reads the element ids out of the prompt it receives |
 | `test_week4_prompts.py` | 8 cases: the prompt fits its budget, describes element targeting and every action's arguments, and the user turn carries the platform |
+| `test_week4_cases.py` | 6 cases: the invariants the five case definitions must hold - a machine-checkable rule, a declared precondition, a distinctive marker, a copy handed back by `get_case` |
+| `test_week4_evidence.py` | 10 cases: what the evidence collector copies, what it refuses to copy, and its error paths |
 
 ### The offline closed loop
 
@@ -243,17 +245,44 @@ a task says it assumes a starting state. Dry runs are exempt: they dispatch noth
 and their verdict is forced to inconclusive, so the guard would only stop the
 pipeline check they exist to perform.
 
+**The report's evidence would not have been in the repository.** `outputs/` is
+untracked, so `outputs/week4/<case>_<timestamp>/task_summary.json` - the path the
+basic task report points at - exists only on the machine that ran the task. A run
+id that resolves nowhere is not traceability, and the hand-off asks for the
+opposite. `scripts/week4_collect_evidence.py` now copies a finished run's summary
+and step log into `Document/Week4/evidence/<run id>/`. It copies named text records
+rather than the session directory on purpose: the screenshots and the per-frame
+element lists are a picture of the whole desktop, and publishing the whole desktop
+is not what "attach the evidence" should mean.
+
+**The declared preconditions contradicted the guard.** T01's said "the browser may
+already be running; that is recorded, not hidden", and T05's said only that the
+application was open. Both were written before the guard existed, and both now
+describe a setup that would be refused: a browser already running satisfies T01's
+rule, and an application open *without* the sample file does not put T05's marker
+on screen, so T05's rule is already true and the run would be void. The two cases
+now declare the state their rules actually need. `test_week4_cases.py` holds the
+invariants a case must satisfy to be runnable at all - a machine-checkable rule and
+a declared precondition - because a case missing either is not "not yet measured",
+it is unrunnable, and its row in the report would mean nothing.
+
 ## 8. Deliverables
 
 - `src/gui_agent/runtime/` - the run layer (8 modules).
 - `scripts/week4_agent_cli.py` - the command-line entry point.
 - `scripts/week4_offline_demo.py` - the loop against scripted frames.
+- `scripts/week4_collect_evidence.py` - copies a finished run's text records into
+  `Document/Week4/evidence/`, so a run id in the test report resolves inside the
+  repository rather than only on the machine that produced it.
 - `configs/week4.yaml` - Week 4 limits, with `AgentConfig` added to `config.py`.
-- 86 new tests.
+- 102 new tests.
 - `Document/Week4/Week4_Usage.md` - flags, the safety model, the record layout.
 - `Document/Week4/Week4_Troubleshooting.md` - eighteen symptoms with what to check
   and what the code actually does about each.
-- This report and the basic task test report.
+- `Document/Week4/Week4_Basic_Task_Test_Report.md` - the five results, one row per
+  case, with the precondition, the attempt and success counts, the verification
+  method and the evidence path each row needs.
+- This report.
 
 **W4-13 diagnostic guide.** The hand-off asks for a table of fifteen situations -
 connection, model, perception, resolution, execution, verification and recording -

@@ -38,6 +38,7 @@ interactive confirmation, and there is deliberately no `--yes`.
 python scripts/week4_agent_cli.py --list-cases      # the five task cases
 python scripts/week4_agent_cli.py --case T01        # dry run: dispatches nothing
 python scripts/week4_offline_demo.py                # the loop, scripted, no desktop
+python scripts/week4_collect_evidence.py --latest T01   # copy a run's records into the repo
 ```
 
 Three properties the loop is built around:
@@ -50,7 +51,7 @@ Three properties the loop is built around:
   parameter or an out-of-range coordinate stops the run instead of clicking
   something plausible.
 
-386 tests, ruff clean. See `Document/Week4/Week4_Usage.md` for the flags, the
+402 tests, ruff clean. See `Document/Week4/Week4_Usage.md` for the flags, the
 safety model and the record layout.
 
 The five basic task runs still have to be performed on a real desktop; their
@@ -101,7 +102,7 @@ python scripts/week3_model_demo.py --provider mock
 python scripts/week3_planning_demo.py --provider mock --instruction "Open the browser"
 ```
 
-386 tests, ruff clean. The model client's retry, timeout and
+402 tests, ruff clean. The model client's retry, timeout and
 error-classification paths are covered, along with the four vision-payload
 failure modes (missing, empty, oversized, unknown type) and the TaskPlan
 schema boundaries. Dataset and model dependencies live in
