@@ -639,3 +639,95 @@ def test_a_readable_frame_does_not_carry_that_note(tmp_path: Path) -> None:
     result = runner.run(task, ExecutionOptions(execute=False))
 
     assert not any("no readable text" in note for note in result.notes), result.notes
+
+
+# ───────── the second confirmation a risky task must get ─────────
+def _risky_task() -> TaskSpec:
+    return TaskSpec(
+        case_id="T04",
+        instruction="send the marker to the week4 test conversation",
+        target_app="messaging",
+        preconditions=["the test conversation is open"],
+        success_rules=["the marker appears as a sent message"],
+        expect_text=["WEEK4_MESSAGE_CHECK_001"],
+        risk="high",
+    )
+
+
+def test_a_risky_task_is_confirmed_a_second_time_before_acting(tmp_path: Path) -> None:
+    """8.3.6 and 12.2.6: sending a message gets its own, separate confirmation.
+
+    The CLI built this prompt and never passed it to the runner, so T04 - the one
+    task that really sends something - ran on a single confirmation while the help
+    text, the usage guide and the troubleshooting guide all said otherwise. Nothing
+    caught it because no test asked whether the prompt was ever called.
+    """
+    runner, executor, _planner = _void_case(tmp_path)
+    asked: list[object] = []
+
+    result = runner.run(
+        _risky_task(),
+        ExecutionOptions(execute=True, confirm=True, verification_timeout_seconds=0),
+        confirm=lambda plan: True,
+        high_risk_confirm=lambda plan: asked.append(plan) or True,
+    )
+
+    assert len(asked) == 1, "the second confirmation was never asked"
+    assert len(executor.actions) == 1, "approving both prompts must let the action through"
+    # The rule cannot hold on a fixed frame, so the run ends failed. That is the
+    # point: it got past the gate instead of being cancelled by it.
+    assert result.status != "cancelled"
+
+
+def test_declining_the_second_confirmation_cancels_without_acting(tmp_path: Path) -> None:
+    runner, executor, _planner = _void_case(tmp_path)
+
+    result = runner.run(
+        _risky_task(),
+        ExecutionOptions(execute=True, confirm=True),
+        confirm=lambda plan: True,
+        high_risk_confirm=lambda plan: False,
+    )
+
+    assert result.status == "cancelled"
+    assert executor.actions == []
+
+
+def test_a_low_risk_task_is_not_asked_twice(tmp_path: Path) -> None:
+    """Two prompts for opening a browser would train the operator to click through."""
+    runner, executor, _planner = _void_case(tmp_path)
+    task = TaskSpec(
+        case_id="T01",
+        instruction="open the browser",
+        preconditions=["no browser window is open"],
+        success_rules=["a browser window is in the foreground"],
+        expect_text=["Done"],
+        risk="low",
+    )
+    asked: list[object] = []
+
+    result = runner.run(
+        task,
+        ExecutionOptions(execute=True, confirm=True, verification_timeout_seconds=0),
+        confirm=lambda plan: True,
+        high_risk_confirm=lambda plan: asked.append(plan) or True,
+    )
+
+    assert asked == []
+    assert len(executor.actions) == 1
+    assert result.status != "cancelled"
+
+
+def test_a_dry_run_never_asks_for_the_second_confirmation(tmp_path: Path) -> None:
+    """Nothing is dispatched, so there is nothing to approve twice."""
+    runner, _executor, _planner = _void_case(tmp_path)
+    asked: list[object] = []
+
+    result = runner.run(
+        _risky_task(),
+        ExecutionOptions(execute=False),
+        high_risk_confirm=lambda plan: asked.append(plan) or True,
+    )
+
+    assert asked == []
+    assert result.status == "dry_run_completed"

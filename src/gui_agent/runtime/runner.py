@@ -75,6 +75,12 @@ def explain_model_failure(message: str) -> str:
     )
 
 
+#: Risk levels that ask for a second, separate confirmation before the first real
+#: action. They are not reversible by looking at the screen afterwards: a message
+#: has been sent, or a window with unsaved content has been closed.
+_RISKY_RISKS = frozenset({"medium", "high"})
+
+
 class RunnerError(RuntimeError):
     """Raised when the run cannot even start."""
 
@@ -111,6 +117,7 @@ class TaskRunner:
         *,
         confirm: Callable[[TaskPlan], bool] | None = None,
         countdown: Callable[[int], None] | None = None,
+        high_risk_confirm: Callable[[TaskPlan], bool] | None = None,
     ) -> TaskRunResult:
         started = self.clock()
         notes: list[str] = []
@@ -186,6 +193,19 @@ class TaskRunner:
         # 4. confirmation gate — before any real input event
         if options.execute:
             if options.confirm and confirm is not None and not confirm(plan):
+                result = self._finish(task, options, "cancelled", started, notes)
+                result.verification = None
+                return result
+            # A risky task gets a second, separate confirmation. The policy lives
+            # here, next to the risk it is about, rather than in each caller: a
+            # caller that forgets to ask is the failure this gate exists to stop,
+            # and one already did - the CLI built the prompt and never passed it.
+            if (
+                options.confirm
+                and high_risk_confirm is not None
+                and task.risk in _RISKY_RISKS
+                and not high_risk_confirm(plan)
+            ):
                 result = self._finish(task, options, "cancelled", started, notes)
                 result.verification = None
                 return result

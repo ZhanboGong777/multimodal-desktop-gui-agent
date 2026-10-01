@@ -92,15 +92,28 @@ def _confirm(plan) -> bool:
     return answer in {"y", "yes"}
 
 
-def _confirm_high_risk(task: TaskSpec) -> bool:
-    """A second, separate confirmation for anything irreversible or public."""
+def _confirm_high_risk(task: TaskSpec, plan) -> bool:
+    """A second, separate confirmation for anything irreversible or public.
+
+    The operator is shown the text the plan will actually type, not just the
+    instruction: agreeing to "send the marker" and agreeing to the marker itself
+    are different decisions, and only the second one is being made here.
+    """
     print()
-    print(f"  This task is marked {task.risk!r}: {task.instruction}")
+    print(f"  This task is marked {task.risk!r} and cannot be undone by looking at the screen.")
+    print(f"  Task      : {task.instruction}")
+    if task.target_app:
+        print(f"  Target    : {task.target_app}")
     if task.expect_text:
-        print(f"  It will attempt to make this text appear: {task.expect_text}")
+        print(f"  Must appear on screen afterwards: {task.expect_text}")
+    for step in plan.steps:
+        text = (step.arguments or {}).get("text")
+        if step.action_type == "type_text" and text:
+            print(f"  Will type : {text!r}")
     try:
-        answer = input("  Confirm separately? [y/N] ").strip().casefold()
+        answer = input("  Confirm this separately? [y/N] ").strip().casefold()
     except EOFError:
+        print("  no interactive terminal available; refusing to assume consent")
         return False
     return answer in {"y", "yes"}
 
@@ -112,6 +125,24 @@ def _countdown(seconds: int) -> None:
         import time
 
         time.sleep(1)
+
+
+def _execute_callbacks(args, task: TaskSpec) -> dict[str, object]:
+    """The callbacks an execute run hands to the runner.
+
+    Named and returned as a dict so the wiring itself is testable. The second
+    confirmation used to be a local variable nobody passed on, which no test
+    noticed because no test asked whether the prompt could ever be reached.
+    """
+    if not args.execute:
+        return {}
+    return {
+        "confirm": _confirm,
+        "countdown": _countdown,
+        # Passed unconditionally: the runner decides which risk levels need it, so
+        # a caller cannot quietly drop the prompt for the tasks that need it most.
+        "high_risk_confirm": lambda plan: _confirm_high_risk(task, plan),
+    }
 
 
 def main() -> int:
@@ -204,14 +235,18 @@ def main() -> int:
         )
         print(f"  records    : {session.directory}")
 
-    confirm_fn = None
-    high_risk_fn = None
-    if args.execute:
-        confirm_fn = _confirm
-        if task.risk in {"high", "medium"}:
+    if args.execute and not sys.stdin.isatty():
+        # 12.2.5: with no terminal there is no way to ask, and consent is never
+        # assumed. Reported as blocked rather than cancelled - the operator did not
+        # decline, the confirmation could not be obtained at all.
+        print(
+            "  --execute needs an interactive terminal: the confirmation cannot be "
+            "asked for here, and consent is never assumed.",
+            file=sys.stderr,
+        )
+        return EXIT_BLOCKED
 
-            def high_risk_fn(_plan: object) -> bool:  # type: ignore[misc]
-                return _confirm_high_risk(task)
+    callbacks = _execute_callbacks(args, task)
 
     runner = TaskRunner(
         observer=observer,
@@ -223,12 +258,9 @@ def main() -> int:
     )
 
     try:
-        result = runner.run(
-            task,
-            options,
-            confirm=confirm_fn,
-            countdown=_countdown if args.execute else None,
-        )
+        # Splatted, not passed by name: a callback the runner does not accept is a
+        # TypeError rather than a safety prompt that silently never fires.
+        result = runner.run(task, options, **callbacks)  # type: ignore[arg-type]
     except KeyboardInterrupt:
         print("\n  interrupted by the user; nothing further will be executed")
         return EXIT_CANCELLED

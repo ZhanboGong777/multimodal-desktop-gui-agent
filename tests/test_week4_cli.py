@@ -74,3 +74,72 @@ def test_a_free_form_instruction_is_flagged_as_unverifiable(tmp_path: Path) -> N
         "--instruction", "Do something vague", "--quiet", "--output-directory", str(tmp_path)
     )
     assert "defines no success rule" in result.stdout
+
+
+def test_execute_without_a_terminal_is_blocked_rather_than_assumed() -> None:
+    """12.2.5: with no terminal there is nobody to ask, so consent is not assumed.
+
+    The refusal happens before the capture, so this is fast and needs no desktop.
+    """
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts" / "week4_agent_cli.py"),
+            "--case",
+            "T01",
+            "--execute",
+        ],
+        capture_output=True,
+        text=True,
+        timeout=120,
+        cwd=REPO_ROOT,
+        stdin=subprocess.DEVNULL,
+        check=False,
+    )
+
+    assert result.returncode == 2, result.stdout
+    assert "interactive terminal" in result.stderr
+
+
+def _load_cli():
+    """Import the CLI as a module so its wiring can be checked directly."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "week4_agent_cli", REPO_ROOT / "scripts" / "week4_agent_cli.py"
+    )
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_an_execute_run_hands_over_both_confirmation_prompts() -> None:
+    """The second prompt existed as a local variable and was never passed on.
+
+    T04 - the one task that really sends something - therefore ran on a single
+    confirmation while the help text, the usage guide and the diagnostic guide all
+    said it got two. 8.3.6 asks for the separate confirmation; this asserts the
+    wiring rather than the runner behaviour, because the wiring is what broke.
+    """
+    import argparse
+
+    from gui_agent.runtime.tasks import get_case
+
+    cli = _load_cli()
+    args = argparse.Namespace(execute=True)
+
+    callbacks = cli._execute_callbacks(args, get_case("T04"))
+
+    assert set(callbacks) == {"confirm", "countdown", "high_risk_confirm"}
+
+
+def test_a_dry_run_hands_over_no_callbacks() -> None:
+    """Nothing is dispatched, so there is nothing to confirm or count down."""
+    import argparse
+
+    from gui_agent.runtime.tasks import get_case
+
+    cli = _load_cli()
+
+    assert cli._execute_callbacks(argparse.Namespace(execute=False), get_case("T04")) == {}
