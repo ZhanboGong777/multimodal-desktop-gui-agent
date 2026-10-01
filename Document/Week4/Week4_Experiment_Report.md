@@ -111,13 +111,14 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **521 passed**, ruff clean |
+| MacBook Air M2 | **527 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 221: 169 in the ten
-files below, and 52 spread across the other suites -
-`test_control_safety.py` 15, `test_model_mock.py` 14, `test_config.py` 7 (a new
-file), `test_plan_parser.py` 5, `test_model_config.py` 4, `test_ocr.py` 2,
-`test_recording.py` 2 and `test_documented_counts.py` 3 (a new file).
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 227: 169 in the ten
+files below, and 58 spread across the other suites -
+`test_control_safety.py` 15, `test_model_mock.py` 14, `test_ocr.py` 7 (five of them
+the Windows-only OCR workarounds), `test_config.py` 7 (a new file),
+`test_plan_parser.py` 5, `test_model_config.py` 4, `test_documented_counts.py` 4
+(a new file) and `test_recording.py` 2.
 
 Those numbers are checked rather than maintained: `test_documented_counts.py`
 collects the suite in a subprocess and asserts that the totals here and in the
@@ -128,6 +129,20 @@ Every number here is a collected count taken on `d67de1f` in a worktree and on t
 current commit, per file - not a running total. The previous version of this
 sentence had drifted: it still described deltas from several rounds earlier and had
 never counted `test_recording.py` at all.
+
+**Half of that sentence was still unchecked, and the other half had already gone
+wrong in translation.** The check covered the ten tabulated files and the number
+they add up to, but not the suites named only in prose - their total, and each of
+the eight deltas beside it, were maintained by hand. Adding five OCR tests moved
+the list but not the total, and the Chinese version of this report sat there
+saying 52 while the eight numbers next to it added up to 57. Nothing failed,
+because nothing was looking. The prose half is now checked the same way the table
+is: each named file is compared against its own count minus its Week 3 baseline,
+the eight must add up to the total the sentence gives, and that total plus the
+tabulated ten must equal the figure the sentence claims overall. The same pass
+brought `Week4_Windows复核手册.md` under the sync tool - it restates the suite
+total and the ten-file total, and a reviewer running its commands against a stale
+expectation would read a correct tree as a broken one.
 
 **The mock never types for any of the five cases.** All five task instructions
 produce a single `click` step, because the intent rules match substrings and

@@ -93,3 +93,53 @@ def test_the_per_file_table_names_the_counts_those_files_have(
     assert sum(int(count) for _, count in rows) == int(prose.group(2)), (
         "the table does not add up to the number the sentence gives for it"
     )
+
+
+def test_the_other_suites_the_sentence_lists_have_the_counts_it_gives(
+    collected: dict[str, int],
+) -> None:
+    """The same sentence's second half, which nothing checked and which went stale.
+
+    The sentence states both a total for the suites it does not tabulate and a
+    per-file delta for each of them. Only the ten tabulated files were guarded, so
+    the total could drift away from its own list without the suite noticing - and
+    it did, in the Chinese translation of this report, where the row total read 52
+    while the eight numbers beside it added up to 57.
+
+    The baselines are Week 3's counts on d67de1f. They are a historical fact about
+    a commit rather than a property of this tree, so they are stated here instead
+    of measured.
+    """
+    week3 = {
+        "test_control_safety.py": 20,
+        "test_model_mock.py": 10,
+        "test_config.py": 0,
+        "test_plan_parser.py": 18,
+        "test_model_config.py": 20,
+        "test_documented_counts.py": 0,
+        "test_ocr.py": 18,
+        "test_recording.py": 14,
+    }
+    report = REPORT.read_text(encoding="utf-8")
+    listed = re.findall(r"`(test_[a-z0-9_]+\.py)` (\d+)(?! \|)", report)
+
+    assert len(listed) == len(week3), (
+        f"the sentence lists {len(listed)} files, not the {len(week3)} it used to"
+    )
+    for name, claimed in listed:
+        assert name in week3, f"{name} is listed but has no Week 3 baseline here"
+        delta = collected.get(f"tests/{name}", 0) - week3[name]
+        assert int(claimed) == delta, (
+            f"{name}: the sentence says {claimed} new tests, "
+            f"the file has {collected.get(f'tests/{name}', 0)} against a baseline of {week3[name]}"
+        )
+
+    prose = re.search(r"Week 4 adds (\d+): (\d+) in the ten\s+files below, and (\d+) spread", report)
+    assert prose, "the sentence stating the totals has moved or changed shape"
+    total_added, tabulated, spread = (int(group) for group in prose.groups())
+    assert sum(int(count) for _, count in listed) == spread, (
+        "the other-suites total does not match the numbers listed beside it"
+    )
+    assert tabulated + spread == total_added, (
+        "the two halves of the sentence do not add up to the total it states"
+    )

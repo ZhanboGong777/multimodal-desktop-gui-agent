@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import os
+import sys
+
 import pytest
 from PIL import Image
 
@@ -334,3 +337,100 @@ def test_a_wide_gap_on_one_text_row_stays_two_controls(
         Image.new("RGB", (400, 40), "white")
     )
     assert [element.text for element in output.elements] == ["File", "Edit"]
+
+
+# ───── the Windows-only workarounds, which had no coverage at all ─────
+def _bare_engine() -> PaddleOCREngine:
+    """`_prepare_platform` touches only `notices`.
+
+    Building a real engine imports PaddleOCR, which is slow and is not what these
+    tests are about - they are about the decision the method makes.
+    """
+    engine = PaddleOCREngine.__new__(PaddleOCREngine)
+    engine.notices = []
+    return engine
+
+
+def test_on_windows_torch_is_blocked_before_paddleocr_can_import_it(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The cuDNN clash: whichever CUDA stack loads first wins, so torch must not.
+
+    Torch ships cuDNN 9.5 and PaddlePaddle 3.3 is built against 9.9, so once torch
+    has loaded its copy, PaddlePaddle's own load dies with a `WinError 127` about
+    `cudnn_cnn64_9.dll`. Blocking the module by name is what stops that.
+
+    Neither workaround had a test, because both return immediately off Windows.
+    Patching the platform is how the branch gets exercised here - they were found
+    and verified on the GPU node, not on this machine.
+    """
+    monkeypatch.setattr(sys, "platform", "win32")
+    monkeypatch.delitem(sys.modules, "torch", raising=False)
+
+    engine = _bare_engine()
+    engine._prepare_platform()
+
+    assert sys.modules.get("torch", "absent") is None, "torch is blocked by name"
+    assert any("blocked" in notice for notice in engine.notices), engine.notices
+
+
+def test_on_windows_an_already_imported_torch_is_reported_not_swapped_out(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Nothing can un-import it, so the honest response is a notice."""
+    monkeypatch.setattr(sys, "platform", "win32")
+    marker = object()
+    monkeypatch.setitem(sys.modules, "torch", marker)
+
+    engine = _bare_engine()
+    engine._prepare_platform()
+
+    assert sys.modules["torch"] is marker
+    assert any("already imported" in notice for notice in engine.notices), engine.notices
+
+
+def test_on_windows_a_non_ascii_profile_is_warned_about(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """PaddleX's C++ predictor cannot read a model config from a non-ASCII path.
+
+    A Chinese account name is enough, and the failure it produces - a JSON parse
+    error about empty input - says nothing about the cause.
+    """
+    monkeypatch.setattr(sys, "platform", "win32")
+    monkeypatch.setitem(sys.modules, "torch", None)
+    monkeypatch.delenv("PADDLE_PDX_CACHE_HOME", raising=False)
+    monkeypatch.setattr(os.path, "expanduser", lambda _path: r"C:\Users\张三")
+
+    engine = _bare_engine()
+    engine._prepare_platform()
+
+    assert any("PADDLE_PDX_CACHE_HOME" in notice for notice in engine.notices), engine.notices
+    assert any(r"D:\paddlex_cache" in notice for notice in engine.notices), "the fix is named"
+
+
+def test_on_windows_a_cache_home_already_set_is_left_alone(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The warning is for the operator who has not set it, not for everyone."""
+    monkeypatch.setattr(sys, "platform", "win32")
+    monkeypatch.setitem(sys.modules, "torch", None)
+    monkeypatch.setenv("PADDLE_PDX_CACHE_HOME", r"D:\paddlex_cache")
+    monkeypatch.setattr(os.path, "expanduser", lambda _path: r"C:\Users\张三")
+
+    engine = _bare_engine()
+    engine._prepare_platform()
+
+    assert not any("non-ASCII" in notice for notice in engine.notices), engine.notices
+
+
+def test_off_windows_neither_workaround_runs(monkeypatch: pytest.MonkeyPatch) -> None:
+    """They exist for one platform's problem, and say so."""
+    monkeypatch.setattr(sys, "platform", "darwin")
+    monkeypatch.delenv("PADDLE_PDX_CACHE_HOME", raising=False)
+    monkeypatch.setattr(os.path, "expanduser", lambda _path: "/Users/张三")
+
+    engine = _bare_engine()
+    engine._prepare_platform()
+
+    assert engine.notices == []
