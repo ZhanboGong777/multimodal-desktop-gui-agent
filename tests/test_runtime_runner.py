@@ -8,6 +8,8 @@ a network or a model.
 
 from __future__ import annotations
 
+import json
+import re
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -731,3 +733,87 @@ def test_a_dry_run_never_asks_for_the_second_confirmation(tmp_path: Path) -> Non
 
     assert asked == []
     assert result.status == "dry_run_completed"
+
+
+# ───────── the record has to explain itself away from this machine ─────────
+def test_the_summary_carries_the_provenance_the_hand_off_asks_for(tmp_path: Path) -> None:
+    """14.2 lists what a summary must contain; most of it was missing.
+
+    Without these the basic task report's environment table has to be filled in
+    from memory afterwards, which is how a report ends up quoting a revision the
+    run did not use.
+    """
+    plan = _plan(PlanStep(step_id="s1", description="stop", action_type="finish"))
+    task = TaskSpec(case_id="T", instruction="x", expect_text=["Done"], success_rules=["r"])
+    runner, recorder = _runner(
+        tmp_path, FakeObserver([_frame("obs-0001", ("Start",))]), FakePlanner(plan), FakeExecutor()
+    )
+
+    result = runner.run(task, ExecutionOptions(execute=False))
+
+    assert result.task_id == "T"
+    assert result.platform == "darwin"
+    assert re.fullmatch(r"\d+\.\d+\.\d+", result.python_version)
+    assert result.screen == "screenshot 1470x956, control 1470x956"
+    assert result.evidence_directory == str(recorder.directory)
+    assert result.started_at is not None and result.finished_at is not None
+    assert result.started_at <= result.finished_at
+    assert result.planning_attempts == 1
+
+
+def test_the_transport_count_is_not_the_planning_attempt_count(tmp_path: Path) -> None:
+    """14.2.1 keeps the two apart on purpose: one plan can cost several requests."""
+    plan = _plan(PlanStep(step_id="s1", description="stop", action_type="finish"))
+    task = TaskSpec(case_id="T", instruction="x", expect_text=["Done"], success_rules=["r"])
+    runner, _recorder = _runner(
+        tmp_path, FakeObserver([_frame("obs-0001", ("Start",))]), FakePlanner(plan), FakeExecutor()
+    )
+
+    result = runner.run(task, ExecutionOptions(execute=False))
+
+    # The fake planner returns a plan without touching a client at all, so the two
+    # counters agree only by accident - which is exactly why they are separate.
+    assert result.planning_attempts == 1
+    assert result.model_requests == 0
+
+
+def test_the_written_summary_is_the_one_that_was_returned(tmp_path: Path) -> None:
+    """The fields have to reach the file, not just the object."""
+    plan = _plan(PlanStep(step_id="s1", description="stop", action_type="finish"))
+    task = TaskSpec(case_id="T", instruction="x", expect_text=["Done"], success_rules=["r"])
+    runner, recorder = _runner(
+        tmp_path, FakeObserver([_frame("obs-0001", ("Start",))]), FakePlanner(plan), FakeExecutor()
+    )
+
+    result = runner.run(task, ExecutionOptions(execute=False))
+
+    written = json.loads((recorder.directory / "task_summary.json").read_text(encoding="utf-8"))
+    assert written["commit"] == result.commit
+    assert written["screen"] == result.screen
+    assert written["evidence_directory"] == result.evidence_directory
+    assert written["planning_attempts"] == result.planning_attempts
+    assert written["model_requests"] == result.model_requests
+
+
+def test_a_stop_reason_is_only_recorded_when_something_stopped_it(tmp_path: Path) -> None:
+    """A successful run was not stopped by anything, so it gets no reason."""
+    plan = _plan(PlanStep(step_id="s1", description="stop", action_type="finish"))
+    task = TaskSpec(case_id="T", instruction="x", expect_text=["Start"], success_rules=["r"])
+    runner, _recorder = _runner(
+        tmp_path, FakeObserver([_frame("obs-0001", ("Start",))]), FakePlanner(plan), FakeExecutor()
+    )
+
+    done = runner.run(task, ExecutionOptions(execute=False))
+
+    assert done.status == "dry_run_completed"
+    assert done.stop_reason == ""
+
+
+def test_a_free_text_error_is_not_reported_as_a_class_name() -> None:
+    """`error_type` holds a type, or nothing - not whatever precedes a colon."""
+    from gui_agent.runtime.runner import _error_type
+
+    assert _error_type("ActionResolutionError: no element matches 'x'") == "ActionResolutionError"
+    assert _error_type("no element matches 'x' in obs-0002") == ""
+    assert _error_type("") == ""
+    assert _error_type(None) == ""

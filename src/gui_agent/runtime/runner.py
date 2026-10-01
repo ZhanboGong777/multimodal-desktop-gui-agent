@@ -19,10 +19,12 @@ from __future__ import annotations
 import re
 import time
 from collections.abc import Callable
+from datetime import UTC, datetime, timedelta
 from typing import Any, Protocol
 
 from ..control.executor import ActionExecutor
 from ..planning import PlanResult, TaskPlan, TaskPlanner
+from . import provenance
 from .action_adapter import ActionAdapter, ActionResolutionError
 from .recorder import TaskRecorder, redact
 from .schemas import (
@@ -79,6 +81,18 @@ def explain_model_failure(message: str) -> str:
 #: action. They are not reversible by looking at the screen afterwards: a message
 #: has been sent, or a window with unsaved content has been closed.
 _RISKY_RISKS = frozenset({"medium", "high"})
+
+
+def _error_type(message: str | None) -> str:
+    """The exception class a step recorded, when its message starts with one.
+
+    Step errors are free text, and "no element matches 'x'" is as common as
+    "ActionResolutionError: ...". Only a leading single word is treated as a class
+    name; reporting a whole sentence as one would be worse than reporting nothing.
+    """
+    head, separator, _ = (message or "").partition(":")
+    head = head.strip()
+    return head if separator and head.isidentifier() else ""
 
 
 class RunnerError(RuntimeError):
@@ -179,6 +193,7 @@ class TaskRunner:
                 f"planning failed: {explain_model_failure(plan_result.error or 'no plan produced')}",
             )
         plan = plan_result.plan
+        planning_attempts = int(plan_result.attempts or 0)
         notes.append(f"planned {len(plan.steps)} steps from {initial.observation_id}")
 
         # 3. budget check before anything is dispatched
@@ -193,7 +208,7 @@ class TaskRunner:
         # 4. confirmation gate — before any real input event
         if options.execute:
             if options.confirm and confirm is not None and not confirm(plan):
-                result = self._finish(task, options, "cancelled", started, notes)
+                result = self._finish(task, options, "cancelled", started, notes, snapshot=initial)
                 result.verification = None
                 return result
             # A risky task gets a second, separate confirmation. The policy lives
@@ -206,13 +221,15 @@ class TaskRunner:
                 and task.risk in _RISKY_RISKS
                 and not high_risk_confirm(plan)
             ):
-                result = self._finish(task, options, "cancelled", started, notes)
+                result = self._finish(task, options, "cancelled", started, notes, snapshot=initial)
                 result.verification = None
                 return result
             if countdown is not None:
                 countdown(3)
 
-        return self._execute_plan(task, plan, options, initial, started, notes)
+        return self._execute_plan(
+            task, plan, options, initial, started, notes, planning_attempts
+        )
 
     # ── the loop ───────────────────────────────────────────────────────
     def _execute_plan(
@@ -223,13 +240,23 @@ class TaskRunner:
         initial: ObservationSnapshot,
         started: float,
         notes: list[str],
+        planning_attempts: int = 0,
     ) -> TaskRunResult:
         steps: list[StepRecord] = []
         current = initial
 
         for index, step in enumerate(plan.steps, start=1):
             if self.clock() - started > options.task_timeout_seconds:
-                return self._finish(task, options, "timed_out", started, notes, steps)
+                return self._finish(
+                    task,
+                    options,
+                    "timed_out",
+                    started,
+                    notes,
+                    steps,
+                    snapshot=initial,
+                    planning_attempts=planning_attempts,
+                )
 
             record = StepRecord(
                 index=index,
@@ -258,7 +285,16 @@ class TaskRunner:
                 record.elapsed_ms = (self.clock() - step_started) * 1000
                 steps.append(record)
                 self.recorder.append_step(record)
-                return self._finish(task, options, "failed", started, notes, steps)
+                return self._finish(
+                    task,
+                    options,
+                    "failed",
+                    started,
+                    notes,
+                    steps,
+                    snapshot=initial,
+                    planning_attempts=planning_attempts,
+                )
 
             record.observation_id = before.observation_id
 
@@ -270,7 +306,16 @@ class TaskRunner:
                 steps.append(record)
                 self.recorder.append_step(record)
                 notes.append(f"{step.step_id}: {exc}")
-                return self._finish(task, options, "failed", started, notes, steps)
+                return self._finish(
+                    task,
+                    options,
+                    "failed",
+                    started,
+                    notes,
+                    steps,
+                    snapshot=initial,
+                    planning_attempts=planning_attempts,
+                )
 
             record.resolved = resolved
             action_result = self.executor.execute(
@@ -306,14 +351,32 @@ class TaskRunner:
 
             if not action_result.success:
                 notes.append(f"{step.step_id}: action failed")
-                return self._finish(task, options, "failed", started, notes, steps)
+                return self._finish(
+                    task,
+                    options,
+                    "failed",
+                    started,
+                    notes,
+                    steps,
+                    snapshot=initial,
+                    planning_attempts=planning_attempts,
+                )
 
             if after is not None:
                 current = after
 
         # ── the plan is done; only the task verifier may call it a success ──
         if not options.execute:
-            result = self._finish(task, options, "dry_run_completed", started, notes, steps)
+            result = self._finish(
+                task,
+                options,
+                "dry_run_completed",
+                started,
+                notes,
+                steps,
+                snapshot=initial,
+                planning_attempts=planning_attempts,
+            )
             # A dry run dispatched nothing, so the task rule cannot have been met -
             # but reporting it as "failed" would say the run went wrong, and it did
             # not. The rule's own verdict is kept as evidence, not as the outcome.
@@ -339,7 +402,16 @@ class TaskRunner:
         status = "succeeded" if verification.passed else "failed"
         if not verification.passed:
             notes.append(f"task verification: {verification.detail}")
-        result = self._finish(task, options, status, started, notes, steps)
+        result = self._finish(
+            task,
+            options,
+            status,
+            started,
+            notes,
+            steps,
+            snapshot=initial,
+            planning_attempts=planning_attempts,
+        )
         result.verification = verification
         if final is not None:
             self.recorder.save_observation(final)
@@ -382,21 +454,56 @@ class TaskRunner:
         started: float,
         notes: list[str],
         steps: list[StepRecord] | None = None,
+        *,
+        snapshot: ObservationSnapshot | None = None,
+        planning_attempts: int = 0,
     ) -> TaskRunResult:
+        client = getattr(self.planner, "client", None)
+        records = steps or []
+        failed = next((record for record in records if record.error), None)
+        elapsed_ms = (self.clock() - started) * 1000.0
+        finished_at = datetime.now(UTC)
         result = TaskRunResult(
             run_id=self.recorder.run_id,
             case_id=task.case_id,
             instruction=task.instruction,
             status=status,  # type: ignore[arg-type]
-            steps=steps or [],
-            elapsed_ms=(self.clock() - started) * 1000.0,
+            steps=records,
+            elapsed_ms=elapsed_ms,
             execute=options.execute,
-            model_name=getattr(getattr(self.planner, "client", None), "model_name", ""),
-            provider=getattr(getattr(self.planner, "client", None), "name", ""),
+            model_name=getattr(client, "model_name", ""),
+            provider=getattr(client, "name", ""),
             notes=notes,
+            # Provenance, because the record has to explain itself on a machine
+            # that did not produce it - that is the point of shipping it as
+            # evidence. `started_at` is derived rather than captured so the run
+            # needs no extra state: `elapsed_ms` comes from the monotonic clock,
+            # which is what a duration should be measured with anyway.
+            task_id=task.case_id,
+            commit=provenance.git_commit(),
+            platform=self.adapter.platform,
+            python_version=provenance.python_version(),
+            screen=provenance.screen_description(snapshot),
+            started_at=finished_at - timedelta(milliseconds=elapsed_ms),
+            finished_at=finished_at,
+            planning_attempts=planning_attempts,
+            model_requests=int(getattr(client, "request_count", 0)),
+            evidence_directory=str(self.recorder.directory),
+            stop_reason=(
+                notes[-1] if notes and status not in {"succeeded", "dry_run_completed"} else ""
+            ),
+            error_type=_error_type(failed.error if failed else None),
+            failed_step_id=failed.step_id if failed else None,
         )
         self.recorder.write_summary(result)
         return result
 
-    def _blocked(self, task: TaskSpec, options: ExecutionOptions, reason: str) -> TaskRunResult:
-        return self._finish(task, options, "blocked", self.clock(), [reason])
+    def _blocked(
+        self,
+        task: TaskSpec,
+        options: ExecutionOptions,
+        reason: str,
+        *,
+        snapshot: ObservationSnapshot | None = None,
+    ) -> TaskRunResult:
+        return self._finish(task, options, "blocked", self.clock(), [reason], snapshot=snapshot)

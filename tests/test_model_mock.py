@@ -230,3 +230,21 @@ def test_the_mock_still_uses_noise_when_that_is_all_there_is() -> None:
     )
     step = json.loads(response.content)["steps"][0]
     assert step["arguments"]["element_id"] == "obs-0002-e000"
+
+
+def test_the_client_counts_the_requests_it_actually_sends() -> None:
+    """14.2.1 asks for transport attempts, kept apart from planning attempts."""
+    client = MockModelClient()
+    assert client.request_count == 0
+
+    client.generate_text("hello")
+
+    assert client.request_count == 1
+
+
+def test_a_retry_is_counted_as_another_request() -> None:
+    client = _AlwaysFails(max_retries=2)  # type: ignore[arg-type]
+
+    client.generate_text("hello")
+
+    assert client.request_count == 3, "one initial attempt plus two retries"

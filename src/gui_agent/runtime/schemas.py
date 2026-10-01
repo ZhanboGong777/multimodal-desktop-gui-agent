@@ -173,6 +173,28 @@ class TaskRunResult(SchemaModel):
     provider: str = ""
     notes: list[str] = Field(default_factory=list)
 
+    # ── provenance, so the record explains itself away from this machine ──
+    # 14.2 asks the summary to carry these rather than leaving a reader to
+    # reconstruct them from the environment they were typed into.
+    task_id: str = ""
+    commit: str = ""
+    platform: str = ""
+    python_version: str = ""
+    screen: str = ""
+    started_at: datetime | None = None
+    finished_at: datetime | None = None
+    #: How often the planner re-parsed or retried the plan format.
+    planning_attempts: int = 0
+    #: Transport attempts actually sent, retries included. Deliberately separate
+    #: from planning_attempts: one plan can cost several requests, and one request
+    #: can produce several parse attempts.
+    model_requests: int = 0
+    evidence_directory: str = ""
+    #: Why the run stopped, in one line, when it did not simply succeed.
+    stop_reason: str = ""
+    error_type: str = ""
+    failed_step_id: str | None = None
+
     @property
     def ok(self) -> bool:
         return self.status == "succeeded"

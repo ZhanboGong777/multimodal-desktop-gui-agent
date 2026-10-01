@@ -88,6 +88,10 @@ class ModelClient(ABC):
         self.timeout_seconds = timeout_seconds
         self.max_retries = max(0, max_retries)
         self.temperature = temperature
+        #: Transport attempts actually made, retries included. Counted here because
+        #: this class is the one place a request leaves the process, and 14.2.1 asks
+        #: for it to be recorded separately from how often the plan was re-parsed.
+        self.request_count = 0
 
     @abstractmethod
     def complete(self, messages: Sequence[Mapping[str, Any]], **kwargs: Any) -> ModelResponse:
@@ -136,6 +140,7 @@ class ModelClient(ABC):
         last_error = "no attempt was made"
         for _ in range(self.max_retries + 1):
             try:
+                self.request_count += 1
                 response = self.complete(messages, **kwargs)
                 response.latency_ms = (time.perf_counter() - started) * 1000.0
                 return response
