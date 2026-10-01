@@ -812,6 +812,29 @@ element list is what traces a coordinate back to the words it came from. The usa
 guide says what redaction does not cover, which was the part a reader would have
 assumed.
 
+**Three more, each half-present.** 7.1.4 asks for the fallback engine to be kept.
+The mechanism was there and dead: `create_ocr_engine` produces the notice, the
+observation service copies it into a property, and nothing in the runtime reads
+it - so a run that fell back recorded `ocr_engine: tesseract` and lost the reason,
+which is the half that explains a slow or poor frame. It travels on the snapshot
+now and is spoken in the run's notes. Not in `errors`: `errors` is what makes the
+verifier refuse to judge a frame, and a fallback that worked is not a degraded
+one.
+
+8.1.2 asks for the allowed key names to reach the model, and the prompt only said
+to use them. A plan could therefore name a key the adapter refused, which the
+model had no way to avoid. The list is read from the constants the adapter checks
+against, so there is one list rather than two. The modifier names turn out to be
+the same on both platforms - what differs is what each presses - so the test
+asserts that distinction rather than the one it was first written with.
+
+12.2.2 wants the plan, its steps, the text to be typed and the risk shown. That
+display existed only inside the execute-mode confirmation, which left the default
+mode - a dry run, whose entire purpose is to let the operator see the plan before
+agreeing to it - as the one mode that showed none of it. A dry run now shows the
+plan through an `on_plan` hook, which is not a confirmation: nothing is
+dispatched, so nothing is being authorised.
+
 ## 8. Deliverables
 
 - `src/gui_agent/runtime/` - the run layer (8 modules).
