@@ -34,7 +34,12 @@ def _cases() -> dict[str, TaskSpec]:
             target_app="browser",
             preconditions=[
                 "the desktop is visible and no other window covers the launch entry",
-                "the browser may already be running; that is recorded, not hidden",
+                (
+                    "no browser window is open. A browser that was already running carries "
+                    "the text this rule looks for, so on its own it would not show that "
+                    "this run opened anything - and a real run is blocked rather than "
+                    "credited for it"
+                ),
             ],
             success_rules=[
                 "a browser window is in the foreground with an address bar or tab strip",
@@ -85,7 +90,15 @@ def _cases() -> dict[str, TaskSpec]:
             case_id="T05",
             instruction="Close the week4 test application without affecting other applications",
             target_app="text editor",
-            preconditions=["the week4 test application is open and focused"],
+            preconditions=[
+                (
+                    f"{SAMPLE_FILE} is open in the test application, so the marker text is on "
+                    "screen before the run starts. The rule only asks that the marker be "
+                    "gone, which is already true while the window is shut - so a run that "
+                    "closed nothing would otherwise look like a success"
+                ),
+                "the window is focused, so the close control is reachable",
+            ],
             success_rules=[
                 "the application's window is gone and unrelated applications are untouched",
             ],
