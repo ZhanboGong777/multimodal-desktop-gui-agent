@@ -189,7 +189,14 @@ def test_the_record_carries_everything_13_4_asks_to_record(
     assert record["provider"] == "openai_compatible"
     assert record["model_name"] == "stub-vision"
     assert record["base_url"].startswith("http://127.0.0.1:")
-    assert record["timeout_seconds"] == 120.0
+    # Read from the config the script actually used, rather than restating the number:
+    # timeout_seconds is a per-machine tuning value (it was raised from 120 to 300 when
+    # a planning call on the review machine took 124 s), and a test that repeats the
+    # literal turns every tuning change into a test failure.
+    import yaml
+
+    week4 = yaml.safe_load((REPO_ROOT / "configs" / "week4.yaml").read_text(encoding="utf-8"))
+    assert record["timeout_seconds"] == float(week4["model"]["timeout_seconds"])
     assert record["max_retries_configured"] == 0
     assert "memory_available_mb_before" in record
     assert record["screenshot"].endswith("shot.png")

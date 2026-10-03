@@ -238,3 +238,17 @@ __marimo__/
 
 # pytest base temp directory (see [tool.pytest.ini_options])
 /.pytest-tmp/
+
+# ── Ad-hoc scripts used while reviewing a task on a second machine ─────────
+# The review harness generates throwaway drivers, probes and transcripts in the
+# repository root. They are not part of the project and must not be committed;
+# the durable checks (scripts/week4_preflight.py etc.) live under scripts/.
+/*.ps1
+/*probe*.py
+/*probe*.txt
+/runner_pid.txt
+/runner_pid.txt.*
+/inject_selftest_result.txt
+/attach_child_result.txt
+/child_console_report.txt
+/*.log

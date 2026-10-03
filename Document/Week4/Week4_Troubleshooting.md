@@ -1,6 +1,6 @@
 # Week 4 troubleshooting
 
-Forty-two situations the closed loop can run into, in the order they tend to appear.
+Forty-three situations the closed loop can run into, in the order they tend to appear.
 Each row says what to check first, and what this implementation actually does —
 the second column matters, because a diagnostic guide that describes behaviour the
 code does not have is worse than none.
@@ -33,7 +33,8 @@ in disguise.
 | Plan is valid JSON but the steps do not fit the screen | Whether the prompt carried the element list | The adapter refuses at resolution time; nothing is clicked |
 | `duplicate step_id` / `... is finish but N step(s) follow it` | The plan's step ids, and where `finish` sits | The plan is rejected at parse time and never executed. A step after the terminal step would otherwise be dispatched, because executability looks only at the verb |
 | `the plan reports errors and will not be executed` | What the model put in the plan's `errors` list | `blocked` before any action. The model uses that field to say it could not work the task out, and running it would read "I am not sure" as "go ahead" |
-| `no element matches '...'` | Take a fresh screenshot; check the OCR language and threshold; is the page still loading? | The step fails and the run stops. It does **not** click a default position, and it does not retry with a guessed target |
+| `no element matches '...'` | Take a fresh screenshot; check the OCR language and threshold; is the page still loading? **And: is the step's target text anywhere in the frame's element list at all?** | The step fails and the run stops. It does **not** click a default position, and it does not retry with a guessed target. If the text is absent from the list, the problem is the frame, not the model - see the row below |
+| The model aims at text that is nowhere on screen (`'browser'`, `'browser icon'`, `'week4 test application'`) | **What window the capture actually contained.** Read `obs-0001.json` and look at the element texts: if they are sentences from a terminal, a log, an editor or a chat panel, the frame was that window, not the desktop | Not a model fault. This is the failure the Windows review produced three times, and the mechanism is worth knowing: `ObservationService` ranks text above contour boxes and then cuts the list at `execution.max_elements` (60 by default). One maximised text-heavy window therefore consumes the entire element budget, and the icons and shortcuts the task needs never reach the prompt. The model is asked to open a browser it was never shown, so it names the most plausible text instead - a correct response to a bad frame. Measured here: a console window produced 145 text elements whose top entries were `'not set.'`, `'(825.4 ms'`, `'Cache hit 99%'`, `'blocked'`; with that gone the same screen yields desktop icons instead. **The agent's own window is the usual culprit**, because it is always there while the agent runs, and it cannot be closed from inside the run. `scripts/week4_preflight.py` checks for this before a case starts: it captures a frame, counts the text elements and fails with this explanation rather than letting a doomed run proceed. Fix by running the case from a session whose window is not on the captured monitor, or by minimising everything first |
 | `... is not from observation ... and the step names no text target` | Whether the model gave a `target_text` alongside an element id | A bare stale id cannot be re-located, so the run stops. A plan that gives both is re-bound automatically |
 
 ## Perception
