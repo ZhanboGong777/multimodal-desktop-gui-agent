@@ -1,0 +1,119 @@
+{
+  "run_id": "T01_20261004_000434",
+  "case_id": "T01",
+  "instruction": "Open the web browser from the desktop",
+  "status": "failed",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "step-1",
+      "description": "Double-click the Microsoft Edge icon",
+      "action_type": "double_click",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "step-1",
+        "action": {
+          "action_type": "double_click",
+          "x": 1566,
+          "y": 470,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Microsoft Edge"
+        },
+        "element_id": "obs-0002-e026",
+        "screenshot_point": {
+          "x": 1566,
+          "y": 470
+        },
+        "control_point": {
+          "x": 1566,
+          "y": 470
+        },
+        "note": "text 'Microsoft Edge' -> obs-0002-e026 (re-bound from obs-0001-e003 in an earlier frame)"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "double_click",
+          "x": 1566,
+          "y": 470,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Microsoft Edge"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: edge",
+        "evidence": {
+          "observation_id": "obs-0003",
+          "changed": true,
+          "element_count": 60,
+          "expectation_tokens": [
+            "microsoft",
+            "edge",
+            "opens"
+          ],
+          "expectation_hits": [
+            "edge"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 5077.999999979511,
+      "after_observation_id": "obs-0003"
+    }
+  ],
+  "verification": {
+    "outcome": "failed",
+    "method": "automatic",
+    "detail": "expected on screen but not found: http, search",
+    "evidence": {
+      "observation_id": "obs-0008",
+      "missing": [
+        "http",
+        "search"
+      ]
+    }
+  },
+  "error": null,
+  "elapsed_ms": 51108.99999999674,
+  "execute": true,
+  "model_name": "qwen2.5vl:7b",
+  "provider": "openai_compatible",
+  "notes": [
+    "planned 1 steps from obs-0001",
+    "task verification: expected on screen but not found: http, search"
+  ],
+  "task_id": "T01",
+  "commit": "4202633",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 2560x1600, control 2560x1600",
+  "started_at": "2026-10-03T14:04:34.026553Z",
+  "finished_at": "2026-10-03T14:05:25.135553Z",
+  "planning_attempts": 1,
+  "model_requests": 1,
+  "planning_ms": 21844.00000004098,
+  "confirmation_ms": 10983.99999999674,
+  "execution_ms": 18280.99999995902,
+  "evidence_directory": "outputs\\week4\\T01_20261004_000434",
+  "stop_reason": "task verification: expected on screen but not found: http, search",
+  "error_type": "",
+  "failed_step_id": null,
+  "action_count": 1
+}

@@ -1,0 +1,120 @@
+{
+  "run_id": "T02_20261004_005225",
+  "case_id": "T02",
+  "instruction": "Search the web for GUI agent research",
+  "status": "failed",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "step-1",
+      "description": "Open browser",
+      "action_type": "click",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "step-1",
+        "action": {
+          "action_type": "click",
+          "x": 181,
+          "y": 1436,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Floating Friends"
+        },
+        "element_id": "obs-0002-e001",
+        "screenshot_point": {
+          "x": 181,
+          "y": 1436
+        },
+        "control_point": {
+          "x": 181,
+          "y": 1436
+        },
+        "note": "text 'Floating Friends' -> obs-0002-e001 (re-bound from obs-0001-e001 in an earlier frame)"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "click",
+          "x": 181,
+          "y": 1436,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Floating Friends"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: browser",
+        "evidence": {
+          "observation_id": "obs-0003",
+          "changed": true,
+          "element_count": 60,
+          "expectation_tokens": [
+            "browser",
+            "opens"
+          ],
+          "expectation_hits": [
+            "browser"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 9750.0,
+      "after_observation_id": "obs-0003"
+    },
+    {
+      "index": 2,
+      "step_id": "step-2",
+      "description": "Navigate to search bar",
+      "action_type": "click",
+      "observation_id": "obs-0004",
+      "resolved": null,
+      "action_result": null,
+      "verification": null,
+      "error": "no element matches 'search bar' in obs-0004",
+      "elapsed_ms": 2967.9999999934807,
+      "after_observation_id": null
+    }
+  ],
+  "verification": null,
+  "error": null,
+  "elapsed_ms": 63077.99999997951,
+  "execute": true,
+  "model_name": "qwen2.5vl:7b",
+  "provider": "openai_compatible",
+  "notes": [
+    "planned 10 steps from obs-0001",
+    "step-2: no element matches 'search bar' in obs-0004"
+  ],
+  "task_id": "T02",
+  "commit": "3d9f8e8",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 2560x1600, control 2560x1600",
+  "started_at": "2026-10-03T14:52:25.808087Z",
+  "finished_at": "2026-10-03T14:53:28.886087Z",
+  "planning_attempts": 1,
+  "model_requests": 1,
+  "planning_ms": 47359.99999998603,
+  "confirmation_ms": 3000.0,
+  "execution_ms": 12717.99999999348,
+  "evidence_directory": "outputs\\week4\\T02_20261004_005225",
+  "stop_reason": "step-2: no element matches 'search bar' in obs-0004",
+  "error_type": "",
+  "failed_step_id": "step-2",
+  "action_count": 1
+}

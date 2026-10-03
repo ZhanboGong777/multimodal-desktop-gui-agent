@@ -158,6 +158,60 @@ explicitly exclude.
   which failed before typing anything. No message was ever sent on this machine.
 * No case was re-run after its last failure to try to turn it into a success.
 
+### Second round - the same five cases, after the fixes
+
+Branch `fix/week4-windows-rerun`. Same machine, same model. Eleven real runs
+(`execute=true`), and the result is unchanged in the only column that counts: **no run
+reached `succeeded`**. What changed is how far each one got and what stopped it.
+
+| run id | status | actions | what stopped it | what it establishes |
+| --- | --- | --- | --- | --- |
+| `T01_20261004_000322` | failed | 1 | `task verification: expected on screen but not found: http, search` | the plan used `click`; the icon was selected, not launched |
+| `T01_20261004_000434` | failed | 1 | same | the plan used **`double_click`** and resolved the shortcut - the verb fix worked, the window still did not open |
+| `T02_20261004_001545` | failed | 0 | `step-1: no element matches 'Microsoft Edge' in obs-0002` | the two OCR elements were joined (`resolved=True`) and the failure moved one step later |
+| `T02_20261004_005017` | failed | 1 | `step-2: no element matches 'search bar' in obs-0004` | **two** steps dispatched, step 1 verified |
+| `T02_20261004_005225` | failed | 1 | `task verification: expected on screen but not found: GUI agent research` | `type_text resolved=True verif=passed` - the text was typed into the frame the run was given |
+| `T01_20261004_004112` | **blocked** | 0 | `the run assumes no browser is running, but these are: msedge.exe, chrome.exe` | the new process precondition fired before the capture: `planning_ms = 0.0`, no `frames/`, no `obs-NNNN.json` |
+
+The last row is the one to read first, because it is the only verdict in this round that
+is *correct by construction* rather than a failure that happened to be informative. It
+also costs 1 828 ms instead of the 30 531 ms a doomed run previously spent on planning.
+
+Two mechanisms were found by instrumenting the driver rather than by reading the code,
+and both are written up in `Week4_Troubleshooting.md`:
+
+1. **Minimising a window activates it in z-order terms, and the next window down is the
+   desktop.** A driver that minimises its own console to keep it out of the frame
+   therefore pushes the case's target behind the desktop, and every capture returns
+   icons. `IsIconic` on the target's handle is the diagnostic; a window at
+   `(-21333, -21333)` with `IsIconic=True` was never going to be in the frame, and
+   `SetForegroundWindow` alone does not bring it forward - `ShowWindow(SW_RESTORE)` has
+   to come first.
+2. **Focusing the console cancels the minimise.** The launcher reported its console
+   handle and then called `SetForegroundWindow` on it, undoing the driver's minimise a
+   fraction of a second later. That is why the sequencing read correctly and the frames
+   kept showing the desktop.
+
+With both fixed the observation finally contained a desktop - and then contained this
+agent's own conversation instead:
+
+```text
+obs-0001-e000 -> 'Chat'
+obs-0001-e008 -> '1 background job running'
+obs-0001-e005 -> 'Trajectory'
+step-1 type_text resolved=True verif=passed
+```
+
+The run typed into the chat window it was being observed from. That is not a defect in
+the case definitions, the prompt or the resolver: **the agent cannot act on a screen that
+does not contain itself, and it cannot remove itself from that screen from inside the
+run.** On this machine there is one monitor (`\\.\DISPLAY1`, 1707x1067), so no local
+window arrangement avoids it. The five cases need a session whose own window is not on
+the captured display - another device observing the run, or a headless client.
+
+Every attempt above is kept, including the ones that failed for reasons already known.
+None was deleted or rewritten, and no run is described as a success it did not record.
+
 ## Metrics
 
 The definitions from the hand-off, so a reader does not have to guess what the
@@ -175,15 +229,22 @@ mean time over all attempts = sum(execution_ms of all formal attempts) / attempt
 
 | Metric | Value |
 | --- | --- |
-| formal real attempts | **11** (2 + 1 + 1 + 1 + 6) |
+| formal real attempts | **22** (11 in the first round, 11 in the second) |
 | successes (`succeeded` and `execute=true`) | **0** |
-| real-task success rate | **0 / 11 = 0 %** |
+| real-task success rate | **0 / 22 = 0 %** |
 | mean execution time of successful tasks | **undefined** - there were no successes |
-| mean `execution_ms` over all attempts | **3 731 ms** |
-| mean `planning_ms` over all attempts | **44 351 ms** |
-| total actions actually dispatched | **5** (T01: 3, T04: 1, T05: 1) |
-| actions that passed their step-level check | **4** of those 5 |
+| mean `execution_ms` over all attempts | **5 398 ms** |
+| mean `planning_ms` over all attempts | **35 723 ms** |
+| total actions actually dispatched | **12** |
+| actions that passed their step-level check | **11** of those 12 |
 | runs that reached the goal rule at all | 2 (T01 attempt 2, T05 attempt 6) |
+
+The first round's table records the 11 attempts that were written up at the time. The
+`outputs/week4` directory holds **34** real executions for these cases (23 on 3 October,
+11 on 4 October), because earlier repeats of the same failure were kept as well. The
+counts above use the documented 11 + 11; the raw directory is the larger number, and the
+difference is not a disagreement about what happened - only about which runs were
+tabulated.
 
 Two caveats on the timing figures, because they are easy to misread:
 

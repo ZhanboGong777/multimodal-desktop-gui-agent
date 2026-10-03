@@ -134,6 +134,13 @@ def _cases() -> dict[str, TaskSpec]:
                 "the application's window is gone and unrelated applications are untouched",
             ],
             forbid_text=["WEEK4-OPEN-FILE-OK"],
+            # "is open in the test application" is about the machine, not the screen. The
+            # text check cannot tell "the window was closed" from "the window was behind
+            # something", and that ambiguity cost three blocked runs on the Windows node:
+            # each reported "the success rule already holds on the untouched screen" while
+            # Notepad was open but not in the capture. Requiring the editor to be running
+            # makes the honest cases proceed and the dishonest ones say so.
+            requires_processes=["editor"],
             risk="medium",
         ),
     }
