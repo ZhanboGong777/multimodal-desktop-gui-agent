@@ -200,6 +200,44 @@ class TaskRunner:
                 task, options, "the task defines no verifiable success rule", timings=timings
             )
 
+        # 0. Application state, which text on screen cannot express - and which is cheap
+        # enough to check before a screenshot is taken.
+        #
+        # T01 says "no browser window is open" and T02 says "a browser window is open".
+        # Both are facts about the machine, and reading them off the screen gets them
+        # wrong in the same way: a browser that is behind another window or minimised
+        # contributes none of the text either rule looks for. T01 therefore planned
+        # against a window that already existed and was failed for not opening anything,
+        # and T05's "the marker is gone" cannot be told from "the window is not visible".
+        # These two lists are the machine-checkable half of those preconditions.
+        #
+        # Checked first on purpose: a run that cannot count should not spend a capture,
+        # an OCR pass and a model call finding that out.
+        if options.execute and options.require_preconditions:
+            for group in task.forbids_processes:
+                found = match_processes(known_processes(group))
+                if found:
+                    return self._blocked(
+                        task,
+                        options,
+                        f"the run assumes no {group} is running, but these are: "
+                        f"{', '.join(found)}. Text on screen cannot show this - a "
+                        f"window behind another one carries no text - so the plan would "
+                        f"be written against a window that already exists and the run "
+                        f"could not be credited with opening it. Close them first.",
+                        timings=timings,
+                    )
+            for group in task.requires_processes:
+                if not match_processes(known_processes(group)):
+                    return self._blocked(
+                        task,
+                        options,
+                        f"the run needs a {group} to be running, and none of "
+                        f"{', '.join(known_processes(group))} is. Start one, put it in "
+                        f"the foreground, and re-run.",
+                        timings=timings,
+                    )
+
         # 1. first look at the screen
         try:
             initial = self.observer.observe()
@@ -238,41 +276,6 @@ class TaskRunner:
                 "the first frame had no readable text: OCR returned no labels, so no "
                 f"text target can resolve against it{hint}"
             )
-
-        # 1b. A real run must not start from a screen where the goal already holds.
-        # 1a. Application state, which text on screen cannot express.
-        #
-        # T01 says "no browser window is open" and T02 says "a browser window is open".
-        # Both are facts about the machine, and reading them off the screen gets them
-        # wrong in the same way: a browser that is behind another window or minimised
-        # contributes none of the text either rule looks for. T01 therefore planned
-        # against a window that already existed and was failed for not opening anything,
-        # and T05's "the marker is gone" cannot be told from "the window is not visible".
-        # These two lists are the machine-checkable half of those preconditions.
-        if options.execute and options.require_preconditions:
-            for group in task.forbids_processes:
-                found = match_processes(known_processes(group))
-                if found:
-                    return self._blocked(
-                        task,
-                        options,
-                        f"the run assumes no {group} is running, but these are: "
-                        f"{', '.join(found)}. Text on screen cannot show this - a "
-                        f"window behind another one carries no text - so the plan would "
-                        f"be written against a window that already exists and the run "
-                        f"could not be credited with opening it. Close them first.",
-                        timings=timings,
-                    )
-            for group in task.requires_processes:
-                if not match_processes(known_processes(group)):
-                    return self._blocked(
-                        task,
-                        options,
-                        f"the run needs a {group} to be running, and none of "
-                        f"{', '.join(known_processes(group))} is. Start one, put it in "
-                        f"the foreground, and re-run.",
-                        timings=timings,
-                    )
 
         # 1b. A real run must not start from a screen where the goal already holds.
         #

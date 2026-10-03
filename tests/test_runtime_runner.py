@@ -237,14 +237,18 @@ def test_a_run_that_forbids_a_process_is_blocked_before_it_plans(
     )
     planner = FakePlanner(plan)
     executor = FakeExecutor()
-    runner, _ = _runner(tmp_path, FakeObserver([_frame("obs-0001", ("desktop",))]),
-                        planner, executor)
+    observer = FakeObserver([_frame("obs-0001", ("desktop",))])
+    runner, _ = _runner(tmp_path, observer, planner, executor)
 
     result = runner.run(task, ExecutionOptions(execute=True, confirm=False))
 
     assert result.status == "blocked"
     assert executor.actions == [], "nothing may be dispatched"
     assert planner.contexts == [], "no model call may be spent on a run that cannot count"
+    assert observer.calls == 0, (
+        "no screenshot may be taken either: the check is about the machine, so "
+        "answering it first costs nothing and a capture plus an OCR pass is not free"
+    )
     assert "no browser is running" in result.notes[0]
     assert "msedge.exe" in result.notes[0], "the note names what was actually found"
 
