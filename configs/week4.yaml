@@ -94,6 +94,13 @@ model:
   timeout_seconds: 300
   temperature: 0.0
   max_retries: 0
+  # A plan of up to 10 steps, each with 7 fields, needs room. Without this the server's
+  # small default cut a real reply off at '"steps":[{"step_id' and the run reported
+  # "no JSON object found in the response" - which blames the model for a limit.
+  # 2048 was still not enough: qwen2.5vl spends output tokens on a reasoning block before
+  # the JSON, and the same run then cut off one step later, mid-"element_id". The client
+  # reports finish_reason=length with the partial reply, so the number is easy to tune.
+  max_tokens: 8192
 
 planning:
   max_steps: 10

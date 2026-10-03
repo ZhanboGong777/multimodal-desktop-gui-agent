@@ -77,6 +77,7 @@ class OpenAICompatibleClient(ModelClient):
         timeout_seconds: float = 60.0,
         max_retries: int = 1,
         temperature: float = 0.0,
+        max_tokens: int | None = None,
         environ: Mapping[str, str] | None = None,
     ) -> None:
         env = os.environ if environ is None else environ
@@ -87,6 +88,7 @@ class OpenAICompatibleClient(ModelClient):
             timeout_seconds=timeout_seconds,
             max_retries=max_retries,
             temperature=temperature,
+            max_tokens=max_tokens,
         )
         self._client: Any = None
 
@@ -148,12 +150,22 @@ class OpenAICompatibleClient(ModelClient):
     def complete(self, messages: Sequence[Mapping[str, Any]], **kwargs: Any) -> ModelResponse:
         client = self._ensure_client()
         payload = self.to_vision_messages(messages, kwargs.get("image_path"))
+        request: dict[str, Any] = {
+            "model": self.model_name,
+            "messages": payload,
+            "temperature": self.temperature,
+        }
+        # An explicit output budget. Without one the server decides, and the server's
+        # default is small: on the review machine a plan was cut off mid-JSON at
+        # '"steps":[{"step_id' and the run reported "no JSON object found in the
+        # response". Truncation then looks like a model that cannot follow the format,
+        # so the number belongs in the configuration rather than in the server's
+        # discretion. max_tokens is only sent when set, so backends that reject it are
+        # unaffected.
+        if self.max_tokens is not None:
+            request["max_tokens"] = self.max_tokens
         try:
-            completion = client.chat.completions.create(
-                model=self.model_name,
-                messages=payload,
-                temperature=self.temperature,
-            )
+            completion = client.chat.completions.create(**request)
         except Exception as exc:
             raise ModelError(f"{type(exc).__name__}: {exc}") from exc
 
@@ -172,6 +184,16 @@ class OpenAICompatibleClient(ModelClient):
                 for key in ("prompt_tokens", "completion_tokens", "total_tokens")
                 if getattr(usage_obj, key, None) is not None
             }
+
+        # A reply that stopped because it ran out of room is not a reply that failed to
+        # follow the format, and the two need different fixes. Say which one happened.
+        finish_reason = getattr(choices[0], "finish_reason", None)
+        if finish_reason == "length":
+            raise ModelError(
+                f"the reply was cut off by the output limit (finish_reason=length, "
+                f"max_tokens={self.max_tokens}); raise model.max_tokens. "
+                f"Partial reply: {content[:200]!r}"
+            )
 
         return ModelResponse(
             content=content,

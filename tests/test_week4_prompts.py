@@ -168,7 +168,10 @@ def test_the_example_is_a_plan_the_parser_accepts() -> None:
     from gui_agent.planning.parser import parse_plan
 
     plan = parse_plan(json.dumps(json.loads(_JSON_EXAMPLE)), instruction="t", max_steps=5)
-    assert plan.steps and plan.steps[-1].action_type == "click"
+    # The example's verb is the one the model copies, so it carries the shortcut rule:
+    # with "click" here, the 7B model chose click for a desktop shortcut on three
+    # consecutive T01 runs while the rule text said double_click.
+    assert plan.steps and plan.steps[-1].action_type == "double_click"
     assert plan.assumptions == []
 
 

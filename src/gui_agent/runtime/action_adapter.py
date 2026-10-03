@@ -158,6 +158,99 @@ def _join_run(run: Sequence[ElementRef]) -> ElementRef:
     )
 
 
+#: Greatest gap, in pixels, between two elements that can still be one target. A
+#: word-level backend leaves a few pixels between the words of a label; a desktop
+#: shortcut stacks its lines closely. Both are far below this.
+_MAX_JOIN_GAP = 40.0
+
+#: How much two elements have to overlap horizontally to count as stacked. A shortcut's
+#: first line ("Microsoft") is wider than its second ("Edge"), so the overlap is real but
+#: neither contains the other.
+_MIN_JOIN_OVERLAP = 0.30
+
+
+def _horizontal_overlap(first: ElementRef, second: ElementRef) -> float:
+    """Overlap of two boxes along x, as a fraction of the narrower one."""
+    left = max(first.bounding_box.left, second.bounding_box.left)
+    right = min(first.bounding_box.right, second.bounding_box.right)
+    if right <= left:
+        return 0.0
+    narrow = min(
+        first.bounding_box.right - first.bounding_box.left,
+        second.bounding_box.right - second.bounding_box.left,
+    )
+    return (right - left) / narrow if narrow > 0 else 0.0
+
+
+def _is_next_in_label(first: ElementRef, second: ElementRef) -> bool:
+    """True when ``second`` reads as the next part of ``first``'s label.
+
+    Two shapes have to work, and they pull in different directions:
+
+    * inline - "Current" then "repository" on one line, so ``second`` starts to the
+      right of ``first`` with a word-sized gap;
+    * stacked - a desktop shortcut's two lines, so ``second`` sits below ``first`` with
+      its box overlapping horizontally.
+
+    The stacked case is why reading order alone is not enough. On a desktop grid,
+    neighbouring columns interleave: with 'Microsoft' at (2473, 386) and 'Edge' at
+    (2473, 412), the element at (403, 412) sorts between them, so a search that steps
+    through the sorted list never sees the two halves of the icon as neighbours.
+    """
+    first_box, second_box = first.bounding_box, second.bounding_box
+
+    # inline: same line, second to the right
+    vertical_gap = abs(second_box.top - first_box.top)
+    horizontal_gap = second_box.left - first_box.right
+    if vertical_gap <= _MAX_JOIN_GAP and 0 <= horizontal_gap <= _MAX_JOIN_GAP:
+        return True
+
+    # stacked: second below, boxes overlapping horizontally
+    if _horizontal_overlap(first, second) >= _MIN_JOIN_OVERLAP:
+        down_gap = second_box.top - first_box.bottom
+        if -_MAX_JOIN_GAP <= down_gap <= _MAX_JOIN_GAP:
+            return True
+    return False
+
+
+def _spatial_runs(
+    elements: Sequence[ElementRef], wanted: Sequence[str], min_confidence: float
+) -> list[list[ElementRef]]:
+    """Runs of elements that are geometric neighbours and spell out ``wanted``.
+
+    Searched as a path rather than a slice: from each element that matches the first
+    token, walk to any neighbour that continues the query. This finds the two lines of
+    a desktop shortcut even when unrelated elements sort between them.
+    """
+    usable = [
+        item
+        for item in elements
+        if item.text.strip() and item.confidence >= min_confidence
+    ]
+    runs: list[list[ElementRef]] = []
+
+    def walk(path: list[ElementRef], position: int) -> None:
+        if position == len(wanted):
+            runs.append(list(path))
+            return
+        tail = path[-1]
+        for candidate in usable:
+            if any(candidate.element_id == seen.element_id for seen in path):
+                continue
+            if not _is_next_in_label(tail, candidate):
+                continue
+            if _tokens(candidate.text) != [wanted[position]]:
+                continue
+            path.append(candidate)
+            walk(path, position + 1)
+            path.pop()
+
+    for item in usable:
+        if _tokens(item.text) == [wanted[0]]:
+            walk([item], 1)
+    return runs
+
+
 def _match_adjacent_runs(
     elements: Sequence[ElementRef], query: str, min_confidence: float
 ) -> list[list[ElementRef]]:
@@ -169,6 +262,10 @@ def _match_adjacent_runs(
     consecutive elements. The run has to consume the query exactly - no partial or
     loose matches - and every match is returned so the caller can still refuse an
     ambiguous one.
+
+    Reading order is tried first because it is the stricter reading of "consecutive".
+    Failing that, geometric neighbours are tried: the two lines of a desktop shortcut
+    are adjacent on screen but are not necessarily adjacent in a top-to-bottom sort.
     """
     wanted = _tokens(query)
     if len(wanted) < _MIN_RUN_TOKENS:
@@ -188,7 +285,9 @@ def _match_adjacent_runs(
             if collected == wanted:
                 runs.append(list(ordered[start : end + 1]))
                 break
-    return runs
+    if runs:
+        return runs
+    return _spatial_runs(elements, wanted, min_confidence)
 
 
 def platform_name() -> str:

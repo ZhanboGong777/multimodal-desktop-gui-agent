@@ -83,11 +83,16 @@ class ModelClient(ABC):
         timeout_seconds: float = 60.0,
         max_retries: int = 1,
         temperature: float = 0.0,
+        max_tokens: int | None = None,
     ) -> None:
         self.model_name = model_name
         self.timeout_seconds = timeout_seconds
         self.max_retries = max(0, max_retries)
         self.temperature = temperature
+        #: Output budget per request, or None to let the server decide. The server's
+        #: default is small on some backends, and a reply truncated mid-JSON reads as a
+        #: model that cannot follow the format when it actually ran out of room.
+        self.max_tokens = max_tokens
         #: Transport attempts actually made, retries included. Counted here because
         #: this class is the one place a request leaves the process, and 14.2.1 asks
         #: for it to be recorded separately from how often the plan was re-parsed.

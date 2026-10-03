@@ -117,6 +117,13 @@ class ModelConfig(ConfigModel):
     timeout_seconds: float = Field(default=60.0, gt=0.0)
     temperature: float = Field(default=0.0, ge=0.0, le=2.0)
     max_retries: int = Field(default=1, ge=0)
+    # Output budget per request. None leaves it to the server, whose default is small on
+    # some backends: a plan was once cut off mid-JSON at '"steps":[{"step_id' and the run
+    # reported "no JSON object found in the response", which reads as a model that cannot
+    # follow the format when it actually ran out of room. A plan of up to 10 steps needs
+    # the space; this also turns a truncated reply into an explicit error instead of a
+    # parse failure.
+    max_tokens: int | None = Field(default=None, gt=0)
 
 
 class PlanningConfig(ConfigModel):

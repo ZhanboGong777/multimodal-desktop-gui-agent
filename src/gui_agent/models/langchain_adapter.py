@@ -39,6 +39,7 @@ class LangChainClient(ModelClient):
         timeout_seconds: float = 60.0,
         max_retries: int = 1,
         temperature: float = 0.0,
+        max_tokens: int | None = None,
         environ: Mapping[str, str] | None = None,
     ) -> None:
         env = os.environ if environ is None else environ
@@ -49,6 +50,7 @@ class LangChainClient(ModelClient):
             timeout_seconds=timeout_seconds,
             max_retries=max_retries,
             temperature=temperature,
+            max_tokens=max_tokens,
         )
         self._model: Any = None
 
@@ -73,6 +75,7 @@ class LangChainClient(ModelClient):
             temperature=self.temperature,
             timeout=self.timeout_seconds,
             max_retries=0,  # ModelClient owns the retry policy.
+            **({"max_tokens": self.max_tokens} if self.max_tokens is not None else {}),
         )
         return self._model
 

@@ -274,6 +274,71 @@ def test_a_run_must_consume_the_whole_query(adapter: ActionAdapter) -> None:
         adapter.resolve(_step(target_text="Current repository main"), snapshot)
 
 
+def _element(element_id: str, text: str, left: int, top: int, right: int, bottom: int,
+             confidence: float = 0.96) -> ElementRef:
+    """An element whose centre follows from its box, as the observation builds it."""
+    box = BoundingBox(left=left, top=top, right=right, bottom=bottom)
+    return ElementRef(
+        element_id=element_id, text=text, bounding_box=box, center=box.center,
+        confidence=confidence,
+    )
+
+
+def test_a_stacked_shortcut_label_is_joined_across_an_interleaved_neighbour(
+    adapter: ActionAdapter,
+) -> None:
+    """The two lines of a desktop shortcut are adjacent on screen, not in sort order.
+
+    Measured on the Windows review machine: the Microsoft Edge shortcut is two OCR
+    elements, 'Microsoft' at (2433,379)-(2513,393) and 'Edge' at (2452,403)-(2494,421).
+    A top-to-bottom sort puts 'MySQL' at (403,412) between them, because its y sits
+    between the two lines. The run search therefore never saw the halves as
+    neighbours, and T01 failed with "no element matches 'Microsoft Edge'" while the
+    icon was plainly on screen and both words were in the element list.
+    """
+    snapshot = ObservationSnapshot(
+        observation_id="obs-0002",
+        captured_at=datetime.now(UTC),
+        screen_info=ScreenInfo(
+            screenshot_width=2560, screenshot_height=1600,
+            control_width=2560, control_height=1600, scale_x=1.0, scale_y=1.0,
+        ),
+        elements=[
+            _element("obs-0002-e009", "Microsoft", 2433, 379, 2513, 393),
+            # A different column, whose vertical position falls between the two lines.
+            _element("obs-0002-e021", "MySQL", 380, 405, 426, 419, confidence=0.94),
+            _element("obs-0002-e010", "Edge", 2452, 403, 2494, 421),
+        ],
+    )
+    resolved = adapter.resolve(_step(target_text="Microsoft Edge"), snapshot)
+    assert resolved.element_id == "obs-0002-e009+obs-0002-e010"
+    assert "joined from 2 adjacent elements" in resolved.note
+
+
+def test_a_stacked_run_still_refuses_two_of_the_same_shortcut(
+    adapter: ActionAdapter,
+) -> None:
+    """Two shortcuts with the same label remain an ambiguity, not a first-match win."""
+    def _pair(top: int) -> list[ElementRef]:
+        base = top
+        return [
+            _element(f"obs-0002-e{base:03d}", "Microsoft", 2433, top, 2513, top + 14),
+            _element(f"obs-0002-e{base + 1:03d}", "Edge", 2452, top + 24, 2494, top + 42),
+        ]
+
+    snapshot = ObservationSnapshot(
+        observation_id="obs-0002",
+        captured_at=datetime.now(UTC),
+        screen_info=ScreenInfo(
+            screenshot_width=2560, screenshot_height=1600,
+            control_width=2560, control_height=1600, scale_x=1.0, scale_y=1.0,
+        ),
+        elements=_pair(100) + _pair(400),
+    )
+    with pytest.raises(ActionResolutionError, match="element runs match"):
+        adapter.resolve(_step(target_text="Microsoft Edge"), snapshot)
+
+
 def test_a_target_that_maps_outside_the_monitor_is_refused(adapter: ActionAdapter) -> None:
     """7.3.6: an illegal coordinate is refused, never clamped to the edge.
 

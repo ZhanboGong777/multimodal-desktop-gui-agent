@@ -29,6 +29,7 @@ def create_model_client(config: ModelConfig) -> ModelClient:
         "timeout_seconds": config.timeout_seconds,
         "max_retries": config.max_retries,
         "temperature": config.temperature,
+        "max_tokens": config.max_tokens,
     }
     if factory is MockModelClient:
         return MockModelClient(**common)
