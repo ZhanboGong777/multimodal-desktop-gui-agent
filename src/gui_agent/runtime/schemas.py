@@ -123,6 +123,13 @@ class TaskSpec(SchemaModel):
     expect_text: list[str] = Field(default_factory=list)
     #: Text that must be gone for the task to count as complete.
     forbid_text: list[str] = Field(default_factory=list)
+    #: Process groups (see runtime.processes.known) that must be running before the
+    #: run starts, and groups that must not be. These are the machine-checkable half of
+    #: preconditions that are about application state rather than screen text: a browser
+    #: that is open but behind another window carries no text, so a text check calls it
+    #: absent and T01 then plans against a window that already exists.
+    requires_processes: list[str] = Field(default_factory=list)
+    forbids_processes: list[str] = Field(default_factory=list)
     risk: Literal["low", "medium", "high"] = "low"
 
 
@@ -139,8 +146,13 @@ class ExecutionOptions(SchemaModel):
     #: when the success rule already holds there. The prose preconditions on
     #: TaskSpec say the same thing in words; this is the machine-checkable half, and
     #: it is what stops T01 or T05 being credited for a state that was already true.
-    #: Only tasks that declare preconditions are checked - declaring them is how a
-    #: task says it assumes a starting state. Dry runs are never checked.
+    #: Only a task that declares preconditions is checked - declaring them is how a
+    #: task says it assumes a starting state. Dry runs are never checked: they
+    #: dispatch nothing, and the pipeline check is what they exist to perform.
+    #:
+    #: The same switch also gates `requires_processes`/`forbids_processes`, which answer
+    #: the part of a precondition that screen text cannot: whether an application is
+    #: running at all.
     require_preconditions: bool = True
 
 

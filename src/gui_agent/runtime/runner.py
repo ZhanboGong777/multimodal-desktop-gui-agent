@@ -28,6 +28,8 @@ from ..control.executor import ActionExecutor
 from ..planning import PlanResult, TaskPlan, TaskPlanner
 from . import provenance
 from .action_adapter import ActionAdapter, ActionResolutionError, keys_for_platform
+from .processes import known as known_processes
+from .processes import match as match_processes
 from .recorder import TaskRecorder, redact
 from .schemas import (
     ExecutionOptions,
@@ -238,10 +240,41 @@ class TaskRunner:
             )
 
         # 1b. A real run must not start from a screen where the goal already holds.
-        # T01 and T05 are both satisfiable by doing nothing: a browser that was
-        # already open carries the text T01 looks for, and T05's rule only asks that
-        # the marker be gone, so a window that was never opened - or was minimised -
-        # satisfies it. A run cannot be credited with a state it did not create.
+        # 1a. Application state, which text on screen cannot express.
+        #
+        # T01 says "no browser window is open" and T02 says "a browser window is open".
+        # Both are facts about the machine, and reading them off the screen gets them
+        # wrong in the same way: a browser that is behind another window or minimised
+        # contributes none of the text either rule looks for. T01 therefore planned
+        # against a window that already existed and was failed for not opening anything,
+        # and T05's "the marker is gone" cannot be told from "the window is not visible".
+        # These two lists are the machine-checkable half of those preconditions.
+        if options.execute and options.require_preconditions:
+            for group in task.forbids_processes:
+                found = match_processes(known_processes(group))
+                if found:
+                    return self._blocked(
+                        task,
+                        options,
+                        f"the run assumes no {group} is running, but these are: "
+                        f"{', '.join(found)}. Text on screen cannot show this - a "
+                        f"window behind another one carries no text - so the plan would "
+                        f"be written against a window that already exists and the run "
+                        f"could not be credited with opening it. Close them first.",
+                        timings=timings,
+                    )
+            for group in task.requires_processes:
+                if not match_processes(known_processes(group)):
+                    return self._blocked(
+                        task,
+                        options,
+                        f"the run needs a {group} to be running, and none of "
+                        f"{', '.join(known_processes(group))} is. Start one, put it in "
+                        f"the foreground, and re-run.",
+                        timings=timings,
+                    )
+
+        # 1b. A real run must not start from a screen where the goal already holds.
         #
         # A dry run is exempt on purpose: it dispatches nothing and its verdict is
         # already forced to inconclusive, so the guard would only stop the pipeline

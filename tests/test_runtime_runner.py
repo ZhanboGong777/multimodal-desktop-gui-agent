@@ -18,6 +18,7 @@ import pytest
 from gui_agent.planning.planner import PlanResult
 from gui_agent.planning.schemas import PlanStep, TaskPlan
 from gui_agent.recording import RunSession
+from gui_agent.runtime import runner as runner_module
 from gui_agent.runtime.action_adapter import ActionAdapter
 from gui_agent.runtime.recorder import TaskRecorder
 from gui_agent.runtime.runner import TaskRunner, explain_model_failure
@@ -212,6 +213,122 @@ def test_a_task_without_a_success_rule_is_blocked(tmp_path: Path) -> None:
 
     assert result.status == "blocked"
     assert executor.actions == []
+
+
+def test_a_run_that_forbids_a_process_is_blocked_before_it_plans(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """T01's "no browser window is open", answered by the operating system.
+
+    The screen cannot answer it: a browser behind another window carries none of the
+    text T01 looks for, so the text check passed and the run planned against a window
+    that already existed. This is the check that stops it, and it has to fire before a
+    model call is spent.
+    """
+    monkeypatch.setattr(runner_module, "match_processes", lambda names: ["msedge.exe"])
+    plan = _plan(PlanStep(step_id="s1", description="click", action_type="click",
+                          target_text="Microsoft Edge"))
+    task = TaskSpec(
+        case_id="T01",
+        instruction="open the browser",
+        success_rules=["a browser window is in the foreground"],
+        expect_text=["http"],
+        forbids_processes=["browser"],
+    )
+    planner = FakePlanner(plan)
+    executor = FakeExecutor()
+    runner, _ = _runner(tmp_path, FakeObserver([_frame("obs-0001", ("desktop",))]),
+                        planner, executor)
+
+    result = runner.run(task, ExecutionOptions(execute=True, confirm=False))
+
+    assert result.status == "blocked"
+    assert executor.actions == [], "nothing may be dispatched"
+    assert planner.contexts == [], "no model call may be spent on a run that cannot count"
+    assert "no browser is running" in result.notes[0]
+    assert "msedge.exe" in result.notes[0], "the note names what was actually found"
+
+
+def test_the_same_run_proceeds_when_no_browser_is_running(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(runner_module, "match_processes", lambda names: [])
+    plan = _plan(
+        PlanStep(step_id="s1", description="click", action_type="click",
+                 target_text="Microsoft Edge"),
+        PlanStep(step_id="s2", description="finish", action_type="finish"),
+    )
+    task = TaskSpec(
+        case_id="T01",
+        instruction="open the browser",
+        success_rules=["a browser window is in the foreground"],
+        expect_text=["http"],
+        forbids_processes=["browser"],
+    )
+    frames = [
+        _frame("obs-0001", ("desktop",)),
+        _frame("obs-0002", ("Microsoft Edge",)),
+        _frame("obs-0003", ("Microsoft Edge", "http search")),
+    ]
+    planner = FakePlanner(plan)
+    executor = FakeExecutor()
+    runner, _ = _runner(tmp_path, FakeObserver(frames), planner, executor)
+
+    result = runner.run(task, ExecutionOptions(execute=True, confirm=False))
+
+    assert planner.contexts, "the plan was asked for once the precondition held"
+    assert result.status == "succeeded"
+
+
+def test_a_run_that_requires_a_process_is_blocked_when_it_is_absent(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """T02 is meaningless without a browser, and that is a fact about the machine."""
+    monkeypatch.setattr(runner_module, "match_processes", lambda names: [])
+    task = TaskSpec(
+        case_id="T02",
+        instruction="search the web",
+        success_rules=["a results page is loaded"],
+        expect_text=["GUI agent research"],
+        requires_processes=["browser"],
+    )
+    planner = FakePlanner(_plan())
+    runner, _ = _runner(tmp_path, FakeObserver([_frame("obs-0001", ("desktop",))]),
+                        planner, FakeExecutor())
+
+    result = runner.run(task, ExecutionOptions(execute=True, confirm=False))
+
+    assert result.status == "blocked"
+    assert "needs a browser to be running" in result.notes[0]
+
+
+def test_the_process_check_is_skipped_when_preconditions_are_off(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The switch that turns the guard off has to turn all of it off."""
+    monkeypatch.setattr(runner_module, "match_processes", lambda names: ["msedge.exe"])
+    plan = _plan(
+        PlanStep(step_id="s1", description="click", action_type="click", target_text="Edge"),
+        PlanStep(step_id="s2", description="finish", action_type="finish"),
+    )
+    task = TaskSpec(
+        case_id="T01",
+        instruction="open the browser",
+        success_rules=["a browser window is in the foreground"],
+        expect_text=["http"],
+        forbids_processes=["browser"],
+    )
+    frames = [
+        _frame("obs-0001", ("desktop",)),
+        _frame("obs-0002", ("Edge",)),
+        _frame("obs-0003", ("Edge", "http")),
+    ]
+    runner, _ = _runner(tmp_path, FakeObserver(frames), FakePlanner(plan), FakeExecutor())
+
+    result = runner.run(task, ExecutionOptions(execute=True, confirm=False,
+                                               require_preconditions=False))
+
+    assert result.status == "succeeded"
 
 
 def test_an_action_failure_stops_the_run(tmp_path: Path) -> None:

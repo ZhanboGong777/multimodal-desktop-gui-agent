@@ -65,6 +65,13 @@ def _cases() -> dict[str, TaskSpec]:
                 "a browser window is in the foreground with an address bar or tab strip",
             ],
             expect_text=["http", "search"],
+            # The machine-checkable half of "no browser window is open". Text cannot
+            # answer it: a browser behind another window, or minimised, contributes none
+            # of the text this rule looks for, so a text check called it absent while it
+            # was running - and T01 then planned against the window that already
+            # existed, which is how it failed three times on the Windows node while both
+            # its words and the model's plan were correct.
+            forbids_processes=["browser"],
             risk="low",
         ),
         "T02": TaskSpec(
@@ -76,6 +83,10 @@ def _cases() -> dict[str, TaskSpec]:
                 "a results page is loaded and the query text is visible",
             ],
             expect_text=["GUI agent research"],
+            # The other direction of the same check: T02 is meaningless without a
+            # browser to search in, and "is one running" is a fact about the machine
+            # rather than something to read off the screen.
+            requires_processes=["browser"],
             risk="low",
         ),
         "T03": TaskSpec(
