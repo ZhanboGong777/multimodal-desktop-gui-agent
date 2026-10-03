@@ -1,0 +1,49 @@
+{
+  "run_id": "T02_20261003_173909",
+  "case_id": "T02",
+  "instruction": "Search the web for GUI agent research",
+  "status": "failed",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "step-1",
+      "description": "Open browser",
+      "action_type": "click",
+      "observation_id": "obs-0002",
+      "resolved": null,
+      "action_result": null,
+      "verification": null,
+      "error": "no element matches 'browser' in obs-0002",
+      "elapsed_ms": 2047.000000020489,
+      "after_observation_id": null
+    }
+  ],
+  "verification": null,
+  "error": null,
+  "elapsed_ms": 111359.99999998603,
+  "execute": true,
+  "model_name": "qwen2.5vl:7b",
+  "provider": "openai_compatible",
+  "notes": [
+    "planned 1 steps from obs-0001",
+    "step-1: no element matches 'browser' in obs-0002"
+  ],
+  "task_id": "T02",
+  "commit": "2587642",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 2560x1600, control 2560x1600",
+  "started_at": "2026-10-03T07:39:09.722211Z",
+  "finished_at": "2026-10-03T07:41:01.082211Z",
+  "planning_attempts": 1,
+  "model_requests": 1,
+  "planning_ms": 98625.0,
+  "confirmation_ms": 10687.999999965541,
+  "execution_ms": 2047.000000020489,
+  "evidence_directory": "outputs\\week4\\T02_20261003_173909",
+  "stop_reason": "step-1: no element matches 'browser' in obs-0002",
+  "error_type": "",
+  "failed_step_id": "step-1",
+  "action_count": 0
+}

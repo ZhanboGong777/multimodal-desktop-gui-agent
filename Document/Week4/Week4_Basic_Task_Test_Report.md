@@ -47,11 +47,16 @@ failure is two attempts, and only the runs whose summary reads `succeeded` with
 
 | Case | Task | Preconditions before the run | Attempts | Successes | Status | Verification method | Timing basis | Evidence |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| T01 | open the browser | desktop visible and launch entry uncovered; **no browser window open** | 0 | 0 | not run | automatic: `http` and `search` both on screen | from the confirmation gate to the final verdict (`execution_ms`); the summary also keeps `planning_ms`, `confirmation_ms` and the whole-run `elapsed_ms`, and the run directory keeps `warmup.json` for the cold and warm numbers, which are deliberately not part of any of them | — |
-| T02 | search the web | a browser window is open and focused | 0 | 0 | not run | automatic: the query text is on screen | as above | — |
-| T03 | open a specified file | `week4_sample.txt` exists in the week4 test folder (`~/Desktop/week4_test`, or `%USERPROFILE%\Desktop\week4_test`); no file of that name is open | 0 | 0 | not run | automatic: `WEEK4-OPEN-FILE-OK` on screen | as above | — |
-| T04 | send a message | the test conversation is open and holds no earlier message with **this run's** marker; the operator agreed a real message may be sent | 0 | 0 | not run | automatic: this run's marker on screen (the CLI prints it as `marker`) | as above | — |
-| T05 | close the application | `week4_sample.txt` is open in the test application, so the marker is on screen; window focused | 0 | 0 | not run | automatic: `WEEK4-OPEN-FILE-OK` **gone** | as above | — |
+| T01 | open the browser | desktop visible and launch entry uncovered; **no browser window open** | 2 | **0** | failed | automatic: `http` and `search` both on screen | from the confirmation gate to the final verdict (`execution_ms`); the summary also keeps `planning_ms`, `confirmation_ms` and the whole-run `elapsed_ms`, and the run directory keeps `warmup.json` for the cold and warm numbers, which are deliberately not part of any of them | `T01_20261003_172642`, `T01_20261003_180109` |
+| T02 | search the web | a browser window is open and focused | 1 | **0** | failed | automatic: the query text is on screen | as above | `T02_20261003_173909` |
+| T03 | open a specified file | `week4_sample.txt` exists in the week4 test folder (`~/Desktop/week4_test`, or `%USERPROFILE%\Desktop\week4_test`); no file of that name is open | 1 | **0** | failed | automatic: `WEEK4-OPEN-FILE-OK` on screen | as above | `T03_20261003_174110` |
+| T04 | send a message | the test conversation is open and holds no earlier message with **this run's** marker; the operator agreed a real message may be sent | 1 | **0** | failed | automatic: this run's marker on screen (the CLI prints it as `marker`) | as above | `T04_20261003_174709` |
+| T05 | close the application | `week4_sample.txt` is open in the test application, so the marker is on screen; window focused | 6 | **0** | failed (1 `timed_out`, 3 `blocked`, 2 `failed`) | automatic: `WEEK4-OPEN-FILE-OK` **gone** | as above | `T05_20261003_174334`, `T05_20261003_180229`, `T05_20261003_180511`, `T05_20261003_181018`, `T05_20261003_182259`, `T05_20261003_182640` |
+
+**These are the first real runs of the five cases on any machine.** `succeeded` with
+`execute=true` was never reached, so **no case counts as a success**. Every attempt is
+listed below with the outcome that was actually written; nothing was deleted, and the
+dry-run passes in §"Dry runs" are not counted as attempts or successes.
 
 ### Why the preconditions are not optional
 
@@ -71,6 +76,88 @@ make the case single-use: the previous run's message is still in the conversatio
 so the rule would already be satisfied and the run would be refused over a message
 it did not send.
 
+## Every attempt, with the outcome it actually recorded
+
+Windows node, commit `2587642`, `qwen2.5vl:7b` at `context_length = 16384`, warm start
+before the runs. Times are milliseconds from each `task_summary.json`.
+
+### T01 - open the browser
+
+| # | run id | status | actions | execution_ms | what stopped it |
+| --- | --- | --- | --- | --- | --- |
+| 1 | `T01_20261003_172642` | failed | 0 | 1 454 | `step-1: 2 elements match 'msedge' (obs-0002-e033:'msedge', obs-0002-e048:'msedge'); refusing to pick one arbitrarily` |
+| 2 | `T01_20261003_180109` | failed | **3** | 9 375 | `step-3: expected result not observed: 'Task completed'` |
+
+Attempt 2 is the informative one: three actions were dispatched and step 1 verified -
+`expected result observed: browser` - so a browser did come to the foreground. It then
+clicked `Close PowerShell` and finally `Finish`, whose expected result `Task completed`
+is a phrase the screen never carries. The run stopped there instead of continuing from
+a step whose result was not observed.
+
+### T02 - search the web
+
+| # | run id | status | actions | execution_ms | what stopped it |
+| --- | --- | --- | --- | --- | --- |
+| 1 | `T02_20261003_173909` | failed | 0 | 2 047 | `step-1: no element matches 'browser' in obs-0002` |
+
+The plan asked to click `browser`; no element on screen carried that text.
+
+### T03 - open a specified file
+
+| # | run id | status | actions | execution_ms | what stopped it |
+| --- | --- | --- | --- | --- | --- |
+| 1 | `T03_20261003_174110` | failed | 0 | 1 922 | `step-1: type_text requires a non-empty arguments.text` |
+
+The plan chose `type_text` for `week4_sample.txt` but supplied no text, so nothing could
+be dispatched.
+
+### T04 - send a message
+
+| # | run id | status | actions | execution_ms | what stopped it |
+| --- | --- | --- | --- | --- | --- |
+| 1 | `T04_20261003_174709` | failed | **1** | 6 062 | `step-2: type_text requires a non-empty arguments.text` |
+
+Step 1 was a real, dispatched click (`dry_run: false`) that the step-level check passed -
+`expected result observed: conversation`. Step 2 wanted to type and supplied no text, so
+the marker was never entered. **No message was sent.**
+
+### T05 - close the application
+
+| # | run id | status | actions | execution_ms | what stopped it |
+| --- | --- | --- | --- | --- | --- |
+| 1 | `T05_20261003_174334` | failed | 0 | 1 718 | `step-1: 5 elements match 'x' (...); refusing to pick one arbitrarily` |
+| 2 | `T05_20261003_180229` | blocked | 0 | 2 078 | `the success rule already holds on the untouched screen` |
+| 3 | `T05_20261003_180511` | blocked | 0 | 1 109 | same |
+| 4 | `T05_20261003_181018` | **timed_out** | 0 | 0 | the confirmation prompt was never answered |
+| 5 | `T05_20261003_182259` | blocked | 0 | 2 391 | `the success rule already holds on the untouched screen` |
+| 6 | `T05_20261003_182640` | failed | **1** | 12 906 | `task verification: still on screen but should be gone: WEEK4-OPEN-FILE-OK` |
+
+Attempts 2, 3 and 5 were blocked because the frame did not contain the marker: the
+test application was open but **not foregrounded**, so it was not in the capture. A
+controlled check on this machine showed the difference directly:
+
+```text
+notepad open but behind other windows  -> frame contains WEEK4-OPEN-FILE-OK : NO
+after bringing notepad to the foreground -> frame contains WEEK4-OPEN-FILE-OK : YES
+```
+
+Attempt 4 hid the operator's console window so it could not appear in the frame;
+hiding it also hid the confirmation prompt, which then could not be answered, and the
+run ended `timed_out` after its budget. Attempt 6 moved the console **off the virtual
+screen** instead (still a real console, still answerable), foregrounded Notepad first,
+and verified the marker was in frame before spending a model call. That attempt ran the
+whole loop and dispatched one click at (2089, 25) on a 2560-wide screen. The close
+control sits near x = 2540, so the click missed it, and the final observation still
+carried Notepad's status-bar text (`Unix (LF)`, `100%`, `18:27`). The window was
+minimised rather than closed - which the pass criteria in §"How success is judged"
+explicitly exclude.
+
+### What was not attempted
+
+* T04 was never run with the operator agreeing to a real send beyond the one run above,
+  which failed before typing anything. No message was ever sent on this machine.
+* No case was re-run after its last failure to try to turn it into a success.
+
 ## Metrics
 
 The definitions from the hand-off, so a reader does not have to guess what the
@@ -83,6 +170,30 @@ mean execution time of successful tasks = sum(execution_ms of successes) / succe
 
 mean time over all attempts = sum(execution_ms of all formal attempts) / attempts
 ```
+
+### Computed from the runs above
+
+| Metric | Value |
+| --- | --- |
+| formal real attempts | **11** (2 + 1 + 1 + 1 + 6) |
+| successes (`succeeded` and `execute=true`) | **0** |
+| real-task success rate | **0 / 11 = 0 %** |
+| mean execution time of successful tasks | **undefined** - there were no successes |
+| mean `execution_ms` over all attempts | **3 731 ms** |
+| mean `planning_ms` over all attempts | **44 351 ms** |
+| total actions actually dispatched | **5** (T01: 3, T04: 1, T05: 1) |
+| actions that passed their step-level check | **4** of those 5 |
+| runs that reached the goal rule at all | 2 (T01 attempt 2, T05 attempt 6) |
+
+Two caveats on the timing figures, because they are easy to misread:
+
+* `mean planning_ms` is inflated by memory pressure, not by the model. This machine had
+  1.4-2.5 GB of free physical memory during the runs, so the 6 GB vision model was
+  partly paged out; single planning calls took 88-111 s instead of the ~13 s the model
+  achieves when memory is free. See `Document/Week3`'s timeout experiment for the same
+  effect measured in isolation.
+* `mean execution_ms` averages over runs that dispatched nothing. It is a measure of
+  the harness, not of desktop control.
 
 1. Dry runs and scripted runs are counted separately and never enter these
    numbers. `task_summary.json` records `execute`, so the split is checkable

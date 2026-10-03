@@ -1,0 +1,49 @@
+{
+  "run_id": "T01_20261003_172642",
+  "case_id": "T01",
+  "instruction": "Open the web browser from the desktop",
+  "status": "failed",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "step-1",
+      "description": "Open the web browser",
+      "action_type": "click",
+      "observation_id": "obs-0002",
+      "resolved": null,
+      "action_result": null,
+      "verification": null,
+      "error": "2 elements match 'msedge' (obs-0002-e033:'msedge', obs-0002-e048:'msedge'); refusing to pick one arbitrarily",
+      "elapsed_ms": 1438.0000000237487,
+      "after_observation_id": null
+    }
+  ],
+  "verification": null,
+  "error": null,
+  "elapsed_ms": 59516.00000000326,
+  "execute": true,
+  "model_name": "qwen2.5vl:7b",
+  "provider": "openai_compatible",
+  "notes": [
+    "planned 1 steps from obs-0001",
+    "step-1: 2 elements match 'msedge' (obs-0002-e033:'msedge', obs-0002-e048:'msedge'); refusing to pick one arbitrarily"
+  ],
+  "task_id": "T01",
+  "commit": "2587642",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 2560x1600, control 2560x1600",
+  "started_at": "2026-10-03T07:26:42.689047Z",
+  "finished_at": "2026-10-03T07:27:42.205047Z",
+  "planning_attempts": 1,
+  "model_requests": 1,
+  "planning_ms": 18000.0,
+  "confirmation_ms": 40061.99999997625,
+  "execution_ms": 1454.0000000270084,
+  "evidence_directory": "outputs\\week4\\T01_20261003_172642",
+  "stop_reason": "step-1: 2 elements match 'msedge' (obs-0002-e033:'msedge', obs-0002-e048:'msedge'); refusing to pick one arbitrarily",
+  "error_type": "",
+  "failed_step_id": "step-1",
+  "action_count": 0
+}

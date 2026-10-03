@@ -1,0 +1,249 @@
+{
+  "run_id": "T01_20261003_180109",
+  "case_id": "T01",
+  "instruction": "Open the web browser from the desktop",
+  "status": "failed",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "step-1",
+      "description": "Open default browser",
+      "action_type": "click",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "step-1",
+        "action": {
+          "action_type": "click",
+          "x": 711,
+          "y": 466,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "dsh web: opening the default browser; pass"
+        },
+        "element_id": "obs-0002-e029",
+        "screenshot_point": {
+          "x": 711,
+          "y": 466
+        },
+        "control_point": {
+          "x": 711,
+          "y": 466
+        },
+        "note": "text 'dsh web: opening the default browser; pass' -> obs-0002-e029"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "click",
+          "x": 711,
+          "y": 466,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "dsh web: opening the default browser; pass"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: browser",
+        "evidence": {
+          "observation_id": "obs-0003",
+          "changed": false,
+          "element_count": 60,
+          "expectation_tokens": [
+            "browser",
+            "opens"
+          ],
+          "expectation_hits": [
+            "browser"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 3108.9999999967404,
+      "after_observation_id": "obs-0003"
+    },
+    {
+      "index": 2,
+      "step_id": "step-2",
+      "description": "Close PowerShell",
+      "action_type": "click",
+      "observation_id": "obs-0004",
+      "resolved": {
+        "step_id": "step-2",
+        "action": {
+          "action_type": "click",
+          "x": 543,
+          "y": 492,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Windows PowerShell"
+        },
+        "element_id": "obs-0004-e050",
+        "screenshot_point": {
+          "x": 543,
+          "y": 492
+        },
+        "control_point": {
+          "x": 543,
+          "y": 492
+        },
+        "note": "text 'Windows PowerShell' -> obs-0004-e050"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "click",
+          "x": 543,
+          "y": 492,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Windows PowerShell"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: powershell, window",
+        "evidence": {
+          "observation_id": "obs-0005",
+          "changed": false,
+          "element_count": 60,
+          "expectation_tokens": [
+            "powershell",
+            "window",
+            "closes"
+          ],
+          "expectation_hits": [
+            "powershell",
+            "window"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 3108.9999999967404,
+      "after_observation_id": "obs-0005"
+    },
+    {
+      "index": 3,
+      "step_id": "step-3",
+      "description": "Finish",
+      "action_type": "click",
+      "observation_id": "obs-0006",
+      "resolved": {
+        "step_id": "step-3",
+        "action": {
+          "action_type": "click",
+          "x": 459,
+          "y": 520,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "finish"
+        },
+        "element_id": "obs-0006-e012",
+        "screenshot_point": {
+          "x": 459,
+          "y": 520
+        },
+        "control_point": {
+          "x": 459,
+          "y": 520
+        },
+        "note": "text 'finish' -> obs-0006-e012"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "click",
+          "x": 459,
+          "y": 520,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "finish"
+        }
+      },
+      "verification": {
+        "outcome": "failed",
+        "method": "automatic",
+        "detail": "expected result not observed: 'Task completed'",
+        "evidence": {
+          "observation_id": "obs-0007",
+          "changed": false,
+          "element_count": 60,
+          "expectation_tokens": [
+            "task",
+            "completed"
+          ],
+          "expectation_hits": []
+        }
+      },
+      "error": null,
+      "elapsed_ms": 3125.0,
+      "after_observation_id": "obs-0007"
+    }
+  ],
+  "verification": null,
+  "error": null,
+  "elapsed_ms": 51562.99999996554,
+  "execute": true,
+  "model_name": "qwen2.5vl:7b",
+  "provider": "openai_compatible",
+  "notes": [
+    "planned 3 steps from obs-0001",
+    "step-3: expected result not observed: 'Task completed'; stopping rather than continuing from a step whose result was not observed"
+  ],
+  "task_id": "T01",
+  "commit": "2587642",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 2560x1600, control 2560x1600",
+  "started_at": "2026-10-03T08:01:09.346223Z",
+  "finished_at": "2026-10-03T08:02:00.909223Z",
+  "planning_attempts": 1,
+  "model_requests": 1,
+  "planning_ms": 19891.00000000326,
+  "confirmation_ms": 22296.99999996228,
+  "execution_ms": 9375.0,
+  "evidence_directory": "outputs\\week4\\T01_20261003_180109",
+  "stop_reason": "step-3: expected result not observed: 'Task completed'; stopping rather than continuing from a step whose result was not observed",
+  "error_type": "",
+  "failed_step_id": null,
+  "action_count": 3
+}

@@ -1,0 +1,25 @@
+CORRECTION
+
+An earlier version of this note said this run never produced task_summary.json. That
+was wrong, and it is corrected here rather than deleted.
+
+What actually happened: the console window was hidden before the run so that the
+window could not appear in the captured frame. Hiding the window also hid the CLI's
+confirmation prompt, so the prompt could never be answered. The run did not die at
+once - it ran to the end of its budget and only then wrote its verdict:
+
+    task_summary.json written at 18:21:24, about 11 minutes after the run started
+    status       : timed_out
+    execute      : True
+    action_count : 0
+    execution_ms : 0
+    stop_reason  : planned 1 steps from obs-0001
+    notes        : ['planned 1 steps from obs-0001']
+
+So this attempt is a real, recorded outcome (timed_out), not a missing one.
+task_summary.json in this directory is the authoritative record.
+
+Lesson: hiding the console is not a workable way to keep it out of the frame - it
+removes the operator's ability to answer the confirmation, which the CLI correctly
+refuses to assume. Moving the window OFF the screen keeps it answerable and keeps it
+out of the frame; that is what attempt 6 did, and it is the approach that worked.

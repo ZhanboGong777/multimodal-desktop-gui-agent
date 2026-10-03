@@ -1,0 +1,75 @@
+{
+  "captured_at": "2026-10-03T08:00:13.957603+00:00",
+  "provider": "openai_compatible",
+  "model_name": "qwen2.5vl:7b",
+  "base_url": "http://127.0.0.1:11434/v1",
+  "screenshot": "D:\\Developer\\multimodal-desktop-gui-agent\\outputs\\week4\\warmup\\monitor1_20261003_175953_165.png",
+  "screenshot_captured_here": true,
+  "timeout_seconds": 120.0,
+  "max_retries_configured": 0,
+  "memory_available_mb_before": 11173.4,
+  "memory_available_mb_after": 8580.1,
+  "ready": true,
+  "probes": [
+    {
+      "kind": "text",
+      "state": "cold-or-idle",
+      "ok": true,
+      "latency_ms": 11615.0,
+      "timeout_seconds": 120.0,
+      "error": null,
+      "failure_class": null,
+      "content": "Ready",
+      "usage": {
+        "prompt_tokens": 26,
+        "completion_tokens": 2,
+        "total_tokens": 28
+      }
+    },
+    {
+      "kind": "image",
+      "state": "vision-path",
+      "ok": true,
+      "latency_ms": 8047.6,
+      "timeout_seconds": 120.0,
+      "error": null,
+      "failure_class": null,
+      "content": "The dominant color or background of the screenshot is black.",
+      "usage": {
+        "prompt_tokens": 4095,
+        "completion_tokens": 12,
+        "total_tokens": 4107
+      }
+    },
+    {
+      "kind": "image",
+      "state": "warm-repeat",
+      "ok": true,
+      "latency_ms": 540.2,
+      "timeout_seconds": 120.0,
+      "error": null,
+      "failure_class": null,
+      "content": "The dominant color or background of the screenshot is black.",
+      "usage": {
+        "prompt_tokens": 4095,
+        "completion_tokens": 12,
+        "total_tokens": 4107
+      }
+    },
+    {
+      "kind": "image",
+      "state": "warm",
+      "ok": true,
+      "latency_ms": 537.9,
+      "timeout_seconds": 120.0,
+      "error": null,
+      "failure_class": null,
+      "content": "The dominant color or background of the screenshot is black.",
+      "usage": {
+        "prompt_tokens": 4095,
+        "completion_tokens": 12,
+        "total_tokens": 4107
+      }
+    }
+  ]
+}
