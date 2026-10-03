@@ -170,3 +170,19 @@ def test_the_example_is_a_plan_the_parser_accepts() -> None:
     plan = parse_plan(json.dumps(json.loads(_JSON_EXAMPLE)), instruction="t", max_steps=5)
     assert plan.steps and plan.steps[-1].action_type == "click"
     assert plan.assumptions == []
+
+
+def test_the_example_shows_how_to_name_an_element() -> None:
+    """The shape a model copies is the shape it produces.
+
+    The example's `arguments` was `{}`, so nothing showed how to name an element -
+    and on the Windows review machine the model wrote `target_text` for every step.
+    One of those was a label OCR had read twice, which the adapter refused as
+    ambiguous, and two more were the model's own description of what it meant
+    ('browser', 'week4 test application'), which matched nothing on screen. Three
+    failures out of ten trace to a field the example left empty.
+    """
+    assert '"element_id":"obs-0001-e003"' in _JSON_EXAMPLE, _JSON_EXAMPLE
+    assert '"arguments":{}' not in _JSON_EXAMPLE, "an empty example teaches empty"
+    # And the rule says why an id is worth preferring over a label.
+    assert "ids are unique" in SYSTEM_PROMPT
