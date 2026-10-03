@@ -100,7 +100,7 @@ python scripts/check_environment.py
 python -m pytest -q
 ```
 
-**期望：`578 passed`**（Mac 上就是这个数，见 §9 若数字不同的处理）。
+**期望：`579 passed`**（Mac 上就是这个数，见 §9 若数字不同的处理）。
 
 ### 3.2 十二个新文件的测试
 
@@ -113,7 +113,7 @@ python -m pytest -q tests/test_action_adapter.py tests/test_runtime_runner.py `
     tests/test_week4_warmup.py tests/test_week4_demo.py
 ```
 
-**期望：`220 passed`。**
+**期望：`221 passed`。**
 
 ### 3.3 离线闭环演示
 
@@ -320,7 +320,7 @@ Get-Content outputs\week4\T01_*\task_summary.json | Select-String '"status"|"exe
 | 现象 | 成因 | 处理 |
 |---|---|---|
 | `Test-Path scripts\week4_warmup.py` 为 False | 推送还没到 | 停下，让用户先 push |
-| 测试数不是 `578` / `220` | 代码版本不对（可能是旧提交） | 报出 `git log --oneline -1` 的提交号，**不要**自行解释成"环境差异" |
+| 测试数不是 `579` / `221` | 代码版本不对（可能是旧提交） | 报出 `git log --oneline -1` 的提交号，**不要**自行解释成"环境差异" |
 | `monitor_index 1 is out of range (available 1..0)` | **两个成因**：屏幕休眠/锁定，或进程根本看不到屏幕 | 判据是 `available 1..0`（只剩索引 0 的聚合伪显示器且尺寸 `0x0`）：那是权限/远程会话问题，**唤醒屏幕没用**。先跑 §2.2 |
 | `the first frame had no readable text` | 先看它**上面那行** `observation: ...` | 写着 `ocr unavailable` / `tesseract is not installed` → 回 §2.1 装 exe（唤醒屏幕没用）；没有 `observation:` 行才是锁屏/黑屏 |
 | `ocr unavailable: Tesseract failed: ...` | OCR 引擎没起来 | 回 §2.1 |
