@@ -1477,3 +1477,33 @@ def test_typed_text_is_masked_in_every_artefact_that_carries_it(tmp_path: Path) 
     assert f"({len(secret)} chars)" in record["resolved"]["action"]["text"], (
         "the length is kept so a failed step can still be diagnosed"
     )
+
+
+def test_a_blocked_run_says_what_it_saw(tmp_path: Path) -> None:
+    """The blocked note carries its evidence, not only its conclusion.
+
+    "The success rule already holds" is true both when the application was closed
+    and when it is merely behind another window, and those need different things
+    from the operator: one is a finished task, the other an unready desktop. The
+    Windows round had to parse obs-NNNN.json by hand to tell them apart, because
+    the note named neither the elements nor the errors.
+    """
+    # T05's rule is that the marker is gone; a frame without it satisfies the rule
+    # before anything has been done, which is exactly when this guard fires.
+    frames = [_frame("obs-0001", ("Desktop", "Notepad", "Files"))]
+    runner, _ = _runner(tmp_path, FakeObserver(frames), FakePlanner(_plan()), FakeExecutor())
+    task = TaskSpec(
+        case_id="T05",
+        instruction="close the app",
+        preconditions=["week4_sample.txt is open in the test application"],
+        forbid_text=["WEEK4-OPEN-FILE-OK"],
+        success_rules=["the application's window is gone"],
+    )
+
+    result = runner.run(task, ExecutionOptions(execute=True, confirm=True), confirm=lambda _p: True)
+
+    assert result.status == "blocked"
+    note = result.stop_reason
+    assert "already holds on the untouched screen" in note
+    assert "elements read" in note, note
+    assert "Notepad" in note, "the operator needs to see what was on screen"

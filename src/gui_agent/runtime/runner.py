@@ -253,11 +253,21 @@ class TaskRunner:
         if options.execute and options.require_preconditions and task.preconditions:
             precondition = self.verifier.check_task(task, initial)
             if precondition.outcome == "passed":
+                # The note carries what was actually seen, not only the conclusion.
+                # "The rule already holds" is true both when the application was
+                # closed and when it is merely behind another window (or its text
+                # was not read), and those need different things from the operator -
+                # one is a finished task, the other is an unready desktop. Without
+                # the evidence the reviewer has to parse obs-NNNN.json to tell them
+                # apart, which is what the Windows round had to do.
+                seen = [item.text.strip() for item in initial.elements if item.text.strip()][:8]
                 return self._blocked(
                     task,
                     options,
                     "the success rule already holds on the untouched screen "
-                    f"({precondition.detail}); this run cannot be credited with it",
+                    f"({precondition.detail}); this run cannot be credited with it. "
+                    f"Evidence: {len(initial.elements)} elements read, "
+                    f"{len(initial.errors)} observation error(s); first text seen: {seen}",
                     timings=timings,
                 )
 

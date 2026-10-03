@@ -111,9 +111,9 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **577 passed**, ruff clean |
+| MacBook Air M2 | **578 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 277: 219 in the
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 278: 220 in the
 twelve files below, and 58 spread across the other suites -
 `test_control_safety.py` 15, `test_model_mock.py` 14, `test_ocr.py` 7 (five of them
 the Windows-only OCR workarounds), `test_config.py` 7 (a new file),
@@ -204,7 +204,7 @@ behaviour needed no change: blocked, nothing dispatched, exit 2, no traceback.
 | Test file | Covers |
 | --- | --- |
 | `test_action_adapter.py` | 34 cases: unique, ambiguous, missing and stale targets, a target split across word-level elements, parameter errors including wrong types, out-of-range coordinates, key whitelist, platform hotkeys, coordinate scaling, `finish` refusal |
-| `test_runtime_runner.py` | 57 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, the guard that refuses to start a real run whose goal already holds, the second confirmation a risky task must get, the provenance the summary carries, and the note a frame with no readable text leaves |
+| `test_runtime_runner.py` | 58 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, the guard that refuses to start a real run whose goal already holds, the second confirmation a risky task must get, the provenance the summary carries, and the note a frame with no readable text leaves |
 | `test_runtime_verification.py` | 15 cases: rule matching, forbidden text, unverifiable tasks, degraded observations, the two case rules that have to tell a real result from a lookalike, and the screen going away while polling |
 | `test_runtime_observation.py` | 11 cases: the whole of `observe()` against a prepared frame - ids, geometry, the OCR-failure record, the element cap - plus what a prompt line carries |
 | `test_runtime_recording.py` | 15 cases: redaction, append-only steps, per-frame files, summary, and where the provenance comes from |
@@ -995,6 +995,35 @@ This is the third failure message in the week that named a cause the operator co
 not act on - after the capture error attributed only to a sleeping display, and the
 missing Tesseract binary that read as a locked screen.
 
+**The first real runs are in, and the report says what they are.** Ten attempts on
+the Windows node, five cases, zero successes - recorded as measured, not as
+unmeasured, because this project has spent its whole length insisting those are
+different things. Every attempt is kept, including the three that were blocked
+before anything was dispatched and the one that sent nothing: T04's record shows a
+single click and then a stop on an empty-text step.
+
+The failures are one kind: the plan could not be executed as the model wrote it.
+Two `type_text` steps with no text, two targets that were the model's own
+descriptions rather than anything on screen ('browser', 'week4 test application'),
+one text OCR read twice so the adapter refused to choose between the candidates,
+three precondition blocks, one exhausted budget, one click that missed a close
+button. Nothing crashed and no safety property failed.
+
+The finding worth most is that the model aimed at the terminal's own text: the one
+click T04 dispatched targeted `'Open the test conversation first.'`, a line the CLI
+had printed. The mock never does this - it only chooses among elements matching the
+instruction - so five dry runs and every scripted test were blind to it. The remedy
+is operational, and both manuals now say it.
+
+Two prompt rules follow from the two commonest failures: `target_text` must be a
+list entry copied word for word or left out, and every argument is required, with
+`type_text` never empty. They fit the same measured budget as before (983
+characters of 1 000). The precondition guard's note also carries its evidence now -
+how many elements were read, how many observation errors, and the first text seen -
+because "the rule already holds" is equally true of a closed application and one
+that is merely behind another window, and the Windows round had to parse
+`obs-NNNN.json` by hand to tell those apart.
+
 ## 8. Deliverables
 
 - `src/gui_agent/runtime/` - the run layer (8 modules).
@@ -1006,7 +1035,7 @@ missing Tesseract binary that read as a locked screen.
   `Document/Week4/evidence/`, so a run id in the test report resolves inside the
   repository rather than only on the machine that produced it.
 - `configs/week4.yaml` - Week 4 limits, with `ExecutionConfig` added to `config.py`.
-- 277 new tests.
+- 278 new tests.
 - `Document/Week4/Week4_Usage.md` - flags, the safety model, the record layout.
 - `Document/Week4/Week4_Troubleshooting.md` - forty-two symptoms with what to check
   and what the code actually does about each.
