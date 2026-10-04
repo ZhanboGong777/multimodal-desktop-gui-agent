@@ -1,0 +1,115 @@
+{
+  "run_id": "T02_20261004_153537",
+  "case_id": "T02",
+  "instruction": "Search the web for GUI agent research",
+  "status": "failed",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "step-1",
+      "description": "Open the Google search bar",
+      "action_type": "type_text",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "step-1",
+        "action": {
+          "action_type": "type_text",
+          "x": null,
+          "y": null,
+          "start": null,
+          "end": null,
+          "text": "<redacted>(18 chars)",
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "GUI agent research"
+        },
+        "element_id": null,
+        "screenshot_point": null,
+        "control_point": null,
+        "note": "type 18 chars"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "type_text",
+          "x": null,
+          "y": null,
+          "start": null,
+          "end": null,
+          "text": "<redacted>(20 chars)",
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "GUI agent research"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: search, research",
+        "evidence": {
+          "observation_id": "obs-0003",
+          "changed": true,
+          "element_count": 60,
+          "expectation_tokens": [
+            "search",
+            "results",
+            "agent",
+            "research"
+          ],
+          "expectation_hits": [
+            "search",
+            "research"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 5579.000000027008,
+      "after_observation_id": "obs-0003"
+    }
+  ],
+  "verification": {
+    "outcome": "failed",
+    "method": "automatic",
+    "detail": "expected on screen but not found: GUI agent research",
+    "evidence": {
+      "observation_id": "obs-0008",
+      "missing": [
+        "GUI agent research"
+      ]
+    }
+  },
+  "error": null,
+  "elapsed_ms": 213484.99999998603,
+  "execute": true,
+  "model_name": "qwen2.5vl:7b",
+  "provider": "openai_compatible",
+  "notes": [
+    "ocr: torch is blocked in this process to keep its cuDNN build from clashing with PaddlePaddle.",
+    "planned 1 steps from obs-0001",
+    "task verification: expected on screen but not found: GUI agent research"
+  ],
+  "task_id": "T02",
+  "commit": "",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 2560x1600, control 2560x1600",
+  "started_at": "2026-10-04T04:35:37.977408Z",
+  "finished_at": "2026-10-04T04:39:11.462408Z",
+  "planning_attempts": 1,
+  "model_requests": 1,
+  "planning_ms": 193905.99999995902,
+  "confirmation_ms": 3000.0,
+  "execution_ms": 16579.00000002701,
+  "evidence_directory": "outputs\\week4\\T02_20261004_153537",
+  "stop_reason": "task verification: expected on screen but not found: GUI agent research",
+  "error_type": "",
+  "failed_step_id": null,
+  "action_count": 1
+}
