@@ -66,9 +66,14 @@ def browser_in_frame() -> tuple[bool, list[str]]:
     """Capture, OCR, and report whether the frame looks like a browser window."""
     cfg = load_config(str(REPO / "configs" / "week4.yaml"))
     engine = create_ocr_engine(cfg.perception.ocr)
+    # Absolute, because this script is also called from a scheduled task whose working
+    # directory is not the repository. Measured the hard way: with the relative
+    # "outputs\week4" the probe died with PermissionError on 'outputs' while the case
+    # itself ran fine, because the CLI's launcher sets the repository as its location and
+    # this script did not.
     frame = capture_monitor(
         cfg.perception.monitor_index,
-        output_directory=Path(cfg.output.directory),
+        output_directory=REPO / cfg.output.directory,
         save=True,
     )
     result = engine.engine.recognize(frame.image)
