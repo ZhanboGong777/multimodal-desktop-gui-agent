@@ -125,6 +125,32 @@ _MIN_RUN_TOKENS = 2
 #: ``execution.max_wait_seconds``; this is what a directly constructed adapter uses.
 DEFAULT_MAX_WAIT_SECONDS = 5.0
 
+#: Window classes that mean "this pixel belongs to the desktop". ``FolderView`` is the
+#: shell's icon host (SysListView32 inside it on older builds); ``Progman`` is the
+#: desktop window itself. Both were observed on the Windows node while probing clicks.
+_DESKTOP_CLASSES = ("FolderView", "SysListView32", "Progman", "WorkerW")
+
+#: A desktop shortcut's name, not a sentence. Longer text is a label in a window.
+_MAX_SHORTCUT_LABEL = 40
+
+#: How far above the label the icon starts, as a fraction of the label's width. Measured
+#: on the review machine: 'Microsoft' spans 80 px at y=379, and the shortcut answers a
+#: double-click at y=300, which is 79 px above the label's top - so 0.98 of its width.
+#: The fraction is used rather than a pixel constant because a desktop scaled differently
+#: scales the icon and its label together.
+_ICON_LIFT = 0.98
+
+#: Fraction of the screen width treated as an icon column at each edge. A desktop keeps
+#: its shortcuts in narrow strips; 0.12 of 2560 px is 307 px, which covers the two
+#: columns seen on the review machine (labels ending near x=2513) without reaching into
+#: the middle of the screen where windows live.
+_ICON_COLUMN_FRACTION = 0.12
+
+#: Below this frame width the icon columns are not applied at all. See
+#: :func:`_in_icon_column`: a fraction of a small frame is not a strip at the edge of a
+#: desktop, it is most of the frame.
+_MIN_DESKTOP_WIDTH = 1920
+
 
 def _tokens(text: str) -> list[str]:
     """Word tokens of a label, so 'Summary (required)' -> ['summary', 'required']."""
@@ -249,6 +275,100 @@ def _spatial_runs(
         if _tokens(item.text) == [wanted[0]]:
             walk([item], 1)
     return runs
+
+
+def _desktop_icon_point(ref: ElementRef, screen_width: int | None) -> tuple[Point, str]:
+    """Where to click for ``ref``, lifting a desktop shortcut's label onto its icon.
+
+    A desktop shortcut is drawn as an icon with its name underneath, and OCR sees only
+    the name. The icon's own pixels are therefore *above* the element, and the element's
+    centre is a click on the label: that selects the shortcut and opens nothing.
+
+    Measured on the Windows node, which is what identified this: the Microsoft Edge
+    shortcut's label sits at (2433,379)-(2513,393) with 'Edge' beneath it at
+    (2452,403)-(2494,421), and double-clicking the label's centre at three intervals
+    (0.15 s, 0.30 s, 0.45 s) left the process count at zero every time, while a
+    double-click at y=300 - inside the icon - reached the shortcut. Synthetic input was
+    never the problem: typing into Notepad and the Win key both worked throughout.
+
+    Two guards keep this off ordinary text. The label has to be short, and it has to sit
+    in the left or right strip where a desktop keeps its icon columns - the second guard
+    is what stops the check from firing on a fixture whose coordinates happen to land on
+    a desktop pixel, which it did before the guard existed and which moved a click from
+    y=30 to y=1 in two existing tests. The point is then confirmed to be the shell's own
+    ``FolderView`` rather than an application.
+    """
+    if not ref.text.strip() or len(ref.text) > _MAX_SHORTCUT_LABEL:
+        return ref.center, ""
+    if not screen_width or not _in_icon_column(ref.center.x, screen_width):
+        return ref.center, ""
+    if not _point_is_desktop(ref.center):
+        return ref.center, ""
+    box = ref.bounding_box
+    # The icon is about as tall as the label is wide, and sits directly above it.
+    icon_size = box.right - box.left
+    lifted = Point(x=ref.center.x, y=max(box.top - int(icon_size * _ICON_LIFT), 1))
+    return lifted, (
+        f" (click lifted from the label at y={ref.center.y} to the icon at y={lifted.y})"
+    )
+
+
+def _in_icon_column(x: int, screen_width: int) -> bool:
+    """True when ``x`` is in the left or right strip where a desktop keeps its icons.
+
+    Gated on the frame being a real desktop size. This is the one assumption in the
+    lift, and it is stated rather than hidden: a 2560x1600 desktop keeps shortcuts in
+    narrow edge strips, while a frame whose coordinates are a few hundred pixels across
+    is a fixture or a scaled-down capture, and in those the strip fractions would swallow
+    most of the width. Two existing tests failed exactly that way - a 1470-wide fixture
+    put x=145 inside a 176-pixel strip and moved a click from y=30 to y=1.
+    """
+    if screen_width < _MIN_DESKTOP_WIDTH:
+        return False
+    margin = int(screen_width * _ICON_COLUMN_FRACTION)
+    return x <= margin or x >= screen_width - margin
+
+
+def _screen_width(observation: ObservationSnapshot) -> int | None:
+    """The captured frame's width, or None when the frame does not say.
+
+    The screenshot's own width is used rather than the control width: the element
+    coordinates are in the screenshot's space, so the icon strips have to be measured
+    against the same space.
+    """
+    info = getattr(observation, "screen_info", None)
+    width = getattr(info, "screenshot_width", None)
+    return int(width) if width else None
+
+
+def _point_is_desktop(point: Point) -> bool:
+    """True when the window under ``point`` is the desktop, not an application.
+
+    Best-effort: a non-Windows host, or a failure to load user32, answers False, which
+    leaves the click where it was. Guessing wrong in the other direction would move
+    clicks inside ordinary windows, so the uncertain answer is the conservative one.
+    """
+    if sys.platform != "win32":
+        return False
+    try:
+        import ctypes
+        from ctypes import wintypes
+
+        class POINT(ctypes.Structure):
+            _fields_ = [("x", ctypes.c_long), ("y", ctypes.c_long)]
+
+        user32 = ctypes.windll.user32
+        user32.WindowFromPoint.restype = wintypes.HWND
+        user32.WindowFromPoint.argtypes = [POINT]
+        user32.GetClassNameW.argtypes = [wintypes.HWND, wintypes.LPWSTR, ctypes.c_int]
+        hwnd = user32.WindowFromPoint(POINT(int(point.x), int(point.y)))
+        if not hwnd:
+            return False
+        buffer = ctypes.create_unicode_buffer(256)
+        user32.GetClassNameW(hwnd, buffer, 256)
+        return buffer.value in _DESKTOP_CLASSES
+    except Exception:  # noqa: BLE001 - any failure means "not known to be the desktop"
+        return False
 
 
 def _match_adjacent_runs(
@@ -388,10 +508,11 @@ class ActionAdapter:
         if len(matches) == 1:
             chosen = observation.element(matches[0].element.element_id) or matches[0].element
             ref = _as_ref(chosen, observation)
-            note = f"text {query!r} -> {ref.element_id}"
+            point, offset_note = _desktop_icon_point(ref, _screen_width(observation))
+            note = f"text {query!r} -> {ref.element_id}{offset_note}"
             if rebound_from:
                 note += f" (re-bound from {rebound_from} in an earlier frame)"
-            return ref.center, ref, note
+            return point, ref, note
         if not matches:
             # A word-level backend, or a plan that names two adjacent labels as one
             # target, reaches here with a query that is genuinely on screen but is
@@ -408,12 +529,13 @@ class ActionAdapter:
                     "refusing to pick one arbitrarily"
                 )
             ref = _join_run(runs[0])
-            note = f"text {query!r} -> {ref.element_id}"
+            point, offset_note = _desktop_icon_point(ref, _screen_width(observation))
+            note = f"text {query!r} -> {ref.element_id}{offset_note}"
             if len(runs[0]) > 1:
                 note += f" (joined from {len(runs[0])} adjacent elements)"
             if rebound_from:
                 note += f" (re-bound from {rebound_from} in an earlier frame)"
-            return ref.center, ref, note
+            return point, ref, note
         listed = ", ".join(f"{m.element.element_id}:{m.element.text!r}" for m in matches[:5])
         raise ActionResolutionError(
             f"{len(matches)} elements match {query!r} ({listed}); refusing to pick one arbitrarily"

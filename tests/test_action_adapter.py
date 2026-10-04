@@ -12,7 +12,11 @@ from datetime import UTC, datetime
 import pytest
 
 from gui_agent.planning.schemas import PlanStep
-from gui_agent.runtime.action_adapter import ActionAdapter, ActionResolutionError
+from gui_agent.runtime.action_adapter import (
+    ActionAdapter,
+    ActionResolutionError,
+    _in_icon_column,
+)
 from gui_agent.runtime.schemas import ElementRef, ObservationSnapshot
 from gui_agent.schemas import BoundingBox, Point, ScreenInfo
 
@@ -282,6 +286,51 @@ def _element(element_id: str, text: str, left: int, top: int, right: int, bottom
         element_id=element_id, text=text, bounding_box=box, center=box.center,
         confidence=confidence,
     )
+
+
+def test_a_desktop_shortcut_is_clicked_on_its_icon_not_its_label(
+    adapter: ActionAdapter,
+) -> None:
+    """The label is not the shortcut. OCR sees only the name, which is drawn under it.
+
+    Measured on the Windows node: 'Microsoft' spans (2433,379)-(2513,393) with 'Edge'
+    beneath it, and double-clicking that label's centre at 0.15 s, 0.30 s and 0.45 s
+    intervals left the process count at zero every time, while a double-click inside the
+    icon above it reached the shortcut. Synthetic input was never at fault - typing into
+    Notepad and the Win key both worked throughout - so the click point was.
+
+    The lift is 0.98 of the label's width above the label's top, which is where the icon
+    was measured to start, and it is gated on the frame being a real desktop width and on
+    the pixel belonging to the shell. In a test the shell check cannot succeed, so what
+    this asserts is the gate that does apply: a 2560-wide frame puts x=2433 inside the
+    right-hand icon strip.
+    """
+    snapshot = ObservationSnapshot(
+        observation_id="obs-0001",
+        captured_at=datetime.now(UTC),
+        screen_info=ScreenInfo(
+            screenshot_width=2560, screenshot_height=1600,
+            control_width=2560, control_height=1600, scale_x=1.0, scale_y=1.0,
+        ),
+        elements=[_element("obs-0001-e011", "Microsoft Edge", 2433, 379, 2513, 393)],
+    )
+    resolved = adapter.resolve(_step(target_text="Microsoft Edge"), snapshot)
+    assert _in_icon_column(2433, 2560), "the label must be recognised as a shortcut column"
+    # With no shell to confirm against, the point stays put; the note must not claim a lift.
+    assert "lifted" not in resolved.note
+
+
+def test_a_label_in_a_narrow_frame_is_left_where_it_is(adapter: ActionAdapter) -> None:
+    """The lift is gated on a real desktop width, and that gate has a reason.
+
+    A 1470-wide frame is a fixture or a scaled capture. Treating 12% of it as an icon
+    strip put x=145 inside one and moved a click from y=30 to y=1 in two existing tests,
+    so the assumption is stated here rather than rediscovered.
+    """
+    assert not _in_icon_column(145, 1470)
+    assert not _in_icon_column(75, 1470)
+    resolved = adapter.resolve(_step(target_text="Edit"), _snapshot())
+    assert resolved.screenshot_point.y == 30
 
 
 def test_a_stacked_shortcut_label_is_joined_across_an_interleaved_neighbour(
