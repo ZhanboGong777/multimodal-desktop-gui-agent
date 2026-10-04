@@ -432,12 +432,25 @@ class TaskRunner:
         is bounded twice over by what already existed: `task_timeout_seconds` is re-checked
         before each pass, and `max_planning_attempts` caps the number of passes.
         """
+        # One list for the whole run, not one per pass. A step that could not be resolved is
+        # recorded here and its pass ends; without carrying this across passes, the record of
+        # *why* the run failed would be discarded by the very retry that follows it, and the
+        # result would report no steps at all for a run that plainly took some.
+        steps: list[StepRecord] = []
         result = self._execute_plan_once(
-            task, plan, options, initial, started, notes, planning_attempts, timings=timings
+            task,
+            plan,
+            options,
+            initial,
+            started,
+            notes,
+            planning_attempts,
+            steps=steps,
+            timings=timings,
         )
         passes = 1
         while (
-            result.status != "succeeded"
+            (result is None or result.status != "succeeded")
             and passes < options.max_planning_attempts
             and self.clock() - started <= options.task_timeout_seconds
         ):
@@ -470,9 +483,25 @@ class TaskRunner:
                 started,
                 notes,
                 planning_attempts + passes - 1,
+                steps=steps,
                 timings=timings,
             )
-        return result
+        if result is not None:
+            return result
+        # Every pass ended on a step that could not be resolved, and there are none left. The
+        # run is a failure, and the note naming the step is already in `notes` - this supplies
+        # the verdict that the pass deliberately did not, with the steps that accumulated.
+        return self._finish(
+            task,
+            options,
+            "failed",
+            started,
+            notes,
+            steps,
+            snapshot=initial,
+            planning_attempts=planning_attempts + passes - 1,
+            timings=timings,
+        )
 
     def _execute_plan_once(
         self,
@@ -484,9 +513,10 @@ class TaskRunner:
         notes: list[str],
         planning_attempts: int = 0,
         *,
+        steps: list[StepRecord] | None = None,
         timings: Timings | None = None,
-    ) -> TaskRunResult:
-        steps: list[StepRecord] = []
+    ) -> TaskRunResult | None:
+        steps = [] if steps is None else steps
         current = initial
 
         for index, step in enumerate(plan.steps, start=1):
@@ -552,17 +582,17 @@ class TaskRunner:
                 steps.append(record)
                 self.recorder.append_step(record)
                 notes.append(f"{step.step_id}: {exc}")
-                return self._finish(
-                    task,
-                    options,
-                    "failed",
-                    started,
-                    notes,
-                    steps,
-                    snapshot=initial,
-                    planning_attempts=planning_attempts,
-                    timings=timings,
-                )
+                # The pass ends here, not the run. Measured on T04: the model emitted
+                # `type_text` with no `text`, the adapter refused it, and the whole run was
+                # recorded `failed` with zero actions - when the case's own next attempt
+                # needed only for the model to be asked again. A step that cannot be resolved
+                # says this *plan* cannot be carried out; it does not say the task cannot, and
+                # the caller has a re-planning loop for exactly the difference.
+                #
+                # `exhausted` is how that is signalled: the caller sees no verification result
+                # and decides between another pass and a final failure, so a resolution error
+                # it cannot improve on - and a run with no passes left - still ends properly.
+                return None
 
             record.resolved = resolved
             action_result = self.executor.execute(
