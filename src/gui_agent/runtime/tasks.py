@@ -64,7 +64,15 @@ def _cases() -> dict[str, TaskSpec]:
             success_rules=[
                 "a browser window is in the foreground with an address bar or tab strip",
             ],
-            expect_text=["http", "search"],
+            # Read from a screenshot of the Windows run's last frame, which is what
+            # settled this: the browser *had* opened (Chrome's new-tab page, with its
+            # address bar and the page title '新标签页'), and the rule still failed
+            # because Chrome on a Chinese install shows '在 Google 中搜索，或输入网址',
+            # never the English word 'search'. The only marks present in both locales are
+            # the scheme in a URL tile and the verb in the search box, so those two are
+            # what the rule asks for. The list is an AND: a rule that listed four marks
+            # failed on the three the frame did not carry.
+            expect_text=["http", "搜索"],
             # The machine-checkable half of "no browser window is open". Text cannot
             # answer it: a browser behind another window, or minimised, contributes none
             # of the text this rule looks for, so a text check called it absent while it
