@@ -678,12 +678,30 @@ class ActionAdapter:
             raise ActionResolutionError(
                 f"wait duration must be a number, got {duration!r}"
             ) from exc
-        if not 0 < seconds <= self.max_wait_seconds:
+        # Clamped to the ceiling rather than refused, and the note says so.
+        #
+        # Measured on T02: the model wrote `wait 10.0` against a 5 s ceiling, and because an
+        # ActionResolutionError ends the whole run, a nine-step plan that had already
+        # clicked, typed and submitted the search stopped on a wait. The search did land -
+        # obs-0007 onwards show the results page and its URL - and the run was recorded as
+        # failed with three good actions behind it.
+        #
+        # The other resolution failures are refusals for a reason: a target that is not on
+        # screen, or an argument that is missing, means the step cannot be carried out at
+        # all. Asking to wait *longer* is not that. Waiting longer cannot do the wrong thing
+        # to the screen, so the ceiling is honoured by taking it and saying that is what
+        # happened, instead of turning a harmless overshoot into a dead run.
+        if not 0 < seconds:
             raise ActionResolutionError(
-                f"wait duration {seconds} is outside the allowed "
-                f"0-{self.max_wait_seconds:g} s range"
+                f"wait duration must be positive, got {seconds}"
             )
+        note = f"wait {seconds}s"
+        if seconds > self.max_wait_seconds:
+            note = (
+                f"wait {seconds}s clamped to the {self.max_wait_seconds:g} s ceiling"
+            )
+            seconds = self.max_wait_seconds
         action = DesktopAction(
             action_type="wait", duration=seconds, target_description=step.target_text
         )
-        return ResolvedAction(step_id=step.step_id, action=action, note=f"wait {seconds}s")
+        return ResolvedAction(step_id=step.step_id, action=action, note=note)

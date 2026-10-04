@@ -136,9 +136,27 @@ def test_a_hotkey_is_translated_for_the_platform() -> None:
     assert on_windows.action.keys == ["ctrl", "l"]
 
 
-def test_an_out_of_range_wait_is_refused(adapter: ActionAdapter) -> None:
-    with pytest.raises(ActionResolutionError, match="0-5"):
-        adapter.resolve(_step(action_type="wait", arguments={"duration": 600}), _snapshot())
+def test_an_over_long_wait_is_clamped_rather_than_refused(adapter: ActionAdapter) -> None:
+    """A wait that overshoots the ceiling is taken at the ceiling, not thrown away.
+
+    Measured on T02: the model wrote `wait 10.0` against a 5 s ceiling, and a resolution
+    error ends the whole run - so a nine-step plan that had already clicked, typed and
+    submitted the search stopped on a wait, with the results page visible in the frames
+    that followed. Refusing a *target that is not on screen* is right, because the step
+    cannot be carried out at all; asking to wait longer is not that, and waiting longer
+    cannot do the wrong thing to the screen.
+    """
+    resolved = adapter.resolve(_step(action_type="wait", arguments={"duration": 600}), _snapshot())
+
+    assert resolved.action.action_type == "wait"
+    assert resolved.action.duration == 5
+    assert "clamped" in resolved.note, resolved.note
+
+
+def test_a_non_positive_wait_is_still_refused(adapter: ActionAdapter) -> None:
+    """The ceiling is forgiving; the floor is not, because zero and negative are meaningless."""
+    with pytest.raises(ActionResolutionError, match="positive"):
+        adapter.resolve(_step(action_type="wait", arguments={"duration": 0}), _snapshot())
 
 
 def test_the_wait_bound_comes_from_the_run_configuration() -> None:
@@ -149,11 +167,14 @@ def test_the_wait_bound_comes_from_the_run_configuration() -> None:
     """
     strict = ActionAdapter(platform="darwin", max_wait_seconds=2)
 
-    with pytest.raises(ActionResolutionError, match="0-2"):
-        strict.resolve(_step(action_type="wait", arguments={"duration": 3}), _snapshot())
+    clamped = strict.resolve(_step(action_type="wait", arguments={"duration": 3}), _snapshot())
+    assert clamped.action.duration == 2, "the configured ceiling is what applies"
+    assert "clamped" in clamped.note
 
     allowed = strict.resolve(_step(action_type="wait", arguments={"duration": 2}), _snapshot())
     assert allowed.action.action_type == "wait"
+    assert allowed.action.duration == 2
+    assert "clamped" not in allowed.note
 
 
 def test_finish_is_never_turned_into_an_action(adapter: ActionAdapter) -> None:

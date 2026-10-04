@@ -126,8 +126,17 @@ execution:
   task_timeout_seconds: 600
   verification_timeout_seconds: 10
   verification_poll_interval_seconds: 0.5
-  # Longest single `wait` step the action adapter will accept.
-  max_wait_seconds: 5
+  # Longest single `wait` step the action adapter will accept. A wait longer than this is
+  # taken at this value with a note rather than refused, so the ceiling bounds one pause
+  # and never ends a run.
+  #
+  # 10 rather than the guide's suggested 5, measured on this machine: a page load after a
+  # submitted search took about 5 s here while planning alone takes ~200 s, and the model
+  # asked for 10 with good reason. The earlier value is what T02 hit - `wait 10.0` against
+  # a 5 s ceiling - and while the clamp now stops that killing the run, a ceiling below what
+  # the hardware needs would still cut the pause short and let the success check run before
+  # the page had arrived.
+  max_wait_seconds: 10
   # A task with no verifiable success rule is reported blocked rather than
   # treated as complete when the plan runs out.
   require_success_rules: true

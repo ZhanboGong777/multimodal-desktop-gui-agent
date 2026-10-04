@@ -241,7 +241,7 @@ def test_the_week4_config_carries_the_run_limits() -> None:
     assert config.execution.task_timeout_seconds == 600
     assert config.execution.verification_timeout_seconds == 10
     assert config.execution.verification_poll_interval_seconds == 0.5
-    assert config.execution.max_wait_seconds == 5
+    assert config.execution.max_wait_seconds == 10
     assert config.execution.require_success_rules is True
 
 
