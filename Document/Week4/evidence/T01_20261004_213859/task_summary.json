@@ -1,0 +1,120 @@
+{
+  "run_id": "T01_20261004_213859",
+  "case_id": "T01",
+  "instruction": "Open the web browser from the desktop",
+  "status": "succeeded",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Double-click the Chrome icon",
+      "action_type": "double_click",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "double_click",
+          "x": 2240,
+          "y": 1001,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Chrome"
+        },
+        "element_id": "obs-0002-e007",
+        "screenshot_point": {
+          "x": 2240,
+          "y": 1001
+        },
+        "control_point": {
+          "x": 2240,
+          "y": 1001
+        },
+        "note": "text 'Chrome' -> obs-0002-e007 (re-bound from obs-0001-e026 in an earlier frame)"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "double_click",
+          "x": 2240,
+          "y": 1001,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Chrome"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: chrome",
+        "evidence": {
+          "observation_id": "obs-0003",
+          "changed": true,
+          "element_count": 60,
+          "expectation_tokens": [
+            "chrome",
+            "window",
+            "opens"
+          ],
+          "expectation_hits": [
+            "chrome"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 6297.000000020489,
+      "after_observation_id": "obs-0003"
+    }
+  ],
+  "verification": {
+    "outcome": "passed",
+    "method": "automatic",
+    "detail": "all success rules matched against the current screen",
+    "evidence": {
+      "observation_id": "obs-0004",
+      "expect_text": [
+        "http",
+        "搜索"
+      ],
+      "forbid_text": []
+    }
+  },
+  "error": null,
+  "elapsed_ms": 242157.00000000652,
+  "execute": true,
+  "model_name": "qwen2.5vl:7b",
+  "provider": "openai_compatible",
+  "notes": [
+    "ocr: torch is blocked in this process to keep its cuDNN build from clashing with PaddlePaddle.",
+    "planned 1 steps from obs-0001"
+  ],
+  "task_id": "T01",
+  "commit": "eb596cd",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 2560x1600, control 2560x1600",
+  "started_at": "2026-10-04T10:38:59.437370Z",
+  "finished_at": "2026-10-04T10:43:01.594370Z",
+  "planning_attempts": 1,
+  "model_requests": 1,
+  "planning_ms": 231593.99999998277,
+  "confirmation_ms": 3000.0,
+  "execution_ms": 7563.000000023749,
+  "evidence_directory": "outputs\\week4\\T01_20261004_213859",
+  "stop_reason": "",
+  "error_type": "",
+  "failed_step_id": null,
+  "action_count": 1
+}

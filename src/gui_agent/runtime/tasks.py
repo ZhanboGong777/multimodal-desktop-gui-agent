@@ -11,6 +11,7 @@ for a string that only this run could have produced does.
 
 from __future__ import annotations
 
+import os
 import sys
 from datetime import UTC, datetime
 
@@ -24,6 +25,20 @@ from .schemas import TaskSpec
 #: case is defined with, for `--list-cases` and for tests.
 MESSAGE_MARKER_PREFIX = "WEEK4_MESSAGE_CHECK_"
 MESSAGE_MARKER = f"{MESSAGE_MARKER_PREFIX}001"
+
+#: The conversation the send-message case is aimed at, as the screen names it.
+#:
+#: It has to be named, and it was not - measured on the Windows node: T04's plan opened with
+#: `click "Open the week4 test conversation"` and the step died with
+#: `no element matches 'week4 test conversation' in obs-0002`. The instruction said "to the
+#: week4 test conversation" while naming nothing the screen could be searched for, so the
+#: model went looking for a box with that label. Which conversation is open is a
+#: *precondition* - the operator prepares it - and a precondition the model is asked to
+#: re-establish is one the case cannot rely on.
+#:
+#: Overridable per machine, because the conversation is the operator's to choose and a
+#: project should not hard-code somebody's chat list. The default is the one this node uses.
+MESSAGE_CONVERSATION = os.environ.get("GUI_AGENT_MESSAGE_CONVERSATION", "文件传输助手")
 
 #: Sample file used by the open-file case; created by the test setup.
 SAMPLE_FILE = "week4_sample.txt"
@@ -147,7 +162,19 @@ def _cases() -> dict[str, TaskSpec]:
         ),
         "T04": TaskSpec(
             case_id="T04",
-            instruction=f"Send {MESSAGE_MARKER} to the week4 test conversation",
+            # "already open" is the whole point, and saying it removes a step the model
+            # otherwise invents. Measured twice on the Windows node: with the instruction
+            # naming the conversation but not its state, the plan opened with
+            # `click "Open the conversation named '文件传输助手'"` and died on
+            # `2 elements match '文件传输助手' (e034, e054); refusing to pick one
+            # arbitrarily` - the name is on screen twice, in the list and in the open chat's
+            # header, which is itself proof that the conversation was already open. The
+            # precondition says the operator prepares it, so the instruction must not ask the
+            # model to do the operator's half.
+            instruction=(
+                f"Type {MESSAGE_MARKER} into the message box of the conversation named "
+                f'"{MESSAGE_CONVERSATION}", which is already open, and send it'
+            ),
             target_app="messaging",
             preconditions=[
                 "the test conversation is open and contains no other message with this marker",
