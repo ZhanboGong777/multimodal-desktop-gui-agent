@@ -35,7 +35,24 @@ def test_contains_matching_is_case_sensitive() -> None:
 
 def test_case_insensitive_matching_ignores_case() -> None:
     assert text_matches("read", "README.md", "case_insensitive")
+
     assert text_matches("READ", "README.md", "case_insensitive")
+
+    # And, in this mode only, it also forgives spacing the OCR engine did not emit.
+    # Recorded from the frame that required it: T02 failed with
+    #   no element matches '在 Google 中搜索，或输入网址' in obs-0002
+    # while the observation held '在Google 中搜索，或输入网址' - the space after 在 is not
+    # there. The model had read the screen correctly; the comparison refused the pair.
+    #
+    # The forgiveness lives here alone. A first version applied it to every mode, and
+    # `test_exact_matching_requires_the_whole_string` caught it: 'OK' matched 'OK Cancel'
+    # in `exact`, and 'read' matched 'README.md' in the case-sensitive `contains`.
+    from_ocr = "在Google 中搜索，或输入网址"
+    from_model = "在 Google 中搜索，或输入网址"
+    assert text_matches(from_model, from_ocr, "case_insensitive")
+    assert text_matches(from_ocr, from_model, "case_insensitive")
+    assert not text_matches(from_model, from_ocr, "exact")
+    assert not text_matches(from_model, from_ocr, "contains")
 
 
 def test_blank_inputs_never_match() -> None:

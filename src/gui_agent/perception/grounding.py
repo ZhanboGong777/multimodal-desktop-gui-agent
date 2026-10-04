@@ -57,14 +57,45 @@ class GroundingResult:
         return None
 
 
+def _without_whitespace(value: str, *, fold_case: bool) -> str:
+    """The text with every whitespace character removed.
+
+    Used as a last resort in the mode that already ignores case, because OCR does not
+    reproduce spacing reliably and the characters it drops are not meaningful in the
+    languages this project meets. The measurement that put this here: T02 failed with
+
+        no element matches '在 Google 中搜索，或输入网址' in obs-0002
+
+    while the frame held '在Google 中搜索，或输入网址' - the same characters with the
+    space after 在 missing, because the OCR engine did not emit it. Every space-sensitive
+    comparison fails on that pair, and the model had read the text correctly.
+
+    Restricted to the case-insensitive mode on purpose. `exact` means the whole string and
+    `contains` is case-sensitive, so a space-blind version of either would match
+    'OK' against 'OK Cancel' and 'read' against 'README.md' - both of which the existing
+    tests assert must not match, and both of which the first version of this function did.
+    """
+    collapsed = "".join(value.split())
+    return collapsed.casefold() if fold_case else collapsed
+
+
 def text_matches(query: str, text: str, match_mode: MatchMode = DEFAULT_MATCH_MODE) -> bool:
-    """Compare a query against element text using the requested mode."""
+    """Compare a query against element text using the requested mode.
+
+    Except in the case-insensitive mode, which falls back to ignoring whitespace when the
+    spacing is the only difference - see :func:`_without_whitespace` for the frame that
+    made that necessary.
+    """
     if not query or not text:
         return False
     if match_mode == "exact":
         return text.strip() == query.strip()
     if match_mode == "case_insensitive":
-        return query.strip().casefold() in text.strip().casefold()
+        if query.strip().casefold() in text.strip().casefold():
+            return True
+        return _without_whitespace(query, fold_case=True) in _without_whitespace(
+            text, fold_case=True
+        )
     return query.strip() in text
 
 
