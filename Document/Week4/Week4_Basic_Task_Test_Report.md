@@ -211,6 +211,23 @@ reached `succeeded`**. What changed is how far each one got and what stopped it.
 | `T02_20261004_005225` | failed | 1 | `task verification: expected on screen but not found: GUI agent research` | `type_text resolved=True verif=passed` - the text was typed into the frame the run was given |
 | `T01_20261004_004112` | **blocked** | 0 | `the run assumes no browser is running, but these are: msedge.exe, chrome.exe` | the new process precondition fired before the capture: `planning_ms = 0.0`, no `frames/`, no `obs-NNNN.json` |
 | `T02_20261004_161652` | failed | **2** | `task verification: expected on screen but not found: GUI agent research` | **both** steps resolved and verified - a `type_text` and a `key_press Enter` - and the frame showed the text in the address bar with its autocomplete open, so Enter selected a suggestion instead of submitting |
+| `T02_20261004_185721` | failed | 2 | `task verification: expected on screen but not found: google.com/search` | **the goal was reached and the verdict could not see it.** The frame is a real Google results page - `google.com/search?q=GUI+agent+research&oq=...&gs_lcrp=...`, a tab titled `GUI agent research - Google`, an AI overview and arXiv results - and the element list for that frame holds neither the URL nor the title. The search was submitted (steps 1 and 2 both verified) and landed (obs-0005 carries both the query and the results page). What failed is the reading, not the doing |
+
+Reading that last row, and the distinction is not a consolation: **the agent did the task and
+the rule could not confirm it.** Three candidate markers were measured against three frames,
+and every one of them goes through the same OCR pass:
+
+| frame | query text | tab title | url host |
+| --- | --- | --- | --- |
+| the real results page (`obs-0005`) | not read | **read** | **read** |
+| the next frame of that same run (`obs-0010`) | **read** | not read | not read |
+| the frame that had falsely passed | **read** | not read | not read |
+
+The only signal present in every frame is the one that cannot tell a submitted search from
+text waiting in an address bar. So on this machine T02 has a demonstrated goal and no
+reliable verdict, and `Week4_Troubleshooting.md` names the three changes that would alter
+that: a different screen size, a different OCR engine, or the window title read through the
+accessibility API rather than through OCR.
 
 The table above is the round's turning points, not every run. T02 produced 30 attempts in
 the second round; eleven of them are in `Document/Week4/evidence` and the rest stayed in
