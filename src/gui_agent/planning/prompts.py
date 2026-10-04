@@ -62,9 +62,18 @@ SYSTEM_PROMPT = "\n".join(
         # each sentence cost room the budget did not have, so they are stated as the rule
         # they are all instances of: a plan runs to the goal, and a step may need a
         # follow-through.
+        # A browser shows two text fields that both say "search": the address bar and the
+        # page's own box. Nothing said which one a task means, and measured on T02 the
+        # model chose the address bar - its two steps resolved and verified, the text went
+        # into the omnibox, and Enter there selects from the autocomplete list instead of
+        # submitting, so no results page appeared and the task rule could not match. The
+        # page field is what "search the web" means. Stated inside the goal rule above
+        # rather than as its own line: it is the same instruction - aim at what reaches
+        # the goal - and a separate sentence cost 60 characters the budget did not have
+        # (the prompt is capped at 1000 and a test enforces it).
         (
-            "- Plan every step to the goal: a shortcut opens with double_click, a search "
-            "needs Enter."
+            "- Plan to the goal: a shortcut opens with double_click, a search needs Enter "
+            "in the page's own field, not the address bar."
         ),
         "- action_type: " + ", ".join(PLAN_ACTION_TYPES) + ".",
         "- Target a listed element_id; ids are unique.",
