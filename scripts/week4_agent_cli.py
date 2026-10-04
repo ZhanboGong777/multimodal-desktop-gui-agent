@@ -111,6 +111,14 @@ def _positive_float(value: str) -> float:
     return number
 
 
+def _confidence(value: str) -> float:
+    """argparse type for a 0..1 threshold; 0 is meaningful here, unlike the limits above."""
+    number = float(value)
+    if not 0.0 <= number <= 1.0:
+        raise argparse.ArgumentTypeError(f"must be between 0 and 1, got {value}")
+    return number
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=__doc__,
@@ -131,6 +139,21 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--execute", action="store_true", help="allow real desktop actions")
     parser.add_argument("--max-actions", type=_positive_int, default=None)
     parser.add_argument("--task-timeout", type=_positive_float, default=None)
+    parser.add_argument(
+        "--ocr-engine",
+        choices=("tesseract", "paddleocr"),
+        default=None,
+        help=(
+            "which OCR backend to use for this run. Tesseract is faster and misses "
+            "low-contrast interface text; PaddleOCR reads it but costs seconds per frame"
+        ),
+    )
+    parser.add_argument(
+        "--ocr-min-confidence",
+        type=_confidence,
+        default=None,
+        help="drop OCR elements below this confidence (0..1)",
+    )
     parser.add_argument("--output-directory", default=None)
     parser.add_argument("--quiet", action="store_true")
     return parser.parse_args()
@@ -329,6 +352,17 @@ def main() -> int:
         config.execution.max_actions = args.max_actions
     if args.task_timeout is not None:
         config.execution.task_timeout_seconds = args.task_timeout
+    # Per-machine OCR, because the right engine is a property of the machine and not of
+    # the project. Measured on the Windows node against one frame of Edge's window:
+    # Tesseract read 86-126 elements in 1.2-1.9 s and produced nothing for the address
+    # bar, while PaddleOCR read '搜索或输入 Web 地址' and '还原页面' in 10-46 s. On the
+    # Mac it is the other way round by an order of magnitude (241 ms against 5 525 ms),
+    # so neither default can be right for both and the choice belongs on the command line.
+    if args.ocr_engine is not None:
+        config.perception.ocr.engine = args.ocr_engine
+        config.perception.ocr.fallback_engine = args.ocr_engine
+    if args.ocr_min_confidence is not None:
+        config.perception.ocr.min_confidence = args.ocr_min_confidence
 
     # ── the task ───────────────────────────────────────────────────────
     message_marker = ""
