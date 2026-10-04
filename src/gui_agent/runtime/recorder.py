@@ -117,6 +117,19 @@ class TaskRecorder:
                     "processing_time_ms": round(snapshot.processing_time_ms, 3),
                     "errors": snapshot.errors,
                     "ocr_notices": snapshot.notices,
+                    # The window that was in front, kept with the frame it belongs to. Not a
+                    # decoration: a class of evidence lives in browser chrome - a results
+                    # page's URL and its tab title - and the OCR engine reads that region
+                    # unreliably, which is exactly how T02 produced two runs that reached a
+                    # Google results page and were recorded as failures. Reading the title
+                    # costs nothing and does not go through the image at all.
+                    #
+                    # Written here as well as held on the snapshot, because this dictionary
+                    # is explicit: a field added to the model does not reach the file until
+                    # it is named below, and one that never reaches the file cannot be
+                    # checked by the person reading the run afterwards.
+                    "window_title": snapshot.window_title,
+                    "window_class": snapshot.window_class,
                     # 16.2 asks for sensitive text to be kept out of the records.
                     # Typed text is masked by the action redactor; this is the other
                     # way a credential reaches a file - OCR reading it off the

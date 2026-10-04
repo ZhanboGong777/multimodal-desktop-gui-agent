@@ -124,7 +124,20 @@ execution:
   # and the per-observation cost is a property of the machine. 600 s leaves room for a
   # ~10-step plan at this speed; --task-timeout overrides it per run.
   task_timeout_seconds: 600
-  verification_timeout_seconds: 10
+  # How long the task verifier keeps re-observing before giving up.
+  #
+  # 60 rather than 10, and the reason is arithmetic on this machine rather than a preference:
+  # one observation costs **14.7 s** with PaddleOCR (measured, 2560x1600, 66 elements; 2.3 s
+  # once warm). A 10 s window therefore could not complete even a single re-observation, so
+  # "polling" was silently one look at the frame the step had just produced - which is the
+  # state *before* a page has finished loading. That is the wrong instant to judge a search
+  # by, and T02 is exactly that case: the results page appeared on obs-0016 of a run whose
+  # verdict had already been decided from the frames either side of it.
+  #
+  # The poll interval is meaningless if it is shorter than an observation, which it also was:
+  # 0.5 s against 14.7 s. Both numbers are properties of the machine's OCR speed, so both are
+  # set here with the measurement beside them.
+  verification_timeout_seconds: 60
   verification_poll_interval_seconds: 0.5
   # How many times one run may ask the model for a plan. 1 is plan-once-and-execute, which
   # this runner did until T02 showed what its ceiling costs: that task needs two actions

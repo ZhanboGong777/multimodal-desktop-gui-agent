@@ -239,7 +239,10 @@ def test_the_week4_config_carries_the_run_limits() -> None:
     # budget also has to cover a per-step observation and PaddleOCR costs ~10 s per frame
     # there. The value tracks the slowest supported machine; --task-timeout overrides it.
     assert config.execution.task_timeout_seconds == 600
-    assert config.execution.verification_timeout_seconds == 10
+    # 60, not 10: on this node one observation costs 14.7 s with PaddleOCR, so a 10 s window
+    # could not complete a single re-observation and "polling" was one look at the frame the
+    # step had just produced - the state before a page finishes loading.
+    assert config.execution.verification_timeout_seconds == 60
     assert config.execution.verification_poll_interval_seconds == 0.5
     assert config.execution.max_wait_seconds == 10
     assert config.execution.require_success_rules is True
