@@ -1,0 +1,49 @@
+{
+  "run_id": "T02_20261004_145300",
+  "case_id": "T02",
+  "instruction": "Search the web for GUI agent research",
+  "status": "failed",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "step-1",
+      "description": "Open browser search bar",
+      "action_type": "type_text",
+      "observation_id": "obs-0002",
+      "resolved": null,
+      "action_result": null,
+      "verification": null,
+      "error": "type_text requires a non-empty arguments.text",
+      "elapsed_ms": 1171.9999999622814,
+      "after_observation_id": null
+    }
+  ],
+  "verification": null,
+  "error": null,
+  "elapsed_ms": 34000.0,
+  "execute": true,
+  "model_name": "qwen2.5vl:7b",
+  "provider": "openai_compatible",
+  "notes": [
+    "planned 3 steps from obs-0001",
+    "step-1: type_text requires a non-empty arguments.text"
+  ],
+  "task_id": "T02",
+  "commit": "025cd1d",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 2560x1600, control 2560x1600",
+  "started_at": "2026-10-04T03:53:00.269264Z",
+  "finished_at": "2026-10-04T03:53:34.269264Z",
+  "planning_attempts": 1,
+  "model_requests": 1,
+  "planning_ms": 20438.00000002375,
+  "confirmation_ms": 12390.00000001397,
+  "execution_ms": 1171.9999999622814,
+  "evidence_directory": "outputs\\week4\\T02_20261004_145300",
+  "stop_reason": "step-1: type_text requires a non-empty arguments.text",
+  "error_type": "",
+  "failed_step_id": "step-1",
+  "action_count": 0
+}

@@ -1,0 +1,87 @@
+{
+  "control": {
+    "action_delay_seconds": 0.2,
+    "countdown_seconds": 3.0,
+    "drag_duration_seconds": 0.5,
+    "dry_run": true,
+    "move_duration_seconds": 0.3,
+    "pyautogui_failsafe": true
+  },
+  "dataset": {
+    "name": "screenagent",
+    "processed_directory": "data/processed",
+    "raw_directory": "data/raw",
+    "sample_limit": 20,
+    "split": "train"
+  },
+  "execution": {
+    "max_actions": 20,
+    "max_elements": 60,
+    "max_wait_seconds": 5.0,
+    "require_success_rules": true,
+    "task_timeout_seconds": 600.0,
+    "verification_poll_interval_seconds": 0.5,
+    "verification_timeout_seconds": 10.0
+  },
+  "logging": {
+    "directory": "outputs\\week4",
+    "level": "INFO"
+  },
+  "model": {
+    "base_url": "http://127.0.0.1:11434/v1",
+    "max_retries": 0,
+    "max_tokens": 8192,
+    "model_name": "qwen2.5vl:7b",
+    "provider": "openai_compatible",
+    "temperature": 0.0,
+    "timeout_seconds": 300.0
+  },
+  "output": {
+    "directory": "outputs\\week4",
+    "save_after_image": true,
+    "save_annotated_image": false,
+    "save_before_image": true,
+    "save_run_summary": true
+  },
+  "perception": {
+    "capture": {
+      "frame_count": 1,
+      "interval_seconds": 0.0,
+      "save_frames": false
+    },
+    "monitor_index": 1,
+    "ocr": {
+      "engine": "paddleocr",
+      "fallback_engine": "paddleocr",
+      "languages": [
+        "en"
+      ],
+      "min_confidence": 0.3,
+      "use_doc_preprocessing": false
+    },
+    "output_directory": "outputs\\week4",
+    "preprocessing": {
+      "gaussian_blur": false,
+      "grayscale": false,
+      "otsu_threshold": false,
+      "resize_scale": 1.0
+    },
+    "screenshot_backend": "mss",
+    "ui_detection": {
+      "enabled": true,
+      "exclusion_threshold": 0.5,
+      "max_area_ratio": 0.5,
+      "max_candidates": 200,
+      "min_area": 100,
+      "min_rectangularity": 0.0
+    }
+  },
+  "planning": {
+    "allow_real_execution": false,
+    "max_steps": 10,
+    "require_structured_output": true
+  },
+  "runtime": {
+    "device": "auto"
+  }
+}
