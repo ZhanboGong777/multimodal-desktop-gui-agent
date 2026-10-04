@@ -96,11 +96,16 @@ def _cases() -> dict[str, TaskSpec]:
             # Measured, because the difference produced a false success: a run typed the
             # query into the address bar and never submitted it, and the rule passed on
             # 'GUI agent research' alone, which the autocomplete dropdown was showing.
-            # `&oq=` is added by the engine on a real submission and appears in the URL
-            # field, so it distinguishes a submitted search from text waiting in an input
-            # box. Confirmed both ways: absent on the frame that falsely passed, present on
-            # a real results page as 'google.com/search?q=GUI+agent+research&oq=GUI+agent+'.
-            expect_text=["GUI agent research", "google.com/search"],
+            # The address field of a loaded page carries its host, and a new tab's is
+            # empty, so the host distinguishes a submitted search from text waiting in an
+            # input box.
+            #
+            # The host and not the full path, for a second reason found the same way: the
+            # path grows query parameters - 'google.com/search?q=...&gs_lcrp=EgZjaHJvbWUy
+            # BggAEEUYOTIGCAEQABg...' - and the OCR read a screen carrying exactly that as
+            # not containing 'google.com/search', so a run that reached a real results page
+            # was recorded as failed. A short, stable string is what survives the engine.
+            expect_text=["GUI agent research", "google.com"],
             # The other direction of the same check: T02 is meaningless without a
             # browser to search in, and "is one running" is a fact about the machine
             # rather than something to read off the screen.
