@@ -113,7 +113,13 @@ planning:
 execution:
   max_elements: 60
   max_actions: 20
-  task_timeout_seconds: 240
+  # Raised from 240 s, which this machine outgrew: with PaddleOCR at about 10 s per frame
+  # (see the OCR note above), reading one plan and executing one step took 257 s in a dry
+  # run of T02 - the run ended `timed_out` after planning had already succeeded, with
+  # `actions: 0`. The budget has to cover the per-step observations, not just the plan,
+  # and the per-observation cost is a property of the machine. 600 s leaves room for a
+  # ~10-step plan at this speed; --task-timeout overrides it per run.
+  task_timeout_seconds: 600
   verification_timeout_seconds: 10
   verification_poll_interval_seconds: 0.5
   # Longest single `wait` step the action adapter will accept.

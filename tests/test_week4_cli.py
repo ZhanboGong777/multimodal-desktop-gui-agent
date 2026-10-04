@@ -234,7 +234,11 @@ def test_the_week4_config_carries_the_run_limits() -> None:
     config = load_config(REPO_ROOT / "configs" / "week4.yaml")
 
     assert config.execution.max_actions == 20
-    assert config.execution.task_timeout_seconds == 240
+    # 600, raised from 240 when a T02 dry run on the Windows node spent 257 s - planning
+    # had succeeded and the run still ended `timed_out` with `actions: 0`, because the
+    # budget also has to cover a per-step observation and PaddleOCR costs ~10 s per frame
+    # there. The value tracks the slowest supported machine; --task-timeout overrides it.
+    assert config.execution.task_timeout_seconds == 600
     assert config.execution.verification_timeout_seconds == 10
     assert config.execution.verification_poll_interval_seconds == 0.5
     assert config.execution.max_wait_seconds == 5
