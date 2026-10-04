@@ -1,0 +1,50 @@
+{
+  "run_id": "T02_20261004_152743",
+  "case_id": "T02",
+  "instruction": "Search the web for GUI agent research",
+  "status": "failed",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "step-1",
+      "description": "Open the search bar in the browser",
+      "action_type": "click",
+      "observation_id": "obs-0002",
+      "resolved": null,
+      "action_result": null,
+      "verification": null,
+      "error": "no element matches 'search bar' in obs-0002",
+      "elapsed_ms": 1858.9999999967404,
+      "after_observation_id": null
+    }
+  ],
+  "verification": null,
+  "error": null,
+  "elapsed_ms": 217686.99999997625,
+  "execute": true,
+  "model_name": "qwen2.5vl:7b",
+  "provider": "openai_compatible",
+  "notes": [
+    "ocr: torch is blocked in this process to keep its cuDNN build from clashing with PaddlePaddle.",
+    "planned 10 steps from obs-0001",
+    "step-1: no element matches 'search bar' in obs-0002"
+  ],
+  "task_id": "T02",
+  "commit": "9a46dd2",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 2560x1600, control 2560x1600",
+  "started_at": "2026-10-04T04:27:43.829654Z",
+  "finished_at": "2026-10-04T04:31:21.516654Z",
+  "planning_attempts": 1,
+  "model_requests": 1,
+  "planning_ms": 212811.99999997625,
+  "confirmation_ms": 3000.0,
+  "execution_ms": 1875.0,
+  "evidence_directory": "outputs\\week4\\T02_20261004_152743",
+  "stop_reason": "step-1: no element matches 'search bar' in obs-0002",
+  "error_type": "",
+  "failed_step_id": "step-1",
+  "action_count": 0
+}
