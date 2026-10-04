@@ -1,0 +1,121 @@
+{
+  "run_id": "T05_20261004_173604",
+  "case_id": "T05",
+  "instruction": "Close the week4 test application without affecting other applications",
+  "status": "failed",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Close the week4 test application",
+      "action_type": "hotkey",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "hotkey",
+          "x": null,
+          "y": null,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": [
+            "alt",
+            "f4"
+          ],
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "week4 test"
+        },
+        "element_id": null,
+        "screenshot_point": null,
+        "control_point": null,
+        "note": "alt+f4"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "hotkey",
+          "x": null,
+          "y": null,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": [
+            "alt",
+            "f4"
+          ],
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "week4 test"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: week4, test",
+        "evidence": {
+          "observation_id": "obs-0003",
+          "changed": true,
+          "element_count": 60,
+          "expectation_tokens": [
+            "week4",
+            "test",
+            "application",
+            "closed"
+          ],
+          "expectation_hits": [
+            "week4",
+            "test"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 5327.999999979511,
+      "after_observation_id": "obs-0003"
+    }
+  ],
+  "verification": {
+    "outcome": "failed",
+    "method": "automatic",
+    "detail": "still on screen but should be gone: WEEK4-OPEN-FILE-OK",
+    "evidence": {
+      "observation_id": "obs-0009",
+      "unexpected": [
+        "WEEK4-OPEN-FILE-OK"
+      ]
+    }
+  },
+  "error": null,
+  "elapsed_ms": 185281.00000001723,
+  "execute": true,
+  "model_name": "qwen2.5vl:7b",
+  "provider": "openai_compatible",
+  "notes": [
+    "ocr: torch is blocked in this process to keep its cuDNN build from clashing with PaddlePaddle.",
+    "planned 1 steps from obs-0001",
+    "task verification: still on screen but should be gone: WEEK4-OPEN-FILE-OK"
+  ],
+  "task_id": "T05",
+  "commit": "80fdd74",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 2560x1600, control 2560x1600",
+  "started_at": "2026-10-04T06:36:04.779537Z",
+  "finished_at": "2026-10-04T06:39:10.060537Z",
+  "planning_attempts": 1,
+  "model_requests": 1,
+  "planning_ms": 166141.00000000326,
+  "confirmation_ms": 3015.00000001397,
+  "execution_ms": 16125.0,
+  "evidence_directory": "outputs\\week4\\T05_20261004_173604",
+  "stop_reason": "task verification: still on screen but should be gone: WEEK4-OPEN-FILE-OK",
+  "error_type": "",
+  "failed_step_id": null,
+  "action_count": 1
+}

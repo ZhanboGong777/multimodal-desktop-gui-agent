@@ -73,7 +73,7 @@ SYSTEM_PROMPT = "\n".join(
         # (the prompt is capped at 1000 and a test enforces it).
         (
             "- Plan to the goal: a shortcut opens with double_click, a search needs Enter "
-            "in the page's own field, not the address bar."
+            "in the page field, not the address bar."
         ),
         "- action_type: " + ", ".join(PLAN_ACTION_TYPES) + ".",
         "- Target a listed element_id; ids are unique.",
@@ -85,12 +85,18 @@ SYSTEM_PROMPT = "\n".join(
         # mistakes the prompt can prevent, and each one cost a whole attempt. The
         # argument lists lost their prose when the search rule was added: the field names
         # carry the meaning, and the platform's key names are still named.
+        #
+        # Then T05 produced a third: `hotkey` with no `keys`, which the adapter refuses
+        # with "hotkey requires a non-empty arguments.keys list". So the same rule carries
+        # the consequence - a step whose arguments are missing is refused before it runs
+        # and the run ends with nothing done - rather than a separate sentence costing 40
+        # characters of a budget capped at 1000 by a test.
         (
-            '- Args: type_text {"text"}; key_press {"key"}; hotkey {"keys":[..]}; '
-            'scroll {"scroll_amount"}; wait {"duration"}; platform key names.'
+            '- Args, or the step is refused: type_text {"text"}; '
+            'key_press {"key"}; hotkey {"keys":[..]}; scroll {"scroll_amount"}; '
+            'wait {"duration"}; platform key names.'
         ),
-        '- LAST step "finish"; description/summary <60 chars.',
-        # 8.2.8: ambiguity is answered, not absorbed. This rule used to read "say so
+        '- LAST step "finish"; summary <60 chars.',        # 8.2.8: ambiguity is answered, not absorbed. This rule used to read "say so
         # in assumptions and still return a plan", and nothing reads assumptions - so
         # an ambiguous instruction produced a plan that executed on a guess the
         # operator never saw. 8.2.7 and 8.2.5 need the other two rules, and all of
