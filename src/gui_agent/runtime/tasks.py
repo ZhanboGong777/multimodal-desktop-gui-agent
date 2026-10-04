@@ -90,21 +90,40 @@ def _cases() -> dict[str, TaskSpec]:
             success_rules=[
                 "a results page is loaded and the query text is visible",
             ],
-            # Both entries are required - the list is an AND - and the second is what makes
-            # the rule mean "a results page" rather than "somewhere on screen".
+            # Both entries are required - the list is an AND - and they are read from two
+            # different places on purpose.
             #
-            # Measured, because the difference produced a false success: a run typed the
-            # query into the address bar and never submitted it, and the rule passed on
-            # 'GUI agent research' alone, which the autocomplete dropdown was showing.
-            # The address field of a loaded page carries its host, and a new tab's is
-            # empty, so the host distinguishes a submitted search from text waiting in an
-            # input box.
+            # 'GUI agent research' is the task's own query. Alone it is not evidence: a run
+            # that typed the query and never submitted it verified as **passed** because the
+            # autocomplete dropdown was showing the string, which is a rule for "the goal was
+            # reached" being satisfied by the goal's input.
             #
-            # The host and not the full path, for a second reason found the same way: the
-            # path grows query parameters - 'google.com/search?q=...&gs_lcrp=EgZjaHJvbWUy
-            # BggAEEUYOTIGCAEQABg...' - and the OCR read a screen carrying exactly that as
-            # not containing 'google.com/search', so a run that reached a real results page
-            # was recorded as failed. A short, stable string is what survives the engine.
+            # 'Google 搜索' is part of the window title, and it comes from the window rather
+            # than from the pixels - the observation records `window_title`, and the verifier
+            # searches it alongside the OCR text. That matters here because this case's real
+            # evidence lives in browser chrome, where the OCR engine is unreliable: measured
+            # on a run that did reach a Google results page, the element list held neither the
+            # URL nor the tab title, and the title was read on one frame and missed on the
+            # next, while `foreground_window_title()` returned
+            # 'GUI agent research - Google 搜索 - Google Chrome' for that same screen.
+            #
+            # The second entry is the only honest marker available, and it is read through
+            # OCR - which is this case's unsolved problem rather than a solved one. Three
+            # alternatives were measured and each is present in the unsubmitted state too,
+            # so each would have been a false discriminator rather than a fix:
+            #
+            #   'Google Chrome'  every Chrome window carries it;
+            #   'Google 搜索'    the autocomplete dropdown shows a suggestion reading
+            #                    'GUI agent research - Google 搜索', character for character
+            #                    what the results page's own title says;
+            #   'http'           the toolbar shows URL-ish text on a new tab as well.
+            #
+            # The window title is now recorded on every observation (`window_title`) and the
+            # verifier searches it, which is a real gain for rules that can use it, and it is
+            # how the three candidates above were checked. It does not settle *this* rule,
+            # because what distinguishes a submitted search from an unsubmitted one is the
+            # address field, and the two states carry the same title and the same suggestion
+            # text. Recorded here so the next attempt does not re-test the same three.
             expect_text=["GUI agent research", "google.com"],
             # The other direction of the same check: T02 is meaningless without a
             # browser to search in, and "is one running" is a fact about the machine

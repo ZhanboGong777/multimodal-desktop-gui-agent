@@ -46,6 +46,69 @@ class CaptureResult:
     image_path: Path | None = None
     capture_time_ms: float = 0.0
     metadata: dict[str, object] = field(default_factory=dict)
+    #: The window in front when the frame was taken, read from the window rather than from
+    #: the pixels. Recorded with every frame because browser chrome is where a class of
+    #: evidence lives and the OCR engine reads that region unreliably - see
+    #: :func:`foreground_window_title`.
+    window_title: str = ""
+    window_class: str = ""
+
+
+def foreground_window_title() -> str:
+    """The foreground window's title, read from the window rather than from pixels.
+
+    Added because a class of evidence lives only in browser chrome and the OCR engine reads
+    that region unreliably. Measured on T02: a real Google results page carried
+    `google.com/search?q=...&gs_lcrp=...` in its address field, and the element list for that
+    same frame did not contain it - while the window title `GUI agent research - Google` was
+    read on one frame of the run and not on the next. The title is available without any
+    image work at all.
+
+    Best-effort by design: an empty string on any platform or session without a foreground
+    window, because a run must not fail for want of a decoration. On Windows the class name
+    comes too, since that is what identifies *which application* is in front - the fact a
+    precondition like T02's actually needs.
+    """
+    try:
+        import sys
+
+        if sys.platform != "win32":
+            return ""
+        import ctypes
+
+        user32 = ctypes.windll.user32  # type: ignore[attr-defined]
+        hwnd = user32.GetForegroundWindow()
+        if not hwnd:
+            return ""
+        length = user32.GetWindowTextLengthW(hwnd)
+        if length <= 0:
+            return ""
+        buffer = ctypes.create_unicode_buffer(length + 1)
+        user32.GetWindowTextW(hwnd, buffer, length + 1)
+        return buffer.value.strip()
+    except Exception:  # noqa: BLE001 - a decoration must never break a capture
+        return ""
+
+
+def foreground_window_class() -> str:
+    """The foreground window's Win32 class name, or an empty string."""
+    try:
+        import sys
+
+        if sys.platform != "win32":
+            return ""
+        import ctypes
+        from ctypes import wintypes
+
+        user32 = ctypes.windll.user32  # type: ignore[attr-defined]
+        hwnd = user32.GetForegroundWindow()
+        if not hwnd:
+            return ""
+        buffer = ctypes.create_unicode_buffer(256)
+        user32.GetClassNameW(wintypes.HWND(hwnd), buffer, 256)
+        return buffer.value.strip()
+    except Exception:  # noqa: BLE001
+        return ""
 
 
 def _control_size() -> tuple[int, int] | None:
@@ -167,6 +230,8 @@ def capture_monitor(
         image_path=image_path,
         capture_time_ms=(time.perf_counter() - started) * 1000.0,
         metadata={"monitor": dict(monitor)},
+        window_title=foreground_window_title(),
+        window_class=foreground_window_class(),
     )
 
 

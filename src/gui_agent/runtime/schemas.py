@@ -60,6 +60,18 @@ class ObservationSnapshot(SchemaModel):
     ocr_engine: str = "none"
     processing_time_ms: float = 0.0
     errors: list[str] = Field(default_factory=list)
+    #: The window in front when the frame was taken, read from the window rather than from
+    #: the pixels, and the class name that identifies which application it belongs to.
+    #:
+    #: Kept because browser chrome is where a class of evidence lives - a results page's URL
+    #: and its tab title - and the OCR engine reads that region unreliably. Measured on T02:
+    #: a real Google results page carried `google.com/search?q=...` in its address field, the
+    #: element list for that frame did not contain it, and the window title was read on one
+    #: frame of the run and not on the next. The title needs no image work, and the class is
+    #: what answers "is a browser in front at all", which is the fact a precondition like
+    #: T02's actually wants.
+    window_title: str = ""
+    window_class: str = ""
     #: What the OCR engine said about itself: a fallback to another engine, a
     #: missing cache directory, a suppressed Windows workaround. Kept separate
     #: from ``errors`` on purpose - 7.1.4 asks for the fallback engine to be

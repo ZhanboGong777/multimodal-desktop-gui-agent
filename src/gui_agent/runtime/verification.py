@@ -15,8 +15,26 @@ from .schemas import ObservationSnapshot, TaskSpec, VerificationResult
 
 
 def _haystack(observation: ObservationSnapshot) -> str:
-    """All visible text in one searchable string, case-folded."""
-    return " ".join(item.text for item in observation.elements if item.text).casefold()
+    """Everything the frame says, in one searchable string, case-folded.
+
+    The window title and its class are included alongside the OCR text, and they are the
+    more reliable half. Measured on T02: a real Google results page carried
+    `google.com/search?q=...&gs_lcrp=...` in its address field and the element list for that
+    frame did not contain it, while the window title `GUI agent research - Google` was read
+    on one frame of the run and missed on the next. The title is read from the window, so it
+    does not depend on the OCR engine seeing a narrow field at all - and a rule may
+    reasonably name it.
+
+    "" rather than an exception when a session has no window: an empty title contributes
+    nothing and the OCR text still decides, which is exactly the behaviour that existed
+    before this was added.
+    """
+    parts = [item.text for item in observation.elements if item.text]
+    if observation.window_title:
+        parts.append(observation.window_title)
+    if observation.window_class:
+        parts.append(observation.window_class)
+    return " ".join(parts).casefold()
 
 
 def _missing(needles: list[str], haystack: str) -> list[str]:

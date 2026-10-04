@@ -145,6 +145,11 @@ class ObservationService:
             processing_time_ms=(time.perf_counter() - started) * 1000.0,
             errors=errors,
             notices=self._engine_notices(),
+            # `getattr` because a capture result is a duck-typed seam here: tests and other
+            # callers build their own, and a frame without these two is still a valid frame.
+            # The window is a decoration on the observation, never a requirement for one.
+            window_title=getattr(capture, "window_title", ""),
+            window_class=getattr(capture, "window_class", ""),
         )
 
     def _engine_notices(self) -> list[str]:
