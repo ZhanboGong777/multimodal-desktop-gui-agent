@@ -15,6 +15,54 @@ from ..schemas import Point
 DEFAULT_TYPE_INTERVAL = 0.02
 
 
+def ascii_input_mode() -> bool:
+    """Put the foreground window's input method into ASCII mode, if it has one.
+
+    Returns whether a conversion mode was found and set. Safe to call on a platform or a
+    window without an IME: it reports False and changes nothing.
+
+    Why this exists, measured on the Windows review machine: with Microsoft Pinyin active,
+    typing the Latin string "GUI agent research" produced **"GUI阿根廷research"** in the
+    field - the IME converted `agent` to Chinese - and the search that followed used that
+    text, so the case's success rule could never match. The same mechanism explains every
+    odd string in this project's records ('researchGUI阿根廷researchresearchGUlresearch',
+    'guivant', '阿根廷文'), all of which had been read as model or OCR faults.
+
+    **It is not wired into `type_text`, and that is deliberate.** Measured on the two
+    applications that matter here: Chrome returns 0 from `ImmGetContext` for its window -
+    it uses TSF and composes input itself - so this call cannot reach it, while calling it
+    before typing on that same window produced no text at all. An IME that ignores the call
+    is the common case for browsers, so the honest state is a helper that works for classic
+    Win32 windows and a documented limit for the rest. What works for a browser is to leave
+    the machine's input method switched to English before the run, which is an operator
+    step, not something this module can assert.
+    """
+    import sys
+
+    if sys.platform != "win32":
+        return False
+    import ctypes
+    from ctypes import wintypes
+
+    try:
+        imm32 = ctypes.windll.imm32  # type: ignore[attr-defined]
+        user32 = ctypes.windll.user32  # type: ignore[attr-defined]
+    except AttributeError:
+        return False
+    hwnd = user32.GetForegroundWindow()
+    if not hwnd:
+        return False
+    himc = imm32.ImmGetContext(wintypes.HWND(hwnd))
+    if not himc:
+        return False
+    try:
+        # IME_CMODE_ALPHANUMERIC (0) clears the native/conversion bits, so keystrokes arrive
+        # as the characters that were sent.
+        return bool(imm32.ImmSetConversionStatus(himc, 0, 0))
+    finally:
+        imm32.ImmReleaseContext(wintypes.HWND(hwnd), himc)
+
+
 class ControlBackend(Protocol):
     """The surface the executor relies on."""
 
