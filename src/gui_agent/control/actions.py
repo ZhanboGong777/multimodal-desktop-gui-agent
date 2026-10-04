@@ -104,7 +104,32 @@ class PyAutoGUIBackend:
         self._gui.press(key)
 
     def hotkey(self, keys: Sequence[str]) -> None:
-        self._gui.hotkey(*keys)
+        # Pressed by hand rather than through pyautogui's own `hotkey`, which silently does
+        # nothing for the Alt combinations on Windows - and T05's whole task is `alt+f4`.
+        #
+        # Measured on the Windows review machine, same window, same document, three ways:
+        #
+        #   pyautogui.hotkey('alt', 'f4')                        window still open
+        #   pyautogui.keyDown('alt'); press('f4'); keyUp('alt')  window closed
+        #   native keybd_event(alt); keybd_event(f4)             window closed
+        #
+        # So the key names and the sequence are both fine and the fault is in the library's
+        # composite call. The loop below is the middle form, which is the one that works and
+        # the one this class can already express: this backend holds the modifier down,
+        # presses the final key, and releases the modifiers in reverse.
+        #
+        # `press` on a modifier is also avoided - it would release the key before the next
+        # one goes down, which is what a hotkey must not do.
+        if not keys:
+            return
+        modifiers, final = list(keys[:-1]), keys[-1]
+        for key in modifiers:
+            self._gui.keyDown(key)
+        try:
+            self._gui.press(final)
+        finally:
+            for key in reversed(modifiers):
+                self._gui.keyUp(key)
 
     def sleep(self, seconds: float) -> None:
         time.sleep(seconds)

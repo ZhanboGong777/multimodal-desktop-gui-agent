@@ -119,6 +119,53 @@ def test_drag_validates_both_endpoints() -> None:
         DesktopAction(action_type="drag", start=Point(x=1, y=1), end=Point(x=500, y=500)),
         make_screen(),
     )
+
+
+class _RecordingGui:
+    """Stands in for the pyautogui module, recording the calls a hotkey makes."""
+
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, str]] = []
+
+    def keyDown(self, key: str) -> None:
+        self.calls.append(("keyDown", key))
+
+    def keyUp(self, key: str) -> None:
+        self.calls.append(("keyUp", key))
+
+    def press(self, key: str) -> None:
+        self.calls.append(("press", key))
+
+    def hotkey(self, *keys: str) -> None:
+        # The composite call this backend deliberately does not use. If it appears here the
+        # regression is back, and the assertion below says why it matters.
+        self.calls.append(("hotkey", ",".join(keys)))
+
+
+def test_a_hotkey_holds_its_modifier_down_across_the_final_key() -> None:
+    """The Windows defect that stopped T05, pinned as a sequence.
+
+    Measured on the review machine, same window and document: `pyautogui.hotkey('alt','f4')`
+    left the window open, while `keyDown('alt'); press('f4'); keyUp('alt')` closed it - and
+    the same native keystrokes closed it too, so the key names and the order were never the
+    problem. T05's entire task is `alt+f4`, so the case could not pass while the backend
+    used the composite call.
+
+    What this asserts is the shape that works: the modifier goes down first, stays down
+    while the final key is pressed, and comes back up afterwards.
+    """
+    from gui_agent.control.actions import PyAutoGUIBackend
+
+    gui = _RecordingGui()
+    backend = PyAutoGUIBackend.__new__(PyAutoGUIBackend)
+    backend._gui = gui
+
+    backend.hotkey(["alt", "f4"])
+
+    assert gui.calls == [("keyDown", "alt"), ("press", "f4"), ("keyUp", "alt")], (
+        "a hotkey must hold its modifiers down across the final key, and must not use "
+        "pyautogui's composite hotkey(), which does nothing for Alt on Windows"
+    )
     with pytest.raises(SafetyError):
         validate_action(
             DesktopAction(action_type="drag", start=Point(x=1, y=1), end=Point(x=5000, y=1)),
@@ -463,7 +510,14 @@ def test_the_real_backend_forwards_each_primitive(monkeypatch: pytest.MonkeyPatc
     assert stub.calls[8] == ("keyDown", ("shift",), {})
     assert stub.calls[9] == ("keyUp", ("shift",), {})
     assert stub.calls[10] == ("press", ("enter",), {})
-    assert stub.calls[11] == ("hotkey", ("ctrl", "l"), {})
+    # A hotkey is three pyautogui calls, not one: the modifier goes down, the final key is
+    # pressed while it is held, and the modifier is released after. It used to be a single
+    # `hotkey` call, which does nothing for Alt on Windows - see the test above this one.
+    assert stub.calls[11:14] == [
+        ("keyDown", ("ctrl",), {}),
+        ("press", ("l",), {}),
+        ("keyUp", ("ctrl",), {}),
+    ]
 
 
 def test_the_real_backend_reports_its_geometry(monkeypatch: pytest.MonkeyPatch) -> None:

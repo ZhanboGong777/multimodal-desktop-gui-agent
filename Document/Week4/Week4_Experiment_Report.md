@@ -111,10 +111,10 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **600 passed**, ruff clean |
+| MacBook Air M2 | **601 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 300: 242 in the fourteen files below, and 58 spread across the other suites -
-`test_control_safety.py` 15, `test_model_mock.py` 14, `test_ocr.py` 7 (five of them
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 301: 242 in the fourteen files below, and 59 spread across the other suites -
+`test_control_safety.py` 16, `test_model_mock.py` 14, `test_ocr.py` 7 (five of them
 the Windows-only OCR workarounds), `test_config.py` 7 (a new file),
 `test_plan_parser.py` 5, `test_model_config.py` 4, `test_documented_counts.py` 4
 (a new file) and `test_recording.py` 2.
@@ -1036,7 +1036,7 @@ that is merely behind another window, and the Windows round had to parse
   `Document/Week4/evidence/`, so a run id in the test report resolves inside the
   repository rather than only on the machine that produced it.
 - `configs/week4.yaml` - Week 4 limits, with `ExecutionConfig` added to `config.py`.
-- 300 new tests.
+- 301 new tests.
 - `Document/Week4/Week4_Usage.md` - flags, the safety model, the record layout.
 - `Document/Week4/Week4_Troubleshooting.md` - forty-two symptoms with what to check
   and what the code actually does about each.
