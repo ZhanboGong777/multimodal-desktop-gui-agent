@@ -48,7 +48,7 @@ failure is two attempts, and only the runs whose summary reads `succeeded` with
 | Case | Task | Preconditions before the run | Attempts | Successes | Status | Verification method | Timing basis | Evidence |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | T01 | open the browser | desktop visible and launch entry uncovered; **no browser window open** | 2 + 5 | **0 + 1** | **succeeded** | automatic: the marks a browser frame carries in either locale (`http`, `搜索`) | from the confirmation gate to the final verdict (`execution_ms`); the summary also keeps `planning_ms`, `confirmation_ms` and the whole-run `elapsed_ms`, and the run directory keeps `warmup.json` for the cold and warm numbers, which are deliberately not part of any of them | first round: `T01_20261003_172642`, `T01_20261003_180109`; second round, the success: **`T01_20261004_140000`** |
-| T02 | search the web | a browser window is open and focused | 1 | **0** | failed | automatic: the query text is on screen | as above | `T02_20261003_173909` |
+| T02 | search the web | a browser window is open and focused | 1 + 30 | **0** | failed | automatic: the query text is on screen | as above | first round: `T02_20261003_173909`; the second round's runs are listed under §"Second round" and eleven of them are in `Document/Week4/evidence` |
 | T03 | open a specified file | `week4_sample.txt` exists in the week4 test folder (`~/Desktop/week4_test`, or `%USERPROFILE%\Desktop\week4_test`); no file of that name is open | 1 | **0** | failed | automatic: `WEEK4-OPEN-FILE-OK` on screen | as above | `T03_20261003_174110` |
 | T04 | send a message | the test conversation is open and holds no earlier message with **this run's** marker; the operator agreed a real message may be sent | 1 | **0** | failed | automatic: this run's marker on screen (the CLI prints it as `marker`) | as above | `T04_20261003_174709` |
 | T05 | close the application | `week4_sample.txt` is open in the test application, so the marker is on screen; window focused | 6 | **0** | failed (1 `timed_out`, 3 `blocked`, 2 `failed`) | automatic: `WEEK4-OPEN-FILE-OK` **gone** | as above | `T05_20261003_174334`, `T05_20261003_180511`, `T05_20261003_181018`, `T05_20261003_182259`, `T05_20261003_182640`; the sixth attempt, `T05_20261003_180229`, has no directory here - its evidence was not collected and the run no longer exists on the machine that produced it, so the attempt is recorded without it rather than cited to nothing |
@@ -185,10 +185,17 @@ reached `succeeded`**. What changed is how far each one got and what stopped it.
 | `T02_20261004_005017` | failed | 1 | `step-2: no element matches 'search bar' in obs-0004` | **two** steps dispatched, step 1 verified |
 | `T02_20261004_005225` | failed | 1 | `task verification: expected on screen but not found: GUI agent research` | `type_text resolved=True verif=passed` - the text was typed into the frame the run was given |
 | `T01_20261004_004112` | **blocked** | 0 | `the run assumes no browser is running, but these are: msedge.exe, chrome.exe` | the new process precondition fired before the capture: `planning_ms = 0.0`, no `frames/`, no `obs-NNNN.json` |
+| `T02_20261004_161652` | failed | **2** | `task verification: expected on screen but not found: GUI agent research` | **both** steps resolved and verified - a `type_text` and a `key_press Enter` - and the frame showed the text in the address bar with its autocomplete open, so Enter selected a suggestion instead of submitting |
 
-The last row is the one to read first, because it is the only verdict in this round that
-is *correct by construction* rather than a failure that happened to be informative. It
-also costs 1 828 ms instead of the 30 531 ms a doomed run previously spent on planning.
+The table above is the round's turning points, not every run. T02 produced 30 attempts in
+the second round; eleven of them are in `Document/Week4/evidence` and the rest stayed in
+`outputs/week4`, which is where the metric block's 61 comes from.
+
+The last two rows are the informative pair. The blocked run is the only verdict in the
+round that is *correct by construction* rather than a failure that happened to be useful,
+and it costs 1 828 ms instead of the 30 531 ms a doomed run previously spent on planning.
+The two-step run is the furthest T02 has reached: the prompt's missing "a plan may hold
+more than one step" rule was the reason every earlier attempt stopped after one action.
 
 Two mechanisms were found by instrumenting the driver rather than by reading the code,
 and both are written up in `Week4_Troubleshooting.md`:
@@ -242,23 +249,27 @@ mean time over all attempts = sum(execution_ms of all formal attempts) / attempt
 
 | Metric | Value |
 | --- | --- |
-| formal real attempts | **45** (T01 18, T02 15, T03 1, T04 1, T05 10) |
+| formal real attempts | **61** (T01 18, T02 31, T03 1, T04 1, T05 10) |
 | successes (`succeeded` and `execute=true`) | **1** |
-| real-task success rate | **1 / 45 = 2.2 %** |
+| real-task success rate | **1 / 61 = 1.6 %** |
 | mean execution time of successful tasks | **6 938 ms** (`T01_20261004_140000`) |
-| mean `execution_ms` over all attempts | **6 568 ms** |
-| mean `planning_ms` over all attempts | **58 298 ms** |
-| total actions actually dispatched | **22** |
-| actions that passed their step-level check | **17** of those 22 |
+| mean `execution_ms` over all attempts | **7 065 ms** |
+| mean `planning_ms` over all attempts | **93 086 ms** |
+| total actions actually dispatched | **31** |
+| actions that passed their step-level check | **25** of those 31 |
 | runs that reached the goal rule at all | 2 (T01 attempt 2, T05 attempt 6) |
 
-The counts above are the runs that exist under `outputs/week4`: 45 real executions, of
-which the second round produced 22 (T01 18 and T02 15 across both rounds, T03 1, T04 1,
-T05 10). The first round's table recorded 11 of the 23 attempts that existed at the time;
-the rest were repeats of the same failure and were kept in the directory rather than
-tabulated. The difference is not a disagreement about what happened - the raw directory
-is the larger number, and it is the one quoted here because it is the one that can be
-counted by anyone with the repository.
+Every number above is a count over the directories under `outputs/week4`, restricted to
+summaries that record `execute: true`, so anyone with the repository can reproduce it with
+`scripts/week4_collect_evidence.py`'s own directory. The first round's table recorded 11 of
+the attempts that existed at the time; the rest were repeats of the same failure, kept in
+the directory rather than tabulated. The raw directory is the larger, checkable number and
+is the one quoted here.
+
+The distribution matters more than the rate: **T02 accounts for 31 of the 61 attempts**,
+because it was the case being worked on, and **T03 and T04 have one attempt each** - from
+the very first round, before any of this branch's fixes existed. T04 in particular is a
+single attempt that failed before typing anything, and no message was ever sent.
 
 Two caveats on the timing figures, because they are easy to misread:
 
