@@ -77,13 +77,18 @@ SYSTEM_PROMPT = "\n".join(
         # capped at 1000. What does move this case is the runner's re-planning, which turns a
         # one-step first answer into further chances rather than trying to make the first
         # answer complete by wording alone.
+        # Reverted: "a message needs Enter" was added for T04 and removed after the frame showed
+        # the marker sitting in the message box with the send button beside it, unclicked. Enter
+        # inserts a newline in that WeChat - it is a per-machine preference - so the rule stated
+        # a fact about a different configuration, and a prompt that says something the screen
+        # contradicts is worse than a silent one.
         (
             "- Plan to the goal: a shortcut opens with double_click, a search needs Enter "
-            "in the page field, not the address bar."
+            "in the page field, not the bar."
         ),
         "- action_type: " + ", ".join(PLAN_ACTION_TYPES) + ".",
         "- Target a listed element_id; ids are unique.",
-        "- target_text: copy listed text, or omit it.",
+        "- target_text: copy a listed text.",
         # Ten real runs on the Windows review machine produced two failures of this
         # kind and two of the next: the model wrote 'browser' and 'week4 test
         # application' - its own descriptions, neither of them on screen - and it
@@ -100,9 +105,10 @@ SYSTEM_PROMPT = "\n".join(
         (
             '- Args, or the step is refused: type_text {"text"}; '
             'key_press {"key"}; hotkey {"keys":[..]}; scroll {"scroll_amount"}; '
-            'wait {"duration"}; platform key names.'
+            'wait {"duration"}; platform keys.'
         ),
-        '- LAST step "finish"; summary <60 chars.',        # 8.2.8: ambiguity is answered, not absorbed. This rule used to read "say so
+        '- LAST step "finish"; summary <60 chars.',
+        # 8.2.8: ambiguity is answered, not absorbed. This rule used to read "say so
         # in assumptions and still return a plan", and nothing reads assumptions - so
         # an ambiguous instruction produced a plan that executed on a guess the
         # operator never saw. 8.2.7 and 8.2.5 need the other two rules, and all of
