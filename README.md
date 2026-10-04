@@ -51,7 +51,7 @@ Three properties the loop is built around:
   parameter or an out-of-range coordinate stops the run instead of clicking
   something plausible.
 
-603 tests, ruff clean. See `Document/Week4/Week4_Usage.md` for the flags, the
+604 tests, ruff clean. See `Document/Week4/Week4_Usage.md` for the flags, the
 safety model and the record layout.
 
 The Chinese deliverables - `Week4_中文实验报告.(md|docx)`, `Week4_Windows复核手册.md`
@@ -107,7 +107,7 @@ python scripts/week3_model_demo.py --provider mock
 python scripts/week3_planning_demo.py --provider mock --instruction "Open the browser"
 ```
 
-603 tests, ruff clean. The model client's retry, timeout and
+604 tests, ruff clean. The model client's retry, timeout and
 error-classification paths are covered, along with the four vision-payload
 failure modes (missing, empty, oversized, unknown type) and the TaskPlan
 schema boundaries. Dataset and model dependencies live in

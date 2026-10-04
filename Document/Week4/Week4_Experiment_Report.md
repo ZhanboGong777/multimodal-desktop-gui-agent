@@ -111,9 +111,9 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **603 passed**, ruff clean |
+| MacBook Air M2 | **604 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 303: 244 in the fourteen files below, and 59 spread across the other suites -
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 304: 245 in the fourteen files below, and 59 spread across the other suites -
 `test_control_safety.py` 16, `test_model_mock.py` 14, `test_ocr.py` 7 (five of them
 the Windows-only OCR workarounds), `test_config.py` 7 (a new file),
 `test_plan_parser.py` 5, `test_model_config.py` 4, `test_documented_counts.py` 4
@@ -202,7 +202,7 @@ behaviour needed no change: blocked, nothing dispatched, exit 2, no traceback.
 
 | Test file | Covers |
 | --- | --- |
-| `test_action_adapter.py` | 39 cases: unique, ambiguous, missing and stale targets, a target split across word-level elements, a stacked shortcut label whose two lines are not adjacent in reading order, parameter errors including wrong types, out-of-range coordinates, key whitelist, platform hotkeys, coordinate scaling, `finish` refusal |
+| `test_action_adapter.py` | 40 cases: unique, ambiguous, missing and stale targets, a target split across word-level elements, a stacked shortcut label whose two lines are not adjacent in reading order, parameter errors including wrong types, out-of-range coordinates, key whitelist, platform hotkeys, coordinate scaling, `finish` refusal |
 | `test_runtime_runner.py` | 62 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, the guard that refuses to start a real run whose goal already holds, the second confirmation a risky task must get, the provenance the summary carries, and the note a frame with no readable text leaves |
 | `test_runtime_verification.py` | 15 cases: rule matching, forbidden text, unverifiable tasks, degraded observations, the two case rules that have to tell a real result from a lookalike, and the screen going away while polling |
 | `test_runtime_observation.py` | 11 cases: the whole of `observe()` against a prepared frame - ids, geometry, the OCR-failure record, the element cap - plus what a prompt line carries |
@@ -1036,7 +1036,7 @@ that is merely behind another window, and the Windows round had to parse
   `Document/Week4/evidence/`, so a run id in the test report resolves inside the
   repository rather than only on the machine that produced it.
 - `configs/week4.yaml` - Week 4 limits, with `ExecutionConfig` added to `config.py`.
-- 303 new tests.
+- 304 new tests.
 - `Document/Week4/Week4_Usage.md` - flags, the safety model, the record layout.
 - `Document/Week4/Week4_Troubleshooting.md` - forty-two symptoms with what to check
   and what the code actually does about each.

@@ -499,6 +499,45 @@ def test_a_drag_naming_an_element_from_nowhere_is_refused(adapter: ActionAdapter
         adapter.resolve(step, _snapshot())
 
 
+def test_a_missing_type_text_argument_falls_back_to_the_steps_own_target(
+    adapter: ActionAdapter,
+) -> None:
+    """The plan T04 produced four passes running, and what may and may not be inferred.
+
+    Measured: `type_text text=None target='WEEK4_MESSAGE_CHECK_'` - the right verb with the
+    right string in the wrong field of the step, refused by the adapter and ending the run.
+    `target_text` is where a step names the literal it is about and the prompt requires it to be
+    copied verbatim, so it is a fair source for the content when `arguments.text` is empty.
+
+    The guard is the other half and the more important one: a `type_text` whose target is a
+    *description* must not have that description typed into the box, so a candidate with spaces
+    is refused even though `arguments.text` may contain them freely.
+    """
+    inferred = adapter.resolve(
+        _step(action_type="type_text", target_text="WEEK4_MESSAGE_CHECK_"),
+        _snapshot(),
+    )
+    assert inferred.action.text == "WEEK4_MESSAGE_CHECK_"
+    assert "target_text" in inferred.note, inferred.note
+
+    supplied = adapter.resolve(
+        _step(action_type="type_text", target_text="field", arguments={"text": "hello world"}),
+        _snapshot(),
+    )
+    assert supplied.action.text == "hello world", "an explicit argument is never overridden"
+    assert "target_text" not in supplied.note
+
+    for description in (
+        "the message box in the week4 test conversation",
+        "send button",
+        "   ",
+    ):
+        with pytest.raises(ActionResolutionError, match="non-empty arguments.text"):
+            adapter.resolve(
+                _step(action_type="type_text", target_text=description), _snapshot()
+            )
+
+
 def test_a_hotkey_without_any_keys_is_refused(adapter: ActionAdapter) -> None:
     with pytest.raises(ActionResolutionError, match="non-empty arguments.keys"):
         adapter.resolve(_step(action_type="hotkey", arguments={}), _snapshot())

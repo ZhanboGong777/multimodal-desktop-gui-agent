@@ -622,14 +622,54 @@ class ActionAdapter:
             note=f"drag {start_id} -> {end_id}",
         )
 
+    #: Longest `target_text` that will be used as the text of a `type_text` step.
+    #:
+    #: The fallback below turns a label into content, which is only right while the label looks
+    #: like content. Together with the no-space rule this is what separates a literal from a
+    #: description: measured against the two shapes T04 actually produced, `'WEEK4_MESSAGE_CHECK_'`
+    #: is accepted and `'the message box in the week4 test conversation'` is refused, which is
+    #: the behaviour wanted - typing a field's description into the field is worse than stopping.
+    MAX_INFERRED_TEXT = 64
+
     def _resolve_type(self, step: PlanStep) -> ResolvedAction:
         text = (step.arguments or {}).get("text")
+        note = ""
         if not (text or "").strip():
-            raise ActionResolutionError("type_text requires a non-empty arguments.text")
+            # Fall back to the step's own `target_text` before refusing.
+            #
+            # Measured on T04, four passes running: the model produced
+            # `type_text text=None target='WEEK4_MESSAGE_CHECK_'` - the right verb, the right
+            # string, in the wrong field of the step. `target_text` is where a step names the
+            # literal it is about, and the prompt already requires it to be copied verbatim
+            # from the screen list, so using it when `arguments.text` is empty costs nothing
+            # and rescues a plan that is otherwise correct.
+            #
+            # Guarded rather than automatic, because the two fields do different jobs: a
+            # `type_text` whose `target_text` is a description of a field would otherwise type
+            # that description into it. Whitespace-only, multi-line and over-long targets are
+            # refused as before, and the note says when the value was inferred so a reader can
+            # tell it from one the model supplied.
+            candidate = (step.target_text or "").strip()
+            # No spaces, one line, and short. `target_text` is allowed to be prose - the prompt
+            # asks for a copied screen text, and a step may name a window or a field - so the
+            # guard is what keeps this from typing a description into a box. Content a person
+            # asks a program to type is very often space-free, and the marker this exists for
+            # is; a description with no spaces at all is not a thing anyone writes.
+            usable = (
+                candidate
+                and len(candidate) <= self.MAX_INFERRED_TEXT
+                and not any(ch.isspace() for ch in candidate)
+            )
+            if not usable:
+                raise ActionResolutionError("type_text requires a non-empty arguments.text")
+            text = candidate
+            note = " (text taken from target_text; arguments.text was empty)"
         action = DesktopAction(
             action_type="type_text", text=text, target_description=step.target_text
         )
-        return ResolvedAction(step_id=step.step_id, action=action, note=f"type {len(text)} chars")
+        return ResolvedAction(
+            step_id=step.step_id, action=action, note=f"type {len(text)} chars{note}"
+        )
 
     def _resolve_key(self, step: PlanStep) -> ResolvedAction:
         key = str((step.arguments or {}).get("key", "")).strip().casefold()
