@@ -754,6 +754,15 @@ class TaskRunner:
             "visible_text": describe_elements(snapshot),
             "success_rules": task.success_rules,
         }
+        # Tried and reverted: `required_text` was added here to hand the model the literals its
+        # success rules are checked for, so it would not have to carry them from the instruction
+        # into a step by hand - which is what T04 fails on, four passes running, with
+        # `type_text requires a non-empty arguments.text`. It changed nothing, because this
+        # dictionary is **built and never rendered**: nothing in `planning/` reads it, so
+        # neither `required_text` nor the `visible_text` beside it reaches the prompt. The
+        # screen reaches the model as the attached image instead, which is why the omission has
+        # been invisible. Recorded here rather than left as a dead field, and `visible_text` is
+        # left alone because removing it is a separate change from this one.
 
     def _finish(
         self,
