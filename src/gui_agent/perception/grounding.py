@@ -58,45 +58,51 @@ class GroundingResult:
 
 
 def _without_whitespace(value: str, *, fold_case: bool) -> str:
-    """The text with every whitespace character removed.
+    """The text with whitespace and the punctuation OCR routinely drops removed.
 
     Used as a last resort in the mode that already ignores case, because OCR does not
-    reproduce spacing reliably and the characters it drops are not meaningful in the
-    languages this project meets. The measurement that put this here: T02 failed with
+    reproduce spacing or fine punctuation reliably. Two measurements put this here, both
+    from the Windows node and both a case failing while the text was plainly on screen:
 
-        no element matches '在 Google 中搜索，或输入网址' in obs-0002
+    * T02 failed with "no element matches '在 Google 中搜索，或输入网址'" while the frame
+      held '在Google 中搜索，或输入网址' - a space the engine did not emit;
+    * T03 failed with "no element matches 'week4_sample.txt'" while the frame held
+      'week4 sample.txt' - the underscore read as a space, which is what happens to a
+      glyph that sits on the baseline and is one pixel wide.
 
-    while the frame held '在Google 中搜索，或输入网址' - the same characters with the
-    space after 在 missing, because the OCR engine did not emit it. Every space-sensitive
-    comparison fails on that pair, and the model had read the text correctly.
-
-    Restricted to the case-insensitive mode on purpose. `exact` means the whole string and
-    `contains` is case-sensitive, so a space-blind version of either would match
-    'OK' against 'OK Cancel' and 'read' against 'README.md' - both of which the existing
-    tests assert must not match, and both of which the first version of this function did.
+    Only whitespace and `_ . -` are removed, and only here. Case-insensitive matching
+    already ignores case, so folding punctuation into it widens nothing its name promises;
+    `exact` and `contains` keep their literal comparisons, which is what two existing tests
+    assert and what a first version of this function broke by applying everywhere.
     """
-    collapsed = "".join(value.split())
-    return collapsed.casefold() if fold_case else collapsed
+    for char in (" ", "\t", "\n", "\r", "\u3000", "_", ".", "-"):
+        value = value.replace(char, "")
+    return value.casefold() if fold_case else value
 
 
 def text_matches(query: str, text: str, match_mode: MatchMode = DEFAULT_MATCH_MODE) -> bool:
     """Compare a query against element text using the requested mode.
 
-    Except in the case-insensitive mode, which falls back to ignoring whitespace when the
-    spacing is the only difference - see :func:`_without_whitespace` for the frame that
-    made that necessary.
+    `exact` and `contains` keep the literal comparison their names promise - whole string,
+    and case-sensitive substring. `contains` is also the default mode, and every mode
+    falls back to ignoring the whitespace and punctuation OCR drops when that is the only
+    difference, which is a separate failure from case: see :func:`_without_whitespace` for
+    the two frames that made it necessary, and note that the case distinction is preserved
+    in both, which is what `test_contains_matching_is_case_sensitive` asserts.
     """
     if not query or not text:
         return False
     if match_mode == "exact":
         return text.strip() == query.strip()
-    if match_mode == "case_insensitive":
-        if query.strip().casefold() in text.strip().casefold():
-            return True
-        return _without_whitespace(query, fold_case=True) in _without_whitespace(
-            text, fold_case=True
-        )
-    return query.strip() in text
+    if match_mode == "case_insensitive" and query.strip().casefold() in text.strip().casefold():
+        return True
+    if match_mode == "contains" and query.strip() in text:
+        return True
+    # The tolerance is applied case-insensitively only when the mode already is; `contains`
+    # compares the punctuation-stripped forms in their original case, so 'READ' still
+    # matches 'readme' only in the mode whose name says it should.
+    fold = match_mode == "case_insensitive"
+    return _without_whitespace(query, fold_case=fold) in _without_whitespace(text, fold_case=fold)
 
 
 def find_text(

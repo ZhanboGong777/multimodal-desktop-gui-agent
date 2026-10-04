@@ -1,0 +1,122 @@
+{
+  "run_id": "T03_20261004_171941",
+  "case_id": "T03",
+  "instruction": "Open the file week4_sample.txt from the week4 test folder",
+  "status": "succeeded",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Double click on week4_sample.txt",
+      "action_type": "double_click",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "double_click",
+          "x": 401,
+          "y": 272,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "week4_sample.txt"
+        },
+        "element_id": "obs-0002-e042",
+        "screenshot_point": {
+          "x": 401,
+          "y": 272
+        },
+        "control_point": {
+          "x": 401,
+          "y": 272
+        },
+        "note": "text 'week4_sample.txt' -> obs-0002-e042 (re-bound from obs-0001-e003 in an earlier frame)"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "double_click",
+          "x": 401,
+          "y": 272,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "week4_sample.txt"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: file, week4, sample",
+        "evidence": {
+          "observation_id": "obs-0003",
+          "changed": true,
+          "element_count": 60,
+          "expectation_tokens": [
+            "file",
+            "week4",
+            "sample",
+            "opened"
+          ],
+          "expectation_hits": [
+            "file",
+            "week4",
+            "sample"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 4297.000000020489,
+      "after_observation_id": "obs-0003"
+    }
+  ],
+  "verification": {
+    "outcome": "passed",
+    "method": "automatic",
+    "detail": "all success rules matched against the current screen",
+    "evidence": {
+      "observation_id": "obs-0004",
+      "expect_text": [
+        "WEEK4-OPEN-FILE-OK"
+      ],
+      "forbid_text": []
+    }
+  },
+  "error": null,
+  "elapsed_ms": 194141.00000000326,
+  "execute": true,
+  "model_name": "qwen2.5vl:7b",
+  "provider": "openai_compatible",
+  "notes": [
+    "ocr: torch is blocked in this process to keep its cuDNN build from clashing with PaddlePaddle.",
+    "planned 1 steps from obs-0001"
+  ],
+  "task_id": "T03",
+  "commit": "1319af1",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 2560x1600, control 2560x1600",
+  "started_at": "2026-10-04T06:19:41.108185Z",
+  "finished_at": "2026-10-04T06:22:55.249185Z",
+  "planning_attempts": 1,
+  "model_requests": 1,
+  "planning_ms": 185812.99999996554,
+  "confirmation_ms": 3015.00000001397,
+  "execution_ms": 5313.000000023749,
+  "evidence_directory": "outputs\\week4\\T03_20261004_171941",
+  "stop_reason": "",
+  "error_type": "",
+  "failed_step_id": null,
+  "action_count": 1
+}
