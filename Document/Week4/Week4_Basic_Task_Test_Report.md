@@ -49,7 +49,7 @@ failure is two attempts, and only the runs whose summary reads `succeeded` with
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | T01 | open the browser | desktop visible and launch entry uncovered; **no browser window open** | 2 + 5 | **0 + 1** | **succeeded** | automatic: the marks a browser frame carries in either locale (`http`, `搜索`) | from the confirmation gate to the final verdict (`execution_ms`); the summary also keeps `planning_ms`, `confirmation_ms` and the whole-run `elapsed_ms`, and the run directory keeps `warmup.json` for the cold and warm numbers, which are deliberately not part of any of them | first round: `T01_20261003_172642`, `T01_20261003_180109`; second round, the success: **`T01_20261004_140000`** |
 | T02 | search the web | a browser window is open and focused | 1 + 30 | **0** | failed | automatic: the query text is on screen | as above | first round: `T02_20261003_173909`; the second round's runs are listed under §"Second round" and eleven of them are in `Document/Week4/evidence` |
-| T03 | open a specified file | `week4_sample.txt` exists in the week4 test folder (`~/Desktop/week4_test`, or `%USERPROFILE%\Desktop\week4_test`); no file of that name is open | 1 | **0** | failed | automatic: `WEEK4-OPEN-FILE-OK` on screen | as above | `T03_20261003_174110` |
+| T03 | open a specified file | `week4_sample.txt` exists in the week4 test folder (`~/Desktop/week4_test`, or `%USERPROFILE%\Desktop\week4_test`); no file of that name is open | 1 + 7 | **1** | **succeeded** | automatic: `WEEK4-OPEN-FILE-OK` on screen | as above | first round: `T03_20261003_174110`; the success: **`T03_20261004_171941`** |
 | T04 | send a message | the test conversation is open and holds no earlier message with **this run's** marker; the operator agreed a real message may be sent | 1 | **0** | failed | automatic: this run's marker on screen (the CLI prints it as `marker`) | as above | `T04_20261003_174709` |
 | T05 | close the application | `week4_sample.txt` is open in the test application, so the marker is on screen; window focused | 6 | **0** | failed (1 `timed_out`, 3 `blocked`, 2 `failed`) | automatic: `WEEK4-OPEN-FILE-OK` **gone** | as above | `T05_20261003_174334`, `T05_20261003_180511`, `T05_20261003_181018`, `T05_20261003_182259`, `T05_20261003_182640`; the sixth attempt, `T05_20261003_180229`, has no directory here - its evidence was not collected and the run no longer exists on the machine that produced it, so the attempt is recorded without it rather than cited to nothing |
 
@@ -68,8 +68,33 @@ action_count = 1
 step-1 double_click: resolved=True verif=passed err=None
 ```
 
-Its records are in `Document/Week4/evidence/T01_20261004_140000`. The four cases that
-did not reach `succeeded` are not described as passing anywhere in this report.
+Its records are in `Document/Week4/evidence/T01_20261004_140000`.
+
+**T03 succeeded on the third round.** Also with a real click, and also on the first step:
+
+```text
+run_id       = T03_20261004_171941
+status       = succeeded
+execute      = True
+verification = passed  (all success rules matched against the current screen)
+action_count = 1
+step-1 double_click: resolved=True element=obs-0002-e042 click=(401,272) verif=passed
+```
+
+Notepad was found running with `*week4_sample.txt` in its title afterwards, which is the
+success rule stated as an observation rather than as a verdict. Its records are in
+`Document/Week4/evidence/T03_20261004_171941`.
+
+**Two of the five cases have now reached `succeeded`.** The three that have not are not
+described as passing anywhere in this report.
+
+What the two successes have in common is worth stating, because it is the same defect twice:
+both were caused by the adapter refusing a pair of strings that a person would call equal.
+T01's shortcut was clicked on its label instead of its icon, and T03's file was refused
+because the OCR engine read `week4_sample.txt` as `week4 sample.txt` - an underscore
+rendered as a space, which is what happens to a one-pixel glyph sitting on the baseline.
+In both cases the model had read the screen correctly and the comparison, not the model,
+was what failed.
 
 ### Why the preconditions are not optional
 
@@ -249,15 +274,15 @@ mean time over all attempts = sum(execution_ms of all formal attempts) / attempt
 
 | Metric | Value |
 | --- | --- |
-| formal real attempts | **61** (T01 18, T02 31, T03 1, T04 1, T05 10) |
-| successes (`succeeded` and `execute=true`) | **1** |
-| real-task success rate | **1 / 61 = 1.6 %** |
-| mean execution time of successful tasks | **6 938 ms** (`T01_20261004_140000`) |
-| mean `execution_ms` over all attempts | **7 065 ms** |
-| mean `planning_ms` over all attempts | **93 086 ms** |
-| total actions actually dispatched | **31** |
-| actions that passed their step-level check | **25** of those 31 |
-| runs that reached the goal rule at all | 2 (T01 attempt 2, T05 attempt 6) |
+| formal real attempts | **68** (T01 18, T02 31, T03 8, T04 1, T05 10) |
+| successes (`succeeded` and `execute=true`) | **2** (`T01_20261004_140000`, `T03_20261004_171941`) |
+| real-task success rate | **2 / 68 = 2.9 %** |
+| mean execution time of successful tasks | **6 126 ms** (6 938 for T01, 5 313 for T03) |
+| mean `execution_ms` over all attempts | **7 221 ms** |
+| mean `planning_ms` over all attempts | **86 380 ms** |
+| total actions actually dispatched | **33** |
+| actions that passed their step-level check | **27** of those 33 |
+| runs that reached the goal rule at all | 2 (T01, T03) |
 
 Every number above is a count over the directories under `outputs/week4`, restricted to
 summaries that record `execute: true`, so anyone with the repository can reproduce it with
