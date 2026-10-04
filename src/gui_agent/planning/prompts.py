@@ -71,6 +71,12 @@ SYSTEM_PROMPT = "\n".join(
         # rather than as its own line: it is the same instruction - aim at what reaches
         # the goal - and a separate sentence cost 60 characters the budget did not have
         # (the prompt is capped at 1000 and a test enforces it).
+        # Tried and reverted: "click a field before typing in it" was added to this rule and
+        # measured over five consecutive calls on T02's own frame, all five of which returned
+        # a single `click` - no better than without it, and it cost 29 characters of a budget
+        # capped at 1000. What does move this case is the runner's re-planning, which turns a
+        # one-step first answer into further chances rather than trying to make the first
+        # answer complete by wording alone.
         (
             "- Plan to the goal: a shortcut opens with double_click, a search needs Enter "
             "in the page field, not the address bar."
