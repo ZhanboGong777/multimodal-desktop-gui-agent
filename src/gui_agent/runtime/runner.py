@@ -417,6 +417,75 @@ class TaskRunner:
         *,
         timings: Timings | None = None,
     ) -> TaskRunResult:
+        """Run a plan, and plan again from what the screen shows when it falls short.
+
+        Measured on T02, which needs two actions - enter a query, submit it - and got a
+        one-step plan three runs in a row. `planner.plan` was called exactly once per run
+        and the returned list was executed in order, so a one-step plan ended the run after
+        one action with the goal unmet, and no amount of prompt wording moved it: the
+        identical prompt and frame produced 1, 2, 8 and 9 steps across runs.
+
+        So the retry lives here instead. When a pass ends without the success rules holding,
+        and the run's own budget still allows it, the model is asked again with the screen
+        as it now stands - which is the difference between "the model has to answer the
+        whole task in one shot" and "the model has to answer the next step". The whole loop
+        is bounded twice over by what already existed: `task_timeout_seconds` is re-checked
+        before each pass, and `max_planning_attempts` caps the number of passes.
+        """
+        result = self._execute_plan_once(
+            task, plan, options, initial, started, notes, planning_attempts, timings=timings
+        )
+        passes = 1
+        while (
+            result.status != "succeeded"
+            and passes < options.max_planning_attempts
+            and self.clock() - started <= options.task_timeout_seconds
+        ):
+            try:
+                after = self._observing()
+            except Exception as exc:  # noqa: BLE001 - re-planning is an improvement, not a duty
+                notes.append(f"re-planning skipped: observation failed: {exc}")
+                break
+            retry = self.planner.plan(
+                task.instruction,
+                context=self._context(after, task, options),
+                image_path=after.image_path,
+                task_id=task.case_id,
+            )
+            if not retry.ok or retry.plan is None or not retry.plan.steps:
+                notes.append(
+                    f"re-planning attempt {passes + 1} produced no steps; stopping"
+                )
+                break
+            passes += 1
+            notes.append(
+                f"re-planned from {after.observation_id}: attempt {passes} of at most "
+                f"{options.max_planning_attempts}"
+            )
+            result = self._execute_plan_once(
+                task,
+                retry.plan,
+                options,
+                initial,
+                started,
+                notes,
+                planning_attempts + passes - 1,
+                timings=timings,
+            )
+        return result
+
+    def _execute_plan_once(
+        self,
+        task: TaskSpec,
+        plan: TaskPlan,
+        options: ExecutionOptions,
+        initial: ObservationSnapshot,
+        started: float,
+        notes: list[str],
+        planning_attempts: int = 0,
+        *,
+        timings: Timings | None = None,
+    ) -> TaskRunResult:
         steps: list[StepRecord] = []
         current = initial
 

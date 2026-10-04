@@ -139,6 +139,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--execute", action="store_true", help="allow real desktop actions")
     parser.add_argument("--max-actions", type=_positive_int, default=None)
     parser.add_argument("--task-timeout", type=_positive_float, default=None)
+    # Worth a flag of its own because the right number is a property of the model's
+    # planning stability rather than of the machine: measured on T02, the same prompt and
+    # frame produced plans of 1, 2, 8 and 9 steps across runs, and a run that gets a
+    # one-step plan on the first ask succeeds on a later one.
+    parser.add_argument("--planning-attempts", type=_positive_int, default=None)
     parser.add_argument(
         "--ocr-engine",
         choices=("tesseract", "paddleocr"),
@@ -352,6 +357,8 @@ def main() -> int:
         config.execution.max_actions = args.max_actions
     if args.task_timeout is not None:
         config.execution.task_timeout_seconds = args.task_timeout
+    if args.planning_attempts is not None:
+        config.execution.max_planning_attempts = args.planning_attempts
     # Per-machine OCR, because the right engine is a property of the machine and not of
     # the project. Measured on the Windows node against one frame of Edge's window:
     # Tesseract read 86-126 elements in 1.2-1.9 s and produced nothing for the address
@@ -431,6 +438,10 @@ def main() -> int:
         task_timeout_seconds=config.execution.task_timeout_seconds,
         verification_timeout_seconds=config.execution.verification_timeout_seconds,
         verification_poll_interval_seconds=config.execution.verification_poll_interval_seconds,
+        # A CLI flag overrides the file, as with the other limits: the value is worth
+        # changing per run for a case whose plan length varies, and re-running with a
+        # different number should not mean editing the config.
+        max_planning_attempts=config.execution.max_planning_attempts,
         confirm=True,
     )
 

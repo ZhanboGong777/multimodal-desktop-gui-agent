@@ -142,10 +142,13 @@ class ExecutionConfig(ConfigModel):
     record of intent, never a switch that gates execution. These values are the
     ones the runner actually enforces.
 
-    There is deliberately no ``max_replans``. Nothing implements re-planning yet,
-    and a knob that no code reads is a claim without a mechanism - the same mistake
-    as the ``require_preconditions`` field that sat unread until it was wired up.
-    Re-planning arrives in Week 6, and the setting can arrive with it.
+    There is deliberately no ``max_replans`` knob for plans that fail part-way - a
+    step that cannot be resolved still ends the run, because acting on a guess is
+    worse than stopping. ``max_planning_attempts`` covers the different case that
+    T02 exposed: a plan that runs to its end and leaves the goal unmet. Nothing
+    implements re-planning *within* a plan, and that is still Week 6's; what is here
+    is asking the model again from the current screen, which is bounded by the same
+    wall clock and by this count.
     """
 
     #: Cap on how many elements reach the model, text first.
@@ -159,6 +162,11 @@ class ExecutionConfig(ConfigModel):
     verification_poll_interval_seconds: float = Field(default=0.5, ge=0.0)
     #: Longest single ``wait`` step the action adapter will accept.
     max_wait_seconds: float = Field(default=5.0, gt=0.0)
+    #: How many times one run may ask the model for a plan. 1 is the behaviour this
+    #: runner had - plan once, execute the list, stop - and the docs on the option
+    #: itself record why T02 needed more: its plan length varied from 1 to 9 steps
+    #: run to run, and a one-step plan ended the run with the goal unmet.
+    max_planning_attempts: int = Field(default=1, gt=0)
     #: When true, a task with no verifiable success rule is reported ``blocked``
     #: instead of being treated as complete when the plan runs out.
     require_success_rules: bool = True

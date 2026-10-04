@@ -126,6 +126,17 @@ execution:
   task_timeout_seconds: 600
   verification_timeout_seconds: 10
   verification_poll_interval_seconds: 0.5
+  # How many times one run may ask the model for a plan. 1 is plan-once-and-execute, which
+  # this runner did until T02 showed what its ceiling costs: that task needs two actions
+  # (enter a query, submit it), the identical prompt and frame produced plans of 1, 2, 8 and
+  # 9 steps across runs, and a one-step plan ended the run after one action with the goal
+  # unmet - so the run failed for a reason no prompt wording moved.
+  #
+  # 4 here, for a machine whose planning is this slow: on this node a planning call takes
+  # ~200 s, so four passes is already ~13 minutes of a 600 s budget's worth of waiting and
+  # the wall clock stops it first if the model is slow. Every pass re-checks that budget, so
+  # the two bounds compose rather than one relying on the other.
+  max_planning_attempts: 4
   # Longest single `wait` step the action adapter will accept. A wait longer than this is
   # taken at this value with a note rather than refused, so the ceiling bounds one pause
   # and never ends a run.

@@ -154,6 +154,19 @@ class ExecutionOptions(SchemaModel):
     #: the part of a precondition that screen text cannot: whether an application is
     #: running at all.
     require_preconditions: bool = True
+    #: How many times the model may be asked for a plan in one run.
+    #:
+    #: 1 keeps the behaviour this runner had: plan once, execute the list, stop. Measured
+    #: on T02 - which needs two actions and got a one-step plan three runs running - the
+    #: ceiling of one pass is what ended the run with the goal unmet, and the identical
+    #: prompt and frame produced 1, 2, 8 and 9 steps across runs, so more passes rather
+    #: than better wording is the lever. Raising it lets a run that falls short ask again
+    #: from the screen as it now stands, which turns "answer the whole task at once" into
+    #: "answer the next step".
+    #:
+    #: Every pass re-checks `task_timeout_seconds`, so this bounds the count of attempts
+    #: and the clock still bounds the run. Set it to 1 to plan exactly once.
+    max_planning_attempts: int = Field(default=1, gt=0)
 
 
 class StepRecord(SchemaModel):
