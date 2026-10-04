@@ -83,15 +83,19 @@ model:
   model_name: mock-vision-model
   base_url: null
   # A planning call carries a 2560x1600 screenshot plus the element list - measured at
-  # ~7 500 tokens on the review machine - so it is not comparable to a text call. Warm,
-  # that machine answers text in ~0.7 s and image in ~0.9 s, but planning has been
-  # measured at 124 s when the model was partly paged out; at 120 s the run died with
-  # "planning failed: ModelError: APITimeoutError", which names the transport rather
-  # than the cause and reads like a broken endpoint. 300 s leaves room for a slow
-  # machine without hiding a genuinely unreachable one; scripts/week4_preflight.py
-  # checks the real latency before a run, so a model that cannot answer in budget is
-  # reported before anything is captured.
-  timeout_seconds: 300
+  # ~7 500 tokens on the review machine - so it is not comparable to a text call, and the
+  # warmup probe does not size it either: that probe sends one image with a short prompt,
+  # while planning sends the image AND 60 element lines under a system prompt.
+  #
+  # Measured here, and the reason this is 600 rather than 300: a request of planning size
+  # answered in 86 s cold and 17 s warm when issued directly, and the same run through the
+  # CLI died at 320 s with "planning failed: ModelError: APITimeoutError". The gap between
+  # 17 s and 320 s is not the request, it is what else is on the machine while the CLI
+  # runs it, so the budget has to absorb that rather than assume the quiet number. The
+  # error names the transport rather than the cause and reads like a broken endpoint;
+  # scripts/week4_preflight.py checks the real latency before a run, so a model that
+  # cannot answer in budget is reported before anything is captured.
+  timeout_seconds: 600
   temperature: 0.0
   max_retries: 0
   # A plan of up to 10 steps, each with 7 fields, needs room. Without this the server's
