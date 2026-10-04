@@ -171,9 +171,17 @@ def _cases() -> dict[str, TaskSpec]:
             # header, which is itself proof that the conversation was already open. The
             # precondition says the operator prepares it, so the instruction must not ask the
             # model to do the operator's half.
-            instruction=(
+            # The default lives in code; the wording a machine needs is settable, because what
+            # sends a message is a property of the client rather than of the case. Measured on
+            # this node: "and send it" produced a plan ending in `key_press Enter`, the marker
+            # stayed in the message box, and the frame showed the send button beside it
+            # unclicked - that WeChat has "Enter for a new line" set, so Enter types a newline.
+            # The rule that had told the model otherwise was reverted; the way to aim it at the
+            # button is to say so, and to say so per machine.
+            instruction=os.environ.get(
+                "GUI_AGENT_MESSAGE_INSTRUCTION",
                 f"Type {MESSAGE_MARKER} into the message box of the conversation named "
-                f'"{MESSAGE_CONVERSATION}", which is already open, and send it'
+                f'"{MESSAGE_CONVERSATION}", which is already open, and send it',
             ),
             target_app="messaging",
             preconditions=[
