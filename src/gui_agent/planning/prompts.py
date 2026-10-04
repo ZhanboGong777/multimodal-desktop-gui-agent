@@ -52,13 +52,20 @@ SYSTEM_PROMPT = "\n".join(
         # runs - it had read the prompt, and produced the example's verb anyway. Placed
         # first, with the reason, so the mapping is established before the JSON shape is
         # copied.
-        "- A desktop shortcut OPENS with double_click; click only selects.",
-        # Same shape as the rule above and found the same way. T02's model planned a
-        # single type_text step for "Search the web for ..." and stopped: the text went
-        # into the field and nothing was submitted, so no results page ever existed and
-        # the task rule could not match. The example's verb is not the whole grammar of a
-        # task, and a search is two actions - enter the text, then send it.
-        "- After type_text in a search field, press Enter to submit.",
+        # One rule where three attempts produced three separate ones, and the shortest is
+        # also the most general. In order: the model chose `click` for a desktop shortcut
+        # (it needs double_click, and this rule sat seventh in the list before it was
+        # first - position mattered as much as wording, because the model produced the
+        # example's verb anyway); it answered a search with a bare type_text and no
+        # submit; and it answered a two-action task with one step while its own
+        # expected_result described the finished search. Each fix added a sentence and
+        # each sentence cost room the budget did not have, so they are stated as the rule
+        # they are all instances of: a plan runs to the goal, and a step may need a
+        # follow-through.
+        (
+            "- Plan every step to the goal: a shortcut opens with double_click, a search "
+            "needs Enter."
+        ),
         "- action_type: " + ", ".join(PLAN_ACTION_TYPES) + ".",
         "- Target a listed element_id; ids are unique.",
         "- target_text: copy listed text, or omit it.",
