@@ -48,7 +48,7 @@ failure is two attempts, and only the runs whose summary reads `succeeded` with
 | Case | Task | Preconditions before the run | Attempts | Successes | Status | Verification method | Timing basis | Evidence |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | T01 | open the browser | desktop visible and launch entry uncovered; **no browser window open** | 2 + 5 | **0 + 1** | **succeeded** | automatic: the marks a browser frame carries in either locale (`http`, `搜索`) | from the confirmation gate to the final verdict (`execution_ms`); the summary also keeps `planning_ms`, `confirmation_ms` and the whole-run `elapsed_ms`, and the run directory keeps `warmup.json` for the cold and warm numbers, which are deliberately not part of any of them | first round: `T01_20261003_172642`, `T01_20261003_180109`; second round, the success: **`T01_20261004_140000`** |
-| T02 | search the web | a browser window is open and focused | 1 + 30 | **0** | failed | automatic: the query text is on screen | as above | first round: `T02_20261003_173909`; the second round's runs are listed under §"Second round" and eleven of them are in `Document/Week4/evidence` |
+| T02 | search the web | a browser window is open and focused | 1 + 38 | **1** | **succeeded** | automatic: the query text **and** a loaded results page (`google.com`) | as above | first round: `T02_20261003_173909`; the second round's runs are listed under §"Second round" and eleven of them are in `Document/Week4/evidence` |
 | T03 | open a specified file | `week4_sample.txt` exists in the week4 test folder (`~/Desktop/week4_test`, or `%USERPROFILE%\Desktop\week4_test`); no file of that name is open | 1 + 7 | **1** | **succeeded** | automatic: `WEEK4-OPEN-FILE-OK` on screen | as above | first round: `T03_20261003_174110`; the success: **`T03_20261004_171941`** |
 | T04 | send a message | the test conversation is open and holds no earlier message with **this run's** marker; the operator agreed a real message may be sent | 1 | **0** | failed | automatic: this run's marker on screen (the CLI prints it as `marker`) | as above | `T04_20261003_174709` |
 | T05 | close the application | `week4_sample.txt` is open in the test application, so the marker is on screen; window focused | 6 | **0** | failed (1 `timed_out`, 3 `blocked`, 2 `failed`) | automatic: `WEEK4-OPEN-FILE-OK` **gone** | as above | `T05_20261003_174334`, `T05_20261003_180511`, `T05_20261003_181018`, `T05_20261003_182259`, `T05_20261003_182640`; the sixth attempt, `T05_20261003_180229`, has no directory here - its evidence was not collected and the run no longer exists on the machine that produced it, so the attempt is recorded without it rather than cited to nothing |
@@ -85,16 +85,53 @@ Notepad was found running with `*week4_sample.txt` in its title afterwards, whic
 success rule stated as an observation rather than as a verdict. Its records are in
 `Document/Week4/evidence/T03_20261004_171941`.
 
-**Two of the five cases have now reached `succeeded`.** The three that have not are not
-described as passing anywhere in this report.
+**T02 succeeded on the last round**, with two actions where every earlier attempt had managed
+at most one:
 
-What the two successes have in common is worth stating, because it is the same defect twice:
-both were caused by the adapter refusing a pair of strings that a person would call equal.
-T01's shortcut was clicked on its label instead of its icon, and T03's file was refused
-because the OCR engine read `week4_sample.txt` as `week4 sample.txt` - an underscore
-rendered as a space, which is what happens to a one-pixel glyph sitting on the baseline.
-In both cases the model had read the screen correctly and the comparison, not the model,
-was what failed.
+```text
+run_id       = T02_20261004_210409
+status       = succeeded
+execute      = True
+verification = passed  (all success rules matched against the current screen)
+action_count = 2
+step-1 type_text  resolved=True verif=passed
+step-2 key_press  resolved=True verif=passed
+```
+
+Its frames show the page change as well as the verdict, which matters because this case once
+produced a false success: the window title read `'新标签页 - Google Chrome'` for `obs-0001`
+to `obs-0004`, the query alone appearing from `obs-0003`, and then **`'GUI agent research -
+Google 搜索 - Google Chrome'`** for `obs-0005` and `obs-0006` - the results page, confirmed by
+a signal that does not go through OCR at all. Its records are in
+`Document/Week4/evidence/T02_20261004_210409`.
+
+**T05 succeeded** after three earlier attempts, its close action correct throughout and a
+save dialog absorbing it until the document was clean:
+
+```text
+run_id       = T05_20261004_180657
+status       = succeeded
+verification = passed  (all success rules matched against the current screen)
+step-1 hotkey keys=['alt','f4'] note='alt+f4'
+```
+
+**Four of the five cases have reached `succeeded`** - T01, T02, T03 and T05. The fifth, T04,
+is not described as passing anywhere in this report, and its single attempt is the one the
+operator agreed to run: it failed before typing anything and **no message was ever sent**.
+
+What the four have in common is worth stating, because three of them are the same defect seen
+three times: **the harness refused something a person would call correct.** T01's shortcut was
+clicked on its label instead of its icon, and the click landed on the label's text rather than
+the icon above it. T03's file was refused because the OCR engine read `week4_sample.txt` as
+`week4 sample.txt` - an underscore rendered as a space, which is what happens to a one-pixel
+glyph sitting on the baseline. And T02's plan ran out after one action because the prompt had
+never said a plan may hold more than one step, while its own `expected_result` described the
+finished search.
+
+T05 is the fourth and a different shape: `pyautogui.hotkey('alt', 'f4')` does nothing at all
+on Windows, silently, while the same keys pressed by hand in three separate calls close the
+window. In every one of the four, **the model had read the screen correctly and the machinery,
+not the model, was what failed.**
 
 ### Why the preconditions are not optional
 
@@ -291,14 +328,27 @@ mean time over all attempts = sum(execution_ms of all formal attempts) / attempt
 
 | Metric | Value |
 | --- | --- |
-| formal real attempts | **68** (T01 18, T02 31, T03 8, T04 1, T05 10) |
-| successes (`succeeded` and `execute=true`) | **2** (`T01_20261004_140000`, `T03_20261004_171941`) |
-| real-task success rate | **2 / 68 = 2.9 %** |
-| mean execution time of successful tasks | **6 126 ms** (6 938 for T01, 5 313 for T03) |
-| mean `execution_ms` over all attempts | **7 221 ms** |
-| mean `planning_ms` over all attempts | **86 380 ms** |
-| total actions actually dispatched | **33** |
-| actions that passed their step-level check | **27** of those 33 |
+| formal real attempts | **82** (T01 18, T02 38, T03 8, T04 1, T05 16) |
+| successes (`succeeded` and `execute=true`) | **4** (`T01_20261004_140000`, `T02_20261004_210409`, `T03_20261004_171941`, `T05_20261004_180657`) |
+| real-task success rate | **4 / 82 = 4.9 %** |
+| mean execution time of successful tasks | **7 254 ms** (6 938 T01, 7 016 T02, 5 313 T03, 9 750 T05) |
+| mean `execution_ms` over all attempts | **11 014 ms** |
+| mean `planning_ms` over all attempts | **119 304 ms** |
+| total actions actually dispatched | **54** |
+| actions that passed their step-level check | **48** of those 54 |
+
+One verdict is **excluded** from the counts above and named here rather than deleted:
+`T02_20261004_182646` recorded `succeeded` and was wrong. Its own frames show the query
+sitting in the address bar with the autocomplete dropdown open and no search submitted, and
+the rule it satisfied then asked only for the query to be somewhere on screen. The rule was
+changed because of it, that run is in `outputs/week4` but never entered the evidence
+directory, and counting it would inflate the rate by a fifth.
+
+**`planning_ms` describes the harness, not the node.** Every figure above was produced through
+a driver that re-asserted the foreground window and sampled it every 0.5-0.8 s, and those two
+loops starve the HTTP read waiting on the model: the same payload plans in **~200 s** through
+that driver and in **34 s cold / 4 s warm** without it. The numbers are left as they happened
+- they are what those runs cost - but they should not be read as a property of this machine.
 | runs that reached the goal rule at all | 2 (T01, T03) |
 
 Every number above is a count over the directories under `outputs/week4`, restricted to
