@@ -140,3 +140,28 @@ def test_the_open_file_case_names_where_the_file_must_be() -> None:
     first = task.preconditions[0]
     assert SAMPLE_FILE in first
     assert sample_directory() in first, first
+
+
+def test_the_search_case_needs_evidence_of_a_results_page_not_just_the_query() -> None:
+    """T02's rule passed on a query that was never submitted, and this is what stops that.
+
+    Measured: a run typed 'GUI agent research' into the address bar, never pressed Enter,
+    and the task verified as **passed** - because the rule asked only for the query text to
+    be on screen, and the autocomplete dropdown was showing it. A second capture of the same
+    untouched screen still read the string, so the false positive was reproducible rather
+    than a one-off.
+
+    The second entry is the results-page marker the engine writes on a real submission. It
+    was absent on the frame that falsely passed and present on a real results page, as
+    'google.com/search?q=GUI+agent+research&oq=GUI+agent+'. Both are required - the list is
+    an AND - so the rule now means "a results page carrying the query", which is what it
+    says, rather than "the query is somewhere on screen".
+    """
+    task = get_case("T02")
+    assert task is not None
+
+    assert "GUI agent research" in task.expect_text
+    assert any("google.com/search" in item for item in task.expect_text), (
+        "the query alone is satisfied by text sitting in an input box; T02 needs the "
+        "marker its own success rule names, a loaded results page"
+    )

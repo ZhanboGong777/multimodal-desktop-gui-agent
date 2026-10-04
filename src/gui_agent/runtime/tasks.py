@@ -90,7 +90,17 @@ def _cases() -> dict[str, TaskSpec]:
             success_rules=[
                 "a results page is loaded and the query text is visible",
             ],
-            expect_text=["GUI agent research"],
+            # Both entries are required - the list is an AND - and the second is what makes
+            # the rule mean "a results page" rather than "somewhere on screen".
+            #
+            # Measured, because the difference produced a false success: a run typed the
+            # query into the address bar and never submitted it, and the rule passed on
+            # 'GUI agent research' alone, which the autocomplete dropdown was showing.
+            # `&oq=` is added by the engine on a real submission and appears in the URL
+            # field, so it distinguishes a submitted search from text waiting in an input
+            # box. Confirmed both ways: absent on the frame that falsely passed, present on
+            # a real results page as 'google.com/search?q=GUI+agent+research&oq=GUI+agent+'.
+            expect_text=["GUI agent research", "google.com/search"],
             # The other direction of the same check: T02 is meaningless without a
             # browser to search in, and "is one running" is a fact about the machine
             # rather than something to read off the screen.
