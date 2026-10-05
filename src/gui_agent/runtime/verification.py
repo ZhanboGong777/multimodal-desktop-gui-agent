@@ -123,7 +123,16 @@ class Verifier:
             # The expectation is free text written by the model, so it is matched
             # loosely: if any distinctive word from it appears, the screen moved
             # in the expected direction. A miss is reported, not hidden.
-            tokens = [t for t in _words(expectation) if len(t) >= 4]
+            #
+            # Words that describe the action rather than name something on screen are removed
+            # first - see :data:`_ACTION_WORDS` for the expectation that made this necessary,
+            # and note what happens if they are left in: a token that cannot appear makes the
+            # check fail, and a failed step verification stops the pass.
+            tokens = [
+                t
+                for t in _words(expectation)
+                if len(t) >= 4 and t not in _ACTION_WORDS
+            ]
             haystack = _haystack(after)
             hits = [t for t in tokens if t in haystack]
             evidence["expectation_tokens"] = tokens
@@ -254,6 +263,46 @@ class Verifier:
             if clock() - started >= deadline_seconds:
                 return result, latest
             sleep(self.poll_interval_seconds)
+
+
+#: Words that describe *how* an action was carried out rather than naming anything a screen
+#: would show. They are excluded from the expectation tokens, because a token that can never
+#: appear makes every such expectation fail - and a failed step verification stops the pass.
+#:
+#: Measured on T04: the model wrote `expected_result='The message is typed into the message
+#: box.'`, the tokens came out as `['message', 'typed', 'into', 'message']`, and none of them
+#: matched the screen. `typed` cannot match: it names the fact that typing happened, not text
+#: that would be displayed. The step had *succeeded* - the marker was typed - and the run was
+#: stopped one step short of its send, four passes running.
+#:
+#: Only words with no screen presence belong here. `message`, `box` and every other noun are
+#: left alone, because a screen really can show them and a case may legitimately expect it to.
+_ACTION_WORDS = frozenset(
+    {
+        "typed",
+        "typing",
+        "clicked",
+        "clicking",
+        "pressed",
+        "pressing",
+        "opened",
+        "opening",
+        "closed",
+        "closing",
+        "sent",
+        "sending",
+        "selected",
+        "selecting",
+        "moved",
+        "moving",
+        "scrolled",
+        "scrolling",
+        "entered",
+        "entering",
+        "performed",
+        "successfully",
+    }
+)
 
 
 def _words(text: str) -> list[str]:

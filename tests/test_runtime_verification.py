@@ -102,6 +102,29 @@ def test_an_observation_with_errors_cannot_pass_a_step() -> None:
     assert "ocr unavailable" in result.detail
 
 
+def test_an_expectation_written_as_a_description_of_the_action_still_passes() -> None:
+    """The sentence T04's model wrote, and the word that made it fail.
+
+    expected_result='The message is typed into the message box' produced the tokens
+    ['message', 'typed', 'into', 'message'] and no hits, because 	yped names what had just
+    been done rather than anything a screen displays. A token that can never match fails the
+    check, and a failed step verification stops the pass - so a step whose typing had worked was
+    recorded as failing and the run stopped one step short of its send, four passes running.
+
+    The assertion is that the action words are gone and the nouns are not: message and \box
+    stay, because a screen can show them and a case may expect it to.
+    """
+    from gui_agent.runtime.verification import _ACTION_WORDS, _words
+
+    tokens = [t for t in _words('The message is typed into the message box') if len(t) >= 4]
+
+    assert 'typed' in tokens, 'the word is present before filtering, or this proves nothing'
+    kept = [t for t in tokens if t not in _ACTION_WORDS]
+    assert 'typed' not in kept
+    assert 'message' in kept and 'into' in kept
+    assert 'box' in [t for t in _words('the box') if t not in _ACTION_WORDS]
+
+
 def test_step_verification_matches_on_expected_result_words() -> None:
     action = DesktopAction(action_type="click", x=1, y=1)
     result = Verifier().check_step(
