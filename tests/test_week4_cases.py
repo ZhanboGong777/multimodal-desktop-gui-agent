@@ -132,6 +132,28 @@ def test_the_sample_directory_is_named_for_each_platform() -> None:
     assert sample_directory("win32") == r"%USERPROFILE%\Desktop\week4_test"
 
 
+def test_the_send_message_default_names_the_button_and_forbids_enter() -> None:
+    """The default instruction has to be the phrasing that is known to work.
+
+    Two measurements on the Windows node, in opposite directions:
+
+    * `"... and send it"` produced a plan ending in `key_press Enter`, and the marker stayed in
+      the message box with the send button beside it unclicked - this client is configured for
+      "Enter for a new line";
+    * an instruction that explicitly *asked* for Enter produced a plan whose `key_press enter`
+      opened the client's file-picker dialog, leaving the box untouched.
+
+    So the default names the control to click and rules the key out, and this asserts both. It
+    matters because the default is what every machine runs: leaving the known-failing sentence in
+    place and relying on `GUI_AGENT_MESSAGE_INSTRUCTION` to avoid it is how a case stays broken on
+    every node nobody configured.
+    """
+    instruction = get_case("T04").instruction
+
+    assert "send button" in instruction, instruction
+    assert "Do not press Enter" in instruction, instruction
+
+
 def test_only_the_send_message_case_turns_the_step_gate_off() -> None:
     """T04 is the one case whose steps cannot be judged, and the flag says so explicitly.
 

@@ -178,10 +178,23 @@ def _cases() -> dict[str, TaskSpec]:
             # unclicked - that WeChat has "Enter for a new line" set, so Enter types a newline.
             # The rule that had told the model otherwise was reverted; the way to aim it at the
             # button is to say so, and to say so per machine.
+            #
+            # So the *default* now says to click the button, because the phrasing it replaced is
+            # the one measured not to work. Leaving a known-failing sentence as the default and
+            # requiring an environment variable to avoid it is how a case stays broken on every
+            # machine nobody configured - and this one has already cost several runs.
+            #
+            # Naming a key is also unsafe in the other direction, measured later on the same
+            # node: an instruction that *asked* for Enter produced a plan whose `key_press enter`
+            # opened WeChat's file-picker dialog (the frame afterwards reports
+            # `foreground: '选择文件'`), leaving the message box untouched. An instruction is
+            # executable policy, so this one names the control to click and forbids the key.
             instruction=os.environ.get(
                 "GUI_AGENT_MESSAGE_INSTRUCTION",
                 f"Type {MESSAGE_MARKER} into the message box of the conversation named "
-                f'"{MESSAGE_CONVERSATION}", which is already open, and send it',
+                f'"{MESSAGE_CONVERSATION}", which is already open, then click the send button. '
+                f"Do not press Enter at any point: in this client Enter opens a file dialog "
+                f"instead of sending.",
             ),
             target_app="messaging",
             preconditions=[
