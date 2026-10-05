@@ -38,7 +38,50 @@ def _run(*extra: str, env: dict[str, str] | None = None) -> subprocess.Completed
     )
 
 
+def test_the_t04_verifier_refuses_a_locked_desktop_without_running_anything() -> None:
+    """The one case that sends a real message must not start on a session it cannot drive.
+
+    Measured on this node, repeatedly: when the screen locks mid-run the capture fails with
+    `BitBlt` from Windows and pyautogui aborts with its corner fail-safe, so a run started in that
+    state dispatches nothing and records a verdict about the wrong thing. The verifier therefore
+    checks the session first and exits `2` - "not a state where a run is meaningful" - rather than
+    letting the CLI plan a task it cannot carry out.
+
+    This test runs on whichever session the suite happens to be in, so it asserts the *contract*
+    rather than one outcome: exit code 0 with the checks printed, or exit code 2 with a refusal,
+    and never a traceback. `--run` is deliberately not exercised - the case sends a real message.
+    """
+    completed = subprocess.run(
+        [sys.executable, str(REPO_ROOT / "scripts" / "week4_t04_verify.py")],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=180,
+    )
+
+    assert completed.returncode in (0, 2), completed.stdout + completed.stderr
+    assert "T04 preflight" in completed.stdout, completed.stdout
+
+    if completed.returncode == 2:
+        assert "REFUSING" in completed.stdout, completed.stdout
+
+
+def test_the_t04_verifier_does_not_disable_the_pointer_fail_safe() -> None:
+    """The fail-safe is the last guard before a mis-computed coordinate becomes a real click.
+
+    It aborts when the pointer reaches a screen corner, and it fired during this branch's work -
+    correctly, when a coordinate belonged to a window that had already moved. A script that turned
+    it off to "make the run go through" would be removing the check that caught that.
+    """
+    source = (REPO_ROOT / "scripts" / "week4_t04_verify.py").read_text(encoding="utf-8")
+
+    assert "FAILSAFE" not in source, "the verifier must not touch pyautogui's fail-safe"
+    assert "pyautogui.position()" in source, "it should read the pointer, to notice a dead session"
+
+
 def test_the_script_exists_and_is_runnable() -> None:
+
     assert SCRIPT.is_file(), "scripts/week4_preflight.py is the check the manual points at"
     result = _run("--help")
     assert result.returncode == 0
