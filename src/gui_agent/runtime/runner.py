@@ -24,8 +24,12 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any, Protocol
 
+from PIL import Image
+
 from ..control.executor import ActionExecutor
 from ..planning import PlanResult, TaskPlan, TaskPlanner
+from ..planning.schemas import PlanStep
+from ..schemas import BoundingBox
 from . import provenance
 from .action_adapter import ActionAdapter, ActionResolutionError, keys_for_platform
 from .processes import known as known_processes
@@ -39,7 +43,9 @@ from .schemas import (
     TaskSpec,
     VerificationResult,
 )
+from .target_grounding import TargetGrounder
 from .verification import Verifier
+from .visual_grounding import GroundingError, match_candidate, validate_frames
 
 
 class Observer(Protocol):
@@ -85,6 +91,10 @@ def explain_model_failure(message: str) -> str:
 #: action. They are not reversible by looking at the screen afterwards: a message
 #: has been sent, or a window with unsaved content has been closed.
 _RISKY_RISKS = frozenset({"medium", "high"})
+
+
+class _TaskDeadlineExceeded(RuntimeError):
+    """An expensive observation or visual request consumed the remaining budget."""
 
 
 @dataclass
@@ -153,6 +163,13 @@ class TaskRunner:
         self.recorder = recorder
         self.clock = clock
         self.sleep = sleep
+        client = getattr(planner, "client", None)
+        self.target_grounder = (
+            TargetGrounder(client) if callable(getattr(client, "generate_multimodal", None)) else None
+        )
+        if verifier.message_client is None and self.target_grounder is not None:
+            verifier.message_client = client
+        self._message_header: tuple[ObservationSnapshot, BoundingBox] | None = None
 
     # ── entry point ────────────────────────────────────────────────────
     def run(
@@ -194,6 +211,8 @@ class TaskRunner:
     ) -> TaskRunResult:
         timings = Timings(started=started)
         notes: list[str] = []
+        self._message_header = None
+        self._message_send_attempted = False
 
         if not task.success_rules and not task.expect_text and not task.forbid_text:
             return self._blocked(
@@ -252,6 +271,21 @@ class TaskRunner:
         # rather than by reading obs-0001.json afterwards.
         for notice in getattr(initial, "notices", []):
             notes.append(f"ocr: {notice}")
+
+        if options.execute and task.message_conversation:
+            context = self.verifier.check_message_context(task, initial, require_empty=True)
+            # Keep the assessment that authorised the recipient, including a
+            # refusal; later header matching must be auditable from the run.
+            self.recorder.session.save_json("message_context.json", context.model_dump(mode="json"))
+            if not context.passed:
+                return self._blocked(
+                    task, options, f"message context: {context.detail}",
+                    snapshot=initial, timings=timings,
+                )
+            header = context.evidence["vision_assessment"]["header_box"]
+            self._message_header = (
+                initial, BoundingBox(left=header[0], top=header[1], right=header[2], bottom=header[3])
+            )
 
         # What the frame said went wrong, in the run's own notes. The OCR engine's
         # account of a failure was written to obs-0001.json and nowhere else, so the
@@ -453,6 +487,8 @@ class TaskRunner:
             (result is None or result.status != "succeeded")
             and passes < options.max_planning_attempts
             and self.clock() - started <= options.task_timeout_seconds
+            and not self._message_send_attempted
+            and sum(record.action_result is not None for record in steps) < options.max_actions
         ):
             try:
                 after = self._observing()
@@ -485,6 +521,7 @@ class TaskRunner:
                 planning_attempts + passes - 1,
                 steps=steps,
                 timings=timings,
+                planning_snapshot=after,
             )
         if result is not None:
             return result
@@ -515,9 +552,11 @@ class TaskRunner:
         *,
         steps: list[StepRecord] | None = None,
         timings: Timings | None = None,
+        planning_snapshot: ObservationSnapshot | None = None,
     ) -> TaskRunResult | None:
         steps = [] if steps is None else steps
-        current = initial
+        source = planning_snapshot or initial
+        current = source
 
         for index, step in enumerate(plan.steps, start=1):
             if self.clock() - started > options.task_timeout_seconds:
@@ -551,6 +590,13 @@ class TaskRunner:
                 notes.append(f"{step.step_id}: finish reached")
                 break
 
+            if sum(item.action_result is not None for item in steps) >= options.max_actions:
+                notes.append("the cumulative action budget is exhausted")
+                return self._finish(
+                    task, options, "failed", started, notes, steps, snapshot=initial,
+                    planning_attempts=planning_attempts, timings=timings,
+                )
+
             # fresh look before acting; the plan may be minutes old
             try:
                 before = self.observer.observe()
@@ -575,7 +621,52 @@ class TaskRunner:
             record.observation_id = before.observation_id
 
             try:
-                resolved = self.adapter.resolve(step, before)
+                deadline = started + options.task_timeout_seconds
+                self._check_deadline(deadline)
+                fresh_step, before, anonymous = self._ground_step(
+                    step, source, before, notes, deadline=deadline
+                )
+                record.observation_id = before.observation_id
+                if options.execute and task.message_conversation:
+                    if step.action_type in {"key_press", "hotkey"}:
+                        raise GroundingError("message tasks require the approved send control, not keys")
+                    if step.action_type == "type_text" and (
+                        len(task.expect_text) != 1 or step.arguments.get("text") != task.expect_text[0]
+                    ):
+                        raise GroundingError("typed message must exactly match this run's marker")
+                    if step.action_type == "type_text" and any(
+                        item.action_type == "type_text" and item.action_result is not None
+                        for item in steps
+                    ):
+                        raise GroundingError("this run's marker was already typed; refusing repetition")
+                    self._guard_message_header(before)
+                if options.execute and (anonymous or task.message_conversation):
+                    check_foreground = getattr(self.observer, "foreground_matches", None)
+                    if not callable(check_foreground) or not check_foreground(before):
+                        raise GroundingError("foreground changed immediately before dispatch")
+                if self.clock() - started > options.task_timeout_seconds:
+                    return self._finish(
+                        task, options, "timed_out", started, notes, steps, snapshot=initial,
+                        planning_attempts=planning_attempts, timings=timings,
+                    )
+                resolved = self.adapter.resolve(fresh_step, before)
+            except _TaskDeadlineExceeded:
+                return self._finish(
+                    task, options, "timed_out", started, notes, steps, snapshot=initial,
+                    planning_attempts=planning_attempts, timings=timings,
+                )
+            except GroundingError as exc:
+                record.error = f"visual grounding refused: {exc}"
+                record.elapsed_ms = (self.clock() - step_started) * 1000
+                steps.append(record)
+                self.recorder.append_step(record)
+                notes.append(f"{step.step_id}: {record.error}")
+                if self.clock() - started > options.task_timeout_seconds:
+                    return self._finish(
+                        task, options, "timed_out", started, notes, steps, snapshot=initial,
+                        planning_attempts=planning_attempts, timings=timings,
+                    )
+                return None
             except ActionResolutionError as exc:
                 record.error = str(exc)
                 record.elapsed_ms = (self.clock() - step_started) * 1000
@@ -595,6 +686,12 @@ class TaskRunner:
                 return None
 
             record.resolved = resolved
+            if options.execute and task.message_conversation and step.action_type == "click" and any(
+                item.action_type == "type_text" and item.action_result is not None for item in steps
+            ):
+                # Dispatch may have sent the message even if the next screenshot
+                # or visual verdict fails. A retry must never send it again.
+                self._message_send_attempted = True
             action_result = self.executor.execute(
                 resolved.action, dry_run=not options.execute, screen=before.screen_info
             )
@@ -676,6 +773,9 @@ class TaskRunner:
 
             if after is not None:
                 current = after
+            if self._message_send_attempted:
+                notes.append("message send was attempted; verifying before any further input")
+                break
 
         # ── the plan is done; only the task verifier may call it a success ──
         if not options.execute:
@@ -713,6 +813,8 @@ class TaskRunner:
             clock=self.clock,
         )
         status = "succeeded" if verification.passed else "failed"
+        if self.clock() - started > options.task_timeout_seconds:
+            status = "timed_out"
         if not verification.passed:
             notes.append(f"task verification: {verification.detail}")
         result = self._finish(
@@ -730,6 +832,79 @@ class TaskRunner:
         if final is not None:
             self.recorder.save_observation(final)
         return result
+
+    def _ground_step(
+        self, step: PlanStep, source: ObservationSnapshot, current: ObservationSnapshot,
+        notes: list[str], *, deadline: float | None = None,
+    ) -> tuple[PlanStep, ObservationSnapshot, bool]:
+        """Refresh only one anonymous target, preserving every approved action field."""
+        old_id = step.arguments.get("element_id") or step.arguments.get("target_element")
+        old = source.element(old_id) if isinstance(old_id, str) else None
+        anonymous = old is not None and old.source == "contour" and not old.text.strip()
+        if not anonymous:
+            return step, current, anonymous
+        # Invalid frame identity is terminal for grounding, not a reason to ask
+        # the model to guess across a different window or degraded capture.
+        validate_frames(source, current)
+        method = "pixel_match"
+        try:
+            chosen = match_candidate(source, current, old_id)
+        except GroundingError:
+            if self.target_grounder is None:
+                raise GroundingError("no model client can refresh the changed anonymous target") from None
+            self._check_deadline(deadline)
+            mapped = self.target_grounder.ground(step, source, current, self.recorder.directory)
+            self._check_deadline(deadline)
+            chosen_id = mapped.arguments.get("element_id") or mapped.arguments.get("target_element")
+            mapping_frame = current
+            current = self._observing()
+            chosen = match_candidate(mapping_frame, current, chosen_id)
+            method = "vision_model_then_pixel_match"
+        arguments = dict(step.arguments)
+        for key in ("element_id", "target_element"):
+            if key in arguments:
+                arguments[key] = chosen.element_id
+        notes.append(
+            f"{step.step_id}: grounded {old_id} from {source.observation_id} "
+            f"to {chosen.element_id} in {current.observation_id} ({method})"
+        )
+        return step.model_copy(update={"arguments": arguments}, deep=True), current, True
+
+    def _check_deadline(self, deadline: float | None) -> None:
+        if deadline is not None and self.clock() > deadline:
+            raise _TaskDeadlineExceeded
+
+    def _guard_message_header(self, current: ObservationSnapshot) -> None:
+        """Keep the visually authorised recipient fixed through all input events.
+
+        Header pixels are verification evidence only. Coordinates dispatched by
+        the executor still come from a real current candidate through the adapter.
+        Exact crops deliberately refuse unreadable or changed recipient headers.
+        """
+        if self._message_header is None:
+            raise GroundingError("message recipient was not visually authorised")
+        source, box = self._message_header
+        validate_frames(source, current)
+        assert source.window_bounds is not None and current.window_bounds is not None
+        dx = current.window_bounds.left - source.window_bounds.left
+        dy = current.window_bounds.top - source.window_bounds.top
+        translated = (box.left + dx, box.top + dy, box.right + dx, box.bottom + dy)
+        bounds = current.window_bounds
+        if not (
+            bounds.left <= translated[0] < translated[2] <= bounds.right
+            and bounds.top <= translated[1] < translated[3] <= bounds.bottom
+        ):
+            raise GroundingError("message header left the active window")
+        try:
+            with Image.open(source.image_path) as image:
+                old = image.convert("RGB").crop((box.left, box.top, box.right, box.bottom))
+            with Image.open(current.image_path) as image:
+                new = image.convert("RGB").crop(translated)
+            low, high = old.convert("L").getextrema()
+            if high - low < 10 or old.tobytes() != new.tobytes():
+                raise GroundingError("active conversation header changed or is unreadable")
+        except (OSError, ValueError) as exc:
+            raise GroundingError(f"cannot validate the active conversation header: {exc}") from exc
 
     # ── helpers ────────────────────────────────────────────────────────
     def _observing(self) -> ObservationSnapshot:

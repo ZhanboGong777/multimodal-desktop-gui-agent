@@ -8,21 +8,28 @@ to the model as targets.
 
 from __future__ import annotations
 
+import json
 from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from gui_agent.config import Config, load_config
+from gui_agent.perception import capture as capture_module
+from gui_agent.perception.capture import ForegroundWindowContext
 from gui_agent.perception.ocr import EngineSelection, OcrError, OcrOutput
+from gui_agent.recording import RunSession
 from gui_agent.runtime import observation
 from gui_agent.runtime.observation import (
     ObservationError,
     ObservationService,
     describe_elements,
+    foreground_matches,
 )
+from gui_agent.runtime.recorder import TaskRecorder
 from gui_agent.runtime.schemas import ElementRef, ObservationSnapshot
+from gui_agent.runtime.visual_grounding import GroundingError, match_candidate, validate_frames
 from gui_agent.schemas import BoundingBox, Point, ScreenInfo, UIElement
 
 
@@ -349,3 +356,286 @@ def test_a_frame_from_an_engine_that_reported_nothing_carries_no_notices(
     _patch(monkeypatch, _StubEngine([_element("Browser")]))
 
     assert ObservationService(Config()).observe().notices == []
+
+
+def _visual_frame(
+    tmp_path: Path,
+    observation_id: str,
+    *,
+    shift: tuple[int, int] = (0, 0),
+    boxes: tuple[tuple[int, int, str], ...] = ((60, 60, "normal"),),
+) -> ObservationSnapshot:
+    """Prepared control images, never a screenshot or a desktop action."""
+    image = Image.new("RGB", (360, 240), "white")
+    draw = ImageDraw.Draw(image)
+    refs = []
+    for index, (left, top, appearance) in enumerate(boxes):
+        left += shift[0]
+        top += shift[1]
+        box = BoundingBox(left=left, top=top, right=left + 40, bottom=top + 40)
+        if appearance != "blank":
+            colour = (40, 100, 180) if appearance == "normal" else (190, 70, 40)
+            draw.rectangle((left, top, left + 39, top + 39), fill=colour, outline="black", width=2)
+            draw.line((left + 8, top + 8, left + 29, top + 29), fill="white", width=4)
+            draw.line((left + 8, top + 29, left + 29, top + 8), fill="black", width=3)
+        refs.append(
+            ElementRef(
+                element_id=f"{observation_id}-e{index:03d}", text="", source="contour",
+                bounding_box=box, center=box.center, confidence=0.5,
+            )
+        )
+    path = tmp_path / f"{observation_id}.png"
+    image.save(path)
+    return ObservationSnapshot(
+        observation_id=observation_id,
+        captured_at=datetime.now(UTC),
+        image_path=str(path),
+        screen_info=ScreenInfo(
+            screenshot_width=360, screenshot_height=240, control_width=360, control_height=240,
+        ),
+        elements=refs,
+        window_id="12:1001", window_title="test conversation", window_class="TestMessenger",
+        window_bounds=BoundingBox(
+            left=20 + shift[0], top=20 + shift[1], right=320 + shift[0], bottom=210 + shift[1],
+        ),
+        foreground_stable=True,
+    )
+
+
+@pytest.mark.parametrize("shift", [(0, 0), (19, 11)])
+def test_anonymous_identity_uses_current_pixels_and_id_after_translation(
+    tmp_path: Path, shift: tuple[int, int],
+) -> None:
+    """Window motion and changed candidate indices must not reuse an old coordinate."""
+    source = _visual_frame(tmp_path, "obs-0001")
+    current = _visual_frame(
+        tmp_path, "obs-0002", shift=shift,
+        boxes=((180, 110, "different"), (60, 60, "normal")),
+    )
+
+    result = match_candidate(source, current, "obs-0001-e000")
+
+    assert result.element_id == "obs-0002-e001"
+    assert result.center == Point(x=80 + shift[0], y=80 + shift[1])
+    assert source.elements[0].element_id == "obs-0001-e000"
+
+
+@pytest.mark.parametrize(
+    "change",
+    ["missing", "appearance", "duplicate", "source", "size", "center", "confidence", "outside"],
+)
+def test_anonymous_identity_refuses_missing_changed_or_ambiguous_candidates(
+    tmp_path: Path, change: str,
+) -> None:
+    """An enabled send control requires current model selection if its pixels changed."""
+    source = _visual_frame(tmp_path, "obs-0001")
+    boxes = ((60, 60, "normal"),)
+    if change == "appearance":
+        boxes = ((60, 60, "different"),)
+    if change == "duplicate":
+        boxes = ((60, 60, "normal"), (180, 110, "normal"))
+    current = _visual_frame(tmp_path, "obs-0002", boxes=boxes)
+    candidate = current.elements[0]
+    updates: dict = {}
+    if change == "missing":
+        current.elements = []
+    elif change == "source":
+        updates["source"] = "ocr"
+    elif change == "size":
+        updates["bounding_box"] = BoundingBox(left=60, top=60, right=120, bottom=100)
+    elif change == "center":
+        updates["center"] = Point(x=65, y=65)
+    elif change == "confidence":
+        updates["confidence"] = 0.1
+    elif change == "outside":
+        updates["bounding_box"] = BoundingBox(left=0, top=0, right=40, bottom=40)
+        updates["center"] = Point(x=20, y=20)
+    if updates:
+        current.elements = [candidate.model_copy(update=updates)]
+
+    with pytest.raises(GroundingError):
+        match_candidate(source, current, "obs-0001-e000")
+
+
+def test_a_blank_crop_cannot_manufacture_a_perfect_visual_match(tmp_path: Path) -> None:
+    source = _visual_frame(tmp_path, "obs-0001", boxes=((60, 60, "blank"),))
+    current = _visual_frame(tmp_path, "obs-0002", boxes=((60, 60, "blank"),))
+
+    with pytest.raises(GroundingError, match="texture"):
+        match_candidate(source, current, "obs-0001-e000")
+
+
+def test_a_disappearing_control_cannot_be_replaced_by_its_surviving_visual_clone(
+    tmp_path: Path,
+) -> None:
+    source = _visual_frame(
+        tmp_path, "obs-0001", boxes=((60, 60, "normal"), (180, 110, "normal")),
+    )
+    current = _visual_frame(tmp_path, "obs-0002", boxes=((180, 110, "normal"),))
+
+    with pytest.raises(GroundingError, match="source candidate is visually ambiguous"):
+        match_candidate(source, current, "obs-0001-e000")
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        "errors", "stable", "identity", "unknown_identity", "title", "class", "bounds", "resize",
+        "scale", "duplicate_id", "foreign_id",
+    ],
+)
+def test_visual_identity_refuses_invalid_frame_pairs(tmp_path: Path, change: str) -> None:
+    source = _visual_frame(tmp_path, "obs-0001")
+    current = _visual_frame(tmp_path, "obs-0002")
+    updates = {
+        "errors": {"errors": ["ui detection failed"]},
+        "stable": {"foreground_stable": False},
+        "identity": {"window_id": "12:1002"},
+        "unknown_identity": {"window_id": ""},
+        "title": {"window_title": "another conversation"},
+        "class": {"window_class": "FileDialog"},
+        "bounds": {"window_bounds": None},
+        "resize": {"window_bounds": BoundingBox(left=20, top=20, right=330, bottom=210)},
+        "scale": {"screen_info": current.screen_info.model_copy(update={"scale_x": 0.5})},
+        "duplicate_id": {"elements": [current.elements[0], current.elements[0]]},
+        "foreign_id": {
+            "elements": [current.elements[0].model_copy(update={"element_id": "obs-0099-e000"})],
+        },
+    }
+
+    with pytest.raises(GroundingError):
+        validate_frames(source, current.model_copy(update=updates[change]))
+
+
+@pytest.mark.parametrize("change", ["missing", "unreadable", "wrong_dimensions"])
+def test_visual_identity_requires_readable_image_evidence(tmp_path: Path, change: str) -> None:
+    source = _visual_frame(tmp_path, "obs-0001")
+    current = _visual_frame(tmp_path, "obs-0002")
+    if change == "missing":
+        current.image_path = None
+    elif change == "unreadable":
+        Path(current.image_path).write_bytes(b"not an image")
+    else:
+        Image.new("RGB", (30, 20), "white").save(current.image_path)
+
+    with pytest.raises(GroundingError, match="image"):
+        validate_frames(source, current)
+
+
+def test_a_candidate_cannot_be_rebound_from_an_unrelated_source_id(tmp_path: Path) -> None:
+    source = _visual_frame(tmp_path, "obs-0001")
+    current = _visual_frame(tmp_path, "obs-0002")
+
+    with pytest.raises(GroundingError, match="absent"):
+        match_candidate(source, current, "obs-0099-e000")
+
+
+def test_observation_forwards_consistent_foreground_and_prioritises_its_candidates(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _patch(monkeypatch, _StubEngine([_element("Conversation")]))
+    capture = _PreparedCapture()
+    capture.window_id = "22:1200"
+    capture.window_title = "Conversation"
+    capture.window_class = "TestMessenger"
+    capture.window_bounds = BoundingBox(left=20, top=10, right=180, bottom=90)
+    capture.foreground_stable = True
+    monkeypatch.setattr(observation, "capture_monitor", lambda *a, **k: capture)
+
+    def detect(*args: object, **kwargs: object) -> list[UIElement]:
+        assert kwargs["priority_region"] == capture.window_bounds
+        return []
+
+    monkeypatch.setattr(observation, "detect_ui_candidates", detect)
+    snapshot = ObservationService(Config()).observe()
+
+    assert snapshot.window_id == capture.window_id
+    assert snapshot.window_bounds == capture.window_bounds
+    assert snapshot.foreground_stable
+
+
+@pytest.mark.parametrize("change", ["same", "identity", "title", "class", "motion", "unknown"])
+def test_dispatch_foreground_check_refuses_post_capture_switch_or_motion(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, change: str,
+) -> None:
+    snapshot = _visual_frame(tmp_path, "obs-0001")
+    context = ForegroundWindowContext(
+        window_id=snapshot.window_id, window_title=snapshot.window_title,
+        window_class=snapshot.window_class, window_bounds=snapshot.window_bounds,
+    )
+    replacements = {
+        "same": context,
+        "identity": ForegroundWindowContext(
+            "12:1002", context.window_title, context.window_class, context.window_bounds,
+        ),
+        "title": ForegroundWindowContext(
+            context.window_id, "another conversation", context.window_class, context.window_bounds,
+        ),
+        "class": ForegroundWindowContext(
+            context.window_id, context.window_title, "FileDialog", context.window_bounds,
+        ),
+        "motion": ForegroundWindowContext(
+            context.window_id, context.window_title, context.window_class,
+            BoundingBox(left=30, top=20, right=330, bottom=210),
+        ),
+        "unknown": ForegroundWindowContext(),
+    }
+    monkeypatch.setattr(observation, "foreground_window_context", lambda: replacements[change])
+
+    assert foreground_matches(snapshot) is (change == "same")
+    assert ObservationService(Config()).foreground_matches(snapshot) is (change == "same")
+
+
+@pytest.mark.parametrize("change", ["same", "identity", "title", "class", "motion"])
+def test_capture_brackets_pixels_with_one_consistent_foreground_context(
+    monkeypatch: pytest.MonkeyPatch, change: str,
+) -> None:
+    """Fake MSS and fake Win32 metadata keep this capture regression fully offline."""
+    before = ForegroundWindowContext(
+        "12:1001", "test", "TestMessenger", BoundingBox(left=10, top=10, right=90, bottom=70),
+    )
+    after = {
+        "same": before,
+        "identity": ForegroundWindowContext("12:1002", "test", "TestMessenger", before.window_bounds),
+        "title": ForegroundWindowContext("12:1001", "changed", "TestMessenger", before.window_bounds),
+        "class": ForegroundWindowContext("12:1001", "test", "FileDialog", before.window_bounds),
+        "motion": ForegroundWindowContext(
+            "12:1001", "test", "TestMessenger",
+            BoundingBox(left=20, top=10, right=100, bottom=70),
+        ),
+    }[change]
+    contexts = iter((before, after))
+
+    class Session:
+        def __enter__(self):
+            self.monitors = [{}, {"left": 0, "top": 0, "width": 200, "height": 100}]
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def grab(self, monitor):
+            return type("Shot", (), {"size": (200, 100), "rgb": bytes(200 * 100 * 3)})()
+
+    monkeypatch.setattr(capture_module.mss, "mss", Session)
+    monkeypatch.setattr(capture_module, "foreground_window_context", lambda: next(contexts))
+    frame = capture_module.capture_monitor(control_size=(100, 50))
+
+    assert frame.window_id == after.window_id
+    assert frame.foreground_stable is (change == "same")
+    assert frame.window_bounds == BoundingBox(
+        left=after.window_bounds.left * 2, top=after.window_bounds.top * 2,
+        right=after.window_bounds.right * 2, bottom=after.window_bounds.bottom * 2,
+    )
+
+
+def test_recorded_observation_keeps_window_identity_used_to_authorise_a_target(tmp_path: Path) -> None:
+    snapshot = _visual_frame(tmp_path, "obs-0001")
+    recorder = TaskRecorder(RunSession.create(tmp_path / "run", session_id="visual-test"))
+
+    path = recorder.save_observation(snapshot)
+    payload = json.loads(path.read_text(encoding="utf-8"))
+
+    assert payload["window_id"] == snapshot.window_id
+    assert payload["window_bounds"] == snapshot.window_bounds.model_dump()
+    assert payload["foreground_stable"] is True

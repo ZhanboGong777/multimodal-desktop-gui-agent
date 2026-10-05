@@ -1628,3 +1628,328 @@ def test_a_blocked_run_says_what_it_saw(tmp_path: Path) -> None:
     assert "already holds on the untouched screen" in note
     assert "elements read" in note, note
     assert "Notepad" in note, "the operator needs to see what was on screen"
+
+
+class SimulatedChat:
+    """Prepared pixels and events, with no desktop or network interaction."""
+
+    def __init__(self, directory: Path, *, fault: str = "") -> None:
+        self.directory = directory
+        self.fault = fault
+        self.calls = 0
+        self.draft = ""
+        self.sent = ""
+        self.focused = False
+        self.frames: dict[str, tuple[ObservationSnapshot, dict]] = {}
+        self.actions: list = []
+        self.foreground_checks = 0
+
+    def observe(self, *, observation_id=None) -> ObservationSnapshot:
+        from PIL import Image, ImageDraw
+
+        self.calls += 1
+        oid = observation_id or f"sim-{self.calls:04d}"
+        dx = self.calls * 2
+        dy = self.calls
+        def box(left, top, right, bottom):
+            return BoundingBox(left=left + dx, top=top + dy, right=right + dx, bottom=bottom + dy)
+        window = box(20, 20, 620, 420)
+        header = box(160, 50, 420, 80)
+        composer = box(150, 300, 580, 395)
+        entry = box(150, 300, 480, 395)
+        send = box(500, 350, 570, 380)
+        message = box(200, 180, 550, 235)
+        conversation = "Other receiver" if self.fault == "wrong_initial" else "文件传输助手"
+        if self.fault == "changed_recipient" and self.draft:
+            conversation = "Other receiver"
+        image = Image.new("RGB", (800, 500), "#888888")
+        draw = ImageDraw.Draw(image)
+        def rect(bounds, **kwargs):
+            draw.rectangle((bounds.left, bounds.top, bounds.right - 1, bounds.bottom - 1), **kwargs)
+        rect(window, fill="white", outline="black", width=2)
+        rect(header, fill="white")
+        # ASCII pixel identity is intentional; the response transcribes the prepared
+        # header, while this pattern proves the recipient cannot change after approval.
+        draw.text((header.left + 5, header.top + 5), conversation.encode("ascii", "replace").decode(), fill="black")
+        rect(entry, fill="white", outline="black", width=3)
+        if self.draft:
+            draw.text((entry.left + 10, entry.top + 10), self.draft, fill="black")
+        rect(send, fill="#22aa55" if self.draft else "#bbbbbb", outline="black", width=2)
+        draw.text((send.left + 8, send.top + 8), "SEND", fill="black")
+        if self.sent:
+            rect(message, fill="#88ee88", outline="black")
+            draw.text((message.left + 5, message.top + 5), self.sent, fill="black")
+        path = self.directory / f"{oid}.png"
+        image.save(path)
+        elements = [
+            ElementRef(element_id=f"{oid}-e001", text="", bounding_box=entry,
+                       center=entry.center, confidence=0.9, source="contour"),
+            ElementRef(element_id=f"{oid}-e002", text="", bounding_box=send,
+                       center=send.center, confidence=0.9, source="contour"),
+        ]
+        if self.fault == "missing_send" and self.draft:
+            elements.pop()
+        if self.fault == "post_mapping_missing" and self.draft and self.calls >= 7:
+            elements.pop()
+        if self.fault == "duplicate_send" and self.draft:
+            elements.append(elements[-1].model_copy(update={"element_id": f"{oid}-e003"}))
+        snapshot = ObservationSnapshot(
+            observation_id=oid, captured_at=datetime.now(UTC), image_path=str(path),
+            screen_info=ScreenInfo(screenshot_width=800, screenshot_height=500,
+                                   control_width=800, control_height=500),
+            elements=elements, window_id="simulated:1", window_title="WeChat",
+            window_class="SimulatedChat", window_bounds=window, foreground_stable=True,
+        )
+        assessment = {
+            "status": "sent" if self.sent else ("draft" if self.draft else "not_found"),
+            "conversation": conversation, "marker": self.sent or self.draft,
+            "header_box": [header.left, header.top, header.right, header.bottom],
+            "composer_box": [composer.left, composer.top, composer.right, composer.bottom],
+            "message_box": [message.left, message.top, message.right, message.bottom] if self.sent else None,
+            "composer_empty": not bool(self.draft),
+        }
+        self.frames[oid] = snapshot, assessment
+        return snapshot
+
+    def foreground_matches(self, snapshot) -> bool:
+        self.foreground_checks += 1
+        return self.fault != "foreground_changed"
+
+    def execute(self, action, *, dry_run=None, screen=None) -> ActionResult:
+        self.actions.append((action, dry_run))
+        if not dry_run:
+            snapshot = next(reversed(self.frames.values()))[0]
+            if action.action_type == "click":
+                if Point(x=action.x, y=action.y) == snapshot.elements[0].center:
+                    self.focused = True
+                elif Point(x=action.x, y=action.y) == snapshot.elements[1].center and self.fault != "send_ineffective":
+                    self.sent, self.draft = self.draft, ""
+                else:
+                    assert self.fault == "send_ineffective", "click must use a CURRENT detected candidate"
+            elif action.action_type == "type_text":
+                assert self.focused, "typing must follow a successful input-box click"
+                self.draft = action.text
+            else:
+                raise AssertionError("T04 must click send rather than press Enter")
+        return ActionResult(action=action, success=True, dry_run=bool(dry_run))
+
+
+def _simulated_t04(tmp_path, *, fault="", clock=None):
+    from gui_agent.models.base import ModelClient, ModelResponse
+    from gui_agent.planning.planner import TaskPlanner
+    from gui_agent.runtime.tasks import get_case_for_run
+
+    task, _ = get_case_for_run("T04", now=datetime(2026, 10, 6, tzinfo=UTC))
+    assert task is not None
+    chat = SimulatedChat(tmp_path, fault=fault)
+
+    class ChatModel(ModelClient):
+        name = "mock"
+
+        def __init__(self):
+            super().__init__(model_name="prepared-T04", max_retries=0)
+            self.mapping_calls = 0
+            self.approved_plan = None
+
+        def complete(self, messages, **kwargs):
+            system = messages[0]["content"]
+            context = json.loads(messages[-1]["content"])["context"]
+            if system.startswith("Assess one screenshot"):
+                payload = dict(chat.frames[context["observation_id"]][1])
+                if fault == "uncertain_after_send" and chat.sent:
+                    payload["status"] = "uncertain"
+            elif system.startswith("Map the target"):
+                self.mapping_calls += 1
+                if fault.startswith("mapping_timeout"):
+                    clock.value += 100
+                candidates = [item["element_id"] for item in context["current_candidates"] if item["element_id"].endswith("e002")]
+                if fault == "duplicate_send":
+                    candidates += [item["element_id"] for item in context["current_candidates"] if item["element_id"].endswith("e003")]
+                payload = {"candidate_ids": candidates}
+                if fault == "mapping_timeout_invalid":
+                    payload = {"candidate_ids": []}
+            else:
+                oid = context["observation_id"]
+                steps = [
+                    PlanStep(step_id="focus", description="click message input", action_type="click", arguments={"element_id": f"{oid}-e001"}),
+                    PlanStep(step_id="type", description="type this run's marker", action_type="type_text", arguments={"text": task.expect_text[0]}),
+                    PlanStep(step_id="send", description="click send button", action_type="click", arguments={"element_id": f"{oid}-e002"}),
+                ]
+                if fault == "draft_only":
+                    steps.pop()
+                if fault in {"extra_send", "repeat_message"}:
+                    if fault == "repeat_message":
+                        steps.append(steps[1].model_copy(update={"step_id": "type-again"}))
+                    steps.append(steps[2].model_copy(update={"step_id": "send-again"}))
+                self.approved_plan = TaskPlan(task_id="T04", instruction=task.instruction, steps=steps)
+                payload = self.approved_plan.model_dump(mode="json")
+            return ModelResponse(content=json.dumps(payload), model_name=self.model_name, provider=self.name)
+
+    client = ChatModel()
+    recorder = TaskRecorder(RunSession.create(tmp_path / "records", session_id="simulated-T04"))
+    runner = TaskRunner(observer=chat, planner=TaskPlanner(client, max_format_retries=0),
+                        adapter=ActionAdapter(platform="win32"), executor=chat,
+                        verifier=Verifier(), recorder=recorder, sleep=lambda _: None,
+                        clock=clock or __import__("time").monotonic)
+    options = ExecutionOptions(execute=True, confirm=True, max_planning_attempts=1,
+                               verification_timeout_seconds=0, task_timeout_seconds=60)
+    return runner, task, options, chat, client, recorder
+
+
+def test_t04_complete_send_uses_fresh_candidates_and_strict_message_evidence(tmp_path):
+    runner, task, options, chat, client, recorder = _simulated_t04(tmp_path)
+    confirmations = []
+    def approve(kind):
+        def callback(plan):
+            assert not chat.actions
+            confirmations.append(kind)
+            return True
+        return callback
+    result = runner.run(task, options, confirm=approve("plan"), high_risk_confirm=approve("send"))
+    assert result.status == "succeeded", result.stop_reason + str(result.notes)
+    assert confirmations == ["plan", "send"]
+    assert [action.action_type for action, _ in chat.actions] == ["click", "type_text", "click"]
+    assert chat.sent == task.expect_text[0] and not chat.draft
+    assert client.mapping_calls == 1, "enabled send button needs a bounded visual refresh"
+    assert chat.foreground_checks == 3
+    assert client.approved_plan.steps[-1].arguments["element_id"] == "sim-0001-e002"
+    assert result.steps[-1].observation_id != "sim-0001"
+    assert result.verification.evidence["assessment_method"] == "vision_model"
+    written = json.loads((recorder.directory / "task_summary.json").read_text(encoding="utf-8"))
+    assert written["status"] == "succeeded" and written["provider"] == "mock"
+    context = json.loads((recorder.directory / "message_context.json").read_text(encoding="utf-8"))
+    assert context["outcome"] == "passed"
+    assert context["evidence"]["vision_assessment"]["conversation"] == task.message_conversation
+
+
+@pytest.mark.parametrize("fault,actions", [
+    ("wrong_initial", 0), ("foreground_changed", 0), ("changed_recipient", 2),
+    ("missing_send", 2), ("duplicate_send", 2), ("draft_only", 2), ("send_ineffective", 3),
+])
+def test_t04_refuses_wrong_recipient_missing_target_and_draft_success(tmp_path, fault, actions):
+    runner, task, options, chat, _, _ = _simulated_t04(tmp_path, fault=fault)
+    result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+    assert result.status in {"failed", "blocked"}
+    assert len(chat.actions) == actions
+    assert not chat.sent
+    if result.verification is not None:
+        assert not result.verification.passed
+
+
+def test_t04_second_confirmation_declined_dispatches_no_actions(tmp_path):
+    runner, task, options, chat, _, _ = _simulated_t04(tmp_path)
+    result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: False)
+    assert result.status == "cancelled" and not chat.actions
+
+
+def test_t04_slow_mapping_never_dispatches_after_task_deadline(tmp_path):
+    class ManualClock:
+        value = 0.0
+        def __call__(self):
+            return self.value
+    for fault in ("mapping_timeout", "mapping_timeout_invalid"):
+        directory = tmp_path / fault
+        directory.mkdir()
+        clock = ManualClock()
+        runner, task, options, chat, _, _ = _simulated_t04(directory, fault=fault, clock=clock)
+        result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+        assert result.status == "timed_out"
+        assert len(chat.actions) == 2 and not chat.sent
+        assert chat.calls == 6, "expired mapping response must not start another capture"
+
+
+def test_t04_post_mapping_target_disappearance_refuses_send(tmp_path):
+    runner, task, options, chat, client, _ = _simulated_t04(tmp_path, fault="post_mapping_missing")
+    result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+    assert result.status == "failed" and len(chat.actions) == 2 and not chat.sent
+    assert client.mapping_calls == 1
+
+
+def test_t04_uncertain_sent_verification_never_retries_the_message(tmp_path):
+    runner, task, options, chat, client, _ = _simulated_t04(tmp_path, fault="uncertain_after_send")
+    options.max_planning_attempts = 4
+    result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+    assert result.status == "failed" and chat.sent == task.expect_text[0]
+    assert len(chat.actions) == 3 and client.mapping_calls == 1
+    assert result.planning_attempts == 1
+    assert result.verification.outcome == "inconclusive"
+
+
+@pytest.mark.parametrize("fault", ["extra_send", "repeat_message"])
+def test_t04_stops_the_approved_plan_after_one_send_attempt(tmp_path, fault):
+    runner, task, options, chat, _, _ = _simulated_t04(tmp_path, fault=fault)
+    result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+    assert result.status == "succeeded" and chat.sent == task.expect_text[0]
+    assert len(chat.actions) == 3 and len(result.steps) == 3
+
+
+def test_t04_preaction_observation_expiry_starts_no_mapping_or_action(tmp_path):
+    class ManualClock:
+        value = 0.0
+        def __call__(self):
+            return self.value
+    clock = ManualClock()
+    runner, task, options, chat, client, _ = _simulated_t04(tmp_path, clock=clock)
+    original = chat.observe
+    def observe(**kwargs):
+        frame = original(**kwargs)
+        if chat.calls == 2:
+            clock.value = 100
+        return frame
+    chat.observe = observe
+    result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+    assert result.status == "timed_out" and not chat.actions and client.mapping_calls == 0
+
+
+def test_anonymous_same_id_cannot_bypass_window_validation(tmp_path):
+    runner, _, _, chat, _, _ = _simulated_t04(tmp_path)
+    source = chat.observe()
+    current = source.model_copy(update={"window_id": "different-window"})
+    step = PlanStep(step_id="click", description="click", action_type="click",
+                    arguments={"element_id": source.elements[0].element_id})
+    from gui_agent.runtime.visual_grounding import GroundingError
+    with pytest.raises(GroundingError, match="foreground window changed"):
+        runner._ground_step(step, source, current, [])
+    current = source.model_copy(update={
+        "elements": [source.elements[1].model_copy(update={"element_id": source.elements[0].element_id})],
+    })
+    with pytest.raises(GroundingError):
+        runner._ground_step(step, source, current, [])
+
+
+def test_replanning_grounds_from_the_actual_retry_planning_frame(tmp_path):
+    chat = SimulatedChat(tmp_path)
+    class RetryPlanner(FakePlanner):
+        def plan(self, instruction, *, context=None, image_path=None, task_id="task-1"):
+            self.contexts.append(context)
+            oid = context["observation_id"]
+            target = "missing" if len(self.contexts) == 1 else f"{oid}-e001"
+            return PlanResult(plan=_plan(PlanStep(step_id="click", description="click input",
+                                                 action_type="click", arguments={"element_id": target})), attempts=1)
+    planner = RetryPlanner(_plan())
+    runner, _ = _runner(tmp_path / "records", chat, planner, chat)
+    received = []
+    original = runner._ground_step
+    def grounding(step, source, current, notes, **kwargs):
+        received.append(source.observation_id)
+        return original(step, source, current, notes, **kwargs)
+    runner._ground_step = grounding
+    result = runner.run(TaskSpec(case_id="T", instruction="click", expect_text=["unseen"]),
+                        ExecutionOptions(execute=True, confirm=False, max_planning_attempts=2,
+                                         verification_timeout_seconds=0))
+    assert result.status == "failed" and len(chat.actions) == 1
+    assert received == [context["observation_id"] for context in planner.contexts]
+    assert received[0] != received[1]
+
+
+def test_replanning_obeys_cumulative_action_budget(tmp_path):
+    planner = FakePlanner(_plan(
+        PlanStep(step_id="click", description="click", action_type="click", target_text="Start")
+    ))
+    executor = FakeExecutor()
+    runner, _ = _runner(tmp_path, FakeObserver([_frame("obs-1", ("Start",))]), planner, executor)
+    result = runner.run(TaskSpec(case_id="T", instruction="click", expect_text=["unseen"]),
+                        ExecutionOptions(execute=True, confirm=False, max_actions=1,
+                                         max_planning_attempts=4, verification_timeout_seconds=0))
+    assert result.status == "failed" and len(executor.actions) == 1
+    assert len(planner.contexts) == 1

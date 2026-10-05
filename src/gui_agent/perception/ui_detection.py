@@ -53,11 +53,20 @@ def _overlap_over_smaller(first: BoundingBox, second: BoundingBox) -> float:
 
 
 def _deduplicate(boxes: list[BoundingBox], containment_threshold: float = 0.8) -> list[BoundingBox]:
-    """Drop boxes that are largely contained in a bigger, already kept box."""
+    """Drop duplicate borders while retaining controls inside a larger container.
+
+    Offline replay of T04_20261005_192417 found the send control inside the input
+    container: containment alone discarded it. Similar-size overlapping boxes are
+    duplicate borders; a much smaller inner box can be a separate control.
+    """
     ordered = sorted(boxes, key=lambda box: box.width * box.height, reverse=True)
     kept: list[BoundingBox] = []
     for candidate in ordered:
-        if any(_containment(candidate, existing) >= containment_threshold for existing in kept):
+        if any(
+            _containment(candidate, existing) >= containment_threshold
+            and candidate.width * candidate.height >= existing.width * existing.height * 0.5
+            for existing in kept
+        ):
             continue
         kept.append(candidate)
     return kept
@@ -74,6 +83,7 @@ def detect_ui_candidates(
     max_candidates: int = DEFAULT_MAX_CANDIDATES,
     exclude: Sequence[BoundingBox] = (),
     exclusion_threshold: float = DEFAULT_EXCLUSION_THRESHOLD,
+    priority_region: BoundingBox | None = None,
 ) -> list[UIElement]:
     """Return simple rectangular candidates marked with ``source="contour"``.
 
@@ -81,7 +91,10 @@ def detect_ui_candidates(
     OCR text regions. Without it the contour pass re-frames every line of text it
     can find, which is both redundant and what makes the annotated image
     unreadable. A candidate is dropped when it overlaps an excluded box by at
-    least ``exclusion_threshold`` of whichever of the two is smaller.
+    least ``exclusion_threshold`` of the candidate's own area. A large input
+    containing a small OCR label must remain targetable. ``priority_region`` is
+    the freshly captured foreground window, whose controls precede desktop clutter
+    when the bounded candidate budget is applied.
     """
     array = to_numpy(image)
     height, width = array.shape[:2]
@@ -90,7 +103,9 @@ def detect_ui_candidates(
 
     gray = cv2.cvtColor(array, cv2.COLOR_RGB2GRAY)
     blurred = cv2.GaussianBlur(gray, (3, 3), 0)
-    edges = cv2.Canny(blurred, 40, 120)
+    # Saved T04 pixels have a dark input border that 40/120 missed; offline replay
+    # with 20/60 recovered it without inventing a box or changing action safety.
+    edges = cv2.Canny(blurred, 20, 60)
     edges = cv2.dilate(edges, np.ones((2, 2), np.uint8), iterations=1)
 
     contours, _ = cv2.findContours(edges, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
@@ -115,13 +130,16 @@ def detect_ui_candidates(
         box = BoundingBox(left=x, top=y, right=x + box_width, bottom=y + box_height)
         if (
             exclude
-            and max((_overlap_over_smaller(box, region) for region in exclude), default=0.0)
+            and max((_containment(box, region) for region in exclude), default=0.0)
             >= exclusion_threshold
         ):
             continue
         boxes.append(box)
 
-    kept = _deduplicate(boxes)[:max_candidates]
+    kept = _deduplicate(boxes)
+    if priority_region is not None:
+        kept.sort(key=lambda box: _containment(box, priority_region) == 1.0, reverse=True)
+    kept = kept[:max_candidates]
     return [
         UIElement(text="", bounding_box=box, confidence=CONTOUR_CONFIDENCE, source="contour")
         for box in kept

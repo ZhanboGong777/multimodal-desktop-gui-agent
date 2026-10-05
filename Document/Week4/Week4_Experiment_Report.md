@@ -115,9 +115,9 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| Local Windows verification | **618 passed**, ruff clean |
+| Local Windows verification | **752 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 318: 259 in the fourteen files below, and 59 spread across the other suites -
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 452: 393 in the fourteen files below, and 59 spread across the other suites -
 `test_control_safety.py` 16, `test_model_mock.py` 14, `test_ocr.py` 7 (five of them
 the Windows-only OCR workarounds), `test_config.py` 7 (a new file),
 `test_plan_parser.py` 5, `test_model_config.py` 4, `test_documented_counts.py` 4
@@ -147,7 +147,7 @@ brought `Week4_Windows复核手册.md` under the sync tool - it restates the sui
 total and the tabulated-file total, and a reviewer running its commands against a stale
 expectation would read a correct tree as a broken one.
 
-**The mock never types for any of the five cases.** All five task instructions
+**The standard rule-based mock never types for any of the five cases.** All five task instructions
 produce a single `click` step, because the intent rules match substrings and
 "research" contains "search" - so T02's plan is a click, not a click-and-type. The
 mock can produce `type_text` (an instruction like "Enter the query" does), and
@@ -206,13 +206,13 @@ behaviour needed no change: blocked, nothing dispatched, exit 2, no traceback.
 
 | Test file | Covers |
 | --- | --- |
-| `test_action_adapter.py` | 45 cases: unique, ambiguous, missing and stale targets, a target split across word-level elements, a stacked shortcut label whose two lines are not adjacent in reading order, current-frame unlabelled targets, stale unlabelled-id refusal with no text, placeholder text or invented text even when geometry matches, parameter errors including wrong types, out-of-range coordinates, key whitelist, platform hotkeys, coordinate scaling, `finish` refusal |
-| `test_runtime_runner.py` | 62 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, the guard that refuses to start a real run whose goal already holds, the second confirmation a risky task must get, the provenance the summary carries, and the note a frame with no readable text leaves |
-| `test_runtime_verification.py` | 16 cases: rule matching, forbidden text, unverifiable tasks, degraded observations, the two case rules that have to tell a real result from a lookalike, and the screen going away while polling |
-| `test_runtime_observation.py` | 15 cases: the whole of `observe()` against a prepared frame - ids, geometry, the OCR-failure record, the element cap - plus labelled and unlabelled prompt lines, text-first ranking, the 100-label/200-contour cap, and label overflow excluding contours |
+| `test_action_adapter.py` | 77 cases: unique, ambiguous, missing and stale targets, split labels, current-frame unlabelled targets, safe pixel correspondence and constrained visual mapping to a detected candidate, missing/changed/duplicate/invalid candidates, parameter errors, coordinate boundaries, key whitelist, platform hotkeys, scaling and `finish` refusal |
+| `test_runtime_runner.py` | 80 cases: the offline closed loop, dry runs, recording, confirmation gates and preconditions; the complete prepared T04 send flow; changed recipients, focus, missing/duplicate controls, drafts, ineffective sends, request deadlines, cumulative action budgets and refusal of repeated typing or another input after a send attempt |
+| `test_runtime_verification.py` | 56 cases: generic rule matching and polling; exact sent-marker and recipient assessment, header/bubble/composer geometry, drafts and wrong conversations, strict response types/fields, unavailable evidence, uncertain/model failures, empty-composer preconditions and same-frame assessment caching |
+| `test_runtime_observation.py` | 55 cases: capture/observer foreground identity, bounds and stability, fail-closed unavailable metadata, current focus checks, frame geometry, OCR-failure records, labelled/unlabelled rendering, text-first ranking, the 100-label/200-contour cap and label overflow |
 | `test_runtime_recording.py` | 15 cases: redaction, append-only steps, per-frame files, summary, and where the provenance comes from |
 | `test_week4_cli.py` | 27 cases: argument errors, no `--yes`, dry-run default, summary always written, `--execute` refused without a terminal, the callback set an execute run hands over, `.env` loading, the flag/environment/YAML precedence, the numeric limits, and the warmup record the run copies in and warns about when it is missing |
-| `test_week4_integration.py` | 10 cases: the loop against a real OpenAI-compatible server over a real socket, which reads the element ids out of the prompt it receives; plus the four that read the request body itself - the screenshot arrives as pixels and not as a path, it is the frame the plan was written from, and a missing or mislabelled file blocks the run rather than blinding the model |
+| `test_week4_integration.py` | 14 cases: the loop against a real OpenAI-compatible test server, prompt/image transport, missing or mislabelled images; low-contrast input detection, nested send controls, OCR exclusion by candidate area and foreground prioritisation before the candidate cap |
 | `test_week4_prompts.py` | 15 cases: the prompt fits its budget, describes element targeting and every action's arguments, and the user turn is the JSON envelope the planner actually sends |
 | `test_week4_cases.py` | 15 cases: the invariants the five case definitions must hold - a machine-checkable rule, a declared precondition, a distinctive marker, a copy handed back by `get_case`, and the fresh marker a send-message run is given |
 | `test_week4_demo.py` | 3 cases: the runnable demonstration, run - it completes with four dispatched actions and `verification: passed`, leaves the records a finished run leaves, and fails on purpose when asked |
@@ -296,7 +296,7 @@ successful run in the retained evidence.
 | T01 - open the browser | 2 | `T01_20261004_140000`, `T01_20261004_213859` |
 | T02 - search the web | 1 | `T02_20261004_210409` |
 | T03 - open a specified file | 1 | `T03_20261004_171941` |
-| T04 - send a message | 0 | No `succeeded` run; the target-rendering repair has not been tested with real desktop actions |
+| T04 - send a message | 0 | No retained real `succeeded` run; the completed follow-up has been checked offline, not on the real desktop |
 | T05 - close the application | 1 | `T05_20261004_180657` |
 
 A dry run against the rule-based mock stops at the first step with
@@ -305,8 +305,9 @@ that are not on the screen, and the adapter refuses to guess. Mock plans are not
 evidence of real capability and are not counted as such here.
 
 `Week4_Basic_Task_Test_Report.md` records the retained attempts, timings and
-verification rules. Offline tests of the target-rendering repair establish its
-mechanics; a new real T04 run is still required to establish task success.
+verification rules. The complete prepared T04 test establishes the repaired
+flow with a simulated chat and mock model; a new real T04 run is still required
+to establish task success.
 
 ## 7. Problems and handling
 
@@ -334,13 +335,56 @@ the 100-label/200-contour capacity and label overflow; this allocation is a
 bounded design allowance, not a new measurement of prompt size or live accuracy.
 The larger prompt still needs a sufficient server context window.
 
-**Prompt visibility does not establish end-to-end T04 success.** The runner
-re-observes before each action, invalidating the planning frame's ids. A labelled
-target can re-bind by its text; a bare unlabelled id has no OCR text fallback and
-is still refused when stale. The visibility repair therefore removes the prompt
-omission but leaves that execution obstacle unresolved. No real desktop action
-was run for this change, and T04 must remain unverified until an authorized live
-run reaches its own sent-message rule.
+**The follow-up completes anonymous target refresh without reusing coordinates.**
+The initial visibility repair left planned anonymous ids stale after the required
+pre-action capture. The runner now validates the captured foreground identity,
+class, title, bounds, screen geometry and image evidence, then compares the old
+target's pixels and context with actual current candidates. If appearance changed
+(such as a send button becoming enabled), one constrained visual mapping request
+can return only a unique current candidate id. It cannot change the approved
+action, typed marker or recipient. The runner captures again after that request
+and requires a unique pixel match before the unchanged adapter and executor map
+and check the current centre. Unknown, absent or ambiguous evidence is refused;
+no nearest box, old coordinate or freely chosen model coordinate is a fallback.
+
+**The detector must retain the controls before refresh can work.** Offline replay
+of the locally saved `T04_20261005_192417/obs-0005` screenshot found that the former
+Canny thresholds missed the dark input border and the send contour was beyond the
+200-candidate cap. Canny now uses 20/60, similar-size duplicate borders are removed
+while small nested controls survive, and OCR exclusions use the candidate's own
+area so a small label cannot erase a complete input. Fresh foreground-contained
+contours precede desktop clutter before truncation. Replaying those saved pixels
+with their recorded OCR exclusions retains the input at index 0 and send control
+at index 50 within 200 candidates. This is a historical-image replay, not a new
+capture or a measurement of the live model's accuracy.
+
+**T04 now verifies a sent bubble, not a marker anywhere on screen.** Its dedicated
+visual assessment transcribes the actual conversation header and marker without
+being supplied the expected recipient or full marker to echo. Strict JSON must
+identify header, message and composer regions within a stable foreground window;
+the exact fresh marker must be in a sent bubble below the header and above a
+non-overlapping empty composer. Drafts, wrong conversations, malformed or uncertain
+responses and missing evidence cannot pass. Before planning, T04 requires the
+correct header and empty composer. Before every input event, the same header
+pixels and current foreground identity must still match. T04 rejects keyboard
+sending and typing text other than its approved marker. The assessment, prompt,
+image source and model/provider are recorded as automatic visual-model evidence,
+which is not a guarantee of live-model accuracy. The initial recipient assessment
+or refusal is also preserved in `message_context.json`.
+
+**The full flow passes offline; real T04 remains unmeasured after the repair.**
+`test_t04_complete_send_uses_fresh_candidates_and_strict_message_evidence` runs
+the real planner, runner, adapter, verifier and recorder with the `prepared-T04`
+mock provider, synthetic moving-window screenshots and a recording action backend.
+It confirms both risk prompts, click-input -> type-marker -> click-send, current
+candidate centres, the changed send button's visual refresh and final sent evidence.
+Related cases refuse wrong or changed recipients, changed focus, missing/duplicate
+controls, a draft-only plan, an ineffective send and expired budgets. Action limits
+are cumulative across planning passes. Once a send may have been dispatched, T04
+stops further inputs in that plan, verifies the result and does not automatically
+retry; repeated typing is also refused. No real desktop actions were
+run for this follow-up; none of these checks changes the retained 38 directories,
+37 real attempts, five successes or four passing cases.
 
 **The plan names elements that are not on screen.** Running a dry run against the
 mock produced `no element matches 'desktop' in obs-0002`. This is the designed
@@ -1074,7 +1118,7 @@ that is merely behind another window, and the Windows round had to parse
 
 ## 8. Deliverables
 
-- `src/gui_agent/runtime/` - the run layer (8 modules).
+- `src/gui_agent/runtime/` - the run layer, including pixel correspondence and constrained visual target mapping.
 - `scripts/week4_agent_cli.py` - the command-line entry point.
 - `scripts/week4_warmup.py` - the warmup 13.4 asks for: a text probe and a real
   screenshot through the project's own client, with the cold/warm record the operator keeps.
@@ -1083,7 +1127,7 @@ that is merely behind another window, and the Windows round had to parse
   `Document/Week4/evidence/`, so a run id in the test report resolves inside the
   repository rather than only on the machine that produced it.
 - `configs/week4.yaml` - Week 4 limits, with `ExecutionConfig` added to `config.py`.
-- 318 new tests.
+- 452 new tests.
 - `Document/Week4/Week4_Usage.md` - flags, the safety model, the record layout.
 - `Document/Week4/Week4_Troubleshooting.md` - seventy-one symptoms with what to check
   and what the code actually does about each.
@@ -1113,25 +1157,25 @@ does not find it in the tree has not hit a missing document.
 ## 9. Limits
 
 - **Four of five basic tasks have passed in five real successful runs.** T01
-  passed twice; T02, T03 and T05 once each. T04 remains unverified after the
-  target-rendering repair, which has only been tested offline.
+  passed twice; T02, T03 and T05 once each. T04's complete repaired flow has
+  passed only with the prepared mock and synthetic chat; a new live result
+  remains unmeasured.
 - Only the primary monitor is supported.
 - `type_text` uses `pyautogui.typewrite`, so ASCII only; Unicode input is not
   claimed.
 - **Re-planning is bounded.** `ExecutionOptions.max_planning_attempts` defaults to
-  4; the wall-clock budget can stop recovery sooner. Every action still passes
+  4; the wall-clock budget and cumulative action cap can stop recovery sooner.
+  T04 never retries after a send attempt. Every action still passes
   the adapter resolution and executor boundary checks. Recovery was implemented after T02 failures with incomplete
   plans; its retained successful run records one planning attempt. This does
   not guarantee recovery for every task or failure.
-- **Foreground metadata is observed, but action-time focus is not guaranteed.**
-  `capture_monitor` records `window_title` and `window_class` in each frame, and
-  the verifier searches them alongside OCR text. They describe the foreground
-  window when the observation was captured; they do not establish that the
-  intended application still has keyboard focus when typing or sending occurs.
-  Targets are resolved against fresh frames and absent or ambiguous targets are
-  refused. A `medium` or `high` risk task also receives the second confirmation
-  with the text to be typed. These checks preserve the safety gates but cannot
-  prevent every mis-typed character.
+- **Foreground checks reduce the focus gap but cannot make input atomic.**
+  Captures record title, class, identity, bounds and whether the foreground stayed
+  stable during capture. Anonymous actions and T04 require current identity/bounds
+  checks immediately before dispatch; T04 also preserves the authorised conversation
+  header pixels. Missing metadata is refused. A foreground change after the final
+  check but before the OS consumes input remains possible. Both risk confirmations,
+  coordinate boundaries and PyAutoGUI fail-safe remain enabled.
 - **Merging OCR words into lines trades a little precision for resolvability.** A
   target that names one word inside a longer mixed line - "main" in "Current branch
   main" - now resolves to the centre of the whole line, because the element no

@@ -605,3 +605,211 @@ def test_a_hotkey_that_boils_down_to_nothing_is_refused(adapter: ActionAdapter) 
 def test_key_press_without_a_key_is_refused(adapter: ActionAdapter) -> None:
     with pytest.raises(ActionResolutionError, match="requires arguments.key"):
         adapter.resolve(_step(action_type="key_press", arguments={}), _snapshot())
+
+
+def _grounding_frames(tmp_path):
+    """Saved, synthetic pixels; these mapping tests never observe the desktop."""
+    from PIL import Image, ImageDraw
+
+    frames = []
+    for observation_id, left, color in (("old", 20, "red"), ("new", 60, "green")):
+        box = BoundingBox(left=left, top=40, right=left + 30, bottom=70)
+        image = Image.new("RGB", (200, 140), "white")
+        ImageDraw.Draw(image).rectangle(
+            (box.left, box.top, box.right - 1, box.bottom - 1), fill=color
+        )
+        path = tmp_path / f"{observation_id}.png"
+        image.save(path)
+        frames.append(
+            ObservationSnapshot(
+                observation_id=observation_id,
+                captured_at=datetime.now(UTC),
+                image_path=str(path),
+                screen_info=ScreenInfo(
+                    screenshot_width=200,
+                    screenshot_height=140,
+                    control_width=100,
+                    control_height=70,
+                ),
+                elements=[ElementRef(
+                    element_id=f"{observation_id}-e000",
+                    text="",
+                    bounding_box=box,
+                    center=box.center,
+                    confidence=0.5,
+                    source="contour",
+                )],
+                window_title="WeChat - 文件传输助手",
+                window_class="WeChatMainWndForPC",
+                window_id="123:456",
+                window_bounds=BoundingBox(left=5, top=5, right=195, bottom=135),
+                foreground_stable=True,
+            )
+        )
+    return frames
+
+
+def _grounding_client(content, error=None):
+    from gui_agent.models.base import ModelClient, ModelResponse
+
+    class Client(ModelClient):
+        name = "offline-grounding"
+
+        def __init__(self):
+            super().__init__(model_name="offline-grounding", max_retries=0)
+            self.received = []
+
+        def complete(self, messages, **kwargs):
+            self.received.append((messages, kwargs))
+            return ModelResponse(
+                content=content,
+                model_name=self.model_name,
+                provider=self.name,
+                error=error,
+            )
+
+    return Client()
+
+
+@pytest.mark.parametrize("alias", ["element_id", "target_element", "both"])
+def test_anonymous_model_mapping_changes_only_the_approved_target_id(tmp_path, alias):
+    import json
+
+    from PIL import Image
+
+    from gui_agent.runtime.target_grounding import TargetGrounder
+
+    old, current = _grounding_frames(tmp_path)
+    arguments = {"text": "WEEK4_MESSAGE_CHECK_20261006", "recipient": "文件传输助手"}
+    for key in (("element_id", "target_element") if alias == "both" else (alias,)):
+        arguments[key] = "old-e000"
+    step = _step(
+        target_text="发送",
+        arguments=arguments,
+        expected_result="the approved marker is sent",
+    )
+    original = step.model_dump(mode="json")
+    client = _grounding_client('{"candidate_ids":["new-e000"]}')
+
+    mapped = TargetGrounder(client).ground(step, old, current, tmp_path / "comparisons")
+
+    assert step.model_dump(mode="json") == original
+    expected = {**original, "arguments": {**arguments}}
+    for key in (("element_id", "target_element") if alias == "both" else (alias,)):
+        expected["arguments"][key] = "new-e000"
+    assert mapped.model_dump(mode="json") == expected
+    resolved = ActionAdapter(platform="win32").resolve(mapped, current)
+    assert resolved.element_id == "new-e000"
+    assert resolved.screenshot_point == Point(x=75, y=55)
+    assert resolved.control_point == Point(x=38, y=28)
+    assert client.request_count == 1
+    messages, kwargs = client.received[0]
+    payload = json.loads(messages[-1]["content"])
+    assert payload["context"]["approved_step"] == original
+    assert payload["context"]["current_candidates"][0]["element_id"] == "new-e000"
+    # Both frames travel as real pixels in the attachment, rather than old paths
+    # written in context that a vision provider would never open.
+    with Image.open(kwargs["image_path"]) as comparison:
+        assert comparison.getpixel((25, 24 + 45)) == (255, 0, 0)
+        assert comparison.getpixel((200 + 65, 24 + 45)) == (0, 128, 0)
+
+
+@pytest.mark.parametrize("reply", [
+    '{"candidate_ids":[]}',
+    '{"candidate_ids":["new-e000","new-e000"]}',
+    '{"candidate_ids":["missing-id"]}',
+    '{"candidate_ids":["old-e000"]}',
+    '{"candidate_ids":[1]}',
+    '{"candidate_ids":"new-e000"}',
+    '{"candidate_ids":["new-e000"],"action_type":"click"}',
+    '{"candidate_ids":["new-e000"],"text":"different message"}',
+    '{"candidate_ids":[],"candidate_ids":["new-e000"]}',
+    '```json\n{"candidate_ids":["new-e000"]}\n```',
+    '[]',
+])
+def test_anonymous_model_mapping_refuses_ambiguous_or_semantic_output(tmp_path, reply):
+    from gui_agent.runtime.target_grounding import TargetGrounder
+    from gui_agent.runtime.visual_grounding import GroundingError
+
+    old, current = _grounding_frames(tmp_path)
+    client = _grounding_client(reply)
+    step = _step(arguments={"element_id": "old-e000"})
+
+    with pytest.raises(GroundingError):
+        TargetGrounder(client).ground(step, old, current, tmp_path / "comparisons")
+
+    assert client.request_count == 1, "invalid output never starts a format retry"
+    assert step.arguments == {"element_id": "old-e000"}
+
+
+@pytest.mark.parametrize("change", [
+    "window_id", "window_title", "window_class", "unstable", "errors", "missing_image",
+    "unknown_source", "labelled_source", "manual_source", "outside_candidate", "giant_candidate",
+    "wrong_id_prefix", "alias_conflict", "non_point_action", "duplicate_source",
+    "duplicate_current", "low_confidence",
+])
+def test_anonymous_model_mapping_refuses_invalid_evidence_before_request(tmp_path, change):
+    from gui_agent.runtime.target_grounding import TargetGrounder
+    from gui_agent.runtime.visual_grounding import GroundingError
+
+    old, current = _grounding_frames(tmp_path)
+    step = _step(arguments={"element_id": "old-e000"})
+    if change in {"window_id", "window_title", "window_class"}:
+        current = current.model_copy(update={change: "different"})
+    elif change == "unstable":
+        current = current.model_copy(update={"foreground_stable": False})
+    elif change == "errors":
+        current = current.model_copy(update={"errors": ["capture incomplete"]})
+    elif change == "missing_image":
+        current = current.model_copy(update={"image_path": str(tmp_path / "missing.png")})
+    elif change == "unknown_source":
+        step = _step(arguments={"element_id": "old-e999"})
+    elif change == "labelled_source":
+        old.elements[0] = old.elements[0].model_copy(update={"text": "Send"})
+    elif change == "manual_source":
+        old.elements[0] = old.elements[0].model_copy(update={"source": "manual"})
+    elif change in {"outside_candidate", "giant_candidate"}:
+        box = (
+            BoundingBox(left=0, top=0, right=30, bottom=30)
+            if change == "outside_candidate"
+            else BoundingBox(left=5, top=5, right=195, bottom=135)
+        )
+        current.elements[0] = current.elements[0].model_copy(
+            update={"bounding_box": box, "center": box.center}
+        )
+    elif change == "wrong_id_prefix":
+        current.elements[0] = current.elements[0].model_copy(update={"element_id": "stale-e000"})
+    elif change == "alias_conflict":
+        step = _step(arguments={"element_id": "old-e000", "target_element": "old-e001"})
+    elif change == "non_point_action":
+        step = _step(action_type="type_text", arguments={"element_id": "old-e000", "text": "x"})
+    elif change == "duplicate_source":
+        old.elements.append(old.elements[0].model_copy())
+    elif change == "duplicate_current":
+        # Even an excluded duplicate must refuse: ActionAdapter.element() would
+        # otherwise return the excluded first id instead of the chosen candidate.
+        current.elements.insert(0, current.elements[0].model_copy(update={"source": "manual"}))
+    elif change == "low_confidence":
+        current.elements[0] = current.elements[0].model_copy(update={"confidence": 0.2})
+    client = _grounding_client('{"candidate_ids":["new-e000"]}')
+
+    with pytest.raises(GroundingError):
+        TargetGrounder(client).ground(step, old, current, tmp_path / "comparisons")
+
+    assert client.request_count == 0
+    assert not client.received
+
+
+def test_anonymous_model_mapping_refuses_provider_failure_without_retry(tmp_path):
+    from gui_agent.runtime.target_grounding import TargetGrounder
+    from gui_agent.runtime.visual_grounding import GroundingError
+
+    old, current = _grounding_frames(tmp_path)
+    client = _grounding_client("", error="offline provider failure")
+
+    with pytest.raises(GroundingError, match="offline provider failure"):
+        TargetGrounder(client).ground(
+            _step(arguments={"element_id": "old-e000"}), old, current, tmp_path / "comparisons"
+        )
+
+    assert client.request_count == 1

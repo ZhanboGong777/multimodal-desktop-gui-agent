@@ -24,10 +24,11 @@ from pathlib import Path
 from typing import Any, ClassVar
 
 import pytest
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from gui_agent.config import ModelConfig
 from gui_agent.models import create_model_client
+from gui_agent.perception.ui_detection import _deduplicate, detect_ui_candidates
 from gui_agent.planning import TaskPlanner
 from gui_agent.recording import RunSession
 from gui_agent.runtime import (
@@ -460,3 +461,60 @@ def test_a_screenshot_that_is_not_an_image_is_refused(server: str, tmp_path: Pat
     assert "unsupported image type" in note
     assert ".txt" in note
     assert ".png" in note, "the refusal should say what it does accept"
+
+
+def _dark_message_controls() -> Image.Image:
+    """Synthetic low-contrast input with a nested send control and desktop clutter."""
+    image = Image.new("RGB", (640, 420), (30, 30, 30))
+    draw = ImageDraw.Draw(image)
+    draw.rectangle((5, 5, 230, 250), outline="white", width=3)
+    draw.rectangle((250, 280, 550, 390), outline=(55, 55, 55), width=2)
+    draw.rectangle((490, 350, 545, 375), outline=(90, 90, 90), width=2)
+    draw.rectangle((300, 295, 420, 312), fill="white")
+    return image
+
+
+def test_contour_dedup_keeps_small_nested_control_but_removes_duplicate_border() -> None:
+    input_box = BoundingBox(left=250, top=280, right=550, bottom=390)
+    duplicate_border = BoundingBox(left=252, top=282, right=548, bottom=388)
+    send_box = BoundingBox(left=490, top=350, right=545, bottom=375)
+    assert _deduplicate([input_box, duplicate_border, send_box]) == [input_box, send_box]
+
+
+def test_ocr_exclusion_keeps_input_enclosing_small_text_region() -> None:
+    candidates = detect_ui_candidates(
+        _dark_message_controls(), exclude=[BoundingBox(left=295, top=290, right=425, bottom=317)],
+    )
+    assert any(
+        item.bounding_box.left <= 250 and item.bounding_box.right >= 550
+        and item.bounding_box.top <= 280 and item.bounding_box.bottom >= 390
+        for item in candidates
+    ), "a small OCR placeholder must not erase the complete input contour"
+    assert not any(
+        295 <= item.bounding_box.left < item.bounding_box.right <= 425
+        and 290 <= item.bounding_box.top < item.bounding_box.bottom <= 317
+        for item in candidates
+    ), "the placeholder itself is already represented by OCR"
+
+
+def test_foreground_priority_precedes_candidate_cap_without_inventing_boxes() -> None:
+    foreground = BoundingBox(left=240, top=260, right=600, bottom=410)
+    ordinary = detect_ui_candidates(_dark_message_controls(), max_candidates=1)
+    focused = detect_ui_candidates(
+        _dark_message_controls(), priority_region=foreground, max_candidates=1,
+    )
+    assert ordinary[0].bounding_box.left < foreground.left, "desktop clutter is larger"
+    assert focused[0].bounding_box.left >= foreground.left
+    all_boxes = [item.bounding_box for item in detect_ui_candidates(_dark_message_controls())]
+    assert focused[0].bounding_box in all_boxes, "priority reorders actual detections"
+
+
+def test_low_contrast_input_and_nested_send_both_survive_two_candidate_budget() -> None:
+    candidates = detect_ui_candidates(
+        _dark_message_controls(), max_candidates=2,
+        priority_region=BoundingBox(left=240, top=260, right=600, bottom=410),
+        exclude=[BoundingBox(left=295, top=290, right=425, bottom=317)],
+    )
+    assert len(candidates) == 2
+    assert any(abs(item.center.x - 400) <= 3 and abs(item.center.y - 335) <= 3 for item in candidates)
+    assert any(abs(item.center.x - 517) <= 3 and abs(item.center.y - 362) <= 3 for item in candidates)

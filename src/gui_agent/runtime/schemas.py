@@ -72,6 +72,12 @@ class ObservationSnapshot(SchemaModel):
     #: T02's actually wants.
     window_title: str = ""
     window_class: str = ""
+    #: Anonymous targets need a window identity, not merely a reusable title.
+    #: The capture samples it on both sides of the screenshot; changed or unknown
+    #: foreground state cannot authorize cross-frame visual re-grounding.
+    window_id: str = ""
+    window_bounds: BoundingBox | None = None
+    foreground_stable: bool = False
     #: What the OCR engine said about itself: a fallback to another engine, a
     #: missing cache directory, a suppressed Windows workaround. Kept separate
     #: from ``errors`` on purpose - 7.1.4 asks for the fallback engine to be
@@ -143,6 +149,10 @@ class TaskSpec(SchemaModel):
     requires_processes: list[str] = Field(default_factory=list)
     forbids_processes: list[str] = Field(default_factory=list)
     risk: Literal["low", "medium", "high"] = "low"
+    #: A send is not proved by finding its input marker anywhere on screen.
+    #: T04 requires an independent visual assessment of the correct conversation,
+    #: sent bubble and empty composer; ordinary text rules retain their behavior.
+    message_conversation: str | None = None
 
     #: Whether a step whose own verification fails should stop the run.
     #:

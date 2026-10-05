@@ -205,6 +205,10 @@ def _cases() -> dict[str, TaskSpec]:
                 "the marker appears as a sent message in the correct conversation",
             ],
             expect_text=[MESSAGE_MARKER],
+            # A marker in the composer was previously accepted as a sent message.
+            # A screenshot assessment must also identify the active chat header,
+            # the sent bubble and an empty composer; OCR anywhere is insufficient.
+            message_conversation=MESSAGE_CONVERSATION,
             risk="high",
             # Its typing step cannot be judged from a screenshot and its task can; see the
             # field for the four runs that established it. The task rule still runs.

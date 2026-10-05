@@ -14,7 +14,11 @@ from pathlib import Path
 from typing import Any
 
 from ..config import DEFAULT_MAX_ELEMENTS, Config
-from ..perception.capture import capture_monitor
+from ..perception.capture import (
+    capture_monitor,
+    foreground_window_context,
+    window_bounds_in_screenshot,
+)
 from ..perception.ocr import OcrError, create_ocr_engine
 from ..perception.ui_detection import detect_ui_candidates
 from ..schemas import UIElement
@@ -28,6 +32,24 @@ class ObservationError(RuntimeError):
 def _rank(element: UIElement) -> tuple[int, float]:
     """Sort key: text first, then confidence, so labels outrank bare contours."""
     return (1 if element.text.strip() else 0, element.confidence)
+
+
+def foreground_matches(snapshot: ObservationSnapshot) -> bool:
+    """Recheck window identity and location immediately before dispatch.
+
+    A match between two saved images cannot authorise a click after another
+    window has taken focus or the target window has moved again. This check reads
+    OS metadata only; it neither captures nor changes the desktop.
+    """
+    if not snapshot.foreground_stable or not snapshot.window_id or snapshot.window_bounds is None:
+        return False
+    current = foreground_window_context()
+    return bool(
+        current.window_id == snapshot.window_id
+        and current.window_title == snapshot.window_title
+        and current.window_class == snapshot.window_class
+        and window_bounds_in_screenshot(current, snapshot.screen_info) == snapshot.window_bounds
+    )
 
 
 class ObservationService:
@@ -68,6 +90,10 @@ class ObservationService:
     def next_id(self) -> str:
         self._counter += 1
         return f"obs-{self._counter:04d}"
+
+    def foreground_matches(self, snapshot: ObservationSnapshot) -> bool:
+        """The injectable observer seam used by the runner's dispatch check."""
+        return foreground_matches(snapshot)
 
     # ── the one call the runtime makes ─────────────────────────────────
     def observe(self, *, observation_id: str | None = None) -> ObservationSnapshot:
@@ -113,6 +139,7 @@ class ObservationService:
                         max_candidates=self.config.perception.ui_detection.max_candidates,
                         exclude=boxes,
                         exclusion_threshold=self.config.perception.ui_detection.exclusion_threshold,
+                        priority_region=getattr(capture, "window_bounds", None),
                     )
                 )
             except Exception as exc:  # noqa: BLE001 - contours are optional context
@@ -145,6 +172,9 @@ class ObservationService:
             # The window is a decoration on the observation, never a requirement for one.
             window_title=getattr(capture, "window_title", ""),
             window_class=getattr(capture, "window_class", ""),
+            window_id=getattr(capture, "window_id", ""),
+            window_bounds=getattr(capture, "window_bounds", None),
+            foreground_stable=getattr(capture, "foreground_stable", False),
         )
 
     def _engine_notices(self) -> list[str]:
@@ -175,8 +205,8 @@ def describe_elements(snapshot: ObservationSnapshot) -> str:
     T04_20261005_192417 could not name an input or send control: contours survived
     selection but were dropped here. Offer their frame-local ids and geometry
     without inventing a semantic label; the model can compare them with the image.
-    The placeholder is not text for re-location: stale contour ids still need a
-    new, current-frame target and cannot be rebound by their old position.
+    The placeholder is not text for re-location: stale contour ids need verified
+    current image evidence and a real current candidate, never their old position.
     """
     lines = []
     for item in snapshot.elements:

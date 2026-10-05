@@ -16,7 +16,7 @@ from pathlib import Path
 import mss
 from PIL import Image
 
-from ..schemas import ScreenInfo
+from ..schemas import BoundingBox, ScreenInfo
 
 
 class CaptureError(RuntimeError):
@@ -52,6 +52,98 @@ class CaptureResult:
     #: :func:`foreground_window_title`.
     window_title: str = ""
     window_class: str = ""
+    window_id: str = ""
+    window_bounds: BoundingBox | None = None
+    foreground_stable: bool = False
+
+
+@dataclass(frozen=True)
+class ForegroundWindowContext:
+    """One OS window identity, with bounds in absolute control coordinates."""
+
+    window_id: str = ""
+    window_title: str = ""
+    window_class: str = ""
+    window_bounds: BoundingBox | None = None
+
+
+def foreground_window_context() -> ForegroundWindowContext:
+    """Read all foreground facts from one HWND, refusing a switch during the read.
+
+    T04's anonymous controls have no text that can establish identity. Title and
+    class alone also identify two different windows, so visual re-grounding needs
+    the process and HWND as well as a consistent rectangle. Unsupported sessions
+    return unknown context; ordinary capture still works, but cannot authorise an
+    anonymous target with that missing evidence.
+    """
+    try:
+        import ctypes
+        import sys
+        from ctypes import wintypes
+
+        if sys.platform != "win32":
+            return ForegroundWindowContext()
+        user32 = ctypes.windll.user32  # type: ignore[attr-defined]
+        user32.GetForegroundWindow.restype = wintypes.HWND
+        hwnd = user32.GetForegroundWindow()
+        if not hwnd:
+            return ForegroundWindowContext()
+        handle = wintypes.HWND(hwnd)
+        pid = wintypes.DWORD()
+        user32.GetWindowThreadProcessId(handle, ctypes.byref(pid))
+        title = ctypes.create_unicode_buffer(user32.GetWindowTextLengthW(handle) + 1)
+        user32.GetWindowTextW(handle, title, len(title))
+        window_class = ctypes.create_unicode_buffer(256)
+        user32.GetClassNameW(handle, window_class, len(window_class))
+        rect = wintypes.RECT()
+        if not user32.GetWindowRect(handle, ctypes.byref(rect)) or not pid.value:
+            return ForegroundWindowContext()
+        bounds = BoundingBox(left=rect.left, top=rect.top, right=rect.right, bottom=rect.bottom)
+        if user32.GetForegroundWindow() != hwnd:
+            return ForegroundWindowContext()
+        return ForegroundWindowContext(
+            window_id=f"{pid.value}:{int(hwnd)}",
+            window_title=title.value.strip(),
+            window_class=window_class.value.strip(),
+            window_bounds=bounds,
+        )
+    except Exception:  # noqa: BLE001 - unknown foreground must fail binding, not capture
+        return ForegroundWindowContext()
+
+
+def window_bounds_in_screenshot(
+    context: ForegroundWindowContext, screen: ScreenInfo
+) -> BoundingBox | None:
+    """Invert the same monitor offset and scale the action adapter uses."""
+    bounds = context.window_bounds
+    if bounds is None or not screen.scale_x or not screen.scale_y:
+        return None
+    try:
+        return BoundingBox(
+            left=round((bounds.left - screen.monitor_left) / screen.scale_x),
+            top=round((bounds.top - screen.monitor_top) / screen.scale_y),
+            right=round((bounds.right - screen.monitor_left) / screen.scale_x),
+            bottom=round((bounds.bottom - screen.monitor_top) / screen.scale_y),
+        )
+    except ValueError:
+        return None
+
+
+def _foreground_fields(
+    before: ForegroundWindowContext, after: ForegroundWindowContext, screen: ScreenInfo
+) -> dict[str, object]:
+    bounds = window_bounds_in_screenshot(after, screen)
+    return {
+        "window_id": after.window_id,
+        "window_title": after.window_title,
+        "window_class": after.window_class,
+        "window_bounds": bounds,
+        # The two reads bracket the actual pixel grab. A changed foreground is
+        # still recorded, but its pixels cannot establish a target's identity.
+        "foreground_stable": bool(
+            after.window_id and after.window_class and bounds is not None and before == after
+        ),
+    }
 
 
 def foreground_window_title() -> str:
@@ -197,7 +289,9 @@ def capture_monitor(
                     f"(available 1..{len(monitors) - 1})"
                 )
             monitor = monitors[monitor_index]
+            foreground_before = foreground_window_context()
             shot = session.grab(monitor)
+            foreground_after = foreground_window_context()
     except CaptureError:
         raise
     except Exception as exc:
@@ -230,8 +324,7 @@ def capture_monitor(
         image_path=image_path,
         capture_time_ms=(time.perf_counter() - started) * 1000.0,
         metadata={"monitor": dict(monitor)},
-        window_title=foreground_window_title(),
-        window_class=foreground_window_class(),
+        **_foreground_fields(foreground_before, foreground_after, screen_info),
     )
 
 
@@ -273,7 +366,9 @@ def capture_region(
                     f"(available 1..{len(monitors) - 1})"
                 )
             monitor = monitors[monitor_index]
+            foreground_before = foreground_window_context()
             shot = session.grab(region.as_mss())
+            foreground_after = foreground_window_context()
     except CaptureError:
         raise
     except Exception as exc:
@@ -314,6 +409,7 @@ def capture_region(
         image_path=image_path,
         capture_time_ms=(time.perf_counter() - started) * 1000.0,
         metadata={"region": region.as_mss()},
+        **_foreground_fields(foreground_before, foreground_after, screen_info),
     )
 
 

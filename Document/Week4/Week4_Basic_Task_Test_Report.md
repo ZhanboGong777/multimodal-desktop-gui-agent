@@ -37,7 +37,9 @@ screenshots and the per-frame observation files behind - they are a picture of t
 whole desktop, and on-screen text is in them verbatim.
 
 `status=succeeded` **and** `execute=true` are both required before a task counts as
-a real success.
+a real success. They are not sufficient when the model and action backend are
+simulated: prepared test records are explicitly offline and excluded from this
+real-desktop inventory.
 
 ## Results
 
@@ -284,12 +286,16 @@ not a benchmark or a success-rate estimate for general desktop use.
 | T04 | the unique marker appears as a sent message in the correct conversation | a draft, an old message with the same text, a send to the wrong conversation, or an external probe's send |
 | T05 | the target application's window is gone and other applications are untouched | the window minimised, or another window closed |
 
-The right-hand column is the standard a human applies. The automatic rules use
-observed text, including recorded foreground window title and class where available,
-so they can be weaker than that standard. For T05 a missing marker does not prove
+The right-hand column is the standard a human applies. T01/T02/T03/T05 automatic
+rules use observed text, including recorded foreground title and class where
+available, so they can be weaker than that standard. The repaired T04 instead uses
+strict visual evidence of the active conversation, exact sent marker and empty
+composer, as described below; its live accuracy has not been measured. For T05 a missing marker does not prove
 that a hidden or minimised window was closed; for T01 a visible browser does not
 prove this run launched it. The precondition checks reduce that gap. Foreground
-metadata describes observation time, and does not guarantee focus at action time.
+metadata in the retained historical runs describes observation time. The current
+T04/anonymous-target path also checks foreground identity and bounds immediately
+before input, while a change after that check can still race with dispatch.
 
 If a run has to be verified by eye, mark its verification method `manual` in the
 notes. An automatic check that did not run is not an automatic pass. A previously
@@ -347,9 +353,73 @@ string somewhere on screen.
 
 The external `T04_20261005_192417` diagnosis identifies a later target-resolution
 blocker: unlabelled input and send controls were omitted from the model's target
-list. The prompt repair exposes detected unlabelled boxes without inventing their
-semantic labels. It does not establish a live pass: anonymous element ids must
-still resolve against a fresh observation, stale ids remain refused, and real
-message attribution still needs verification. No desktop actions were run for
-this repair; the operator must perform the guarded T04 preflight and explicitly
-confirmed live run before a new success can be recorded.
+list. The first repair exposed detected boxes but could not refresh their ids
+after the required pre-action capture. The follow-up below implements that refresh
+and stricter message attribution. Neither code change changes an old verdict.
+
+## Offline T04 follow-up, 2026-10-06
+
+The collected suite now contains **752 tests**, including **452 additions** to
+the 300-test Week 3 baseline: 393 cases in the fourteen Week 4 table files and
+59 additions in the other suites. These code checks do not add real task attempts.
+
+`test_runtime_runner.py::test_t04_complete_send_uses_fresh_candidates_and_strict_message_evidence`
+passes the complete prepared flow: click the input, type the fresh marker, click
+send and verify the resulting bubble. It uses the real planner, runtime, adapter,
+verifier and recorder, with the **`prepared-T04` mock provider**, synthetic moving
+chat screenshots and a recording action backend. Both confirmation callbacks are
+checked, current-frame target centres are used, and the enabled send button requires
+one constrained visual mapping followed by another capture. The resulting mock
+`succeeded` record is simulated; it is excluded from the retained real-run totals.
+
+The refreshed path requires stable foreground identity, title, class, bounds and
+geometry, then matches actual target pixels and their context to current detected
+candidates. A changed control can be mapped by the visual model to one candidate
+id only. It cannot change the operator-approved action, marker or recipient, and
+a further screenshot must confirm that candidate before input. Before T04 starts,
+visual context must show the correct conversation header and an empty composer;
+the same header pixels and foreground identity are checked before each input event.
+The final assessment must transcribe the exact fresh marker as a sent bubble below
+that header and above a non-overlapping empty composer. Unavailable or uncertain
+evidence cannot pass. This is an automatic visual-model assessment, with its prompt,
+source image, model/provider and structured `vision_assessment` recorded; live-model
+accuracy remains unmeasured. The initial recipient assessment or refusal is also
+recorded in `message_context.json`.
+
+The prepared regressions also cover a wrong or changed recipient, lost focus,
+missing or duplicate controls, a plan that only leaves a draft, an ineffective send,
+expired mapping/verification requests and cumulative action limits. Once a
+post-typing click might have sent the message, further inputs in that plan stop
+and the runner checks the goal without automatically retrying the send. Repeated
+typing is refused, including when the approved plan contains extra send steps.
+
+Separately, the locally available screenshot for historical
+`T04_20261005_192417/obs-0005` was replayed through the detector with its recorded
+OCR exclusions. Lower-contrast contour detection, small nested-control retention,
+candidate-area OCR exclusions and foreground prioritisation retain the input at
+candidate index **0** and send at **50**, both within 200 candidates. This is
+offline processing of saved pixels, not a new desktop capture, new real run or
+live-model accuracy measurement. That run remains outside the checked-in
+38-directory evidence snapshot.
+
+**Real T04 has not been newly measured.** The checked-in inventory remains
+38 directories, 37 real attempts, five successful runs and four of five cases
+passing. No desktop actions or messages were dispatched for this repair.
+
+For the owner to collect a new real result, prepare the unlocked desktop with
+the correct conversation open and empty input, use the English input method,
+close screenshot viewers and select the configured real model endpoint. Then run
+the existing guarded preflight and explicitly confirmed case:
+
+```powershell
+Set-Location D:\Developer\multimodal-desktop-gui-agent
+& .\.venv\Scripts\python.exe scripts\week4_t04_verify.py
+& .\.venv\Scripts\python.exe scripts\week4_t04_verify.py --run
+```
+
+The helper requests the existing 1800-second task budget and preserves both CLI
+confirmations; the second command can send a real message. The owner should inspect
+the new summary and its visual evidence before collecting that run. Keep earlier
+evidence directories unchanged. If a send was attempted but verification was
+uncertain, inspect the conversation before starting another run; the runtime will
+not retry it automatically.
