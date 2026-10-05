@@ -50,7 +50,7 @@ failure is two attempts, and only the runs whose summary reads `succeeded` with
 | T01 | open the browser | desktop visible and launch entry uncovered; **no browser window open** | 2 + 5 | **0 + 1** | **succeeded** | automatic: the marks a browser frame carries in either locale (`http`, `搜索`) | from the confirmation gate to the final verdict (`execution_ms`); the summary also keeps `planning_ms`, `confirmation_ms` and the whole-run `elapsed_ms`, and the run directory keeps `warmup.json` for the cold and warm numbers, which are deliberately not part of any of them | first round: `T01_20261003_172642`, `T01_20261003_180109`; second round, the success: **`T01_20261004_140000`** |
 | T02 | search the web | a browser window is open and focused | 1 + 38 | **1** | **succeeded** | automatic: the query text **and** a loaded results page (`google.com`) | as above | first round: `T02_20261003_173909`; the second round's runs are listed under §"Second round" and eleven of them are in `Document/Week4/evidence` |
 | T03 | open a specified file | `week4_sample.txt` exists in the week4 test folder (`~/Desktop/week4_test`, or `%USERPROFILE%\Desktop\week4_test`); no file of that name is open | 1 + 7 | **1** | **succeeded** | automatic: `WEEK4-OPEN-FILE-OK` on screen | as above | first round: `T03_20261003_174110`; the success: **`T03_20261004_171941`** |
-| T04 | send a message | the test conversation is open and holds no earlier message with **this run's** marker; the operator agreed a real message may be sent | 2 | **0 recorded** | timed_out, and **the goal was reached anyway** | automatic: this run's marker on screen (the CLI prints it as `marker`) | as above | `T04_20261003_174709` (failed, before any of this branch's fixes); **`T04_20261005_003044`** carried out the task and recorded no verdict - see the note under this table |
+| T04 | send a message | the test conversation is open and holds no earlier message with **this run's** marker; the operator agreed a real message may be sent | 2 | **0** | timed_out, with the plan's actions all dispatched and no verdict recorded | automatic: this run's marker on screen (the CLI prints it as `marker`) | as above | `T04_20261003_174709` (failed, before any of this branch's fixes); **`T04_20261005_003044`** dispatched all four actions and recorded no verdict - see the note under this table |
 | T05 | close the application | `week4_sample.txt` is open in the test application, so the marker is on screen; window focused | 6 | **0** | failed (1 `timed_out`, 3 `blocked`, 2 `failed`) | automatic: `WEEK4-OPEN-FILE-OK` **gone** | as above | `T05_20261003_174334`, `T05_20261003_180511`, `T05_20261003_181018`, `T05_20261003_182259`, `T05_20261003_182640`; the sixth attempt, `T05_20261003_180229`, has no directory here - its evidence was not collected and the run no longer exists on the machine that produced it, so the attempt is recorded without it rather than cited to nothing |
 
 **These are the first real runs of the five cases on any machine.** Every attempt is
@@ -432,17 +432,30 @@ Record each failure with its classification - focus wrong, target ambiguous, inp
 incomplete, not submitted, load timeout, verification insufficient - and the run
 id, so the evidence can be found again.
 
-**T04 is the one case whose goal was reached without a recorded verdict, and the frame says so.**
-The run `T04_20261005_003044` dispatched four actions and is recorded `timed_out` with no
-verification result - the task budget expired before the checker ran. Its evidence, and a frame
-taken afterwards, show the marker as a **sent** message in 文件传输助手, which is exactly what the
-success rule asks for. So the honest entry is what the table carries: not `succeeded`, because
-nothing recorded that verdict, and not `failed`, because the task was carried out.
+**T04 is the one case with no recorded verdict, and the evidence for what happened is mixed.**
+The run `T04_20261005_003044` is recorded `timed_out`, and every one of its four actions was
+dispatched and reported success:
 
-Getting even this far produced the most expensive lesson in this report, and it is a measurement
-one. T04's message box is invisible to the OCR - thirty-one observations with WeChat in front never
-read it - while its conversation is readable. A marker in the element list therefore could not be
-attributed to one or the other, and every check in this branch assumed the box: so a **sent**
-message was read as a draft, and "no message has been sent" was reported while a message had been.
-The two are told apart by **position** - the conversation is right-aligned and higher, the box is
-the full-width field at the bottom - never by the string, which is identical in both.
+    type_text  resolved=True success=True note='type 35 chars (text taken from target_text...)'
+    click      resolved=True success=True note="text '发送' -> obs-0004-e035"
+    type_text  resolved=True success=True
+    click      resolved=True success=True
+
+So the plan reached its send step, twice, which no earlier T04 run managed. What it did **not** do
+is satisfy the task rule: four passes ran `task verification: expected on screen but not found:
+WEEK4_MESSAGE_CHECK_20261005_003044`, and the run timed out before the checker ever passed.
+
+**Whether the message was sent is therefore not established**, and the table says `timed_out`
+rather than `succeeded` for that reason. What is visible in the frames is a sent message in
+文件传输助手 whose text reads `WEEK_MESSAGE_CHECK_20261005_003044WEEK4_MESSAGE_CHECK_20261005_0`,
+but the OCR reads that field unreliably - thirty-one observations of one run with the client in
+front returned zero reads of a marker sitting in the message box - so a frame that appears to show
+it sent is not proof that this run's message was the one that arrived, and the strict reading is
+the only one the report can carry.
+
+**The lesson this case paid for, and it is a measurement one.** T04's message box is invisible to
+the OCR while its conversation is readable, so a marker in the element list cannot be attributed to
+one or the other, and every check in this branch assumed the box. That led to a **sent** message
+being read as a draft, and to "no message has been sent" being reported while a message had been.
+The two are told apart by **position** - the conversation is right-aligned and higher, the message
+box is the full-width field at the bottom - never by the string, which is identical in both.
