@@ -650,7 +650,14 @@ class TaskRunner:
             # that did not change is the expected outcome rather than a mismatch -
             # stopping there would truncate the one mode whose purpose is to walk
             # the whole plan and show it.
-            if options.execute and record.verification.outcome == "failed":
+            if (
+                options.execute
+                and record.verification.outcome == "failed"
+                # A case may declare that its steps cannot be judged this way; see
+                # TaskSpec.gate_on_step_verification for the measurement that made T04
+                # need it. The task rule still decides the outcome at the end.
+                and task.gate_on_step_verification
+            ):
                 notes.append(
                     f"{step.step_id}: {record.verification.detail}; stopping rather than "
                     "continuing from a step whose result was not observed"

@@ -193,6 +193,9 @@ def _cases() -> dict[str, TaskSpec]:
             ],
             expect_text=[MESSAGE_MARKER],
             risk="high",
+            # Its typing step cannot be judged from a screenshot and its task can; see the
+            # field for the four runs that established it. The task rule still runs.
+            gate_on_step_verification=False,
         ),
         "T05": TaskSpec(
             case_id="T05",

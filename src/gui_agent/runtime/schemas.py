@@ -144,6 +144,26 @@ class TaskSpec(SchemaModel):
     forbids_processes: list[str] = Field(default_factory=list)
     risk: Literal["low", "medium", "high"] = "low"
 
+    #: Whether a step whose own verification fails should stop the run.
+    #:
+    #: True everywhere by default, and it is the right rule: a step whose result was not
+    #: observed is not something to build on, and continuing would act on a guess.
+    #:
+    #: Set False for a case whose *steps* cannot be verified that way but whose *task* can.
+    #: T04 is the one, and the measurement is in the troubleshooting guide: its typing step asks
+    #: the model to describe what it just did - `expected_result='The message is typed into the
+    #: message box'` - and that sentence cannot be matched against a screen, because the box it
+    #: names is invisible to the OCR. The same sentence came back on four passes of four separate
+    #: runs, including runs whose instruction explicitly forbade mentioning the box. So the gate
+    #: was not measuring the step; it was measuring whether the model happened to phrase its own
+    #: expectation in words that appear on screen.
+    #:
+    #: Turning it off does not remove verification. The task-level rule still runs at the end
+    #: against the whole screen - for T04, the marker as a sent message in the conversation - and
+    #: every step's own outcome is still recorded. What goes away is a mid-plan stop caused by a
+    #: description rather than by a fact.
+    gate_on_step_verification: bool = True
+
 
 class ExecutionOptions(SchemaModel):
     """Limits and switches for one run, all of them explicit."""
