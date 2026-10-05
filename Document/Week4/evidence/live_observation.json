@@ -79,5 +79,26 @@
       ]
     }
   },
-  "not_yet_measured": "The five task runs need a reachable vision model. The GPU node was offline when this was recorded, so no real planning call was made and no task has been attempted for real."
+  "historical_scope": "This darwin capture was recorded while the GPU node was offline. No real planning call or task execution was performed for this observation. The observation values and task_cases above preserve that baseline; they are not current Windows task definitions or results.",
+  "current_results": {
+    "source": "Checked-in */task_summary.json, reconciled on 2026-10-05",
+    "run_directories": 38,
+    "real_attempts": 37,
+    "successful_runs": 5,
+    "passed_cases": [
+      "T01",
+      "T02",
+      "T03",
+      "T05"
+    ],
+    "success_run_ids": [
+      "T01_20261004_140000",
+      "T01_20261004_213859",
+      "T02_20261004_210409",
+      "T03_20261004_171941",
+      "T05_20261004_180657"
+    ],
+    "t04_status": "No succeeded run. Target-rendering repair has not been tested on the real desktop.",
+    "report": "../Week4_Basic_Task_Test_Report.md"
+  }
 }

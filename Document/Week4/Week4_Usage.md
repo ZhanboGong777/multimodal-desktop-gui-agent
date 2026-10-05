@@ -169,7 +169,7 @@ desktop you are willing to have recorded.
 
 ## When something goes wrong
 
-`Document/Week4/Week4_Troubleshooting.md` lists forty-two symptoms - from a refused
+`Document/Week4/Week4_Troubleshooting.md` lists seventy-one symptoms - from a refused
 connection to a save-changes dialog - with what to check first and what the code
 does about each. The two most common while setting up:
 

@@ -9,11 +9,12 @@ to the model as targets.
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from pathlib import Path
 
 import pytest
 from PIL import Image
 
-from gui_agent.config import Config
+from gui_agent.config import Config, load_config
 from gui_agent.perception.ocr import EngineSelection, OcrError, OcrOutput
 from gui_agent.runtime import observation
 from gui_agent.runtime.observation import (
@@ -46,12 +47,12 @@ def test_each_observation_gets_its_own_id() -> None:
     assert len(set(ids)) == 3
 
 
-def test_contours_are_not_offered_as_targets() -> None:
-    """8.1.4: the element list is what the model aims with, so it holds real text.
+@pytest.mark.parametrize("blank_text", ["", "   "])
+def test_contours_are_offered_with_an_explicit_unlabelled_marker(blank_text: str) -> None:
+    """T04 needs contours that OCR cannot label, without inventing their meaning.
 
-    A bare contour box has no label. Listing it would invite the model to describe
-    it as "the search box", which is an invention the adapter would then refuse -
-    or worse, resolve against the wrong element.
+    Whitespace is not a label either. Both forms must show the id and geometry
+    that the visual model can compare against the screenshot.
     """
     snapshot = ObservationSnapshot(
         observation_id="obs-0001",
@@ -62,7 +63,7 @@ def test_contours_are_not_offered_as_targets() -> None:
         elements=[
             ElementRef(
                 element_id="obs-0001-e000",
-                text="",
+                text=blank_text,
                 bounding_box=BoundingBox(left=0, top=0, right=20, bottom=20),
                 center=Point(x=10, y=10),
                 confidence=0.9,
@@ -80,9 +81,11 @@ def test_contours_are_not_offered_as_targets() -> None:
 
     rendered = describe_elements(snapshot)
 
-    assert "obs-0001-e001" in rendered
-    assert "obs-0001-e000" not in rendered, "an unlabelled box is not a target"
-    assert rendered.count("\n") == 0, "one line per offered element"
+    assert rendered.splitlines() == [
+        "obs-0001-e000  <unlabelled box>  conf=0.90  center=(10,10)  box=(0,0,20,20)",
+        "obs-0001-e001  'Search'  conf=0.90  center=(55,10)  box=(30,0,80,20)",
+    ]
+    assert snapshot.elements[0].text == blank_text, "the marker must not become observed text"
 
 
 def test_the_element_line_carries_what_a_step_needs_to_aim() -> None:
@@ -225,11 +228,16 @@ def test_the_element_cap_keeps_the_labelled_elements(monkeypatch: pytest.MonkeyP
     """`_select` ranks text ahead of unlabelled contours.
 
     That ordering is what stops a screenful of boxes from pushing the labels out of
-    the prompt - the cap is 60 by default, and a busy screen produces more contours
-    than that on its own.
+    the prompt, even at a deliberately small cap or when contours have higher
+    confidence than OCR.
     """
-    labels = [_element(f"label {index}", index) for index in range(5)]
-    blanks = [_element("", index) for index in range(80)]
+    labels = [
+        _element(f"label {index}", index).model_copy(update={"confidence": 0.1})
+        for index in range(5)
+    ]
+    blanks = [
+        _element("", index).model_copy(update={"confidence": 1.0}) for index in range(80)
+    ]
     _patch(monkeypatch, _StubEngine(labels + blanks))
 
     snapshot = ObservationService(Config(), max_elements=10).observe()
@@ -238,6 +246,52 @@ def test_the_element_cap_keeps_the_labelled_elements(monkeypatch: pytest.MonkeyP
     assert [item.text for item in snapshot.elements if item.text] == [
         f"label {index}" for index in range(5)
     ]
+    assert all(item.text for item in snapshot.elements[:5])
+    assert all(not item.text for item in snapshot.elements[5:])
+
+
+@pytest.mark.parametrize("label_count", [66, 100, 301])
+def test_week4_element_budget_keeps_labels_before_the_full_contour_pool(
+    monkeypatch: pytest.MonkeyPatch, label_count: int
+) -> None:
+    """300 covers the measured 66 OCR elements plus all 200 configured contours.
+
+    100 fixes the chosen OCR allowance; 301 exercises overflow, where labels
+    still outrank even high-confidence contours instead of being displaced.
+    The frame and both perception backends are prepared, never live.
+    """
+    config = load_config(Path(__file__).resolve().parents[1] / "configs" / "week4.yaml")
+    assert config.execution.max_elements == 300
+    assert config.perception.ui_detection.max_candidates == 200
+    assert ObservationService(Config()).max_elements == config.execution.max_elements
+    assert Config().execution.max_elements == config.execution.max_elements
+    labels = [
+        _element(f"label {index}", index % 10).model_copy(update={"confidence": 0.1})
+        for index in range(label_count)
+    ]
+    contours = [
+        _element("", index % 10).model_copy(update={"confidence": 1.0, "source": "contour"})
+        for index in range(config.perception.ui_detection.max_candidates)
+    ]
+    _patch(monkeypatch, _StubEngine(labels))
+
+    def detect(*args: object, **kwargs: object) -> list[UIElement]:
+        assert kwargs["max_candidates"] == 200
+        return contours
+
+    monkeypatch.setattr(observation, "detect_ui_candidates", detect)
+
+    snapshot = ObservationService(config, max_elements=config.execution.max_elements).observe()
+
+    retained_labels = min(label_count, config.execution.max_elements)
+    assert len(snapshot.elements) == min(label_count + len(contours), config.execution.max_elements)
+    assert [item.text for item in snapshot.elements[:retained_labels]] == [
+        f"label {index}" for index in range(retained_labels)
+    ]
+    assert all(not item.text for item in snapshot.elements[retained_labels:])
+    assert sum(item.source == "contour" for item in snapshot.elements) == min(
+        len(contours), config.execution.max_elements - retained_labels
+    )
 
 
 def test_a_contour_failure_is_recorded_and_the_frame_survives(

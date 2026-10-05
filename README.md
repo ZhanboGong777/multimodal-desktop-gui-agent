@@ -43,15 +43,16 @@ python scripts/week4_collect_evidence.py --latest T01   # copy a run's records i
 
 Three properties the loop is built around:
 
-- **One plan, then step-by-step re-observation.** The model is not called per
-  click, so a 20-action task fits a 240 s budget.
+- **Plan, then step-by-step re-observation, with bounded recovery.** The model is
+  not called per click; up to four planning attempts run within the task's time
+  budget. Every action still passes adapter resolution and executor boundary checks.
 - **A screenshot changing is not success.** Only the task's own success rule can
   return `succeeded`; `finish` and a run out of steps cannot.
 - **Refusal beats guessing.** An ambiguous target, a stale element id, a missing
   parameter or an out-of-range coordinate stops the run instead of clicking
   something plausible.
 
-609 tests, ruff clean. See `Document/Week4/Week4_Usage.md` for the flags, the
+618 tests, ruff clean. See `Document/Week4/Week4_Usage.md` for the flags, the
 safety model and the record layout.
 
 The Chinese deliverables - `Week4_中文实验报告.(md|docx)`, `Week4_Windows复核手册.md`
@@ -59,8 +60,18 @@ and the `sync_report_numbers.py` tool that keeps their numbers in step with this
 tree - are delivered alongside the repository rather than inside it, so a citation
 to one of those filenames will not resolve here.
 
-The five basic task runs still have to be performed on a real desktop; their
-results go in `Document/Week4/Week4_Basic_Task_Test_Report.md`.
+Real Windows evidence records four of five basic cases passing, across five
+successful runs: T01 twice, and T02, T03 and T05 once each. T04 remains unverified
+after the target-rendering repair; its offline tests do not establish a real
+message-send result. The retained attempts and timings are in
+`Document/Week4/Week4_Basic_Task_Test_Report.md`.
+
+Detected text-free controls now appear in the model's target list as
+`<unlabelled box>` with their frame-local ids and geometry. The 300-element cap
+allows 100 OCR labels plus the configured 200 contour candidates, with text
+ranked first. The runner still refreshes the observation before acting, so a
+bare unlabelled id from the planning frame is stale and remains refused without
+a text fallback. This is still an unresolved obstacle for T04.
 
 ### Week 3
 
@@ -107,7 +118,7 @@ python scripts/week3_model_demo.py --provider mock
 python scripts/week3_planning_demo.py --provider mock --instruction "Open the browser"
 ```
 
-609 tests, ruff clean. The model client's retry, timeout and
+618 tests, ruff clean. The model client's retry, timeout and
 error-classification paths are covered, along with the four vision-payload
 failure modes (missing, empty, oversized, unknown type) and the TaskPlan
 schema boundaries. Dataset and model dependencies live in

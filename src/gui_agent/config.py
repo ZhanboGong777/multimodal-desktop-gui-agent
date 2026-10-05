@@ -12,6 +12,13 @@ from pydantic import BaseModel, ConfigDict, Field
 
 DEFAULT_CONFIG_PATH = Path("configs/default.yaml")
 
+#: Keep the configured 200 contours plus 100 OCR elements. The Windows review
+#: measured 66 OCR elements; the former 60-slot cap could not hold even those,
+#: and T04_20261005_192417 needs anonymous contours to reach its icon controls.
+#: This is a bounded prompt budget, not a guarantee for screens with >100 labels;
+#: observation selection still gives every label priority over a bare contour.
+DEFAULT_MAX_ELEMENTS = 300
+
 
 class ConfigModel(BaseModel):
     """Base config model that rejects unknown or misspelled keys."""
@@ -142,17 +149,15 @@ class ExecutionConfig(ConfigModel):
     record of intent, never a switch that gates execution. These values are the
     ones the runner actually enforces.
 
-    There is deliberately no ``max_replans`` knob for plans that fail part-way - a
-    step that cannot be resolved still ends the run, because acting on a guess is
-    worse than stopping. ``max_planning_attempts`` covers the different case that
-    T02 exposed: a plan that runs to its end and leaves the goal unmet. Nothing
-    implements re-planning *within* a plan, and that is still Week 6's; what is here
-    is asking the model again from the current screen, which is bounded by the same
-    wall clock and by this count.
+    There is deliberately no ``max_replans`` alias. ``max_planning_attempts``
+    bounds new planning passes from the current screen, including when a step
+    could not be resolved or a completed plan left the goal unmet. T02 exposed
+    the latter and T04 the former; an unresolved step still dispatches nothing.
+    Each new pass is bounded by the same wall clock and by this count.
     """
 
     #: Cap on how many elements reach the model, text first.
-    max_elements: int = Field(default=60, gt=0)
+    max_elements: int = Field(default=DEFAULT_MAX_ELEMENTS, gt=0)
     #: Desktop actions allowed in one task, excluding the terminal ``finish``.
     max_actions: int = Field(default=20, gt=0)
     #: Wall-clock budget for one task.

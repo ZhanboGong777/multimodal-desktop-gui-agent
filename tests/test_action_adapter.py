@@ -71,6 +71,44 @@ def test_an_element_id_from_this_frame_resolves(adapter: ActionAdapter) -> None:
     assert resolved.element_id == "obs-0001-e002"
 
 
+@pytest.mark.parametrize("blank_text", ["", "   "])
+def test_an_unlabelled_element_id_resolves_through_control_scaling(
+    adapter: ActionAdapter, blank_text: str
+) -> None:
+    """Anonymous T04 controls use the same mapping and bounds checks as OCR targets."""
+    snapshot = _snapshot(texts=(blank_text,))
+    snapshot.elements[0] = snapshot.elements[0].model_copy(update={"source": "contour"})
+    snapshot.screen_info = ScreenInfo(
+        screenshot_width=2940, screenshot_height=1912,
+        control_width=1470, control_height=956, scale_x=0.5, scale_y=0.5,
+    )
+
+    resolved = adapter.resolve(_step(arguments={"element_id": "obs-0001-e000"}), snapshot)
+
+    assert resolved.element_id == "obs-0001-e000"
+    assert resolved.screenshot_point == Point(x=45, y=30)
+    assert resolved.control_point == Point(x=22, y=15)
+    assert (resolved.action.x, resolved.action.y) == (22, 15)
+
+
+@pytest.mark.parametrize("target_text", [None, "<unlabelled box>", "send button"])
+def test_a_stale_unlabelled_id_cannot_rebind_by_position_or_placeholder(
+    adapter: ActionAdapter, target_text: str | None
+) -> None:
+    """A new contour at the old geometry is not evidence of the same control.
+
+    The runner observes again before acting. Rendering a contour must not grant
+    permission to reuse an old id or treat the placeholder as observed text.
+    """
+    earlier = _snapshot(texts=("",))
+    current = _snapshot("obs-0002", texts=("",))
+    assert earlier.elements[0].bounding_box == current.elements[0].bounding_box
+    step = _step(arguments={"element_id": earlier.elements[0].element_id}, target_text=target_text)
+
+    with pytest.raises(ActionResolutionError, match="not from observation|no element matches"):
+        adapter.resolve(step, current)
+
+
 def test_an_element_id_from_another_frame_is_refused(adapter: ActionAdapter) -> None:
     """The same id in a new frame means a different element, so it must not resolve."""
     stale = _step(arguments={"element_id": "obs-0001-e000"})

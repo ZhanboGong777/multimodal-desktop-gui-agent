@@ -13,17 +13,12 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from ..config import Config
+from ..config import DEFAULT_MAX_ELEMENTS, Config
 from ..perception.capture import capture_monitor
 from ..perception.ocr import OcrError, create_ocr_engine
 from ..perception.ui_detection import detect_ui_candidates
 from ..schemas import UIElement
 from .schemas import ElementRef, ObservationSnapshot
-
-#: Cap on how many elements reach the model. A full-screen OCR pass can produce
-#: hundreds of boxes, and pasting all of them into the prompt buries the useful
-#: ones and costs tokens for nothing.
-DEFAULT_MAX_ELEMENTS = 60
 
 
 class ObservationError(RuntimeError):
@@ -177,16 +172,18 @@ class ObservationService:
 def describe_elements(snapshot: ObservationSnapshot) -> str:
     """Render the element list for the model prompt.
 
-    Only elements with text are offered as clickable targets. A contour box has
-    no label, so presenting it as "the search box" would be an invention.
+    T04_20261005_192417 could not name an input or send control: contours survived
+    selection but were dropped here. Offer their frame-local ids and geometry
+    without inventing a semantic label; the model can compare them with the image.
+    The placeholder is not text for re-location: stale contour ids still need a
+    new, current-frame target and cannot be rebound by their old position.
     """
     lines = []
     for item in snapshot.elements:
-        if not item.text.strip():
-            continue
+        label = repr(item.text) if item.text.strip() else "<unlabelled box>"
         box = item.bounding_box
         lines.append(
-            f"{item.element_id}  {item.text!r}  conf={item.confidence:.2f}  "
+            f"{item.element_id}  {label}  conf={item.confidence:.2f}  "
             f"center=({item.center.x},{item.center.y})  box=({box.left},{box.top},{box.right},{box.bottom})"
         )
     return "\n".join(lines)

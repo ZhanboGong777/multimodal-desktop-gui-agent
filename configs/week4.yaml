@@ -5,10 +5,11 @@
 # `--config configs/week4.yaml`.
 #
 # Before a real model run, check the server's context window. A full-screen
-# screenshot plus the element list measured 7 517 tokens on a 2560x1600 display,
+# screenshot plus the former 60-slot element list measured 7 517 tokens on a 2560x1600 display,
 # and Ollama serves 4096 by default, which fails with HTTP 400. Raise it, e.g.
 #   OLLAMA_CONTEXT_LENGTH=16384
-# before starting the server. The Mock provider is unaffected.
+# before starting the server. Request size with the 300-slot list and anonymous
+# contours needs a new measurement. The Mock provider is unaffected.
 
 runtime:
   device: auto
@@ -82,10 +83,12 @@ model:
   provider: mock
   model_name: mock-vision-model
   base_url: null
-  # A planning call carries a 2560x1600 screenshot plus the element list - measured at
-  # ~7 500 tokens on the review machine - so it is not comparable to a text call, and the
+  # The historical planning call carried a 2560x1600 screenshot plus the 60-slot list -
+  # measured at ~7 500 tokens on the review machine - so it is not comparable to a text call, and the
   # warmup probe does not size it either: that probe sends one image with a short prompt,
-  # while planning sends the image AND 60 element lines under a system prompt.
+  # while planning sent the image AND up to 60 labelled element lines under a system prompt.
+  # The repaired list includes anonymous contours and allows 300 lines; its token size
+  # and latency have not been measured on this machine yet.
   #
   # Measured here, and the reason this is 600 rather than 300: a request of planning size
   # answered in 86 s cold and 17 s warm when issued directly, and the same run through the
@@ -112,10 +115,15 @@ planning:
   allow_real_execution: false
 
 # ── Week 4 additions ────────────────────────────────────────────────
-# Named `execution` to match 13.2. There is no max_replans: nothing implements
-# re-planning yet, and a knob no code reads is a claim without a mechanism.
+# Named `execution` to match 13.2. Bounded new planning passes are controlled by
+# max_planning_attempts below; there is no separate max_replans alias.
 execution:
-  max_elements: 60
+  # T04_20261005_192417 exposed that anonymous controls never reached the model.
+  # 300 = all 200 configured contour candidates + 100 OCR slots: the measured
+  # Windows PaddleOCR frame had 66 elements, leaving 34 slots beyond that sample.
+  # Text ranks ahead of contours, including when this total is exceeded. The cap
+  # remains bounded; prompt size/latency with this larger list is not yet measured.
+  max_elements: 300
   max_actions: 20
   # Raised from 240 s, which this machine outgrew: with PaddleOCR at about 10 s per frame
   # (see the OCR note above), reading one plan and executing one step took 257 s in a dry

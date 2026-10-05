@@ -41,354 +41,238 @@ a real success.
 
 ## Results
 
-Attempts and successes are counted per case: a run that had to be repeated after a
-failure is two attempts, and only the runs whose summary reads `succeeded` with
-`execute=true` are successes.
+This report was reconciled against every checked-in `task_summary.json` under
+`Document/Week4/evidence/`: **38 run directories**, of which **37 record
+`execute=true`** and one is a dry run. **Four of the five cases have recorded
+successes: T01, T02, T03 and T05. There are five successful runs**, because T01
+succeeded twice. T04 has no recorded success; changing the code does not change
+these historical verdicts, and no real desktop action was run for this repair.
 
-| Case | Task | Preconditions before the run | Attempts | Successes | Status | Verification method | Timing basis | Evidence |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| T01 | open the browser | desktop visible and launch entry uncovered; **no browser window open** | 2 + 5 | **0 + 1** | **succeeded** | automatic: the marks a browser frame carries in either locale (`http`, `搜索`) | from the confirmation gate to the final verdict (`execution_ms`); the summary also keeps `planning_ms`, `confirmation_ms` and the whole-run `elapsed_ms`, and the run directory keeps `warmup.json` for the cold and warm numbers, which are deliberately not part of any of them | first round: `T01_20261003_172642`, `T01_20261003_180109`; second round, the success: **`T01_20261004_140000`** |
-| T02 | search the web | a browser window is open and focused | 1 + 38 | **1** | **succeeded** | automatic: the query text **and** a loaded results page (`google.com`) | as above | first round: `T02_20261003_173909`; the second round's runs are listed under §"Second round" and eleven of them are in `Document/Week4/evidence` |
-| T03 | open a specified file | `week4_sample.txt` exists in the week4 test folder (`~/Desktop/week4_test`, or `%USERPROFILE%\Desktop\week4_test`); no file of that name is open | 1 + 7 | **1** | **succeeded** | automatic: `WEEK4-OPEN-FILE-OK` on screen | as above | first round: `T03_20261003_174110`; the success: **`T03_20261004_171941`** |
-| T04 | send a message | the test conversation is open and holds no earlier message with **this run's** marker; the operator agreed a real message may be sent | 2 | **0** | timed_out, with the plan's actions all dispatched and no verdict recorded | automatic: this run's marker on screen (the CLI prints it as `marker`) | as above | `T04_20261003_174709` (failed, before any of this branch's fixes); **`T04_20261005_003044`** dispatched all four actions and recorded no verdict - see the note under this table |
-| T05 | close the application | `week4_sample.txt` is open in the test application, so the marker is on screen; window focused | 6 | **0** | failed (1 `timed_out`, 3 `blocked`, 2 `failed`) | automatic: `WEEK4-OPEN-FILE-OK` **gone** | as above | `T05_20261003_174334`, `T05_20261003_180511`, `T05_20261003_181018`, `T05_20261003_182259`, `T05_20261003_182640`; the sixth attempt, `T05_20261003_180229`, has no directory here - its evidence was not collected and the run no longer exists on the machine that produced it, so the attempt is recorded without it rather than cited to nothing |
+Here, an **attempt** is one checked-in run with `execute=true`, including a run
+blocked by its precondition. The three blocked runs are shown separately in the
+status breakdown; they dispatched no actions. A planning retry within a run is
+not another attempt. Uncollected historical runs are excluded from every total.
 
-**These are the first real runs of the five cases on any machine.** Every attempt is
-listed below with the outcome that was actually written; nothing was deleted, and the
-dry-run passes in §"Dry runs" are not counted as attempts or successes.
+| Case | Task and preconditions | Attempts | Successes | Recorded statuses | Successful evidence |
+| --- | --- | --- | --- | --- | --- |
+| T01 | open the browser; desktop visible, launch entry uncovered, no browser running | **6** | **2** | 2 succeeded, 3 failed, 1 blocked | `T01_20261004_140000`, `T01_20261004_213859` |
+| T02 | search the web; browser open and focused, English input method | **17** | **1** | 1 succeeded, 16 failed | `T02_20261004_210409` |
+| T03 | open the specified `week4_sample.txt` in the week4 test folder; no file of that name already open | **2** | **1** | 1 succeeded, 1 failed | `T03_20261004_171941` |
+| T04 | send a fresh per-run marker to the open test conversation; operator agrees to a real send | **3** | **0** | 2 failed, 1 timed_out | none; all three available runs are listed below |
+| T05 | close the test application; `WEEK4-OPEN-FILE-OK` visible in the focused application first | **9** | **1** | 1 succeeded, 5 failed, 2 blocked, 1 timed_out | `T05_20261004_180657` |
+| Total | five controlled cases | **37** | **5** | 5 succeeded, 27 failed, 3 blocked, 2 timed_out | **4 / 5 cases** |
 
-**T01 succeeded on the second round.** On this machine, with a real click:
+Every successful summary records `execute=true`, final `verification=passed` and
+the following dispatched actions. Milliseconds are rounded to the nearest whole
+number here; aggregate means below use the original floating-point values.
 
-```text
-run_id       = T01_20261004_140000
-status       = succeeded
-execute      = True
-verification = passed
-action_count = 1
-step-1 double_click: resolved=True verif=passed err=None
-```
+| Successful run | execute | Final verification | action_count | Dispatched actions | execution_ms |
+| --- | --- | --- | --- | --- | --- |
+| `T01_20261004_140000` | true | passed | 1 | double_click | 6 938 |
+| `T01_20261004_213859` | true | passed | 1 | double_click | 7 563 |
+| `T02_20261004_210409` | true | passed | 2 | type_text, key_press Enter | **11 969** |
+| `T03_20261004_171941` | true | passed | 1 | double_click | 5 313 |
+| `T05_20261004_180657` | true | passed | 1 | hotkey Alt+F4 | 9 750 |
 
-Its records are in `Document/Week4/evidence/T01_20261004_140000`.
-
-**T03 succeeded on the third round.** Also with a real click, and also on the first step:
-
-```text
-run_id       = T03_20261004_171941
-status       = succeeded
-execute      = True
-verification = passed  (all success rules matched against the current screen)
-action_count = 1
-step-1 double_click: resolved=True element=obs-0002-e042 click=(401,272) verif=passed
-```
-
-Notepad was found running with `*week4_sample.txt` in its title afterwards, which is the
-success rule stated as an observation rather than as a verdict. Its records are in
-`Document/Week4/evidence/T03_20261004_171941`.
-
-**T02 succeeded on the last round**, with two actions where every earlier attempt had managed
-at most one:
-
-```text
-run_id       = T02_20261004_210409
-status       = succeeded
-execute      = True
-verification = passed  (all success rules matched against the current screen)
-action_count = 2
-step-1 type_text  resolved=True verif=passed
-step-2 key_press  resolved=True verif=passed
-```
-
-Its frames show the page change as well as the verdict, which matters because this case once
-produced a false success: the window title read `'新标签页 - Google Chrome'` for `obs-0001`
-to `obs-0004`, the query alone appearing from `obs-0003`, and then **`'GUI agent research -
-Google 搜索 - Google Chrome'`** for `obs-0005` and `obs-0006` - the results page, confirmed by
-a signal that does not go through OCR at all. Its records are in
-`Document/Week4/evidence/T02_20261004_210409`.
-
-**T05 succeeded** after three earlier attempts, its close action correct throughout and a
-save dialog absorbing it until the document was clean:
-
-```text
-run_id       = T05_20261004_180657
-status       = succeeded
-verification = passed  (all success rules matched against the current screen)
-step-1 hotkey keys=['alt','f4'] note='alt+f4'
-```
-
-**Four of the five cases have reached `succeeded`** - T01, T02, T03 and T05. The fifth, T04,
-is not described as passing anywhere in this report, and its single attempt is the one the
-operator agreed to run: it failed before typing anything and **no message was ever sent**.
-
-What the four have in common is worth stating, because three of them are the same defect seen
-three times: **the harness refused something a person would call correct.** T01's shortcut was
-clicked on its label instead of its icon, and the click landed on the label's text rather than
-the icon above it. T03's file was refused because the OCR engine read `week4_sample.txt` as
-`week4 sample.txt` - an underscore rendered as a space, which is what happens to a one-pixel
-glyph sitting on the baseline. And T02's plan ran out after one action because the prompt had
-never said a plan may hold more than one step, while its own `expected_result` described the
-finished search.
-
-T05 is the fourth and a different shape: `pyautogui.hotkey('alt', 'f4')` does nothing at all
-on Windows, silently, while the same keys pressed by hand in three separate calls close the
-window. In every one of the four, **the model had read the screen correctly and the machinery,
-not the model, was what failed.**
+T01's first success and its later repeat both belong to the 2026-10-04 follow-up
+runs. T02's successful final rule requires the query and `google.com`, so merely
+typing the query in an address bar is insufficient. T03's final rule requires
+`WEEK4-OPEN-FILE-OK`; T05 requires that marker to disappear. The recorded automatic
+verdicts must still be read with the limitations in §"Per-case success rules".
 
 ### Why the preconditions are not optional
 
-A real run checks its own starting state before it plans anything. T01 and T05 are
-both satisfiable without doing anything - a browser that was already running
-carries the text T01 looks for, and T05 only asks that the marker be gone, which is
-already true while the window is shut. If either precondition is unmet the run is
-reported `blocked` with `the success rule already holds on the untouched screen`,
-and no model call is made and no click is dispatched.
-
-That is a correct outcome, not a failure: it means the screen could not have shown
-whether this run did the work. Set the precondition up and run it again.
+T01 and T05 can appear satisfied without doing anything: a browser may already be
+running, and T05's marker is absent while its window is shut or hidden. Such runs
+are `blocked`, cannot be credited with reaching the goal, and dispatch no actions.
+T01's recorded blocked run used the browser-process guard; T05's two recorded
+blocked runs found the goal already satisfied on the untouched screen.
 
 T04's marker is minted per run (`WEEK4_MESSAGE_CHECK_<timestamp>`) and printed as
-`marker`, because 15.4 asks for a fresh identifier every time. A fixed one would
-make the case single-use: the previous run's message is still in the conversation,
-so the rule would already be satisfied and the run would be refused over a message
-it did not send.
+`marker`. A previous run's message cannot satisfy this run's rule. A draft, a sent
+message in another conversation and a message sent by an external probe all fail
+the attribution required for this controlled task.
 
-## Every attempt, with the outcome it actually recorded
+## Every recorded real attempt
 
-Windows node, commit `2587642`, `qwen2.5vl:7b` at `context_length = 16384`, warm start
-before the runs. Times are milliseconds from each `task_summary.json`.
+These tables include **all 37 checked-in `execute=true` summaries**, grouped by
+case and ordered by run id. Each row resolves to
+`Document/Week4/evidence/<run id>/task_summary.json`; no unavailable run is mixed
+into this inventory. `actions` is `action_count`, not planned steps or planning
+attempts. The stop descriptions come from `stop_reason`, step errors, final
+verification or recorded notes. The summary's `commit` identifies the code used
+by each run; the runs span multiple commits, rather than all using one revision.
 
 ### T01 - open the browser
 
-| # | run id | status | actions | execution_ms | what stopped it |
+| run id | status | actions | execution_ms | planning_attempts | Recorded result or stop |
 | --- | --- | --- | --- | --- | --- |
-| 1 | `T01_20261003_172642` | failed | 0 | 1 454 | `step-1: 2 elements match 'msedge' (obs-0002-e033:'msedge', obs-0002-e048:'msedge'); refusing to pick one arbitrarily` |
-| 2 | `T01_20261003_180109` | failed | **3** | 9 375 | `step-3: expected result not observed: 'Task completed'` |
-
-Attempt 2 is the informative one: three actions were dispatched and step 1 verified -
-`expected result observed: browser` - so a browser did come to the foreground. It then
-clicked `Close PowerShell` and finally `Finish`, whose expected result `Task completed`
-is a phrase the screen never carries. The run stopped there instead of continuing from
-a step whose result was not observed.
+| `T01_20261003_172642` | failed | 0 | 1 454 | 1 | ambiguous `msedge`: two matching elements |
+| `T01_20261003_180109` | failed | 3 | 9 375 | 1 | step 3: expected result `Task completed` not observed |
+| `T01_20261004_000434` | failed | 1 | 18 281 | 1 | final rule missing `http`, `search` |
+| `T01_20261004_004112` | blocked | 0 | 1 828 | 0 | precondition: `msedge.exe`, `chrome.exe` already running |
+| `T01_20261004_140000` | succeeded | 1 | 6 938 | 1 | final verification passed |
+| `T01_20261004_213859` | succeeded | 1 | 7 563 | 1 | final verification passed |
 
 ### T02 - search the web
 
-| # | run id | status | actions | execution_ms | what stopped it |
+| run id | status | actions | execution_ms | planning_attempts | Recorded result or stop |
 | --- | --- | --- | --- | --- | --- |
-| 1 | `T02_20261003_173909` | failed | 0 | 2 047 | `step-1: no element matches 'browser' in obs-0002` |
-
-The plan asked to click `browser`; no element on screen carried that text.
+| `T02_20261003_173909` | failed | 0 | 2 047 | 1 | step 1: no element matches 'browser' |
+| `T02_20261004_001545` | failed | 0 | 1 890 | 1 | step 1: no element matches 'browser' |
+| `T02_20261004_005017` | failed | 0 | 2 469 | 1 | step 1: no element matches 'browser' |
+| `T02_20261004_005225` | failed | 1 | 12 718 | 1 | step 2: no element matches 'search bar' |
+| `T02_20261004_145300` | failed | 0 | 1 172 | 1 | step 1: empty `arguments.text` |
+| `T02_20261004_150104` | failed | 0 | 1 922 | 1 | step 1: no element matches 'browser' |
+| `T02_20261004_152743` | failed | 0 | 1 875 | 1 | step 1: no element matches 'search bar' |
+| `T02_20261004_153537` | failed | 1 | 16 579 | 1 | expected on screen but not found: GUI agent research |
+| `T02_20261004_161652` | failed | 2 | 22 156 | 1 | expected on screen but not found: GUI agent research |
+| `T02_20261004_162722` | failed | 1 | 15 672 | 1 | expected on screen but not found: GUI agent research |
+| `T02_20261004_163241` | failed | 0 | 1 703 | 1 | ambiguous `about:blank`: two matching elements |
+| `T02_20261004_181529` | failed | 1 | 17 782 | 1 | expected on screen but not found: GUI agent research |
+| `T02_20261004_185721` | failed | 2 | 21 266 | 1 | expected on screen but not found: google.com/search |
+| `T02_20261004_191217` | failed | 1 | 16 141 | 1 | expected on screen but not found: google.com |
+| `T02_20261004_193222` | failed | 3 | 131 234 | 2 | expected on screen but not found: GUI agent research, google.com |
+| `T02_20261004_203337` | failed | 2 | 71 734 | 1 | expected on screen but not found: google.com |
+| `T02_20261004_210409` | succeeded | 2 | 11 969 | 1 | final verification passed |
 
 ### T03 - open a specified file
 
-| # | run id | status | actions | execution_ms | what stopped it |
+| run id | status | actions | execution_ms | planning_attempts | Recorded result or stop |
 | --- | --- | --- | --- | --- | --- |
-| 1 | `T03_20261003_174110` | failed | 0 | 1 922 | `step-1: type_text requires a non-empty arguments.text` |
-
-The plan chose `type_text` for `week4_sample.txt` but supplied no text, so nothing could
-be dispatched.
+| `T03_20261003_174110` | failed | 0 | 1 922 | 1 | step 1: empty `arguments.text` |
+| `T03_20261004_171941` | succeeded | 1 | 5 313 | 1 | final verification passed |
 
 ### T04 - send a message
 
-| # | run id | status | actions | execution_ms | what stopped it |
+| run id | status | actions | execution_ms | planning_attempts | Recorded result or stop |
 | --- | --- | --- | --- | --- | --- |
-| 1 | `T04_20261003_174709` | failed | **1** | 6 062 | `step-2: type_text requires a non-empty arguments.text` |
-
-Step 1 was a real, dispatched click (`dry_run: false`) that the step-level check passed -
-`expected result observed: conversation`. Step 2 wanted to type and supplied no text, so
-the marker was never entered. **No message was sent.**
+| `T04_20261003_174709` | failed | 1 | 6 062 | 1 | step 2: empty `arguments.text`; only the preceding click dispatched |
+| `T04_20261005_003044` | timed_out | 4 | 499 125 | 3 | marker checks failed; timed out after 3 planning attempts, no final verdict |
+| `T04_20261005_012521` | failed | 3 | 255 093 | 2 | marker check failed; second pass's typing expectation failed |
 
 ### T05 - close the application
 
-| # | run id | status | actions | execution_ms | what stopped it |
+| run id | status | actions | execution_ms | planning_attempts | Recorded result or stop |
 | --- | --- | --- | --- | --- | --- |
-| 1 | `T05_20261003_174334` | failed | 0 | 1 718 | `step-1: 5 elements match 'x' (...); refusing to pick one arbitrarily` |
-| 2 | `T05_20261003_180229` | blocked | 0 | 2 078 | `the success rule already holds on the untouched screen` |
-| 3 | `T05_20261003_180511` | blocked | 0 | 1 109 | same |
-| 4 | `T05_20261003_181018` | **timed_out** | 0 | 0 | the confirmation prompt was never answered |
-| 5 | `T05_20261003_182259` | blocked | 0 | 2 391 | `the success rule already holds on the untouched screen` |
-| 6 | `T05_20261003_182640` | failed | **1** | 12 906 | `task verification: still on screen but should be gone: WEEK4-OPEN-FILE-OK` |
+| `T05_20261003_174334` | failed | 0 | 1 718 | 1 | ambiguous `x`: five matching elements |
+| `T05_20261003_180511` | blocked | 0 | 1 109 | 0 | precondition: goal already holds on untouched screen |
+| `T05_20261003_181018` | timed_out | 0 | 0 | 1 | no actions; 633 453 ms in confirmation, no final verdict |
+| `T05_20261003_182259` | blocked | 0 | 2 391 | 0 | precondition: goal already holds on untouched screen |
+| `T05_20261003_182640` | failed | 1 | 12 906 | 1 | still on screen but should be gone: WEEK4-OPEN-FILE-OK |
+| `T05_20261004_173604` | failed | 1 | 16 125 | 1 | still on screen but should be gone: WEEK4-OPEN-FILE-OK |
+| `T05_20261004_174538` | failed | 1 | 17 000 | 1 | still on screen but should be gone: WEEK4-OPEN-FILE-OK |
+| `T05_20261004_175356` | failed | 1 | 17 094 | 1 | still on screen but should be gone: WEEK4-OPEN-FILE-OK |
+| `T05_20261004_180657` | succeeded | 1 | 9 750 | 1 | final verification passed |
 
-Attempts 2, 3 and 5 were blocked because the frame did not contain the marker: the
-test application was open but **not foregrounded**, so it was not in the capture. A
-controlled check on this machine showed the difference directly:
+## Dry runs
 
-```text
-notepad open but behind other windows  -> frame contains WEEK4-OPEN-FILE-OK : NO
-after bringing notepad to the foreground -> frame contains WEEK4-OPEN-FILE-OK : YES
-```
+`T01_20261001_215642` is the remaining, 38th evidence directory. It records
+`execute=false`, `status=dry_run_completed`, `verification=inconclusive`, provider
+`mock` and model `mock-vision-model` on macOS. Its one action record is dry-run
+output, not a dispatched desktop action. It is excluded from the 37 attempts,
+five successes, action totals and timing means.
 
-Attempt 4 hid the operator's console window so it could not appear in the frame;
-hiding it also hid the confirmation prompt, which then could not be answered, and the
-run ended `timed_out` after its budget. Attempt 6 moved the console **off the virtual
-screen** instead (still a real console, still answerable), foregrounded Notepad first,
-and verified the marker was in frame before spending a model call. That attempt ran the
-whole loop and dispatched one click at (2089, 25) on a 2560-wide screen. The close
-control sits near x = 2540, so the click missed it, and the final observation still
-carried Notepad's status-bar text (`Unix (LF)`, `100%`, `18:27`). The window was
-minimised rather than closed - which the pass criteria in §"How success is judged"
-explicitly exclude.
+## Historical rounds and unavailable evidence
 
-### What was not attempted
+The historical round names describe dated subsets of the inventory, not separate
+counts to add to it:
 
-* T04 was never run with the operator agreeing to a real send beyond the one run above,
-  which failed before typing anything. No message was ever sent on this machine.
-* No case was re-run after its last failure to try to turn it into a success.
+- **First round, 2026-10-03:** 10 checked-in real runs, with no `succeeded`
+  verdicts. The contemporary account also mentioned an uncollected T05 run;
+  it is listed as unavailable below and does not raise the recorded total to 11.
+- **Second round, 2026-10-04 follow-up runs:** 25 checked-in real runs, including
+  **all five successes**. Early failures in this round do not describe its final
+  outcome. T02 has 16 recorded runs in this round, plus its first-round failure,
+  for 17 overall.
+- **Later T04 follow-ups, 2026-10-05:** two checked-in runs, one `timed_out` and one
+  `failed`. Together with its first-round failure, T04 has three recorded attempts
+  and no success.
 
-### Second round - the same five cases, after the fixes
+These earlier references cannot be verified from checked-in run directories and
+are excluded from the aggregate statistics:
 
-Branch `fix/week4-windows-rerun`. Same machine, same model. Eleven real runs
-(`execute=true`), and the result is unchanged in the only column that counts: **no run
-reached `succeeded`**. What changed is how far each one got and what stopped it.
+| Historical run reference | Evidence availability and reported context |
+| --- | --- |
+| `T01_20261004_000322` | **Unavailable:** no directory here. The earlier narrative reported a failed single click that selected the browser shortcut. That report is not a checked-in summary. |
+| `T05_20261003_180229` | **Unavailable:** evidence was not collected; the earlier narrative reported `blocked` because the goal already held. |
+| `T02_20261004_182646` | **Unavailable:** previously described as an uncollected false `succeeded` verdict in `outputs/week4`; the query was reportedly still in the address bar. It is not one of the five recorded successes. |
+| `T04_20261005_192417` | **Unavailable in this evidence snapshot:** the external background document reports `failed`, 0 actions, about 895 s and four target-resolution failures. It is not one of the 38 directories audited here, and is not added to the three recorded T04 attempts. |
 
-| run id | status | actions | what stopped it | what it establishes |
-| --- | --- | --- | --- | --- |
-| `T01_20261004_000322` | failed | 1 | `task verification: expected on screen but not found: http, search` | the plan used `click`; the icon was selected, not launched |
-| `T01_20261004_000434` | failed | 1 | same | the plan used **`double_click`** and resolved the shortcut - the verb fix worked, the window still did not open |
-| `T02_20261004_001545` | failed | 0 | `step-1: no element matches 'Microsoft Edge' in obs-0002` | the two OCR elements were joined (`resolved=True`) and the failure moved one step later |
-| `T02_20261004_005017` | failed | 1 | `step-2: no element matches 'search bar' in obs-0004` | **two** steps dispatched, step 1 verified |
-| `T02_20261004_005225` | failed | 1 | `task verification: expected on screen but not found: GUI agent research` | `type_text resolved=True verif=passed` - the text was typed into the frame the run was given |
-| `T01_20261004_004112` | **blocked** | 0 | `the run assumes no browser is running, but these are: msedge.exe, chrome.exe` | the new process precondition fired before the capture: `planning_ms = 0.0`, no `frames/`, no `obs-NNNN.json` |
-| `T02_20261004_161652` | failed | **2** | `task verification: expected on screen but not found: GUI agent research` | **both** steps resolved and verified - a `type_text` and a `key_press Enter` - and the frame showed the text in the address bar with its autocomplete open, so Enter selected a suggestion instead of submitting |
-| `T02_20261004_185721` | failed | 2 | `task verification: expected on screen but not found: google.com/search` | **the goal was reached and the verdict could not see it.** The frame is a real Google results page - `google.com/search?q=GUI+agent+research&oq=...&gs_lcrp=...`, a tab titled `GUI agent research - Google`, an AI overview and arXiv results - and the element list for that frame holds neither the URL nor the title. The search was submitted (steps 1 and 2 both verified) and landed (obs-0005 carries both the query and the results page). What failed is the reading, not the doing |
+Some earlier diagnoses also required screenshots or foreground sampling retained
+outside the checked-in evidence. The following accounts remain historical
+operator observations, rather than new measurements or automatic passes:
 
-Reading that last row, and the distinction is not a consolation: **the agent did the task and
-the rule could not confirm it.** Three candidate markers were measured against three frames,
-and every one of them goes through the same OCR pass:
-
-| frame | query text | tab title | url host |
-| --- | --- | --- | --- |
-| the real results page (`obs-0005`) | not read | **read** | **read** |
-| the next frame of that same run (`obs-0010`) | **read** | not read | not read |
-| the frame that had falsely passed | **read** | not read | not read |
-
-The only signal present in every frame is the one that cannot tell a submitted search from
-text waiting in an address bar. So on this machine T02 has a demonstrated goal and no
-reliable verdict, and `Week4_Troubleshooting.md` names the three changes that would alter
-that: a different screen size, a different OCR engine, or the window title read through the
-accessibility API rather than through OCR.
-
-The table above is the round's turning points, not every run. T02 produced 30 attempts in
-the second round; eleven of them are in `Document/Week4/evidence` and the rest stayed in
-`outputs/week4`, which is where the metric block's 61 comes from.
-
-The last two rows are the informative pair. The blocked run is the only verdict in the
-round that is *correct by construction* rather than a failure that happened to be useful,
-and it costs 1 828 ms instead of the 30 531 ms a doomed run previously spent on planning.
-The two-step run is the furthest T02 has reached: the prompt's missing "a plan may hold
-more than one step" rule was the reason every earlier attempt stopped after one action.
-
-Two mechanisms were found by instrumenting the driver rather than by reading the code,
-and both are written up in `Week4_Troubleshooting.md`:
-
-1. **Minimising a window activates it in z-order terms, and the next window down is the
-   desktop.** A driver that minimises its own console to keep it out of the frame
-   therefore pushes the case's target behind the desktop, and every capture returns
-   icons. `IsIconic` on the target's handle is the diagnostic; a window at
-   `(-21333, -21333)` with `IsIconic=True` was never going to be in the frame, and
-   `SetForegroundWindow` alone does not bring it forward - `ShowWindow(SW_RESTORE)` has
-   to come first.
-2. **Focusing the console cancels the minimise.** The launcher reported its console
-   handle and then called `SetForegroundWindow` on it, undoing the driver's minimise a
-   fraction of a second later. That is why the sequencing read correctly and the frames
-   kept showing the desktop.
-
-With both fixed the observation finally contained a desktop - and then contained this
-agent's own conversation instead:
-
-```text
-obs-0001-e000 -> 'Chat'
-obs-0001-e008 -> '1 background job running'
-obs-0001-e005 -> 'Trajectory'
-step-1 type_text resolved=True verif=passed
-```
-
-The run typed into the chat window it was being observed from. That is not a defect in
-the case definitions, the prompt or the resolver: **the agent cannot act on a screen that
-does not contain itself, and it cannot remove itself from that screen from inside the
-run.** On this machine there is one monitor (`\\.\DISPLAY1`, 1707x1067), so no local
-window arrangement avoids it. The five cases need a session whose own window is not on
-the captured display - another device observing the run, or a headless client.
-
-Every attempt above is kept, including the ones that failed for reasons already known.
-None was deleted or rewritten, and no run is described as a success it did not record.
+- The first T01 success followed changing shortcut clicks to land on the icon;
+  T03 followed tolerating OCR's underscore-to-space reading of the filename.
+- Early T02 runs were affected by foreground windows, the input method and
+  verification that could not distinguish address-bar text from a submitted
+  search. `T02_20261004_185721` records a **failed** final check for
+  `google.com/search`, even though the operator reported seeing a results page.
+  Its recorded status stays failed. Later window-title signals and bounded
+  re-planning are available in the harness; planning retries in an existing run
+  do not increase the attempt count.
+- The original T05 account described a missed close click and a minimised window;
+  minimising is excluded by §"Per-case success rules". Later runs encountered
+  Notepad tabs or a save dialog. `T05_20261004_180657` records a successful Alt+F4
+  action; the earlier blanket claim that this hotkey never works on Windows is
+  not supported by that successful summary.
+- The operator found that minimising or foregrounding the driver's console,
+  subprocess windows and screenshot viewers could disturb the captured desktop.
+  These findings explain the need to prepare the foreground and keep observation
+  viewers closed during execution. They do not imply that the later successful
+  cases were impossible on this single-monitor machine.
 
 ## Metrics
 
-The definitions from the hand-off, so a reader does not have to guess what the
-counts above mean:
+Every aggregate below is recomputable from the 38 checked-in summaries, with the
+single `execute=false` dry run excluded. **Blocked runs remain in the 37-attempt
+inventory and denominator**, with their status disclosed. This uses one consistent
+recorded-run definition rather than mixing uncollected output, model calls and
+real run directories.
 
 ```text
-real-task success rate = runs whose goal rule passed / formal real attempts
-
-mean execution time of successful tasks = sum(execution_ms of successes) / successes
-
-mean time over all attempts = sum(execution_ms of all formal attempts) / attempts
+recorded-run success rate = count(execute=true and status=succeeded) / count(execute=true)
+case coverage = cases with at least one recorded success / five defined cases
+mean successful execution time = sum(execution_ms of all successes) / five successes
+mean time over all recorded real attempts = sum(field of execute=true runs) / 37
 ```
-
-### Computed from the runs above
 
 | Metric | Value |
 | --- | --- |
-| formal real attempts | **82** (T01 18, T02 38, T03 8, T04 1, T05 16) |
-| successes (`succeeded` and `execute=true`) | **4** (`T01_20261004_140000`, `T02_20261004_210409`, `T03_20261004_171941`, `T05_20261004_180657`) |
-| real-task success rate | **4 / 82 = 4.9 %** |
-| mean execution time of successful tasks | **7 254 ms** (6 938 T01, 7 016 T02, 5 313 T03, 9 750 T05) |
-| mean `execution_ms` over all attempts | **11 014 ms** |
-| mean `planning_ms` over all attempts | **119 304 ms** |
-| total actions actually dispatched | **54** |
-| actions that passed their step-level check | **48** of those 54 |
+| evidence run directories | **38** |
+| formal recorded real attempts (`execute=true`) | **37** (T01 6, T02 17, T03 2, T04 3, T05 9) |
+| successes (`succeeded` and `execute=true`) | **5**, in the successful-run table above |
+| cases with a recorded success | **4 / 5 = 80 %** |
+| recorded-run success rate | **5 / 37 = 13.5 %** |
+| recorded real-run statuses | 5 succeeded, 27 failed, 3 blocked, 2 timed_out |
+| mean `execution_ms` over all five successful runs | **8 306.6 ms** = (6 938 + 7 563 + 11 969 + 5 313 + 9 750) / 5 |
+| mean `execution_ms` of the first success per successful case only | **8 492.5 ms** = (6 938 + 11 969 + 5 313 + 9 750) / 4; excludes T01's later repeat |
+| mean `execution_ms` over all 37 recorded real attempts | **33 550.7 ms** |
+| mean `planning_ms` over all 37 recorded real attempts | **132 266.6 ms** |
+| total actions actually dispatched | **36** (`action_count`, excluding dry-run output) |
+| dispatched actions with a passed step-level check | **34 / 36**; a step pass is not a task success |
 
-One verdict is **excluded** from the counts above and named here rather than deleted:
-`T02_20261004_182646` recorded `succeeded` and was wrong. Its own frames show the query
-sitting in the address bar with the autocomplete dropdown open and no search submitted, and
-the rule it satisfied then asked only for the query to be somewhere on screen. The rule was
-changed because of it, that run is in `outputs/week4` but never entered the evidence
-directory, and counting it would inflate the rate by a fifth.
+T02 accounts for **17 of the 37 attempts**. T03 has two and T04 has three.
+These counts describe the collected evidence, not an estimate of all work performed
+on the operator's machine.
 
-**`planning_ms` describes the harness, not the node.** Every figure above was produced through
-a driver that re-asserted the foreground window and sampled it every 0.5-0.8 s, and those two
-loops starve the HTTP read waiting on the model: the same payload plans in **~200 s** through
-that driver and in **34 s cold / 4 s warm** without it. The numbers are left as they happened
-- they are what those runs cost - but they should not be read as a property of this machine.
-| runs that reached the goal rule at all | 2 (T01, T03) |
+`execution_ms` is the harness phase from confirmation to the final verdict or stop;
+for a run with no confirmation timestamp, its fallback phase boundary is used.
+`planning_ms` measures the initial planning phase, `confirmation_ms` keeps the
+operator gate separate, and `elapsed_ms` is the whole run. Re-planning inside the
+execution loop contributes to `execution_ms`, so it is not pure desktop input time.
+The mean includes blocked runs and runs that dispatched nothing. Warmup is recorded
+separately and excluded from these phases.
 
-Every number above is a count over the directories under `outputs/week4`, restricted to
-summaries that record `execute: true`, so anyone with the repository can reproduce it with
-`scripts/week4_collect_evidence.py`'s own directory. The first round's table recorded 11 of
-the attempts that existed at the time; the rest were repeats of the same failure, kept in
-the directory rather than tabulated. The raw directory is the larger, checkable number and
-is the one quoted here.
+Historical latency probes found about **200 s** per planning call through the
+foreground driver, versus **34 s cold / 4 s warm** without it; the later T04 background
+quotes **110-120 s** from observation timestamps inside a run. These are different
+measurement conditions and sources. The summaries preserve what each run cost;
+the pooled mean does not isolate model latency, memory pressure or driver overhead.
 
-The distribution matters more than the rate: **T02 accounts for 31 of the 61 attempts**,
-because it was the case being worked on, and **T03 and T04 have one attempt each** - from
-the very first round, before any of this branch's fixes existed. T04 in particular is a
-single attempt that failed before typing anything, and no message was ever sent.
-
-Two caveats on the timing figures, because they are easy to misread:
-
-* `mean planning_ms` is inflated by memory pressure, not by the model. This machine had
-  1.4-2.5 GB of free physical memory during the runs, so the 6 GB vision model was
-  partly paged out; single planning calls took 88-111 s instead of the ~13 s the model
-  achieves when memory is free. See `Document/Week3`'s timeout experiment for the same
-  effect measured in isolation.
-* `mean execution_ms` averages over runs that dispatched nothing. It is a measure of
-  the harness, not of desktop control.
-
-1. Dry runs and scripted runs are counted separately and never enter these
-   numbers. `task_summary.json` records `execute`, so the split is checkable
-   rather than remembered.
-2. A case stopped by its own precondition is listed separately. It did not run, so
-   it is not an attempt - and it is not quietly dropped either.
-3. A run that started and then failed, timed out or was cancelled **is** a formal
-   attempt, and is classified by its `status`.
-4. `execution_ms` is the primary measure: from the confirmation gate to the final
-   verdict. The operator's reading time is kept apart in `confirmation_ms`,
-   planning in `planning_ms`, and the whole run in `elapsed_ms`, because counting a
-   slow operator as a slow model is the easiest way to publish a meaningless
-   average.
-5. An action success rate, if quoted, has the number of actions actually dispatched
-   as its denominator - not the number of tasks.
-6. These are five controlled tasks on two machines, not a benchmark. Scale
-   evaluation is Week 7.
+These are controlled tasks on one Windows node plus a separate macOS mock dry run,
+not a benchmark or a success-rate estimate for general desktop use.
 
 ## Per-case success rules
 
@@ -397,65 +281,75 @@ Two caveats on the timing figures, because they are easy to misread:
 | T01 | a browser window with an address bar or tab strip is in the foreground | a launcher shortcut pressed, the name typed into a search box, or another browser already in front |
 | T02 | a results page is loaded and the query text is visible | text sitting in the input box without a submitted search |
 | T03 | the file is open in an application | the file merely selected, or a same-named file opened from elsewhere |
-| T04 | the unique marker appears as a sent message in the correct conversation | a draft, an old message with the same text, or a send to the wrong conversation |
+| T04 | the unique marker appears as a sent message in the correct conversation | a draft, an old message with the same text, a send to the wrong conversation, or an external probe's send |
 | T05 | the target application's window is gone and other applications are untouched | the window minimised, or another window closed |
 
-The right-hand column is the standard a human applies. The automatic rule is
-weaker than it: it can only look for text on screen, so for T05 it cannot tell a
-closed window from one that was never opened, and for T01 it cannot tell a browser
-this run launched from one that was already there. The precondition check covers
-that gap, which is why a row is only meaningful when its preconditions held.
+The right-hand column is the standard a human applies. The automatic rules use
+observed text, including recorded foreground window title and class where available,
+so they can be weaker than that standard. For T05 a missing marker does not prove
+that a hidden or minimised window was closed; for T01 a visible browser does not
+prove this run launched it. The precondition checks reduce that gap. Foreground
+metadata describes observation time, and does not guarantee focus at action time.
 
-If a run has to be verified by eye, mark the verification method `manual` in the
-notes. An automatic check that did not run is not an automatic pass.
+If a run has to be verified by eye, mark its verification method `manual` in the
+notes. An automatic check that did not run is not an automatic pass. A previously
+recorded failed or timed-out run is not promoted because a later repair exists.
 
 ## Environment
 
-Most of this is read off `task_summary.json` rather than remembered - the second
-column says which field, so a row can be checked instead of trusted.
-
-| Item | Value | Where it comes from |
+| Item | Recorded Windows real runs | Evidence basis |
 | --- | --- | --- |
-| Machine | | the summary's `platform` (`darwin` / `win32`) |
-| OS and display | | `os_version` and `screen` |
-| Commit | | `commit` |
-| Model and endpoint | | `provider` and `model_name` |
-| Context window (`OLLAMA_CONTEXT_LENGTH`) | | set on the server; not recorded, so write it down here |
-| `timeout_seconds` | | `model.timeout_seconds` in the config the run used |
-| Free memory before the run | | `memory_available_mb_before` in the run's `warmup.json` |
-| Warmup: cold probe and warm repeat | | the `latency_ms` of the `cold-or-idle` and `warm` probes in the same file; 16.5.4 keeps it beside the run's timings and 13.4.1 keeps it out of them |
-| Python | | `python_version` |
+| Platform and OS | `win32`, `Windows-11-10.0.26200-SP0` | all 37 summaries |
+| Display | screenshot 2560x1600, control 2560x1600 in 34 runs; absent in the 3 blocked summaries | `screen` |
+| Python | 3.12.4 | `python_version` |
+| Model and provider | `qwen2.5vl:7b`, `openai_compatible` | `model_name`, `provider` |
+| Commit | varies by run; `T02_20261004_153537` has an empty commit field | `commit`; do not infer an absent revision |
+| Context window | historical operator setting: `OLLAMA_CONTEXT_LENGTH=16384`; not stored in the summary | operator context, not an independently recorded summary field |
+| Endpoint and per-request timeout | inspect each run's `run_config.json`, rather than applying the current configuration retrospectively | `model.base_url`, `model.timeout_seconds` |
+| Warmup and memory | read the run's `warmup.json` when recorded; absent fields are unavailable, not zero | cold/warm probe latency and available memory fields |
+
+The macOS directory is the mock dry run described in §"Dry runs". It records
+`darwin`, macOS 26.3.1, Python 3.12.10 and a 1920x1080 screenshot/control space.
+It establishes no real-task result on macOS.
 
 ## Failure notes
 
-Record each failure with its classification - focus wrong, target ambiguous, input
-incomplete, not submitted, load timeout, verification insufficient - and the run
-id, so the evidence can be found again.
+**T04 has no recorded success.** Its three available summaries establish different
+stopping points:
 
-**T04 is the one case with no recorded verdict, and the evidence for what happened is mixed.**
-The run `T04_20261005_003044` is recorded `timed_out`, and every one of its four actions was
-dispatched and reported success:
+- `T04_20261003_174709`: one real click passed its step check; the next `type_text`
+  had no `arguments.text`, so this run never typed its marker.
+- `T04_20261005_003044`: four real actions (`type_text`, `click`, `type_text`,
+  `click`) dispatched and passed their step checks across two executed passes.
+  Marker verification failed after both passes; a third planning attempt began,
+  and the run ended `timed_out` with `verification=null`. Its 703 813 ms elapsed
+  time and 499 125 ms execution phase do not establish that the required message
+  was sent.
+- `T04_20261005_012521`: three real actions dispatched across two planning attempts.
+  The first pass's typing and send click passed step checks, but the task-marker
+  check failed. The second pass stopped after typing because its expectation
+  `Text is typed into the message box` was not observed. Final status is `failed`,
+  with `verification=null` and 460 328 ms elapsed.
 
-    type_text  resolved=True success=True note='type 35 chars (text taken from target_text...)'
-    click      resolved=True success=True note="text '发送' -> obs-0004-e035"
-    type_text  resolved=True success=True
-    click      resolved=True success=True
+The historical operator notes report a sent bubble in 文件传输助手 containing
+concatenated marker fragments during the `003044` investigation. The background
+attributes that send to an **external probe click**, not to a completed controlled
+run. It proves neither that the exact per-run marker arrived through the plan nor
+that no message was ever sent on the machine. The global claim "no message was
+ever sent" is therefore unsupported; the supported result is **zero successful
+T04 runs in the checked-in evidence**.
 
-So the plan reached its send step, twice, which no earlier T04 run managed. What it did **not** do
-is satisfy the task rule: four passes ran `task verification: expected on screen but not found:
-WEEK4_MESSAGE_CHECK_20261005_003044`, and the run timed out before the checker ever passed.
+A dispatched click or a passed step-level check only reports that the input path
+ran and its local expectation matched. T04's goal requires an exact fresh marker
+as a **sent** message in the correct conversation. Draft and sent text must be
+distinguished by their position in the conversation, not by finding the same
+string somewhere on screen.
 
-**Whether the message was sent is therefore not established**, and the table says `timed_out`
-rather than `succeeded` for that reason. What is visible in the frames is a sent message in
-文件传输助手 whose text reads `WEEK_MESSAGE_CHECK_20261005_003044WEEK4_MESSAGE_CHECK_20261005_0`,
-but the OCR reads that field unreliably - thirty-one observations of one run with the client in
-front returned zero reads of a marker sitting in the message box - so a frame that appears to show
-it sent is not proof that this run's message was the one that arrived, and the strict reading is
-the only one the report can carry.
-
-**The lesson this case paid for, and it is a measurement one.** T04's message box is invisible to
-the OCR while its conversation is readable, so a marker in the element list cannot be attributed to
-one or the other, and every check in this branch assumed the box. That led to a **sent** message
-being read as a draft, and to "no message has been sent" being reported while a message had been.
-The two are told apart by **position** - the conversation is right-aligned and higher, the message
-box is the full-width field at the bottom - never by the string, which is identical in both.
+The external `T04_20261005_192417` diagnosis identifies a later target-resolution
+blocker: unlabelled input and send controls were omitted from the model's target
+list. The prompt repair exposes detected unlabelled boxes without inventing their
+semantic labels. It does not establish a live pass: anonymous element ids must
+still resolve against a fresh observation, stale ids remain refused, and real
+message attribution still needs verification. No desktop actions were run for
+this repair; the operator must perform the guarded T04 preflight and explicitly
+confirmed live run before a new success can be recorded.

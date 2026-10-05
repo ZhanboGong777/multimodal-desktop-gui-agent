@@ -30,13 +30,17 @@ Nothing in `runtime/` reimplements perception or control. It calls
 `capture_monitor`, `create_ocr_engine`, `detect_ui_candidates`, `find_text`,
 `screenshot_to_control` and `ActionExecutor.execute` exactly as they are.
 
-### Three decisions that shape the loop
+### Decisions that shape the loop
 
-**One plan, then step-by-step re-observation.** The model is not called once per
-click. A plan that is re-derived every step cannot be shown to the operator before
-it runs, and re-observing is orders of magnitude cheaper than re-planning. This
-also keeps a 20-action task inside a 240 s budget: one planning call at 12–14 s
-plus roughly 2 s of observation per step.
+**Plan, then step-by-step re-observation, with bounded recovery.** The model is
+not called once per click. The initial plan is shown before execution, and each step
+gets a fresh observation. If a plan cannot reach the task rule, the runner can
+request another plan within the wall-clock budget. Every action still passes
+the adapter resolution and executor boundary checks. `ExecutionOptions.max_planning_attempts` defaults
+to 4. Recovery was introduced to address T02 failures with incomplete plans;
+the retained successful run itself records one planning attempt and one model
+request. Four attempts are a ceiling, not a promise that a slow model fits four
+calls into the run budget.
 
 **Every step is resolved against the current frame.** A plan made from one
 screenshot is not a licence to click through a page that has since changed. Before
@@ -111,9 +115,9 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| MacBook Air M2 | **609 passed**, ruff clean |
+| Local Windows verification | **618 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 309: 250 in the fourteen files below, and 59 spread across the other suites -
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 318: 259 in the fourteen files below, and 59 spread across the other suites -
 `test_control_safety.py` 16, `test_model_mock.py` 14, `test_ocr.py` 7 (five of them
 the Windows-only OCR workarounds), `test_config.py` 7 (a new file),
 `test_plan_parser.py` 5, `test_model_config.py` 4, `test_documented_counts.py` 4
@@ -202,10 +206,10 @@ behaviour needed no change: blocked, nothing dispatched, exit 2, no traceback.
 
 | Test file | Covers |
 | --- | --- |
-| `test_action_adapter.py` | 40 cases: unique, ambiguous, missing and stale targets, a target split across word-level elements, a stacked shortcut label whose two lines are not adjacent in reading order, parameter errors including wrong types, out-of-range coordinates, key whitelist, platform hotkeys, coordinate scaling, `finish` refusal |
+| `test_action_adapter.py` | 45 cases: unique, ambiguous, missing and stale targets, a target split across word-level elements, a stacked shortcut label whose two lines are not adjacent in reading order, current-frame unlabelled targets, stale unlabelled-id refusal with no text, placeholder text or invented text even when geometry matches, parameter errors including wrong types, out-of-range coordinates, key whitelist, platform hotkeys, coordinate scaling, `finish` refusal |
 | `test_runtime_runner.py` | 62 cases: the offline closed loop, coordinate provenance, dry-run semantics, budget refusal, cancellation, failed actions, wrong-screen failure, recording, the context-overflow hint, the guard that refuses to start a real run whose goal already holds, the second confirmation a risky task must get, the provenance the summary carries, and the note a frame with no readable text leaves |
 | `test_runtime_verification.py` | 16 cases: rule matching, forbidden text, unverifiable tasks, degraded observations, the two case rules that have to tell a real result from a lookalike, and the screen going away while polling |
-| `test_runtime_observation.py` | 11 cases: the whole of `observe()` against a prepared frame - ids, geometry, the OCR-failure record, the element cap - plus what a prompt line carries |
+| `test_runtime_observation.py` | 15 cases: the whole of `observe()` against a prepared frame - ids, geometry, the OCR-failure record, the element cap - plus labelled and unlabelled prompt lines, text-first ranking, the 100-label/200-contour cap, and label overflow excluding contours |
 | `test_runtime_recording.py` | 15 cases: redaction, append-only steps, per-frame files, summary, and where the provenance comes from |
 | `test_week4_cli.py` | 27 cases: argument errors, no `--yes`, dry-run default, summary always written, `--execute` refused without a terminal, the callback set an execute run hands over, `.env` loading, the flag/environment/YAML precedence, the numeric limits, and the warmup record the run copies in and warns about when it is missing |
 | `test_week4_integration.py` | 10 cases: the loop against a real OpenAI-compatible server over a real socket, which reads the element ids out of the prompt it receives; plus the four that read the request body itself - the screenshot arrives as pixels and not as a path, it is the frame the plan was written from, and a missing or mislabelled file blocks the run rather than blinding the model |
@@ -282,19 +286,61 @@ evidence that any real task succeeds.
 
 ## 6. Basic task results
 
-**Not yet measured.** The five cases are defined with their success rules in
-`src/gui_agent/runtime/tasks.py` and can be listed with `--list-cases`, but a real
-result requires a real desktop and a real model.
+**Four of the five cases have passed on the real Windows desktop, across five
+successful runs.** Each credited run records both `status=succeeded` and
+`execute=true`; T01 passed twice, and T02, T03 and T05 once each. T04 has no
+successful run in the retained evidence.
+
+| Case | Successful runs | Evidence run ids |
+| --- | --- | --- |
+| T01 - open the browser | 2 | `T01_20261004_140000`, `T01_20261004_213859` |
+| T02 - search the web | 1 | `T02_20261004_210409` |
+| T03 - open a specified file | 1 | `T03_20261004_171941` |
+| T04 - send a message | 0 | No `succeeded` run; the target-rendering repair has not been tested with real desktop actions |
+| T05 - close the application | 1 | `T05_20261004_180657` |
 
 A dry run against the rule-based mock stops at the first step with
 `no element matches 'desktop'`, which is correct: the mock's plan names elements
 that are not on the screen, and the adapter refuses to guess. Mock plans are not
 evidence of real capability and are not counted as such here.
 
-The results table is filled in by `Week4_Basic_Task_Test_Report.md` once the runs
-have been performed.
+`Week4_Basic_Task_Test_Report.md` records the retained attempts, timings and
+verification rules. Offline tests of the target-rendering repair establish its
+mechanics; a new real T04 run is still required to establish task success.
 
 ## 7. Problems and handling
+
+**Unlabelled controls were detected but omitted from the model's target list.**
+The supplied Windows review of `T04_20261005_192417` reports four failed planning
+attempts, no dispatched actions, and a frame with 60 selected elements but only
+six text labels inside the WeChat window. That diagnostic run is external review
+material, not a retained run directory in this checkout. OCR and contour detection
+were already connected; `describe_elements()` discarded every text-free element
+after selection, so the model was given no identity for an unlabelled control.
+
+The renderer now exposes those detected candidates as `<unlabelled box>`, with
+their frame-local `element_id`, confidence, centre and bounding box. It supplies
+geometry without inventing names such as "input box" or "send button". A current
+frame's id can resolve a text-free candidate through the existing coordinate
+mapping and boundary checks. The placeholder is not a text label, and no freely
+chosen model coordinate or stale bare id is accepted.
+
+`execution.max_elements` is raised from 60 to 300, matching the Python defaults:
+200 configured contour candidates plus 100 OCR slots. The supplied Windows OCR
+measurement was 66 labels, so the OCR allowance provides 34 slots beyond that
+frame. Text remains first, ordered by confidence, and even a frame with more
+than 300 labels cannot have those labels displaced by contours. Fixtures test
+the 100-label/200-contour capacity and label overflow; this allocation is a
+bounded design allowance, not a new measurement of prompt size or live accuracy.
+The larger prompt still needs a sufficient server context window.
+
+**Prompt visibility does not establish end-to-end T04 success.** The runner
+re-observes before each action, invalidating the planning frame's ids. A labelled
+target can re-bind by its text; a bare unlabelled id has no OCR text fallback and
+is still refused when stale. The visibility repair therefore removes the prompt
+omission but leaves that execution obstacle unresolved. No real desktop action
+was run for this change, and T04 must remain unverified until an authorized live
+run reaches its own sent-message rule.
 
 **The plan names elements that are not on screen.** Running a dry run against the
 mock produced `no element matches 'desktop' in obs-0002`. This is the designed
@@ -501,9 +547,10 @@ proposes an `execution:` section holding the run-layer limits; this had them und
 `agent:`. Renamed, since a reader with the hand-off open should not have to work
 out that the two are the same thing. `max_wait_seconds` was added with it and
 actually wired into the action adapter - the wait bound had been the literal `10`
-in `_resolve_wait`, so the configured value could not have had any effect. There is
-still no `max_replans`: nothing implements re-planning yet, and adding a knob no
-code reads would repeat the mistake that `require_preconditions` was.
+in `_resolve_wait`, so the configured value could not have had any effect.
+Re-planning is now controlled by `max_planning_attempts`, default 4, and the
+runner checks it and the wall-clock budget on each recovery pass. Every action
+still passes the adapter resolution and executor boundary checks.
 
 **Three of the plan-validation rules were not enforced.** 8.3 lists what a plan
 has to satisfy before it may run; three of them were missing, and two of those
@@ -558,10 +605,10 @@ model. Both are fixed. The same run now records one planning attempt, the wait i
 `confirmation_ms`, and `execution_ms` at zero - which is right, because a refused
 plan costs the system nothing.
 
-That exercise is also the only time the second confirmation has actually run. A T04
-driven through a pty shows two prompts, and declining the second cancels with
-nothing dispatched. The path had been wired but never executed end to end, which is
-how it came to be left unwired in the first place.
+That exercise also checked the second confirmation. A T04 driven through a pty
+shows two prompts, and declining the second cancels with nothing dispatched.
+Before that check the path had not been exercised end to end, which is how the
+missing wiring survived.
 
 **A failing endpoint was attempted three times, and the record said one.** The
 OpenAI SDK retries twice on its own, and `max_retries` was never passed to it - so
@@ -1036,9 +1083,9 @@ that is merely behind another window, and the Windows round had to parse
   `Document/Week4/evidence/`, so a run id in the test report resolves inside the
   repository rather than only on the machine that produced it.
 - `configs/week4.yaml` - Week 4 limits, with `ExecutionConfig` added to `config.py`.
-- 309 new tests.
+- 318 new tests.
 - `Document/Week4/Week4_Usage.md` - flags, the safety model, the record layout.
-- `Document/Week4/Week4_Troubleshooting.md` - forty-two symptoms with what to check
+- `Document/Week4/Week4_Troubleshooting.md` - seventy-one symptoms with what to check
   and what the code actually does about each.
 - `Document/Week4/Week4_Basic_Task_Test_Report.md` - the five results, one row per
   case, with the precondition, the attempt and success counts, the verification
@@ -1048,7 +1095,7 @@ that is merely behind another window, and the Windows round had to parse
 **W4-13 diagnostic guide.** The hand-off asks for a table of fifteen situations -
 connection, model, perception, resolution, execution, verification and recording -
 each with what to check and how it is handled. That is
-`Document/Week4/Week4_Troubleshooting.md`, grown to forty-two as the Windows review
+`Document/Week4/Week4_Troubleshooting.md`, grown to seventy-one as the Windows review
 added situations the first pass had not met. Each row states the behaviour this
 code has, not the behaviour it ought to have; a diagnostic guide describing
 behaviour the implementation does not have would be worse than none.
@@ -1065,21 +1112,26 @@ does not find it in the tree has not hit a missing document.
 
 ## 9. Limits
 
-- **The five basic tasks have not been run for real.** Everything above is offline
-  or dry-run evidence. This is the main open item.
+- **Four of five basic tasks have passed in five real successful runs.** T01
+  passed twice; T02, T03 and T05 once each. T04 remains unverified after the
+  target-rendering repair, which has only been tested offline.
 - Only the primary monitor is supported.
 - `type_text` uses `pyautogui.typewrite`, so ASCII only; Unicode input is not
   claimed.
-- There is no re-planning. A failed step stops the run; recovery is Week 6.
-- **There is no automatic focus check.** Targets are resolved against a fresh frame
-  and the adapter refuses an absent or ambiguous one, but nothing reads the
-  foreground window to confirm that the intended application has keyboard focus
-  before a typing or send step. 11.3 asks for that to be written down when
-  cross-platform foreground detection is not implemented, and it is not. The
-  mitigation is procedural rather than automatic: a `medium` or `high` risk task is
-  confirmed a second time with the text the plan will type, which is why a T04 row
-  cannot be credited unless the operator saw that prompt. Nothing here prevents
-  every mis-typed character, and no claim to the contrary is made.
+- **Re-planning is bounded.** `ExecutionOptions.max_planning_attempts` defaults to
+  4; the wall-clock budget can stop recovery sooner. Every action still passes
+  the adapter resolution and executor boundary checks. Recovery was implemented after T02 failures with incomplete
+  plans; its retained successful run records one planning attempt. This does
+  not guarantee recovery for every task or failure.
+- **Foreground metadata is observed, but action-time focus is not guaranteed.**
+  `capture_monitor` records `window_title` and `window_class` in each frame, and
+  the verifier searches them alongside OCR text. They describe the foreground
+  window when the observation was captured; they do not establish that the
+  intended application still has keyboard focus when typing or sending occurs.
+  Targets are resolved against fresh frames and absent or ambiguous targets are
+  refused. A `medium` or `high` risk task also receives the second confirmation
+  with the text to be typed. These checks preserve the safety gates but cannot
+  prevent every mis-typed character.
 - **Merging OCR words into lines trades a little precision for resolvability.** A
   target that names one word inside a longer mixed line - "main" in "Current branch
   main" - now resolves to the centre of the whole line, because the element no

@@ -12,9 +12,11 @@ them into an explicit message.
    element list was made of fragments like 'not set.', '(825.4 ms', 'Cache hit 99%',
    'blocked' - the harness window - so no real UI element was offered and the model
    invented a target. A terminal window on screen is enough to do this: text elements
-   are ranked above contour boxes and the 60-element cap then excludes the desktop.
-3. The Ollama context window was 4096 while the prompt needs ~7 500 tokens, giving
-   HTTP 400 "exceeds the available context size".
+   are ranked above contour boxes and the former 60-element cap excluded the desktop.
+   The cap is now 300, but an obstructed capture still offers the wrong window.
+3. The Ollama context window was 4096 while the former 60-slot prompt needed
+   ~7 500 tokens, giving HTTP 400 "exceeds the available context size". The new
+   300-slot anonymous list needs a new request-size measurement.
 4. The screen was already in the end state the case is supposed to produce, which the
    runner reports as `blocked` (correct) - worth knowing before spending a model call.
 
@@ -134,7 +136,7 @@ def check_observation(config_path: str) -> list[str]:
         print("             A desktop worth acting on has one window and some icons. This "
               "screen is an application - very likely the one running this agent - and "
               "because text is ranked above contour boxes and the list is capped at "
-              "agent.max_elements, it can take the entire element budget. The model is "
+              "execution.max_elements, it can take the entire element budget. The model is "
               "then shown that window's text instead of the desktop, and invents targets.")
         print("             Run the case from a session whose own window is NOT on the "
               "captured monitor, or minimise everything and re-run this check until the "

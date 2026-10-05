@@ -16,8 +16,10 @@ loud ones. So the tests here do not check that it prints something - they check 
 from __future__ import annotations
 
 import json
+import runpy
 import subprocess
 import sys
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
@@ -36,6 +38,15 @@ def _run(*extra: str, env: dict[str, str] | None = None) -> subprocess.Completed
         timeout=180,
         env=env,
     )
+
+
+@pytest.fixture(scope="module")
+def check_context() -> Callable[[str, int], list[str]]:
+    # In the Windows full suite, --skip-model still captured the live desktop:
+    # OCR's copyright symbol then crashed GBK output before the context verdict
+    # was printed. Exercise the production context check against our stub server
+    # directly, so these network tests never depend on observation or the model.
+    return runpy.run_path(str(SCRIPT))["check_context"]
 
 
 def test_the_t04_verifier_refuses_a_locked_desktop_without_running_anything() -> None:
@@ -90,7 +101,7 @@ def test_the_script_exists_and_is_runnable() -> None:
 
 
 def test_a_context_window_below_the_prompt_size_is_reported(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    check_context: Callable[[str, int], list[str]], capsys: pytest.CaptureFixture[str]
 ) -> None:
     """4096 against a ~7 500 token prompt is what stopped an earlier run with HTTP 400."""
     payload = {
@@ -104,41 +115,49 @@ def test_a_context_window_below_the_prompt_size_is_reported(
     }
     server = _StubServer(json.dumps(payload).encode())
     try:
-        result = _run(
-            "--skip-model",
-            "--base-url",
-            server.url,
-            "--required-context",
-            "8192",
-        )
+        problems = check_context(server.url, 8192)
     finally:
         server.close()
 
-    assert "context_length=4096" in result.stdout
-    assert "below the 8192 tokens" in result.stdout
-    assert "OLLAMA_CONTEXT_LENGTH" in result.stdout, "the message must carry the fix"
-    assert result.returncode == 1
+    output = capsys.readouterr().out
+    assert "context_length=4096" in output
+    assert "below the 8192 tokens" in output
+    assert "OLLAMA_CONTEXT_LENGTH" in output, "the message must carry the fix"
+    assert "[FAIL]" in output
+    assert problems == ["context window 4096 < 8192"], "the CLI must receive a blocking problem"
 
 
-def test_a_context_window_that_is_big_enough_passes_that_check() -> None:
+def test_a_context_window_that_is_big_enough_passes_that_check(
+    check_context: Callable[[str, int], list[str]], capsys: pytest.CaptureFixture[str]
+) -> None:
     payload = {"models": [{"name": "m", "context_length": 16384, "size_vram": 1}]}
     server = _StubServer(json.dumps(payload).encode())
     try:
-        result = _run("--skip-model", "--base-url", server.url, "--required-context", "8192")
+        problems = check_context(server.url, 8192)
     finally:
         server.close()
-    assert "covers the 8192 needed" in result.stdout
+    output = capsys.readouterr().out
+    assert "covers the 8192 needed" in output
+    assert "[ok]" in output
+    assert problems == [], "this check must not block a sufficient context window"
 
 
-def test_no_model_loaded_is_reported_as_a_warning_not_a_pass() -> None:
+def test_no_model_loaded_is_reported_as_a_warning_not_a_pass(
+    check_context: Callable[[str, int], list[str]], capsys: pytest.CaptureFixture[str]
+) -> None:
     """Otherwise the first task run records a model load as its own planning time."""
     server = _StubServer(json.dumps({"models": []}).encode())
     try:
-        result = _run("--skip-model", "--base-url", server.url)
+        problems = check_context(server.url, 8192)
     finally:
         server.close()
-    assert "no model is loaded" in result.stdout
-    assert "warm it up first" in result.stdout
+    output = capsys.readouterr().out
+    assert "no model is loaded" in output
+    assert "[warn]" in output
+    assert "[ok]" not in output
+    assert len(problems) == 1, "a warning must still prevent the CLI from reporting a pass"
+    assert "warm it up first" in problems[0]
+    assert "scripts/week4_warmup.py" in problems[0], "the blocking problem must carry the fix"
 
 
 def test_the_terminal_marker_list_covers_the_wording_that_was_actually_seen() -> None:
