@@ -1,0 +1,242 @@
+{
+  "run_id": "T04_20261005_012521",
+  "case_id": "T04",
+  "instruction": "Type WEEK4_MESSAGE_CHECK_20261005_012521 into the message box of the conversation named \"文件传输助手\", which is already open, then click the send button",
+  "status": "failed",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Type text into the message box",
+      "action_type": "type_text",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "type_text",
+          "x": null,
+          "y": null,
+          "start": null,
+          "end": null,
+          "text": "<redacted>(35 chars)",
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "WEEK4_MESSAGE_CHECK_20261005_012521"
+        },
+        "element_id": null,
+        "screenshot_point": null,
+        "control_point": null,
+        "note": "type 35 chars"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "type_text",
+          "x": null,
+          "y": null,
+          "start": null,
+          "end": null,
+          "text": "<redacted>(20 chars)",
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "WEEK4_MESSAGE_CHECK_20261005_012521"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: message",
+        "evidence": {
+          "observation_id": "obs-0003",
+          "changed": true,
+          "element_count": 60,
+          "expectation_tokens": [
+            "text",
+            "typed",
+            "into",
+            "message"
+          ],
+          "expectation_hits": [
+            "message"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 7077.999999979511,
+      "after_observation_id": "obs-0003"
+    },
+    {
+      "index": 2,
+      "step_id": "s2",
+      "description": "Click the send button",
+      "action_type": "click",
+      "observation_id": "obs-0004",
+      "resolved": {
+        "step_id": "s2",
+        "action": {
+          "action_type": "click",
+          "x": 2344,
+          "y": 1152,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "发送"
+        },
+        "element_id": "obs-0004-e042",
+        "screenshot_point": {
+          "x": 2344,
+          "y": 1152
+        },
+        "control_point": {
+          "x": 2344,
+          "y": 1152
+        },
+        "note": "text '发送' -> obs-0004-e042 (re-bound from obs-0001-e041 in an earlier frame)"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "click",
+          "x": 2344,
+          "y": 1152,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "发送"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: message",
+        "evidence": {
+          "observation_id": "obs-0005",
+          "changed": false,
+          "element_count": 60,
+          "expectation_tokens": [
+            "message",
+            "sent"
+          ],
+          "expectation_hits": [
+            "message"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 5422.000000020489,
+      "after_observation_id": "obs-0005"
+    },
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Type text into the message box",
+      "action_type": "type_text",
+      "observation_id": "obs-0033",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "type_text",
+          "x": null,
+          "y": null,
+          "start": null,
+          "end": null,
+          "text": "<redacted>(35 chars)",
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "WEEK4_MESSAGE_CHECK_20261005_012521"
+        },
+        "element_id": null,
+        "screenshot_point": null,
+        "control_point": null,
+        "note": "type 35 chars"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "type_text",
+          "x": null,
+          "y": null,
+          "start": null,
+          "end": null,
+          "text": "<redacted>(20 chars)",
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "WEEK4_MESSAGE_CHECK_20261005_012521"
+        }
+      },
+      "verification": {
+        "outcome": "failed",
+        "method": "automatic",
+        "detail": "expected result not observed: 'Text is typed into the message box'",
+        "evidence": {
+          "observation_id": "obs-0034",
+          "changed": true,
+          "element_count": 60,
+          "expectation_tokens": [
+            "text",
+            "typed",
+            "into",
+            "message"
+          ],
+          "expectation_hits": []
+        }
+      },
+      "error": null,
+      "elapsed_ms": 7156.0000000172295,
+      "after_observation_id": "obs-0034"
+    }
+  ],
+  "verification": null,
+  "error": null,
+  "elapsed_ms": 460327.9999999795,
+  "execute": true,
+  "model_name": "qwen2.5vl:7b",
+  "provider": "openai_compatible",
+  "notes": [
+    "ocr: torch is blocked in this process to keep its cuDNN build from clashing with PaddlePaddle.",
+    "planned 2 steps from obs-0001",
+    "task verification: expected on screen but not found: WEEK4_MESSAGE_CHECK_20261005_012521",
+    "re-planned from obs-0032: attempt 2 of at most 4",
+    "s1: expected result not observed: 'Text is typed into the message box'; stopping rather than continuing from a step whose result was not observed"
+  ],
+  "task_id": "T04",
+  "commit": "817bcf8",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 2560x1600, control 2560x1600",
+  "started_at": "2026-10-04T14:25:21.601263Z",
+  "finished_at": "2026-10-04T14:33:01.929263Z",
+  "planning_attempts": 2,
+  "model_requests": 2,
+  "planning_ms": 202234.99999998603,
+  "confirmation_ms": 3000.0,
+  "execution_ms": 255092.99999999348,
+  "evidence_directory": "outputs\\week4\\T04_20261005_012521",
+  "stop_reason": "s1: expected result not observed: 'Text is typed into the message box'; stopping rather than continuing from a step whose result was not observed",
+  "error_type": "",
+  "failed_step_id": null,
+  "action_count": 3
+}
