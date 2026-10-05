@@ -132,6 +132,28 @@ def test_the_sample_directory_is_named_for_each_platform() -> None:
     assert sample_directory("win32") == r"%USERPROFILE%\Desktop\week4_test"
 
 
+def test_only_the_send_message_case_turns_the_step_gate_off() -> None:
+    """T04 is the one case whose steps cannot be judged, and the flag says so explicitly.
+
+    Measured across four passes of four separate runs: T04's typing step verifies against
+    `expected_result` reading "The message is typed into the message box", whose tokens include
+    `typed` - a word that names what was done rather than anything a screen displays - and whose
+    remaining nouns name a box the OCR cannot read. So the check fails on a step that *worked*, and
+    a failed step verification stops the run before its send. The same sentence came back even from
+    runs whose instruction explicitly forbade mentioning the box.
+
+    What is asserted here is that the exception stays an exception: if another case ever turns this
+    off, that should be a decision someone makes on purpose rather than a default spreading.
+    """
+    off = [
+        case_id
+        for case_id in case_ids()
+        if get_case(case_id) is not None and not get_case(case_id).gate_on_step_verification
+    ]
+
+    assert off == ["T04"], f"expected only T04 to disable the gate, got {off}"
+
+
 def test_the_open_file_case_names_where_the_file_must_be() -> None:
     """T03 cannot start without the file, so its precondition says where to put it."""
     task = get_case("T03")
