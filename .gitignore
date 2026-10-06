@@ -238,6 +238,12 @@ __marimo__/
 
 # pytest base temp directory (see [tool.pytest.ini_options])
 /.pytest-tmp/
+# Tests that need a directory of their own name one with a suffix -
+# `.pytest-tmp-message-regions/`, `.pytest-tmp-verification-final/` - and the exact
+# pattern above did not cover them. Both appeared as untracked after a full run and
+# showed up in GitHub Desktop as 327 changed files, all generated PNGs. They are
+# throwaway fixtures, so they are ignored by prefix rather than committed.
+/.pytest-tmp-*/
 
 # ── Ad-hoc scripts used while reviewing a task on a second machine ─────────
 # The review harness generates throwaway drivers, probes and transcripts in the
