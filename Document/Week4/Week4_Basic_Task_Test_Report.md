@@ -370,7 +370,7 @@ and stricter message attribution. Neither code change changes an old verdict.
 
 ## T04 follow-up validation, 2026-10-06
 
-The collected suite now contains **879 tests**, including **577 additions** to
+The collected suite now contains **880 tests**, including **577 additions** to
 the 300-test Week 3 baseline: 512 cases in the fifteen Week 4 table files and
 65 additions in the other suites. These code checks do not add real task attempts.
 

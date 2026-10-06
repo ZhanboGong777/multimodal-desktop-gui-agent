@@ -1687,7 +1687,7 @@ class SimulatedChat:
             ElementRef(element_id=f"{oid}-e002", text="", bounding_box=send,
                        center=send.center, confidence=0.9, source="contour"),
         ]
-        if self.fault == "missing_send" and self.draft:
+        if self.fault.startswith("missing_send") and self.draft:
             elements.pop()
         if self.fault == "post_mapping_missing" and self.draft and self.calls >= 7:
             elements.pop()
@@ -1754,6 +1754,9 @@ def _simulated_t04(tmp_path, *, fault="", clock=None):
             self.approved_plan = None
             self.planning_contexts = []
             self.assessment_contexts = []
+            #: Plans actually produced. planning_contexts grows on every planning request,
+            #: including ones the model then refuses, so it cannot say "this is the 2nd plan".
+            self.plans_returned = 0
 
         def complete(self, messages, **kwargs):
             system = messages[0]["content"]
@@ -1816,8 +1819,17 @@ def _simulated_t04(tmp_path, *, fault="", clock=None):
                     if fault == "repeat_message":
                         steps.append(steps[1].model_copy(update={"step_id": "type-again"}))
                     steps.append(steps[2].model_copy(update={"step_id": "send-again"}))
-                self.approved_plan = TaskPlan(task_id="T04", instruction=task.instruction, steps=steps)
+                errors = []
+                if fault == "missing_send_replan_errors" and self.plans_returned > 0:
+                    # A later pass that says, in the plan's own field, that it could not work
+                    # the task out. PlanResult.ok does not look at this field - it only asks
+                    # that something parsed - so the re-planning path needed its own refusal.
+                    errors = ["I could not work out the screen"]
+                self.approved_plan = TaskPlan(
+                    task_id="T04", instruction=task.instruction, steps=steps, errors=errors
+                )
                 payload = self.approved_plan.model_dump(mode="json")
+                self.plans_returned += 1
             return ModelResponse(content=json.dumps(payload), model_name=self.model_name, provider=self.name)
 
     client = ChatModel()
@@ -1917,6 +1929,29 @@ def test_t04_still_refuses_a_description_that_never_states_the_marker(tmp_path):
     assert any(
         "must exactly match this run's marker" in (step.error or "") for step in result.steps
     ), [step.error for step in result.steps]
+
+
+def test_re_planning_that_reports_errors_is_not_executed(tmp_path):
+    """A second plan may not dispatch what the first was forbidden to.
+
+    The first plan is refused when it carries errors: the model uses that field to say it
+    could not work the task out, and the refusal is recorded beside the check. A re-plan is
+    not a different kind of plan, and PlanResult.ok does not cover the field - it only
+    requires that something parsed - so the re-planning path needed the same refusal and had
+    none. A second pass that reported errors was executed anyway.
+
+    The shape is the one that makes it likely: the approved plan runs out short of the goal,
+    which is exactly the moment the model is least sure of the screen. The assertion is that
+    nothing leaves the machine.
+    """
+    runner, task, options, chat, _, _ = _simulated_t04(tmp_path, fault="missing_send_replan_errors")
+    options = options.model_copy(update={"max_planning_attempts": 3})
+
+    result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+
+    assert any("reports errors" in note for note in result.notes), result.notes
+    assert result.status in {"failed", "blocked"}
+    assert not chat.sent, "a plan that reports errors must not send anything"
 
 
 def test_t04_second_confirmation_declined_dispatches_no_actions(tmp_path):

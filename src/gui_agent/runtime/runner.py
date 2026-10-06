@@ -516,6 +516,19 @@ class TaskRunner:
                     f"re-planning attempt {passes + 1} produced no steps; stopping"
                 )
                 break
+            if retry.plan.errors:
+                # The first plan is refused when it reports errors (8.3.5 below), for the
+                # reason recorded there: the model uses that field to say it could not work
+                # the task out, and running it anyway reads "I am not sure" as "go ahead".
+                # A re-plan is not a different kind of plan, and `PlanResult.ok` does not
+                # cover this - it only requires that something parsed. So the same refusal
+                # is applied here, where it had been missing: without it a second pass could
+                # dispatch what the first pass was forbidden to.
+                notes.append(
+                    f"re-planning attempt {passes + 1} reports errors and will not be "
+                    "executed: " + "; ".join(retry.plan.errors[:3])
+                )
+                break
             passes += 1
             notes.append(
                 f"re-planned from {after.observation_id}: attempt {passes} of at most "
