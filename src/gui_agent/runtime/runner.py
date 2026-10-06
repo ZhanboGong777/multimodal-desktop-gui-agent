@@ -694,7 +694,29 @@ class TaskRunner:
                         task, options, "timed_out", started, notes, steps, snapshot=initial,
                         planning_attempts=planning_attempts, timings=timings,
                     )
+                self.adapter.resolution_region = None
+                if options.execute and task.message_conversation:
+                    # Scope text resolution to the composer this task has already authorised,
+                    # so a word the plan names cannot match the same word that another
+                    # application happens to be rendering. Measured on
+                    # T04_20261006_233621: the frame held both the send control at
+                    # (2072,986) and this harness's own activity log line
+                    # `'已点击发送（2072,986）'` at (654,315), and the adapter refused the
+                    # step for ambiguity before the guard that would have rejected the
+                    # outside match could run.
+                    #
+                    # Only for an executing message task: a dry run dispatches nothing, and
+                    # authorising a region is part of what a real send requires. A composer
+                    # that is not authorised leaves the region unset and the old behaviour
+                    # intact.
+                    try:
+                        composer, _ = self._message_controls(before)
+                    except GroundingError:
+                        composer = None
+                    if composer is not None:
+                        self.adapter.resolution_region = composer
                 resolved = self.adapter.resolve(fresh_step, before)
+                self.adapter.resolution_region = None
                 if options.execute and task.message_conversation and step.action_type == "click":
                     self._guard_message_click(fresh_step, resolved, before)
             except _TaskDeadlineExceeded:

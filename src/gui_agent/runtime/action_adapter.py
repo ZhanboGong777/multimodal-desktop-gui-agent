@@ -440,6 +440,10 @@ class ActionAdapter:
         self.platform = platform or platform_name()
         self.min_confidence = min_confidence
         self.max_wait_seconds = float(max_wait_seconds)
+        #: When set, a text target must be fully inside this box. The runner sets it for a
+        #: message task so the send control cannot be confused with the same word rendered
+        #: by another application; see the measurement in `_locate`.
+        self.resolution_region: BoundingBox | None = None
 
     # ── public entry point ─────────────────────────────────────────────
     def resolve(self, step: PlanStep, observation: ObservationSnapshot) -> ResolvedAction:
@@ -505,6 +509,31 @@ class ActionAdapter:
         # the first candidate without checking the count is how an ambiguous query
         # silently becomes a click on the wrong control.
         matches = list(result.candidates)
+        if self.resolution_region is not None:
+            # A caller may narrow where this step is allowed to land. The runner does that
+            # for a message task, with the composer it has already authorised.
+            #
+            # Measured on T04_20261006_233621: the plan's third step named '发送' and the
+            # frame held two elements with that text - the send control at (2072,986), and
+            # `'已点击发送（2072,986）'` at (654,315), which is this harness's own activity
+            # log rendered on screen and read back by OCR. The adapter refused for
+            # ambiguity, which is right in general and wrong here: it cannot know that one
+            # of the two belongs to a different application. The runner can - it computes
+            # that boundary already - so scoping the match is **tighter** than the check it
+            # replaces, not looser: a match outside the authorised region is dropped and
+            # never re-chosen, and when nothing is inside the region the original list is
+            # kept so the ambiguity refusal still happens.
+            region = self.resolution_region
+            inside = [
+                item
+                for item in matches
+                if region.left <= item.element.bounding_box.left
+                and item.element.bounding_box.right <= region.right
+                and region.top <= item.element.bounding_box.top
+                and item.element.bounding_box.bottom <= region.bottom
+            ]
+            if inside:
+                matches = inside
         if len(matches) == 1:
             chosen = observation.element(matches[0].element.element_id) or matches[0].element
             ref = _as_ref(chosen, observation)

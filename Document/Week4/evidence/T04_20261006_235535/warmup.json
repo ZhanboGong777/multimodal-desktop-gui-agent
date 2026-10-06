@@ -1,0 +1,60 @@
+{
+  "captured_at": "2026-10-06T12:55:19.942990+00:00",
+  "provider": "openai_compatible",
+  "model_name": "qwen2.5vl:7b",
+  "base_url": "http://127.0.0.1:11434/v1",
+  "screenshot": "D:\\Developer\\multimodal-desktop-gui-agent\\outputs\\week4\\warmup\\monitor1_20261006_235452_576.png",
+  "screenshot_captured_here": true,
+  "timeout_seconds": 600.0,
+  "max_retries_configured": 0,
+  "memory_available_mb_before": 8612.0,
+  "memory_available_mb_after": 4846.1,
+  "ready": true,
+  "probes": [
+    {
+      "kind": "text",
+      "state": "cold-or-idle",
+      "ok": true,
+      "latency_ms": 15897.9,
+      "timeout_seconds": 600.0,
+      "error": null,
+      "failure_class": null,
+      "content": "Ready",
+      "usage": {
+        "prompt_tokens": 26,
+        "completion_tokens": 2,
+        "total_tokens": 28
+      }
+    },
+    {
+      "kind": "image",
+      "state": "vision-path",
+      "ok": true,
+      "latency_ms": 10416.2,
+      "timeout_seconds": 600.0,
+      "error": null,
+      "failure_class": null,
+      "content": "The dominant color or background of the screenshot is dark gray.",
+      "usage": {
+        "prompt_tokens": 4095,
+        "completion_tokens": 13,
+        "total_tokens": 4108
+      }
+    },
+    {
+      "kind": "image",
+      "state": "warm-repeat",
+      "ok": true,
+      "latency_ms": 967.9,
+      "timeout_seconds": 600.0,
+      "error": null,
+      "failure_class": null,
+      "content": "The dominant color or background of the screenshot is dark gray.",
+      "usage": {
+        "prompt_tokens": 4095,
+        "completion_tokens": 13,
+        "total_tokens": 4108
+      }
+    }
+  ]
+}
