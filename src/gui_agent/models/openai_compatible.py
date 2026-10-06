@@ -164,6 +164,11 @@ class OpenAICompatibleClient(ModelClient):
         # unaffected.
         if self.max_tokens is not None:
             request["max_tokens"] = self.max_tokens
+        # Structured visual assessments opt in to JSON schema at the endpoint.
+        # Keep ordinary planning/text requests unchanged, and leave response
+        # validation to the caller instead of repairing generated content here.
+        if kwargs.get("response_format") is not None:
+            request["response_format"] = kwargs["response_format"]
         try:
             completion = client.chat.completions.create(**request)
         except Exception as exc:

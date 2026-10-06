@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -298,8 +299,11 @@ def _message_frame(tmp_path: Path) -> ObservationSnapshot:
 def _sent_assessment(**updates) -> dict:
     return {
         "status": "sent", "conversation": _TEST_CONVERSATION, "marker": _TEST_MARKER,
-        "header_box": [300, 50, 450, 75], "message_box": [400, 160, 680, 190],
-        "composer_box": [300, 350, 700, 500], "composer_empty": True,
+        # Responses describe the 580x530 window crop, whose screenshot origin is
+        # (200,20). Verifier evidence must map these back to the original frame.
+        "header_box": [100, 30, 250, 55], "message_box": [200, 140, 480, 170],
+        "composer_box": [100, 330, 500, 480], "composer_empty": True,
+        "outgoing": True, "send_state": "sent",
         **updates,
     }
 
@@ -328,7 +332,12 @@ def test_sent_message_requires_visual_transcript_evidence_without_ocr(tmp_path: 
     assert frame.elements == [], "the saved real T04 frame's OCR missed header and marker"
     assert verdict.evidence["assessment_method"] == "vision_model"
     assert verdict.evidence["vision_assessment"]["message_box"] == [400, 160, 680, 190]
-    assert verdict.evidence["image_path"] == frame.image_path
+    assert verdict.evidence["source_image_path"] == frame.image_path
+    crop_path = Path(verdict.evidence["image_path"])
+    assert crop_path != Path(frame.image_path)
+    assert client.calls[0]["image_path"] == str(crop_path)
+    with Image.open(crop_path) as crop:
+        assert crop.size == (580, 530)
     assert verdict.evidence["model_name"] == "synthetic-vision"
     prompt = json.dumps(client.calls[0], ensure_ascii=False)
     assert _TEST_MARKER not in prompt and _TEST_CONVERSATION not in prompt
@@ -344,11 +353,11 @@ def test_sent_message_requires_visual_transcript_evidence_without_ocr(tmp_path: 
         ({"marker": _TEST_MARKER.lower()}, "failed"),
         ({"marker": "WEEK4_MESSAGE_CHECK_OLD"}, "failed"),
         ({"composer_empty": False}, "failed"),
-        ({"message_box": [400, 370, 680, 390]}, "inconclusive"),
-        ({"message_box": [50, 160, 180, 190]}, "inconclusive"),
-        ({"header_box": [210, 50, 250, 75]}, "inconclusive"),
-        ({"header_box": [300, 170, 450, 195]}, "inconclusive"),
-        ({"composer_box": [300, 350, 900, 500]}, "inconclusive"),
+        ({"message_box": [200, 350, 480, 370]}, "inconclusive"),
+        ({"message_box": [-150, 140, -20, 170]}, "inconclusive"),
+        ({"header_box": [10, 30, 50, 55]}, "inconclusive"),
+        ({"header_box": [100, 150, 250, 175]}, "inconclusive"),
+        ({"composer_box": [100, 330, 700, 480]}, "inconclusive"),
     ],
 )
 def test_draft_wrong_recipient_and_invalid_regions_never_credit_sent_message(
@@ -375,6 +384,8 @@ def test_draft_wrong_recipient_and_invalid_regions_never_credit_sent_message(
         {"status": "success"}, {"conversation": None}, {"marker": [_TEST_MARKER]},
         {"status": "draft", "composer_empty": True},
         {"extra_evidence": "trust me"},
+        {"outgoing": "true"}, {"outgoing": False},
+        {"send_state": "pending"}, {"send_state": "failed"}, {"send_state": "unavailable"},
     ],
 )
 def test_visual_assessment_is_strict_json_without_coercion(tmp_path: Path, updates: dict) -> None:
@@ -464,3 +475,408 @@ def test_changed_window_or_image_does_not_reuse_cached_assessment(tmp_path: Path
     frame.image_path = str(second)
     assert verifier.check_task(_message_task(), frame).passed
     assert len(client.calls) == 3
+
+
+def test_message_crop_preserves_pixels_and_records_local_to_screen_transform(tmp_path: Path) -> None:
+    frame = _message_frame(tmp_path)
+    assert frame.image_path is not None and frame.window_bounds is not None
+    pixels = Image.new("RGB", (800, 600), "red")
+    pixels.paste("blue", (200, 20, 780, 550))
+    pixels.paste("green", (210, 40, 220, 50))
+    pixels.save(frame.image_path)
+    local_payload = _sent_assessment()
+    client = _MessageClient(local_payload)
+    verdict = Verifier(message_client=client).check_task(_message_task(), frame)
+    assert verdict.passed
+    evidence = verdict.evidence
+    assert evidence["crop_transform"] == {
+        "source_bounds": {"left": 200, "top": 20, "right": 780, "bottom": 550},
+        "origin": {"x": 200, "y": 20}, "size": {"width": 580, "height": 530},
+        "scale_x": 1, "scale_y": 1,
+    }
+    assert evidence["vision_assessment_local"] == local_payload
+    assert evidence["vision_assessment"]["header_box"] == [300, 50, 450, 75]
+    assert evidence["vision_assessment"]["composer_box"] == [300, 350, 700, 500]
+    assert evidence["assessment_coordinate_space"] == "foreground_crop_pixels"
+    assert evidence["vision_assessment_coordinate_space"] == "screenshot_pixels"
+    assert json.loads(evidence["assessment_raw_content"]) == local_payload
+    assert evidence["assessment_prompt"] == {
+        "system": client.calls[0]["system"],
+        "instruction": client.calls[0]["instruction"],
+        "context": client.calls[0]["context"],
+        "response_format": client.calls[0]["response_format"],
+        "include_image_path_in_prompt": False,
+    }
+    assert client.calls[0]["context"]["image_size"] == {"width": 580, "height": 530}
+    assert "crop-local" in client.calls[0]["system"]
+    assert "580x530" in client.calls[0]["instruction"]
+    with Image.open(evidence["image_path"]) as crop:
+        assert crop.getpixel((0, 0)) == (0, 0, 255)
+        assert crop.getpixel((10, 20)) == (0, 128, 0)
+
+
+@pytest.mark.parametrize("field", ["header_box", "message_box", "composer_box"])
+def test_screen_valid_box_outside_the_crop_is_rejected_before_translation(
+    tmp_path: Path, field: str,
+) -> None:
+    frame = _message_frame(tmp_path)
+    # These coordinates fit both the screenshot and the original window. They
+    # are still invalid model evidence because the attached crop is only 580px wide.
+    client = _MessageClient(_sent_assessment(**{field: [590, 50, 620, 75]}))
+    verdict = Verifier(message_client=client).check_task(_message_task(), frame)
+    assert verdict.outcome == "inconclusive"
+    assert f"{field} lies outside the attached foreground crop" in verdict.detail
+    assert "vision_assessment" not in verdict.evidence
+    assert verdict.evidence["assessment_raw_content"] == client.content
+
+
+def test_changed_crop_bounds_invalidates_cache_and_updates_evidence(tmp_path: Path) -> None:
+    frame = _message_frame(tmp_path)
+    client = _MessageClient(_sent_assessment())
+    verifier = Verifier(message_client=client)
+    first = verifier.check_task(_message_task(), frame)
+    assert first.passed
+    frame.window_bounds = BoundingBox(left=180, top=30, right=770, bottom=560)
+    second = verifier.check_task(_message_task(), frame)
+    assert second.passed
+    assert len(client.calls) == 2
+    assert first.evidence["image_path"] != second.evidence["image_path"]
+    assert second.evidence["vision_assessment"]["header_box"] == [280, 60, 430, 85]
+    assert second.evidence["crop_transform"]["origin"] == {"x": 180, "y": 30}
+    third = verifier.check_task(_message_task(), frame)
+    assert third.evidence["assessment_cached"] is True
+    assert third.evidence["image_path"] == second.evidence["image_path"]
+    assert len(client.calls) == 2
+    assert Path(first.evidence["image_path"]).is_file(), "previous crop evidence stays available"
+
+
+def test_same_file_metadata_with_changed_pixels_does_not_reuse_crop_assessment(tmp_path: Path) -> None:
+    frame = _message_frame(tmp_path)
+    image = tmp_path / "fixed-size-frame.bmp"
+    Image.new("RGB", (800, 600), "white").save(image)
+    frame.image_path = str(image)
+    client = _MessageClient(_sent_assessment())
+    verifier = Verifier(message_client=client)
+    first = verifier.check_task(_message_task(), frame)
+    initial = image.stat()
+    Image.new("RGB", (800, 600), "black").save(image)
+    os.utime(image, ns=(initial.st_atime_ns, initial.st_mtime_ns))
+    assert image.stat().st_size == initial.st_size
+    assert image.stat().st_mtime_ns == initial.st_mtime_ns
+    second = verifier.check_task(_message_task(), frame)
+    assert first.passed and second.passed
+    assert len(client.calls) == 2
+    assert first.evidence["source_pixel_sha256"] != second.evidence["source_pixel_sha256"]
+    assert first.evidence["image_path"] != second.evidence["image_path"]
+
+
+@pytest.mark.parametrize("bounds", [
+    {"left": -1, "top": 20, "right": 780, "bottom": 550},
+    {"left": 200, "top": 20, "right": 801, "bottom": 550},
+    {"left": 200, "top": 550, "right": 780, "bottom": 550},
+    {"left": 200.5, "top": 20, "right": 780, "bottom": 550},
+])
+def test_invalid_foreground_crop_bounds_never_call_the_model(tmp_path: Path, bounds: dict) -> None:
+    frame = _message_frame(tmp_path)
+    frame.window_bounds = BoundingBox.model_construct(**bounds)
+    client = _MessageClient(_sent_assessment())
+    verdict = Verifier(message_client=client).check_task(_message_task(), frame)
+    assert verdict.outcome == "inconclusive"
+    assert not client.calls
+    assert not (tmp_path / "message_assessments").exists()
+
+
+def test_invalid_json_keeps_raw_response_crop_and_prompt_in_cached_evidence(tmp_path: Path) -> None:
+    frame = _message_frame(tmp_path)
+    client = _MessageClient("```json\nnot a parsed assessment\n```")
+    verifier = Verifier(message_client=client)
+    first = verifier.check_message_context(_message_task(), frame, require_empty=True)
+    assert first.outcome == "inconclusive"
+    assert first.evidence["assessment_raw_content"] == client.content
+    assert Path(first.evidence["image_path"]).is_file()
+    assert first.evidence["source_image_path"] == frame.image_path
+    assert "vision_assessment" not in first.evidence
+    second = verifier.check_task(_message_task(), frame)
+    assert second.outcome == "inconclusive"
+    assert second.evidence["assessment_cached"] is True
+    assert second.evidence["assessment_raw_content"] == client.content
+    assert len(client.calls) == 1
+
+
+def _regional_message_frame(tmp_path: Path) -> ObservationSnapshot:
+    """Observed OCR/title and real-sized contour proposals, never fabricated targets."""
+    frame = _message_frame(tmp_path)
+    frame.window_title = "Message client"
+    frame.window_class = "ClientWindow"
+
+    def element(number: int, coordinates: tuple, *, text: str = "", source: str = "contour"):
+        box = BoundingBox(
+            left=coordinates[0], top=coordinates[1], right=coordinates[2], bottom=coordinates[3],
+        )
+        return ElementRef(
+            element_id=f"{frame.observation_id}-e{number:03d}", text=text,
+            bounding_box=box, center=box.center, confidence=0.9, source=source,
+        )
+
+    frame.elements = [
+        element(1, (300, 350, 700, 500)),
+        element(2, (310, 50, 450, 75), text=_TEST_CONVERSATION, source="ocr"),
+        # An earlier sidebar match must never become the title crop.
+        element(3, (210, 35, 280, 60), text=_TEST_CONVERSATION, source="ocr"),
+        element(4, (400, 160, 680, 190)),
+        element(5, (400, 280, 680, 310)),
+        element(6, (405, 165, 675, 185), text="WEEK4_MESSAGE_CHECK_OLD", source="ocr"),
+    ]
+    pixels = Image.new("RGB", (800, 600), "white")
+    pixels.paste("blue", (310, 50, 450, 75))
+    pixels.paste("green", (300, 350, 700, 500))
+    pixels.paste("magenta", (400, 160, 680, 190))
+    pixels.paste("magenta", (400, 280, 680, 310))
+    pixels.save(frame.image_path)
+    return frame
+
+
+class _RegionalMessageClient:
+    """Independent synthetic replies selected by the actual region request role."""
+
+    def __init__(self, **overrides) -> None:
+        self.payloads = {
+            "header": {"readable": True, "text": _TEST_CONVERSATION},
+            "composer": {"is_composer": True, "empty": True, "draft_text": ""},
+            "messages": {
+                "status": "sent", "marker": _TEST_MARKER,
+                "message_candidate_id": "message-frame-e005", "outgoing": True, "send_state": "sent",
+            },
+            **overrides,
+        }
+        self.calls: list[dict] = []
+
+    def generate_multimodal(self, instruction, **kwargs) -> ModelResponse:
+        self.calls.append({"instruction": instruction, **kwargs})
+        role = kwargs["context"]["region_role"]
+        payload = self.payloads[role]
+        content = payload if isinstance(payload, str) else json.dumps(payload, ensure_ascii=False)
+        return ModelResponse(content=content, model_name="synthetic-region-vision", provider="test")
+
+
+def test_initial_regional_assessment_isolates_header_and_composer_from_old_messages(tmp_path: Path) -> None:
+    frame = _regional_message_frame(tmp_path)
+    before = Path(frame.image_path).read_bytes()
+    client = _RegionalMessageClient()
+    verdict = Verifier(message_client=client).check_message_context(_message_task(), frame, require_empty=True)
+    assert verdict.passed
+    assert [call["context"]["region_role"] for call in client.calls] == ["header", "composer"]
+    assert verdict.evidence["assessment_scope"] == "recipient_and_composer"
+    assert verdict.evidence["vision_assessment"] == {
+        "conversation": _TEST_CONVERSATION, "header_box": [306, 46, 454, 79],
+        "composer_box": [300, 350, 700, 500], "composer_empty": True,
+    }
+    prompt = json.dumps(client.calls, ensure_ascii=False)
+    assert _TEST_CONVERSATION not in prompt and _TEST_MARKER not in prompt
+    assert "WEEK4_MESSAGE_CHECK_OLD" not in prompt and "WEEK4_MESSAGE_CHECK_" not in prompt
+    for call in client.calls:
+        schema = call["response_format"]["json_schema"]["schema"]
+        assert call["response_format"]["type"] == "json_schema"
+        assert schema["additionalProperties"] is False
+        assert set(schema["required"]) == set(schema["properties"])
+        assert call["image_path"] != frame.image_path
+        with Image.open(call["image_path"]) as crop:
+            assert (255, 0, 255) not in {colour for _, colour in crop.getcolors(crop.width * crop.height)}
+    assert Path(frame.image_path).read_bytes() == before
+    assert [panel["label"] for panel in verdict.evidence["region_panels"]["panels"]] == ["HEADER", "COMPOSER"]
+
+
+def test_final_regional_assessment_uses_three_requests_and_maps_observed_message_candidate(tmp_path: Path) -> None:
+    frame = _regional_message_frame(tmp_path)
+    client = _RegionalMessageClient()
+    verdict = Verifier(message_client=client).check_task(_message_task(), frame)
+    assert verdict.passed
+    assert [call["context"]["region_role"] for call in client.calls] == ["header", "composer", "messages"]
+    message_request = client.calls[2]
+    assert message_request["context"]["message_candidate_ids"] == ["message-frame-e005", "message-frame-e004"]
+    # Body coordinates must refer to the exact source candidate, not to a
+    # neighbour visible in the halo of the contact-sheet panel.
+    with Image.open(message_request["image_path"]) as attached, Image.open(frame.image_path) as source:
+        for candidate in message_request["context"]["message_candidates"]:
+            box = frame.element(candidate["candidate_id"]).bounding_box
+            local = candidate["candidate_box"]
+            panel = candidate["panel_box"]
+            assert panel[0] <= local[0] < local[2] <= panel[2]
+            assert panel[1] <= local[1] < local[3] <= panel[3]
+            assert attached.crop(tuple(local)).tobytes() == source.crop(
+                (box.left, box.top, box.right, box.bottom),
+            ).tobytes()
+    assert message_request["response_format"]["json_schema"]["schema"]["properties"]["message_candidate_id"]["enum"] == [
+        "", "message-frame-e005", "message-frame-e004",
+    ]
+    assert verdict.evidence["vision_assessment"]["message_box"] == [400, 280, 680, 310]
+    assert set(verdict.evidence["vision_assessment"]) == {
+        "status", "conversation", "marker", "header_box", "message_box", "composer_box", "composer_empty",
+        "outgoing", "send_state",
+    }
+    assert len(verdict.evidence["assessment_responses"]) == 3
+    assert verdict.evidence["assessment_coordinate_space"] == "observed_region_ids"
+    assert _TEST_MARKER not in json.dumps(client.calls, ensure_ascii=False)
+    assert _TEST_CONVERSATION not in json.dumps(client.calls, ensure_ascii=False)
+    assert all(Path(item["image_path"]).is_file() for item in verdict.evidence["assessment_requests"])
+
+
+def test_overwritten_derived_image_cannot_back_cached_assessment(tmp_path: Path) -> None:
+    frame = _regional_message_frame(tmp_path)
+    client = _RegionalMessageClient()
+    verifier = Verifier(message_client=client)
+    first = verifier.check_task(_message_task(), frame)
+    assert first.passed and len(client.calls) == 3
+    changed = Path(first.evidence["assessment_requests"][-1]["image_path"])
+    with Image.open(changed) as pixels:
+        Image.new("RGB", pixels.size, "red").save(changed)
+    second = verifier.check_task(_message_task(), frame)
+    assert second.passed and len(client.calls) == 6
+    assert not second.evidence.get("assessment_cached")
+    import hashlib
+    assert second.evidence["assessment_image_sha256"][str(changed)] == hashlib.sha256(changed.read_bytes()).hexdigest()
+
+
+@pytest.mark.parametrize("update", [
+    {"message_candidate_id": "message-frame-e999"},
+    {"message_candidate_id": "message-frame-e002"},
+    {"message_candidate_id": ""},
+    {"send_state": "pending"},
+    {"send_state": "failed"},
+    {"send_state": "unavailable"},
+    {"outgoing": False},
+    {"marker": "WEEK4_MESSAGE_CHECK_OLD"},
+])
+def test_regional_send_requires_current_bubble_id_exact_marker_and_completed_outgoing_state(
+    tmp_path: Path, update: dict,
+) -> None:
+    client = _RegionalMessageClient()
+    client.payloads["messages"].update(update)
+    verdict = Verifier(message_client=client).check_task(_message_task(), _regional_message_frame(tmp_path))
+    assert not verdict.passed
+    assert verdict.outcome in {"failed", "inconclusive"}
+    assert len(client.calls) == 3
+    assert verdict.evidence["assessment_responses"][-1]["content"] == json.dumps(client.payloads["messages"], ensure_ascii=False)
+
+
+@pytest.mark.parametrize("role,content", [
+    ("header", '{"readable":"true","text":"x"}'),
+    ("header", '{"readable":true,"text":123}'),
+    ("header", '{"readable":false,"text":""}'),
+    ("header", '{"readable":true,"text":"x","readable":true}'),
+    ("header", '{"readable":true,"text":"x","header_is_conversation_title":true}'),
+    ("composer", '{"is_composer":false,"empty":true,"draft_text":""}'),
+    ("composer", '{"is_composer":true,"empty":"true","draft_text":""}'),
+    ("composer", '{"is_composer":true,"empty":true,"draft_text":"a draft"}'),
+    ("composer", '{"is_composer":true,"empty":false,"draft_text":null}'),
+    ("messages", '{"status":"success","marker":"","message_candidate_id":"","outgoing":true,"send_state":"sent"}'),
+    ("messages", '{"status":"sent","marker":[],"message_candidate_id":"message-frame-e005","outgoing":true,"send_state":"sent"}'),
+    ("messages", '{"status":"sent","marker":"x","message_candidate_id":"message-frame-e005","outgoing":1,"send_state":"sent"}'),
+    ("messages", '{"status":"sent","marker":"x","message_candidate_id":"message-frame-e005","outgoing":true,"send_state":"success"}'),
+    ("messages", '{"status":"draft","marker":"x","message_candidate_id":"","outgoing":false,"send_state":"unavailable"}'),
+    ("messages", '{"status":"not_found","marker":"","message_candidate_id":"message-frame-e005","outgoing":false,"send_state":"unavailable"}'),
+])
+def test_regional_json_roles_types_and_draft_consistency_are_strict(
+    tmp_path: Path, role: str, content: str,
+) -> None:
+    client = _RegionalMessageClient(**{role: content})
+    verdict = Verifier(message_client=client).check_task(_message_task(), _regional_message_frame(tmp_path))
+    assert verdict.outcome == "inconclusive"
+    assert "unusable" in verdict.detail
+    assert verdict.evidence["assessment_responses"][-1]["content"] == content
+
+
+def test_initial_regional_assessment_rejects_draft_without_requesting_messages(tmp_path: Path) -> None:
+    client = _RegionalMessageClient(composer={"is_composer": True, "empty": False, "draft_text": "unfinished draft"})
+    verdict = Verifier(message_client=client).check_message_context(
+        _message_task(), _regional_message_frame(tmp_path), require_empty=True,
+    )
+    assert verdict.outcome == "failed"
+    assert "must be empty" in verdict.detail
+    assert [call["context"]["region_role"] for call in client.calls] == ["header", "composer"]
+
+
+def test_initial_and_final_regional_cache_scopes_do_not_reuse_each_other(tmp_path: Path) -> None:
+    frame = _regional_message_frame(tmp_path)
+    client = _RegionalMessageClient()
+    verifier = Verifier(message_client=client)
+    initial = verifier.check_message_context(_message_task(), frame, require_empty=True)
+    final = verifier.check_task(_message_task(), frame)
+    assert initial.passed and final.passed
+    assert len(client.calls) == 5
+    assert initial.evidence["image_path"] != final.evidence["image_path"]
+    again_initial = verifier.check_message_context(_message_task(), frame, require_empty=True)
+    again_final = verifier.check_task(_message_task(), frame)
+    assert again_initial.evidence["assessment_cached"] is True
+    assert again_final.evidence["assessment_cached"] is True
+    assert len(client.calls) == 5
+    assert "marker" not in again_initial.evidence["vision_assessment"]
+    assert again_final.evidence["vision_assessment"]["marker"] == _TEST_MARKER
+
+
+@pytest.mark.parametrize("change", ["pixels", "header", "composer", "message"])
+def test_regional_pixel_or_roi_changes_trigger_new_assessments_and_distinct_evidence(
+    tmp_path: Path, change: str,
+) -> None:
+    frame = _regional_message_frame(tmp_path)
+    client = _RegionalMessageClient()
+    verifier = Verifier(message_client=client)
+    first = verifier.check_task(_message_task(), frame)
+    assert first.passed
+    if change == "pixels":
+        with Image.open(frame.image_path) as pixels:
+            changed = pixels.copy()
+        changed.putpixel((410, 290), (1, 2, 3))
+        changed.save(frame.image_path)
+    else:
+        index = {"header": 1, "composer": 0, "message": 4}[change]
+        item = frame.elements[index]
+        old = item.bounding_box
+        box = BoundingBox(left=old.left + 1, top=old.top, right=old.right, bottom=old.bottom)
+        frame.elements[index] = item.model_copy(update={"bounding_box": box, "center": box.center})
+    second = verifier.check_task(_message_task(), frame)
+    assert second.passed
+    assert len(client.calls) == 6
+    assert second.evidence["image_path"] != first.evidence["image_path"]
+    assert Path(first.evidence["image_path"]).is_file()
+    assert Path(second.evidence["image_path"]).is_file()
+    assert first.evidence["region_panels"] != second.evidence["region_panels"]
+
+
+@pytest.mark.parametrize("role", ["header", "composer", "messages"])
+def test_missing_cached_regional_request_image_is_rebuilt_before_evidence_is_reused(tmp_path: Path, role: str) -> None:
+    frame = _regional_message_frame(tmp_path)
+    client = _RegionalMessageClient()
+    verifier = Verifier(message_client=client)
+    first = verifier.check_task(_message_task(), frame)
+    assert first.passed
+    request = next(item for item in first.evidence["assessment_requests"] if item["role"] == role)
+    missing = Path(request["image_path"])
+    missing.unlink()
+    second = verifier.check_task(_message_task(), frame)
+    assert second.passed
+    assert missing.is_file()
+    assert len(client.calls) == 6
+    assert not second.evidence.get("assessment_cached", False)
+    assert verifier.check_task(_message_task(), frame).evidence["assessment_cached"] is True
+    assert len(client.calls) == 6
+
+
+@pytest.mark.parametrize("role", ["header", "composer", "messages"])
+def test_malformed_regional_reply_keeps_actual_raw_content_and_request_evidence(tmp_path: Path, role: str) -> None:
+    frame = _regional_message_frame(tmp_path)
+    raw = "```json\n{broken:response}\n```"
+    client = _RegionalMessageClient(**{role: raw})
+    verifier = Verifier(message_client=client)
+    first = verifier.check_task(_message_task(), frame)
+    assert first.outcome == "inconclusive"
+    responses = first.evidence["assessment_responses"]
+    assert responses[-1]["role"] == role and responses[-1]["content"] == raw
+    assert raw in first.evidence["assessment_raw_content"]
+    assert all(Path(item["image_path"]).is_file() for item in first.evidence["assessment_requests"])
+    assert "vision_assessment" not in first.evidence
+    count = len(client.calls)
+    second = verifier.check_task(_message_task(), frame)
+    assert second.outcome == "inconclusive" and second.evidence["assessment_cached"] is True
+    assert second.evidence["assessment_responses"] == responses
+    assert len(client.calls) == count

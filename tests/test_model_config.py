@@ -7,6 +7,7 @@ import json
 import socket
 import threading
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 from PIL import Image
@@ -448,3 +449,87 @@ def test_an_endpoint_that_answers_with_nothing_says_so() -> None:
             _client_for(server).complete([{"role": "user", "content": "hi"}])
     finally:
         server.close()
+
+
+def _capturing_client() -> tuple[OpenAICompatibleClient, list[dict]]:
+    """Capture SDK requests without an HTTP endpoint or a model."""
+    requests: list[dict] = []
+
+    def create(**kwargs):
+        requests.append(kwargs)
+        return SimpleNamespace(
+            model="synthetic-model", usage=None,
+            choices=[SimpleNamespace(
+                finish_reason="stop", message=SimpleNamespace(content="```json\n{}\n```"),
+            )],
+        )
+
+    client = OpenAICompatibleClient(model_name="synthetic-model", environ={}, max_retries=0)
+    client._client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=create)))
+    return client, requests
+
+
+@pytest.mark.parametrize("response_format", [
+    {"type": "json_object"},
+    {
+        "type": "json_schema",
+        "json_schema": {
+            "name": "visual_assessment", "strict": True,
+            "schema": {
+                "type": "object", "properties": {"visible": {"type": "boolean"}},
+                "required": ["visible"], "additionalProperties": False,
+            },
+        },
+    },
+])
+def test_multimodal_response_format_reaches_sdk_without_changing_context_or_content(
+    tmp_path: Path, response_format: dict,
+) -> None:
+    client, requests = _capturing_client()
+    image = _png(tmp_path / "crop.png")
+    original_format = json.dumps(response_format, sort_keys=True)
+    response = client.generate_multimodal(
+        "Assess this image", image_path=str(image), context={"coordinate_space": "crop_pixels"},
+        system="Read visible evidence only", response_format=response_format,
+    )
+    assert response.ok
+    assert requests[0]["response_format"] == response_format
+    assert json.dumps(response_format, sort_keys=True) == original_format
+    assert requests[0]["messages"][0] == {"role": "system", "content": "Read visible evidence only"}
+    user = requests[0]["messages"][1]["content"]
+    assert user[1]["image_url"]["url"].startswith("data:image/png;base64,")
+    assert json.loads(user[0]["text"]) == {
+        "instruction": "Assess this image", "context": {"coordinate_space": "crop_pixels"},
+        "image_path": str(image),
+    }
+    assert response.content == "```json\n{}\n```", "transport must not repair fenced provider output"
+
+
+@pytest.mark.parametrize("options", [{}, {"response_format": None}])
+def test_default_multimodal_requests_omit_response_format(options: dict) -> None:
+    client, requests = _capturing_client()
+    client.generate_multimodal("Use the ordinary plan format", **options)
+    assert "response_format" not in requests[0]
+    assert requests[0]["messages"] == [{
+        "role": "user", "content": json.dumps({"instruction": "Use the ordinary plan format"}),
+    }]
+
+
+def test_response_format_is_request_scoped_and_does_not_leak_to_text_or_planning() -> None:
+    client, requests = _capturing_client()
+    client.generate_multimodal("Assess", response_format={"type": "json_object"})
+    client.generate_multimodal("Plan")
+    client.generate_text("Warm up")
+    assert requests[0]["response_format"] == {"type": "json_object"}
+    assert all("response_format" not in request for request in requests[1:])
+    assert client.request_count == 3
+
+
+def test_independent_visual_request_hides_filename_timestamp_but_keeps_actual_pixels(tmp_path: Path) -> None:
+    client, requests = _capturing_client()
+    path = _png(tmp_path / "T04_20261006_174500.png")
+    client.generate_multimodal("Transcribe pixels", image_path=str(path), include_image_path_in_prompt=False)
+    content = requests[0]["messages"][0]["content"]
+    assert json.loads(content[0]["text"]) == {"instruction": "Transcribe pixels"}
+    assert "20261006_174500" not in content[0]["text"]
+    assert content[1]["image_url"]["url"].startswith("data:image/png;base64,")

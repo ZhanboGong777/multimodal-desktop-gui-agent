@@ -36,8 +36,10 @@ from .processes import known as known_processes
 from .processes import match as match_processes
 from .recorder import TaskRecorder, redact
 from .schemas import (
+    ElementRef,
     ExecutionOptions,
     ObservationSnapshot,
+    ResolvedAction,
     StepRecord,
     TaskRunResult,
     TaskSpec,
@@ -170,6 +172,8 @@ class TaskRunner:
         if verifier.message_client is None and self.target_grounder is not None:
             verifier.message_client = client
         self._message_header: tuple[ObservationSnapshot, BoundingBox] | None = None
+        self._message_composer: tuple[ObservationSnapshot, BoundingBox] | None = None
+        self._message_text_typed = False
 
     # ── entry point ────────────────────────────────────────────────────
     def run(
@@ -212,6 +216,8 @@ class TaskRunner:
         timings = Timings(started=started)
         notes: list[str] = []
         self._message_header = None
+        self._message_composer = None
+        self._message_text_typed = False
         self._message_send_attempted = False
 
         if not task.success_rules and not task.expect_text and not task.forbid_text:
@@ -285,6 +291,10 @@ class TaskRunner:
             header = context.evidence["vision_assessment"]["header_box"]
             self._message_header = (
                 initial, BoundingBox(left=header[0], top=header[1], right=header[2], bottom=header[3])
+            )
+            composer = context.evidence["vision_assessment"]["composer_box"]
+            self._message_composer = (
+                initial, BoundingBox(left=composer[0], top=composer[1], right=composer[2], bottom=composer[3])
             )
 
         # What the frame said went wrong, in the run's own notes. The OCR engine's
@@ -650,6 +660,8 @@ class TaskRunner:
                         planning_attempts=planning_attempts, timings=timings,
                     )
                 resolved = self.adapter.resolve(fresh_step, before)
+                if options.execute and task.message_conversation and step.action_type == "click":
+                    self._guard_message_click(fresh_step, resolved, before)
             except _TaskDeadlineExceeded:
                 return self._finish(
                     task, options, "timed_out", started, notes, steps, snapshot=initial,
@@ -701,6 +713,8 @@ class TaskRunner:
                 "error": action_result.error,
                 "action": redact(resolved.action.model_dump(mode="json")),
             }
+            if options.execute and task.message_conversation and step.action_type == "type_text" and action_result.success:
+                self._message_text_typed = True
 
             # re-observe only when something was actually dispatched
             after: ObservationSnapshot | None = None
@@ -906,6 +920,50 @@ class TaskRunner:
         except (OSError, ValueError) as exc:
             raise GroundingError(f"cannot validate the active conversation header: {exc}") from exc
 
+    def _message_controls(self, current: ObservationSnapshot) -> tuple[BoundingBox, list[ElementRef]]:
+        """Current detected controls in the independently authorised editor region.
+
+        Planning and dispatch share this boundary. Window translation transports
+        the approved region, never a click point or an old candidate id.
+        """
+        if self._message_composer is None:
+            raise GroundingError("message editor was not visually authorised")
+        source, authorised = self._message_composer
+        validate_frames(source, current)
+        self._guard_message_header(current)
+        assert source.window_bounds is not None and current.window_bounds is not None
+        dx = current.window_bounds.left - source.window_bounds.left
+        dy = current.window_bounds.top - source.window_bounds.top
+        composer = BoundingBox(
+            left=authorised.left + dx, top=authorised.top + dy,
+            right=authorised.right + dx, bottom=authorised.bottom + dy,
+        )
+        bounds = current.window_bounds
+        if not (
+            bounds.left <= composer.left < composer.right <= bounds.right
+            and bounds.top <= composer.top < composer.bottom <= bounds.bottom
+        ):
+            raise GroundingError("message composer left the active window")
+        candidates = [
+            item for item in current.elements
+            if item.source in {"ocr", "contour"} and item.confidence >= 0.35
+            and item.center == item.bounding_box.center
+            and composer.left <= item.bounding_box.left < item.bounding_box.right <= composer.right
+            and composer.top <= item.bounding_box.top < item.bounding_box.bottom <= composer.bottom
+        ]
+        return composer, candidates
+
+    def _guard_message_click(
+        self, step: PlanStep, resolved: ResolvedAction, current: ObservationSnapshot,
+    ) -> None:
+        """Refuse a target outside the exact current candidate list given to planning."""
+        if any(key in step.arguments for key in ("x", "y", "coordinates", "position", "point")):
+            raise GroundingError("message clicks require a current detected candidate, not coordinates")
+        _, candidates = self._message_controls(current)
+        matches = [item for item in candidates if item.element_id == resolved.element_id]
+        if len(matches) != 1 or resolved.screenshot_point != matches[0].center:
+            raise GroundingError("message click is not a current candidate inside the authorised composer")
+
     # ── helpers ────────────────────────────────────────────────────────
     def _observing(self) -> ObservationSnapshot:
         snapshot = self.observer.observe()
@@ -917,7 +975,7 @@ class TaskRunner:
     ) -> dict[str, Any]:
         from .observation import describe_elements
 
-        return {
+        context = {
             "platform": self.adapter.platform,
             "observation_id": snapshot.observation_id,
             "screen": (
@@ -936,15 +994,68 @@ class TaskRunner:
             "visible_text": describe_elements(snapshot),
             "success_rules": task.success_rules,
         }
-        # Tried and reverted: `required_text` was added here to hand the model the literals its
-        # success rules are checked for, so it would not have to carry them from the instruction
-        # into a step by hand - which is what T04 fails on, four passes running, with
-        # `type_text requires a non-empty arguments.text`. It changed nothing, because this
-        # dictionary is **built and never rendered**: nothing in `planning/` reads it, so
-        # neither `required_text` nor the `visible_text` beside it reaches the prompt. The
-        # screen reaches the model as the attached image instead, which is why the omission has
-        # been invisible. Recorded here rather than left as a dead field, and `visible_text` is
-        # left alone because removing it is a separate change from this one.
+        if not task.message_conversation:
+            return context
+        # The recorded static T04 probe sent 300 whole-desktop targets (21806
+        # tokens). The model bound typing to a sidebar/Codex target and selected
+        # a sidebar click as send. Keep only observed controls inside the editor
+        # region that the independent initial visual assessment authorised.
+        context["visible_text"] = ""
+        message_context: dict[str, Any] = {
+            "text_already_typed": self._message_text_typed,
+            "rules": (
+                "Use only current listed candidate ids for clicks. "
+                "Click the message editor, then type_text with arguments containing only text "
+                "(no element_id/target_text), then click the visible send control. "
+                "Never press Enter or use a keyboard shortcut to send. "
+                "Do not click the sidebar, transcript or other applications."
+            ),
+        }
+        context["message_task"] = message_context
+        if self._message_composer is None:
+            message_context.update(
+                region_status="unavailable",
+                rules="The message editor region has not been visually authorised. Return no steps and explain in errors.",
+            )
+            return context
+        try:
+            composer, candidates = self._message_controls(snapshot)
+        except GroundingError as exc:
+            message_context.update(
+                region_status="unavailable", region_error=str(exc),
+                rules="Current pixels cannot validate the authorised message editor. Return no steps and explain in errors.",
+            )
+            return context
+        source = self._message_composer[0]
+        visible = snapshot.model_copy(update={"elements": candidates})
+        context["visible_text"] = describe_elements(visible)
+        editors = [
+            item for item in candidates
+            if item.source == "contour" and not item.text.strip() and item.bounding_box == composer
+        ]
+        send_labels = [
+            item for item in candidates
+            if item.source == "ocr" and item.text.strip().casefold() in {"发送", "send"}
+        ]
+        message_context.update(
+            region_status="visually_authorised", source_observation_id=source.observation_id,
+            composer_bounds=composer.model_dump(),
+            candidate_ids=[item.element_id for item in candidates],
+        )
+        if len(editors) == 1:
+            message_context["editor_candidate_id"] = editors[0].element_id
+        if len(send_labels) == 1:
+            message_context["send_candidate_id"] = send_labels[0].element_id
+        if self._message_text_typed:
+            message_context["rules"] = (
+                "This run's exact marker has already been successfully typed. Only click the "
+                "current visible send control, then finish. Do not type again, click the editor "
+                "to refocus, clear text, or press Enter. If send is unavailable return no steps "
+                "and explain in errors."
+            )
+        elif len(task.expect_text) == 1:
+            message_context["type_text_arguments"] = {"text": task.expect_text[0]}
+        return context
 
     def _finish(
         self,

@@ -54,7 +54,7 @@ Three properties the loop is built around:
   with an actual current candidate, confirmed against a further screenshot after
   any visual mapping call. Missing, ambiguous or unsafe evidence stops the pass.
 
-752 tests, ruff clean. See `Document/Week4/Week4_Usage.md` for the flags, the
+877 tests, ruff clean. See `Document/Week4/Week4_Usage.md` for the flags, the
 safety model and the record layout.
 
 The Chinese deliverables - `Week4_中文实验报告.(md|docx)`, `Week4_Windows复核手册.md`
@@ -63,9 +63,9 @@ tree - are delivered alongside the repository rather than inside it, so a citati
 to one of those filenames will not resolve here.
 
 Real Windows evidence records four of five basic cases passing, across five
-successful runs: T01 twice, and T02, T03 and T05 once each. T04 remains unmeasured
-on the real desktop after the follow-up repair; its offline tests do not establish a real
-message-send result. The retained attempts and timings are in
+successful runs: T01 twice, and T02, T03 and T05 once each. The latest retained
+T04 run, `T04_20261006_115446`, was blocked by its initial visual-context check
+and dispatched zero actions. T04 has no retained real success. The attempts and timings are in
 `Document/Week4/Week4_Basic_Task_Test_Report.md`.
 
 Detected text-free controls now appear in the model's target list as
@@ -77,13 +77,28 @@ targets using their pixels and context; when appearance changes, a constrained
 visual mapping call can select only a detected candidate. A new capture confirms
 that selection before dispatch, with stable window identity and focus checks.
 
-T04 also checks the actual conversation header and an empty composer before
-starting, preserves those header pixels before each input event, and requires a
-visual assessment of the exact marker in a sent bubble above an empty composer.
+T04's `message_regions.py` selects observed foreground regions for the header,
+possible composer and transcript candidates. The model assesses header and
+composer crops independently through strict JSON schemas; the expected recipient,
+full marker and image-filename timestamps are withheld from model text. The final
+message assessment can name only an observed candidate id and must identify an
+outgoing, sent bubble containing the
+exact marker above an empty composer. Crops preserve native pixels and record
+source bounds and layout transforms. They are visual evidence, not new action targets.
+T04 planning lists only observed controls within the visually authorised composer
+and tells retries when this run's marker has already been typed. A saved-frame
+real-model probe now produces the correct click-editor, type-marker, click-send plan;
+the strict final assessment also rejects the old frame's mismatched message marker.
+The runner preserves the authorised header pixels and checks current foreground
+identity before each input event; both confirmations, current-candidate resolution,
+coordinate bounds and fail-safe remain required.
+
 The complete click-input, type-marker, click-send flow passes against the
 `prepared-T04` mock provider and synthetic chat; a historical screenshot replay
-also retains both required contours within the 200-candidate cap. These are
-offline checks. A new real run still needs the CLI's two confirmations.
+also retains both required contours within the 200-candidate cap. Two real-model
+requests against the saved `115446` frame now pass its isolated recipient/editor
+context check with zero desktop actions. This is offline saved-image validation,
+not a real message-send result. A new real run still needs the CLI's two confirmations.
 
 ### Week 3
 
@@ -130,7 +145,7 @@ python scripts/week3_model_demo.py --provider mock
 python scripts/week3_planning_demo.py --provider mock --instruction "Open the browser"
 ```
 
-752 tests, ruff clean. The model client's retry, timeout and
+877 tests, ruff clean. The model client's retry, timeout and
 error-classification paths are covered, along with the four vision-payload
 failure modes (missing, empty, oversized, unknown type) and the TaskPlan
 schema boundaries. Dataset and model dependencies live in

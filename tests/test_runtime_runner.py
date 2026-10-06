@@ -1707,6 +1707,8 @@ class SimulatedChat:
             "composer_box": [composer.left, composer.top, composer.right, composer.bottom],
             "message_box": [message.left, message.top, message.right, message.bottom] if self.sent else None,
             "composer_empty": not bool(self.draft),
+            "outgoing": bool(self.sent),
+            "send_state": "sent" if self.sent else "unavailable",
         }
         self.frames[oid] = snapshot, assessment
         return snapshot
@@ -1750,12 +1752,25 @@ def _simulated_t04(tmp_path, *, fault="", clock=None):
             super().__init__(model_name="prepared-T04", max_retries=0)
             self.mapping_calls = 0
             self.approved_plan = None
+            self.planning_contexts = []
+            self.assessment_contexts = []
 
         def complete(self, messages, **kwargs):
             system = messages[0]["content"]
             context = json.loads(messages[-1]["content"])["context"]
-            if system.startswith("Assess one screenshot"):
+            if system.startswith("Assess the attached foreground-window crop"):
+                self.assessment_contexts.append(context)
                 payload = dict(chat.frames[context["observation_id"]][1])
+                # The verifier now sends only this frame's foreground crop.
+                # Keep simulated evidence in that actual image's coordinate
+                # space, including when the window translates between frames.
+                window = chat.frames[context["observation_id"]][0].window_bounds
+                assert window is not None
+                for name in ("header_box", "message_box", "composer_box"):
+                    region = payload[name]
+                    if region is not None:
+                        payload[name] = [region[0] - window.left, region[1] - window.top,
+                                         region[2] - window.left, region[3] - window.top]
                 if fault == "uncertain_after_send" and chat.sent:
                     payload["status"] = "uncertain"
             elif system.startswith("Map the target"):
@@ -1769,6 +1784,7 @@ def _simulated_t04(tmp_path, *, fault="", clock=None):
                 if fault == "mapping_timeout_invalid":
                     payload = {"candidate_ids": []}
             else:
+                self.planning_contexts.append(context)
                 oid = context["observation_id"]
                 steps = [
                     PlanStep(step_id="focus", description="click message input", action_type="click", arguments={"element_id": f"{oid}-e001"}),
@@ -1953,3 +1969,218 @@ def test_replanning_obeys_cumulative_action_budget(tmp_path):
                                          max_planning_attempts=4, verification_timeout_seconds=0))
     assert result.status == "failed" and len(executor.actions) == 1
     assert len(planner.contexts) == 1
+
+
+def _chat_controls(chat, frame):
+    """Detected editor border and OCR send label, plus distracting real frame ids."""
+    assessment = chat.frames[frame.observation_id][1]
+    composer = BoundingBox(
+        left=assessment["composer_box"][0], top=assessment["composer_box"][1],
+        right=assessment["composer_box"][2], bottom=assessment["composer_box"][3],
+    )
+
+    def candidate(number, box, text="", source="contour", confidence=0.9):
+        return ElementRef(
+            element_id=f"{frame.observation_id}-e{number:03d}", text=text,
+            bounding_box=box, center=box.center, confidence=confidence, source=source,
+        )
+
+    frame.elements.extend([
+        candidate(90, composer),
+        candidate(91, frame.elements[1].bounding_box, text="发送", source="ocr"),
+        candidate(92, BoundingBox(left=40, top=100, right=100, bottom=120), text="Sidebar", source="ocr"),
+        candidate(93, BoundingBox(left=200, top=180, right=450, bottom=210), text="Transcript", source="ocr"),
+        candidate(94, BoundingBox(left=700, top=100, right=750, bottom=120), text="Other app", source="ocr"),
+        candidate(95, BoundingBox(left=composer.left - 1, top=composer.top + 10,
+                                  right=composer.left + 20, bottom=composer.top + 40), text="Partial", source="ocr"),
+        candidate(96, frame.elements[1].bounding_box, text="Weak", source="ocr", confidence=0.2),
+        candidate(97, frame.elements[1].bounding_box, text="Manual", source="manual"),
+    ])
+    return composer
+
+
+def _approved_message_context(tmp_path):
+    runner, task, options, chat, client, _ = _simulated_t04(tmp_path)
+    source = chat.observe()
+    composer = _chat_controls(chat, source)
+    approved = runner.verifier.check_message_context(task, source, require_empty=True)
+    assert approved.passed
+    header = approved.evidence["vision_assessment"]["header_box"]
+    runner._message_header = (source, BoundingBox(left=header[0], top=header[1], right=header[2], bottom=header[3]))
+    runner._message_composer = (source, composer)
+    return runner, task, options, chat, client, source
+
+
+def test_message_planning_context_contains_only_authorised_current_editor_controls(tmp_path):
+    runner, task, options, _, _, source = _approved_message_context(tmp_path)
+    context = runner._context(source, task, options)
+    message = context["message_task"]
+    expected = [f"{source.observation_id}-e{number:03d}" for number in (1, 2, 90, 91)]
+    assert message["candidate_ids"] == expected
+    assert message["editor_candidate_id"] == f"{source.observation_id}-e090"
+    assert message["send_candidate_id"] == f"{source.observation_id}-e091"
+    assert message["type_text_arguments"] == {"text": task.expect_text[0]}
+    assert message["text_already_typed"] is False
+    assert "no element_id/target_text" in message["rules"]
+    assert "Never press Enter" in message["rules"]
+    assert all(element_id in context["visible_text"] for element_id in expected)
+    assert all(label not in context["visible_text"] for label in ("Sidebar", "Transcript", "Other app", "Partial", "Weak", "Manual"))
+    assert len(source.elements) == 10, "planning context must not remove full-frame audit evidence"
+
+
+def test_message_editor_context_tracks_window_translation_and_uses_only_new_frame_ids(tmp_path):
+    runner, task, options, chat, _, source = _approved_message_context(tmp_path)
+    current = chat.observe()
+    composer = _chat_controls(chat, current)
+    context = runner._context(current, task, options)
+    message = context["message_task"]
+    assert message["source_observation_id"] == source.observation_id
+    assert message["composer_bounds"] == composer.model_dump()
+    assert all(element_id.startswith(current.observation_id + "-e") for element_id in message["candidate_ids"])
+    assert source.observation_id not in context["visible_text"]
+    assert message["editor_candidate_id"] == f"{current.observation_id}-e090"
+    assert message["send_candidate_id"] == f"{current.observation_id}-e091"
+
+
+@pytest.mark.parametrize("problem", ["unknown_editor", "window", "unstable", "resize", "header"])
+def test_message_context_with_unusable_authorisation_offers_no_click_candidates(tmp_path, problem):
+    from PIL import Image, ImageDraw
+    runner, task, options, chat, _, _ = _approved_message_context(tmp_path)
+    current = chat.observe()
+    _chat_controls(chat, current)
+    if problem == "unknown_editor":
+        runner._message_composer = None
+    elif problem == "window":
+        current.window_id = "another-window"
+    elif problem == "unstable":
+        current.foreground_stable = False
+    elif problem == "resize":
+        current.window_bounds = current.window_bounds.model_copy(update={"right": current.window_bounds.right + 1})
+    else:
+        with Image.open(current.image_path) as image:
+            altered = image.copy()
+        header = chat.frames[current.observation_id][1]["header_box"]
+        ImageDraw.Draw(altered).rectangle(tuple(header), fill="red")
+        altered.save(current.image_path)
+    context = runner._context(current, task, options)
+    assert context["visible_text"] == ""
+    assert context["message_task"]["region_status"] == "unavailable"
+    assert "candidate_ids" not in context["message_task"]
+    assert "Return no steps" in context["message_task"]["rules"]
+
+
+@pytest.mark.parametrize("ambiguity", ["editor", "send", "no_send_ocr"])
+def test_message_context_never_guesses_ambiguous_role_ids_or_drops_unlabelled_send(tmp_path, ambiguity):
+    runner, task, options, _, _, source = _approved_message_context(tmp_path)
+    editor = source.element(f"{source.observation_id}-e090")
+    send = source.element(f"{source.observation_id}-e091")
+    if ambiguity == "editor":
+        source.elements.append(editor.model_copy(update={"element_id": f"{source.observation_id}-e098"}))
+    elif ambiguity == "send":
+        source.elements.append(send.model_copy(update={"element_id": f"{source.observation_id}-e098", "text": "Send"}))
+    else:
+        source.elements.remove(send)
+    context = runner._context(source, task, options)
+    message = context["message_task"]
+    if ambiguity == "editor":
+        assert "editor_candidate_id" not in message
+    else:
+        assert "send_candidate_id" not in message
+    assert f"{source.observation_id}-e002" in message["candidate_ids"]
+    assert "<unlabelled box>" in context["visible_text"]
+    assert len(message["candidate_ids"]) >= 3, "role hints do not replace the actual element list"
+
+
+def test_non_message_planning_context_remains_the_complete_observation(tmp_path):
+    from gui_agent.runtime.observation import describe_elements
+    runner, _, options, _, _, source = _approved_message_context(tmp_path)
+    task = TaskSpec(case_id="T02", instruction="search", target_app="browser", success_rules=["results"])
+    context = runner._context(source, task, options)
+    assert set(context) == {"platform", "observation_id", "screen", "target_app", "allowed_keys", "limits", "visible_text", "success_rules"}
+    assert context["visible_text"] == describe_elements(source)
+    assert "Sidebar" in context["visible_text"] and "Other app" in context["visible_text"]
+
+
+def test_exact_message_literal_is_given_to_planning_but_withheld_from_visual_assessment(tmp_path):
+    runner, task, options, chat, client, _ = _simulated_t04(tmp_path)
+    result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+    assert result.status == "succeeded"
+    message = client.planning_contexts[0]["message_task"]
+    assert message["type_text_arguments"] == {"text": task.expect_text[0]}
+    assert all(task.expect_text[0] not in json.dumps(context) for context in client.assessment_contexts)
+    assert runner._message_composer[0].observation_id == next(iter(chat.frames))
+    assert runner._message_text_typed is True
+
+
+def test_successful_typing_retry_plans_only_the_remaining_send_action(tmp_path):
+    runner, task, options, chat, _, _ = _simulated_t04(tmp_path, fault="draft_only")
+    original = runner.planner.plan
+    contexts = []
+    def retry_plan(instruction, *, context=None, **kwargs):
+        contexts.append(context)
+        if len(contexts) == 1:
+            return original(instruction, context=context, **kwargs)
+        oid = context["observation_id"]
+        return PlanResult(plan=_plan(
+            PlanStep(step_id="send", description="click current send", action_type="click", arguments={"element_id": f"{oid}-e002"}),
+            PlanStep(step_id="finish", description="finish", action_type="finish"),
+        ))
+    runner.planner.plan = retry_plan
+    options = options.model_copy(update={"max_planning_attempts": 2})
+    result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+    assert result.status == "succeeded"
+    assert len(contexts) == 2
+    retry = contexts[1]["message_task"]
+    assert retry["text_already_typed"] is True and "type_text_arguments" not in retry
+    assert "Only click" in retry["rules"] and "Do not type again" in retry["rules"]
+    assert "refocus" in retry["rules"]
+    assert [action.action_type for action, _ in chat.actions] == ["click", "type_text", "click"]
+
+
+def test_new_run_resets_message_typing_and_authorised_region_state(tmp_path):
+    runner, task, options, chat, client, source = _approved_message_context(tmp_path)
+    runner._message_text_typed = True
+    result = runner.run(task, options, confirm=lambda _: False)
+    assert result.status == "cancelled" and not chat.actions
+    assert runner._message_text_typed is False
+    assert runner._message_composer[0].observation_id != source.observation_id
+    assert client.planning_contexts[-1]["message_task"]["text_already_typed"] is False
+
+
+@pytest.mark.parametrize("target", ["sidebar", "transcript", "other_app", "partial", "coordinates"])
+def test_actual_message_dispatch_refuses_targets_outside_the_authorised_current_candidate_list(tmp_path, target):
+    runner, task, options, chat, _, _ = _simulated_t04(tmp_path)
+    observe = chat.observe
+    def observed(**kwargs):
+        frame = observe(**kwargs)
+        _chat_controls(chat, frame)
+        return frame
+    chat.observe = observed
+    target_number = {"sidebar": 92, "transcript": 93, "other_app": 94, "partial": 95, "coordinates": 1}[target]
+    target_text = {"sidebar": "Sidebar", "transcript": "Transcript", "other_app": "Other app", "partial": "Partial", "coordinates": None}[target]
+    def bad_plan(instruction, *, context=None, **kwargs):
+        arguments = {"element_id": f"{context['observation_id']}-e{target_number:03d}"}
+        if target == "coordinates":
+            arguments.update(x=5, y=5)
+        return PlanResult(plan=_plan(PlanStep(
+            step_id="unsafe", description="click", action_type="click", target_text=target_text, arguments=arguments,
+        )))
+    runner.planner.plan = bad_plan
+    result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+    assert result.status == "failed" and not chat.actions
+    assert any("visual grounding refused" in (step.error or "") for step in result.steps)
+    if target == "coordinates":
+        assert "not coordinates" in result.steps[-1].error
+    else:
+        assert "inside the authorised composer" in result.steps[-1].error
+
+
+@pytest.mark.parametrize("candidate_number", [1, 2, 90, 91])
+def test_message_click_guard_accepts_real_current_editor_icon_and_ocr_candidates(tmp_path, candidate_number):
+    runner, _, _, _, _, source = _approved_message_context(tmp_path)
+    step = PlanStep(step_id="click", description="click", action_type="click",
+                    arguments={"element_id": f"{source.observation_id}-e{candidate_number:03d}"})
+    resolved = runner.adapter.resolve(step, source)
+    runner._guard_message_click(step, resolved, source)
+    assert resolved.element_id in {item.element_id for item in runner._message_controls(source)[1]}
+    assert resolved.screenshot_point == source.element(resolved.element_id).center

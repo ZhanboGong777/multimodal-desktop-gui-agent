@@ -9,7 +9,7 @@ means "passed", and a dry run is never a success however clean it looks.
 ```bash
 export GUI_AGENT_API_KEY=ollama
 export GUI_AGENT_BASE_URL=http://<windows-host>:11434/v1
-export OLLAMA_CONTEXT_LENGTH=16384        # before the server starts
+export OLLAMA_CONTEXT_LENGTH=32768        # before the server starts; verify /api/ps
 
 # Warm the model first, and separately. The first request a cold server sees costs
 # seconds to a minute, and a task that pays it records a model load as its own
@@ -44,14 +44,15 @@ real-desktop inventory.
 ## Results
 
 This report was reconciled against every checked-in `task_summary.json` under
-`Document/Week4/evidence/`: **38 run directories**, of which **37 record
+`Document/Week4/evidence/`: **39 run directories**, of which **38 record
 `execute=true`** and one is a dry run. **Four of the five cases have recorded
 successes: T01, T02, T03 and T05. There are five successful runs**, because T01
 succeeded twice. T04 has no recorded success; changing the code does not change
-these historical verdicts, and no real desktop action was run for this repair.
+these historical verdicts. The latest T04 acceptance attempt was blocked by its
+initial visual-context assessment and dispatched zero desktop actions.
 
 Here, an **attempt** is one checked-in run with `execute=true`, including a run
-blocked by its precondition. The three blocked runs are shown separately in the
+blocked by a precondition or initial context check. The four blocked runs are shown separately in the
 status breakdown; they dispatched no actions. A planning retry within a run is
 not another attempt. Uncollected historical runs are excluded from every total.
 
@@ -60,9 +61,9 @@ not another attempt. Uncollected historical runs are excluded from every total.
 | T01 | open the browser; desktop visible, launch entry uncovered, no browser running | **6** | **2** | 2 succeeded, 3 failed, 1 blocked | `T01_20261004_140000`, `T01_20261004_213859` |
 | T02 | search the web; browser open and focused, English input method | **17** | **1** | 1 succeeded, 16 failed | `T02_20261004_210409` |
 | T03 | open the specified `week4_sample.txt` in the week4 test folder; no file of that name already open | **2** | **1** | 1 succeeded, 1 failed | `T03_20261004_171941` |
-| T04 | send a fresh per-run marker to the open test conversation; operator agrees to a real send | **3** | **0** | 2 failed, 1 timed_out | none; all three available runs are listed below |
+| T04 | send a fresh per-run marker to the open test conversation; operator agrees to a real send | **4** | **0** | 2 failed, 1 timed_out, 1 blocked | none; all four available runs are listed below |
 | T05 | close the test application; `WEEK4-OPEN-FILE-OK` visible in the focused application first | **9** | **1** | 1 succeeded, 5 failed, 2 blocked, 1 timed_out | `T05_20261004_180657` |
-| Total | five controlled cases | **37** | **5** | 5 succeeded, 27 failed, 3 blocked, 2 timed_out | **4 / 5 cases** |
+| Total | five controlled cases | **38** | **5** | 5 succeeded, 27 failed, 4 blocked, 2 timed_out | **4 / 5 cases** |
 
 Every successful summary records `execute=true`, final `verification=passed` and
 the following dispatched actions. Milliseconds are rounded to the nearest whole
@@ -97,7 +98,7 @@ the attribution required for this controlled task.
 
 ## Every recorded real attempt
 
-These tables include **all 37 checked-in `execute=true` summaries**, grouped by
+These tables include **all 38 checked-in `execute=true` summaries**, grouped by
 case and ordered by run id. Each row resolves to
 `Document/Week4/evidence/<run id>/task_summary.json`; no unavailable run is mixed
 into this inventory. `actions` is `action_count`, not planned steps or planning
@@ -152,6 +153,7 @@ by each run; the runs span multiple commits, rather than all using one revision.
 | `T04_20261003_174709` | failed | 1 | 6 062 | 1 | step 2: empty `arguments.text`; only the preceding click dispatched |
 | `T04_20261005_003044` | timed_out | 4 | 499 125 | 3 | marker checks failed; timed out after 3 planning attempts, no final verdict |
 | `T04_20261005_012521` | failed | 3 | 255 093 | 2 | marker check failed; second pass's typing expectation failed |
+| `T04_20261006_115446` | blocked | 0 | 108 484 | 0 | initial visual context: header/composer regions are not valid active-chat evidence |
 
 ### T05 - close the application
 
@@ -169,10 +171,10 @@ by each run; the runs span multiple commits, rather than all using one revision.
 
 ## Dry runs
 
-`T01_20261001_215642` is the remaining, 38th evidence directory. It records
+`T01_20261001_215642` is the sole remaining dry-run evidence directory. It records
 `execute=false`, `status=dry_run_completed`, `verification=inconclusive`, provider
 `mock` and model `mock-vision-model` on macOS. Its one action record is dry-run
-output, not a dispatched desktop action. It is excluded from the 37 attempts,
+output, not a dispatched desktop action. It is excluded from the 38 attempts,
 five successes, action totals and timing means.
 
 ## Historical rounds and unavailable evidence
@@ -189,7 +191,9 @@ counts to add to it:
   for 17 overall.
 - **Later T04 follow-ups, 2026-10-05:** two checked-in runs, one `timed_out` and one
   `failed`. Together with its first-round failure, T04 has three recorded attempts
-  and no success.
+  and no success by that date.
+- **Real T04 acceptance, 2026-10-06:** `T04_20261006_115446` adds one blocked
+  attempt with zero actions. T04 now has four retained attempts and no success.
 
 These earlier references cannot be verified from checked-in run directories and
 are excluded from the aggregate statistics:
@@ -199,7 +203,7 @@ are excluded from the aggregate statistics:
 | `T01_20261004_000322` | **Unavailable:** no directory here. The earlier narrative reported a failed single click that selected the browser shortcut. That report is not a checked-in summary. |
 | `T05_20261003_180229` | **Unavailable:** evidence was not collected; the earlier narrative reported `blocked` because the goal already held. |
 | `T02_20261004_182646` | **Unavailable:** previously described as an uncollected false `succeeded` verdict in `outputs/week4`; the query was reportedly still in the address bar. It is not one of the five recorded successes. |
-| `T04_20261005_192417` | **Unavailable in this evidence snapshot:** the external background document reports `failed`, 0 actions, about 895 s and four target-resolution failures. It is not one of the 38 directories audited here, and is not added to the three recorded T04 attempts. |
+| `T04_20261005_192417` | **Unavailable in this evidence snapshot:** the external background document reports `failed`, 0 actions, about 895 s and four target-resolution failures. It is not one of the 39 directories audited here, and is not added to the four recorded T04 attempts. |
 
 Some earlier diagnoses also required screenshots or foreground sampling retained
 outside the checked-in evidence. The following accounts remain historical
@@ -227,8 +231,8 @@ operator observations, rather than new measurements or automatic passes:
 
 ## Metrics
 
-Every aggregate below is recomputable from the 38 checked-in summaries, with the
-single `execute=false` dry run excluded. **Blocked runs remain in the 37-attempt
+Every aggregate below is recomputable from the 39 checked-in summaries, with the
+single `execute=false` dry run excluded. **Blocked runs remain in the 38-attempt
 inventory and denominator**, with their status disclosed. This uses one consistent
 recorded-run definition rather than mixing uncollected output, model calls and
 real run directories.
@@ -237,25 +241,25 @@ real run directories.
 recorded-run success rate = count(execute=true and status=succeeded) / count(execute=true)
 case coverage = cases with at least one recorded success / five defined cases
 mean successful execution time = sum(execution_ms of all successes) / five successes
-mean time over all recorded real attempts = sum(field of execute=true runs) / 37
+mean time over all recorded real attempts = sum(field of execute=true runs) / 38
 ```
 
 | Metric | Value |
 | --- | --- |
-| evidence run directories | **38** |
-| formal recorded real attempts (`execute=true`) | **37** (T01 6, T02 17, T03 2, T04 3, T05 9) |
+| evidence run directories | **39** |
+| formal recorded real attempts (`execute=true`) | **38** (T01 6, T02 17, T03 2, T04 4, T05 9) |
 | successes (`succeeded` and `execute=true`) | **5**, in the successful-run table above |
 | cases with a recorded success | **4 / 5 = 80 %** |
-| recorded-run success rate | **5 / 37 = 13.5 %** |
-| recorded real-run statuses | 5 succeeded, 27 failed, 3 blocked, 2 timed_out |
+| recorded-run success rate | **5 / 38 = 13.2 %** |
+| recorded real-run statuses | 5 succeeded, 27 failed, 4 blocked, 2 timed_out |
 | mean `execution_ms` over all five successful runs | **8 306.6 ms** = (6 938 + 7 563 + 11 969 + 5 313 + 9 750) / 5 |
 | mean `execution_ms` of the first success per successful case only | **8 492.5 ms** = (6 938 + 11 969 + 5 313 + 9 750) / 4; excludes T01's later repeat |
-| mean `execution_ms` over all 37 recorded real attempts | **33 550.7 ms** |
-| mean `planning_ms` over all 37 recorded real attempts | **132 266.6 ms** |
+| mean `execution_ms` over all 38 recorded real attempts | **35 522.6 ms** |
+| mean `planning_ms` over all 38 recorded real attempts | **128 785.9 ms** |
 | total actions actually dispatched | **36** (`action_count`, excluding dry-run output) |
 | dispatched actions with a passed step-level check | **34 / 36**; a step pass is not a task success |
 
-T02 accounts for **17 of the 37 attempts**. T03 has two and T04 has three.
+T02 accounts for **17 of the 38 attempts**. T03 has two and T04 has four.
 These counts describe the collected evidence, not an estimate of all work performed
 on the operator's machine.
 
@@ -290,7 +294,8 @@ The right-hand column is the standard a human applies. T01/T02/T03/T05 automatic
 rules use observed text, including recorded foreground title and class where
 available, so they can be weaker than that standard. The repaired T04 instead uses
 strict visual evidence of the active conversation, exact sent marker and empty
-composer, as described below; its live accuracy has not been measured. For T05 a missing marker does not prove
+composer, as described below. Its latest live acceptance was blocked; saved-image
+model validation does not establish its live success rate. For T05 a missing marker does not prove
 that a hidden or minimised window was closed; for T01 a visible browser does not
 prove this run launched it. The precondition checks reduce that gap. Foreground
 metadata in the retained historical runs describes observation time. The current
@@ -305,12 +310,12 @@ recorded failed or timed-out run is not promoted because a later repair exists.
 
 | Item | Recorded Windows real runs | Evidence basis |
 | --- | --- | --- |
-| Platform and OS | `win32`, `Windows-11-10.0.26200-SP0` | all 37 summaries |
-| Display | screenshot 2560x1600, control 2560x1600 in 34 runs; absent in the 3 blocked summaries | `screen` |
+| Platform and OS | `win32`, `Windows-11-10.0.26200-SP0` | all 38 summaries |
+| Display | screenshot 2560x1600, control 2560x1600 in 35 runs; absent in 3 older blocked summaries | `screen` |
 | Python | 3.12.4 | `python_version` |
 | Model and provider | `qwen2.5vl:7b`, `openai_compatible` | `model_name`, `provider` |
 | Commit | varies by run; `T02_20261004_153537` has an empty commit field | `commit`; do not infer an absent revision |
-| Context window | historical operator setting: `OLLAMA_CONTEXT_LENGTH=16384`; not stored in the summary | operator context, not an independently recorded summary field |
+| Context window | historical operator setting: `OLLAMA_CONTEXT_LENGTH=16384`; latest T04 acceptance separately verified actual loaded context 32768 | context is not a summary field; latest `/api/ps` proof is in the external acceptance bundle |
 | Endpoint and per-request timeout | inspect each run's `run_config.json`, rather than applying the current configuration retrospectively | `model.base_url`, `model.timeout_seconds` |
 | Warmup and memory | read the run's `warmup.json` when recorded; absent fields are unavailable, not zero | cold/warm probe latency and available memory fields |
 
@@ -320,7 +325,7 @@ It establishes no real-task result on macOS.
 
 ## Failure notes
 
-**T04 has no recorded success.** Its three available summaries establish different
+**T04 has no recorded success.** Its four available summaries establish different
 stopping points:
 
 - `T04_20261003_174709`: one real click passed its step check; the next `type_text`
@@ -336,6 +341,12 @@ stopping points:
   check failed. The second pass stopped after typing because its expectation
   `Text is typed into the message box` was not observed. Final status is `failed`,
   with `verification=null` and 460 328 ms elapsed.
+- `T04_20261006_115446`: the 2560x1600 assessment placed the header in the
+  sidebar area and the composer in the transcript, and incorrectly reported
+  the empty composer as nonempty. The strict geometry check refused this evidence
+  before planning or confirmation: `blocked`, zero actions, zero planning attempts,
+  one model request and 108 484 ms elapsed. `message_context.json` retains the
+  refusal and raw structured assessment; no new marker was sent.
 
 The historical operator notes report a sent bubble in 文件传输助手 containing
 concatenated marker fragments during the `003044` investigation. The background
@@ -357,11 +368,11 @@ list. The first repair exposed detected boxes but could not refresh their ids
 after the required pre-action capture. The follow-up below implements that refresh
 and stricter message attribution. Neither code change changes an old verdict.
 
-## Offline T04 follow-up, 2026-10-06
+## T04 follow-up validation, 2026-10-06
 
-The collected suite now contains **752 tests**, including **452 additions** to
-the 300-test Week 3 baseline: 393 cases in the fourteen Week 4 table files and
-59 additions in the other suites. These code checks do not add real task attempts.
+The collected suite now contains **877 tests**, including **577 additions** to
+the 300-test Week 3 baseline: 512 cases in the fifteen Week 4 table files and
+65 additions in the other suites. These code checks do not add real task attempts.
 
 `test_runtime_runner.py::test_t04_complete_send_uses_fresh_candidates_and_strict_message_evidence`
 passes the complete prepared flow: click the input, type the fresh marker, click
@@ -372,19 +383,66 @@ checked, current-frame target centres are used, and the enabled send button requ
 one constrained visual mapping followed by another capture. The resulting mock
 `succeeded` record is simulated; it is excluded from the retained real-run totals.
 
-The refreshed path requires stable foreground identity, title, class, bounds and
+The refreshed action path requires stable foreground identity, title, class, bounds and
 geometry, then matches actual target pixels and their context to current detected
 candidates. A changed control can be mapped by the visual model to one candidate
 id only. It cannot change the operator-approved action, marker or recipient, and
 a further screenshot must confirm that candidate before input. Before T04 starts,
 visual context must show the correct conversation header and an empty composer;
 the same header pixels and foreground identity are checked before each input event.
-The final assessment must transcribe the exact fresh marker as a sent bubble below
-that header and above a non-overlapping empty composer. Unavailable or uncertain
-evidence cannot pass. This is an automatic visual-model assessment, with its prompt,
-source image, model/provider and structured `vision_assessment` recorded; live-model
-accuracy remains unmeasured. The initial recipient assessment or refusal is also
-recorded in `message_context.json`.
+The final assessment must transcribe the exact fresh marker as an outgoing sent
+bubble below that header and above a non-overlapping empty composer. Pending,
+failed, unavailable or uncertain send evidence cannot pass. The initial recipient
+assessment or refusal is recorded in `message_context.json`.
+
+The real `115446` refusal exposed a different problem: asking the model to locate
+header, composer and message boxes in a whole desktop image allowed sidebar regions
+and older bubbles to contaminate the assessment. `message_regions.py` now selects
+a unique observed bottom-wide contour as a possible composer, derives a padded
+header crop from the upper OCR row within its horizontal span, and bounds
+transcript candidates above it. These are geometric proposals; the model must
+confirm that the header is readable and the composer region is an editor.
+Independent header and composer images use strict JSON schemas and initial
+context excludes older message images. Final assessment inspects native-pixel
+message crops, with nearby pixels retained to reveal pending/failed-send indicators,
+and returns only a real candidate id. The original candidate box, crop source
+bounds, layout transform and source-image pixel hash remain recorded. No crop
+supplies a new click point, and no expected recipient, full marker or image-path
+timestamp is supplied to the assessor's text. Source and derived-image pixel
+hashes validate cached evidence; message-crop geometry distinguishes the original
+bubble from its indicator halo. Strict schema/type checks, exact marker comparison,
+foreground guards, header-pixel preservation, confirmations, action bounds and
+fail-safe remain.
+
+The saved-frame probe
+`outputs/week4_t04_crop_validation_20261006_132746/verifier_context_isolated.json`
+records two real `qwen2.5vl:7b` requests: the header crop transcribed
+`文件传输助手`, and the composer crop reported an editor with no draft. The
+recipient/editor context verdict is `passed`, with **zero desktop actions**.
+This locally saved model evidence is outside the checked-in real-run inventory;
+it neither changes the `115446` blocked verdict nor establishes a real sent message.
+
+The same saved frame exposed planning noise: the original 300-element desktop
+list cost 21 806 prompt tokens and produced a send click on a sidebar contour.
+The production T04 planning context now lists only current observed candidates
+inside the independently authorised composer, requires the exact marker in
+`arguments.text`, and tells retries when text was already typed. The revised
+real-model probe used 5 841 prompt tokens and produced click-editor, type the
+complete 35-character marker, then click the actual `发送` OCR candidate. Target
+centres still come from the current observed elements; no free coordinate is used.
+
+| Saved-frame probe | Recorded result | Model requests | Desktop actions | Local record |
+| --- | --- | --- | --- | --- |
+| Isolated header/editor context | passed; actual header and empty editor | 2 | 0 | `verifier_context_isolated.json` |
+| Scoped production planner | correct three-action plan, 31 904 ms; resolution without dispatch | 1 | 0 | `planner_scoped_response.json` |
+| Sent-message verifier, readable-title probe | failed; observed old marker does not exactly match the fresh run marker, 12 487 ms | 3 | 0 | `verifier_sent_explicit_readability.json` |
+| Sent-message verifier, current production geometry/cache/hidden-filename checks | failed; same exact old-marker mismatch, 74 585 ms | 3 | 0 | `verifier_sent_final_production.json` |
+
+These records are in the local
+`outputs/week4_t04_crop_validation_20261006_132746/` directory. The earlier
+unscoped plan and the first final-assessment refusal are retained there too.
+The final old-frame probe demonstrates strict rejection, not task success;
+none of these requests dispatched input or contributes a real-run attempt.
 
 The prepared regressions also cover a wrong or changed recipient, lost focus,
 missing or duplicate controls, a plan that only leaves a draft, an ineffective send,
@@ -400,11 +458,12 @@ candidate-area OCR exclusions and foreground prioritisation retain the input at
 candidate index **0** and send at **50**, both within 200 candidates. This is
 offline processing of saved pixels, not a new desktop capture, new real run or
 live-model accuracy measurement. That run remains outside the checked-in
-38-directory evidence snapshot.
+39-directory evidence snapshot.
 
-**Real T04 has not been newly measured.** The checked-in inventory remains
-38 directories, 37 real attempts, five successful runs and four of five cases
-passing. No desktop actions or messages were dispatched for this repair.
+**Real T04 was newly attempted and blocked before input.** The inventory now has
+39 directories, 38 real attempts, five successful runs and four of five cases
+passing. T04 still has zero retained successes. The region fix and saved-frame
+model probes add no desktop actions or messages.
 
 For the owner to collect a new real result, prepare the unlocked desktop with
 the correct conversation open and empty input, use the English input method,
@@ -413,12 +472,20 @@ the existing guarded preflight and explicitly confirmed case:
 
 ```powershell
 Set-Location D:\Developer\multimodal-desktop-gui-agent
+$env:GUI_AGENT_API_KEY = 'ollama'
+$env:GUI_AGENT_BASE_URL = 'http://127.0.0.1:11434/v1'
 & .\.venv\Scripts\python.exe scripts\week4_t04_verify.py
-& .\.venv\Scripts\python.exe scripts\week4_t04_verify.py --run
+& .\.venv\Scripts\python.exe scripts\week4_agent_cli.py --case T04 `
+  --provider openai_compatible --model qwen2.5vl:7b `
+  --base-url http://127.0.0.1:11434/v1 --execute --task-timeout 1800 `
+  --ocr-engine paddleocr --ocr-min-confidence 0.3
 ```
 
-The helper requests the existing 1800-second task budget and preserves both CLI
-confirmations; the second command can send a real message. The owner should inspect
+Verify the actual loaded model has a sufficient context window (32768 in the
+latest acceptance preparation), then warm it before preparing the desktop. The
+explicit provider/model avoid the YAML's mock default. The CLI keeps the existing
+1800-second task budget and both confirmations; the second command can send a real
+message. The owner should inspect
 the new summary and its visual evidence before collecting that run. Keep earlier
 evidence directories unchanged. If a send was attempted but verification was
 uncertain, inspect the conversation before starting another run; the runtime will

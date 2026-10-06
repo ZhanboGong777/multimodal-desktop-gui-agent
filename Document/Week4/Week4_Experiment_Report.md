@@ -16,6 +16,7 @@ src/gui_agent/runtime/
 ├── schemas.py         ObservationSnapshot, ResolvedAction, TaskSpec, TaskRunResult
 ├── observation.py     ObservationService: capture + OCR + contours as one frame
 ├── action_adapter.py  PlanStep -> DesktopAction, or a refusal
+├── message_regions.py observed header/composer/message crops and native-pixel mappings
 ├── verification.py    Verifier: check_step, check_task
 ├── runner.py          TaskRunner: the finite loop
 ├── recorder.py        TaskRecorder: per-step records that never overwrite
@@ -77,9 +78,11 @@ of steps and a changed screen all fail to satisfy it on their own.
 
 ## 3. Experiment environment
 
-Unchanged from Week 3: code and tests on the MacBook Air M2, model served by
-Ollama on the Windows node over HTTP. Week 4 adds a screen to drive, so the
-perception and control paths are exercised for real for the first time.
+Initial integration used the Week 3 arrangement: code and tests on the MacBook
+Air M2, with Ollama on the Windows node over HTTP. Later tests and real acceptance
+also run locally on Windows 11 with Python 3.12.4 and a 2560x1600 primary display.
+The retained summaries identify each run's environment and revision; the latest
+T04 preparation separately verified a loaded 32768-token model context.
 
 ### OCR backend choice
 
@@ -115,12 +118,12 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| Local Windows verification | **752 passed**, ruff clean |
+| Local Windows verification | **877 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 452: 393 in the fourteen files below, and 59 spread across the other suites -
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 577: 512 in the fifteen files below, and 65 spread across the other suites -
 `test_control_safety.py` 16, `test_model_mock.py` 14, `test_ocr.py` 7 (five of them
 the Windows-only OCR workarounds), `test_config.py` 7 (a new file),
-`test_plan_parser.py` 5, `test_model_config.py` 4, `test_documented_counts.py` 4
+`test_plan_parser.py` 5, `test_model_config.py` 10, `test_documented_counts.py` 4
 (a new file) and `test_recording.py` 2.
 
 Those numbers are checked rather than maintained: `test_documented_counts.py`
@@ -207,8 +210,9 @@ behaviour needed no change: blocked, nothing dispatched, exit 2, no traceback.
 | Test file | Covers |
 | --- | --- |
 | `test_action_adapter.py` | 77 cases: unique, ambiguous, missing and stale targets, split labels, current-frame unlabelled targets, safe pixel correspondence and constrained visual mapping to a detected candidate, missing/changed/duplicate/invalid candidates, parameter errors, coordinate boundaries, key whitelist, platform hotkeys, scaling and `finish` refusal |
-| `test_runtime_runner.py` | 80 cases: the offline closed loop, dry runs, recording, confirmation gates and preconditions; the complete prepared T04 send flow; changed recipients, focus, missing/duplicate controls, drafts, ineffective sends, request deadlines, cumulative action budgets and refusal of repeated typing or another input after a send attempt |
-| `test_runtime_verification.py` | 56 cases: generic rule matching and polling; exact sent-marker and recipient assessment, header/bubble/composer geometry, drafts and wrong conversations, strict response types/fields, unavailable evidence, uncertain/model failures, empty-composer preconditions and same-frame assessment caching |
+| `test_runtime_runner.py` | 103 cases: the offline closed loop, dry runs, recording, confirmation gates and preconditions; the complete prepared T04 send flow; scoped candidate lists and exact typing arguments, translation and current composer checks, typed-state retry context, changed recipients/focus, missing/duplicate controls, drafts, ineffective sends, request deadlines, cumulative action budgets and refusal of repeated typing or another input after a send attempt |
+| `test_runtime_verification.py` | 110 cases: generic rule matching and polling; isolated header/editor/message JSON schemas, strict outgoing/send state and exact marker/recipient attribution, source/crop geometry and candidate ids, draft rejection, hidden filename context, malformed types/fields, unavailable/uncertain evidence, derived-image cache integrity and window-crop fallback checks |
+| `test_message_regions.py` | 42 cases: observed foreground region selection, translation, sidebar exclusion and OCR-row merging; ambiguous/missing composer or header refusal, bounded latest-first message candidates, duplicate borders, native-pixel crops and transforms, initial message exclusion, indicator halos, source-image validation and no source overwrite |
 | `test_runtime_observation.py` | 55 cases: capture/observer foreground identity, bounds and stability, fail-closed unavailable metadata, current focus checks, frame geometry, OCR-failure records, labelled/unlabelled rendering, text-first ranking, the 100-label/200-contour cap and label overflow |
 | `test_runtime_recording.py` | 15 cases: redaction, append-only steps, per-frame files, summary, and where the provenance comes from |
 | `test_week4_cli.py` | 27 cases: argument errors, no `--yes`, dry-run default, summary always written, `--execute` refused without a terminal, the callback set an execute run hands over, `.env` loading, the flag/environment/YAML precedence, the numeric limits, and the warmup record the run copies in and warns about when it is missing |
@@ -291,13 +295,23 @@ successful runs.** Each credited run records both `status=succeeded` and
 `execute=true`; T01 passed twice, and T02, T03 and T05 once each. T04 has no
 successful run in the retained evidence.
 
-| Case | Successful runs | Evidence run ids |
-| --- | --- | --- |
-| T01 - open the browser | 2 | `T01_20261004_140000`, `T01_20261004_213859` |
-| T02 - search the web | 1 | `T02_20261004_210409` |
-| T03 - open a specified file | 1 | `T03_20261004_171941` |
-| T04 - send a message | 0 | No retained real `succeeded` run; the completed follow-up has been checked offline, not on the real desktop |
-| T05 - close the application | 1 | `T05_20261004_180657` |
+| Case | Attempts | Successful runs | Recorded statuses | Successful evidence run ids |
+| --- | --- | --- | --- | --- |
+| T01 - open the browser | 6 | 2 | 2 succeeded, 3 failed, 1 blocked | `T01_20261004_140000`, `T01_20261004_213859` |
+| T02 - search the web | 17 | 1 | 1 succeeded, 16 failed | `T02_20261004_210409` |
+| T03 - open a specified file | 2 | 1 | 1 succeeded, 1 failed | `T03_20261004_171941` |
+| T04 - send a message | 4 | 0 | 2 failed, 1 timed_out, 1 blocked | none; latest `T04_20261006_115446` was blocked with zero actions |
+| T05 - close the application | 9 | 1 | 1 succeeded, 5 failed, 2 blocked, 1 timed_out | `T05_20261004_180657` |
+| Total | 38 | 5 | 5 succeeded, 27 failed, 4 blocked, 2 timed_out | 4 of 5 cases |
+
+All 39 retained `task_summary.json` files were read for this inventory: 38 have
+`execute=true`, including the four blocked runs; one is a mock dry run. The
+recorded-run success rate is **5 / 38 = 13.2 %**. Mean `execution_ms` is
+**35 522.6 ms** over the 38 real attempts and **8 306.6 ms** over the five
+successes; mean initial `planning_ms` is **128 785.9 ms** over all real attempts.
+There are 36 dispatched action records, 34 with passed step checks. A step pass
+does not establish task success. These aggregates retain failed/blocked attempts
+and exclude uncollected historical references, offline probes and the dry run.
 
 A dry run against the rule-based mock stops at the first step with
 `no element matches 'desktop'`, which is correct: the mock's plan names elements
@@ -306,8 +320,10 @@ evidence of real capability and are not counted as such here.
 
 `Week4_Basic_Task_Test_Report.md` records the retained attempts, timings and
 verification rules. The complete prepared T04 test establishes the repaired
-flow with a simulated chat and mock model; a new real T04 run is still required
-to establish task success.
+flow with a simulated chat and mock model. The real `115446` acceptance attempt
+stopped before planning because its visual header/composer geometry was invalid;
+its summary records one model request, zero actions and `status=blocked`.
+Subsequent saved-image model checks do not establish a real T04 success.
 
 ## 7. Problems and handling
 
@@ -358,21 +374,41 @@ with their recorded OCR exclusions retains the input at index 0 and send control
 at index 50 within 200 candidates. This is a historical-image replay, not a new
 capture or a measurement of the live model's accuracy.
 
-**T04 now verifies a sent bubble, not a marker anywhere on screen.** Its dedicated
-visual assessment transcribes the actual conversation header and marker without
-being supplied the expected recipient or full marker to echo. Strict JSON must
-identify header, message and composer regions within a stable foreground window;
-the exact fresh marker must be in a sent bubble below the header and above a
-non-overlapping empty composer. Drafts, wrong conversations, malformed or uncertain
-responses and missing evidence cannot pass. Before planning, T04 requires the
-correct header and empty composer. Before every input event, the same header
-pixels and current foreground identity must still match. T04 rejects keyboard
-sending and typing text other than its approved marker. The assessment, prompt,
-image source and model/provider are recorded as automatic visual-model evidence,
-which is not a guarantee of live-model accuracy. The initial recipient assessment
-or refusal is also preserved in `message_context.json`.
+**The real initial assessment confused sidebar text and old bubbles.**
+`T04_20261006_115446` sent a full 2560x1600 screenshot to the visual assessor.
+The returned title box lay in the sidebar area and its proposed composer lay in
+the transcript; it also called the empty editor nonempty. Strict geometry
+validation blocked the run before planning or input. A window-only image still
+confused the same regions in a later saved-image probe, so merely cropping to the
+window was insufficient.
 
-**The full flow passes offline; real T04 remains unmeasured after the repair.**
+`message_regions.py` now proposes a unique bottom-wide foreground contour, a
+padded upper OCR-row header within its x span, and observed transcript contours.
+The model receives independent header and composer source crops through strict
+JSON schemas and must confirm readability and editor semantics. Initial context
+does not include old message crops. The final message request receives native-pixel
+candidate crops with nearby pixels for pending/failed-send indicators, returns
+one observed candidate id, and transcribes the whole visible marker. Neither the
+expected recipient nor the full expected marker is supplied, and image filenames
+are excluded from model text so their timestamps cannot supply missing digits.
+Actual candidate bounds inside message crops keep marker reading separate from
+the nearby indicator halo. Source bounds,
+unaltered candidate boxes, native-pixel transforms, source pixel hash, prompts and
+raw/schema responses are recorded. No proposed region supplies a free click point.
+Source and derived-image hashes validate cached assessments before reuse.
+
+**T04 still requires strict sent-message evidence.** The exact fresh marker must
+be in an outgoing bubble marked sent, below the authorised header and above an
+empty composer. Drafts, wrong conversations, pending/failed/unavailable send states,
+malformed JSON and uncertain evidence cannot pass. The window-crop fallback also
+retains strict schema and original-screen geometry checks. Before planning, T04
+requires the correct header and empty composer; before every input event, those
+header pixels and current foreground identity must still match. Keyboard sending,
+unapproved text and repeated typing are refused. Both confirmations, candidate
+resolution, coordinate bounds and fail-safe remain required. The initial assessment
+or refusal is preserved in `message_context.json`.
+
+**The complete mock flow passes; the latest real attempt remains blocked.**
 `test_t04_complete_send_uses_fresh_candidates_and_strict_message_evidence` runs
 the real planner, runner, adapter, verifier and recorder with the `prepared-T04`
 mock provider, synthetic moving-window screenshots and a recording action backend.
@@ -382,9 +418,44 @@ Related cases refuse wrong or changed recipients, changed focus, missing/duplica
 controls, a draft-only plan, an ineffective send and expired budgets. Action limits
 are cumulative across planning passes. Once a send may have been dispatched, T04
 stops further inputs in that plan, verifies the result and does not automatically
-retry; repeated typing is also refused. No real desktop actions were
-run for this follow-up; none of these checks changes the retained 38 directories,
-37 real attempts, five successes or four passing cases.
+retry; repeated typing is also refused. These prepared checks do not change any
+historical verdict. The latest inventory is 39 directories, 38 real attempts,
+five successes and four passing cases, including the zero-action `115446` refusal.
+
+The local record
+`outputs/week4_t04_crop_validation_20261006_132746/verifier_context_isolated.json`
+uses the saved `115446` source frame and the real `qwen2.5vl:7b` endpoint. Two
+independent JSON-schema requests transcribed `文件传输助手` and identified an
+empty composer, producing a passed recipient/editor context check with zero
+desktop actions. This offline saved-image result is not a new real run, a sent
+message or a promotion of the blocked summary. Planning, input, sending and final
+verification still require their own real acceptance evidence.
+
+**Planning needs the authorised editor's candidates, not every desktop target.**
+The first saved-frame real-model plan consumed 21 806 prompt tokens, omitted
+`arguments.text`, and named a sidebar contour as its send target. The production
+T04 context now lists only observed current candidates inside the independently
+authorised composer, supplies the exact typing arguments, and states whether the
+marker has already been typed so a retry can plan only the remaining send.
+The unchanged screenshot with that context produced click-editor, type the
+complete 35-character marker, click the actual `发送` candidate in 31 904 ms,
+using 5 841 prompt tokens. Adapter resolution confirmed the real candidate centres
+without dispatch. The local record is `planner_scoped_response.json` in the same
+probe directory. This is one saved-frame planning result, not a live input test.
+
+The readable-title old-frame verifier probe, `verifier_sent_explicit_readability.json`,
+made three real-model requests in 12 487 ms. It read the actual header, an empty
+editor and the old outgoing bubble, then returned `failed` because the observed
+marker did not exactly match the fresh run marker. The earlier refusal that
+reported unreadable title evidence is retained separately. All these probes
+record zero desktop actions; the strict evidence requirements were preserved.
+
+The latest production verifier, including actual candidate geometry, hidden
+image filenames and derived-image hash validation, was also tested on that saved
+frame. `verifier_sent_final_production.json` records three requests in 74 585 ms
+and the same failed exact-marker comparison, with zero desktop actions. Earlier
+probe timings remain attributed to their own recorded versions and are not
+replaced by this later measurement.
 
 **The plan names elements that are not on screen.** Running a dry run against the
 mock produced `no element matches 'desktop' in obs-0002`. This is the designed
@@ -1127,9 +1198,9 @@ that is merely behind another window, and the Windows round had to parse
   `Document/Week4/evidence/`, so a run id in the test report resolves inside the
   repository rather than only on the machine that produced it.
 - `configs/week4.yaml` - Week 4 limits, with `ExecutionConfig` added to `config.py`.
-- 452 new tests.
+- 577 new tests.
 - `Document/Week4/Week4_Usage.md` - flags, the safety model, the record layout.
-- `Document/Week4/Week4_Troubleshooting.md` - seventy-one symptoms with what to check
+- `Document/Week4/Week4_Troubleshooting.md` - seventy-three symptoms with what to check
   and what the code actually does about each.
 - `Document/Week4/Week4_Basic_Task_Test_Report.md` - the five results, one row per
   case, with the precondition, the attempt and success counts, the verification
@@ -1139,7 +1210,7 @@ that is merely behind another window, and the Windows round had to parse
 **W4-13 diagnostic guide.** The hand-off asks for a table of fifteen situations -
 connection, model, perception, resolution, execution, verification and recording -
 each with what to check and how it is handled. That is
-`Document/Week4/Week4_Troubleshooting.md`, grown to seventy-one as the Windows review
+`Document/Week4/Week4_Troubleshooting.md`, grown to seventy-three as the Windows review
 added situations the first pass had not met. Each row states the behaviour this
 code has, not the behaviour it ought to have; a diagnostic guide describing
 behaviour the implementation does not have would be worse than none.
@@ -1158,8 +1229,9 @@ does not find it in the tree has not hit a missing document.
 
 - **Four of five basic tasks have passed in five real successful runs.** T01
   passed twice; T02, T03 and T05 once each. T04's complete repaired flow has
-  passed only with the prepared mock and synthetic chat; a new live result
-  remains unmeasured.
+  passed only with the prepared mock and synthetic chat. The latest real attempt
+  was blocked before input; the new isolated-region context passes on a saved
+  image with the real model and establishes no real send.
 - Only the primary monitor is supported.
 - `type_text` uses `pyautogui.typewrite`, so ASCII only; Unicode input is not
   claimed.

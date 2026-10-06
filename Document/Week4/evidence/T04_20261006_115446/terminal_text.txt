@@ -1,0 +1,26 @@
+  platform   : win32
+  provider   : openai_compatible (qwen2.5vl:7b)
+  env file   : none in this directory (flags, environment and YAML only)
+  mode       : EXECUTE (real desktop actions)
+  case       : T04  risk=high
+  marker     : WEEK4_MESSAGE_CHECK_20261006_115446
+  limits     : 20 actions, 1800s budget
+  records    : outputs\week4\T04_20261006_115446
+  warmup     : warmup.json copied from outputs\week4
+Creating model: ('PP-OCRv6_medium_det', None, None)
+Model files already exist. Using cached files. To redownload, please delete the directory manually: `D:\paddlex_cache\official_models\PP-OCRv6_medium_det`.
+WARNING: Logging before InitGoogleLogging() is written to STDERR
+W1006 11:55:12.031805 83452 gpu_resources.cc:116] Please NOTE: device: 0, GPU Compute Capability: 8.9, Driver API Version: 12.6, Runtime API Version: 12.6
+Creating model: ('PP-OCRv6_medium_rec', None, None)
+Model files already exist. Using cached files. To redownload, please delete the directory manually: `D:\paddlex_cache\official_models\PP-OCRv6_medium_rec`.
+W1006 11:55:13.265031 83452 gpu_resources.cc:245] WARNING: device: 0. The installed Paddle is compiled with CUDNN 9.9, but CUDNN version in your machine is 9.5, which may cause serious incompatible bug. Please recompile or reinstall Paddle with compatible CUDNN version.
+
+  Task status : blocked
+  actions     : 0
+  elapsed     : 108.5s
+  note        : message context: header and composer regions are not valid activ
+ve-chat evidence
+  records    : outputs\week4\T04_20261006_115446
+  summary    : outputs\week4\T04_20261006_115446\task_summary.json
+
+{"status": "blocked", "actions": 0}

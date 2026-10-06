@@ -116,20 +116,29 @@ class ModelClient(ABC):
         image_path: str | None = None,
         context: dict[str, Any] | None = None,
         system: str | None = None,
+        response_format: dict[str, Any] | None = None,
+        include_image_path_in_prompt: bool = True,
     ) -> ModelResponse:
         """Send an instruction with screen context, and optionally a system prompt.
 
         The instruction stays separate from the rules on purpose: a backend that
         echoes the instruction back (the mock does) must see the task, not the
-        whole prompt template.
+        whole prompt template. ``response_format`` is an opt-in transport option,
+        separate from screen context; omitted calls retain their existing payload.
         """
         request = ModelRequest(
-            instruction=instruction, context=context or {}, image_path=image_path
+            instruction=instruction, context=context or {},
+            # Independent evidence readers must not learn a run timestamp from
+            # the filename. Pixels still travel through the transport option.
+            image_path=image_path if include_image_path_in_prompt else None,
         )
         messages = request.to_messages()
         if system:
             messages.insert(0, {"role": "system", "content": system})
-        return self._with_retries(messages, {"image_path": image_path})
+        kwargs: dict[str, Any] = {"image_path": image_path}
+        if response_format is not None:
+            kwargs["response_format"] = response_format
+        return self._with_retries(messages, kwargs)
 
     def health_check(self) -> bool:
         """True when the backend answers at all. Never raises."""
