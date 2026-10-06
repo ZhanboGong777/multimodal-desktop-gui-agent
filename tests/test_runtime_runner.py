@@ -1600,6 +1600,89 @@ def test_typed_text_is_masked_in_every_artefact_that_carries_it(tmp_path: Path) 
     )
 
 
+def test_a_gone_marker_is_not_a_closed_window(tmp_path: Path, monkeypatch) -> None:
+    """T05's rule is about a window, and the marker's absence only stands in for it.
+
+    An unreadable frame, a frame whose element budget filled with other text, and a miss by
+    the OCR engine all look exactly like a closed application to a rule that reads text. So
+    when a task says the application must be closed, the machine is asked as well - and a
+    process that is still running refuses the success the text rule would have granted.
+
+    The measured case is T05: its marker is gone the moment the window is behind another
+    one, and `documented counts` aside, the case's own notes have said since the Windows
+    round that "the marker is gone" cannot be told from "the window is not visible".
+    """
+    import gui_agent.runtime.runner as runner_module
+
+    observed: list[str] = []
+
+    def fake_match(names, running=None):
+        observed.append("called")
+        return ["notepad.exe"]  # the editor is still there
+
+    monkeypatch.setattr(runner_module, "match_processes", fake_match)
+    monkeypatch.setattr(
+        runner_module, "known_processes", lambda group, platform=None: ("notepad.exe",)
+    )
+
+    frames = [
+        _frame("obs-0001", ("week4_sample.txt - Notepad", "WEEK4-OPEN-FILE-OK")),
+        _frame("obs-0002", ("Desktop",)),
+    ]
+    runner, _ = _runner(tmp_path, FakeObserver(frames), FakePlanner(_plan()), FakeExecutor())
+    task = TaskSpec(
+        case_id="T05",
+        instruction="close the app",
+        preconditions=["week4_sample.txt is open in the test application"],
+        forbid_text=["WEEK4-OPEN-FILE-OK"],
+        success_rules=["the application's window is gone"],
+        must_exit_processes=["editor"],
+    )
+
+    result = runner.run(task, ExecutionOptions(execute=True, confirm=True), confirm=lambda _p: True)
+
+    assert observed, "the process check must actually run"
+    assert result.status == "failed", result.stop_reason + str(result.notes)
+    assert result.verification is not None and not result.verification.passed
+    assert "never closed" in result.verification.detail, result.verification.detail
+    assert result.verification.evidence["screen_rule_outcome"] == "passed", (
+        "the record must show that the text rule alone would have passed"
+    )
+    assert any("still running" in note for note in result.notes), result.notes
+
+
+def test_a_closed_window_still_passes_when_the_process_is_gone(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """The other direction: the check must not turn a real close into a failure."""
+    import gui_agent.runtime.runner as runner_module
+
+    monkeypatch.setattr(runner_module, "match_processes", lambda names, running=None: [])
+    monkeypatch.setattr(
+        runner_module, "known_processes", lambda group, platform=None: ("notepad.exe",)
+    )
+
+    frames = [
+        _frame("obs-0001", ("week4_sample.txt - Notepad", "WEEK4-OPEN-FILE-OK")),
+        _frame("obs-0002", ("Desktop",)),
+    ]
+    runner, _ = _runner(tmp_path, FakeObserver(frames), FakePlanner(_plan()), FakeExecutor())
+    task = TaskSpec(
+        case_id="T05",
+        instruction="close the app",
+        preconditions=["week4_sample.txt is open in the test application"],
+        forbid_text=["WEEK4-OPEN-FILE-OK"],
+        success_rules=["the application's window is gone"],
+        must_exit_processes=["editor"],
+    )
+
+    result = runner.run(task, ExecutionOptions(execute=True, confirm=True), confirm=lambda _p: True)
+
+    assert result.status == "succeeded", result.stop_reason + str(result.notes)
+    assert result.verification is not None and result.verification.passed
+    assert not any("still running" in note for note in result.notes), result.notes
+
+
 def test_a_blocked_run_says_what_it_saw(tmp_path: Path) -> None:
     """The blocked note carries its evidence, not only its conclusion.
 

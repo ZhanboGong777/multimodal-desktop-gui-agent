@@ -118,9 +118,9 @@ label a vision model asks for.
 
 | Machine | Result |
 | --- | --- |
-| Local Windows verification | **880 passed**, ruff clean |
+| Local Windows verification | **882 passed**, ruff clean |
 
-Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 580: 515 in the fifteen files below, and 65 spread across the other suites -
+Week 3 ended at 300 tests (counted on `d67de1f`). Week 4 adds 582: 517 in the fifteen files below, and 65 spread across the other suites -
 `test_control_safety.py` 16, `test_model_mock.py` 14, `test_ocr.py` 7 (five of them
 the Windows-only OCR workarounds), `test_config.py` 7 (a new file),
 `test_plan_parser.py` 5, `test_model_config.py` 10, `test_documented_counts.py` 4
@@ -210,7 +210,7 @@ behaviour needed no change: blocked, nothing dispatched, exit 2, no traceback.
 | Test file | Covers |
 | --- | --- |
 | `test_action_adapter.py` | 77 cases: unique, ambiguous, missing and stale targets, split labels, current-frame unlabelled targets, safe pixel correspondence and constrained visual mapping to a detected candidate, missing/changed/duplicate/invalid candidates, parameter errors, coordinate boundaries, key whitelist, platform hotkeys, scaling and `finish` refusal |
-| `test_runtime_runner.py` | 106 cases: the offline closed loop, dry runs, recording, confirmation gates and preconditions; the complete prepared T04 send flow; scoped candidate lists and exact typing arguments, translation and current composer checks, typed-state retry context, changed recipients/focus, missing/duplicate controls, drafts, ineffective sends, request deadlines, cumulative action budgets and refusal of repeated typing or another input after a send attempt |
+| `test_runtime_runner.py` | 108 cases: the offline closed loop, dry runs, recording, confirmation gates and preconditions; the complete prepared T04 send flow; scoped candidate lists and exact typing arguments, translation and current composer checks, typed-state retry context, changed recipients/focus, missing/duplicate controls, drafts, ineffective sends, request deadlines, cumulative action budgets and refusal of repeated typing or another input after a send attempt |
 | `test_runtime_verification.py` | 110 cases: generic rule matching and polling; isolated header/editor/message JSON schemas, strict outgoing/send state and exact marker/recipient attribution, source/crop geometry and candidate ids, draft rejection, hidden filename context, malformed types/fields, unavailable/uncertain evidence, derived-image cache integrity and window-crop fallback checks |
 | `test_message_regions.py` | 42 cases: observed foreground region selection, translation, sidebar exclusion and OCR-row merging; ambiguous/missing composer or header refusal, bounded latest-first message candidates, duplicate borders, native-pixel crops and transforms, initial message exclusion, indicator halos, source-image validation and no source overwrite |
 | `test_runtime_observation.py` | 55 cases: capture/observer foreground identity, bounds and stability, fail-closed unavailable metadata, current focus checks, frame geometry, OCR-failure records, labelled/unlabelled rendering, text-first ranking, the 100-label/200-contour cap and label overflow |
@@ -1198,7 +1198,7 @@ that is merely behind another window, and the Windows round had to parse
   `Document/Week4/evidence/`, so a run id in the test report resolves inside the
   repository rather than only on the machine that produced it.
 - `configs/week4.yaml` - Week 4 limits, with `ExecutionConfig` added to `config.py`.
-- 580 new tests.
+- 582 new tests.
 - `Document/Week4/Week4_Usage.md` - flags, the safety model, the record layout.
 - `Document/Week4/Week4_Troubleshooting.md` - seventy-three symptoms with what to check
   and what the code actually does about each.

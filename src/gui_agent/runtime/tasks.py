@@ -238,6 +238,12 @@ def _cases() -> dict[str, TaskSpec]:
             # Notepad was open but not in the capture. Requiring the editor to be running
             # makes the honest cases proceed and the dishonest ones say so.
             requires_processes=["editor"],
+                # The rule above is about the window being gone, and the marker's absence is
+                # only a proxy for it: an unreadable frame, a frame whose element budget
+                # filled with other text, and an OCR miss all look the same as a closed
+                # application. This asks the machine, which is where the question has an
+                # answer.
+                must_exit_processes=["editor"],
             risk="medium",
         ),
     }

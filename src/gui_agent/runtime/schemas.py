@@ -148,6 +148,13 @@ class TaskSpec(SchemaModel):
     #: absent and T01 then plans against a window that already exists.
     requires_processes: list[str] = Field(default_factory=list)
     forbids_processes: list[str] = Field(default_factory=list)
+    #: Process groups that must **not** still be running when the run finishes. The
+    #: exit-side twin of `requires_processes`, and it exists because a missing marker string
+    #: is not evidence that a window closed: an unreadable frame, a frame whose element
+    #: budget filled with other text, and a miss by the OCR engine all look exactly like a
+    #: closed application to a text-only rule. T05's rule says "the application's window is
+    #: gone", so it is asked that way - of the machine rather than of the OCR engine.
+    must_exit_processes: list[str] = Field(default_factory=list)
     risk: Literal["low", "medium", "high"] = "low"
     #: A send is not proved by finding its input marker anywhere on screen.
     #: T04 requires an independent visual assessment of the correct conversation,

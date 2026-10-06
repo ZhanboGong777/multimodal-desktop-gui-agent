@@ -896,6 +896,37 @@ class TaskRunner:
             sleep=self.sleep,
             clock=self.clock,
         )
+        # A missing marker string is not evidence that a window closed. T05's rule asks for
+        # "the application's window is gone", and a text-only rule cannot tell a closed
+        # application from an unreadable frame, a frame whose element budget filled with
+        # other text, or a miss by the OCR engine. Asked of the machine instead, which is
+        # the one place the question has an answer.
+        if verification.passed and task.must_exit_processes:
+            still_running: list[str] = []
+            for group in task.must_exit_processes:
+                names = known_processes(group)
+                if names and match_processes(names):
+                    still_running.append(group)
+            if still_running:
+                notes.append(
+                    "the screen rule matched, but the process the task was to close is "
+                    f"still running ({', '.join(still_running)}); a marker that cannot be "
+                    "read is not a window that closed"
+                )
+                verification = VerificationResult(
+                    outcome="failed",
+                    method=task.verification,
+                    detail=(
+                        "the text rule matched but the application was never closed: "
+                        + ", ".join(still_running)
+                        + " still running"
+                    ),
+                    evidence={
+                        **(verification.evidence or {}),
+                        "still_running": still_running,
+                        "screen_rule_outcome": verification.outcome,
+                    },
+                )
         status = "succeeded" if verification.passed else "failed"
         if self.clock() - started > options.task_timeout_seconds:
             status = "timed_out"
