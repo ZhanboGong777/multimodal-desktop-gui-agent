@@ -1786,11 +1786,30 @@ def _simulated_t04(tmp_path, *, fault="", clock=None):
             else:
                 self.planning_contexts.append(context)
                 oid = context["observation_id"]
-                steps = [
-                    PlanStep(step_id="focus", description="click message input", action_type="click", arguments={"element_id": f"{oid}-e001"}),
-                    PlanStep(step_id="type", description="type this run's marker", action_type="type_text", arguments={"text": task.expect_text[0]}),
-                    PlanStep(step_id="send", description="click send button", action_type="click", arguments={"element_id": f"{oid}-e002"}),
-                ]
+                if fault == "marker_in_description_only":
+                    # The shape measured on T04_20261006_225340: the model names the marker
+                    # in its own sentence and leaves both text fields empty. `target_text` is
+                    # None and `arguments` has no "text", so `ActionAdapter`'s fallback cannot
+                    # help and the runner's marker check refuses.
+                    steps = [
+                        PlanStep(step_id="focus", description="click message input", action_type="click", arguments={"element_id": f"{oid}-e001"}),
+                        PlanStep(step_id="type", description=f"Type {task.expect_text[0]}", action_type="type_text"),
+                        PlanStep(step_id="send", description="click send button", action_type="click", arguments={"element_id": f"{oid}-e002"}),
+                    ]
+                elif fault == "marker_never_stated":
+                    # The guard on the other side: a description that talks about typing
+                    # without containing the marker must still be refused.
+                    steps = [
+                        PlanStep(step_id="focus", description="click message input", action_type="click", arguments={"element_id": f"{oid}-e001"}),
+                        PlanStep(step_id="type", description="type the run's marker into the box", action_type="type_text"),
+                        PlanStep(step_id="send", description="click send button", action_type="click", arguments={"element_id": f"{oid}-e002"}),
+                    ]
+                else:
+                    steps = [
+                        PlanStep(step_id="focus", description="click message input", action_type="click", arguments={"element_id": f"{oid}-e001"}),
+                        PlanStep(step_id="type", description="type this run's marker", action_type="type_text", arguments={"text": task.expect_text[0]}),
+                        PlanStep(step_id="send", description="click send button", action_type="click", arguments={"element_id": f"{oid}-e002"}),
+                    ]
                 if fault == "draft_only":
                     steps.pop()
                 if fault in {"extra_send", "repeat_message"}:
@@ -1850,6 +1869,54 @@ def test_t04_refuses_wrong_recipient_missing_target_and_draft_success(tmp_path, 
     assert not chat.sent
     if result.verification is not None:
         assert not result.verification.passed
+
+
+def test_t04_takes_the_marker_from_the_description_when_the_argument_is_empty(tmp_path):
+    """The failure measured on the real machine, and the one thing the fix accepts.
+
+    `T04_20261006_225340`, two passes running:
+
+        step_id     = s2
+        description = "Type WEEK4_MESSAGE_CHECK_20261006_225340"
+        target_text = None
+        arguments   = {}          (no "text")
+        error       = visual grounding refused: typed message must exactly match this
+                      run's marker
+
+    The `click` before it resolved to `(1705,919)` - the editor - so the plan was right
+    and only the field was wrong. `ActionAdapter` already falls back to `target_text`,
+    but that cannot help when the model leaves *both* text fields empty, and it cannot
+    know the marker either because `resolve()` receives no task.
+
+    The narrowed acceptance is the point: the marker must appear **verbatim** in the
+    step's own description. Nothing is inferred from free prose.
+    """
+    runner, task, options, chat, _, _ = _simulated_t04(
+        tmp_path, fault="marker_in_description_only"
+    )
+    result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+
+    assert result.status == "succeeded", result.stop_reason + str(result.notes)
+    assert chat.sent == task.expect_text[0], "the marker reached the client despite the empty argument"
+    assert not chat.draft
+    assert [action.action_type for action, _ in chat.actions] == ["click", "type_text", "click"]
+    assert any("took it from the description" in note for note in result.notes), result.notes
+
+
+def test_t04_still_refuses_a_description_that_never_states_the_marker(tmp_path):
+    """The guard on the other side: a description about typing is not the marker.
+
+    If the fix read free prose instead of looking for the marker verbatim, this shape
+    would type the sentence into the box. It must keep refusing.
+    """
+    runner, task, options, chat, _, _ = _simulated_t04(tmp_path, fault="marker_never_stated")
+    result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+
+    assert result.status in {"failed", "blocked"}
+    assert not chat.sent, "nothing may be typed when the marker was never stated"
+    assert any(
+        "must exactly match this run's marker" in (step.error or "") for step in result.steps
+    ), [step.error for step in result.steps]
 
 
 def test_t04_second_confirmation_declined_dispatches_no_actions(tmp_path):

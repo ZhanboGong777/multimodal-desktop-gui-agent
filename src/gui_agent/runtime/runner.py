@@ -640,6 +640,41 @@ class TaskRunner:
                 if options.execute and task.message_conversation:
                     if step.action_type in {"key_press", "hotkey"}:
                         raise GroundingError("message tasks require the approved send control, not keys")
+                    if step.action_type == "type_text":
+                        # The model names the marker in its own words but leaves the argument
+                        # empty. Measured on T04_20261006_225340, two passes running:
+                        #
+                        #     step_id     = s2
+                        #     description = "Type WEEK4_MESSAGE_CHECK_20261006_225340"
+                        #     target_text = None
+                        #     arguments   = {}          (no "text")
+                        #     error       = visual grounding refused: typed message must
+                        #                   exactly match this run's marker
+                        #
+                        # The click before it resolved to (1705,919) - the editor - so the plan
+                        # was right and only the field was wrong. `ActionAdapter` already falls
+                        # back to `target_text` for this, but that fallback cannot help when the
+                        # model leaves *both* text fields empty, and it cannot know the marker
+                        # either: `resolve()` receives no task.
+                        #
+                        # So the normalisation lives here, where the marker is known, and it
+                        # accepts one thing only: a marker that appears **verbatim** in the
+                        # step's own description. That is not a relaxation - the check below
+                        # still demands an exact match against `task.expect_text`, the adapter
+                        # still refuses a blank text, and free prose in a description is still
+                        # not typed anywhere.
+                        marker = task.expect_text[0] if len(task.expect_text) == 1 else None
+                        supplied = (step.arguments or {}).get("text")
+                        if (
+                            marker
+                            and not (supplied or "").strip()
+                            and marker in str(step.description or "")
+                        ):
+                            step.arguments = {**(step.arguments or {}), "text": marker}
+                            notes.append(
+                                f"{step.step_id}: the marker was named in the description but "
+                                "not in arguments.text; took it from the description verbatim"
+                            )
                     if step.action_type == "type_text" and (
                         len(task.expect_text) != 1 or step.arguments.get("text") != task.expect_text[0]
                     ):
