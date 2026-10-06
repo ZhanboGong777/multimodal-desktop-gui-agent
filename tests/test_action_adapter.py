@@ -59,6 +59,49 @@ def adapter() -> ActionAdapter:
     return ActionAdapter(platform="darwin")
 
 
+def test_a_label_is_never_typed_as_if_it_were_the_text():
+    """The `target_text` fallback is gone, and this is the measurement that removed it.
+
+    `T05_20261007_011805`: the model planned `type_text` for a task whose goal is to **close
+    an application**, named the close control `"关闭"`, and left `arguments` empty. The old
+    fallback accepted `target_text` when it had no whitespace, was one line and was short -
+    and `"关闭"` satisfied all three. So the run typed two Chinese characters into a text
+    editor: a step that could not possibly have achieved the goal was dispatched, and
+    `ActionResult.success` reported it as a success because the event was sent.
+
+    No local test separates a literal from a label; they are the same shape. What separates
+    them is the task, and `resolve()` receives no task. So the adapter infers nothing, and the
+    runner - which can check an inference against `task.expect_text` - is the only place a
+    literal may come from.
+    """
+    adapter = ActionAdapter(platform="win32")
+
+    for label in ("关闭", "Close", "Cancel", "OK"):
+        step = PlanStep(
+            step_id="s1",
+            description="Close the text editor application",
+            action_type="type_text",
+            target_text=label,
+            arguments={},
+        )
+        with pytest.raises(ActionResolutionError):
+            adapter.resolve(step, None)
+
+
+def test_explicit_text_is_still_typed():
+    """The other direction: removing the fallback must not remove the ordinary path."""
+    adapter = ActionAdapter(platform="win32")
+    step = PlanStep(
+        step_id="s1",
+        description="type the marker",
+        action_type="type_text",
+        arguments={"text": "WEEK4_MESSAGE_CHECK_1"},
+    )
+    resolved = adapter.resolve(step, None)
+    assert resolved.action.text == "WEEK4_MESSAGE_CHECK_1"
+    assert resolved.action.action_type == "type_text"
+
+
 def test_a_unique_text_target_resolves(adapter: ActionAdapter) -> None:
     resolved = adapter.resolve(_step(target_text="Edit"), _snapshot())
     assert resolved.action.action_type == "click"
@@ -537,43 +580,43 @@ def test_a_drag_naming_an_element_from_nowhere_is_refused(adapter: ActionAdapter
         adapter.resolve(step, _snapshot())
 
 
-def test_a_missing_type_text_argument_falls_back_to_the_steps_own_target(
+def test_a_missing_type_text_argument_is_refused_however_the_target_reads(
     adapter: ActionAdapter,
 ) -> None:
-    """The plan T04 produced four passes running, and what may and may not be inferred.
+    """`target_text` is not a source for typed content, and the measurement says why.
 
-    Measured: `type_text text=None target='WEEK4_MESSAGE_CHECK_'` - the right verb with the
-    right string in the wrong field of the step, refused by the adapter and ending the run.
-    `target_text` is where a step names the literal it is about and the prompt requires it to be
-    copied verbatim, so it is a fair source for the content when `arguments.text` is empty.
+    It used to be. T04, four passes running, produced
+    `type_text text=None target='WEEK4_MESSAGE_CHECK_'` - the right verb, the right string, in
+    the wrong field - and inferring from `target_text` rescued a plan that was otherwise
+    correct. The guard was "no whitespace, one line, short", reasoning that a description with
+    no spaces is not a thing anyone writes.
 
-    The guard is the other half and the more important one: a `type_text` whose target is a
-    *description* must not have that description typed into the box, so a candidate with spaces
-    is refused even though `arguments.text` may contain them freely.
+    Then `T05_20261007_011805` measured the hole. The model planned `type_text` for a task that
+    **closes an application**, named the close control `"关闭"`, and left `arguments` empty.
+    Two characters, no whitespace, far under the ceiling - so the guard passed it and the run
+    typed two Chinese characters into a text editor. A step that could not possibly have
+    achieved the goal was dispatched, and the action reported success because the event was
+    sent.
+
+    A literal and a label are the same shape locally; what separates them is the task, and
+    `resolve()` receives no task. So the adapter infers nothing, and the runner - which can
+    check an inference against `task.expect_text` - is the only place a literal may come from.
     """
-    inferred = adapter.resolve(
-        _step(action_type="type_text", target_text="WEEK4_MESSAGE_CHECK_"),
-        _snapshot(),
-    )
-    assert inferred.action.text == "WEEK4_MESSAGE_CHECK_"
-    assert "target_text" in inferred.note, inferred.note
+    for target in (
+        "WEEK4_MESSAGE_CHECK_",          # the string the old fallback existed for
+        "关闭",                           # the label that broke it
+        "Close",
+        "the message box in the week4 test conversation",
+        "   ",
+    ):
+        with pytest.raises(ActionResolutionError, match="non-empty arguments.text"):
+            adapter.resolve(_step(action_type="type_text", target_text=target), _snapshot())
 
     supplied = adapter.resolve(
         _step(action_type="type_text", target_text="field", arguments={"text": "hello world"}),
         _snapshot(),
     )
-    assert supplied.action.text == "hello world", "an explicit argument is never overridden"
-    assert "target_text" not in supplied.note
-
-    for description in (
-        "the message box in the week4 test conversation",
-        "send button",
-        "   ",
-    ):
-        with pytest.raises(ActionResolutionError, match="non-empty arguments.text"):
-            adapter.resolve(
-                _step(action_type="type_text", target_text=description), _snapshot()
-            )
+    assert supplied.action.text == "hello world", "an explicit argument is what gets typed"
 
 
 def test_a_hotkey_without_any_keys_is_refused(adapter: ActionAdapter) -> None:

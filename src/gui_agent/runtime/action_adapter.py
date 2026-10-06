@@ -664,35 +664,26 @@ class ActionAdapter:
         text = (step.arguments or {}).get("text")
         note = ""
         if not (text or "").strip():
-            # Fall back to the step's own `target_text` before refusing.
+            # `target_text` is **not** where an inferred literal comes from any more.
             #
-            # Measured on T04, four passes running: the model produced
+            # It used to be. Measured on T04, four passes running, the model produced
             # `type_text text=None target='WEEK4_MESSAGE_CHECK_'` - the right verb, the right
-            # string, in the wrong field of the step. `target_text` is where a step names the
-            # literal it is about, and the prompt already requires it to be copied verbatim
-            # from the screen list, so using it when `arguments.text` is empty costs nothing
-            # and rescues a plan that is otherwise correct.
+            # string, in the wrong field - and a fallback to `target_text` rescued a plan that
+            # was otherwise correct. It was guarded by "no whitespace, one line, short", on the
+            # reasoning that a description with no spaces is not a thing anyone writes.
             #
-            # Guarded rather than automatic, because the two fields do different jobs: a
-            # `type_text` whose `target_text` is a description of a field would otherwise type
-            # that description into it. Whitespace-only, multi-line and over-long targets are
-            # refused as before, and the note says when the value was inferred so a reader can
-            # tell it from one the model supplied.
-            candidate = (step.target_text or "").strip()
-            # No spaces, one line, and short. `target_text` is allowed to be prose - the prompt
-            # asks for a copied screen text, and a step may name a window or a field - so the
-            # guard is what keeps this from typing a description into a box. Content a person
-            # asks a program to type is very often space-free, and the marker this exists for
-            # is; a description with no spaces at all is not a thing anyone writes.
-            usable = (
-                candidate
-                and len(candidate) <= self.MAX_INFERRED_TEXT
-                and not any(ch.isspace() for ch in candidate)
-            )
-            if not usable:
-                raise ActionResolutionError("type_text requires a non-empty arguments.text")
-            text = candidate
-            note = " (text taken from target_text; arguments.text was empty)"
+            # Then `T05_20261007_011805` measured the hole in that reasoning. The model planned
+            # `type_text` for a task that **closes an application**, named the close control
+            # `"关闭"`, and left `arguments` empty. Two characters, no whitespace, far under the
+            # ceiling: the guard accepted it, and the run typed two Chinese characters into a
+            # text editor. A step that could not possibly have achieved the goal was dispatched.
+            #
+            # No local test separates a literal from a label, because the two are the same
+            # shape. What separates them is the task: the runner infers a marker from the step's
+            # own description and can check that inference against `task.expect_text`. An
+            # adapter that receives no task can check nothing, so it infers nothing. `target_text`
+            # keeps its other job - naming what the step is about - and is never typed.
+            raise ActionResolutionError("type_text requires a non-empty arguments.text")
         action = DesktopAction(
             action_type="type_text", text=text, target_description=step.target_text
         )
