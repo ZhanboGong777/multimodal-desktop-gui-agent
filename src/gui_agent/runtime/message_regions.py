@@ -22,6 +22,17 @@ _MAX_MESSAGES = 10
 _HEADER_PADDING = 4
 _LABEL_HEIGHT = 24
 _MESSAGE_HALO = 32
+_COMPOSER_BOTTOM_FRACTION = 0.85
+# T04_20261009_083042_910048_75cebb04 exposed a titlebar X at 1.44%
+# window height above the chat title at 7.11%-9.58%. Across 106 preceding
+# usable real regions plus this frame the title occupied 6.90%-9.68%, beginning within
+# 1.31% of the observed editor's left edge. These conservative layout bands
+# isolate supported chat titles; they do not recognise recipient text.
+_HEADER_TOP_FRACTION = 0.05
+_HEADER_MAX_TOP_FRACTION = 0.12
+_HEADER_BOTTOM_FRACTION = 0.18
+_HEADER_ANCHOR_LEFT_FRACTION = 0.20
+_HEADER_FRAGMENT_GAP_HEIGHTS = 2.0
 
 
 class MessageRegionError(ValueError):
@@ -140,11 +151,75 @@ def _duplicate_border(first: BoundingBox, second: BoundingBox) -> bool:
     )
 
 
+def _header_row(
+    elements: list[ElementRef], foreground: BoundingBox, body: BoundingBox,
+) -> list[ElementRef]:
+    """Require one left-anchored content-title row, separate from window chrome.
+
+    The editor supplies the actual chat column. Only complete OCR boxes in a
+    bounded content band can supply evidence; disconnected right-side toolbar
+    glyphs are not appended to a title. Missing or competing left-anchored rows
+    remain ambiguous, even when their OCR strings happen to be identical.
+    """
+    # Do not turn text inside an actual compact transcript-like border into a
+    # title if title OCR is missing. Full-width pane/window borders and the
+    # bottom editor are excluded from this conservative enclosure veto.
+    enclosures = [
+        item.bounding_box for item in elements
+        if item.source == "contour" and not item.text.strip()
+        and body.left <= item.bounding_box.left < item.bounding_box.right <= body.right
+        and item.bounding_box.bottom < body.top
+        and item.bounding_box.width <= body.width * 0.90
+        and item.bounding_box.height <= foreground.height * 0.25
+        and item.bounding_box.width * item.bounding_box.height
+        <= body.width * (body.top - foreground.top) * 0.50
+    ]
+    candidates = [
+        item for item in elements
+        if item.source == "ocr" and item.text.strip()
+        and body.left <= item.bounding_box.left < item.bounding_box.right <= body.right
+        and item.bounding_box.top >= foreground.top + foreground.height * _HEADER_TOP_FRACTION
+        and item.bounding_box.top <= foreground.top + foreground.height * _HEADER_MAX_TOP_FRACTION
+        and item.bounding_box.bottom <= foreground.top + foreground.height * _HEADER_BOTTOM_FRACTION
+        and not any(_inside(item.bounding_box, enclosure) for enclosure in enclosures)
+    ]
+    anchors = [
+        item for item in candidates
+        if item.bounding_box.left <= body.left + body.width * _HEADER_ANCHOR_LEFT_FRACTION
+    ]
+    if not anchors:
+        raise MessageRegionError("no upper OCR row is available in the bounded chat content-title band")
+    first = min(anchors, key=lambda item: (item.bounding_box.top, item.bounding_box.left))
+    if any(not _same_row(first.bounding_box, item.bounding_box) for item in anchors):
+        raise MessageRegionError("exactly one content-title OCR row is required; competing rows are ambiguous")
+    row = sorted(
+        (item for item in candidates if _same_row(first.bounding_box, item.bounding_box)),
+        key=lambda item: (item.bounding_box.left, item.element_id),
+    )
+    segments: list[list[ElementRef]] = []
+    for item in row:
+        if segments:
+            previous = segments[-1]
+            right = max(member.bounding_box.right for member in previous)
+            height = max(item.bounding_box.height, *(member.bounding_box.height for member in previous))
+            if item.bounding_box.left - right <= height * _HEADER_FRAGMENT_GAP_HEIGHTS:
+                previous.append(item)
+                continue
+        segments.append([item])
+    anchor_ids = {item.element_id for item in anchors}
+    anchored = [segment for segment in segments if any(item.element_id in anchor_ids for item in segment)]
+    if len(anchored) != 1:
+        raise MessageRegionError("exactly one contiguous content-title OCR row is required")
+    return anchored[0]
+
+
 def select_message_regions(observation: ObservationSnapshot) -> MessageRegions:
     """Select bounded visual candidates without using expected recipient or marker.
 
-    The bottom, wide contour must be unique. Header geometry comes from the
-    uppermost OCR row within that contour's horizontal span; OCR strings are
+    The wide contour reaching the foreground's bottom band must be unique.
+    A wide transcript bubble above that band is still a message candidate.
+    Header geometry comes from a unique left-anchored content-title OCR row
+    below window chrome within that contour's horizontal span; OCR strings are
     never copied into the assessor's image. Message candidates remain actual
     contours between those regions, with enclosing transcript frames excluded.
     """
@@ -155,25 +230,18 @@ def select_message_regions(observation: ObservationSnapshot) -> MessageRegions:
         if item.source == "contour" and not item.text.strip()
         and item.bounding_box.width >= foreground.width * 0.45
         and item.bounding_box.top >= foreground.top + foreground.height * 0.60
+        # In T04_20261007_140104_387834_d3da5521, a 604-pixel bubble crossed
+        # foreground.width * 0.45 = 603.9 but ended at 773, above editor 1019.
+        # Require the existing observed contour to reach the window's bottom band;
+        # do not choose whichever candidate happens to be nearest the bottom.
+        and item.bounding_box.bottom >= foreground.top + foreground.height * _COMPOSER_BOTTOM_FRACTION
         and item.bounding_box.height <= foreground.height * 0.40
     ]
     if len(composers) != 1:
         raise MessageRegionError("exactly one bottom wide contour candidate is required")
     composer = composers[0]
     body = composer.bounding_box
-    header_candidates = [
-        item for item in elements
-        if item.source == "ocr" and item.text.strip()
-        and body.left <= item.bounding_box.left < item.bounding_box.right <= body.right
-        and item.bounding_box.bottom <= foreground.top + foreground.height * 0.25
-    ]
-    if not header_candidates:
-        raise MessageRegionError("no upper OCR row is available within the candidate chat span")
-    first = min(header_candidates, key=lambda item: (item.bounding_box.top, item.bounding_box.left))
-    row = sorted(
-        (item for item in header_candidates if _same_row(first.bounding_box, item.bounding_box)),
-        key=lambda item: (item.bounding_box.left, item.element_id),
-    )
+    row = _header_row(elements, foreground, body)
     header = BoundingBox(
         left=max(body.left, min(item.bounding_box.left for item in row) - _HEADER_PADDING),
         top=max(foreground.top, min(item.bounding_box.top for item in row) - _HEADER_PADDING),

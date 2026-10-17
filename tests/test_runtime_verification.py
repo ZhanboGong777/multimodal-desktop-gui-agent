@@ -880,3 +880,152 @@ def test_malformed_regional_reply_keeps_actual_raw_content_and_request_evidence(
     assert second.outcome == "inconclusive" and second.evidence["assessment_cached"] is True
     assert second.evidence["assessment_responses"] == responses
     assert len(client.calls) == count
+
+
+def _draft_client(**updates) -> _RegionalMessageClient:
+    return _RegionalMessageClient(composer={
+        "is_composer": True, "empty": False, "draft_text": _TEST_MARKER,
+        "composition_pending": False, "send_enabled": True, **updates,
+    })
+
+
+def test_pre_send_draft_requires_exact_current_committed_text_without_old_messages(tmp_path: Path) -> None:
+    frame = _regional_message_frame(tmp_path)
+    source = Path(frame.image_path).read_bytes()
+    client = _draft_client()
+    result = Verifier(message_client=client).check_message_draft(_message_task(), frame)
+    assert result.passed
+    assert result.evidence["assessment_scope"] == "committed_message_draft"
+    assert [call["context"]["region_role"] for call in client.calls] == ["header", "composer"]
+    assert result.evidence["vision_assessment"]["draft_text"] == _TEST_MARKER
+    assert result.evidence["vision_assessment"]["composition_pending"] is False
+    assert result.evidence["vision_assessment"]["send_enabled"] is True
+    composer_request = result.evidence["assessment_requests"][-1]
+    composer_schema = composer_request["response_format"]["json_schema"]["schema"]
+    assert composer_schema["properties"]["send_enabled"] == {"type": "boolean"}
+    assert "send_enabled" in composer_schema["required"]
+    composer_reply = json.loads(result.evidence["assessment_responses"][-1]["content"])
+    assert composer_reply["send_enabled"] is True
+    assert [panel["label"] for panel in result.evidence["region_panels"]["panels"]] == ["HEADER", "COMPOSER"]
+    request = json.dumps(client.calls, ensure_ascii=False)
+    assert _TEST_MARKER not in request and _TEST_CONVERSATION not in request
+    assert "WEEK4_MESSAGE_CHECK_OLD" not in request
+    for call in client.calls:
+        with Image.open(call["image_path"]) as crop:
+            assert (255, 0, 255) not in {colour for _, colour in crop.getcolors(crop.width * crop.height)}
+    assert Path(frame.image_path).read_bytes() == source
+
+
+@pytest.mark.parametrize("text", [
+    "", "WEEK4_MESSAGE_CHECK_OLD", _TEST_MARKER[:-1], _TEST_MARKER + "x",
+    _TEST_MARKER + _TEST_MARKER, " " + _TEST_MARKER, _TEST_MARKER + " ",
+])
+def test_partial_stale_appended_or_duplicate_draft_cannot_authorise_send(tmp_path: Path, text: str) -> None:
+    result = Verifier(message_client=_draft_client(draft_text=text)).check_message_draft(
+        _message_task(), _regional_message_frame(tmp_path),
+    )
+    assert result.outcome == "failed"
+    assert "does not exactly match" in result.detail
+
+
+def test_exact_marker_with_uncommitted_composition_cannot_authorise_send(tmp_path: Path) -> None:
+    result = Verifier(message_client=_draft_client(composition_pending=True)).check_message_draft(
+        _message_task(), _regional_message_frame(tmp_path),
+    )
+    assert result.outcome == "failed"
+    assert "uncommitted" in result.detail
+
+
+def test_exact_committed_marker_with_disabled_send_control_cannot_authorise_send(tmp_path: Path) -> None:
+    client = _draft_client(send_enabled=False)
+    result = Verifier(message_client=client).check_message_draft(
+        _message_task(), _regional_message_frame(tmp_path),
+    )
+    assert result.outcome == "failed" and "disabled" in result.detail
+    assessment = result.evidence["vision_assessment"]
+    assert assessment["draft_text"] == _TEST_MARKER
+    assert assessment["composition_pending"] is False
+    assert assessment["send_enabled"] is False
+    assert json.loads(result.evidence["assessment_responses"][-1]["content"])["send_enabled"] is False
+    assert len(client.calls) == 2, "a disabled send control cannot trigger a reading retry"
+
+
+@pytest.mark.parametrize("enabled", ["true", "false", 0, 1, None])
+def test_send_enabled_evidence_is_not_coerced_into_send_permission(tmp_path: Path, enabled) -> None:
+    client = _draft_client(send_enabled=enabled)
+    result = Verifier(message_client=client).check_message_draft(
+        _message_task(), _regional_message_frame(tmp_path),
+    )
+    assert result.outcome == "inconclusive"
+    assert "send_enabled must be a JSON boolean" in result.detail
+    assert json.loads(result.evidence["assessment_responses"][-1]["content"])["send_enabled"] == enabled
+    assert "vision_assessment" not in result.evidence
+
+
+def test_missing_send_enabled_evidence_cannot_authorise_send(tmp_path: Path) -> None:
+    client = _draft_client()
+    del client.payloads["composer"]["send_enabled"]
+    result = Verifier(message_client=client).check_message_draft(
+        _message_task(), _regional_message_frame(tmp_path),
+    )
+    assert result.outcome == "inconclusive" and "exactly the required fields" in result.detail
+    assert "send_enabled" not in json.loads(result.evidence["assessment_responses"][-1]["content"])
+    assert "vision_assessment" not in result.evidence
+
+
+@pytest.mark.parametrize("composition", ["false", 0, None])
+def test_composition_flag_is_not_coerced_into_send_permission(tmp_path: Path, composition) -> None:
+    result = Verifier(message_client=_draft_client(composition_pending=composition)).check_message_draft(
+        _message_task(), _regional_message_frame(tmp_path),
+    )
+    assert result.outcome == "inconclusive"
+    assert "JSON boolean" in result.detail
+
+
+def test_missing_composition_evidence_cannot_authorise_send(tmp_path: Path) -> None:
+    client = _draft_client()
+    del client.payloads["composer"]["composition_pending"]
+    result = Verifier(message_client=client).check_message_draft(_message_task(), _regional_message_frame(tmp_path))
+    assert result.outcome == "inconclusive"
+    assert result.evidence["assessment_responses"][-1]["role"] == "composer"
+
+
+def test_exact_draft_in_wrong_conversation_cannot_authorise_send(tmp_path: Path) -> None:
+    client = _draft_client()
+    client.payloads["header"] = {"readable": True, "text": "Another recipient"}
+    result = Verifier(message_client=client).check_message_draft(_message_task(), _regional_message_frame(tmp_path))
+    assert result.outcome == "failed"
+    assert "conversation" in result.detail
+
+
+def test_draft_gate_never_falls_back_to_reading_full_window_or_old_bubbles(tmp_path: Path) -> None:
+    client = _MessageClient(_sent_assessment())
+    result = Verifier(message_client=client).check_message_draft(_message_task(), _message_frame(tmp_path))
+    assert result.outcome == "inconclusive"
+    assert "detected header and composer" in result.detail
+    assert not client.calls
+
+
+def test_draft_and_sent_evidence_cache_scopes_are_independent(tmp_path: Path) -> None:
+    frame = _regional_message_frame(tmp_path)
+    client = _draft_client()
+    verifier = Verifier(message_client=client)
+    draft = verifier.check_message_draft(_message_task(), frame)
+    assert draft.passed and len(client.calls) == 2
+    client.payloads["composer"] = {"is_composer": True, "empty": True, "draft_text": ""}
+    sent = verifier.check_task(_message_task(), frame)
+    assert sent.passed and len(client.calls) == 5
+    assert draft.evidence["image_path"] != sent.evidence["image_path"]
+    again = verifier.check_message_draft(_message_task(), frame)
+    assert again.passed and again.evidence["assessment_cached"] is True
+    assert len(client.calls) == 5
+
+
+@pytest.mark.parametrize("markers", [[], [""], ["one", "two"]])
+def test_draft_gate_requires_one_nonempty_exact_marker(tmp_path: Path, markers: list[str]) -> None:
+    task = _message_task()
+    task.expect_text = markers
+    client = _draft_client()
+    result = Verifier(message_client=client).check_message_draft(task, _regional_message_frame(tmp_path))
+    assert result.outcome == "inconclusive"
+    assert not client.calls

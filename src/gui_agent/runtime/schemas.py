@@ -277,6 +277,14 @@ class TaskRunResult(SchemaModel):
     planning_ms: float = 0.0
     confirmation_ms: float = 0.0
     execution_ms: float = 0.0
+    #: All planner calls, including recovery/format retries and failed calls.
+    #: This overlaps planning_ms/execution_ms; never sum it with those phases.
+    planner_ms: float = 0.0
+    #: Calls to the planner, distinct from its cumulative format/parse attempts.
+    planning_calls: int = 0
+    #: Runtime entry to final verdict, excluding all confirmation/countdown gates.
+    #: CLI initialization, process startup and final JSON serialization are outside it.
+    system_elapsed_ms: float = 0.0
     evidence_directory: str = ""
     #: Why the run stopped, in one line, when it did not simply succeed.
     stop_reason: str = ""
@@ -289,5 +297,5 @@ class TaskRunResult(SchemaModel):
 
     @property
     def action_count(self) -> int:
-        """Steps that actually produced a desktop action, excluding ``finish``."""
-        return sum(1 for step in self.steps if step.resolved is not None)
+        """Executor attempts, including dry-run validation but excluding refused targets."""
+        return sum(1 for step in self.steps if step.action_result is not None)

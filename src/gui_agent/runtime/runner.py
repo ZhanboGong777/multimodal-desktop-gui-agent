@@ -17,6 +17,7 @@ Design decisions worth stating, because each rules out an easier wrong version:
 from __future__ import annotations
 
 import contextlib
+import json
 import re
 import time
 from collections.abc import Callable
@@ -29,9 +30,10 @@ from PIL import Image
 from ..control.executor import ActionExecutor
 from ..planning import PlanResult, TaskPlan, TaskPlanner
 from ..planning.schemas import PlanStep
-from ..schemas import BoundingBox
+from ..schemas import ActionResult, BoundingBox
 from . import provenance
 from .action_adapter import ActionAdapter, ActionResolutionError, keys_for_platform
+from .cursor_parking import plan_cursor_parking, verify_parking_frame
 from .processes import known as known_processes
 from .processes import match as match_processes
 from .recorder import TaskRecorder, redact
@@ -45,6 +47,7 @@ from .schemas import (
     TaskSpec,
     VerificationResult,
 )
+from .screenshot_quality import assess_screenshot_quality, window_identity
 from .target_grounding import TargetGrounder
 from .verification import Verifier
 from .visual_grounding import GroundingError, match_candidate, validate_frames
@@ -94,6 +97,14 @@ def explain_model_failure(message: str) -> str:
 #: has been sent, or a window with unsaved content has been closed.
 _RISKY_RISKS = frozenset({"medium", "high"})
 
+# First capture plus four bounded retries. Staggering only changes the capture
+# phase; it never relaxes the required exact draft pixels or authorises input.
+_MESSAGE_RECHECK_DELAYS = (0.15, 0.25, 0.35, 0.45)
+
+# One initial frame plus two read-only captures; this does not retry a verifier,
+# change focus, move the pointer, type text, or authorise a Send.
+_MESSAGE_QUALITY_MAX_CAPTURES = 3
+
 
 class _TaskDeadlineExceeded(RuntimeError):
     """An expensive observation or visual request consumed the remaining budget."""
@@ -101,32 +112,44 @@ class _TaskDeadlineExceeded(RuntimeError):
 
 @dataclass
 class Timings:
-    """Where one run's wall clock went.
+    """Runtime entry to final verdict, excluding CLI setup and final serialization.
 
-    16.5.4 asks for the phases separately rather than one number, and the phase
-    that matters most is the one a person occupies: the confirmation prompt and the
-    countdown sit inside the run's wall clock, so counting them as system time
-    would make a slow operator look like a slow model. `execution_ms` is the
-    measure the report quotes - from the moment the operator let it run to the
-    final verdict.
+    The original phases retain their boundaries: initial observation/planning,
+    all confirmation gates (including countdowns), then execution/re-planning.
+    ``planner_ms`` separately totals *every* planner call, so it overlaps those
+    phases and must not be added to them. ``system_elapsed_ms`` removes gate time.
     """
 
     started: float
     planned: float | None = None
-    confirmed: float | None = None
+    confirmation_seconds: float = 0.0
+    confirmation_started: float | None = None
+    planner_seconds: float = 0.0
+    planning_calls: int = 0
+    planning_attempts: int = 0
+
+    def begin_confirmation(self, started: float) -> None:
+        self.confirmation_started = started
+
+    def end_confirmation(self, ended: float) -> None:
+        if self.confirmation_started is not None:
+            self.confirmation_seconds += ended - self.confirmation_started
+            self.confirmation_started = None
 
     def breakdown(self, ended: float) -> dict[str, float]:
         planned = self.planned if self.planned is not None else self.started
-        base = self.confirmed if self.confirmed is not None else planned
+        confirmation = self.confirmation_seconds
+        if self.confirmation_started is not None:
+            confirmation += ended - self.confirmation_started
+        elapsed = ended - self.started
+        planning = planned - self.started
         return {
-            "elapsed_ms": (ended - self.started) * 1000.0,
-            "planning_ms": (planned - self.started) * 1000.0,
-            "confirmation_ms": (
-                (self.confirmed - self.planned) * 1000.0
-                if self.confirmed is not None and self.planned is not None
-                else 0.0
-            ),
-            "execution_ms": (ended - base) * 1000.0,
+            "elapsed_ms": elapsed * 1000.0,
+            "planning_ms": planning * 1000.0,
+            "confirmation_ms": confirmation * 1000.0,
+            "execution_ms": (elapsed - planning - confirmation) * 1000.0,
+            "planner_ms": self.planner_seconds * 1000.0,
+            "system_elapsed_ms": (elapsed - confirmation) * 1000.0,
         }
 
 
@@ -196,6 +219,8 @@ class TaskRunner:
         rebuilt from.
         """
         started = self.clock()
+        self._timings = Timings(started=started)
+        self._notes: list[str] = []
         try:
             return self._run(
                 task, options, started, confirm, countdown, high_risk_confirm, on_plan
@@ -213,12 +238,14 @@ class TaskRunner:
         high_risk_confirm: Callable[[TaskPlan], bool] | None,
         on_plan: Callable[[TaskPlan], None] | None,
     ) -> TaskRunResult:
-        timings = Timings(started=started)
-        notes: list[str] = []
+        timings = self._timings
+        notes = self._notes
         self._message_header = None
         self._message_composer = None
         self._message_text_typed = False
         self._message_send_attempted = False
+        self._message_send_blocked = False
+        self._message_cursor_parking_attempted = False
 
         if not task.success_rules and not task.expect_text and not task.forbid_text:
             return self._blocked(
@@ -264,9 +291,43 @@ class TaskRunner:
                     )
 
         # 1. first look at the screen
+        message_deadline = (
+            started + options.task_timeout_seconds
+            if options.execute and task.message_conversation else None
+        )
+        if message_deadline is not None and self.clock() >= message_deadline:
+            self.recorder.session.save_json("screenshot_quality_initial.json", {
+                "stage": "initial_message_preflight", "outcome": "timed_out",
+                "code": "task_budget_exhausted_before_capture",
+                "detail": "task budget expired before the first message capture",
+                "max_captures": _MESSAGE_QUALITY_MAX_CAPTURES, "capture_attempts": 0,
+                "samples": [], "gui_actions": 0, "model_calls": 0,
+                "semantic_authorization": False, "send_authorization": False,
+            })
+            return self._finish(
+                task, options, "timed_out", started,
+                ["screenshot quality: task budget expired before initial capture"], timings=timings,
+            )
         try:
             initial = self.observer.observe()
         except Exception as exc:  # noqa: BLE001 - a failed first look ends the run
+            if message_deadline is not None:
+                expired = self.clock() >= message_deadline
+                self.recorder.session.save_json("screenshot_quality_initial.json", {
+                    "stage": "initial_message_preflight",
+                    "outcome": "timed_out" if expired else "blocked",
+                    "code": "initial_message_observation_failed",
+                    "detail": f"initial observation failed: {type(exc).__name__}: {exc}",
+                    "max_captures": _MESSAGE_QUALITY_MAX_CAPTURES, "capture_attempts": 1,
+                    "samples": [{"capture_index": 1, "capture_error": f"{type(exc).__name__}: {exc}"}],
+                    "gui_actions": 0, "model_calls": 0,
+                    "semantic_authorization": False, "send_authorization": False,
+                })
+                if expired:
+                    return self._finish(
+                        task, options, "timed_out", started,
+                        [f"initial observation failed after task budget expired: {exc}"], timings=timings,
+                    )
             return self._blocked(
                 task, options, f"initial observation failed: {exc}", timings=timings
             )
@@ -279,6 +340,16 @@ class TaskRunner:
             notes.append(f"ocr: {notice}")
 
         if options.execute and task.message_conversation:
+            initial, quality = self._message_quality_preflight(initial, message_deadline)
+            reason = f"screenshot quality: {quality['code']}: {quality['detail']}"
+            if quality["outcome"] == "timed_out":
+                return self._finish(
+                    task, options, "timed_out", started, notes + [reason],
+                    snapshot=initial, timings=timings,
+                )
+            if quality["outcome"] == "blocked":
+                return self._blocked(task, options, reason, snapshot=initial, timings=timings)
+            notes.append(reason)
             context = self.verifier.check_message_context(task, initial, require_empty=True)
             # Keep the assessment that authorised the recipient, including a
             # refusal; later header matching must be auditable from the run.
@@ -352,17 +423,17 @@ class TaskRunner:
                 )
 
         # 2. plan from that observation
-        plan_result = self.planner.plan(
-            task.instruction,
-            context=self._context(initial, task, options),
-            image_path=initial.image_path,
-            task_id=task.case_id,
-        )
+        try:
+            plan_result = self._plan_from(initial, task, options, timings)
+        except Exception as exc:  # noqa: BLE001 - failed providers still get a summary
+            return self._blocked(
+                task, options, f"planning failed: {type(exc).__name__}: {exc}",
+                timings=timings, snapshot=initial,
+            )
         # Stamped whether or not the plan worked out. A planning call that fails
         # after two seconds still spent those two seconds planning, and leaving the
         # stamp unset reported them as `execution_ms` - which is the direction that
         # misleads, because a blocked run then looks like one that was busy acting.
-        timings.planned = self.clock()
         if not plan_result.ok or plan_result.plan is None:
             return self._blocked(
                 task,
@@ -371,7 +442,7 @@ class TaskRunner:
                 timings=timings,
             )
         plan = plan_result.plan
-        planning_attempts = int(plan_result.attempts or 0)
+        planning_attempts = timings.planning_attempts
         notes.append(f"planned {len(plan.steps)} steps from {initial.observation_id}")
 
         # 8.3.5: a plan that reports errors is not executed. The model uses this
@@ -406,6 +477,7 @@ class TaskRunner:
 
         # 4. confirmation gate — before any real input event
         if options.execute:
+            timings.begin_confirmation(timings.planned if timings.planned is not None else self.clock())
             # Both prompts are asked in order, and a refusal at either ends the run.
             # The short-circuit is the point: a plan the operator just declined must
             # not then be put to them a second time.
@@ -426,7 +498,7 @@ class TaskRunner:
                 # The gate is over, so time a person spent reading the plan belongs
                 # to confirmation_ms. Without this the wait landed in execution_ms,
                 # which made a hesitant operator look like a slow system.
-                timings.confirmed = self.clock()
+                timings.end_confirmation(self.clock())
                 result = self._finish(
                     task,
                     options,
@@ -442,11 +514,156 @@ class TaskRunner:
                 countdown(3)
             # Everything from here is the system working, not a person reading - the
             # countdown included, since it is a warning addressed to the operator.
-            timings.confirmed = self.clock()
+            timings.end_confirmation(self.clock())
 
         return self._execute_plan(
             task, plan, options, initial, started, notes, planning_attempts, timings=timings
         )
+
+    def _plan_from(
+        self, snapshot: ObservationSnapshot, task: TaskSpec,
+        options: ExecutionOptions, timings: Timings,
+    ) -> PlanResult:
+        """Account for a call even if it raises, returns errors or returns no steps."""
+        call_started = self.clock()
+        timings.planning_calls += 1
+        result: PlanResult | None = None
+        planner_started: float | None = None
+        message_call = task.case_id == "T04" and bool(task.message_conversation)
+        instruction = task.instruction
+        context: dict[str, Any] | None = None
+        error = ""
+        record_name = f"planning_{timings.planning_calls:04d}.json"
+        planning_record: dict[str, Any] = {
+            "schema": "week4.t04_planning.v1", "call_index": timings.planning_calls,
+            "observation_id": snapshot.observation_id, "image_path": snapshot.image_path,
+            "original_instruction": task.instruction, "instruction": instruction,
+            "context": None, "raw_response": None, "parsed_plan": None,
+            "error": None, "planner_invoked": False,
+        }
+        try:
+            context = self._context(snapshot, task, options)
+            if message_call:
+                if isinstance(self.planner, TaskPlanner):
+                    # TaskPlanner adds this to its model context. Include it in
+                    # the saved request as well, with the same actual value.
+                    context = {**context, "max_steps": self.planner.max_steps}
+                if options.execute and self._message_text_typed:
+                    # The event was dispatched, not verified as committed. The
+                    # original task still controls independent draft/sent checks.
+                    instruction = (
+                        "The text-entry event for this task was already dispatched. "
+                        "The draft has not yet been independently verified as committed. "
+                        "Continue from the current screen: only click the visible send control "
+                        "using a current listed element_id, then finish. For an OCR send candidate, "
+                        "the click must include both arguments.element_id and target_text copied "
+                        "exactly from that same candidate's actual listed text; do not invent a label. "
+                        "Do not type again, "
+                        "refocus the editor, clear text, press Enter or use keyboard shortcuts. "
+                        "If no safe send control is visible, return finish with errors."
+                    )
+                elif len(task.expect_text) == 1:
+                    message = context["message_task"]
+                    editor_id = message.get("editor_candidate_id")
+                    send_id = message.get("send_candidate_id")
+                    editor = snapshot.element(editor_id) if isinstance(editor_id, str) else None
+                    send = snapshot.element(send_id) if isinstance(send_id, str) else None
+                    candidate_ids = message.get("candidate_ids", [])
+                    if (
+                        message.get("region_status") == "visually_authorised"
+                        and editor is not None and editor.element_id in candidate_ids
+                        and editor.source == "contour" and not editor.text.strip()
+                        and send is not None and send.element_id in candidate_ids
+                        and send.source == "ocr" and send.text.strip()
+                    ):
+                        # A schema illustration, not an executable plan. Values
+                        # come from the current authorised context/frame; the
+                        # model still has to produce every executable argument.
+                        example = json.dumps({
+                            "task_id": task.case_id, "instruction": task.instruction,
+                            "summary": "Focus the editor, type the marker, and send",
+                            "steps": [
+                                {"step_id": "focus", "description": "click the authorised editor",
+                                 "action_type": "click", "target_text": None,
+                                 "arguments": {"element_id": editor.element_id}},
+                                {"step_id": "type", "description": "type this run's complete marker",
+                                 "action_type": "type_text", "target_text": None,
+                                 "arguments": {"text": task.expect_text[0]}},
+                                {"step_id": "send", "description": "click the visible send control",
+                                 "action_type": "click", "target_text": send.text,
+                                 "arguments": {"element_id": send.element_id}},
+                                {"step_id": "finish", "description": "end the plan",
+                                 "action_type": "finish", "target_text": None, "arguments": {}},
+                            ], "errors": [],
+                        }, ensure_ascii=False)
+                        instruction = (
+                            task.instruction + "\nPlan all four steps in order: click the authorised "
+                            "current editor, type_text, click the visible send control, finish. "
+                            "Include the editor click even if it appears focused. Put the complete "
+                            "marker in arguments.text; the type_text step must have target_text null "
+                            "and no element_id. A marker only in target_text or description does not "
+                            "authorise typing. For the OCR send click, include both arguments.element_id "
+                            "and target_text copied exactly from that same candidate's actual listed "
+                            "text: an ID alone may be stale in the fresh dispatch frame. Use only "
+                            "current authorised listed candidates; do not invent target labels or "
+                            "press Enter. Typing is a dispatched event, not proof of a committed draft. "
+                            "If a required candidate is unavailable or ambiguous, return no executable "
+                            "steps and explain in errors.\nPlan JSON example: " + example
+                        )
+                    else:
+                        example = json.dumps({"steps": [{
+                            "step_id": "type", "description": "type this run's complete marker",
+                            "action_type": "type_text", "target_text": None,
+                            "arguments": {"text": task.expect_text[0]},
+                        }]}, ensure_ascii=False)
+                        instruction = (
+                            task.instruction + "\nThe typing step must use the nested JSON shape "
+                            + example + ". Put the complete marker in arguments.text. A marker only "
+                            "in target_text or description does not authorise typing. This illustrates "
+                            "only the typing fields: a complete click example cannot be built from "
+                            "the current unique authorised editor/send roles. Use only actual current "
+                            "authorised candidates; do not invent IDs or target labels. If a required "
+                            "candidate is unavailable or ambiguous, return no executable steps and "
+                            "explain in errors."
+                        )
+                planning_record.update(instruction=instruction, context=context, planner_invoked=True)
+                # Keep the actual request even if the model call is interrupted.
+                self.recorder.session.save_json(record_name, planning_record)
+            planner_started = self.clock()
+            result = self.planner.plan(
+                instruction,
+                context=context,
+                image_path=snapshot.image_path,
+                task_id=task.case_id,
+            )
+            return result
+        except BaseException as exc:
+            error = f"{type(exc).__name__}: {exc}"
+            raise
+        finally:
+            ended = self.clock()
+            planner_ms = (ended - planner_started) * 1000.0 if planner_started is not None else 0.0
+            timings.planner_seconds += planner_ms / 1000.0
+            # A provider exception has no PlanResult, but a planning attempt did
+            # happen. Returned parse/format attempts are summed across all calls.
+            timings.planning_attempts += max(1, int(result.attempts or 0)) if result else 1
+            if message_call:
+                planning_record.update(
+                    instruction=instruction, context=context,
+                    elapsed_ms=(ended - call_started) * 1000.0,
+                    planner_ms=planner_ms,
+                    attempts=max(1, int(result.attempts or 0)) if result else 1,
+                    response_scope="final_response_of_planner_call",
+                    raw_response=result.response.content if result and result.response else None,
+                    response=result.response.as_dict() if result and result.response else None,
+                    parsed_plan=result.plan.model_dump(mode="json") if result and result.plan else None,
+                    error=error or (result.error if result else None),
+                )
+                self.recorder.session.save_json(record_name, planning_record)
+            if timings.planned is None:
+                # Automated request/response evidence writes belong to initial
+                # planning, never to the subsequent human confirmation gate.
+                timings.planned = self.clock() if message_call else ended
 
     # ── the loop ───────────────────────────────────────────────────────
     def _execute_plan(
@@ -494,10 +711,11 @@ class TaskRunner:
         )
         passes = 1
         while (
-            (result is None or result.status != "succeeded")
+            (result is None or result.status == "failed")
             and passes < options.max_planning_attempts
             and self.clock() - started <= options.task_timeout_seconds
             and not self._message_send_attempted
+            and not self._message_send_blocked
             and sum(record.action_result is not None for record in steps) < options.max_actions
         ):
             try:
@@ -505,12 +723,18 @@ class TaskRunner:
             except Exception as exc:  # noqa: BLE001 - re-planning is an improvement, not a duty
                 notes.append(f"re-planning skipped: observation failed: {exc}")
                 break
-            retry = self.planner.plan(
-                task.instruction,
-                context=self._context(after, task, options),
-                image_path=after.image_path,
-                task_id=task.case_id,
-            )
+            if self.clock() - started > options.task_timeout_seconds:
+                notes.append("task budget exhausted while observing for re-planning")
+                break
+            try:
+                retry = self._plan_from(after, task, options, timings or self._timings)
+            except Exception as exc:  # noqa: BLE001 - preserve the completed pass and final time
+                notes.append(f"re-planning failed: {type(exc).__name__}: {exc}")
+                break
+            planning_attempts = (timings or self._timings).planning_attempts
+            if self.clock() - started > options.task_timeout_seconds:
+                notes.append("task budget exhausted during re-planning; no further actions")
+                break
             if not retry.ok or retry.plan is None or not retry.plan.steps:
                 notes.append(
                     f"re-planning attempt {passes + 1} produced no steps; stopping"
@@ -541,26 +765,28 @@ class TaskRunner:
                 initial,
                 started,
                 notes,
-                planning_attempts + passes - 1,
+                planning_attempts,
                 steps=steps,
                 timings=timings,
                 planning_snapshot=after,
             )
-        if result is not None:
-            return result
-        # Every pass ended on a step that could not be resolved, and there are none left. The
-        # run is a failure, and the note naming the step is already in `notes` - this supplies
-        # the verdict that the pass deliberately did not, with the steps that accumulated.
+        status = result.status if result is not None else "failed"
+        if status == "failed" and self.clock() - started > options.task_timeout_seconds:
+            status = "timed_out"
+        # A pass may already have written a provisional result. Finalize again
+        # after *all* retries: an empty/error retry still spent time, and a later
+        # unresolved step still belongs beside the earlier steps in the summary.
         return self._finish(
             task,
             options,
-            "failed",
+            status,
             started,
             notes,
             steps,
             snapshot=initial,
-            planning_attempts=planning_attempts + passes - 1,
+            planning_attempts=planning_attempts,
             timings=timings,
+            verification=result.verification if result is not None else None,
         )
 
     def _execute_plan_once(
@@ -581,7 +807,7 @@ class TaskRunner:
         source = planning_snapshot or initial
         current = source
 
-        for index, step in enumerate(plan.steps, start=1):
+        for step in plan.steps:
             if self.clock() - started > options.task_timeout_seconds:
                 return self._finish(
                     task,
@@ -596,7 +822,7 @@ class TaskRunner:
                 )
 
             record = StepRecord(
-                index=index,
+                index=len(steps) + 1,
                 step_id=step.step_id,
                 description=step.description,
                 action_type=step.action_type,
@@ -653,41 +879,8 @@ class TaskRunner:
                 if options.execute and task.message_conversation:
                     if step.action_type in {"key_press", "hotkey"}:
                         raise GroundingError("message tasks require the approved send control, not keys")
-                    if step.action_type == "type_text":
-                        # The model names the marker in its own words but leaves the argument
-                        # empty. Measured on T04_20261006_225340, two passes running:
-                        #
-                        #     step_id     = s2
-                        #     description = "Type WEEK4_MESSAGE_CHECK_20261006_225340"
-                        #     target_text = None
-                        #     arguments   = {}          (no "text")
-                        #     error       = visual grounding refused: typed message must
-                        #                   exactly match this run's marker
-                        #
-                        # The click before it resolved to (1705,919) - the editor - so the plan
-                        # was right and only the field was wrong. `ActionAdapter` already falls
-                        # back to `target_text` for this, but that fallback cannot help when the
-                        # model leaves *both* text fields empty, and it cannot know the marker
-                        # either: `resolve()` receives no task.
-                        #
-                        # So the normalisation lives here, where the marker is known, and it
-                        # accepts one thing only: a marker that appears **verbatim** in the
-                        # step's own description. That is not a relaxation - the check below
-                        # still demands an exact match against `task.expect_text`, the adapter
-                        # still refuses a blank text, and free prose in a description is still
-                        # not typed anywhere.
-                        marker = task.expect_text[0] if len(task.expect_text) == 1 else None
-                        supplied = (step.arguments or {}).get("text")
-                        if (
-                            marker
-                            and not (supplied or "").strip()
-                            and marker in str(step.description or "")
-                        ):
-                            step.arguments = {**(step.arguments or {}), "text": marker}
-                            notes.append(
-                                f"{step.step_id}: the marker was named in the description but "
-                                "not in arguments.text; took it from the description verbatim"
-                            )
+                    # The plan must explicitly supply the executable literal.
+                    # A description/target label cannot fill missing arguments.
                     if step.action_type == "type_text" and (
                         len(task.expect_text) != 1 or step.arguments.get("text") != task.expect_text[0]
                     ):
@@ -771,6 +964,114 @@ class TaskRunner:
             if options.execute and task.message_conversation and step.action_type == "click" and any(
                 item.action_type == "type_text" and item.action_result is not None for item in steps
             ):
+                # Dispatch success only says the typing event was accepted. Read
+                # the current draft independently before an irreversible send.
+                try:
+                    draft = self.verifier.check_message_draft(task, before)
+                except Exception as exc:  # noqa: BLE001 - uncertainty cannot authorise a send
+                    draft = VerificationResult(
+                        outcome="inconclusive",
+                        detail=f"draft verification failed: {type(exc).__name__}: {exc}",
+                    )
+                self.recorder.session.save_json(
+                    f"message_draft_{record.index:04d}.json", draft.model_dump(mode="json")
+                )
+                if not draft.passed:
+                    self._message_send_blocked = True
+                    record.verification = draft
+                    record.error = f"message draft verification refused send: {draft.detail}"
+                    record.elapsed_ms = (self.clock() - step_started) * 1000
+                    steps.append(record)
+                    self.recorder.append_step(record)
+                    notes.append(record.error)
+                    return self._finish(
+                        task, options, "failed", started, notes, steps, snapshot=initial,
+                        planning_attempts=planning_attempts, timings=timings, verification=draft,
+                    )
+                # Draft verification is another slow visual request: the run's
+                # budget and foreground must still hold when it returns.
+                if self.clock() - started > options.task_timeout_seconds:
+                    self._message_send_blocked = True
+                    record.verification = draft
+                    record.error = "task budget exhausted while verifying the message draft"
+                    record.elapsed_ms = (self.clock() - step_started) * 1000
+                    steps.append(record)
+                    self.recorder.append_step(record)
+                    notes.append(record.error)
+                    return self._finish(
+                        task, options, "timed_out", started, notes, steps, snapshot=initial,
+                        planning_attempts=planning_attempts, timings=timings,
+                    )
+                verified = before
+                recheck: dict[str, Any] = {
+                    "verified_observation_id": verified.observation_id,
+                    "outcome": "inconclusive",
+                }
+                draft.evidence["dispatch_recheck"] = recheck
+                try:
+                    fresh_step, resolved, before = self._refresh_verified_message_send(
+                        fresh_step, resolved, verified, recheck,
+                        deadline=started + options.task_timeout_seconds,
+                    )
+                    record.observation_id = before.observation_id
+                    record.resolved = resolved
+                    recheck.update(
+                        outcome="passed", composer_pixels="exact_match",
+                        send_candidate_pixels="exact_match", send_candidate_id=resolved.element_id,
+                    )
+                    self.recorder.session.save_json(
+                        f"message_draft_{record.index:04d}.json", draft.model_dump(mode="json")
+                    )
+                except KeyboardInterrupt:
+                    recheck["outcome"] = "cancelled"
+                    self.recorder.session.save_json(
+                        f"message_draft_{record.index:04d}.json", draft.model_dump(mode="json")
+                    )
+                    raise
+                except Exception as exc:  # noqa: BLE001 - a changed/unreadable draft cannot be sent
+                    self._message_send_blocked = True
+                    stopped_status = "timed_out" if isinstance(exc, _TaskDeadlineExceeded) else "failed"
+                    recheck.update(outcome=stopped_status, error=f"{type(exc).__name__}: {exc}")
+                    self.recorder.session.save_json(
+                        f"message_draft_{record.index:04d}.json", draft.model_dump(mode="json")
+                    )
+                    record.verification = VerificationResult(
+                        outcome="failed", detail="the accepted draft changed before dispatch",
+                        evidence=draft.evidence,
+                    )
+                    record.error = f"message changed after draft verification: {type(exc).__name__}: {exc}"
+                    record.elapsed_ms = (self.clock() - step_started) * 1000
+                    steps.append(record)
+                    self.recorder.append_step(record)
+                    notes.append(record.error)
+                    return self._finish(
+                        task, options, stopped_status, started, notes, steps, snapshot=initial,
+                        planning_attempts=planning_attempts, timings=timings,
+                    )
+                if self.clock() - started > options.task_timeout_seconds:
+                    self._message_send_blocked = True
+                    record.verification = draft
+                    record.error = "task budget exhausted while rechecking the verified message draft"
+                    record.elapsed_ms = (self.clock() - step_started) * 1000
+                    steps.append(record)
+                    self.recorder.append_step(record)
+                    notes.append(record.error)
+                    return self._finish(
+                        task, options, "timed_out", started, notes, steps, snapshot=initial,
+                        planning_attempts=planning_attempts, timings=timings,
+                    )
+                check_foreground = getattr(self.observer, "foreground_matches", None)
+                if not callable(check_foreground) or not check_foreground(before):
+                    self._message_send_blocked = True
+                    record.error = "foreground changed while verifying the message draft"
+                    record.elapsed_ms = (self.clock() - step_started) * 1000
+                    steps.append(record)
+                    self.recorder.append_step(record)
+                    notes.append(record.error)
+                    return self._finish(
+                        task, options, "failed", started, notes, steps, snapshot=initial,
+                        planning_attempts=planning_attempts, timings=timings,
+                    )
                 # Dispatch may have sent the message even if the next screenshot
                 # or visual verdict fails. A retry must never send it again.
                 self._message_send_attempted = True
@@ -857,6 +1158,22 @@ class TaskRunner:
 
             if after is not None:
                 current = after
+            if (options.execute and task.message_conversation
+                    and step.action_type == "type_text" and action_result.success):
+                try:
+                    current = self._park_message_cursor(
+                        before, after, options, started, steps,
+                    )
+                except KeyboardInterrupt:
+                    raise
+                except Exception as exc:  # noqa: BLE001 - uncertain parking cannot precede a Send
+                    self._message_send_blocked = True
+                    status = "timed_out" if isinstance(exc, _TaskDeadlineExceeded) else "failed"
+                    notes.append(f"cursor parking refused further input: {type(exc).__name__}: {exc}")
+                    return self._finish(
+                        task, options, status, started, notes, steps, snapshot=initial,
+                        planning_attempts=planning_attempts, timings=timings,
+                    )
             if self._message_send_attempted:
                 notes.append("message send was attempted; verifying before any further input")
                 break
@@ -961,6 +1278,22 @@ class TaskRunner:
         # Invalid frame identity is terminal for grounding, not a reason to ask
         # the model to guess across a different window or degraded capture.
         validate_frames(source, current)
+        editor_target = False
+        allowed_candidate_ids = None
+        if self._message_composer is not None:
+            source_composer, _ = self._message_controls(source)
+            if old.bounding_box == source_composer:
+                # T04_20261007_132911_213511_fb82db6e mapped the approved
+                # editor to eligible OCR Send. Fresh RGB checks proved that
+                # Send stayed unchanged, not that it was the old editor.
+                # Bind the role to the actual approved source candidate and
+                # independent composer evidence, not step_id/description.
+                source_editor = self._message_editor_candidate(source)
+                if source_editor.element_id != old_id:
+                    raise GroundingError("approved source target is not the authorised message editor")
+                editor_target = True
+                current_editor = self._message_editor_candidate(current)
+                allowed_candidate_ids = frozenset({current_editor.element_id})
         method = "pixel_match"
         try:
             chosen = match_candidate(source, current, old_id)
@@ -968,13 +1301,27 @@ class TaskRunner:
             if self.target_grounder is None:
                 raise GroundingError("no model client can refresh the changed anonymous target") from None
             self._check_deadline(deadline)
-            mapped = self.target_grounder.ground(step, source, current, self.recorder.directory)
+            if editor_target:
+                mapped = self.target_grounder.ground(
+                    step, source, current, self.recorder.directory,
+                    allowed_candidate_ids=allowed_candidate_ids,
+                )
+            else:
+                mapped = self.target_grounder.ground(step, source, current, self.recorder.directory)
             self._check_deadline(deadline)
             chosen_id = mapped.arguments.get("element_id") or mapped.arguments.get("target_element")
+            if editor_target and chosen_id not in allowed_candidate_ids:
+                raise GroundingError("message editor mapping changed the approved target role")
             mapping_frame = current
             current = self._observing()
+            if editor_target:
+                # A model may take minutes. Preserve the role/uniqueness in the
+                # fresh frame as well as the original RGB identity check.
+                current_editor = self._message_editor_candidate(current)
             chosen = match_candidate(mapping_frame, current, chosen_id)
             method = "vision_model_then_pixel_match"
+        if editor_target and chosen.element_id != current_editor.element_id:
+            raise GroundingError("message editor grounding changed the approved target role")
         arguments = dict(step.arguments)
         for key in ("element_id", "target_element"):
             if key in arguments:
@@ -984,6 +1331,188 @@ class TaskRunner:
             f"to {chosen.element_id} in {current.observation_id} ({method})"
         )
         return step.model_copy(update={"arguments": arguments}, deep=True), current, True
+
+    def _park_message_cursor(
+        self, typing_before: ObservationSnapshot, typing_after: ObservationSnapshot | None,
+        options: ExecutionOptions, started: float, steps: list[StepRecord],
+    ) -> ObservationSnapshot:
+        """One counted move away from draft pixels; strict Send guards stay downstream."""
+        current = typing_after or typing_before
+        if self._message_cursor_parking_attempted:
+            return current
+        self._message_cursor_parking_attempted = True
+        parking_started = self.clock()
+        deadline = started + options.task_timeout_seconds
+        ledger: dict[str, Any] = {
+            "scope": "one runtime geometry-only cursor move after successful typing",
+            "typing_before_observation_id": typing_before.observation_id,
+            "typing_after_observation_id": typing_after.observation_id if typing_after else None,
+            "dispatch_attempted": False, "outcome": "inconclusive",
+            "semantic_authorization": False, "send_authorization": False,
+            "max_actions": options.max_actions,
+            "modifier_cleanup": "existing executor key_up cleanup retained; no click/type/press/send",
+            "stop_mechanism": "KeyboardInterrupt and existing executor fail-safe; no global Esc listener",
+        }
+        record: StepRecord | None = None
+
+        def persist() -> None:
+            ledger["elapsed_ms"] = (self.clock() - parking_started) * 1000
+            self.recorder.session.save_json("cursor_parking.json", ledger)
+
+        try:
+            self._check_deadline(deadline)
+            used = sum(item.action_result is not None for item in steps)
+            ledger["actions_used_before"] = used
+            if options.max_actions - used < 2:
+                ledger.update(outcome="skipped", code="reserve_one_send_action")
+                persist()
+                self._check_deadline(deadline)
+                return current
+            # check_step may itself be slow. Take a new capture for this internal
+            # move rather than treating the earlier post-type RGB as current.
+            current = self.observer.observe()
+            self.recorder.save_observation(current)
+            self._check_deadline(deadline)
+            validate_frames(typing_before, current)
+            if (current.observation_id == typing_before.observation_id
+                    or current.captured_at < typing_before.captured_at
+                    or (typing_after is not None and (
+                        current.observation_id == typing_after.observation_id
+                        or current.captured_at < typing_after.captured_at
+                    ))):
+                raise GroundingError("cursor parking requires a fresh post-type observation")
+            self._guard_message_header(current)
+            decision = plan_cursor_parking(current, step_id="runtime_cursor_parking")
+            ledger["before"] = decision.evidence["source"]
+            ledger["decision"] = {"code": decision.code, **decision.evidence}
+            self._check_deadline(deadline)
+            if decision.outcome == "skipped":
+                ledger.update(outcome="skipped", code=decision.code)
+                persist()
+                self._check_deadline(deadline)
+                return current
+            if decision.outcome != "planned" or decision.resolved is None:
+                raise GroundingError(f"cursor parking geometry refused: {decision.code}")
+            record = StepRecord(
+                index=len(steps) + 1, step_id=decision.resolved.step_id,
+                description="move cursor outside current message window before strict draft reading",
+                action_type="move", observation_id=current.observation_id, resolved=decision.resolved,
+            )
+            ledger.update(outcome="ready_to_dispatch", resolved=decision.resolved.model_dump(mode="json"))
+            persist()
+            self._check_deadline(deadline)
+            check_foreground = getattr(self.observer, "foreground_matches", None)
+            if not callable(check_foreground) or not check_foreground(current):
+                raise GroundingError("foreground changed immediately before cursor parking")
+            self._check_deadline(deadline)
+            ledger["dispatch_attempted"] = True
+            record.action_result = {
+                "success": False, "dry_run": False, "error": "cursor move completion unknown",
+                "action": decision.resolved.action.model_dump(mode="json"),
+            }
+            result = self.executor.execute(
+                decision.resolved.action, dry_run=False, screen=current.screen_info,
+            )
+            if (not isinstance(result, ActionResult) or type(result.success) is not bool
+                    or result.dry_run is not False or result.action != decision.resolved.action):
+                raise GroundingError("cursor parking returned an unknown execution result")
+            record.action_result.update(success=result.success, error=result.error)
+            ledger["action_result"] = record.action_result
+            if not result.success:
+                raise GroundingError(f"cursor parking move failed: {result.error}")
+            self._check_deadline(deadline)
+            ledger["post_capture_attempted"] = True
+            moved = self.observer.observe()
+            self.recorder.save_observation(moved)
+            record.after_observation_id = moved.observation_id
+            ledger["after_observation_id"] = moved.observation_id
+            ledger["after_geometry"] = {
+                "window_identity": list(window_identity(moved)),
+                "screen_info": moved.screen_info.model_dump(mode="json"),
+                "image_path": moved.image_path, "errors": moved.errors,
+            }
+            ledger["after"] = verify_parking_frame(current, moved)
+            self._guard_message_header(moved)
+            if not check_foreground(moved):
+                raise GroundingError("foreground changed after cursor parking")
+            self._check_deadline(deadline)
+            record.verification = VerificationResult(
+                outcome="passed", detail="cursor move completed with unchanged foreground geometry; no Send authorization",
+                evidence={"semantic_authorization": False, "send_authorization": False},
+            )
+            ledger.update(outcome="completed", code="move_completed_geometry_unchanged")
+            persist()
+            self._check_deadline(deadline)
+            return moved
+        except KeyboardInterrupt:
+            self._message_send_blocked = True
+            ledger.update(outcome="cancelled", error="KeyboardInterrupt")
+            if record is not None:
+                record.error = "cursor parking interrupted; no further input authorised"
+            raise
+        except Exception as exc:
+            self._message_send_blocked = True
+            ledger.update(outcome="timed_out" if isinstance(exc, _TaskDeadlineExceeded) else "failed",
+                          error=f"{type(exc).__name__}: {exc}")
+            if record is not None:
+                record.error = ledger["error"]
+                record.verification = VerificationResult(outcome="failed", detail=record.error)
+            raise
+        finally:
+            if record is not None:
+                ledger["action_result"] = record.action_result
+            try:
+                persist()
+                if ledger["outcome"] in {"completed", "skipped"}:
+                    self._check_deadline(deadline)
+            except KeyboardInterrupt:
+                self._message_send_blocked = True
+                ledger.update(outcome="cancelled", error="KeyboardInterrupt while saving parking evidence")
+                if record is not None:
+                    record.error = ledger["error"]
+                    record.verification = VerificationResult(outcome="failed", detail=record.error)
+                persist()
+                raise
+            except _TaskDeadlineExceeded:
+                self._message_send_blocked = True
+                ledger.update(outcome="timed_out", error="task budget exhausted while saving parking evidence")
+                if record is not None:
+                    record.error = ledger["error"]
+                    record.verification = VerificationResult(outcome="failed", detail=record.error)
+                persist()
+                raise
+            except Exception as exc:
+                self._message_send_blocked = True
+                ledger.update(outcome="failed", error=f"parking evidence write failed: {type(exc).__name__}: {exc}")
+                if record is not None:
+                    record.error = ledger["error"]
+                    record.verification = VerificationResult(outcome="failed", detail=record.error)
+                persist()
+                raise
+            finally:
+                if record is not None:
+                    record.elapsed_ms = (self.clock() - parking_started) * 1000
+                    steps.append(record)
+                    self.recorder.append_step(record)
+                    try:
+                        if ledger["outcome"] in {"completed", "skipped"}:
+                            self._check_deadline(deadline)
+                    except _TaskDeadlineExceeded:
+                        self._message_send_blocked = True
+                        ledger.update(outcome="timed_out", code="parking_step_log_budget_exhausted",
+                                      error="move already recorded; step-log IO exhausted task budget")
+                        persist()
+                        # The move log is append-only. Record the subsequent IO
+                        # failure separately, without counting another action.
+                        failure = StepRecord(
+                            index=len(steps) + 1, step_id="runtime_cursor_parking_evidence",
+                            description="cursor move recorded; evidence IO consumed remaining task budget",
+                            action_type="evidence", error=ledger["error"],
+                            verification=VerificationResult(outcome="failed", detail=ledger["error"]),
+                        )
+                        steps.append(failure)
+                        self.recorder.append_step(failure)
+                        raise
 
     def _check_deadline(self, deadline: float | None) -> None:
         if deadline is not None and self.clock() > deadline:
@@ -1054,6 +1583,17 @@ class TaskRunner:
         ]
         return composer, candidates
 
+    def _message_editor_candidate(self, current: ObservationSnapshot) -> ElementRef:
+        """One observed editor contour, exactly matching the authorised region."""
+        composer, candidates = self._message_controls(current)
+        editors = [
+            item for item in candidates
+            if item.source == "contour" and not item.text.strip() and item.bounding_box == composer
+        ]
+        if len(editors) != 1:
+            raise GroundingError("authorised message editor is not one unique current contour")
+        return editors[0]
+
     def _guard_message_click(
         self, step: PlanStep, resolved: ResolvedAction, current: ObservationSnapshot,
     ) -> None:
@@ -1065,7 +1605,195 @@ class TaskRunner:
         if len(matches) != 1 or resolved.screenshot_point != matches[0].center:
             raise GroundingError("message click is not a current candidate inside the authorised composer")
 
+    def _refresh_verified_message_send(
+        self, step: PlanStep, resolved: ResolvedAction, verified: ObservationSnapshot,
+        evidence: dict[str, Any],
+        *, deadline: float,
+    ) -> tuple[PlanStep, ResolvedAction, ObservationSnapshot]:
+        """Recheck the exact accepted draft after the slow visual request returns.
+
+        Window translation is allowed. A blinking caret can return to the accepted
+        pixels within at most five fresh captures; only composer mismatch permits
+        another capture, never altered headers, candidates or degraded frames.
+        Even one persistently changed text pixel refuses the send. No similarity
+        threshold or mask can distinguish a caret from an edited character safely.
+        """
+        old_composer, _ = self._message_controls(verified)
+        previous = verified.element(resolved.element_id or "")
+        if previous is None:
+            raise GroundingError("the verified send candidate is missing")
+
+        def crop(image: Image.Image, box: BoundingBox) -> Image.Image:
+            return image.convert("RGB").crop((box.left, box.top, box.right, box.bottom))
+
+        def exact(old: Image.Image, new: Image.Image) -> bool:
+            return old.size == new.size and old.tobytes() == new.tobytes()
+
+        def ensure_budget() -> None:
+            if self.clock() >= deadline:
+                raise _TaskDeadlineExceeded("task budget exhausted during message pixel recheck")
+
+        def ensure_foreground(snapshot: ObservationSnapshot) -> None:
+            check = getattr(self.observer, "foreground_matches", None)
+            if not callable(check) or not check(snapshot):
+                raise GroundingError("foreground changed during message pixel recheck")
+
+        with Image.open(verified.image_path) as old_image:
+            accepted_composer = crop(old_image, old_composer)
+            accepted_send = crop(old_image, previous.bounding_box)
+        samples: list[dict[str, Any]] = []
+        evidence.update(max_capture_attempts=5, samples=samples)
+        latest = verified
+        for index in range(5):
+            sample: dict[str, Any] = {"attempt": index + 1, "outcome": "inconclusive"}
+            samples.append(sample)
+            try:
+                ensure_budget()
+                ensure_foreground(latest)
+                if index:
+                    delay = _MESSAGE_RECHECK_DELAYS[index - 1]
+                    if self.clock() + delay >= deadline:
+                        raise _TaskDeadlineExceeded("not enough task budget for another pixel recheck")
+                    sample["wait_seconds"] = delay
+                    self.sleep(delay)
+                    ensure_budget()
+                    ensure_foreground(latest)
+                current = self._observing()
+                latest = current
+                sample.update(observation_id=current.observation_id, image_path=current.image_path)
+                evidence.update(
+                    dispatch_observation_id=current.observation_id,
+                    dispatch_image_path=current.image_path,
+                )
+                ensure_budget()
+                new_composer, _ = self._message_controls(current)
+                ensure_foreground(current)
+                chosen = match_candidate(verified, current, resolved.element_id or "")
+                with Image.open(current.image_path) as new_image:
+                    if not exact(accepted_send, crop(new_image, chosen.bounding_box)):
+                        raise GroundingError("send candidate pixels changed after draft verification")
+                    sample["send_candidate_pixels"] = "exact_match"
+                    sample["send_candidate_id"] = chosen.element_id
+                    if not exact(accepted_composer, crop(new_image, new_composer)):
+                        sample.update(outcome="composer_mismatch", composer_pixels="mismatch")
+                        ensure_budget()
+                        continue
+                sample["composer_pixels"] = "exact_match"
+                arguments = {**step.arguments, "element_id": chosen.element_id}
+                refreshed = step.model_copy(update={"arguments": arguments}, deep=True)
+                fresh_resolved = self.adapter.resolve(refreshed, current)
+                self._guard_message_click(refreshed, fresh_resolved, current)
+                ensure_budget()
+                sample["outcome"] = "passed"
+                return refreshed, fresh_resolved, current
+            except Exception as exc:
+                sample.update(
+                    outcome="timed_out" if isinstance(exc, _TaskDeadlineExceeded) else "failed",
+                    error=f"{type(exc).__name__}: {exc}",
+                )
+                raise
+            except KeyboardInterrupt:
+                sample["outcome"] = "cancelled"
+                raise
+        raise GroundingError("message composer pixels did not match in five bounded captures")
+
     # ── helpers ────────────────────────────────────────────────────────
+    def _message_quality_preflight(
+        self, initial: ObservationSnapshot, deadline: float | None,
+    ) -> tuple[ObservationSnapshot, dict[str, Any]]:
+        """Bounded source-frame checks before the first semantic model request.
+
+        Only known transient capture conditions may cause another observation.
+        A different window/title/class/bounds or monitor geometry is a refusal,
+        not a reason to focus an app. Every sampled frame stays in the ledger.
+        """
+        samples: list[dict[str, Any]] = []
+        ledger: dict[str, Any] = {
+            "stage": "initial_message_preflight", "outcome": "pending",
+            "max_captures": _MESSAGE_QUALITY_MAX_CAPTURES, "samples": samples,
+            "gui_actions": 0, "model_calls": 0,
+            "semantic_authorization": False, "send_authorization": False,
+            "scope": "basic source-frame integrity; arbitrary overlays and cursor state are unknown",
+        }
+        current = initial
+        original_identity = window_identity(initial)
+        original_screen = initial.screen_info.model_dump()
+
+        def conclude(outcome: str, code: str, detail: str):
+            ledger.update(outcome=outcome, code=code, detail=detail)
+            return current, ledger
+
+        try:
+            for index in range(1, _MESSAGE_QUALITY_MAX_CAPTURES + 1):
+                sample: dict[str, Any] = {
+                    "capture_index": index, "observation_id": current.observation_id,
+                    "image_path": current.image_path, "captured_at": current.captured_at.isoformat(),
+                    "window_id": current.window_id, "window_title": current.window_title,
+                    "window_class": current.window_class,
+                    "window_bounds": current.window_bounds.model_dump() if current.window_bounds else None,
+                    "foreground_stable": current.foreground_stable,
+                    "screen_info": current.screen_info.model_dump(),
+                }
+                samples.append(sample)
+                self._check_deadline(deadline)
+                if (window_identity(current) != original_identity
+                        or current.screen_info.model_dump() != original_screen):
+                    sample["outcome"] = "blocked"
+                    return conclude(
+                        "blocked", "foreground_changed_during_quality_recheck",
+                        "window identity, bounds or monitor geometry changed during quality captures",
+                    )
+                assessment = assess_screenshot_quality(current)
+                sample["quality"] = assessment.to_dict()
+                self._check_deadline(deadline)
+                sample["outcome"] = assessment.outcome
+                if assessment.outcome != "retryable":
+                    return conclude(assessment.outcome, assessment.code, assessment.detail)
+                if index == _MESSAGE_QUALITY_MAX_CAPTURES:
+                    return conclude(
+                        "blocked", "quality_capture_limit_reached",
+                        f"{assessment.code} persisted for {_MESSAGE_QUALITY_MAX_CAPTURES} captures",
+                    )
+                self._check_deadline(deadline)
+                try:
+                    current = self._observing()
+                except Exception as exc:  # noqa: BLE001 - capture failure cannot authorize an action
+                    expired = deadline is not None and self.clock() >= deadline
+                    samples.append({
+                        "capture_index": index + 1, "outcome": "timed_out" if expired else "blocked",
+                        "capture_error": f"{type(exc).__name__}: {exc}",
+                    })
+                    return conclude(
+                        "timed_out" if expired else "blocked", "quality_reobservation_failed",
+                        f"read-only quality reobservation failed: {type(exc).__name__}: {exc}",
+                    )
+                except KeyboardInterrupt:
+                    samples.append({"capture_index": index + 1, "outcome": "cancelled",
+                                    "capture_error": "KeyboardInterrupt"})
+                    raise
+        except _TaskDeadlineExceeded as exc:
+            if samples:
+                samples[-1].update(outcome="timed_out", error=str(exc))
+            return conclude("timed_out", "task_budget_exhausted_during_quality", str(exc))
+        except KeyboardInterrupt:
+            if samples:
+                samples[-1]["outcome"] = "cancelled"
+            ledger.update(outcome="cancelled", code="quality_preflight_interrupted",
+                          detail="operator interrupted read-only quality preflight")
+            raise
+        finally:
+            ledger["capture_attempts"] = len(samples)
+            self.recorder.session.save_json("screenshot_quality_initial.json", ledger)
+            # Automatic evidence IO is part of the task budget, too. Do not
+            # start a semantic request if the apparently passed frame used it up.
+            if (ledger["outcome"] == "passed" and deadline is not None
+                    and self.clock() >= deadline):
+                ledger.update(outcome="timed_out", code="task_budget_exhausted_during_quality_recording",
+                              detail="task budget expired while recording quality evidence")
+                samples[-1].update(outcome="timed_out", error=ledger["detail"])
+                self.recorder.session.save_json("screenshot_quality_initial.json", ledger)
+        raise AssertionError("quality capture loop ended without a verdict")
+
     def _observing(self) -> ObservationSnapshot:
         snapshot = self.observer.observe()
         self.recorder.save_observation(snapshot)
@@ -1149,7 +1877,8 @@ class TaskRunner:
             message_context["send_candidate_id"] = send_labels[0].element_id
         if self._message_text_typed:
             message_context["rules"] = (
-                "This run's exact marker has already been successfully typed. Only click the "
+                "A text-entry event for this run's marker was successfully dispatched; the "
+                "draft is not yet verified as committed. Only click the "
                 "current visible send control, then finish. Do not type again, click the editor "
                 "to refocus, clear text, or press Enter. If send is unavailable return no steps "
                 "and explain in errors."
@@ -1210,11 +1939,14 @@ class TaskRunner:
             screen=provenance.screen_description(snapshot),
             started_at=finished_at - timedelta(milliseconds=elapsed_ms),
             finished_at=finished_at,
-            planning_attempts=planning_attempts,
+            planning_attempts=(timings.planning_attempts if timings is not None else planning_attempts),
             model_requests=int(getattr(client, "request_count", 0)),
             planning_ms=phases["planning_ms"],
             confirmation_ms=phases["confirmation_ms"],
             execution_ms=phases["execution_ms"],
+            planner_ms=phases["planner_ms"],
+            planning_calls=(timings.planning_calls if timings is not None else 0),
+            system_elapsed_ms=phases["system_elapsed_ms"],
             evidence_directory=str(self.recorder.directory),
             stop_reason=(
                 notes[-1] if notes and status not in {"succeeded", "dry_run_completed"} else ""
@@ -1244,8 +1976,10 @@ class TaskRunner:
             options,
             "cancelled",
             started,
-            ["interrupted by the operator; nothing further was executed"],
+            self._notes + ["interrupted by the operator; nothing further was executed"],
             records,
+            planning_attempts=self._timings.planning_attempts,
+            timings=self._timings,
         )
 
     def _blocked(
@@ -1260,5 +1994,6 @@ class TaskRunner:
         # `timings.started`, not `self.clock()`: a blocked run that spent twenty
         # seconds inside a model call before giving up used to record 0.0 ms.
         return self._finish(
-            task, options, "blocked", timings.started, [reason], snapshot=snapshot, timings=timings
+            task, options, "blocked", timings.started, [reason], snapshot=snapshot, timings=timings,
+            planning_attempts=timings.planning_attempts,
         )

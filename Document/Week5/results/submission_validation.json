@@ -1,0 +1,46 @@
+{
+  "schema": "week5.public.submission_validation.v1",
+  "scope": "CPU publication validation; no new model training, calibration or desktop execution",
+  "full_regression": {
+    "command": "python -m pytest -q",
+    "exit_code": 1,
+    "passed": 2643,
+    "failed": 1,
+    "collected": 2644,
+    "seconds": 478.84,
+    "failure": "README still said884 while the then-collected suite had2644 tests; historical failure retained"
+  },
+  "correction": "README now reflects2645 collected tests after one additional prompt/plan check; Week4 report remains tied to its original884-case baseline",
+  "focused_after_correction": {
+    "command": "python -m pytest -q tests/test_documented_counts.py tests/test_week5_c11_submission.py --basetemp=.pytest-submission-checks",
+    "exit_code": 0,
+    "passed": 18,
+    "seconds": 9.46,
+    "includes_original_failed_check": true,
+    "includes_one_newly_added_test": true
+  },
+  "distinct_current_tests_with_passing_observations": 2645,
+  "all_current_tests_claimed_to_have_run_in_one_exit0_full_invocation": false,
+  "ruff": {
+    "command": "ruff check src tests scripts",
+    "exit_code": 0
+  },
+  "staged_whitespace_check": {
+    "command": "git diff --cached --check",
+    "exit_code": 0
+  },
+  "final_prompt_source_AST_comparison": {
+    "phases": 4,
+    "passed": true,
+    "synthetic_literal": true
+  },
+  "actual_public_PNGs_visually_inspected": [
+    "training_objective.png",
+    "offline_quality.png",
+    "original12_scope_matrix_001.png"
+  ],
+  "historical_offline_plot_pending_desktop_text": "Preserved offline-closure snapshot; final desktop scope is documented separately in the report and matrix",
+  "raw_wechat_screenshots_in_new_public_files": 0,
+  "new_GPU_runs": 0,
+  "new_desktop_inputs": 0
+}

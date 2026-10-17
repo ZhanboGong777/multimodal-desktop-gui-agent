@@ -13,6 +13,8 @@ import sys
 from pathlib import Path
 from typing import ClassVar
 
+import pytest
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -108,6 +110,65 @@ def test_execute_without_a_terminal_is_blocked_rather_than_assumed(tmp_path: Pat
     # Refused before the run directory exists: an empty session left behind is
     # indistinguishable from a run that died early.
     assert not destination.exists() or not any(destination.iterdir())
+
+
+@pytest.mark.parametrize("run_id", ["../escape", "bad/name", "bad\\name", "CON", "NUL", ""])
+def test_explicit_run_id_rejects_unsafe_directory_names(run_id: str) -> None:
+    result = run_cli("--case", "T01", "--run-id", run_id)
+    assert result.returncode == 2
+    assert "--run-id" in result.stderr
+
+
+def test_explicit_run_id_does_not_overwrite_an_existing_run(tmp_path: Path) -> None:
+    directory = tmp_path / "T04_existing"
+    directory.mkdir()
+    sentinel = directory / "task_summary.json"
+    sentinel.write_text('{"original": true}', encoding="utf-8")
+    result = run_cli(
+        "--case", "T04", "--run-id", directory.name, "--output-directory", str(tmp_path)
+    )
+    assert result.returncode == 2
+    assert "refusing to overwrite" in result.stderr
+    assert sentinel.read_text(encoding="utf-8") == '{"original": true}'
+    assert list(tmp_path.iterdir()) == [directory]
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        ("--case", "T01"),
+        ("--case", "T04", "--instruction", "some other instruction"),
+        ("--instruction", "some instruction"),
+    ],
+)
+def test_explicit_message_marker_requires_the_unmodified_t04_case(args: tuple[str, ...]) -> None:
+    result = run_cli(*args, "--message-marker", "WEEK4_MESSAGE_CHECK_test")
+    assert result.returncode == 2
+    assert "requires --case T04 without --instruction" in result.stderr
+
+
+def test_explicit_t04_marker_and_run_id_travel_with_the_record(tmp_path: Path) -> None:
+    import json
+
+    marker = "WEEK4_MESSAGE_CHECK_20261007_unique"
+    result = run_cli(
+        "--case",
+        "T04",
+        "--provider",
+        "mock",
+        "--run-id",
+        "T04_feedback_test",
+        "--message-marker",
+        marker,
+        "--output-directory",
+        str(tmp_path),
+    )
+    path = tmp_path / "T04_feedback_test" / "task_summary.json"
+    assert path.exists(), result.stdout + result.stderr
+    summary = json.loads(path.read_text(encoding="utf-8"))
+    assert summary["run_id"] == "T04_feedback_test"
+    assert marker in summary["instruction"]
+    assert summary["execute"] is False
 
 
 def _load_cli():
@@ -270,8 +331,14 @@ def test_the_smallest_valid_limit_is_applied_rather_than_ignored(tmp_path: Path)
     got the default instead. The header prints what was actually applied.
     """
     result = run_cli(
-        "--case", "T01", "--max-actions", "1", "--task-timeout", "7",
-        "--output-directory", str(tmp_path / "records"),
+        "--case",
+        "T01",
+        "--max-actions",
+        "1",
+        "--task-timeout",
+        "7",
+        "--output-directory",
+        str(tmp_path / "records"),
     )
 
     assert "1 actions, 7s budget" in result.stdout, result.stdout
@@ -376,8 +443,12 @@ def test_a_dry_run_is_told_to_display_the_plan(capsys) -> None:
         instruction="search",
         summary="Search in the browser",
         steps=[
-            PlanStep(step_id="step-1", description="type", action_type="type_text",
-                     arguments={"text": "GUI agent research"}),
+            PlanStep(
+                step_id="step-1",
+                description="type",
+                action_type="type_text",
+                arguments={"text": "GUI agent research"},
+            ),
             PlanStep(step_id="step-2", description="stop", action_type="finish"),
         ],
     )
@@ -510,9 +581,7 @@ def test_the_environment_check_notices_a_screen_it_cannot_see(monkeypatch, capsy
     spec.loader.exec_module(module)
 
     class _Session:
-        monitors: ClassVar[list[dict[str, int]]] = [
-            {"left": 0, "top": 0, "width": 0, "height": 0}
-        ]
+        monitors: ClassVar[list[dict[str, int]]] = [{"left": 0, "top": 0, "width": 0, "height": 0}]
         width = 0
         height = 0
 

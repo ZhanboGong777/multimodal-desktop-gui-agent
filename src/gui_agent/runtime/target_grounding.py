@@ -145,6 +145,8 @@ class TargetGrounder:
         source: ObservationSnapshot,
         current: ObservationSnapshot,
         output_directory: Path,
+        *,
+        allowed_candidate_ids: frozenset[str] | None = None,
     ) -> PlanStep:
         validate_frames(source, current)
         if step.action_type not in POINT_ACTIONS:
@@ -177,6 +179,12 @@ class TargetGrounder:
             if not _eligible(element, current):
                 continue
             candidates[element.element_id] = element
+        if allowed_candidate_ids is not None:
+            # Role restrictions come from independently authorised runtime
+            # evidence, never the model's description of the approved step.
+            if not allowed_candidate_ids or not allowed_candidate_ids <= candidates.keys():
+                raise GroundingError("authorised mapping candidates are not eligible CURRENT controls")
+            candidates = {key: item for key, item in candidates.items() if key in allowed_candidate_ids}
         if not candidates:
             raise GroundingError("there are no eligible CURRENT detected candidates")
         comparison = _comparison(source, current, target, output_directory)

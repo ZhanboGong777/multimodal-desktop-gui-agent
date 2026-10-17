@@ -25,6 +25,7 @@ DEFAULT_MIN_RECTANGULARITY = 0.0
 DEFAULT_MAX_CANDIDATES = 200
 DEFAULT_EXCLUSION_THRESHOLD = 0.5
 CONTOUR_CONFIDENCE = 0.5
+_THIN_BORDER_RECTANGULARITY = 0.90
 
 
 def _containment(inner: BoundingBox, outer: BoundingBox) -> float:
@@ -109,10 +110,25 @@ def detect_ui_candidates(
     edges = cv2.dilate(edges, np.ones((2, 2), np.uint8), iterations=1)
 
     contours, _ = cv2.findContours(edges, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    # A one-pixel dark-theme border can disappear in the blur even though its
+    # native pixels have adequate contrast. T04's 2026-10-07 frame had no editor
+    # candidate for this reason. Preserve the normal noise-resistant pass, and
+    # supplement it with native-pixel edges only when they enclose a nearly full
+    # rectangle. Open strokes, text fragments and noisy clusters must not gain
+    # broad action boxes merely because the blur was removed.
+    native_edges = cv2.dilate(
+        cv2.Canny(gray, 20, 60), np.ones((2, 2), np.uint8), iterations=1,
+    )
+    thin_contours, _ = cv2.findContours(
+        native_edges, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE,
+    )
     image_area = float(width * height)
     boxes: list[BoundingBox] = []
 
-    for contour in contours:
+    for contour, thin_border in [
+        *((contour, False) for contour in contours),
+        *((contour, True) for contour in thin_contours),
+    ]:
         x, y, box_width, box_height = cv2.boundingRect(contour)
         area = box_width * box_height
         if area < min_area or area > image_area * max_area_ratio:
@@ -120,12 +136,15 @@ def detect_ui_candidates(
         aspect = box_width / float(box_height) if box_height else 0.0
         if aspect < min_aspect or aspect > max_aspect:
             continue
-        if min_rectangularity > 0.0:
+        required_rectangularity = max(
+            min_rectangularity, _THIN_BORDER_RECTANGULARITY if thin_border else 0.0,
+        )
+        if required_rectangularity > 0.0:
             # How much of the bounding box the contour actually fills. A button or
             # an input is nearly solid, a stray cluster of edge pixels is not. Note
             # that the useful threshold is theme dependent, so this is opt-in.
             filled = cv2.contourArea(contour) / float(area) if area else 0.0
-            if filled < min_rectangularity:
+            if filled < required_rectangularity:
                 continue
         box = BoundingBox(left=x, top=y, right=x + box_width, bottom=y + box_height)
         if (

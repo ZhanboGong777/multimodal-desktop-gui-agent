@@ -1,5 +1,18 @@
 # Multimodal Desktop GUI Agent
 
+### Week 5 submission
+
+The completed Week 5 delivery is in [Document/Week5](Document/Week5/README.md),
+including the [final report](Document/Week5/Week5_Final_Report_20261017.md),
+[reproduction instructions](Document/Week5/Reproduction.md), public result summaries,
+and the actual [C11 LoRA](artifacts/week5/c11/). The final model is the pinned
+Qwen2.5-VL-3B-Instruct with resized pixel action JSON and structure6/coordinate4/other2 CE.
+All original 16 offline gates passed. The original 12 desktop messages were verified
+across three prompt versions and five successful execution candidates; this is
+not a single fixed prompt scoring 12/12. Historical alternative implementations
+remain in the source with their CPU tests. Week 4 results below retain their
+historical scope; current test collection is checked separately.
+
 ### Project Overview
 
 This project develops and optimizes a desktop GUI agent powered by multimodal large
@@ -54,7 +67,7 @@ Three properties the loop is built around:
   with an actual current candidate, confirmed against a further screenshot after
   any visual mapping call. Missing, ambiguous or unsafe evidence stops the pass.
 
-884 tests, ruff clean. See `Document/Week4/Week4_Usage.md` for the flags, the
+2645 tests, ruff clean (current Week5 suite). See `Document/Week4/Week4_Usage.md` for the flags, the
 safety model and the record layout.
 
 The Chinese deliverables - `Week4_中文实验报告.(md|docx)`, `Week4_Windows复核手册.md`
@@ -145,7 +158,7 @@ python scripts/week3_model_demo.py --provider mock
 python scripts/week3_planning_demo.py --provider mock --instruction "Open the browser"
 ```
 
-884 tests, ruff clean. The model client's retry, timeout and
+2645 tests, ruff clean (current Week5 suite). The model client's retry, timeout and
 error-classification paths are covered, along with the four vision-payload
 failure modes (missing, empty, oversized, unknown type) and the TaskPlan
 schema boundaries. Dataset and model dependencies live in

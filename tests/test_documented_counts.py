@@ -13,6 +13,7 @@ it into the delivered document.
 
 from __future__ import annotations
 
+import json
 import re
 import subprocess
 import sys
@@ -53,7 +54,21 @@ def collected() -> dict[str, int]:
         if found:
             counts[found.group(1)] = counts.get(found.group(1), 0) + 1
     assert counts, f"the collection produced nothing:\n{done.stdout[-2000:]}"
+    assert done.returncode == 0, done.stdout[-2000:]
     return counts
+
+
+def historical_week4_counts() -> dict[str, int]:
+    """Week4's report describes its delivered commit, before Week5 added tests.
+
+    This ledger was collected on the unchanged 0a34092 checkout during Week5
+    publication. Current collection remains the source for the current README.
+    """
+    path = REPO_ROOT / "Document/Week5/results/week4_baseline_collection.json"
+    ledger = json.loads(path.read_text(encoding="utf-8"))
+    assert ledger["commit"] == "0a340929d7b720445a096f20ed6e0ba5f1a78f75"
+    assert sum(ledger["counts"].values()) == ledger["total"] == 884
+    return ledger["counts"]
 
 
 def test_the_readme_states_the_size_of_the_suite_it_describes(
@@ -69,6 +84,7 @@ def test_the_readme_states_the_size_of_the_suite_it_describes(
 def test_the_report_states_the_size_of_the_suite_it_describes(
     collected: dict[str, int],
 ) -> None:
+    collected = historical_week4_counts()
     total = sum(collected.values())
     claimed = set(re.findall(r"\*\*(\d+) passed\*\*", REPORT.read_text(encoding="utf-8")))
 
@@ -94,6 +110,7 @@ def test_the_per_file_table_names_the_counts_those_files_have(
     The table had drifted file by file while only the total was kept up to date,
     and the sentence miscounted the files for a while.
     """
+    collected = historical_week4_counts()
     report = REPORT.read_text(encoding="utf-8")
     rows = re.findall(r"^\| `(test_[a-z0-9_]+\.py)` \| (\d+) cases", report, re.MULTILINE)
 
@@ -125,6 +142,7 @@ def test_the_other_suites_the_sentence_lists_have_the_counts_it_gives(
     of measured.
     """
     # Week 3 ended at WEEK3_TOTAL; these are the eight files it already had.
+    collected = historical_week4_counts()
     week3 = {
         "test_control_safety.py": 20,
         "test_model_mock.py": 10,

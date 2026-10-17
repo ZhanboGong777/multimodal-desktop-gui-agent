@@ -244,7 +244,8 @@ def test_factory_returns_the_bare_engine_when_fallback_is_disabled(
 def test_paddle_v3_parser_accepts_numpy_arrays() -> None:
     """PaddleOCR can hand back NumPy arrays; `or` on those raises ValueError."""
     np = pytest.importorskip("numpy")
-    engine = PaddleOCREngine()
+    # Parsing does not need backend initialization or its process-wide CUDA workaround.
+    engine = PaddleOCREngine.__new__(PaddleOCREngine)
 
     payload = [
         {
@@ -268,7 +269,7 @@ def test_paddle_v3_parser_accepts_numpy_arrays() -> None:
 def test_paddle_v3_parser_handles_missing_polygons() -> None:
     """A page without any polygon key must degrade to no elements, not crash."""
     np = pytest.importorskip("numpy")
-    engine = PaddleOCREngine()
+    engine = PaddleOCREngine.__new__(PaddleOCREngine)
 
     # rec_polys explicitly None and dt_polys absent.
     assert engine._parse([{"rec_texts": np.array(["x"]), "rec_polys": None}], 0.5) == []
@@ -365,7 +366,12 @@ def test_on_windows_torch_is_blocked_before_paddleocr_can_import_it(
     and verified on the GPU node, not on this machine.
     """
     monkeypatch.setattr(sys, "platform", "win32")
+    # delitem alone records no undo when torch starts absent. Register its
+    # original state first, so the engine's direct None assignment cannot leak
+    # into later CPU training tests in this same pytest process.
+    monkeypatch.setitem(sys.modules, "torch", None)
     monkeypatch.delitem(sys.modules, "torch", raising=False)
+    assert "torch" not in sys.modules
 
     engine = _bare_engine()
     engine._prepare_platform()

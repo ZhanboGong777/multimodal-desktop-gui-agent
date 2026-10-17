@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -119,6 +120,28 @@ def _confidence(value: str) -> float:
     return number
 
 
+def _run_id(value: str) -> str:
+    """One portable directory component; explicit IDs must never merge runs."""
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,127}", value):
+        raise argparse.ArgumentTypeError("use 1..128 ASCII letters, digits, '-' or '_'")
+    if value.upper() in {
+        "CON",
+        "PRN",
+        "AUX",
+        "NUL",
+        *[f"COM{i}" for i in range(10)],
+        *[f"LPT{i}" for i in range(10)],
+    }:
+        raise argparse.ArgumentTypeError("reserved Windows directory name")
+    return value
+
+
+def _message_marker(value: str) -> str:
+    if not re.fullmatch(r"WEEK4_MESSAGE_CHECK_[A-Za-z0-9_-]{1,100}", value):
+        raise argparse.ArgumentTypeError("expected WEEK4_MESSAGE_CHECK_ plus an ASCII identifier")
+    return value
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=__doc__,
@@ -160,6 +183,18 @@ def parse_args() -> argparse.Namespace:
         help="drop OCR elements below this confidence (0..1)",
     )
     parser.add_argument("--output-directory", default=None)
+    parser.add_argument(
+        "--run-id",
+        type=_run_id,
+        default=None,
+        help="exact new run directory ID; an existing ID is refused",
+    )
+    parser.add_argument(
+        "--message-marker",
+        type=_message_marker,
+        default=None,
+        help="explicit unique marker for T04; does not bypass confirmations",
+    )
     parser.add_argument("--quiet", action="store_true")
     return parser.parse_args()
 
@@ -344,6 +379,10 @@ def main() -> int:
         print("error: pass --instruction or --case (see --list-cases)", file=sys.stderr)
         return EXIT_BLOCKED
 
+    if args.message_marker and (not args.case or args.case.upper() != "T04" or args.instruction):
+        print("error: --message-marker requires --case T04 without --instruction", file=sys.stderr)
+        return EXIT_BLOCKED
+
     try:
         config = load_config(args.config)
     except Exception as exc:  # noqa: BLE001
@@ -381,6 +420,15 @@ def main() -> int:
                 file=sys.stderr,
             )
             return EXIT_BLOCKED
+        if args.message_marker:
+            if not message_marker or message_marker not in task.instruction:
+                print("error: T04 instruction has no replaceable message marker", file=sys.stderr)
+                return EXIT_BLOCKED
+            task.instruction = task.instruction.replace(message_marker, args.message_marker)
+            task.expect_text = [
+                args.message_marker if text == message_marker else text for text in task.expect_text
+            ]
+            message_marker = args.message_marker
         if args.instruction:
             task.instruction = args.instruction
     else:
@@ -406,6 +454,9 @@ def main() -> int:
         return EXIT_BLOCKED
 
     output_directory = Path(args.output_directory or config.output.directory)
+    if args.run_id and (output_directory / args.run_id).exists():
+        print("error: requested --run-id already exists; refusing to overwrite", file=sys.stderr)
+        return EXIT_BLOCKED
 
     # ── wire the loop ──────────────────────────────────────────────────
     client = create_model_client(config.model)
@@ -418,7 +469,18 @@ def main() -> int:
     # RunSession keys its directory by session id; prefixing with the case id
     # keeps the five task runs distinguishable in the output tree.
     stamp = __import__("datetime").datetime.now().astimezone().strftime("%Y%m%d_%H%M%S")
-    session = RunSession.create(output_directory, session_id=f"{task.case_id}_{stamp}")
+    if args.run_id:
+        directory = output_directory / args.run_id
+        try:
+            directory.mkdir(parents=True, exist_ok=False)
+        except FileExistsError:
+            print(
+                "error: requested --run-id already exists; refusing to overwrite", file=sys.stderr
+            )
+            return EXIT_BLOCKED
+        session = RunSession(session_id=args.run_id, directory=directory)
+    else:
+        session = RunSession.create(output_directory, session_id=f"{task.case_id}_{stamp}")
     recorder = TaskRecorder(session)
     # The frames belong to the run that took them. They used to be written to the
     # directory the sessions live in, so every run's screenshots piled up beside the

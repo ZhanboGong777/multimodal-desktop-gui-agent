@@ -856,3 +856,50 @@ def test_anonymous_model_mapping_refuses_provider_failure_without_retry(tmp_path
         )
 
     assert client.request_count == 1
+
+
+@pytest.mark.parametrize("reply", ["new-e000", "new-e001"])
+def test_mapping_candidate_scope_keeps_an_eligible_other_role_out_of_the_request(tmp_path, reply):
+    import json
+
+    from gui_agent.runtime.target_grounding import TargetGrounder
+    from gui_agent.runtime.visual_grounding import GroundingError
+
+    old, current = _grounding_frames(tmp_path)
+    box = BoundingBox(left=120, top=90, right=165, bottom=115)
+    current.elements.append(ElementRef(
+        element_id="new-e001", text="Send", bounding_box=box, center=box.center,
+        confidence=0.9, source="ocr",
+    ))
+    client = _grounding_client(json.dumps({"candidate_ids": [reply]}))
+    step = _step(arguments={"element_id": "old-e000"})
+    if reply == "new-e001":
+        with pytest.raises(GroundingError, match="not an eligible CURRENT candidate"):
+            TargetGrounder(client).ground(
+                step, old, current, tmp_path / "comparisons",
+                allowed_candidate_ids=frozenset({"new-e000"}),
+            )
+    else:
+        mapped = TargetGrounder(client).ground(
+            step, old, current, tmp_path / "comparisons",
+            allowed_candidate_ids=frozenset({"new-e000"}),
+        )
+        assert mapped.arguments == {"element_id": "new-e000"}
+    context = json.loads(client.received[0][0][-1]["content"])["context"]
+    assert [item["element_id"] for item in context["current_candidates"]] == ["new-e000"]
+    assert client.request_count == 1 and step.arguments == {"element_id": "old-e000"}
+
+
+@pytest.mark.parametrize("scope", [frozenset(), frozenset({"missing"}), frozenset({"new-e000", "missing"})])
+def test_mapping_candidate_scope_must_be_complete_and_eligible_before_any_request(tmp_path, scope):
+    from gui_agent.runtime.target_grounding import TargetGrounder
+    from gui_agent.runtime.visual_grounding import GroundingError
+
+    old, current = _grounding_frames(tmp_path)
+    client = _grounding_client('{"candidate_ids":["new-e000"]}')
+    with pytest.raises(GroundingError, match="authorised mapping candidates"):
+        TargetGrounder(client).ground(
+            _step(arguments={"element_id": "old-e000"}), old, current, tmp_path / "comparisons",
+            allowed_candidate_ids=scope,
+        )
+    assert client.request_count == 0 and not client.received

@@ -21,12 +21,13 @@ from gui_agent.recording import RunSession
 from gui_agent.runtime import runner as runner_module
 from gui_agent.runtime.action_adapter import ActionAdapter
 from gui_agent.runtime.recorder import TaskRecorder
-from gui_agent.runtime.runner import TaskRunner, explain_model_failure
+from gui_agent.runtime.runner import TaskRunner, Timings, explain_model_failure
 from gui_agent.runtime.schemas import (
     ElementRef,
     ExecutionOptions,
     ObservationSnapshot,
     TaskSpec,
+    VerificationResult,
 )
 from gui_agent.runtime.verification import Verifier
 from gui_agent.schemas import ActionResult, BoundingBox, Point, ScreenInfo
@@ -1726,6 +1727,8 @@ class SimulatedChat:
         self.frames: dict[str, tuple[ObservationSnapshot, dict]] = {}
         self.actions: list = []
         self.foreground_checks = 0
+        self.parking_geometry = None
+        self.send_mapped = False
 
     def observe(self, *, observation_id=None) -> ObservationSnapshot:
         from PIL import Image, ImageDraw
@@ -1734,6 +1737,9 @@ class SimulatedChat:
         oid = observation_id or f"sim-{self.calls:04d}"
         dx = self.calls * 2
         dy = self.calls
+        if self.parking_geometry is not None:
+            dx, dy = self.parking_geometry
+            self.parking_geometry = None
         def box(left, top, right, bottom):
             return BoundingBox(left=left + dx, top=top + dy, right=right + dx, bottom=bottom + dy)
         window = box(20, 20, 620, 420)
@@ -1772,7 +1778,7 @@ class SimulatedChat:
         ]
         if self.fault.startswith("missing_send") and self.draft:
             elements.pop()
-        if self.fault == "post_mapping_missing" and self.draft and self.calls >= 7:
+        if self.fault == "post_mapping_missing" and self.draft and self.send_mapped:
             elements.pop()
         if self.fault == "duplicate_send" and self.draft:
             elements.append(elements[-1].model_copy(update={"element_id": f"{oid}-e003"}))
@@ -1814,6 +1820,11 @@ class SimulatedChat:
             elif action.action_type == "type_text":
                 assert self.focused, "typing must follow a successful input-box click"
                 self.draft = action.text
+            elif action.action_type == "move":
+                bounds = snapshot.window_bounds
+                assert not (bounds.left <= action.x < bounds.right
+                            and bounds.top <= action.y < bounds.bottom), "parking must leave the actual window"
+                self.parking_geometry = bounds.left - 20, bounds.top - 20
             else:
                 raise AssertionError("T04 must click send rather than press Enter")
         return ActionResult(action=action, success=True, dry_run=bool(dry_run))
@@ -1861,6 +1872,7 @@ def _simulated_t04(tmp_path, *, fault="", clock=None):
                     payload["status"] = "uncertain"
             elif system.startswith("Map the target"):
                 self.mapping_calls += 1
+                chat.send_mapped = True
                 if fault.startswith("mapping_timeout"):
                     clock.value += 100
                 candidates = [item["element_id"] for item in context["current_candidates"] if item["element_id"].endswith("e002")]
@@ -1872,14 +1884,18 @@ def _simulated_t04(tmp_path, *, fault="", clock=None):
             else:
                 self.planning_contexts.append(context)
                 oid = context["observation_id"]
-                if fault == "marker_in_description_only":
+                if fault in {"marker_in_description_only", "marker_in_target_only"}:
                     # The shape measured on T04_20261006_225340: the model names the marker
                     # in its own sentence and leaves both text fields empty. `target_text` is
                     # None and `arguments` has no "text", so `ActionAdapter`'s fallback cannot
                     # help and the runner's marker check refuses.
                     steps = [
                         PlanStep(step_id="focus", description="click message input", action_type="click", arguments={"element_id": f"{oid}-e001"}),
-                        PlanStep(step_id="type", description=f"Type {task.expect_text[0]}", action_type="type_text"),
+                        PlanStep(
+                            step_id="type", description=f"Type {task.expect_text[0]}",
+                            action_type="type_text",
+                            target_text=task.expect_text[0] if fault == "marker_in_target_only" else None,
+                        ),
                         PlanStep(step_id="send", description="click send button", action_type="click", arguments={"element_id": f"{oid}-e002"}),
                     ]
                 elif fault == "marker_never_stated":
@@ -1921,6 +1937,23 @@ def _simulated_t04(tmp_path, *, fault="", clock=None):
                         adapter=ActionAdapter(platform="win32"), executor=chat,
                         verifier=Verifier(), recorder=recorder, sleep=lambda _: None,
                         clock=clock or __import__("time").monotonic)
+    # This fixture tests the runner with two simplified controls, not the real
+    # message-region detector. The isolated-crop verifier has its own pixel/ROI
+    # tests. Read the prepared current-frame draft here, never the expected marker.
+    def prepared_draft(spec, frame):
+        assessment = chat.frames[frame.observation_id][1]
+        passed = (
+            assessment["conversation"] == spec.message_conversation
+            and assessment["status"] == "draft"
+            and assessment["marker"] == spec.expect_text[0]
+        )
+        return VerificationResult(
+            outcome="passed" if passed else "failed", method="automatic",
+            detail="prepared current-frame draft matches" if passed else "prepared draft mismatch",
+            evidence={"observation_id": frame.observation_id, "actual_draft": assessment["marker"],
+                      "source": "synthetic_prepared_frame"},
+        )
+    runner.verifier.check_message_draft = prepared_draft
     options = ExecutionOptions(execute=True, confirm=True, max_planning_attempts=1,
                                verification_timeout_seconds=0, task_timeout_seconds=60)
     return runner, task, options, chat, client, recorder
@@ -1938,10 +1971,10 @@ def test_t04_complete_send_uses_fresh_candidates_and_strict_message_evidence(tmp
     result = runner.run(task, options, confirm=approve("plan"), high_risk_confirm=approve("send"))
     assert result.status == "succeeded", result.stop_reason + str(result.notes)
     assert confirmations == ["plan", "send"]
-    assert [action.action_type for action, _ in chat.actions] == ["click", "type_text", "click"]
+    assert [action.action_type for action, _ in chat.actions] == ["click", "type_text", "move", "click"]
     assert chat.sent == task.expect_text[0] and not chat.draft
     assert client.mapping_calls == 1, "enabled send button needs a bounded visual refresh"
-    assert chat.foreground_checks == 3
+    assert chat.foreground_checks == 8, "parking, pixel recheck and dispatch must recheck the foreground"
     assert client.approved_plan.steps[-1].arguments["element_id"] == "sim-0001-e002"
     assert result.steps[-1].observation_id != "sim-0001"
     assert result.verification.evidence["assessment_method"] == "vision_model"
@@ -1954,7 +1987,7 @@ def test_t04_complete_send_uses_fresh_candidates_and_strict_message_evidence(tmp
 
 @pytest.mark.parametrize("fault,actions", [
     ("wrong_initial", 0), ("foreground_changed", 0), ("changed_recipient", 2),
-    ("missing_send", 2), ("duplicate_send", 2), ("draft_only", 2), ("send_ineffective", 3),
+    ("missing_send", 3), ("duplicate_send", 3), ("draft_only", 3), ("send_ineffective", 4),
 ])
 def test_t04_refuses_wrong_recipient_missing_target_and_draft_success(tmp_path, fault, actions):
     runner, task, options, chat, _, _ = _simulated_t04(tmp_path, fault=fault)
@@ -1966,36 +1999,18 @@ def test_t04_refuses_wrong_recipient_missing_target_and_draft_success(tmp_path, 
         assert not result.verification.passed
 
 
-def test_t04_takes_the_marker_from_the_description_when_the_argument_is_empty(tmp_path):
-    """The failure measured on the real machine, and the one thing the fix accepts.
-
-    `T04_20261006_225340`, two passes running:
-
-        step_id     = s2
-        description = "Type WEEK4_MESSAGE_CHECK_20261006_225340"
-        target_text = None
-        arguments   = {}          (no "text")
-        error       = visual grounding refused: typed message must exactly match this
-                      run's marker
-
-    The `click` before it resolved to `(1705,919)` - the editor - so the plan was right
-    and only the field was wrong. `ActionAdapter` already falls back to `target_text`,
-    but that cannot help when the model leaves *both* text fields empty, and it cannot
-    know the marker either because `resolve()` receives no task.
-
-    The narrowed acceptance is the point: the marker must appear **verbatim** in the
-    step's own description. Nothing is inferred from free prose.
-    """
+@pytest.mark.parametrize("fault", ["marker_in_description_only", "marker_in_target_only"])
+def test_t04_never_fills_missing_text_from_a_description_or_target(tmp_path, fault):
+    """The model must supply executable arguments, even if it names the exact marker."""
     runner, task, options, chat, _, _ = _simulated_t04(
-        tmp_path, fault="marker_in_description_only"
+        tmp_path, fault=fault
     )
     result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
 
-    assert result.status == "succeeded", result.stop_reason + str(result.notes)
-    assert chat.sent == task.expect_text[0], "the marker reached the client despite the empty argument"
-    assert not chat.draft
-    assert [action.action_type for action, _ in chat.actions] == ["click", "type_text", "click"]
-    assert any("took it from the description" in note for note in result.notes), result.notes
+    assert result.status == "failed" and not chat.sent and not chat.draft
+    assert [action.action_type for action, _ in chat.actions] == ["click"]
+    assert "must exactly match" in result.steps[-1].error
+    assert runner.planner.client.approved_plan.steps[1].arguments == {}
 
 
 def test_t04_still_refuses_a_description_that_never_states_the_marker(tmp_path):
@@ -2055,14 +2070,14 @@ def test_t04_slow_mapping_never_dispatches_after_task_deadline(tmp_path):
         runner, task, options, chat, _, _ = _simulated_t04(directory, fault=fault, clock=clock)
         result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
         assert result.status == "timed_out"
-        assert len(chat.actions) == 2 and not chat.sent
-        assert chat.calls == 6, "expired mapping response must not start another capture"
+        assert len(chat.actions) == 3 and not chat.sent
+        assert chat.calls == 8, "parking captures precede mapping; its expired response must not start another capture"
 
 
 def test_t04_post_mapping_target_disappearance_refuses_send(tmp_path):
     runner, task, options, chat, client, _ = _simulated_t04(tmp_path, fault="post_mapping_missing")
     result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
-    assert result.status == "failed" and len(chat.actions) == 2 and not chat.sent
+    assert result.status == "failed" and len(chat.actions) == 3 and not chat.sent
     assert client.mapping_calls == 1
 
 
@@ -2071,7 +2086,7 @@ def test_t04_uncertain_sent_verification_never_retries_the_message(tmp_path):
     options.max_planning_attempts = 4
     result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
     assert result.status == "failed" and chat.sent == task.expect_text[0]
-    assert len(chat.actions) == 3 and client.mapping_calls == 1
+    assert len(chat.actions) == 4 and client.mapping_calls == 1
     assert result.planning_attempts == 1
     assert result.verification.outcome == "inconclusive"
 
@@ -2081,7 +2096,7 @@ def test_t04_stops_the_approved_plan_after_one_send_attempt(tmp_path, fault):
     runner, task, options, chat, _, _ = _simulated_t04(tmp_path, fault=fault)
     result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
     assert result.status == "succeeded" and chat.sent == task.expect_text[0]
-    assert len(chat.actions) == 3 and len(result.steps) == 3
+    assert len(chat.actions) == 4 and len(result.steps) == 4
 
 
 def test_t04_preaction_observation_expiry_starts_no_mapping_or_action(tmp_path):
@@ -2319,7 +2334,7 @@ def test_successful_typing_retry_plans_only_the_remaining_send_action(tmp_path):
     assert retry["text_already_typed"] is True and "type_text_arguments" not in retry
     assert "Only click" in retry["rules"] and "Do not type again" in retry["rules"]
     assert "refocus" in retry["rules"]
-    assert [action.action_type for action, _ in chat.actions] == ["click", "type_text", "click"]
+    assert [action.action_type for action, _ in chat.actions] == ["click", "type_text", "move", "click"]
 
 
 def test_new_run_resets_message_typing_and_authorised_region_state(tmp_path):
@@ -2369,3 +2384,762 @@ def test_message_click_guard_accepts_real_current_editor_icon_and_ocr_candidates
     runner._guard_message_click(step, resolved, source)
     assert resolved.element_id in {item.element_id for item in runner._message_controls(source)[1]}
     assert resolved.screenshot_point == source.element(resolved.element_id).center
+
+
+class _ManualRuntimeClock:
+    def __init__(self) -> None:
+        self.value = 0.0
+
+    def __call__(self) -> float:
+        return self.value
+
+
+@pytest.mark.parametrize("retry_kind", ["empty", "errors", "exception", "timeout", "recovered", "unresolved"])
+def test_final_summary_covers_every_replanning_attempt(tmp_path, retry_kind):
+    """A retry that cannot execute used to return a pre-retry summary and duration."""
+    clock = _ManualRuntimeClock()
+    finish = _plan(PlanStep(step_id="finish", description="stop", action_type="finish"))
+    frames = [
+        _frame("initial", ("Start",)), _frame("verify-first", ("Start",)),
+        _frame("retry-source", ("Start",)), _frame("verify-final", ("Done",)),
+    ]
+    planner = FakePlanner(finish)
+    calls = []
+    def plan(*_args, **_kwargs):
+        calls.append(clock.value)
+        clock.value += 2 if len(calls) == 1 else (20 if retry_kind == "timeout" else 7)
+        if len(calls) == 1:
+            return PlanResult(plan=finish, attempts=2)
+        if retry_kind == "exception":
+            raise RuntimeError("provider unavailable")
+        if retry_kind == "empty":
+            return PlanResult(plan=_plan(), attempts=3)
+        if retry_kind == "errors":
+            return PlanResult(plan=finish.model_copy(update={"errors": ["cannot plan"]}), attempts=3)
+        if retry_kind == "unresolved":
+            return PlanResult(plan=_plan(PlanStep(
+                step_id="missing", description="click", action_type="click", target_text="Absent",
+            )), attempts=3)
+        return PlanResult(plan=finish, attempts=3)
+    planner.plan = plan
+    runner, recorder = _runner(tmp_path, FakeObserver(frames), planner, FakeExecutor(), clock=clock)
+    def confirm(_plan):
+        clock.value += 5
+        return True
+    result = runner.run(
+        TaskSpec(case_id="T", instruction="finish", expect_text=["Done"]),
+        ExecutionOptions(execute=True, confirm=True, max_planning_attempts=2,
+                         task_timeout_seconds=15, verification_timeout_seconds=0),
+        confirm=confirm,
+    )
+    expected_status = {"recovered": "succeeded", "timeout": "timed_out"}.get(retry_kind, "failed")
+    assert result.status == expected_status
+    assert result.elapsed_ms == (27_000 if retry_kind == "timeout" else 14_000)
+    assert result.planner_ms == (22_000 if retry_kind == "timeout" else 9_000)
+    assert result.planning_calls == 2
+    assert result.planning_attempts == (3 if retry_kind == "exception" else 5)
+    assert result.planning_ms == 2_000 and result.confirmation_ms == 5_000
+    assert result.elapsed_ms == result.planning_ms + result.confirmation_ms + result.execution_ms
+    assert result.system_elapsed_ms == result.elapsed_ms - 5_000
+    assert [step.index for step in result.steps] == list(range(1, len(result.steps) + 1))
+    written = json.loads((recorder.directory / "task_summary.json").read_text(encoding="utf-8"))
+    assert written["elapsed_ms"] == result.elapsed_ms
+    assert written["planning_attempts"] == result.planning_attempts
+    assert written["planning_calls"] == result.planning_calls
+    assert written["planner_ms"] == result.planner_ms
+    assert written["system_elapsed_ms"] == result.system_elapsed_ms
+    assert written["notes"] == result.notes
+    assert written["steps"] == recorder.read_steps()
+    assert len(written["steps"]) == (2 if retry_kind in {"recovered", "unresolved"} else 1)
+    assert (result.finished_at - result.started_at).total_seconds() * 1000 == result.elapsed_ms
+
+
+def test_retry_observation_failure_is_in_the_final_duration_and_notes(tmp_path):
+    clock = _ManualRuntimeClock()
+    class Observer(FakeObserver):
+        def observe(self, **kwargs):
+            if self.calls == 2:
+                clock.value += 4
+                raise RuntimeError("screen unavailable")
+            return super().observe(**kwargs)
+    planner = FakePlanner(_plan(PlanStep(step_id="finish", description="stop", action_type="finish")))
+    original = planner.plan
+    def plan(*args, **kwargs):
+        clock.value += 2
+        return original(*args, **kwargs)
+    planner.plan = plan
+    runner, recorder = _runner(tmp_path, Observer([_frame("frame", ("Start",))]),
+                               planner, FakeExecutor(), clock=clock)
+    result = runner.run(TaskSpec(case_id="T", instruction="x", expect_text=["Done"]),
+                        ExecutionOptions(execute=True, confirm=False, max_planning_attempts=2,
+                                         verification_timeout_seconds=0))
+    assert result.status == "failed" and result.elapsed_ms == 6_000
+    assert result.planning_calls == 1 and result.planner_ms == 2_000
+    assert "screen unavailable" in result.stop_reason
+    written = json.loads((recorder.directory / "task_summary.json").read_text(encoding="utf-8"))
+    assert written["notes"] == result.notes and written["elapsed_ms"] == 6_000
+
+
+def test_initial_planner_exception_still_writes_its_time_and_attempt(tmp_path):
+    clock = _ManualRuntimeClock()
+    planner = FakePlanner(None)
+    def plan(*_args, **_kwargs):
+        clock.value += 2
+        raise RuntimeError("provider unavailable")
+    planner.plan = plan
+    runner, recorder = _runner(tmp_path, FakeObserver([_frame("frame", ("Start",))]),
+                               planner, FakeExecutor(), clock=clock)
+    result = runner.run(TaskSpec(case_id="T", instruction="x", expect_text=["Done"]),
+                        ExecutionOptions(execute=True, confirm=False))
+    assert result.status == "blocked" and result.elapsed_ms == 2_000
+    assert result.planning_calls == result.planning_attempts == 1
+    assert result.planner_ms == result.planning_ms == 2_000
+    assert "RuntimeError" in result.stop_reason
+    written = json.loads((recorder.directory / "task_summary.json").read_text(encoding="utf-8"))
+    assert written["planning_attempts"] == 1 and written["steps"] == []
+
+
+@pytest.mark.parametrize("phase", ["planning", "confirmation"])
+def test_interruption_keeps_phase_timings_and_attempt_counts(tmp_path, phase):
+    clock = _ManualRuntimeClock()
+    planner = FakePlanner(_plan(PlanStep(step_id="finish", description="stop", action_type="finish")))
+    original = planner.plan
+    def plan(*args, **kwargs):
+        clock.value += 2
+        if phase == "planning":
+            raise KeyboardInterrupt
+        return original(*args, **kwargs)
+    planner.plan = plan
+    def confirm(_plan):
+        clock.value += 5
+        raise KeyboardInterrupt
+    runner, recorder = _runner(tmp_path, FakeObserver([_frame("frame", ("Start",))]),
+                               planner, FakeExecutor(), clock=clock)
+    result = runner.run(TaskSpec(case_id="T", instruction="x", expect_text=["Done"]),
+                        ExecutionOptions(execute=True), confirm=confirm)
+    assert result.status == "cancelled" and result.planning_calls == 1
+    assert result.planning_attempts == 1 and result.planner_ms == 2_000
+    assert result.confirmation_ms == (5_000 if phase == "confirmation" else 0)
+    assert result.elapsed_ms == (7_000 if phase == "confirmation" else 2_000)
+    written = json.loads((recorder.directory / "task_summary.json").read_text(encoding="utf-8"))
+    assert written["confirmation_ms"] == result.confirmation_ms
+
+
+def test_confirmation_time_accumulates_across_gates_and_open_gate():
+    timings = Timings(started=0, planned=2)
+    timings.begin_confirmation(2)
+    timings.end_confirmation(7)
+    timings.begin_confirmation(10)
+    phases = timings.breakdown(12)
+    assert phases["confirmation_ms"] == 7_000
+    assert phases["system_elapsed_ms"] == 5_000
+    timings.end_confirmation(12)
+    phases = timings.breakdown(15)
+    assert phases["confirmation_ms"] == 7_000 and phases["execution_ms"] == 6_000
+    assert phases["elapsed_ms"] == sum(phases[key] for key in ("planning_ms", "confirmation_ms", "execution_ms"))
+
+
+@pytest.mark.parametrize("failure", ["mismatch", "uncertain", "exception", "slow", "foreground"])
+def test_t04_current_draft_gate_refuses_send_and_stops_replanning(tmp_path, failure):
+    clock = _ManualRuntimeClock()
+    runner, task, options, chat, client, recorder = _simulated_t04(tmp_path, clock=clock)
+    options.max_planning_attempts = 3
+    calls = []
+    def draft(_task, frame):
+        calls.append(frame.observation_id)
+        if failure == "exception":
+            raise RuntimeError("draft model unavailable")
+        if failure == "slow":
+            clock.value += 100
+        if failure == "foreground":
+            chat.foreground_matches = lambda _frame: False
+        return VerificationResult(
+            outcome={"mismatch": "failed", "uncertain": "inconclusive"}.get(failure, "passed"),
+            detail="prepared draft check", evidence={"observation_id": frame.observation_id},
+        )
+    runner.verifier.check_message_draft = draft
+    result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+    assert result.status == ("timed_out" if failure == "slow" else "failed")
+    assert len(chat.actions) == 3 and not chat.sent and len(calls) == 1
+    assert result.action_count == 3, "parking counts; a draft-refused Send was never dispatched"
+    assert len(client.planning_contexts) == 1, "a refused draft must not cause another send plan"
+    assert result.steps[-1].action_result is None
+    assert (recorder.directory / "message_draft_0004.json").exists()
+    written = json.loads((recorder.directory / "task_summary.json").read_text(encoding="utf-8"))
+    assert written["steps"] == recorder.read_steps()
+
+
+def _alter_prepared_editor_pixel(frame):
+    from PIL import Image
+    with Image.open(frame.image_path) as pixels:
+        edited = pixels.copy()
+    editor = frame.elements[0].bounding_box
+    edited.putpixel((editor.left + 5, editor.top + 5), (0, 0, 0))
+    edited.save(frame.image_path)
+
+
+@pytest.mark.parametrize("change", [
+    "different_text", "one_character", "recipient", "missing_candidate", "ambiguous_candidate",
+    "send_pixels", "one_pixel", "observation_failed", "observation_timeout",
+])
+def test_t04_changes_during_draft_verification_cannot_send_or_replan(tmp_path, change):
+    """Same-window edits after a model request must not inherit its earlier verdict."""
+    clock = _ManualRuntimeClock()
+    runner, task, options, chat, client, recorder = _simulated_t04(tmp_path, clock=clock)
+    options.max_planning_attempts = 3
+    accepted = runner.verifier.check_message_draft
+    original_observe = chat.observe
+    def draft(spec, frame):
+        result = accepted(spec, frame)
+        assert result.passed
+        if change == "different_text":
+            chat.draft = "CHANGED_AFTER_CAPTURE"
+        elif change == "one_character":
+            chat.draft = chat.draft[:-1] + ("1" if chat.draft[-1] != "1" else "2")
+        elif change == "recipient":
+            chat.fault = "changed_recipient"
+        elif change == "missing_candidate":
+            chat.fault = "missing_send"
+        elif change == "ambiguous_candidate":
+            chat.fault = "duplicate_send"
+        else:
+            def changed_observe(**kwargs):
+                if change == "observation_failed":
+                    raise RuntimeError("display unavailable")
+                current = original_observe(**kwargs)
+                if change == "observation_timeout":
+                    clock.value += 100
+                else:
+                    from PIL import Image, ImageDraw
+                    with Image.open(current.image_path) as pixels:
+                        edited = pixels.copy()
+                    if change == "send_pixels":
+                        send = current.elements[1].bounding_box
+                        ImageDraw.Draw(edited).rectangle(
+                            (send.left + 5, send.top + 5, send.left + 8, send.top + 8), fill="red",
+                        )
+                    else:
+                        editor = current.elements[0].bounding_box
+                        edited.putpixel((editor.left + 5, editor.top + 5), (0, 0, 0))
+                    edited.save(current.image_path)
+                return current
+            chat.observe = changed_observe
+        return result
+    runner.verifier.check_message_draft = draft
+    result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+    assert result.status == ("timed_out" if change == "observation_timeout" else "failed")
+    assert len(chat.actions) == result.action_count == 3 and not chat.sent
+    assert len(client.planning_contexts) == 1, "changed accepted pixels must stop the whole send run"
+    assert result.steps[-1].action_result is None
+    assert "draft" in result.steps[-1].error or "display unavailable" in result.steps[-1].error
+    written = json.loads((recorder.directory / "task_summary.json").read_text(encoding="utf-8"))
+    assert written["steps"] == recorder.read_steps()
+    evidence = json.loads((recorder.directory / "message_draft_0004.json").read_text(encoding="utf-8"))
+    samples = evidence["evidence"]["dispatch_recheck"]["samples"]
+    if change in {"one_character", "different_text", "one_pixel"}:
+        assert len(samples) == 5 and all(sample["outcome"] == "composer_mismatch" for sample in samples)
+        assert all(sample["composer_pixels"] == "mismatch" for sample in samples)
+    else:
+        assert len(samples) == 1, "only composer mismatch may request another capture"
+
+
+@pytest.mark.parametrize("matching_capture", [2, 5])
+def test_t04_blinking_pixel_can_return_to_exact_accepted_pixels_and_send_once(tmp_path, matching_capture):
+    clock = _ManualRuntimeClock()
+    runner, task, options, chat, client, recorder = _simulated_t04(tmp_path, clock=clock)
+    options.max_planning_attempts = 3
+    accepted = runner.verifier.check_message_draft
+    original_observe = chat.observe
+    captured = []
+    waits = []
+    def sleep(seconds):
+        waits.append(seconds)
+        clock.value += seconds
+    runner.sleep = sleep
+    def draft(spec, frame):
+        result = accepted(spec, frame)
+        assert result.passed
+        def observe(**kwargs):
+            current = original_observe(**kwargs)
+            captured.append(current.observation_id)
+            if len(captured) < matching_capture:
+                _alter_prepared_editor_pixel(current)
+            return current
+        chat.observe = observe
+        return result
+    runner.verifier.check_message_draft = draft
+    result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+    assert result.status == "succeeded" and chat.sent == task.expect_text[0]
+    assert len(chat.actions) == result.action_count == 4
+    assert len(client.planning_contexts) == 1, "recapturing pixels must not request a new plan"
+    evidence = json.loads((recorder.directory / "message_draft_0004.json").read_text(encoding="utf-8"))
+    samples = evidence["evidence"]["dispatch_recheck"]["samples"]
+    assert len(samples) == matching_capture
+    assert all(sample["outcome"] == "composer_mismatch" for sample in samples[:-1])
+    assert samples[-1]["outcome"] == "passed" and samples[-1]["composer_pixels"] == "exact_match"
+    assert result.steps[-1].observation_id == samples[-1]["observation_id"]
+    assert [delay for delay in waits if delay != 0.2] == [0.15, 0.25, 0.35, 0.45][:matching_capture - 1]
+    assert result.elapsed_ms >= sum(sample.get("wait_seconds", 0) for sample in samples) * 1000
+
+
+@pytest.mark.parametrize("stop", [
+    "window", "title", "foreground", "budget_after_observation", "budget_during_wait",
+    "budget_before_wait", "observation_failed", "interrupted",
+])
+def test_t04_bounded_recapture_stops_on_state_budget_or_observation_changes(tmp_path, stop):
+    clock = _ManualRuntimeClock()
+    runner, task, options, chat, client, recorder = _simulated_t04(tmp_path, clock=clock)
+    options.max_planning_attempts = 3
+    accepted = runner.verifier.check_message_draft
+    original_observe = chat.observe
+    attempts = []
+    def sleep(seconds):
+        clock.value += 100 if stop == "budget_during_wait" and seconds == 0.15 else seconds
+    runner.sleep = sleep
+    def draft(spec, frame):
+        result = accepted(spec, frame)
+        assert result.passed
+        def observe(**kwargs):
+            attempts.append(len(attempts) + 1)
+            if len(attempts) == 2:
+                if stop == "observation_failed":
+                    raise RuntimeError("screen unavailable during recapture")
+                if stop == "interrupted":
+                    raise KeyboardInterrupt
+            current = original_observe(**kwargs)
+            if len(attempts) == 1:
+                _alter_prepared_editor_pixel(current)
+                if stop == "budget_before_wait":
+                    clock.value = options.task_timeout_seconds - 0.05
+            elif stop == "window":
+                current.window_id = "another-window"
+            elif stop == "title":
+                current.window_title = "Another conversation"
+            elif stop == "foreground":
+                chat.foreground_matches = lambda _frame: False
+            elif stop == "budget_after_observation":
+                clock.value = options.task_timeout_seconds
+            return current
+        chat.observe = observe
+        return result
+    runner.verifier.check_message_draft = draft
+    result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+    expected = "timed_out" if stop.startswith("budget") else "cancelled" if stop == "interrupted" else "failed"
+    assert result.status == expected and len(chat.actions) == result.action_count == 3 and not chat.sent
+    assert len(client.planning_contexts) == 1 and len(attempts) <= 2
+    evidence = json.loads((recorder.directory / "message_draft_0004.json").read_text(encoding="utf-8"))
+    recheck = evidence["evidence"]["dispatch_recheck"]
+    assert recheck["max_capture_attempts"] == 5 and len(recheck["samples"]) == 2
+    assert recheck["samples"][0]["outcome"] == "composer_mismatch"
+    assert recheck["samples"][1]["outcome"] == expected
+    assert recheck["samples"][0]["observation_id"]
+    assert recheck["outcome"] == expected
+
+
+def test_t04_send_rechecks_pixels_and_resolves_a_new_current_candidate(tmp_path):
+    runner, task, options, chat, _, recorder = _simulated_t04(tmp_path)
+    result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+    assert result.status == "succeeded" and chat.sent == task.expect_text[0]
+    evidence = json.loads((recorder.directory / "message_draft_0004.json").read_text(encoding="utf-8"))
+    recheck = evidence["evidence"]["dispatch_recheck"]
+    assert recheck["verified_observation_id"] != recheck["dispatch_observation_id"]
+    assert result.steps[-1].observation_id == recheck["dispatch_observation_id"]
+    assert result.steps[-1].resolved.element_id == recheck["send_candidate_id"]
+    assert recheck["send_candidate_id"].startswith(recheck["dispatch_observation_id"] + "-e")
+    assert recheck["composer_pixels"] == recheck["send_candidate_pixels"] == "exact_match"
+
+
+def _capture_t04_stage_transport(client):
+    """Inspect actual TaskPlanner envelopes with an entirely offline model client."""
+    from gui_agent.models.base import ModelResponse
+    original = client.complete
+    requests = []
+    def complete(messages, **kwargs):
+        envelope = json.loads(messages[-1]["content"])
+        if messages[0]["content"].startswith("Plan GUI actions"):
+            requests.append(envelope)
+            context = envelope["context"]
+            if context["message_task"]["text_already_typed"]:
+                oid = context["observation_id"]
+                plan = _plan(
+                    PlanStep(step_id="send", description="click current send", action_type="click",
+                             arguments={"element_id": f"{oid}-e002"}),
+                    PlanStep(step_id="finish", description="finish", action_type="finish"),
+                ).model_copy(update={"instruction": envelope["instruction"]})
+                return ModelResponse(content=json.dumps(plan.model_dump(mode="json")),
+                                     model_name=client.model_name, provider=client.name)
+        return original(messages, **kwargs)
+    client.complete = complete
+    return requests
+
+
+def _initial_plan_example(instruction):
+    if "\nPlan JSON example: " in instruction:
+        encoded = instruction.split("\nPlan JSON example: ", 1)[1]
+    else:
+        encoded = instruction[instruction.index('{"steps":'):]
+    example, _ = json.JSONDecoder().raw_decode(encoded)
+    return example
+
+
+def _initial_typing_example(instruction):
+    example = _initial_plan_example(instruction)
+    return next(step for step in example["steps"] if step["action_type"] == "type_text")
+
+
+def test_t04_actual_planner_receives_nested_typing_then_send_only_without_changing_task(tmp_path):
+    runner, task, options, chat, client, recorder = _simulated_t04(tmp_path, fault="draft_only")
+    # Add prepared complete roles only for this prompt-contract test. The other
+    # synthetic runner fixtures intentionally have two anonymous controls.
+    observe = chat.observe
+    def observe_roles(**kwargs):
+        frame = observe(**kwargs)
+        _chat_controls(chat, frame)
+        return frame
+    chat.observe = observe_roles
+    options.max_planning_attempts = 2
+    original_instruction = task.instruction
+    marker = task.expect_text[0]
+    requests = _capture_t04_stage_transport(client)
+    result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+    assert result.status == "succeeded" and chat.sent == marker
+    assert len(requests) == 2 and original_instruction in requests[0]["instruction"]
+    initial = _initial_plan_example(requests[0]["instruction"])
+    roles = requests[0]["context"]["message_task"]
+    assert [step["action_type"] for step in initial["steps"]] == ["click", "type_text", "click", "finish"]
+    assert initial["steps"][0]["arguments"] == {"element_id": roles["editor_candidate_id"]}
+    assert initial["steps"][0]["target_text"] is None
+    assert initial["steps"][2]["arguments"] == {"element_id": roles["send_candidate_id"]}
+    source = chat.frames[requests[0]["context"]["observation_id"]][0]
+    assert initial["steps"][2]["target_text"] == source.element(roles["send_candidate_id"]).text
+    typing = _initial_typing_example(requests[0]["instruction"])
+    assert typing["action_type"] == "type_text" and typing["arguments"] == {"text": marker}
+    assert typing["target_text"] is None
+    stage = requests[1]
+    assert stage["instruction"] != original_instruction and marker not in stage["instruction"]
+    assert "only click" in stage["instruction"] and "current listed element_id" in stage["instruction"]
+    assert "do not invent a label" in stage["instruction"] and "press Enter" in stage["instruction"]
+    assert "both arguments.element_id and target_text" in stage["instruction"]
+    assert "that same candidate's actual listed text" in stage["instruction"]
+    assert "if target_text is needed" not in stage["instruction"]
+    assert "dispatched" in stage["instruction"]
+    assert "not yet been independently verified as committed" in stage["instruction"]
+    assert stage["context"]["message_task"]["text_already_typed"] is True
+    assert "not yet verified as committed" in stage["context"]["message_task"]["rules"]
+    assert "type_text_arguments" not in stage["context"]["message_task"]
+    assert task.instruction == result.instruction == original_instruction and task.expect_text == [marker]
+    assert [action.action_type for action, _ in chat.actions] == ["click", "type_text", "move", "click"]
+    written = json.loads((recorder.directory / "task_summary.json").read_text(encoding="utf-8"))
+    assert written["instruction"] == original_instruction
+    for index, request in enumerate(requests, start=1):
+        recorded = json.loads((recorder.directory / f"planning_{index:04d}.json").read_text(encoding="utf-8"))
+        assert recorded["instruction"] == request["instruction"]
+        assert recorded["context"] == request["context"]
+        assert recorded["image_path"] == request["image_path"]
+        assert recorded["observation_id"] == request["context"]["observation_id"]
+        assert json.loads(recorded["raw_response"])["steps"] == recorded["parsed_plan"]["steps"]
+        assert recorded["original_instruction"] == original_instruction and recorded["error"] is None
+        if index == 1:
+            assert len(recorded["parsed_plan"]["steps"]) == 2, "the example must not supply executable steps"
+            assert recorded["parsed_plan"]["steps"][0]["arguments"] != initial["steps"][0]["arguments"]
+    draft = json.loads((recorder.directory / "message_draft_0004.json").read_text(encoding="utf-8"))
+    assert draft["evidence"]["actual_draft"] == marker
+
+
+@pytest.mark.parametrize("send_text", ["发送", "SeNd"])
+def test_t04_full_prompt_uses_the_current_authorised_ids_and_actual_ocr_text(tmp_path, send_text):
+    runner, task, options, chat, client, source = _approved_message_context(tmp_path)
+    current = chat.observe()
+    _chat_controls(chat, current)
+    current.element(f"{current.observation_id}-e091").text = send_text
+    requests = _capture_t04_stage_transport(client)
+    original_instruction = task.instruction
+    runner._plan_from(current, task, options, Timings(started=runner.clock()))
+    assert len(requests) == 1 and not chat.actions
+    example = _initial_plan_example(requests[0]["instruction"])
+    assert example["task_id"] == task.case_id and example["instruction"] == original_instruction
+    assert [step["action_type"] for step in example["steps"]] == ["click", "type_text", "click", "finish"]
+    assert example["steps"][0]["arguments"] == {"element_id": f"{current.observation_id}-e090"}
+    assert example["steps"][2]["arguments"] == {"element_id": f"{current.observation_id}-e091"}
+    assert example["steps"][2]["target_text"] == send_text
+    assert source.observation_id not in json.dumps(example)
+    assert _initial_typing_example(requests[0]["instruction"])["arguments"] == {"text": task.expect_text[0]}
+    assert task.instruction == original_instruction
+
+
+@pytest.mark.parametrize("missing_role", ["editor", "send", "ambiguous_editor", "ambiguous_send", "unauthorised"])
+def test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example(tmp_path, missing_role):
+    runner, task, options, chat, client, source = _approved_message_context(tmp_path)
+    if missing_role == "unauthorised":
+        runner._message_composer = None
+    else:
+        number = 90 if "editor" in missing_role else 91
+        element = source.element(f"{source.observation_id}-e{number:03d}")
+        if missing_role.startswith("ambiguous"):
+            source.elements.append(element.model_copy(update={"element_id": f"{source.observation_id}-e098"}))
+        else:
+            source.elements.remove(element)
+    requests = _capture_t04_stage_transport(client)
+    runner._plan_from(source, task, options, Timings(started=runner.clock()))
+    assert len(requests) == 1 and not chat.actions
+    instruction = requests[0]["instruction"]
+    example = _initial_plan_example(instruction)
+    assert [step["action_type"] for step in example["steps"]] == ["type_text"]
+    assert example["steps"][0]["arguments"] == {"text": task.expect_text[0]}
+    assert example["steps"][0]["target_text"] is None
+    assert "element_id" not in json.dumps(example)
+    assert "complete click example cannot be built" in instruction
+    assert "A marker only in target_text or description does not authorise typing" in instruction
+    assert instruction.startswith(task.instruction)
+
+
+@pytest.mark.parametrize("case_id,conversation,typed", [
+    ("T04", None, True), ("T02", None, False), ("T02", None, True),
+    ("T02", "prepared recipient", True),
+])
+def test_t04_stage_prompts_leave_non_message_and_other_task_instructions_unchanged(
+    tmp_path, case_id, conversation, typed,
+):
+    frame = _frame("frame", ("Start",))
+    planner = FakePlanner(_plan(PlanStep(step_id="finish", description="stop", action_type="finish")))
+    runner, recorder = _runner(tmp_path, FakeObserver([frame]), planner, FakeExecutor())
+    runner._message_text_typed = typed
+    requests = []
+    original = planner.plan
+    def plan(instruction, **kwargs):
+        requests.append(instruction)
+        return original(instruction, **kwargs)
+    planner.plan = plan
+    task = TaskSpec(case_id=case_id, instruction="original complete goal", expect_text=["Done"],
+                    message_conversation=conversation)
+    runner._plan_from(frame, task, ExecutionOptions(execute=True), Timings(started=runner.clock()))
+    assert requests == [task.instruction] and not (recorder.directory / "planning_0001.json").exists()
+
+
+def test_t04_send_only_stage_still_rejects_an_uncommitted_draft(tmp_path):
+    runner, task, options, chat, client, recorder = _simulated_t04(tmp_path, fault="draft_only")
+    options.max_planning_attempts = 3
+    requests = _capture_t04_stage_transport(client)
+    checks = []
+    def uncommitted(spec, frame):
+        checks.append((spec.expect_text, frame.observation_id))
+        return VerificationResult(
+            outcome="failed", detail="prepared uncommitted IME draft",
+            evidence={"composition_pending": True, "actual_draft": chat.draft},
+        )
+    runner.verifier.check_message_draft = uncommitted
+    original_instruction = task.instruction
+    marker = task.expect_text[0]
+    result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+    assert result.status == "failed" and not chat.sent and len(chat.actions) == 3
+    assert len(requests) == 2 and requests[1]["instruction"] != original_instruction
+    assert requests[1]["context"]["message_task"]["text_already_typed"] is True
+    assert checks == [([marker], result.steps[-1].observation_id)]
+    assert task.instruction == result.instruction == original_instruction and task.expect_text == [marker]
+    written = json.loads((recorder.directory / "task_summary.json").read_text(encoding="utf-8"))
+    assert written["instruction"] == original_instruction and written["action_count"] == 3
+    assert written["steps"][-1]["verification"]["evidence"]["composition_pending"] is True
+
+
+def test_t04_declined_confirmation_leaves_the_actual_request_and_model_plan_auditable(tmp_path):
+    runner, task, options, chat, client, recorder = _simulated_t04(tmp_path, fault="marker_in_target_only")
+    client.api_key = "should-not-appear-in-planning-records"
+    original_instruction = task.instruction
+    result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: False)
+    assert result.status == "cancelled" and not chat.actions
+    saved = (recorder.directory / "planning_0001.json").read_text(encoding="utf-8")
+    record = json.loads(saved)
+    assert _initial_typing_example(record["instruction"])["arguments"] == {"text": task.expect_text[0]}
+    assert record["parsed_plan"]["steps"][1]["arguments"] == {}
+    assert record["parsed_plan"]["steps"][1]["target_text"] == task.expect_text[0]
+    assert json.loads(record["raw_response"])["steps"] == record["parsed_plan"]["steps"]
+    assert record["original_instruction"] == result.instruction == task.instruction == original_instruction
+    assert record["observation_id"] == "sim-0001" and record["context"]["message_task"]["text_already_typed"] is False
+    assert record["image_path"] == chat.frames["sim-0001"][0].image_path
+    assert record["error"] is None and client.api_key not in saved and "api_key" not in saved
+
+
+@pytest.mark.parametrize("failure", ["invalid_response", "provider_exception", "interrupted"])
+def test_t04_planning_failures_keep_actual_request_and_response_or_exception(tmp_path, failure):
+    from gui_agent.models.base import ModelResponse
+    runner, task, options, chat, client, recorder = _simulated_t04(tmp_path)
+    original = client.complete
+    def complete(messages, **kwargs):
+        if messages[0]["content"].startswith("Plan GUI actions"):
+            if failure == "provider_exception":
+                raise RuntimeError("prepared provider failure")
+            if failure == "interrupted":
+                raise KeyboardInterrupt
+            return ModelResponse(content="invalid prepared response", model_name=client.model_name,
+                                 provider=client.name)
+        return original(messages, **kwargs)
+    client.complete = complete
+    result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+    assert result.status == ("cancelled" if failure == "interrupted" else "blocked") and not chat.actions
+    record = json.loads((recorder.directory / "planning_0001.json").read_text(encoding="utf-8"))
+    assert record["observation_id"] == "sim-0001" and record["parsed_plan"] is None
+    assert record["planner_invoked"] is True and record["error"]
+    assert _initial_typing_example(record["instruction"])["arguments"] == {"text": task.expect_text[0]}
+    if failure == "invalid_response":
+        assert record["raw_response"] == "invalid prepared response"
+    else:
+        assert record["raw_response"] is None and record["response"] is None
+
+
+def test_t04_automated_planning_evidence_time_is_never_subtracted_as_human_confirmation(tmp_path):
+    clock = _ManualRuntimeClock()
+    runner, task, options, _, client, recorder = _simulated_t04(tmp_path, clock=clock)
+    original_complete = client.complete
+    def complete(messages, **kwargs):
+        if messages[0]["content"].startswith("Plan GUI actions"):
+            clock.value += 2
+        return original_complete(messages, **kwargs)
+    client.complete = complete
+    original_save = recorder.session.save_json
+    def save_json(name, payload):
+        if name.startswith("planning_"):
+            clock.value += 3
+        return original_save(name, payload)
+    recorder.session.save_json = save_json
+    def confirm(_plan):
+        clock.value += 2
+        return True
+    result = runner.run(task, options, confirm=confirm, high_risk_confirm=confirm)
+    assert result.status == "succeeded"
+    assert result.planner_ms == 2_000, "request/response recording is outside the actual planner call"
+    assert result.planning_ms == 8_000, "both automatic evidence writes are system planning work"
+    assert result.confirmation_ms == 4_000, "only the two operator gates are confirmation time"
+    assert result.elapsed_ms == 12_000 and result.system_elapsed_ms == 8_000
+    assert result.elapsed_ms == result.planning_ms + result.confirmation_ms + result.execution_ms
+    record = json.loads((recorder.directory / "planning_0001.json").read_text(encoding="utf-8"))
+    assert record["planner_ms"] == 2_000 and record["response_scope"] == "final_response_of_planner_call"
+
+
+def _prepared_editor_mapping_run(tmp_path, *, mapped_role="editor", phase_fault="", change_pixels=True):
+    """Synthetic observed composer roles and RGB changes, never a desktop/model."""
+    from PIL import Image, ImageDraw
+
+    from gui_agent.models.base import ModelResponse
+
+    runner, task, options, chat, client, recorder = _simulated_t04(tmp_path)
+    original_observe = chat.observe
+    mapping_contexts = []
+
+    def observe(**kwargs):
+        frame = original_observe(**kwargs)
+        entry = frame.elements[0].bounding_box
+        composer = _chat_controls(chat, frame)
+        # The prepared detector now exposes one real full-composer contour,
+        # matching the independently assessed region as the real failure did.
+        frame.elements[0] = frame.elements[0].model_copy(update={
+            "bounding_box": composer, "center": composer.center,
+        })
+        frame.elements = [item for item in frame.elements if not item.element_id.endswith("-e090")]
+        with Image.open(frame.image_path) as pixels:
+            image = pixels.copy()
+        if change_pixels and chat.calls > 1 and not chat.draft and not chat.sent:
+            color = "#abcdef" if phase_fault == "post_rgb" and chat.calls == 3 else "#eeeeee"
+            ImageDraw.Draw(image).rectangle(tuple(entry.model_dump().values()), fill=color, outline="black", width=3)
+        if chat.calls == 2 and phase_fault in {"current_missing", "current_ambiguous"}:
+            if phase_fault == "current_missing":
+                frame.elements.pop(0)
+            else:
+                frame.elements.append(frame.elements[0].model_copy(update={"element_id": f"{frame.observation_id}-e099"}))
+        if chat.calls == 3:
+            if phase_fault == "post_missing":
+                frame.elements.pop(0)
+            elif phase_fault == "post_ambiguous":
+                frame.elements.append(frame.elements[0].model_copy(update={"element_id": f"{frame.observation_id}-e099"}))
+            elif phase_fault == "post_header":
+                ImageDraw.Draw(image).rectangle(tuple(chat.frames[frame.observation_id][1]["header_box"]), fill="red")
+            elif phase_fault == "post_window":
+                frame.window_id = "another:window"
+        image.save(frame.image_path)
+        return frame
+
+    original_complete = client.complete
+    def complete(messages, **kwargs):
+        envelope = json.loads(messages[-1]["content"])
+        if messages[0]["content"].startswith("Map the target"):
+            context = envelope["context"]
+            mapping_contexts.append(context)
+            oid = context["current_observation_id"]
+            # Even an eligible OCR send response outside the supplied role
+            # scope must be rejected, rather than corrected by the runner.
+            candidate = f"{oid}-e091" if mapped_role == "send" else f"{oid}-e001"
+            return ModelResponse(content=json.dumps({"candidate_ids": [candidate]}),
+                                 model_name=client.model_name, provider=client.name)
+        response = original_complete(messages, **kwargs)
+        if messages[0]["content"].startswith("Plan GUI actions"):
+            payload = json.loads(response.content)
+            send = next(step for step in payload["steps"] if step["step_id"] == "send")
+            send["arguments"] = {"element_id": envelope["context"]["message_task"]["send_candidate_id"]}
+            send["target_text"] = "发送"
+            response.content = json.dumps(payload)
+            if phase_fault == "source_ambiguous":
+                source = chat.frames[envelope["context"]["observation_id"]][0]
+                source.elements.append(source.elements[0].model_copy(update={"element_id": f"{source.observation_id}-e099"}))
+        return response
+
+    original_foreground = chat.foreground_matches
+    def foreground(frame):
+        return original_foreground(frame) and not (
+            phase_fault == "post_foreground" and frame.observation_id == "sim-0003"
+        )
+    chat.observe = observe
+    chat.foreground_matches = foreground
+    client.complete = complete
+    return runner, task, options, chat, recorder, mapping_contexts
+
+
+def test_t04_editor_mapping_to_send_is_refused_before_any_input(tmp_path):
+    runner, task, options, chat, _, contexts = _prepared_editor_mapping_run(tmp_path, mapped_role="send")
+    result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+    assert result.status == "failed" and not chat.actions and not chat.draft and not chat.sent
+    assert len(contexts) == 1
+    context = contexts[0]
+    assert list(context["source_element"]["bounding_box"].values()) == chat.frames["sim-0001"][1]["composer_box"]
+    assert [item["element_id"] for item in context["current_candidates"]] == ["sim-0002-e001"]
+    assert "not an eligible CURRENT candidate" in result.steps[0].error
+
+
+@pytest.mark.parametrize("change_pixels", [False, True])
+def test_t04_editor_role_survives_translation_and_original_rgb_checks(tmp_path, change_pixels):
+    runner, task, options, chat, _, contexts = _prepared_editor_mapping_run(tmp_path, change_pixels=change_pixels)
+    result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+    assert result.status == "succeeded" and chat.sent == task.expect_text[0]
+    assert [action.action_type for action, _ in chat.actions] == ["click", "type_text", "move", "click"]
+    assert len(contexts) == int(change_pixels)
+    record = result.steps[0]
+    current = chat.frames[record.observation_id][0]
+    candidate = current.element(record.resolved.element_id)
+    assert candidate.source == "contour" and not candidate.text
+    assert list(candidate.bounding_box.model_dump().values()) == chat.frames[record.observation_id][1]["composer_box"]
+    assert record.resolved.screenshot_point == candidate.center
+
+
+@pytest.mark.parametrize("phase_fault", [
+    "source_ambiguous", "current_missing", "current_ambiguous", "post_missing", "post_ambiguous",
+    "post_rgb", "post_header", "post_window", "post_foreground",
+])
+def test_t04_editor_role_or_post_mapping_evidence_change_stops_all_input(tmp_path, phase_fault):
+    runner, task, options, chat, _, contexts = _prepared_editor_mapping_run(tmp_path, phase_fault=phase_fault)
+    result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+    assert result.status == "failed" and not chat.actions and not chat.draft and not chat.sent
+    assert len(contexts) == int(phase_fault.startswith("post_"))
+    assert result.steps and "visual grounding refused" in result.steps[0].error
+    if phase_fault == "post_rgb":
+        assert "appearance changed" in result.steps[0].error
+
+
+def test_t04_editor_fast_pixel_path_cannot_change_to_a_different_role(tmp_path, monkeypatch):
+    runner, task, options, chat, _, contexts = _prepared_editor_mapping_run(tmp_path, change_pixels=False)
+    original_match = runner_module.match_candidate
+    def wrong_role(source, current, element_id):
+        if source.observation_id == "sim-0001" and element_id == "sim-0001-e001":
+            return current.element(f"{current.observation_id}-e091")
+        return original_match(source, current, element_id)
+    monkeypatch.setattr(runner_module, "match_candidate", wrong_role)
+    result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+    assert result.status == "failed" and not chat.actions and not contexts
+    assert "changed the approved target role" in result.steps[0].error

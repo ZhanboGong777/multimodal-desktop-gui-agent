@@ -8,8 +8,9 @@ from datetime import UTC, datetime
 
 import numpy as np
 import pytest
-from PIL import Image
+from PIL import Image, ImageDraw
 
+from gui_agent.perception.ui_detection import detect_ui_candidates
 from gui_agent.runtime.message_regions import (
     MessageRegionError,
     render_message_regions,
@@ -77,6 +78,37 @@ def test_selects_observed_composer_header_and_latest_first_messages() -> None:
     assert [item.element_id for item in regions.messages] == ["obs-0001-e005", "obs-0001-e004"]
 
 
+def _wide_bubble_snapshot() -> ObservationSnapshot:
+    """Recorded geometry, with no local image path or expected message text."""
+    snapshot = _snapshot()
+    snapshot.screen_info = ScreenInfo(
+        screenshot_width=2560, screenshot_height=1600, control_width=2560, control_height=1600,
+    )
+    snapshot.window_bounds = BoundingBox(left=813, top=76, right=2155, bottom=1047)
+    snapshot.elements = [
+        _element(132, (1284, 820, 2127, 1019)),
+        _element(61, (1294, 143, 1426, 170), source="ocr", text="PRIVATE_HEADER_TEXT"),
+        _element(134, (1435, 717, 2039, 773)),
+    ]
+    return snapshot
+
+
+def test_wide_lower_transcript_bubble_remains_a_message_above_the_bottom_editor() -> None:
+    snapshot = _wide_bubble_snapshot()
+    bubble = snapshot.elements[-1]
+    regions = select_message_regions(snapshot)
+    assert regions.composer is snapshot.elements[0]
+    assert regions.messages[0] is bubble
+    assert regions.messages[0].bounding_box.bottom < regions.composer.bounding_box.top
+
+
+def test_only_a_wide_lower_transcript_bubble_cannot_supply_an_editor() -> None:
+    snapshot = _wide_bubble_snapshot()
+    snapshot.elements.pop(0)
+    with pytest.raises(MessageRegionError, match="exactly one"):
+        select_message_regions(snapshot)
+
+
 @pytest.mark.parametrize("dx,dy", [(30, 50), (-20, -25)])
 def test_region_selection_translates_with_observed_window(dx: int, dy: int) -> None:
     snapshot = _snapshot()
@@ -115,9 +147,9 @@ def test_header_merges_same_row_fragments_and_excludes_date_and_sidebar() -> Non
 
 def test_header_padding_stays_in_observed_chat_span_and_foreground() -> None:
     snapshot = _snapshot()
-    snapshot.elements[1] = _element(2, (300, 41, 700, 63), source="ocr", text="Header")
+    snapshot.elements[1] = _element(2, (300, 65, 700, 87), source="ocr", text="Header")
     regions = select_message_regions(snapshot)
-    assert regions.header_box == BoundingBox(left=300, top=40, right=700, bottom=67)
+    assert regions.header_box == BoundingBox(left=300, top=61, right=700, bottom=91)
 
 
 @pytest.mark.parametrize("second", [
@@ -330,3 +362,41 @@ def test_renderer_cannot_overwrite_source_or_use_lossy_output(tmp_path, destinat
     with pytest.raises(MessageRegionError):
         render_message_regions(snapshot, select_message_regions(snapshot), tmp_path / destination)
     assert (tmp_path / "source.png").read_bytes() == original
+
+
+def _observed_thin_editors(snapshot: ObservationSnapshot, boxes: list[tuple[int, int, int, int]]) -> None:
+    """Candidates originate in the real detector, with only observation-local ids added."""
+    pixels = Image.new("RGB", (800, 600), (29, 29, 30))
+    draw = ImageDraw.Draw(pixels)
+    for box in boxes:
+        draw.rounded_rectangle(box, radius=12, outline=(45, 45, 46), width=1)
+    detected = detect_ui_candidates(pixels, priority_region=snapshot.window_bounds)
+    snapshot.elements = snapshot.elements[1:3] + [
+        ElementRef(
+            element_id=f"{snapshot.observation_id}-e{100 + index:03d}", text=item.text,
+            bounding_box=item.bounding_box, center=item.bounding_box.center,
+            confidence=item.confidence, source=item.source,
+        )
+        for index, item in enumerate(detected)
+    ]
+
+
+def test_detector_recovered_thin_editor_is_still_an_observed_unique_region() -> None:
+    snapshot = _snapshot()
+    _observed_thin_editors(snapshot, [(300, 400, 700, 520)])
+    regions = select_message_regions(snapshot)
+    assert regions.composer in snapshot.elements
+    assert regions.composer.element_id == "obs-0001-e100"
+    assert regions.composer.source == "contour"
+    assert regions.header_element_ids == ("obs-0001-e002",)
+
+
+def test_two_real_thin_editors_remain_ambiguous_after_native_detection() -> None:
+    snapshot = _snapshot()
+    # Both actual detected borders reach the bottom band. A transcript border
+    # above that band must not invalidate an otherwise unique editor, but two
+    # qualifying editors still cannot be selected by proximity or size.
+    _observed_thin_editors(snapshot, [(300, 350, 700, 470), (300, 480, 700, 530)])
+    assert len([item for item in snapshot.elements if item.source == "contour"]) == 2
+    with pytest.raises(MessageRegionError, match="exactly one"):
+        select_message_regions(snapshot)
