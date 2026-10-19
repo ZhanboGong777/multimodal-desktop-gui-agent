@@ -37,10 +37,13 @@ from .cursor_parking import plan_cursor_parking, verify_parking_frame
 from .processes import known as known_processes
 from .processes import match as match_processes
 from .recorder import TaskRecorder, redact
+from .recovery import build_recovery_feedback, remaining_milliseconds
 from .schemas import (
     ElementRef,
     ExecutionOptions,
     ObservationSnapshot,
+    RecoveryFeedback,
+    RecoveryRecord,
     ResolvedAction,
     StepRecord,
     TaskRunResult,
@@ -197,6 +200,7 @@ class TaskRunner:
         self._message_header: tuple[ObservationSnapshot, BoundingBox] | None = None
         self._message_composer: tuple[ObservationSnapshot, BoundingBox] | None = None
         self._message_text_typed = False
+        self._recovery_records: list[RecoveryRecord] = []
 
     # ── entry point ────────────────────────────────────────────────────
     def run(
@@ -218,6 +222,7 @@ class TaskRunner:
         what was already appended to the log, and that is what the summary is
         rebuilt from.
         """
+        self._recovery_records = []
         started = self.clock()
         self._timings = Timings(started=started)
         self._notes: list[str] = []
@@ -523,6 +528,7 @@ class TaskRunner:
     def _plan_from(
         self, snapshot: ObservationSnapshot, task: TaskSpec,
         options: ExecutionOptions, timings: Timings,
+        *, recovery: RecoveryFeedback | None = None,
     ) -> PlanResult:
         """Account for a call even if it raises, returns errors or returns no steps."""
         call_started = self.clock()
@@ -543,6 +549,8 @@ class TaskRunner:
         }
         try:
             context = self._context(snapshot, task, options)
+            if recovery is not None:
+                context["recovery"] = recovery.model_dump(mode="json")
             if message_call:
                 if isinstance(self.planner, TaskPlanner):
                     # TaskPlanner adds this to its model context. Include it in
@@ -698,6 +706,7 @@ class TaskRunner:
         # *why* the run failed would be discarded by the very retry that follows it, and the
         # result would report no steps at all for a run that plainly took some.
         steps: list[StepRecord] = []
+        pass_start = 0
         result = self._execute_plan_once(
             task,
             plan,
@@ -718,49 +727,25 @@ class TaskRunner:
             and not self._message_send_blocked
             and sum(record.action_result is not None for record in steps) < options.max_actions
         ):
-            try:
-                after = self._observing()
-            except Exception as exc:  # noqa: BLE001 - re-planning is an improvement, not a duty
-                notes.append(f"re-planning skipped: observation failed: {exc}")
-                break
-            if self.clock() - started > options.task_timeout_seconds:
-                notes.append("task budget exhausted while observing for re-planning")
-                break
-            try:
-                retry = self._plan_from(after, task, options, timings or self._timings)
-            except Exception as exc:  # noqa: BLE001 - preserve the completed pass and final time
-                notes.append(f"re-planning failed: {type(exc).__name__}: {exc}")
-                break
+            prepared = self._prepare_recovery(
+                task, options, started, notes, steps[pass_start:], result,
+                next_pass=passes + 1,
+                actions_used=sum(record.action_result is not None for record in steps),
+                timings=timings or self._timings,
+            )
             planning_attempts = (timings or self._timings).planning_attempts
-            if self.clock() - started > options.task_timeout_seconds:
-                notes.append("task budget exhausted during re-planning; no further actions")
+            if prepared is None:
                 break
-            if not retry.ok or retry.plan is None or not retry.plan.steps:
-                notes.append(
-                    f"re-planning attempt {passes + 1} produced no steps; stopping"
-                )
-                break
-            if retry.plan.errors:
-                # The first plan is refused when it reports errors (8.3.5 below), for the
-                # reason recorded there: the model uses that field to say it could not work
-                # the task out, and running it anyway reads "I am not sure" as "go ahead".
-                # A re-plan is not a different kind of plan, and `PlanResult.ok` does not
-                # cover this - it only requires that something parsed. So the same refusal
-                # is applied here, where it had been missing: without it a second pass could
-                # dispatch what the first pass was forbidden to.
-                notes.append(
-                    f"re-planning attempt {passes + 1} reports errors and will not be "
-                    "executed: " + "; ".join(retry.plan.errors[:3])
-                )
-                break
+            retry_plan, after = prepared
             passes += 1
             notes.append(
                 f"re-planned from {after.observation_id}: attempt {passes} of at most "
                 f"{options.max_planning_attempts}"
             )
+            pass_start = len(steps)
             result = self._execute_plan_once(
                 task,
-                retry.plan,
+                retry_plan,
                 options,
                 initial,
                 started,
@@ -788,6 +773,80 @@ class TaskRunner:
             timings=timings,
             verification=result.verification if result is not None else None,
         )
+
+    def _prepare_recovery(
+        self,
+        task: TaskSpec,
+        options: ExecutionOptions,
+        started: float,
+        notes: list[str],
+        pass_steps: list[StepRecord],
+        result: TaskRunResult | None,
+        *,
+        next_pass: int,
+        actions_used: int,
+        timings: Timings,
+    ) -> tuple[TaskPlan, ObservationSnapshot] | None:
+        """Observe, re-plan and record the attempt without dispatching input."""
+        attempt_started = self.clock()
+        deadline = started + options.task_timeout_seconds
+        feedback = build_recovery_feedback(
+            pass_steps, previous_pass=next_pass - 1,
+            verification=result.verification if result else None,
+            actions_used=actions_used, max_actions=options.max_actions,
+            remaining_ms=remaining_milliseconds(deadline, attempt_started),
+        )
+        observation_id: str | None = None
+        outcome = "observation_failed"
+        try:
+            try:
+                after = self._observing()
+                observation_id = after.observation_id
+            except Exception as exc:  # noqa: BLE001 - preserve the completed pass
+                notes.append(f"re-planning skipped: observation failed: {exc}")
+                return None
+            now = self.clock()
+            feedback = feedback.model_copy(update={
+                "remaining_ms": remaining_milliseconds(deadline, now),
+            })
+            if now > deadline:
+                outcome = "timed_out"
+                notes.append("task budget exhausted while observing for re-planning")
+                return None
+            outcome = "planning_failed"
+            try:
+                retry = self._plan_from(after, task, options, timings, recovery=feedback)
+            except Exception as exc:  # noqa: BLE001 - preserve count and duration
+                notes.append(f"re-planning failed: {type(exc).__name__}: {exc}")
+                return None
+            if self.clock() > deadline:
+                outcome = "timed_out"
+                notes.append("task budget exhausted during re-planning; no further actions")
+                return None
+            if not retry.ok or retry.plan is None or not retry.plan.steps:
+                outcome = "no_plan"
+                notes.append(f"re-planning attempt {next_pass} produced no steps; stopping")
+                return None
+            if retry.plan.errors:
+                outcome = "plan_errors"
+                notes.append(
+                    f"re-planning attempt {next_pass} reports errors and will not be "
+                    "executed: " + "; ".join(retry.plan.errors[:3])
+                )
+                return None
+            outcome = "plan_ready"
+            return retry.plan, after
+        except KeyboardInterrupt:
+            outcome = "cancelled"
+            raise
+        finally:
+            record = RecoveryRecord(
+                next_pass=next_pass, outcome=outcome,  # type: ignore[arg-type]
+                observation_id=observation_id, feedback=feedback,
+                elapsed_ms=max(0.0, (self.clock() - attempt_started) * 1000),
+            )
+            self._recovery_records.append(record)
+            self.recorder.append_recovery(record)
 
     def _execute_plan_once(
         self,
@@ -1953,6 +2012,7 @@ class TaskRunner:
             ),
             error_type=_error_type(failed.error if failed else None),
             failed_step_id=failed.step_id if failed else None,
+            recovery_records=self._recovery_records,
         )
         self.recorder.write_summary(result)
         return result
@@ -1971,12 +2031,33 @@ class TaskRunner:
             # it must not cost the summary every step before it.
             with contextlib.suppress(Exception):
                 records.append(StepRecord.model_validate(entry))
+        recovery_notes: list[str] = []
+        try:
+            completed, invalid_lines = self.recorder.read_recovery()
+            if invalid_lines:
+                recovery_notes.append(
+                    "recovery log contains incomplete or invalid records on lines "
+                    + ", ".join(map(str, invalid_lines))
+                    + "; retained complete records only"
+                )
+            if completed != self._recovery_records:
+                recovery_notes.append(
+                    "recovery summary rebuilt from completed log records after interruption"
+                )
+            self._recovery_records = completed
+        except OSError:
+            self._recovery_records = []
+            recovery_notes.append(
+                "recovery log could not be read; completed recovery records are unconfirmed"
+            )
         return self._finish(
             task,
             options,
             "cancelled",
             started,
-            self._notes + ["interrupted by the operator; nothing further was executed"],
+            self._notes + recovery_notes + [
+                "interrupted by the operator; nothing further was executed",
+            ],
             records,
             planning_attempts=self._timings.planning_attempts,
             timings=self._timings,

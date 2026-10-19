@@ -13,7 +13,7 @@ from typing import Any, Literal
 
 from pydantic import Field
 
-from ..schemas import BoundingBox, DesktopAction, Point, SchemaModel, ScreenInfo
+from ..schemas import ActionType, BoundingBox, DesktopAction, Point, SchemaModel, ScreenInfo
 
 #: How the outcome of a step or a task was decided.
 VerificationMethod = Literal["automatic", "manual"]
@@ -234,6 +234,63 @@ class StepRecord(SchemaModel):
     after_observation_id: str | None = None
 
 
+RecoveryReason = Literal[
+    "target_resolution",
+    "visual_grounding",
+    "pre_action_observation",
+    "post_action_observation",
+    "action_execution",
+    "step_verification",
+    "task_verification",
+    "plan_exhausted",
+]
+
+
+class RecoveryStep(SchemaModel):
+    """A previous action's outcome, without arguments, screen text or error prose."""
+
+    index: int = Field(ge=0)
+    action_type: ActionType
+    attempted: bool
+    succeeded: bool | None = None
+    verification: VerificationOutcome | None = None
+
+
+class RecoveryFeedback(SchemaModel):
+    """Bounded, non-authorizing context for a fresh planning request."""
+
+    previous_pass: int = Field(gt=0)
+    reason: RecoveryReason
+    failed_step_index: int | None = Field(default=None, ge=0)
+    actions_used: int = Field(ge=0)
+    actions_remaining: int = Field(ge=0)
+    remaining_ms: float | None = Field(default=None, ge=0, allow_inf_nan=False)
+    recent_steps: list[RecoveryStep] = Field(default_factory=list, max_length=5)
+    omitted_steps: int = Field(default=0, ge=0)
+    instruction: Literal[
+        "Plan from the current observation; previous attempts do not prove success. "
+        "Do not replay completed inputs to recreate an earlier state. "
+        "Existing task checks and remaining budgets still apply."
+    ] = (
+        "Plan from the current observation; previous attempts do not prove success. "
+        "Do not replay completed inputs to recreate an earlier state. "
+        "Existing task checks and remaining budgets still apply."
+    )
+
+
+class RecoveryRecord(SchemaModel):
+    """One completed re-planning attempt; it does not claim an action executed."""
+
+    next_pass: int = Field(ge=2)
+    outcome: Literal[
+        "plan_ready", "observation_failed", "planning_failed", "no_plan",
+        "plan_errors", "timed_out", "cancelled",
+    ]
+    observation_id: str | None = None
+    feedback: RecoveryFeedback
+    elapsed_ms: float = Field(ge=0, allow_inf_nan=False)
+
+
 class TaskRunResult(SchemaModel):
     """The outcome of one task run."""
 
@@ -290,6 +347,7 @@ class TaskRunResult(SchemaModel):
     stop_reason: str = ""
     error_type: str = ""
     failed_step_id: str | None = None
+    recovery_records: list[RecoveryRecord] = Field(default_factory=list)
 
     @property
     def ok(self) -> bool:

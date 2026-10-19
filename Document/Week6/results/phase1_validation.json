@@ -1,0 +1,77 @@
+{
+  "schema": "week6.phase1.cpu_validation.v1",
+  "date": "2026-10-19",
+  "branch": "week6-robustness",
+  "base_commit": "d180710d7efcfdd6930065cdba6abf882a52328f",
+  "scope": "Failure feedback and recovery records; no production model training or desktop inputs.",
+  "environment": {
+    "pytest": "9.1.1",
+    "ruff": "0.16.7",
+    "os": "Windows",
+    "python": "3.12.4"
+  },
+  "baseline": {
+    "exit_code": 0,
+    "passed": 218,
+    "command": "python -m pytest -q tests/test_runtime_runner.py tests/test_runtime_recording.py tests/test_week5_quality_runner.py --basetemp=.pytest-tmp-week6-baseline",
+    "seconds": 120.74
+  },
+  "new_tests": {
+    "exit_code": 0,
+    "passed": 28,
+    "command": "python -m pytest -q tests/test_week6_recovery.py --basetemp=.pytest-tmp-week6-new-final",
+    "seconds": 7.63
+  },
+  "full_regression": {
+    "collected": 2673,
+    "exit_code": 1,
+    "command": "python -m pytest -q --basetemp=.pytest-tmp-week6-full",
+    "warnings": 8,
+    "diagnosis": "Child UTF-8 output was decoded by the parent as GBK; Chinese paths caused UnicodeDecodeError.",
+    "passed": 2667,
+    "seconds": 587.29,
+    "failed": 6,
+    "environment": {
+      "PYTHONIOENCODING": "utf-8",
+      "PYTHONUTF8": "unset",
+      "parent_default_text_encoding": "cp936"
+    }
+  },
+  "encoding_recheck": {
+    "exit_code": 0,
+    "passed": 6,
+    "command": "python -m pytest -q tests/test_prepare_dataset_cli.py::test_converts_and_reads_back tests/test_prepare_dataset_cli.py::test_validate_only_writes_nothing tests/test_prepare_dataset_cli.py::test_a_record_without_an_intent_is_counted_not_fatal tests/test_prepare_dataset_cli.py::test_parquet_flows_through_the_cli tests/test_week4_cli.py::test_a_run_finds_the_warmup_record_in_its_own_output_directory tests/test_week4_preflight.py::test_the_t04_verifier_refuses_a_locked_desktop_without_running_anything --tb=short --basetemp=.pytest-tmp-week6-encoding",
+    "tests": [
+      "tests/test_prepare_dataset_cli.py::test_converts_and_reads_back",
+      "tests/test_prepare_dataset_cli.py::test_validate_only_writes_nothing",
+      "tests/test_prepare_dataset_cli.py::test_a_record_without_an_intent_is_counted_not_fatal",
+      "tests/test_prepare_dataset_cli.py::test_parquet_flows_through_the_cli",
+      "tests/test_week4_cli.py::test_a_run_finds_the_warmup_record_in_its_own_output_directory",
+      "tests/test_week4_preflight.py::test_the_t04_verifier_refuses_a_locked_desktop_without_running_anything"
+    ],
+    "environment": {
+      "PYTHONIOENCODING": "utf-8",
+      "PYTHONUTF8": "1"
+    },
+    "seconds": 7.67,
+    "code_and_assertions_changed": false
+  },
+  "distinct_current_tests_with_passing_observations": 2673,
+  "all_current_tests_claimed_to_have_run_in_one_exit0_full_invocation": false,
+  "static_check": {
+    "command": "python -m ruff check .",
+    "exit_code": 0
+  },
+  "review": "Failure classification and interrupted recovery-log writes reviewed and corrected; no remaining blocking finding.",
+  "source_sha256": {
+    "src/gui_agent/runtime/runner.py": "35fb031e88c2789edded61f582d3972e3f66abb6c689d44e397ad7a7b54f0b02",
+    "src/gui_agent/runtime/schemas.py": "24c9a2b29e70d3bf6c388e9a389f4c1984f273bd6ed658432e9de68bae54f8e1",
+    "src/gui_agent/runtime/recorder.py": "8ccc9b1668633aa274d818564586d367b48d721eba18106904d29b6e5faadf88",
+    "src/gui_agent/runtime/recovery.py": "f69c0f2e268213ae265b8324ed0f30caf3ed36c59ffaaa78884d68d3e59f946f",
+    "tests/test_week6_recovery.py": "324065c177810ca4e580a4d8c0b7df68448188c8d90537909841056d4c939cfd"
+  },
+  "week5_historical_manifest": "Unchanged; verify the fixed Week5 base commit, not current Week6 file bytes.",
+  "new_production_model_training": 0,
+  "new_desktop_inputs": 0,
+  "week6_complete": false
+}

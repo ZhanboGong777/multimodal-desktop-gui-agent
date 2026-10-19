@@ -1,5 +1,13 @@
 # Multimodal Desktop GUI Agent
 
+### Week 6 development
+
+Week 6 is underway on `week6-robustness`. The first change adds structured failure
+feedback to bounded re-planning and records each recovery attempt in
+`recovery.jsonl` and the task summary. Retries still share the original task
+deadline and action budget. See [Document/Week6](Document/Week6/README.md) for
+the implementation, CPU tests and remaining work toward system v2.0.
+
 ### Week 5 submission
 
 The completed Week 5 delivery is in [Document/Week5](Document/Week5/README.md),
@@ -67,7 +75,7 @@ Three properties the loop is built around:
   with an actual current candidate, confirmed against a further screenshot after
   any visual mapping call. Missing, ambiguous or unsafe evidence stops the pass.
 
-2645 tests, ruff clean (current Week5 suite). See `Document/Week4/Week4_Usage.md` for the flags, the
+2673 tests, ruff clean (current Week6 suite). See `Document/Week4/Week4_Usage.md` for the flags, the
 safety model and the record layout.
 
 The Chinese deliverables - `Week4_中文实验报告.(md|docx)`, `Week4_Windows复核手册.md`
@@ -158,7 +166,7 @@ python scripts/week3_model_demo.py --provider mock
 python scripts/week3_planning_demo.py --provider mock --instruction "Open the browser"
 ```
 
-2645 tests, ruff clean (current Week5 suite). The model client's retry, timeout and
+2673 tests, ruff clean (current Week6 suite). The model client's retry, timeout and
 error-classification paths are covered, along with the four vision-payload
 failure modes (missing, empty, oversized, unknown type) and the TaskPlan
 schema boundaries. Dataset and model dependencies live in

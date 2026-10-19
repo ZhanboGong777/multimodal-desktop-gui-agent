@@ -15,7 +15,7 @@ from typing import Any
 
 from ..control.safety import REDACTED, is_sensitive_text  # the same marker the action log uses
 from ..recording import RunSession
-from .schemas import ObservationSnapshot, StepRecord, TaskRunResult
+from .schemas import ObservationSnapshot, RecoveryRecord, StepRecord, TaskRunResult
 
 #: Argument keys whose values must never reach the log.
 SENSITIVE_KEYS = frozenset({"text", "clipboard", "password", "message", "content"})
@@ -92,6 +92,7 @@ class TaskRecorder:
         self.directory = Path(session.directory)
         self.directory.mkdir(parents=True, exist_ok=True)
         self._step_log = self.directory / "steps.jsonl"
+        self._recovery_log = self.directory / "recovery.jsonl"
 
     @property
     def run_id(self) -> str:
@@ -188,6 +189,31 @@ class TaskRecorder:
             for line in self._step_log.read_text(encoding="utf-8").splitlines()
             if line.strip()
         ]
+
+    def append_recovery(self, record: RecoveryRecord) -> None:
+        """Append a finalized, text-free recovery record once, before dispatch."""
+        with self._recovery_log.open("a", encoding="utf-8") as handle:
+            handle.write(record.model_dump_json() + "\n")
+
+    def read_recovery(self) -> tuple[list[RecoveryRecord], list[int]]:
+        """Read complete records and report damaged line numbers without rewriting them.
+
+        Cancellation may land inside a write. A damaged line must not hide the
+        records before it, or become an invented completed attempt in the summary.
+        This reads evidence only; records are never replayed as actions.
+        """
+        if not self._recovery_log.exists():
+            return [], []
+        records: list[RecoveryRecord] = []
+        invalid_lines: list[int] = []
+        for number, line in enumerate(self._recovery_log.read_bytes().splitlines(), start=1):
+            if not line.strip():
+                continue
+            try:
+                records.append(RecoveryRecord.model_validate_json(line))
+            except ValueError:
+                invalid_lines.append(number)
+        return records, invalid_lines
 
     # ── summary ────────────────────────────────────────────────────────
     def write_summary(self, result: TaskRunResult) -> Path:
