@@ -1,0 +1,122 @@
+{
+  "run_id": "001_phase_one",
+  "case_id": "phase_one",
+  "instruction": "Apply synthetic phase One once",
+  "status": "succeeded",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "apply-1",
+      "description": "Apply synthetic phase One",
+      "action_type": "click",
+      "observation_id": "sim-obs-0002",
+      "resolved": {
+        "step_id": "apply-1",
+        "action": {
+          "action_type": "click",
+          "x": 130,
+          "y": 90,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Apply One"
+        },
+        "element_id": "sim-obs-0002-e000",
+        "screenshot_point": {
+          "x": 130,
+          "y": 90
+        },
+        "control_point": {
+          "x": 130,
+          "y": 90
+        },
+        "note": "text 'Apply One' -> sim-obs-0002-e000"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "click",
+          "x": 130,
+          "y": 90,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Apply One"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: resultoneready",
+        "evidence": {
+          "observation_id": "sim-obs-0003",
+          "changed": true,
+          "element_count": 2,
+          "expectation_tokens": [
+            "resultoneready"
+          ],
+          "expectation_hits": [
+            "resultoneready"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 250.0,
+      "after_observation_id": "sim-obs-0003"
+    }
+  ],
+  "verification": {
+    "outcome": "passed",
+    "method": "automatic",
+    "detail": "all success rules matched against the current screen",
+    "evidence": {
+      "observation_id": "sim-obs-0004",
+      "expect_text": [
+        "ResultOneReady"
+      ],
+      "forbid_text": []
+    }
+  },
+  "error": null,
+  "elapsed_ms": 289.9999999999636,
+  "execute": true,
+  "model_name": "",
+  "provider": "",
+  "notes": [
+    "ocr: SYNTHETIC backend: no screenshot capture or OCR occurred.",
+    "planned 1 steps from sim-obs-0001"
+  ],
+  "task_id": "phase_one",
+  "commit": "9149e06",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 640x480, control 640x480",
+  "started_at": "2026-10-24T04:23:43.626995Z",
+  "finished_at": "2026-10-24T04:23:43.916995Z",
+  "planning_attempts": 1,
+  "model_requests": 0,
+  "planning_ms": 29.999999999972715,
+  "confirmation_ms": 0.0,
+  "execution_ms": 259.9999999999909,
+  "planner_ms": 19.99999999998181,
+  "planning_calls": 1,
+  "system_elapsed_ms": 289.9999999999636,
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt003\\executor_result_unknown\\workflow\\001_phase_one",
+  "stop_reason": "",
+  "error_type": "",
+  "failed_step_id": null,
+  "recovery_records": [],
+  "unconfirmed_action_attempts": 0,
+  "action_count": 1
+}

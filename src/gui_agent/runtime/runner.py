@@ -34,6 +34,7 @@ from ..schemas import ActionResult, BoundingBox
 from . import provenance
 from .action_adapter import ActionAdapter, ActionResolutionError, keys_for_platform
 from .cursor_parking import plan_cursor_parking, verify_parking_frame
+from .monitoring import RunMonitor
 from .processes import known as known_processes
 from .processes import match as match_processes
 from .recorder import TaskRecorder, redact
@@ -201,6 +202,26 @@ class TaskRunner:
         self._message_composer: tuple[ObservationSnapshot, BoundingBox] | None = None
         self._message_text_typed = False
         self._recovery_records: list[RecoveryRecord] = []
+        # Telemetry measures its own real elapsed time. In particular it must not
+        # consume reads from a caller's deterministic execution-clock fixture.
+        self.monitor = RunMonitor(self.recorder.directory)
+        self._monitor_started = False
+        self._notes: list[str] = []
+
+    def _status(self, stage: str, **changes: Any) -> None:
+        """Telemetry never authorizes an action or causes one to be retried."""
+        if not self._monitor_started:
+            return
+        try:
+            state = self.monitor.update(stage, **changes)
+            if state.get("write_failures"):
+                note = "runtime monitoring write failed; status evidence may be incomplete"
+                if note not in self._notes:
+                    self._notes.append(note)
+        except (OSError, ValueError):
+            note = "runtime monitoring unavailable; execution checks remain in force"
+            if note not in self._notes:
+                self._notes.append(note)
 
     # ── entry point ────────────────────────────────────────────────────
     def run(
@@ -226,12 +247,44 @@ class TaskRunner:
         started = self.clock()
         self._timings = Timings(started=started)
         self._notes: list[str] = []
+        self._pending_dispatch: StepRecord | None = None
+        self._dispatch_inflight = False
+        self._dispatch_uncertain = False
+        self._monitor_started = False
         try:
-            return self._run(
+            self.monitor.start(
+                case_id=re.sub(r"[^A-Za-z0-9_.-]", "_", task.case_id)[:64] or "task",
+                execute=options.execute, max_actions=options.max_actions,
+                max_planning_attempts=options.max_planning_attempts,
+            )
+            self._monitor_started = True
+        except (OSError, ValueError):
+            self._notes.append("runtime monitoring could not start")
+        try:
+            result = self._run(
                 task, options, started, confirm, countdown, high_risk_confirm, on_plan
             )
         except KeyboardInterrupt:
-            return self._abandon(task, options, started)
+            result = self._abandon(task, options, started)
+        except Exception:
+            # Preserve an honest terminal monitor state if a caller must diagnose
+            # an unexpected exception. This does not turn it into task success.
+            with contextlib.suppress(OSError, ValueError):
+                self.monitor.finish("failed", detail_code="unhandled_exception")
+            raise
+        if self._monitor_started:
+            try:
+                state = self.monitor.finish(
+                    result.status, actions_used=result.action_count + result.unconfirmed_action_attempts,
+                )
+                if state.get("write_failures"):
+                    result.notes.append("runtime monitoring write failed; final status may be incomplete")
+                    self.recorder.write_summary(result)
+            except (OSError, ValueError):
+                result.notes.append("runtime monitoring could not record the final status")
+                self.recorder.write_summary(result)
+        self._monitor_started = False
+        return result
 
     def _run(
         self,
@@ -251,10 +304,11 @@ class TaskRunner:
         self._message_send_attempted = False
         self._message_send_blocked = False
         self._message_cursor_parking_attempted = False
+        self._status("preconditions")
 
-        if not task.success_rules and not task.expect_text and not task.forbid_text:
+        if not task.expect_text and not task.forbid_text and not task.message_conversation:
             return self._blocked(
-                task, options, "the task defines no verifiable success rule", timings=timings
+                task, options, "the task defines no verifiable success rule: an executable check is required", timings=timings
             )
 
         # 0. Application state, which text on screen cannot express - and which is cheap
@@ -314,6 +368,12 @@ class TaskRunner:
                 ["screenshot quality: task budget expired before initial capture"], timings=timings,
             )
         try:
+            self._status("observing")
+            if self.clock() >= started + options.task_timeout_seconds:
+                return self._finish(
+                    task, options, "timed_out", started,
+                    notes + ["task budget exhausted before initial capture"], timings=timings,
+                )
             initial = self.observer.observe()
         except Exception as exc:  # noqa: BLE001 - a failed first look ends the run
             if message_deadline is not None:
@@ -429,7 +489,14 @@ class TaskRunner:
 
         # 2. plan from that observation
         try:
+            self._check_deadline(started + options.task_timeout_seconds)
             plan_result = self._plan_from(initial, task, options, timings)
+        except _TaskDeadlineExceeded:
+            return self._finish(
+                task, options, "timed_out", started,
+                notes + ["task budget exhausted before initial planning"],
+                snapshot=initial, timings=timings,
+            )
         except Exception as exc:  # noqa: BLE001 - failed providers still get a summary
             return self._blocked(
                 task, options, f"planning failed: {type(exc).__name__}: {exc}",
@@ -482,6 +549,7 @@ class TaskRunner:
 
         # 4. confirmation gate — before any real input event
         if options.execute:
+            self._status("confirmation")
             timings.begin_confirmation(timings.planned if timings.planned is not None else self.clock())
             # Both prompts are asked in order, and a refusal at either ends the run.
             # The short-circuit is the point: a plan the operator just declined must
@@ -532,16 +600,17 @@ class TaskRunner:
     ) -> PlanResult:
         """Account for a call even if it raises, returns errors or returns no steps."""
         call_started = self.clock()
-        timings.planning_calls += 1
+        next_call = timings.planning_calls + 1
+        self._status("planning", planning_pass=next_call)
         result: PlanResult | None = None
         planner_started: float | None = None
         message_call = task.case_id == "T04" and bool(task.message_conversation)
         instruction = task.instruction
         context: dict[str, Any] | None = None
         error = ""
-        record_name = f"planning_{timings.planning_calls:04d}.json"
+        record_name = f"planning_{next_call:04d}.json"
         planning_record: dict[str, Any] = {
-            "schema": "week4.t04_planning.v1", "call_index": timings.planning_calls,
+            "schema": "week4.t04_planning.v1", "call_index": next_call,
             "observation_id": snapshot.observation_id, "image_path": snapshot.image_path,
             "original_instruction": task.instruction, "instruction": instruction,
             "context": None, "raw_response": None, "parsed_plan": None,
@@ -637,7 +706,9 @@ class TaskRunner:
                 planning_record.update(instruction=instruction, context=context, planner_invoked=True)
                 # Keep the actual request even if the model call is interrupted.
                 self.recorder.session.save_json(record_name, planning_record)
+            self._check_deadline(timings.started + options.task_timeout_seconds)
             planner_started = self.clock()
+            timings.planning_calls += 1
             result = self.planner.plan(
                 instruction,
                 context=context,
@@ -654,7 +725,8 @@ class TaskRunner:
             timings.planner_seconds += planner_ms / 1000.0
             # A provider exception has no PlanResult, but a planning attempt did
             # happen. Returned parse/format attempts are summed across all calls.
-            timings.planning_attempts += max(1, int(result.attempts or 0)) if result else 1
+            if planner_started is not None:
+                timings.planning_attempts += max(1, int(result.attempts or 0)) if result else 1
             if message_call:
                 planning_record.update(
                     instruction=instruction, context=context,
@@ -666,6 +738,7 @@ class TaskRunner:
                     response=result.response.as_dict() if result and result.response else None,
                     parsed_plan=result.plan.model_dump(mode="json") if result and result.plan else None,
                     error=error or (result.error if result else None),
+                    planner_invoked=planner_started is not None,
                 )
                 self.recorder.session.save_json(record_name, planning_record)
             if timings.planned is None:
@@ -722,9 +795,10 @@ class TaskRunner:
         while (
             (result is None or result.status == "failed")
             and passes < options.max_planning_attempts
-            and self.clock() - started <= options.task_timeout_seconds
+            and self.clock() - started < options.task_timeout_seconds
             and not self._message_send_attempted
             and not self._message_send_blocked
+            and not self._dispatch_uncertain
             and sum(record.action_result is not None for record in steps) < options.max_actions
         ):
             prepared = self._prepare_recovery(
@@ -756,7 +830,7 @@ class TaskRunner:
                 planning_snapshot=after,
             )
         status = result.status if result is not None else "failed"
-        if status == "failed" and self.clock() - started > options.task_timeout_seconds:
+        if status == "failed" and self.clock() - started >= options.task_timeout_seconds:
             status = "timed_out"
         # A pass may already have written a provisional result. Finalize again
         # after *all* retries: an empty/error retry still spent time, and a later
@@ -789,6 +863,7 @@ class TaskRunner:
     ) -> tuple[TaskPlan, ObservationSnapshot] | None:
         """Observe, re-plan and record the attempt without dispatching input."""
         attempt_started = self.clock()
+        self._status("recovering", actions_used=actions_used, planning_pass=next_pass)
         deadline = started + options.task_timeout_seconds
         feedback = build_recovery_feedback(
             pass_steps, previous_pass=next_pass - 1,
@@ -809,7 +884,7 @@ class TaskRunner:
             feedback = feedback.model_copy(update={
                 "remaining_ms": remaining_milliseconds(deadline, now),
             })
-            if now > deadline:
+            if now >= deadline:
                 outcome = "timed_out"
                 notes.append("task budget exhausted while observing for re-planning")
                 return None
@@ -819,7 +894,7 @@ class TaskRunner:
             except Exception as exc:  # noqa: BLE001 - preserve count and duration
                 notes.append(f"re-planning failed: {type(exc).__name__}: {exc}")
                 return None
-            if self.clock() > deadline:
+            if self.clock() >= deadline:
                 outcome = "timed_out"
                 notes.append("task budget exhausted during re-planning; no further actions")
                 return None
@@ -867,7 +942,7 @@ class TaskRunner:
         current = source
 
         for step in plan.steps:
-            if self.clock() - started > options.task_timeout_seconds:
+            if self.clock() - started >= options.task_timeout_seconds:
                 return self._finish(
                     task,
                     options,
@@ -907,6 +982,7 @@ class TaskRunner:
 
             # fresh look before acting; the plan may be minutes old
             try:
+                self._status("observing", actions_used=sum(item.action_result is not None for item in steps))
                 before = self.observer.observe()
                 self.recorder.save_observation(before)
             except Exception as exc:  # noqa: BLE001
@@ -929,6 +1005,7 @@ class TaskRunner:
             record.observation_id = before.observation_id
 
             try:
+                self._status("resolving")
                 deadline = started + options.task_timeout_seconds
                 self._check_deadline(deadline)
                 fresh_step, before, anonymous = self._ground_step(
@@ -954,7 +1031,7 @@ class TaskRunner:
                     check_foreground = getattr(self.observer, "foreground_matches", None)
                     if not callable(check_foreground) or not check_foreground(before):
                         raise GroundingError("foreground changed immediately before dispatch")
-                if self.clock() - started > options.task_timeout_seconds:
+                if self.clock() - started >= options.task_timeout_seconds:
                     return self._finish(
                         task, options, "timed_out", started, notes, steps, snapshot=initial,
                         planning_attempts=planning_attempts, timings=timings,
@@ -995,7 +1072,7 @@ class TaskRunner:
                 steps.append(record)
                 self.recorder.append_step(record)
                 notes.append(f"{step.step_id}: {record.error}")
-                if self.clock() - started > options.task_timeout_seconds:
+                if self.clock() - started >= options.task_timeout_seconds:
                     return self._finish(
                         task, options, "timed_out", started, notes, steps, snapshot=initial,
                         planning_attempts=planning_attempts, timings=timings,
@@ -1049,7 +1126,7 @@ class TaskRunner:
                     )
                 # Draft verification is another slow visual request: the run's
                 # budget and foreground must still hold when it returns.
-                if self.clock() - started > options.task_timeout_seconds:
+                if self.clock() - started >= options.task_timeout_seconds:
                     self._message_send_blocked = True
                     record.verification = draft
                     record.error = "task budget exhausted while verifying the message draft"
@@ -1107,7 +1184,7 @@ class TaskRunner:
                         task, options, stopped_status, started, notes, steps, snapshot=initial,
                         planning_attempts=planning_attempts, timings=timings,
                     )
-                if self.clock() - started > options.task_timeout_seconds:
+                if self.clock() - started >= options.task_timeout_seconds:
                     self._message_send_blocked = True
                     record.verification = draft
                     record.error = "task budget exhausted while rechecking the verified message draft"
@@ -1134,9 +1211,46 @@ class TaskRunner:
                 # Dispatch may have sent the message even if the next screenshot
                 # or visual verdict fails. A retry must never send it again.
                 self._message_send_attempted = True
-            action_result = self.executor.execute(
-                resolved.action, dry_run=not options.execute, screen=before.screen_info
-            )
+            self._status("executing")
+            self._pending_dispatch = record
+            self.recorder.append_dispatch_intent(record)
+            # Status/intent persistence can block. Check the authority and budget
+            # again after that I/O, with no further telemetry write before input.
+            if self.clock() - started >= options.task_timeout_seconds:
+                notes.append("task budget exhausted before executor entry")
+                return self._finish(
+                    task, options, "timed_out", started, notes, steps, snapshot=initial,
+                    planning_attempts=planning_attempts, timings=timings,
+                )
+            if options.execute and (anonymous or task.message_conversation):
+                check_foreground = getattr(self.observer, "foreground_matches", None)
+                if not callable(check_foreground) or not check_foreground(before):
+                    record.error = "visual grounding refused: foreground changed before executor entry"
+                    steps.append(record)
+                    self.recorder.append_step(record)
+                    notes.append(record.error)
+                    return self._finish(
+                        task, options, "failed", started, notes, steps, snapshot=initial,
+                        planning_attempts=planning_attempts, timings=timings,
+                    )
+            self._dispatch_inflight = True
+            try:
+                action_result = self.executor.execute(
+                    resolved.action, dry_run=not options.execute, screen=before.screen_info
+                )
+            except KeyboardInterrupt:
+                raise
+            except Exception:  # noqa: BLE001 - input may already have reached the application
+                self._dispatch_uncertain = True
+                record.error = "executor raised; dispatch outcome is unconfirmed"
+                record.elapsed_ms = (self.clock() - step_started) * 1000
+                steps.append(record)
+                self.recorder.append_step(record)
+                notes.append("executor outcome is unconfirmed; automatic replay is disabled")
+                return self._finish(
+                    task, options, "failed", started, notes, steps, snapshot=initial,
+                    planning_attempts=planning_attempts, timings=timings,
+                )
             record.action_result = {
                 "success": action_result.success,
                 "dry_run": action_result.dry_run,
@@ -1151,12 +1265,14 @@ class TaskRunner:
             if options.execute and action_result.success:
                 self.sleep(0.2)
                 try:
+                    self._status("observing", actions_used=1 + sum(item.action_result is not None for item in steps))
                     after = self.observer.observe()
                     self.recorder.save_observation(after)
                     record.after_observation_id = after.observation_id
                 except Exception as exc:  # noqa: BLE001
                     record.error = f"post-action observation failed: {exc}"
 
+            self._status("step_verification", actions_used=1 + sum(item.action_result is not None for item in steps))
             record.verification = self.verifier.check_step(
                 expected_result=step.expected_result,
                 action_type=step.action_type,
@@ -1167,6 +1283,8 @@ class TaskRunner:
             record.elapsed_ms = (self.clock() - step_started) * 1000
             steps.append(record)
             self.recorder.append_step(record)
+            self._dispatch_inflight = False
+            self._pending_dispatch = None
 
             if not action_result.success:
                 notes.append(f"{step.step_id}: action failed")
@@ -1238,6 +1356,7 @@ class TaskRunner:
                 break
 
         # ── the plan is done; only the task verifier may call it a success ──
+        self._status("task_verification")
         if not options.execute:
             # A dry run dispatched nothing, so the task rule cannot have been met -
             # but reporting it as "failed" would say the run went wrong, and it did
@@ -1265,10 +1384,16 @@ class TaskRunner:
                 ),
             )
 
+        remaining = started + options.task_timeout_seconds - self.clock()
+        if remaining <= 0:
+            return self._finish(
+                task, options, "timed_out", started, notes + ["task budget exhausted before final verification"],
+                steps, snapshot=initial, planning_attempts=planning_attempts, timings=timings,
+            )
         verification, final = self.verifier.check_task_with_polling(
             task,
-            self._observing,
-            deadline_seconds=options.verification_timeout_seconds,
+            lambda: self._observing(deadline=started + options.task_timeout_seconds),
+            deadline_seconds=min(options.verification_timeout_seconds, remaining),
             sleep=self.sleep,
             clock=self.clock,
         )
@@ -1304,7 +1429,7 @@ class TaskRunner:
                     },
                 )
         status = "succeeded" if verification.passed else "failed"
-        if self.clock() - started > options.task_timeout_seconds:
+        if self.clock() - started >= options.task_timeout_seconds:
             status = "timed_out"
         if not verification.passed:
             notes.append(f"task verification: {verification.detail}")
@@ -1574,7 +1699,7 @@ class TaskRunner:
                         raise
 
     def _check_deadline(self, deadline: float | None) -> None:
-        if deadline is not None and self.clock() > deadline:
+        if deadline is not None and self.clock() >= deadline:
             raise _TaskDeadlineExceeded
 
     def _guard_message_header(self, current: ObservationSnapshot) -> None:
@@ -1853,9 +1978,16 @@ class TaskRunner:
                 self.recorder.session.save_json("screenshot_quality_initial.json", ledger)
         raise AssertionError("quality capture loop ended without a verdict")
 
-    def _observing(self) -> ObservationSnapshot:
+    def _observing(self, *, deadline: float | None = None) -> ObservationSnapshot:
+        self._status("observing")
+        if deadline is not None:
+            self._check_deadline(deadline)
         snapshot = self.observer.observe()
         self.recorder.save_observation(snapshot)
+        # Capture and persistence can consume the remaining budget. Do not hand
+        # an expired frame to a verifier that may start a new model request.
+        if deadline is not None:
+            self._check_deadline(deadline)
         return snapshot
 
     def _context(
@@ -1962,6 +2094,17 @@ class TaskRunner:
     ) -> TaskRunResult:
         client = getattr(self.planner, "client", None)
         records = steps or []
+        unconfirmed = int(bool(
+            self._dispatch_inflight and self._pending_dispatch is not None
+            and not any(
+                item.index == self._pending_dispatch.index and item.action_result is not None
+                for item in records
+            )
+        ))
+        if unconfirmed:
+            notes = notes[:-1] + [
+                "one executor attempt has an unconfirmed outcome; input may have occurred; do not replay it",
+            ] + notes[-1:]
         failed = next((record for record in records if record.error), None)
         # 16.5.4 wants the phases apart, so the clock is read once and split rather
         # than sampled twice with a different meaning each time.
@@ -2013,6 +2156,7 @@ class TaskRunner:
             error_type=_error_type(failed.error if failed else None),
             failed_step_id=failed.step_id if failed else None,
             recovery_records=self._recovery_records,
+            unconfirmed_action_attempts=unconfirmed,
         )
         self.recorder.write_summary(result)
         return result
@@ -2026,7 +2170,18 @@ class TaskRunner:
         for it is how a failed attempt disappears from a success rate.
         """
         records: list[StepRecord] = []
-        for entry in self.recorder.read_steps():
+        step_notes: list[str] = []
+        try:
+            entries, invalid_steps = self.recorder.read_steps_with_errors()
+            if invalid_steps:
+                step_notes.append(
+                    "step log contains incomplete or invalid records on lines "
+                    + ", ".join(map(str, invalid_steps)) + "; retained complete records only"
+                )
+        except OSError:
+            entries = []
+            step_notes.append("step log could not be read; completed actions are unconfirmed")
+        for entry in entries:
             # A torn last line is possible when the interrupt landed mid-write, and
             # it must not cost the summary every step before it.
             with contextlib.suppress(Exception):
@@ -2055,7 +2210,7 @@ class TaskRunner:
             options,
             "cancelled",
             started,
-            self._notes + recovery_notes + [
+            self._notes + step_notes + recovery_notes + [
                 "interrupted by the operator; nothing further was executed",
             ],
             records,

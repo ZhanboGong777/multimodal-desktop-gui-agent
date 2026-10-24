@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Week6 Local Demo</title>
+<style>
+body{margin:0;background:#f6f7f8;color:#17212d;font:20px/1.6 Arial,sans-serif}
+main{max-width:900px;margin:50px auto;padding:40px;background:white;border:1px solid #bbc2ca}
+h1{font-size:32px;margin:0 0 22px}p{margin:16px 0}
+button{font:700 21px Arial;padding:15px 28px;background:#184c7e;color:white;border:2px solid #184c7e;border-radius:4px;cursor:pointer}
+button:disabled{background:#e0e4e8;color:#67727d;border-color:#c3cbd3;cursor:default}
+textarea{box-sizing:border-box;width:100%;height:150px;font:24px/1.5 Arial;padding:16px;border:2px solid #5b6774;margin:12px 0 22px}
+label{display:block;font-weight:bold}#status{font-size:25px;font-weight:bold;margin-top:28px}
+[hidden]{display:none!important}
+</style>
+<main>
+  <section id="start">
+    <h1>Week6 Local Demo</h1>
+    <p>Open the local editor to begin.</p>
+    <button id="open">Open Editor</button>
+  </section>
+  <section id="editor" hidden>
+    <h1>Week6 Local Editor</h1>
+    <label for="draft">Draft Text</label>
+    <textarea id="draft" spellcheck="false" aria-label="Draft Text"></textarea>
+    <button id="complete" disabled>Complete Local Demo</button>
+    <p id="status" role="status">Draft is empty</p>
+  </section>
+  <p>This local demonstration sends no messages and saves no files.</p>
+</main>
+<script>
+const openButton=document.querySelector('#open');
+const editor=document.querySelector('#editor');
+const draft=document.querySelector('#draft');
+const complete=document.querySelector('#complete');
+const status=document.querySelector('#status');
+openButton.addEventListener('click',()=>{
+  document.querySelector('#start').hidden=true;
+  editor.hidden=false;
+});
+draft.addEventListener('input',()=>{
+  const ready=draft.value==='WEEK6_DRAFT_READY';
+  complete.disabled=!ready;
+  status.textContent=ready?'Draft ready for local confirmation':'Draft needs the demonstration marker';
+});
+complete.addEventListener('click',()=>{
+  if(draft.value!=='WEEK6_DRAFT_READY')return;
+  status.textContent='WEEK6_COMPLETE';
+  complete.disabled=true;
+});
+</script>
+</html>

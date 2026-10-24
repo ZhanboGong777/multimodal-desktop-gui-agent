@@ -1,12 +1,14 @@
 # Multimodal Desktop GUI Agent
 
-### Week 6 development
+### Week 6 system v2.0
 
-Week 6 is underway on `week6-robustness`. The first change adds structured failure
-feedback to bounded re-planning and records each recovery attempt in
-`recovery.jsonl` and the task summary. Retries still share the original task
-deadline and action budget. See [Document/Week6](Document/Week6/README.md) for
-the implementation, CPU tests and remaining work toward system v2.0.
+System v2.0 adds verified subgoals, shared workflow budgets, bounded failure
+recovery, passive live status records and measured perception-stage timings.
+The development branch is `codex/week6-delivery`, based on the retained Week 6
+phase-one commit and the Week 5 submission. See [Document/Week6](Document/Week6/README.md)
+for the entry points, reproducible experiments, test records and capability limits.
+The real local-model probe retains an ambiguous-target failure; simulated
+fault recovery and saved-image planning are reported separately from desktop success.
 
 ### Week 5 submission
 
@@ -75,7 +77,7 @@ Three properties the loop is built around:
   with an actual current candidate, confirmed against a further screenshot after
   any visual mapping call. Missing, ambiguous or unsafe evidence stops the pass.
 
-2673 tests, ruff clean (current Week6 suite). See `Document/Week4/Week4_Usage.md` for the flags, the
+2840 tests, ruff clean (current Week6 suite). See `Document/Week4/Week4_Usage.md` for the flags, the
 safety model and the record layout.
 
 The Chinese deliverables - `Week4_中文实验报告.(md|docx)`, `Week4_Windows复核手册.md`
@@ -166,7 +168,7 @@ python scripts/week3_model_demo.py --provider mock
 python scripts/week3_planning_demo.py --provider mock --instruction "Open the browser"
 ```
 
-2673 tests, ruff clean (current Week6 suite). The model client's retry, timeout and
+2840 tests, ruff clean (current Week6 suite). The model client's retry, timeout and
 error-classification paths are covered, along with the four vision-payload
 failure modes (missing, empty, oversized, unknown type) and the TaskPlan
 schema boundaries. Dataset and model dependencies live in

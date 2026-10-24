@@ -1,0 +1,117 @@
+{
+  "run_id": "002_phase_two",
+  "case_id": "phase_two",
+  "instruction": "Apply synthetic phase Two once",
+  "status": "dry_run_completed",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "apply-1",
+      "description": "Apply synthetic phase Two",
+      "action_type": "click",
+      "observation_id": "sim-obs-0004",
+      "resolved": {
+        "step_id": "apply-1",
+        "action": {
+          "action_type": "click",
+          "x": 130,
+          "y": 90,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Apply Two"
+        },
+        "element_id": "sim-obs-0004-e000",
+        "screenshot_point": {
+          "x": 130,
+          "y": 90
+        },
+        "control_point": {
+          "x": 130,
+          "y": 90
+        },
+        "note": "text 'Apply Two' -> sim-obs-0004-e000"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": true,
+        "error": null,
+        "action": {
+          "action_type": "click",
+          "x": 130,
+          "y": 90,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Apply Two"
+        }
+      },
+      "verification": {
+        "outcome": "failed",
+        "method": "automatic",
+        "detail": "expected result not observed: 'ResultTwoReady'",
+        "evidence": {
+          "observation_id": "sim-obs-0004",
+          "changed": false,
+          "element_count": 1,
+          "expectation_tokens": [
+            "resulttwoready"
+          ],
+          "expectation_hits": []
+        }
+      },
+      "error": null,
+      "elapsed_ms": 39.99999999996362,
+      "after_observation_id": null
+    }
+  ],
+  "verification": {
+    "outcome": "inconclusive",
+    "method": "automatic",
+    "detail": "dry run: actions were resolved and validated but nothing was dispatched, so the task goal was not attempted (the rule would read failed)",
+    "evidence": {
+      "would_be": "failed",
+      "rule_detail": "expected on screen but not found: ResultTwoReady"
+    }
+  },
+  "error": null,
+  "elapsed_ms": 69.99999999993634,
+  "execute": false,
+  "model_name": "",
+  "provider": "",
+  "notes": [
+    "ocr: SYNTHETIC backend: no screenshot capture or OCR occurred.",
+    "planned 1 steps from sim-obs-0003"
+  ],
+  "task_id": "phase_two",
+  "commit": "9149e06",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 640x480, control 640x480",
+  "started_at": "2026-10-24T04:38:44.433901Z",
+  "finished_at": "2026-10-24T04:38:44.503901Z",
+  "planning_attempts": 1,
+  "model_requests": 0,
+  "planning_ms": 29.999999999972715,
+  "confirmation_ms": 0.0,
+  "execution_ms": 39.99999999996362,
+  "planner_ms": 19.99999999998181,
+  "planning_calls": 1,
+  "system_elapsed_ms": 69.99999999993634,
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt005\\dry_run_is_not_success\\workflow\\002_phase_two",
+  "stop_reason": "",
+  "error_type": "",
+  "failed_step_id": null,
+  "recovery_records": [],
+  "unconfirmed_action_attempts": 0,
+  "action_count": 1
+}

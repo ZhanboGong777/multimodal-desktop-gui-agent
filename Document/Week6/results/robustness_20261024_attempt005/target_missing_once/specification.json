@@ -1,0 +1,78 @@
+{
+  "workflow_id": "target_missing_once",
+  "instruction": "Complete three synthetic phases",
+  "subgoals": [
+    {
+      "case_id": "phase_one",
+      "instruction": "Apply synthetic phase One once",
+      "target_app": null,
+      "preconditions": [],
+      "success_rules": [],
+      "verification": "automatic",
+      "expect_text": [
+        "ResultOneReady"
+      ],
+      "forbid_text": [],
+      "requires_processes": [],
+      "forbids_processes": [],
+      "must_exit_processes": [],
+      "risk": "low",
+      "message_conversation": null,
+      "gate_on_step_verification": true
+    },
+    {
+      "case_id": "phase_two",
+      "instruction": "Apply synthetic phase Two once",
+      "target_app": null,
+      "preconditions": [],
+      "success_rules": [],
+      "verification": "automatic",
+      "expect_text": [
+        "ResultTwoReady"
+      ],
+      "forbid_text": [],
+      "requires_processes": [],
+      "forbids_processes": [],
+      "must_exit_processes": [],
+      "risk": "low",
+      "message_conversation": null,
+      "gate_on_step_verification": true
+    },
+    {
+      "case_id": "phase_three",
+      "instruction": "Apply synthetic phase Three once",
+      "target_app": null,
+      "preconditions": [],
+      "success_rules": [],
+      "verification": "automatic",
+      "expect_text": [
+        "ResultThreeReady"
+      ],
+      "forbid_text": [],
+      "requires_processes": [],
+      "forbids_processes": [],
+      "must_exit_processes": [],
+      "risk": "low",
+      "message_conversation": null,
+      "gate_on_step_verification": true
+    }
+  ],
+  "final_check": {
+    "case_id": "final",
+    "instruction": "Check fresh synthetic state",
+    "target_app": null,
+    "preconditions": [],
+    "success_rules": [],
+    "verification": "automatic",
+    "expect_text": [
+      "WorkflowComplete"
+    ],
+    "forbid_text": [],
+    "requires_processes": [],
+    "forbids_processes": [],
+    "must_exit_processes": [],
+    "risk": "low",
+    "message_conversation": null,
+    "gate_on_step_verification": true
+  }
+}

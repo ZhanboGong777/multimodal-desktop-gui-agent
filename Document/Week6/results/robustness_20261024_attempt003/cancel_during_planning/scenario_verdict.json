@@ -1,0 +1,275 @@
+{
+  "scenario": "cancel_during_planning",
+  "expected": {
+    "status": "cancelled",
+    "total_actions": 1,
+    "planning_calls": 2,
+    "recovery_count": 0,
+    "unconfirmed_action_attempts": 0,
+    "subgoal_statuses": [
+      "completed",
+      "cancelled",
+      "not_started"
+    ],
+    "final_verification": null,
+    "simulated_successful_dispatches": 1,
+    "simulated_executor_calls": 1,
+    "first_goal_executor_calls": 1,
+    "accounting_complete": true,
+    "callback_completed_progress": [
+      0,
+      0,
+      1,
+      1,
+      1
+    ]
+  },
+  "actual": {
+    "status": "cancelled",
+    "total_actions": 1,
+    "planning_calls": 2,
+    "recovery_count": 0,
+    "unconfirmed_action_attempts": 0,
+    "subgoal_statuses": [
+      "completed",
+      "cancelled",
+      "not_started"
+    ],
+    "final_verification": null,
+    "simulated_successful_dispatches": 1,
+    "simulated_executor_calls": 1,
+    "first_goal_executor_calls": 1,
+    "accounting_complete": true,
+    "callback_completed_progress": [
+      0,
+      0,
+      1,
+      1,
+      1
+    ]
+  },
+  "checks": [
+    {
+      "name": "status",
+      "expected": "cancelled",
+      "actual": "cancelled",
+      "passed": true
+    },
+    {
+      "name": "total_actions",
+      "expected": 1,
+      "actual": 1,
+      "passed": true
+    },
+    {
+      "name": "planning_calls",
+      "expected": 2,
+      "actual": 2,
+      "passed": true
+    },
+    {
+      "name": "recovery_count",
+      "expected": 0,
+      "actual": 0,
+      "passed": true
+    },
+    {
+      "name": "unconfirmed_action_attempts",
+      "expected": 0,
+      "actual": 0,
+      "passed": true
+    },
+    {
+      "name": "subgoal_statuses",
+      "expected": [
+        "completed",
+        "cancelled",
+        "not_started"
+      ],
+      "actual": [
+        "completed",
+        "cancelled",
+        "not_started"
+      ],
+      "passed": true
+    },
+    {
+      "name": "final_verification",
+      "expected": null,
+      "actual": null,
+      "passed": true
+    },
+    {
+      "name": "simulated_successful_dispatches",
+      "expected": 1,
+      "actual": 1,
+      "passed": true
+    },
+    {
+      "name": "simulated_executor_calls",
+      "expected": 1,
+      "actual": 1,
+      "passed": true
+    },
+    {
+      "name": "first_goal_executor_calls",
+      "expected": 1,
+      "actual": 1,
+      "passed": true
+    },
+    {
+      "name": "accounting_complete",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "name": "callback_completed_progress",
+      "expected": [
+        0,
+        0,
+        1,
+        1,
+        1
+      ],
+      "actual": [
+        0,
+        0,
+        1,
+        1,
+        1
+      ],
+      "passed": true
+    },
+    {
+      "name": "every_executor_coordinate_matches_current_frame",
+      "expected": true,
+      "actual": true,
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "resolved_ids_belong_to_recorded_dispatch_frame",
+      "expected": true,
+      "actual": true,
+      "passed": true,
+      "detail": {
+        "resolved_frames_checked": 1
+      }
+    },
+    {
+      "name": "callback_observes_already_written_progress",
+      "expected": true,
+      "actual": true,
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_events_match_durable_journal_prefix",
+      "expected": true,
+      "actual": true,
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "checkpoint_sequences_are_contiguous",
+      "expected": true,
+      "actual": true,
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "returned_result_equals_durable_summary",
+      "expected": true,
+      "actual": true,
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "terminal_checkpoint_matches_result",
+      "expected": true,
+      "actual": true,
+      "passed": true,
+      "detail": null
+    }
+  ],
+  "passed": true,
+  "wall_elapsed_ms": 658.9677999727428,
+  "virtual_elapsed_ms": 319.99999999993634,
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt003\\cancel_during_planning",
+  "recovery_records": [],
+  "workflow_result": {
+    "schema_version": "week6.workflow.v1",
+    "workflow_id": "cancel_during_planning",
+    "status": "cancelled",
+    "execute": true,
+    "subgoals": [
+      {
+        "index": 0,
+        "case_id": "phase_one",
+        "status": "completed",
+        "child_status": "succeeded",
+        "actions": 1,
+        "unconfirmed_action_attempts": 0,
+        "planning_calls": 1,
+        "verification": {
+          "outcome": "passed",
+          "method": "automatic",
+          "detail": "all success rules matched against the current screen",
+          "evidence": {
+            "observation_id": "sim-obs-0004",
+            "expect_text": [
+              "ResultOneReady"
+            ],
+            "forbid_text": []
+          }
+        },
+        "elapsed_ms": 289.9999999999636,
+        "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt003\\cancel_during_planning\\workflow\\001_phase_one",
+        "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt003\\cancel_during_planning\\workflow\\001_phase_one\\task_summary.json",
+        "error": null
+      },
+      {
+        "index": 1,
+        "case_id": "phase_two",
+        "status": "cancelled",
+        "child_status": "cancelled",
+        "actions": 0,
+        "unconfirmed_action_attempts": 0,
+        "planning_calls": 1,
+        "verification": null,
+        "elapsed_ms": 29.999999999972715,
+        "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt003\\cancel_during_planning\\workflow\\002_phase_two",
+        "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt003\\cancel_during_planning\\workflow\\002_phase_two\\task_summary.json",
+        "error": null
+      },
+      {
+        "index": 2,
+        "case_id": "phase_three",
+        "status": "not_started",
+        "child_status": null,
+        "actions": 0,
+        "unconfirmed_action_attempts": 0,
+        "planning_calls": 0,
+        "verification": null,
+        "elapsed_ms": 0.0,
+        "evidence_directory": "",
+        "summary_reference": "",
+        "error": null
+      }
+    ],
+    "total_actions": 1,
+    "unconfirmed_action_attempts": 0,
+    "planning_calls": 2,
+    "accounting_complete": true,
+    "elapsed_ms": 319.99999999993634,
+    "final_verification": null,
+    "final_observation_id": null,
+    "final_observation_reference": "",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt003\\cancel_during_planning\\workflow",
+    "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt003\\cancel_during_planning\\workflow\\workflow_summary.json",
+    "checkpoint_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt003\\cancel_during_planning\\workflow\\checkpoints.jsonl",
+    "error": "subgoal did not finish with the required task verification",
+    "notes": []
+  }
+}

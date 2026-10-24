@@ -1,0 +1,55 @@
+{
+  "request_number": 4,
+  "condition": "ambiguous_same_labels",
+  "started_at_utc": "2026-10-24T04:11:33.715960+00:00",
+  "timeout_seconds": 119.9994558999897,
+  "model": "qwen2.5vl:3b",
+  "temperature": 0.0,
+  "max_tokens": 2048,
+  "transport_retries": 0,
+  "raw_sdk_response": {
+    "id": "chatcmpl-771",
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+          "content": "{\"task_id\":\"t1\",\"instruction\":\"Click the Run analysis button in this local demo, then finish.\",\"summary\":\"Click Run analysis button\",\"steps\":[{\"step_id\":\"s1\",\"description\":\"Click the Run analysis button\",\"action_type\":\"click\",\"target_text\":\"Run analysis\",\"arguments\":{\"element_id\":\"obs-0003-e000\"},\"expected_result\":\"Run analysis button is clicked\",\"status\":\"success\"}]}",
+          "refusal": null,
+          "role": "assistant",
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1792815095,
+    "model": "qwen2.5vl:3b",
+    "object": "chat.completion",
+    "metadata": null,
+    "moderation": null,
+    "service_tier": null,
+    "system_fingerprint": "fp_ollama",
+    "usage": {
+      "completion_tokens": 87,
+      "prompt_tokens": 1830,
+      "total_tokens": 1917,
+      "completion_tokens_details": null,
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 304,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    }
+  },
+  "independent_raw_parse_check": {
+    "ok": false,
+    "error": "the plan failed validation: steps.0.status: Input should be 'pending', 'planned', 'skipped', 'done', 'failed' or 'pending_runtime_resolution'"
+  },
+  "finished_at_utc": "2026-10-24T04:11:35.468651+00:00",
+  "elapsed_ms": 1751.7767999670468
+}

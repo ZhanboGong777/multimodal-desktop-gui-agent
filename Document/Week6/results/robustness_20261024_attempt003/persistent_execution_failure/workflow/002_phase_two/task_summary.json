@@ -1,0 +1,194 @@
+{
+  "run_id": "002_phase_two",
+  "case_id": "phase_two",
+  "instruction": "Apply synthetic phase Two once",
+  "status": "failed",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "apply-1",
+      "description": "Apply synthetic phase Two",
+      "action_type": "click",
+      "observation_id": "sim-obs-0006",
+      "resolved": {
+        "step_id": "apply-1",
+        "action": {
+          "action_type": "click",
+          "x": 130,
+          "y": 90,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Apply Two"
+        },
+        "element_id": "sim-obs-0006-e000",
+        "screenshot_point": {
+          "x": 130,
+          "y": 90
+        },
+        "control_point": {
+          "x": 130,
+          "y": 90
+        },
+        "note": "text 'Apply Two' -> sim-obs-0006-e000"
+      },
+      "action_result": {
+        "success": false,
+        "dry_run": false,
+        "error": "injected confirmed failure; simulated state unchanged",
+        "action": {
+          "action_type": "click",
+          "x": 130,
+          "y": 90,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Apply Two"
+        }
+      },
+      "verification": {
+        "outcome": "failed",
+        "method": "automatic",
+        "detail": "action failed: injected confirmed failure; simulated state unchanged",
+        "evidence": {
+          "error": "injected confirmed failure; simulated state unchanged"
+        }
+      },
+      "error": null,
+      "elapsed_ms": 39.99999999996362,
+      "after_observation_id": null
+    },
+    {
+      "index": 2,
+      "step_id": "apply-2",
+      "description": "Apply synthetic phase Two",
+      "action_type": "click",
+      "observation_id": "sim-obs-0008",
+      "resolved": {
+        "step_id": "apply-2",
+        "action": {
+          "action_type": "click",
+          "x": 350,
+          "y": 90,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Apply Two"
+        },
+        "element_id": "sim-obs-0008-e000",
+        "screenshot_point": {
+          "x": 350,
+          "y": 90
+        },
+        "control_point": {
+          "x": 350,
+          "y": 90
+        },
+        "note": "text 'Apply Two' -> sim-obs-0008-e000"
+      },
+      "action_result": {
+        "success": false,
+        "dry_run": false,
+        "error": "injected confirmed failure; simulated state unchanged",
+        "action": {
+          "action_type": "click",
+          "x": 350,
+          "y": 90,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Apply Two"
+        }
+      },
+      "verification": {
+        "outcome": "failed",
+        "method": "automatic",
+        "detail": "action failed: injected confirmed failure; simulated state unchanged",
+        "evidence": {
+          "error": "injected confirmed failure; simulated state unchanged"
+        }
+      },
+      "error": null,
+      "elapsed_ms": 39.99999999996362,
+      "after_observation_id": null
+    }
+  ],
+  "verification": null,
+  "error": null,
+  "elapsed_ms": 139.99999999987267,
+  "execute": true,
+  "model_name": "",
+  "provider": "",
+  "notes": [
+    "ocr: SYNTHETIC backend: no screenshot capture or OCR occurred.",
+    "planned 1 steps from sim-obs-0005",
+    "apply-1: action failed",
+    "re-planned from sim-obs-0007: attempt 2 of at most 2",
+    "apply-2: action failed"
+  ],
+  "task_id": "phase_two",
+  "commit": "9149e06",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 640x480, control 640x480",
+  "started_at": "2026-10-24T04:23:38.786533Z",
+  "finished_at": "2026-10-24T04:23:38.926533Z",
+  "planning_attempts": 2,
+  "model_requests": 0,
+  "planning_ms": 29.999999999972715,
+  "confirmation_ms": 0.0,
+  "execution_ms": 109.99999999989996,
+  "planner_ms": 39.99999999996362,
+  "planning_calls": 2,
+  "system_elapsed_ms": 139.99999999987267,
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt003\\persistent_execution_failure\\workflow\\002_phase_two",
+  "stop_reason": "apply-2: action failed",
+  "error_type": "",
+  "failed_step_id": null,
+  "recovery_records": [
+    {
+      "next_pass": 2,
+      "outcome": "plan_ready",
+      "observation_id": "sim-obs-0007",
+      "feedback": {
+        "previous_pass": 1,
+        "reason": "action_execution",
+        "failed_step_index": 1,
+        "actions_used": 1,
+        "actions_remaining": 6,
+        "remaining_ms": 29630.00000000011,
+        "recent_steps": [
+          {
+            "index": 1,
+            "action_type": "click",
+            "attempted": true,
+            "succeeded": false,
+            "verification": "failed"
+          }
+        ],
+        "omitted_steps": 0,
+        "instruction": "Plan from the current observation; previous attempts do not prove success. Do not replay completed inputs to recreate an earlier state. Existing task checks and remaining budgets still apply."
+      },
+      "elapsed_ms": 29.999999999972715
+    }
+  ],
+  "unconfirmed_action_attempts": 0,
+  "action_count": 2
+}

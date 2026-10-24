@@ -1,0 +1,20 @@
+{
+  "schema": "week6.robustness.overwrite_refusal.v1",
+  "command": [
+    "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe",
+    "-X",
+    "utf8",
+    "scripts/week6_robustness_demo.py",
+    "--output-dir",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt002"
+  ],
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "Traceback (most recent call last):\n  File \"C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_robustness_demo.py\", line 486, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_robustness_demo.py\", line 435, in main\n    destination.mkdir(parents=True, exist_ok=False)\n  File \"D:\\anaconda\\Lib\\pathlib.py\", line 1311, in mkdir\n    os.mkdir(self, mode)\nFileExistsError: [WinError 183] 当文件已存在时，无法创建该文件。: 'C:\\\\Users\\\\联想\\\\Documents\\\\ChatGPT\\\\Intern\\\\week6-worktree\\\\Document\\\\Week6\\\\results\\\\robustness_20261024_attempt002'\n",
+  "files_before": 325,
+  "files_after": 325,
+  "all_existing_bytes_unchanged": true,
+  "source_batch": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt002",
+  "passed": true,
+  "elapsed_ms": 1024.975300009828
+}

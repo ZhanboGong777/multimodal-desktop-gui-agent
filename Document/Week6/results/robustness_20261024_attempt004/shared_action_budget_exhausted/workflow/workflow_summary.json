@@ -1,0 +1,85 @@
+{
+  "schema_version": "week6.workflow.v1",
+  "workflow_id": "shared_action_budget_exhausted",
+  "status": "blocked",
+  "execute": true,
+  "subgoals": [
+    {
+      "index": 0,
+      "case_id": "phase_one",
+      "status": "completed",
+      "child_status": "succeeded",
+      "actions": 1,
+      "unconfirmed_action_attempts": 0,
+      "planning_calls": 1,
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "sim-obs-0004",
+          "expect_text": [
+            "ResultOneReady"
+          ],
+          "forbid_text": []
+        }
+      },
+      "elapsed_ms": 289.9999999999636,
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt004\\shared_action_budget_exhausted\\workflow\\001_phase_one",
+      "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt004\\shared_action_budget_exhausted\\workflow\\001_phase_one\\task_summary.json",
+      "error": null
+    },
+    {
+      "index": 1,
+      "case_id": "phase_two",
+      "status": "completed",
+      "child_status": "succeeded",
+      "actions": 1,
+      "unconfirmed_action_attempts": 0,
+      "planning_calls": 1,
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "sim-obs-0008",
+          "expect_text": [
+            "ResultTwoReady"
+          ],
+          "forbid_text": []
+        }
+      },
+      "elapsed_ms": 289.9999999999636,
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt004\\shared_action_budget_exhausted\\workflow\\002_phase_two",
+      "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt004\\shared_action_budget_exhausted\\workflow\\002_phase_two\\task_summary.json",
+      "error": null
+    },
+    {
+      "index": 2,
+      "case_id": "phase_three",
+      "status": "not_started",
+      "child_status": null,
+      "actions": 0,
+      "unconfirmed_action_attempts": 0,
+      "planning_calls": 0,
+      "verification": null,
+      "elapsed_ms": 0.0,
+      "evidence_directory": "",
+      "summary_reference": "",
+      "error": null
+    }
+  ],
+  "total_actions": 2,
+  "unconfirmed_action_attempts": 0,
+  "planning_calls": 2,
+  "accounting_complete": true,
+  "elapsed_ms": 579.9999999999272,
+  "final_verification": null,
+  "final_observation_id": null,
+  "final_observation_reference": "",
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt004\\shared_action_budget_exhausted\\workflow",
+  "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt004\\shared_action_budget_exhausted\\workflow\\workflow_summary.json",
+  "checkpoint_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt004\\shared_action_budget_exhausted\\workflow\\checkpoints.jsonl",
+  "error": "workflow action budget exhausted",
+  "notes": []
+}

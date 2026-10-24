@@ -1,0 +1,75 @@
+{
+  "request_number": 5,
+  "condition": "ambiguous_same_labels",
+  "started_at_utc": "2026-10-24T04:11:35.470265+00:00",
+  "timeout_seconds": 118.24495929997647,
+  "model": "qwen2.5vl:3b",
+  "temperature": 0.0,
+  "max_tokens": 2048,
+  "transport_retries": 0,
+  "raw_sdk_response": {
+    "id": "chatcmpl-202",
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+          "content": "{\"task_id\":\"t1\",\"instruction\":\"Click the Run analysis button in this local demo, then finish.\",\"summary\":\"Click Run analysis button.\",\"steps\":[{\"step_id\":\"s1\",\"description\":\"Click the Run analysis button in the local analysis demo.\",\"action_type\":\"click\",\"target_text\":\"Run analysis\",\"arguments\":{\"element_id\":\"obs-0003-e000\"},\"expected_result\":\"Run analysis button is clicked.\"}]}\"",
+          "refusal": null,
+          "role": "assistant",
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1792815096,
+    "model": "qwen2.5vl:3b",
+    "object": "chat.completion",
+    "metadata": null,
+    "moderation": null,
+    "service_tier": null,
+    "system_fingerprint": "fp_ollama",
+    "usage": {
+      "completion_tokens": 89,
+      "prompt_tokens": 1830,
+      "total_tokens": 1919,
+      "completion_tokens_details": null,
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 1829,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    }
+  },
+  "independent_raw_parse_check": {
+    "ok": true,
+    "plan": {
+      "task_id": "t1",
+      "instruction": "Click the Run analysis button in this local demo, then finish.",
+      "summary": "Click Run analysis button.",
+      "steps": [
+        {
+          "step_id": "s1",
+          "description": "Click the Run analysis button in the local analysis demo.",
+          "action_type": "click",
+          "target_text": "Run analysis",
+          "arguments": {
+            "element_id": "obs-0003-e000"
+          },
+          "expected_result": "Run analysis button is clicked.",
+          "status": "pending"
+        }
+      ],
+      "assumptions": [],
+      "requires_confirmation": true,
+      "errors": []
+    }
+  },
+  "finished_at_utc": "2026-10-24T04:11:36.420958+00:00",
+  "elapsed_ms": 949.7454999946058
+}

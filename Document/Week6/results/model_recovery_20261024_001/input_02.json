@@ -1,0 +1,197 @@
+{
+  "condition": "recovery_relayout",
+  "instruction": "Click the Run analysis button in this local demo, then finish. Do not type or use keyboard shortcuts.",
+  "context": {
+    "platform": "win32",
+    "observation_id": "obs-0002",
+    "screen": "800x520",
+    "target_app": "Local analysis demo",
+    "allowed_keys": {
+      "keys": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "a",
+        "b",
+        "backspace",
+        "c",
+        "d",
+        "delete",
+        "down",
+        "e",
+        "end",
+        "enter",
+        "esc",
+        "escape",
+        "f",
+        "f1",
+        "f10",
+        "f11",
+        "f12",
+        "f2",
+        "f3",
+        "f4",
+        "f5",
+        "f6",
+        "f7",
+        "f8",
+        "f9",
+        "g",
+        "h",
+        "home",
+        "i",
+        "j",
+        "k",
+        "l",
+        "left",
+        "m",
+        "n",
+        "o",
+        "p",
+        "pagedown",
+        "pageup",
+        "q",
+        "r",
+        "return",
+        "right",
+        "s",
+        "space",
+        "t",
+        "tab",
+        "u",
+        "up",
+        "v",
+        "w",
+        "x",
+        "y",
+        "z"
+      ],
+      "modifiers": [
+        "alt",
+        "cmd",
+        "command",
+        "control",
+        "ctrl",
+        "shift",
+        "super",
+        "win"
+      ],
+      "hotkey_separator": "+"
+    },
+    "limits": "at most 2 actions and 120 s for this planning probe",
+    "visible_text": "obs-0002-e000  'Cancel'  conf=1.00  center=(220,318)  box=(90,280,350,356)\nobs-0002-e001  'Run analysis'  conf=1.00  center=(595,418)  box=(465,380,725,456)",
+    "success_rules": [
+      "the uniquely identified Run analysis button is activated"
+    ],
+    "recovery": {
+      "previous_pass": 1,
+      "reason": "target_resolution",
+      "failed_step_index": 0,
+      "actions_used": 0,
+      "actions_remaining": 2,
+      "remaining_ms": 120000.0,
+      "recent_steps": [
+        {
+          "index": 0,
+          "action_type": "click",
+          "attempted": false,
+          "succeeded": null,
+          "verification": null
+        }
+      ],
+      "omitted_steps": 0,
+      "instruction": "Plan from the current observation; previous attempts do not prove success. Do not replay completed inputs to recreate an earlier state. Existing task checks and remaining budgets still apply."
+    }
+  },
+  "snapshot": {
+    "observation_id": "obs-0002",
+    "captured_at": "2026-10-24T04:11:12.907904Z",
+    "image_path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\model_recovery_20261024_001\\frames\\f002.png",
+    "screen_info": {
+      "screenshot_width": 800,
+      "screenshot_height": 520,
+      "control_width": 800,
+      "control_height": 520,
+      "monitor_index": 1,
+      "monitor_left": 0,
+      "monitor_top": 0,
+      "scale_x": 1.0,
+      "scale_y": 1.0
+    },
+    "elements": [
+      {
+        "element_id": "obs-0002-e000",
+        "text": "Cancel",
+        "bounding_box": {
+          "left": 90,
+          "top": 280,
+          "right": 350,
+          "bottom": 356
+        },
+        "center": {
+          "x": 220,
+          "y": 318
+        },
+        "confidence": 1.0,
+        "source": "manual"
+      },
+      {
+        "element_id": "obs-0002-e001",
+        "text": "Run analysis",
+        "bounding_box": {
+          "left": 465,
+          "top": 380,
+          "right": 725,
+          "bottom": 456
+        },
+        "center": {
+          "x": 595,
+          "y": 418
+        },
+        "confidence": 1.0,
+        "source": "manual"
+      }
+    ],
+    "ocr_engine": "synthetic_ground_truth_no_ocr",
+    "processing_time_ms": 0.0,
+    "stage_timings_ms": {},
+    "errors": [],
+    "window_title": "Local analysis demo",
+    "window_class": "SyntheticFixture",
+    "window_id": "synthetic-local-analysis",
+    "window_bounds": {
+      "left": 30,
+      "top": 30,
+      "right": 770,
+      "bottom": 490
+    },
+    "foreground_stable": true,
+    "notices": []
+  },
+  "image_sha256": "b8baa0423570e3672235ce2db0ddf49e9e77e49db4e81af873a45ce4ee215eed",
+  "ground_truth": {
+    "expected_behavior": "one_current_click",
+    "expected_element_id": "obs-0002-e001",
+    "expected_screenshot_point": {
+      "x": 595,
+      "y": 418
+    },
+    "old_frame_ids": [
+      "obs-0001-e000",
+      "obs-0001-e001"
+    ],
+    "old_unique_button_point": {
+      "x": 220,
+      "y": 318
+    },
+    "ambiguous": false,
+    "ground_truth_is_not_in_model_context": true
+  }
+}

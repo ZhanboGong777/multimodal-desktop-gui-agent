@@ -175,6 +175,15 @@ class TaskRecorder:
         return target
 
     # ── steps ──────────────────────────────────────────────────────────
+    def append_dispatch_intent(self, record: StepRecord) -> None:
+        """Record entry to an executor without storing text, keys or coordinates."""
+        with (self.directory / "dispatch_intents.jsonl").open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps({
+                "index": record.index, "action_type": record.action_type,
+                "observation_id": record.observation_id,
+                "meaning": "intent_only_not_proof_of_dispatch_or_success",
+            }) + "\n")
+
     def append_step(self, record: StepRecord) -> None:
         """Append one line; steps are never rewritten, so a crash keeps the history."""
         payload = _mask_step(record.model_dump(mode="json"))
@@ -182,13 +191,29 @@ class TaskRecorder:
             handle.write(json.dumps(payload, ensure_ascii=False) + "\n")
 
     def read_steps(self) -> list[dict[str, Any]]:
+        records, _ = self.read_steps_with_errors()
+        return records
+
+    def read_steps_with_errors(self) -> tuple[list[dict[str, Any]], list[int]]:
+        """Keep complete valid steps when interruption tears a later JSONL write.
+
+        The raw journal is never repaired or replayed. Invalid entries are not
+        counted as completed actions, and cancellation reports their line numbers.
+        """
         if not self._step_log.exists():
-            return []
-        return [
-            json.loads(line)
-            for line in self._step_log.read_text(encoding="utf-8").splitlines()
-            if line.strip()
-        ]
+            return [], []
+        records: list[dict[str, Any]] = []
+        invalid: list[int] = []
+        for number, line in enumerate(self._step_log.read_bytes().splitlines(), 1):
+            if not line.strip():
+                continue
+            try:
+                value = json.loads(line)
+                StepRecord.model_validate(value)
+                records.append(value)
+            except (ValueError, TypeError):
+                invalid.append(number)
+        return records, invalid
 
     def append_recovery(self, record: RecoveryRecord) -> None:
         """Append a finalized, text-free recovery record once, before dispatch."""

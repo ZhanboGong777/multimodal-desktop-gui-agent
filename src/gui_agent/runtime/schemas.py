@@ -59,6 +59,11 @@ class ObservationSnapshot(SchemaModel):
     elements: list[ElementRef] = Field(default_factory=list)
     ocr_engine: str = "none"
     processing_time_ms: float = 0.0
+    #: Non-overlapping observation wall times in milliseconds. Capture includes
+    #: saving when enabled; engine_init is the factory (zero after reuse); lazy
+    #: backend loading belongs to OCR. Selection includes frame-local references.
+    #: Snapshot validation/serialization is outside these stage measurements.
+    stage_timings_ms: dict[str, float] = Field(default_factory=dict)
     errors: list[str] = Field(default_factory=list)
     #: The window in front when the frame was taken, read from the window rather than from
     #: the pixels, and the class name that identifies which application it belongs to.
@@ -348,6 +353,9 @@ class TaskRunResult(SchemaModel):
     error_type: str = ""
     failed_step_id: str | None = None
     recovery_records: list[RecoveryRecord] = Field(default_factory=list)
+    #: An executor was entered but no complete result reached the step journal.
+    #: Kept separate from confirmed action_count; it never authorizes replay.
+    unconfirmed_action_attempts: int = Field(default=0, ge=0)
 
     @property
     def ok(self) -> bool:

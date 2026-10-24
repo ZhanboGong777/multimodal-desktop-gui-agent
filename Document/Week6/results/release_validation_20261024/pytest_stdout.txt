@@ -1,0 +1,299 @@
+........................................................................ [  2%]
+........................................................................ [  5%]
+........................................................................ [  7%]
+........................................................................ [ 10%]
+........................................................................ [ 12%]
+........................................................................ [ 15%]
+........................................................................ [ 17%]
+................................................................F....... [ 20%]
+...F...........F........................................................ [ 22%]
+.........................FFFFFFFFFFF.................................... [ 25%]
+........................................................................ [ 28%]
+...................................................................F.... [ 30%]
+........................................................................ [ 33%]
+........................................................................ [ 35%]
+........................................................................ [ 38%]
+........................................................................ [ 40%]
+........................................................................ [ 43%]
+........................................................................ [ 45%]
+........................................................................ [ 48%]
+........................................................................ [ 50%]
+........................................................................ [ 53%]
+........................................................................ [ 56%]
+........................................................................ [ 58%]
+........................................................................ [ 61%]
+........................................................................ [ 63%]
+........................................................................ [ 66%]
+........................................................................ [ 68%]
+........................................................................ [ 71%]
+........................................................................ [ 73%]
+........................................................................ [ 76%]
+........................................................................ [ 78%]
+........................................................................ [ 81%]
+........................................................................ [ 84%]
+........................................................................ [ 86%]
+........................................................................ [ 89%]
+........................................................................ [ 91%]
+........................................................................ [ 94%]
+.......................F................................................ [ 96%]
+........................................................................ [ 99%]
+....................                                                     [100%]
+================================== FAILURES ===================================
+______________ test_a_blocked_run_still_records_how_long_it_took ______________
+tests\test_runtime_runner.py:1040: in test_a_blocked_run_still_records_how_long_it_took
+    assert result.elapsed_ms == 2500.0, "one reading of a 2.5 s clock, not zero"
+E   AssertionError: one reading of a 2.5 s clock, not zero
+E   assert 12500.0 == 2500.0
+E    +  where 12500.0 = TaskRunResult(run_id='run-1', case_id='T05', instruction='close the week4 test application', status='blocked', steps=[...: ['Desktop', 'Other window']", error_type='', failed_step_id=None, recovery_records=[], unconfirmed_action_attempts=0).elapsed_ms
+___________ test_an_interrupted_run_still_writes_a_readable_summary ___________
+tests\test_runtime_runner.py:1361: in test_an_interrupted_run_still_writes_a_readable_summary
+    assert "interrupted by the operator" in result.stop_reason
+E   AssertionError: assert 'interrupted by the operator' in 'one executor attempt has an unconfirmed outcome; input may have occurred; do not replay it'
+E    +  where 'one executor attempt has an unconfirmed outcome; input may have occurred; do not replay it' = TaskRunResult(run_id='run-1', case_id='T', instruction='x', status='cancelled', steps=[StepRecord(index=1, step_id='s1...ve occurred; do not replay it', error_type='', failed_step_id=None, recovery_records=[], unconfirmed_action_attempts=1).stop_reason
+__ test_t04_complete_send_uses_fresh_candidates_and_strict_message_evidence ___
+tests\test_runtime_runner.py:1977: in test_t04_complete_send_uses_fresh_candidates_and_strict_message_evidence
+    assert chat.foreground_checks == 8, "parking, pixel recheck and dispatch must recheck the foreground"
+E   AssertionError: parking, pixel recheck and dispatch must recheck the foreground
+E   assert 11 == 8
+E    +  where 11 = <test_runtime_runner.SimulatedChat object at 0x000001C39739F2C0>.foreground_checks
+_ test_t04_full_prompt_uses_the_current_authorised_ids_and_actual_ocr_text[\u53d1\u9001] _
+src\gui_agent\runtime\runner.py:210: in _status
+    state = self.monitor.update(stage, **changes)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\gui_agent\runtime\monitoring.py:316: in update
+    status = self._next(stage, planning_pass=planning_pass, actions_used=actions_used,
+src\gui_agent\runtime\monitoring.py:292: in _next
+    raise ValueError("monitor has not started")
+E   ValueError: monitor has not started
+
+During handling of the above exception, another exception occurred:
+tests\test_runtime_runner.py:2857: in test_t04_full_prompt_uses_the_current_authorised_ids_and_actual_ocr_text
+    runner._plan_from(current, task, options, Timings(started=runner.clock()))
+src\gui_agent\runtime\runner.py:594: in _plan_from
+    self._status("planning", planning_pass=next_call)
+src\gui_agent\runtime\runner.py:217: in _status
+    if note not in self._notes:
+                   ^^^^^^^^^^^
+E   AttributeError: 'TaskRunner' object has no attribute '_notes'
+_ test_t04_full_prompt_uses_the_current_authorised_ids_and_actual_ocr_text[SeNd] _
+src\gui_agent\runtime\runner.py:210: in _status
+    state = self.monitor.update(stage, **changes)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\gui_agent\runtime\monitoring.py:316: in update
+    status = self._next(stage, planning_pass=planning_pass, actions_used=actions_used,
+src\gui_agent\runtime\monitoring.py:292: in _next
+    raise ValueError("monitor has not started")
+E   ValueError: monitor has not started
+
+During handling of the above exception, another exception occurred:
+tests\test_runtime_runner.py:2857: in test_t04_full_prompt_uses_the_current_authorised_ids_and_actual_ocr_text
+    runner._plan_from(current, task, options, Timings(started=runner.clock()))
+src\gui_agent\runtime\runner.py:594: in _plan_from
+    self._status("planning", planning_pass=next_call)
+src\gui_agent\runtime\runner.py:217: in _status
+    if note not in self._notes:
+                   ^^^^^^^^^^^
+E   AttributeError: 'TaskRunner' object has no attribute '_notes'
+_ test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example[editor] _
+src\gui_agent\runtime\runner.py:210: in _status
+    state = self.monitor.update(stage, **changes)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\gui_agent\runtime\monitoring.py:316: in update
+    status = self._next(stage, planning_pass=planning_pass, actions_used=actions_used,
+src\gui_agent\runtime\monitoring.py:292: in _next
+    raise ValueError("monitor has not started")
+E   ValueError: monitor has not started
+
+During handling of the above exception, another exception occurred:
+tests\test_runtime_runner.py:2883: in test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example
+    runner._plan_from(source, task, options, Timings(started=runner.clock()))
+src\gui_agent\runtime\runner.py:594: in _plan_from
+    self._status("planning", planning_pass=next_call)
+src\gui_agent\runtime\runner.py:217: in _status
+    if note not in self._notes:
+                   ^^^^^^^^^^^
+E   AttributeError: 'TaskRunner' object has no attribute '_notes'
+_ test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example[send] _
+src\gui_agent\runtime\runner.py:210: in _status
+    state = self.monitor.update(stage, **changes)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\gui_agent\runtime\monitoring.py:316: in update
+    status = self._next(stage, planning_pass=planning_pass, actions_used=actions_used,
+src\gui_agent\runtime\monitoring.py:292: in _next
+    raise ValueError("monitor has not started")
+E   ValueError: monitor has not started
+
+During handling of the above exception, another exception occurred:
+tests\test_runtime_runner.py:2883: in test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example
+    runner._plan_from(source, task, options, Timings(started=runner.clock()))
+src\gui_agent\runtime\runner.py:594: in _plan_from
+    self._status("planning", planning_pass=next_call)
+src\gui_agent\runtime\runner.py:217: in _status
+    if note not in self._notes:
+                   ^^^^^^^^^^^
+E   AttributeError: 'TaskRunner' object has no attribute '_notes'
+_ test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example[ambiguous_editor] _
+src\gui_agent\runtime\runner.py:210: in _status
+    state = self.monitor.update(stage, **changes)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\gui_agent\runtime\monitoring.py:316: in update
+    status = self._next(stage, planning_pass=planning_pass, actions_used=actions_used,
+src\gui_agent\runtime\monitoring.py:292: in _next
+    raise ValueError("monitor has not started")
+E   ValueError: monitor has not started
+
+During handling of the above exception, another exception occurred:
+tests\test_runtime_runner.py:2883: in test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example
+    runner._plan_from(source, task, options, Timings(started=runner.clock()))
+src\gui_agent\runtime\runner.py:594: in _plan_from
+    self._status("planning", planning_pass=next_call)
+src\gui_agent\runtime\runner.py:217: in _status
+    if note not in self._notes:
+                   ^^^^^^^^^^^
+E   AttributeError: 'TaskRunner' object has no attribute '_notes'
+_ test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example[ambiguous_send] _
+src\gui_agent\runtime\runner.py:210: in _status
+    state = self.monitor.update(stage, **changes)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\gui_agent\runtime\monitoring.py:316: in update
+    status = self._next(stage, planning_pass=planning_pass, actions_used=actions_used,
+src\gui_agent\runtime\monitoring.py:292: in _next
+    raise ValueError("monitor has not started")
+E   ValueError: monitor has not started
+
+During handling of the above exception, another exception occurred:
+tests\test_runtime_runner.py:2883: in test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example
+    runner._plan_from(source, task, options, Timings(started=runner.clock()))
+src\gui_agent\runtime\runner.py:594: in _plan_from
+    self._status("planning", planning_pass=next_call)
+src\gui_agent\runtime\runner.py:217: in _status
+    if note not in self._notes:
+                   ^^^^^^^^^^^
+E   AttributeError: 'TaskRunner' object has no attribute '_notes'
+_ test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example[unauthorised] _
+src\gui_agent\runtime\runner.py:210: in _status
+    state = self.monitor.update(stage, **changes)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\gui_agent\runtime\monitoring.py:316: in update
+    status = self._next(stage, planning_pass=planning_pass, actions_used=actions_used,
+src\gui_agent\runtime\monitoring.py:292: in _next
+    raise ValueError("monitor has not started")
+E   ValueError: monitor has not started
+
+During handling of the above exception, another exception occurred:
+tests\test_runtime_runner.py:2883: in test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example
+    runner._plan_from(source, task, options, Timings(started=runner.clock()))
+src\gui_agent\runtime\runner.py:594: in _plan_from
+    self._status("planning", planning_pass=next_call)
+src\gui_agent\runtime\runner.py:217: in _status
+    if note not in self._notes:
+                   ^^^^^^^^^^^
+E   AttributeError: 'TaskRunner' object has no attribute '_notes'
+_ test_t04_stage_prompts_leave_non_message_and_other_task_instructions_unchanged[T04-None-True] _
+src\gui_agent\runtime\runner.py:210: in _status
+    state = self.monitor.update(stage, **changes)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\gui_agent\runtime\monitoring.py:316: in update
+    status = self._next(stage, planning_pass=planning_pass, actions_used=actions_used,
+src\gui_agent\runtime\monitoring.py:292: in _next
+    raise ValueError("monitor has not started")
+E   ValueError: monitor has not started
+
+During handling of the above exception, another exception occurred:
+tests\test_runtime_runner.py:2915: in test_t04_stage_prompts_leave_non_message_and_other_task_instructions_unchanged
+    runner._plan_from(frame, task, ExecutionOptions(execute=True), Timings(started=runner.clock()))
+src\gui_agent\runtime\runner.py:594: in _plan_from
+    self._status("planning", planning_pass=next_call)
+src\gui_agent\runtime\runner.py:217: in _status
+    if note not in self._notes:
+                   ^^^^^^^^^^^
+E   AttributeError: 'TaskRunner' object has no attribute '_notes'
+_ test_t04_stage_prompts_leave_non_message_and_other_task_instructions_unchanged[T02-None-False] _
+src\gui_agent\runtime\runner.py:210: in _status
+    state = self.monitor.update(stage, **changes)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\gui_agent\runtime\monitoring.py:316: in update
+    status = self._next(stage, planning_pass=planning_pass, actions_used=actions_used,
+src\gui_agent\runtime\monitoring.py:292: in _next
+    raise ValueError("monitor has not started")
+E   ValueError: monitor has not started
+
+During handling of the above exception, another exception occurred:
+tests\test_runtime_runner.py:2915: in test_t04_stage_prompts_leave_non_message_and_other_task_instructions_unchanged
+    runner._plan_from(frame, task, ExecutionOptions(execute=True), Timings(started=runner.clock()))
+src\gui_agent\runtime\runner.py:594: in _plan_from
+    self._status("planning", planning_pass=next_call)
+src\gui_agent\runtime\runner.py:217: in _status
+    if note not in self._notes:
+                   ^^^^^^^^^^^
+E   AttributeError: 'TaskRunner' object has no attribute '_notes'
+_ test_t04_stage_prompts_leave_non_message_and_other_task_instructions_unchanged[T02-None-True] _
+src\gui_agent\runtime\runner.py:210: in _status
+    state = self.monitor.update(stage, **changes)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\gui_agent\runtime\monitoring.py:316: in update
+    status = self._next(stage, planning_pass=planning_pass, actions_used=actions_used,
+src\gui_agent\runtime\monitoring.py:292: in _next
+    raise ValueError("monitor has not started")
+E   ValueError: monitor has not started
+
+During handling of the above exception, another exception occurred:
+tests\test_runtime_runner.py:2915: in test_t04_stage_prompts_leave_non_message_and_other_task_instructions_unchanged
+    runner._plan_from(frame, task, ExecutionOptions(execute=True), Timings(started=runner.clock()))
+src\gui_agent\runtime\runner.py:594: in _plan_from
+    self._status("planning", planning_pass=next_call)
+src\gui_agent\runtime\runner.py:217: in _status
+    if note not in self._notes:
+                   ^^^^^^^^^^^
+E   AttributeError: 'TaskRunner' object has no attribute '_notes'
+_ test_t04_stage_prompts_leave_non_message_and_other_task_instructions_unchanged[T02-prepared recipient-True] _
+src\gui_agent\runtime\runner.py:210: in _status
+    state = self.monitor.update(stage, **changes)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\gui_agent\runtime\monitoring.py:316: in update
+    status = self._next(stage, planning_pass=planning_pass, actions_used=actions_used,
+src\gui_agent\runtime\monitoring.py:292: in _next
+    raise ValueError("monitor has not started")
+E   ValueError: monitor has not started
+
+During handling of the above exception, another exception occurred:
+tests\test_runtime_runner.py:2915: in test_t04_stage_prompts_leave_non_message_and_other_task_instructions_unchanged
+    runner._plan_from(frame, task, ExecutionOptions(execute=True), Timings(started=runner.clock()))
+src\gui_agent\runtime\runner.py:594: in _plan_from
+    self._status("planning", planning_pass=next_call)
+src\gui_agent\runtime\runner.py:217: in _status
+    if note not in self._notes:
+                   ^^^^^^^^^^^
+E   AttributeError: 'TaskRunner' object has no attribute '_notes'
+____________________________ test_package_version _____________________________
+tests\test_smoke.py:5: in test_package_version
+    assert __version__ == "0.1.0"
+E   AssertionError: assert '2.0.0' == '0.1.0'
+E     
+E     - 0.1.0
+E     + 2.0.0
+_____ test_concurrent_readers_never_observe_torn_latest_or_false_finished _____
+tests\test_week6_monitoring.py:211: in test_concurrent_readers_never_observe_torn_latest_or_false_finished
+    assert all(item["state"] in {"active", "inconsistent"} for item in observations)
+E   assert False
+E    +  where False = all(<generator object test_concurrent_readers_never_observe_torn_latest_or_false_finished.<locals>.<genexpr> at 0x000001C3A65D7780>)
+------------------------------ Captured log call ------------------------------
+WARNING  gui_agent.runtime.monitoring:monitoring.py:218 Run monitor persistence failure: latest_write_failed
+=========================== short test summary info ===========================
+FAILED tests/test_runtime_runner.py::test_a_blocked_run_still_records_how_long_it_took
+FAILED tests/test_runtime_runner.py::test_an_interrupted_run_still_writes_a_readable_summary
+FAILED tests/test_runtime_runner.py::test_t04_complete_send_uses_fresh_candidates_and_strict_message_evidence
+FAILED tests/test_runtime_runner.py::test_t04_full_prompt_uses_the_current_authorised_ids_and_actual_ocr_text[\u53d1\u9001]
+FAILED tests/test_runtime_runner.py::test_t04_full_prompt_uses_the_current_authorised_ids_and_actual_ocr_text[SeNd]
+FAILED tests/test_runtime_runner.py::test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example[editor]
+FAILED tests/test_runtime_runner.py::test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example[send]
+FAILED tests/test_runtime_runner.py::test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example[ambiguous_editor]
+FAILED tests/test_runtime_runner.py::test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example[ambiguous_send]
+FAILED tests/test_runtime_runner.py::test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example[unauthorised]
+FAILED tests/test_runtime_runner.py::test_t04_stage_prompts_leave_non_message_and_other_task_instructions_unchanged[T04-None-True]
+FAILED tests/test_runtime_runner.py::test_t04_stage_prompts_leave_non_message_and_other_task_instructions_unchanged[T02-None-False]
+FAILED tests/test_runtime_runner.py::test_t04_stage_prompts_leave_non_message_and_other_task_instructions_unchanged[T02-None-True]
+FAILED tests/test_runtime_runner.py::test_t04_stage_prompts_leave_non_message_and_other_task_instructions_unchanged[T02-prepared recipient-True]
+FAILED tests/test_smoke.py::test_package_version - AssertionError: assert '2....
+FAILED tests/test_week6_monitoring.py::test_concurrent_readers_never_observe_torn_latest_or_false_finished
+16 failed, 2812 passed in 470.14s (0:07:50)

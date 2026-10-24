@@ -1,0 +1,36 @@
+{
+  "schema": "week6.delivery.manifest.v1",
+  "version": "2.0.0",
+  "branch": "codex/week6-delivery",
+  "base_commit": "9149e064d90ab6796e7f25ece6cbbd026785b26c",
+  "created_at_utc": "2026-10-24T04:58:05.885081+00:00",
+  "deliverables": {
+    "usage": "README.md",
+    "release_notes": "Release_Notes.md",
+    "report_markdown": "Week6_Robustness_Report.md",
+    "report_docx": {
+      "path": "Week6_实验报告.docx",
+      "sha256": "898c4f2fdb1a38f3d5dce2a11a8fee21753f1443c598c405114d2b8159f2d106"
+    },
+    "report_pdf": {
+      "path": "Week6_实验报告.pdf",
+      "sha256": "d7364557ae32f2c6fc005f754777705f7facbeafd5647c7a78e4bd6b4a944bcc"
+    },
+    "example": "../../configs/week6_example_workflow.json",
+    "local_demo": "demo/local_editor.html"
+  },
+  "validation": {
+    "final": "results/release_validation_20261024_attempt004/validation.json",
+    "tests_passed": 2840,
+    "pytest_seconds": 443.05,
+    "exit_code": 0,
+    "source_unchanged": true,
+    "ruff": "results/ruff_20261024.json",
+    "robustness": "results/robustness_20261024_attempt005/summary.json",
+    "perception": "results/perception_summary.json",
+    "real_model": "results/model_recovery_20261024_001/summary.json",
+    "report_qa": "results/report_qa_20261024.json",
+    "wheel": "results/package_verification_20261024.json"
+  },
+  "scope": "Production v2.0 source, example, repeatable experiment evidence and8-page robustness report. Simulated and saved-image results do not establish real-desktop success rate. No Week5 training, weights or history were modified."
+}

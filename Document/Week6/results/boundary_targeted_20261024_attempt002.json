@@ -1,0 +1,17 @@
+{
+  "schema": "week6.targeted_boundary_test.v1",
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/test_week6_monitoring.py",
+    "--basetemp=.pytest-tmp-week6-final-read-diagnostics",
+    "--tb=short"
+  ],
+  "exit_code": 0,
+  "passed": 51,
+  "failed": 0,
+  "pytest_elapsed_seconds": 2.66,
+  "change": "Explicitly assert unavailable/trustedFalse/snapshotNone/monitor_files_unreadable for Windows read denial. Also inject this precise PermissionError deterministically. No production code changed after attempt003; the final full attempt004 ran the revised test."
+}

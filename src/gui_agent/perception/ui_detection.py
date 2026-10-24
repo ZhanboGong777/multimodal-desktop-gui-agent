@@ -8,6 +8,7 @@ candidate regions. This is deliberately not a semantic detector.
 from __future__ import annotations
 
 from collections.abc import Sequence
+from itertools import chain
 
 import cv2
 import numpy as np
@@ -60,16 +61,35 @@ def _deduplicate(boxes: list[BoundingBox], containment_threshold: float = 0.8) -
     container: containment alone discarded it. Similar-size overlapping boxes are
     duplicate borders; a much smaller inner box can be a separate control.
     """
-    ordered = sorted(boxes, key=lambda box: box.width * box.height, reverse=True)
+    # On dense screens containment used most of the contour pass's Python time.
+    # Compute immutable geometry once per call, and reject the size condition
+    # before doing intersection arithmetic. The sort remains stable and the two
+    # original thresholds are unchanged; smaller controls inside containers stay.
+    ordered = sorted(
+        ((box, box.width * box.height) for box in boxes),
+        key=lambda item: item[1], reverse=True,
+    )
     kept: list[BoundingBox] = []
-    for candidate in ordered:
-        if any(
-            _containment(candidate, existing) >= containment_threshold
-            and candidate.width * candidate.height >= existing.width * existing.height * 0.5
-            for existing in kept
-        ):
+    geometry: list[tuple[int, int, int, int, int]] = []
+    for candidate, area in ordered:
+        left, top, right, bottom = (
+            candidate.left, candidate.top, candidate.right, candidate.bottom,
+        )
+        duplicate = False
+        for old_left, old_top, old_right, old_bottom, old_area in geometry:
+            if area < old_area * 0.5:
+                continue
+            overlap_width = min(right, old_right) - max(left, old_left)
+            overlap_height = min(bottom, old_bottom) - max(top, old_top)
+            overlap = (overlap_width * overlap_height
+                       if overlap_width > 0 and overlap_height > 0 else 0)
+            if overlap / float(area) >= containment_threshold:
+                duplicate = True
+                break
+        if duplicate:
             continue
         kept.append(candidate)
+        geometry.append((left, top, right, bottom, area))
     return kept
 
 
@@ -124,11 +144,12 @@ def detect_ui_candidates(
     )
     image_area = float(width * height)
     boxes: list[BoundingBox] = []
+    seen: set[tuple[int, int, int, int]] = set()
 
-    for contour, thin_border in [
-        *((contour, False) for contour in contours),
-        *((contour, True) for contour in thin_contours),
-    ]:
+    for contour, thin_border in chain(
+        ((contour, False) for contour in contours),
+        ((contour, True) for contour in thin_contours),
+    ):
         x, y, box_width, box_height = cv2.boundingRect(contour)
         area = box_width * box_height
         if area < min_area or area > image_area * max_area_ratio:
@@ -146,6 +167,12 @@ def detect_ui_candidates(
             filled = cv2.contourArea(contour) / float(area) if area else 0.0
             if filled < required_rectangularity:
                 continue
+        # Both edge passes often return precisely the same border. Only discard
+        # it after that pass's area/aspect/rectangularity checks have succeeded.
+        # This is frame-local geometry, never a cached target from another frame.
+        coordinates = (x, y, x + box_width, y + box_height)
+        if coordinates in seen:
+            continue
         box = BoundingBox(left=x, top=y, right=x + box_width, bottom=y + box_height)
         if (
             exclude
@@ -154,6 +181,7 @@ def detect_ui_candidates(
         ):
             continue
         boxes.append(box)
+        seen.add(coordinates)
 
     kept = _deduplicate(boxes)
     if priority_region is not None:

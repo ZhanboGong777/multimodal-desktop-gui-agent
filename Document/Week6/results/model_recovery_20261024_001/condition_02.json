@@ -1,0 +1,93 @@
+{
+  "condition": "recovery_relayout",
+  "planner_invocations": 1,
+  "actual_http_requests": 2,
+  "project_client_request_count": 2,
+  "condition_elapsed_ms": 3018.991900025867,
+  "plan_result": {
+    "ok": true,
+    "elapsed_ms": 3018.965,
+    "attempts": 2,
+    "error": null,
+    "plan": {
+      "task_id": "t1",
+      "instruction": "Click the Run analysis button in this local demo, then finish.",
+      "summary": "Click Run analysis",
+      "steps": [
+        {
+          "step_id": "s1",
+          "description": "Click the Run analysis button",
+          "action_type": "click",
+          "target_text": "Run analysis",
+          "arguments": {},
+          "expected_result": "Run analysis button is clicked",
+          "status": "pending"
+        }
+      ],
+      "assumptions": [],
+      "requires_confirmation": true,
+      "errors": []
+    },
+    "model": {
+      "provider": "openai_compatible",
+      "model_name": "qwen2.5vl:3b",
+      "latency_ms": 1222.335,
+      "usage": {
+        "prompt_tokens": 1963,
+        "completion_tokens": 116,
+        "total_tokens": 2079
+      },
+      "error": null,
+      "content_length": 437
+    }
+  },
+  "last_model_raw_content": "{\n  \"task_id\": \"t1\",\n  \"instruction\": \"Click the Run analysis button in this local demo, then finish.\",\n  \"summary\": \"Click Run analysis\",\n  \"steps\": [\n    {\n      \"step_id\": \"s1\",\n      \"description\": \"Click the Run analysis button\",\n      \"action_type\": \"click\",\n      \"target_text\": \"Run analysis\",\n      \"arguments\": {},\n      \"expected_result\": \"Run analysis button is clicked\",\n      \"status\": \"pending\"\n    }\n  ],\n  \"errors\": []\n}",
+  "target_comparison": {
+    "target_check_passed": true,
+    "model_refusal_observed": false,
+    "executable_step_count": 1,
+    "adapter_resolutions": [
+      {
+        "step_id": "s1",
+        "action_type": "click",
+        "adapter_accepted": true,
+        "resolved": {
+          "step_id": "s1",
+          "action": {
+            "action_type": "click",
+            "x": 595,
+            "y": 418,
+            "start": null,
+            "end": null,
+            "text": null,
+            "key": null,
+            "keys": null,
+            "scroll_amount": null,
+            "duration": null,
+            "target_description": "Run analysis"
+          },
+          "element_id": "obs-0002-e001",
+          "screenshot_point": {
+            "x": 595,
+            "y": 418
+          },
+          "control_point": {
+            "x": 595,
+            "y": 418
+          },
+          "note": "text 'Run analysis' -> obs-0002-e001"
+        },
+        "uses_current_listed_geometry": true
+      }
+    ],
+    "stale_id_references": [],
+    "explicit_coordinate_arguments": false,
+    "runtime_plan_errors_present": false,
+    "desktop_actions_dispatched": 0,
+    "note": "Adapter acceptance validates a current candidate, not semantic disambiguation or desktop success."
+  },
+  "request_numbers": [
+    2,
+    3
+  ]
+}

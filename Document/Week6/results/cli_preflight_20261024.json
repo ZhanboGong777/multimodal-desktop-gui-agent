@@ -1,0 +1,32 @@
+{
+  "command": [
+    "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+    "scripts/week6_agent_cli.py",
+    "--workflow",
+    "configs/week6_example_workflow.json",
+    "--validate-only",
+    "--provider",
+    "openai_compatible",
+    "--base-url",
+    "http://127.0.0.1:11434/v1",
+    "--model",
+    "qwen2.5vl:3b",
+    "--ocr-engine",
+    "tesseract",
+    "--planning-attempts",
+    "6",
+    "--max-actions",
+    "12",
+    "--task-timeout",
+    "240"
+  ],
+  "exit_code": 0,
+  "observed_stdout": {
+    "workflow_id": "week6_local_editor_demo",
+    "subgoals": 3,
+    "valid": true,
+    "desktop_actions": 0,
+    "model_calls": 0
+  },
+  "scope": "Definition-only preflight; no desktop input, screenshot or model initialization."
+}

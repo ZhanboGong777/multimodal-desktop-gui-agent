@@ -106,7 +106,13 @@ class ObservationService:
         started = time.perf_counter()
         oid = observation_id or self.next_id()
         errors: list[str] = []
+        # Non-overlapping wall times. A cached engine has zero factory time;
+        # backend-specific lazy initialization remains part of recognize/OCR.
+        stage_timings = dict.fromkeys(
+            ("capture", "engine_init", "ocr", "ui_detection", "selection"), 0.0,
+        )
 
+        stage_started = time.perf_counter()
         try:
             capture = capture_monitor(
                 self.config.perception.monitor_index,
@@ -115,12 +121,26 @@ class ObservationService:
             )
         except Exception as exc:
             raise ObservationError(f"capture failed: {type(exc).__name__}: {exc}") from exc
+        stage_timings["capture"] = (time.perf_counter() - stage_started) * 1000.0
 
         elements: list[UIElement] = []
         engine_name = "none"
         try:
-            selection = self._engine()
-            output = selection.engine.recognize(capture.image)
+            if self._selection is None:
+                stage_started = time.perf_counter()
+                try:
+                    selection = self._engine()
+                finally:
+                    stage_timings["engine_init"] = (
+                        time.perf_counter() - stage_started
+                    ) * 1000.0
+            else:
+                selection = self._engine()
+            stage_started = time.perf_counter()
+            try:
+                output = selection.engine.recognize(capture.image)
+            finally:
+                stage_timings["ocr"] = (time.perf_counter() - stage_started) * 1000.0
             elements = list(output.elements)
             engine_name = output.engine
             errors.extend(output.errors)
@@ -128,6 +148,7 @@ class ObservationService:
             errors.append(f"ocr unavailable: {exc}")
 
         if self.config.perception.ui_detection.enabled:
+            stage_started = time.perf_counter()
             try:
                 boxes = [element.bounding_box for element in elements]
                 elements.extend(
@@ -144,7 +165,12 @@ class ObservationService:
                 )
             except Exception as exc:  # noqa: BLE001 - contours are optional context
                 errors.append(f"ui detection failed: {type(exc).__name__}: {exc}")
+            finally:
+                stage_timings["ui_detection"] = (
+                    time.perf_counter() - stage_started
+                ) * 1000.0
 
+        stage_started = time.perf_counter()
         refs = [
             ElementRef(
                 element_id=f"{oid}-e{index:03d}",
@@ -156,6 +182,7 @@ class ObservationService:
             )
             for index, element in enumerate(self._select(elements))
         ]
+        stage_timings["selection"] = (time.perf_counter() - stage_started) * 1000.0
 
         return ObservationSnapshot(
             observation_id=oid,
@@ -165,6 +192,7 @@ class ObservationService:
             elements=refs,
             ocr_engine=engine_name,
             processing_time_ms=(time.perf_counter() - started) * 1000.0,
+            stage_timings_ms=stage_timings,
             errors=errors,
             notices=self._engine_notices(),
             # `getattr` because a capture result is a duck-typed seam here: tests and other

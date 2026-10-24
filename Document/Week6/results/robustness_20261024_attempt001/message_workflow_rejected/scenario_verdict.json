@@ -1,0 +1,171 @@
+{
+  "scenario": "message_workflow_rejected",
+  "expected": {
+    "status": "rejected",
+    "total_actions": 0,
+    "planning_calls": 0,
+    "recovery_count": 0,
+    "unconfirmed_action_attempts": 0,
+    "subgoal_statuses": [
+      "not_started",
+      "not_started",
+      "not_started"
+    ],
+    "final_verification": null,
+    "simulated_successful_dispatches": 0,
+    "simulated_executor_calls": 0,
+    "first_goal_executor_calls": 0,
+    "accounting_complete": true,
+    "callback_completed_progress": []
+  },
+  "actual": {
+    "status": "rejected",
+    "total_actions": 0,
+    "planning_calls": 0,
+    "recovery_count": 0,
+    "unconfirmed_action_attempts": 0,
+    "subgoal_statuses": [
+      "not_started",
+      "not_started",
+      "not_started"
+    ],
+    "final_verification": null,
+    "simulated_successful_dispatches": 0,
+    "simulated_executor_calls": 0,
+    "first_goal_executor_calls": 0,
+    "accounting_complete": true,
+    "callback_completed_progress": []
+  },
+  "checks": [
+    {
+      "name": "status",
+      "expected": "rejected",
+      "actual": "rejected",
+      "passed": true
+    },
+    {
+      "name": "total_actions",
+      "expected": 0,
+      "actual": 0,
+      "passed": true
+    },
+    {
+      "name": "planning_calls",
+      "expected": 0,
+      "actual": 0,
+      "passed": true
+    },
+    {
+      "name": "recovery_count",
+      "expected": 0,
+      "actual": 0,
+      "passed": true
+    },
+    {
+      "name": "unconfirmed_action_attempts",
+      "expected": 0,
+      "actual": 0,
+      "passed": true
+    },
+    {
+      "name": "subgoal_statuses",
+      "expected": [
+        "not_started",
+        "not_started",
+        "not_started"
+      ],
+      "actual": [
+        "not_started",
+        "not_started",
+        "not_started"
+      ],
+      "passed": true
+    },
+    {
+      "name": "final_verification",
+      "expected": null,
+      "actual": null,
+      "passed": true
+    },
+    {
+      "name": "simulated_successful_dispatches",
+      "expected": 0,
+      "actual": 0,
+      "passed": true
+    },
+    {
+      "name": "simulated_executor_calls",
+      "expected": 0,
+      "actual": 0,
+      "passed": true
+    },
+    {
+      "name": "first_goal_executor_calls",
+      "expected": 0,
+      "actual": 0,
+      "passed": true
+    },
+    {
+      "name": "accounting_complete",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "name": "callback_completed_progress",
+      "expected": [],
+      "actual": [],
+      "passed": true
+    },
+    {
+      "name": "every_executor_coordinate_matches_current_frame",
+      "expected": true,
+      "actual": true,
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "resolved_ids_belong_to_recorded_dispatch_frame",
+      "expected": true,
+      "actual": true,
+      "passed": true,
+      "detail": {
+        "resolved_frames_checked": 0
+      }
+    },
+    {
+      "name": "callback_observes_already_written_progress",
+      "expected": true,
+      "actual": true,
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_events_match_durable_journal_prefix",
+      "expected": true,
+      "actual": true,
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "checkpoint_sequences_are_contiguous",
+      "expected": true,
+      "actual": true,
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "message_rejected_before_any_child_created",
+      "expected": true,
+      "actual": true,
+      "passed": true,
+      "detail": null
+    }
+  ],
+  "passed": true,
+  "wall_elapsed_ms": 2.6385000091977417,
+  "virtual_elapsed_ms": 0.0,
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt001\\message_workflow_rejected",
+  "recovery_records": [],
+  "workflow_result": null
+}

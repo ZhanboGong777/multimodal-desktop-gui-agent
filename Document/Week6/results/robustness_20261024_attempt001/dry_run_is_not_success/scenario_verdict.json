@@ -1,0 +1,296 @@
+{
+  "scenario": "dry_run_is_not_success",
+  "expected": {
+    "status": "dry_run_completed",
+    "total_actions": 3,
+    "planning_calls": 3,
+    "recovery_count": 0,
+    "unconfirmed_action_attempts": 0,
+    "subgoal_statuses": [
+      "dry_run_completed",
+      "dry_run_completed",
+      "dry_run_completed"
+    ],
+    "final_verification": null,
+    "simulated_successful_dispatches": 0,
+    "simulated_executor_calls": 3,
+    "first_goal_executor_calls": 1,
+    "accounting_complete": true,
+    "callback_completed_progress": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "actual": {
+    "status": "dry_run_completed",
+    "total_actions": 3,
+    "planning_calls": 3,
+    "recovery_count": 0,
+    "unconfirmed_action_attempts": 0,
+    "subgoal_statuses": [
+      "dry_run_completed",
+      "dry_run_completed",
+      "dry_run_completed"
+    ],
+    "final_verification": null,
+    "simulated_successful_dispatches": 0,
+    "simulated_executor_calls": 3,
+    "first_goal_executor_calls": 1,
+    "accounting_complete": true,
+    "callback_completed_progress": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "checks": [
+    {
+      "name": "status",
+      "expected": "dry_run_completed",
+      "actual": "dry_run_completed",
+      "passed": true
+    },
+    {
+      "name": "total_actions",
+      "expected": 3,
+      "actual": 3,
+      "passed": true
+    },
+    {
+      "name": "planning_calls",
+      "expected": 3,
+      "actual": 3,
+      "passed": true
+    },
+    {
+      "name": "recovery_count",
+      "expected": 0,
+      "actual": 0,
+      "passed": true
+    },
+    {
+      "name": "unconfirmed_action_attempts",
+      "expected": 0,
+      "actual": 0,
+      "passed": true
+    },
+    {
+      "name": "subgoal_statuses",
+      "expected": [
+        "dry_run_completed",
+        "dry_run_completed",
+        "dry_run_completed"
+      ],
+      "actual": [
+        "dry_run_completed",
+        "dry_run_completed",
+        "dry_run_completed"
+      ],
+      "passed": true
+    },
+    {
+      "name": "final_verification",
+      "expected": null,
+      "actual": null,
+      "passed": true
+    },
+    {
+      "name": "simulated_successful_dispatches",
+      "expected": 0,
+      "actual": 0,
+      "passed": true
+    },
+    {
+      "name": "simulated_executor_calls",
+      "expected": 3,
+      "actual": 3,
+      "passed": true
+    },
+    {
+      "name": "first_goal_executor_calls",
+      "expected": 1,
+      "actual": 1,
+      "passed": true
+    },
+    {
+      "name": "accounting_complete",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "name": "callback_completed_progress",
+      "expected": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "actual": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "passed": true
+    },
+    {
+      "name": "every_executor_coordinate_matches_current_frame",
+      "expected": true,
+      "actual": true,
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "resolved_ids_belong_to_recorded_dispatch_frame",
+      "expected": true,
+      "actual": true,
+      "passed": true,
+      "detail": {
+        "resolved_frames_checked": 3
+      }
+    },
+    {
+      "name": "callback_observes_already_written_progress",
+      "expected": true,
+      "actual": true,
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_events_match_durable_journal_prefix",
+      "expected": true,
+      "actual": true,
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "checkpoint_sequences_are_contiguous",
+      "expected": true,
+      "actual": true,
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "returned_result_equals_durable_summary",
+      "expected": true,
+      "actual": true,
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "terminal_checkpoint_matches_result",
+      "expected": true,
+      "actual": true,
+      "passed": true,
+      "detail": null
+    }
+  ],
+  "passed": true,
+  "wall_elapsed_ms": 1219.9692000285722,
+  "virtual_elapsed_ms": 209.999999999809,
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt001\\dry_run_is_not_success",
+  "recovery_records": [],
+  "workflow_result": {
+    "schema_version": "week6.workflow.v1",
+    "workflow_id": "dry_run_is_not_success",
+    "status": "dry_run_completed",
+    "execute": false,
+    "subgoals": [
+      {
+        "index": 0,
+        "case_id": "phase_one",
+        "status": "dry_run_completed",
+        "child_status": "dry_run_completed",
+        "actions": 1,
+        "unconfirmed_action_attempts": 0,
+        "planning_calls": 1,
+        "verification": {
+          "outcome": "inconclusive",
+          "method": "automatic",
+          "detail": "dry run: actions were resolved and validated but nothing was dispatched, so the task goal was not attempted (the rule would read failed)",
+          "evidence": {
+            "would_be": "failed",
+            "rule_detail": "expected on screen but not found: ResultOneReady"
+          }
+        },
+        "elapsed_ms": 69.99999999993634,
+        "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt001\\dry_run_is_not_success\\workflow\\001_phase_one",
+        "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt001\\dry_run_is_not_success\\workflow\\001_phase_one\\task_summary.json",
+        "error": null
+      },
+      {
+        "index": 1,
+        "case_id": "phase_two",
+        "status": "dry_run_completed",
+        "child_status": "dry_run_completed",
+        "actions": 1,
+        "unconfirmed_action_attempts": 0,
+        "planning_calls": 1,
+        "verification": {
+          "outcome": "inconclusive",
+          "method": "automatic",
+          "detail": "dry run: actions were resolved and validated but nothing was dispatched, so the task goal was not attempted (the rule would read failed)",
+          "evidence": {
+            "would_be": "failed",
+            "rule_detail": "expected on screen but not found: ResultTwoReady"
+          }
+        },
+        "elapsed_ms": 69.99999999993634,
+        "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt001\\dry_run_is_not_success\\workflow\\002_phase_two",
+        "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt001\\dry_run_is_not_success\\workflow\\002_phase_two\\task_summary.json",
+        "error": null
+      },
+      {
+        "index": 2,
+        "case_id": "phase_three",
+        "status": "dry_run_completed",
+        "child_status": "dry_run_completed",
+        "actions": 1,
+        "unconfirmed_action_attempts": 0,
+        "planning_calls": 1,
+        "verification": {
+          "outcome": "inconclusive",
+          "method": "automatic",
+          "detail": "dry run: actions were resolved and validated but nothing was dispatched, so the task goal was not attempted (the rule would read failed)",
+          "evidence": {
+            "would_be": "failed",
+            "rule_detail": "expected on screen but not found: ResultThreeReady"
+          }
+        },
+        "elapsed_ms": 69.99999999993634,
+        "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt001\\dry_run_is_not_success\\workflow\\003_phase_three",
+        "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt001\\dry_run_is_not_success\\workflow\\003_phase_three\\task_summary.json",
+        "error": null
+      }
+    ],
+    "total_actions": 3,
+    "unconfirmed_action_attempts": 0,
+    "planning_calls": 3,
+    "accounting_complete": true,
+    "elapsed_ms": 209.999999999809,
+    "final_verification": null,
+    "final_observation_id": null,
+    "final_observation_reference": "",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt001\\dry_run_is_not_success\\workflow",
+    "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt001\\dry_run_is_not_success\\workflow\\workflow_summary.json",
+    "checkpoint_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt001\\dry_run_is_not_success\\workflow\\checkpoints.jsonl",
+    "error": null,
+    "notes": []
+  }
+}

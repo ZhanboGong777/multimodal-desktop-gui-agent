@@ -838,11 +838,11 @@ class Verifier:
         Nothing else may mark a task ``succeeded``: not ``finish``, not a run out
         of steps, not a changed screenshot.
         """
-        if not task.success_rules and not task.expect_text and not task.forbid_text:
+        if not task.expect_text and not task.forbid_text and not task.message_conversation:
             return VerificationResult(
                 outcome="inconclusive",
                 method=task.verification,
-                detail="the task has no verifiable success rule; refusing to declare it complete",
+                detail="the task has no executable success check; natural-language rules alone cannot prove completion",
             )
 
         if observation is None:
@@ -854,6 +854,25 @@ class Verifier:
 
         if task.message_conversation is not None:
             return self._check_sent_message(task, observation)
+
+        if any(not text.strip() for text in [*task.expect_text, *task.forbid_text]):
+            return VerificationResult(
+                outcome="inconclusive", method=task.verification,
+                detail="an empty text check cannot prove task completion",
+            )
+        if observation.errors:
+            return VerificationResult(
+                outcome="inconclusive", method=task.verification,
+                detail="the current observation reported errors; completion is unconfirmed",
+                evidence={"observation_id": observation.observation_id},
+            )
+        readable = any(item.text.strip() for item in observation.elements) or bool(observation.window_title.strip())
+        if task.forbid_text and not readable:
+            return VerificationResult(
+                outcome="inconclusive", method=task.verification,
+                detail="no readable current evidence can prove the required text disappeared",
+                evidence={"observation_id": observation.observation_id},
+            )
 
         haystack = _haystack(observation)
         evidence: dict[str, Any] = {"observation_id": observation.observation_id}
@@ -926,7 +945,7 @@ class Verifier:
                 return result, latest
             if clock() - started >= deadline_seconds:
                 return result, latest
-            sleep(self.poll_interval_seconds)
+            sleep(min(self.poll_interval_seconds, max(0.0, deadline_seconds - (clock() - started))))
 
 
 #: Words that describe *how* an action was carried out rather than naming anything a screen

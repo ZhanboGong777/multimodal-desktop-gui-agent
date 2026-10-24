@@ -1,0 +1,107 @@
+{
+  "schema_version": "week6.workflow.v1",
+  "workflow_id": "execution_failure_once",
+  "status": "succeeded",
+  "execute": true,
+  "subgoals": [
+    {
+      "index": 0,
+      "case_id": "phase_one",
+      "status": "completed",
+      "child_status": "succeeded",
+      "actions": 1,
+      "unconfirmed_action_attempts": 0,
+      "planning_calls": 1,
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "sim-obs-0004",
+          "expect_text": [
+            "ResultOneReady"
+          ],
+          "forbid_text": []
+        }
+      },
+      "elapsed_ms": 289.9999999999636,
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt003\\execution_failure_once\\workflow\\001_phase_one",
+      "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt003\\execution_failure_once\\workflow\\001_phase_one\\task_summary.json",
+      "error": null
+    },
+    {
+      "index": 1,
+      "case_id": "phase_two",
+      "status": "completed",
+      "child_status": "succeeded",
+      "actions": 2,
+      "unconfirmed_action_attempts": 0,
+      "planning_calls": 2,
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "sim-obs-0010",
+          "expect_text": [
+            "ResultTwoReady"
+          ],
+          "forbid_text": []
+        }
+      },
+      "elapsed_ms": 359.99999999989996,
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt003\\execution_failure_once\\workflow\\002_phase_two",
+      "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt003\\execution_failure_once\\workflow\\002_phase_two\\task_summary.json",
+      "error": null
+    },
+    {
+      "index": 2,
+      "case_id": "phase_three",
+      "status": "completed",
+      "child_status": "succeeded",
+      "actions": 1,
+      "unconfirmed_action_attempts": 0,
+      "planning_calls": 1,
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "sim-obs-0014",
+          "expect_text": [
+            "ResultThreeReady"
+          ],
+          "forbid_text": []
+        }
+      },
+      "elapsed_ms": 289.9999999999636,
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt003\\execution_failure_once\\workflow\\003_phase_three",
+      "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt003\\execution_failure_once\\workflow\\003_phase_three\\task_summary.json",
+      "error": null
+    }
+  ],
+  "total_actions": 4,
+  "unconfirmed_action_attempts": 0,
+  "planning_calls": 4,
+  "accounting_complete": true,
+  "elapsed_ms": 949.9999999998181,
+  "final_verification": {
+    "outcome": "passed",
+    "method": "automatic",
+    "detail": "all success rules matched against the current screen",
+    "evidence": {
+      "observation_id": "sim-obs-0015",
+      "expect_text": [
+        "WorkflowComplete"
+      ],
+      "forbid_text": []
+    }
+  },
+  "final_observation_id": "sim-obs-0015",
+  "final_observation_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt003\\execution_failure_once\\workflow\\003_phase_three\\sim-obs-0015.json",
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt003\\execution_failure_once\\workflow",
+  "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt003\\execution_failure_once\\workflow\\workflow_summary.json",
+  "checkpoint_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\robustness_20261024_attempt003\\execution_failure_once\\workflow\\checkpoints.jsonl",
+  "error": null,
+  "notes": []
+}
