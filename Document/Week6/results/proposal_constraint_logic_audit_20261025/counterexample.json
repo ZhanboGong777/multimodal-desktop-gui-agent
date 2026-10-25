@@ -1,0 +1,250 @@
+{
+  "schema": "week6.independent.proposal_constraint_logic_audit.v1",
+  "created_utc": "2026-10-25T08:00:26.938208+00:00",
+  "source": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\src\\gui_agent\\planning\\workflow_decomposer.py",
+  "source_sha256": "ab8d84135804cf6cc5c097f98fd02c88648511d212089d1c041fd7b3faa0be60",
+  "source_unchanged": true,
+  "source_locations": {
+    "old_expected_rejection": 374,
+    "full_progress_predicate": 381
+  },
+  "scope": "Six direct pure-CPU logical checks on fabricated generic observations; no model call, capture, GUI input, or runtime task execution.",
+  "primary_counterexample": "Option A and Option B are initially visible. After a hypothetical stage change, A persists and B disappears. The full conjunction A AND NOT B changes failed to passed, but the checker rejects it because A alone was initially visible.",
+  "cases": [
+    {
+      "case": "compound_A_and_not_B",
+      "expect_text": [
+        "Option A"
+      ],
+      "forbid_text": [
+        "Option B"
+      ],
+      "initial_full_check": {
+        "outcome": "failed",
+        "method": "automatic",
+        "detail": "still on screen but should be gone: Option B",
+        "evidence": {
+          "observation_id": "cpu-initial",
+          "unexpected": [
+            "Option B"
+          ]
+        }
+      },
+      "following_full_check": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "cpu-following",
+          "expect_text": [
+            "Option A"
+          ],
+          "forbid_text": [
+            "Option B"
+          ]
+        }
+      },
+      "current_checker_allowed": false,
+      "current_checker_error": "subgoal 1 expect_text is already visible in the current frame: ['Option A']. A current operation label is not post-action evidence. Remove that expect_text; if future wording is unknown, use a currently visible stage marker that must disappear as forbid_text."
+    },
+    {
+      "case": "weaker_not_B",
+      "expect_text": [],
+      "forbid_text": [
+        "Option B"
+      ],
+      "initial_full_check": {
+        "outcome": "failed",
+        "method": "automatic",
+        "detail": "still on screen but should be gone: Option B",
+        "evidence": {
+          "observation_id": "cpu-initial",
+          "unexpected": [
+            "Option B"
+          ]
+        }
+      },
+      "following_full_check": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "cpu-following",
+          "expect_text": [],
+          "forbid_text": [
+            "Option B"
+          ]
+        }
+      },
+      "current_checker_allowed": true,
+      "current_checker_error": ""
+    },
+    {
+      "case": "button_label_only",
+      "expect_text": [
+        "Option A"
+      ],
+      "forbid_text": [],
+      "initial_full_check": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "cpu-initial",
+          "expect_text": [
+            "Option A"
+          ],
+          "forbid_text": []
+        }
+      },
+      "following_full_check": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "cpu-following",
+          "expect_text": [
+            "Option A"
+          ],
+          "forbid_text": []
+        }
+      },
+      "current_checker_allowed": false,
+      "current_checker_error": "subgoal 1 expect_text is already visible in the current frame: ['Option A']. A current operation label is not post-action evidence. Remove that expect_text; if future wording is unknown, use a currently visible stage marker that must disappear as forbid_text."
+    },
+    {
+      "case": "already_satisfied_combination",
+      "expect_text": [
+        "Option A"
+      ],
+      "forbid_text": [
+        "Absent option C"
+      ],
+      "initial_full_check": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "cpu-initial",
+          "expect_text": [
+            "Option A"
+          ],
+          "forbid_text": [
+            "Absent option C"
+          ]
+        }
+      },
+      "following_full_check": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "cpu-following",
+          "expect_text": [
+            "Option A"
+          ],
+          "forbid_text": [
+            "Absent option C"
+          ]
+        }
+      },
+      "current_checker_allowed": false,
+      "current_checker_error": "subgoal 1 expect_text is already visible in the current frame: ['Option A']. A current operation label is not post-action evidence. Remove that expect_text; if future wording is unknown, use a currently visible stage marker that must disappear as forbid_text."
+    },
+    {
+      "case": "existing_context_plus_new_stage",
+      "expect_text": [
+        "Option A",
+        "Stage reviewed"
+      ],
+      "forbid_text": [],
+      "initial_full_check": {
+        "outcome": "failed",
+        "method": "automatic",
+        "detail": "expected on screen but not found: Stage reviewed",
+        "evidence": {
+          "observation_id": "cpu-initial",
+          "missing": [
+            "Stage reviewed"
+          ]
+        }
+      },
+      "following_full_check": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "cpu-following",
+          "expect_text": [
+            "Option A",
+            "Stage reviewed"
+          ],
+          "forbid_text": []
+        }
+      },
+      "current_checker_allowed": false,
+      "current_checker_error": "subgoal 1 expect_text is already visible in the current frame: ['Option A']. A current operation label is not post-action evidence. Remove that expect_text; if future wording is unknown, use a currently visible stage marker that must disappear as forbid_text."
+    },
+    {
+      "case": "caller_final_required_text_forbidden",
+      "expect_text": [
+        "Stage reviewed"
+      ],
+      "forbid_text": [
+        "Workflow finished"
+      ],
+      "initial_full_check": {
+        "outcome": "failed",
+        "method": "automatic",
+        "detail": "expected on screen but not found: Stage reviewed",
+        "evidence": {
+          "observation_id": "cpu-initial",
+          "missing": [
+            "Stage reviewed"
+          ]
+        }
+      },
+      "following_full_check": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "cpu-following",
+          "expect_text": [
+            "Stage reviewed"
+          ],
+          "forbid_text": [
+            "Workflow finished"
+          ]
+        }
+      },
+      "current_checker_allowed": false,
+      "current_checker_error": "subgoal 1 forbid_text conflicts with caller final expect_text: [('Workflow finished', 'Workflow finished')]. Preserve caller-required final text; propose a different observable progress check."
+    }
+  ],
+  "logical_monotonicity_issue": "The checker permits NOT B alone, but rejects the strictly stronger A AND NOT B using the same observations. Adding a true retained-context requirement narrows the accepted successor states; it cannot make this conjunction weaker than the already permitted rule.",
+  "recommendation": {
+    "general_rule": "After immutable-final conflict checks, reject a proposed stage when its entire check conjunction is already passed in the current readable observation. Allow retained expect_text if at least one currently unmet predicate requires an independently observed transition.",
+    "equivalent_progress_condition": "any required expected text absent now OR any forbidden text present now; keep current unreadable/error observations conservative.",
+    "reject_cases": [
+      "Only the currently visible operation label is required.",
+      "Every expected term is already present and every forbidden term is already absent."
+    ],
+    "preserve": [
+      "Caller final expect/forbid lists are unchanged.",
+      "Generated forbid_text conflicting with caller final-required text is refused under the existing conservative policy.",
+      "Completed instruction/check-signature no-replay gate remains independent and unchanged.",
+      "All schema/format/constraint repairs remain inside the same request and time budgets.",
+      "A child and overall success still require fresh observations and independent final checks."
+    ],
+    "not_recommended": "Do not accept a model claim of completion, infer that an input happened from a proposed check, change the final acceptance rules, add fixture-specific strings, or rewrite any prior failed run."
+  },
+  "limits": [
+    "A false initial conjunction and true later conjunction are evidence of a checked state transition, not proof of which physical input caused it.",
+    "OCR misses can imitate disappearance; real fixture events, stable-window checks and one-to-one input attribution remain necessary.",
+    "The later observation here is fabricated solely to demonstrate predicate logic. It is not a successful desktop run."
+  ],
+  "caller_final_rules_unchanged": true,
+  "Week6_complete": false,
+  "real_GUI_acceptance_success": false
+}

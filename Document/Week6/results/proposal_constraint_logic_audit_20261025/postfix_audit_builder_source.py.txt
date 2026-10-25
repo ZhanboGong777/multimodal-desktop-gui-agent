@@ -1,0 +1,95 @@
+"""Recheck the original generic logical counterexample against the frozen fix."""
+from __future__ import annotations
+
+import hashlib
+import json
+import sys
+from datetime import UTC, datetime
+from pathlib import Path
+
+ROOT=Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+OUT=ROOT/'Document/Week6/results/proposal_constraint_logic_audit_20261025'
+SOURCE=ROOT/'src/gui_agent/planning/workflow_decomposer.py'
+EXPECTED_SHA='3bc8ff2accfb32d5e4f58a5461fec0bfd97ee0bc14b5434d047632c5ef3e7a18'
+sys.path.insert(0,str(ROOT/'src'))
+from gui_agent.planning.workflow_decomposer import DecompositionProposal,WorkflowRequest,_check_proposal_constraints
+from gui_agent.runtime.schemas import ObservationSnapshot,TaskSpec
+from gui_agent.runtime.verification import Verifier
+
+
+def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+assert sha(SOURCE)==EXPECTED_SHA
+old_files={str(path):sha(path) for path in OUT.rglob('*') if path.is_file()}
+original=json.loads((OUT/'counterexample.json').read_bytes())
+initial=ObservationSnapshot.model_validate_json((OUT/'generic_initial_observation.json').read_bytes())
+following=ObservationSnapshot.model_validate_json((OUT/'generic_following_observation.json').read_bytes())
+request=WorkflowRequest(workflow_id='GenericLogic',
+    instruction='Choose a local option, then complete the remaining stages',expect_text=['Workflow finished'])
+request_before=request.model_dump(mode='json')
+expected={
+    'compound_A_and_not_B':True,'weaker_not_B':True,'button_label_only':False,
+    'already_satisfied_combination':False,'existing_context_plus_new_stage':True,
+    'caller_final_required_text_forbidden':False,
+}
+verifier=Verifier()
+checks=[]
+for old_case in original['cases']:
+    name=old_case['case']
+    proposal=DecompositionProposal.model_validate({'status':'ready','reason':'','subgoals':[{
+        'instruction':'Advance the current local stage','expect_text':old_case['expect_text'],
+        'forbid_text':old_case['forbid_text']}]})
+    error=''
+    try:
+        _check_proposal_constraints(proposal,request,initial,[])
+        allowed=True
+    except ValueError as exc:
+        allowed=False
+        error=str(exc)
+    task=TaskSpec(case_id='CHECK',instruction='Check proposed local progress only',
+                  expect_text=old_case['expect_text'],forbid_text=old_case['forbid_text'])
+    checks.append({'case':name,'expect_text':old_case['expect_text'],'forbid_text':old_case['forbid_text'],
+                   'expected_allowed':expected[name],'actual_allowed':allowed,'error':error,
+                   'passed':allowed==expected[name],
+                   'before_fix_allowed':old_case['current_checker_allowed'],
+                   'initial_full_check':verifier.check_task(task,initial).model_dump(mode='json'),
+                   'hypothetical_following_full_check':verifier.check_task(task,following).model_dump(mode='json')})
+assert all(row['passed'] for row in checks)
+assert checks[0]['initial_full_check']['outcome']=='failed'
+assert checks[0]['hypothetical_following_full_check']['outcome']=='passed'
+assert request.model_dump(mode='json')==request_before
+assert sha(SOURCE)==EXPECTED_SHA
+assert all(sha(Path(path))==digest for path,digest in old_files.items())
+source_text=SOURCE.read_text('utf-8')
+result={
+    'schema':'week6.independent.proposal_constraint_postfix_audit.v1',
+    'created_utc':datetime.now(UTC).isoformat(),'source':str(SOURCE),'source_sha256':EXPECTED_SHA,
+    'scope':'Six direct pure-CPU checks against the same generic observations used in the original counterexample. No pytest suite, model call, GUI capture/input or window activation.',
+    'original_counterexample':'counterexample.json','original_audit_files_unchanged':True,
+    'source_unchanged_during_probe':True,'checks':checks,'all_checks_passed':True,
+    'core_findings':{
+        'strong_A_and_not_B_allowed_now':checks[0]['actual_allowed'],
+        'label_only_already_satisfied_still_rejected':not checks[2]['actual_allowed'],
+        'all_satisfied_conjunction_still_rejected':not checks[3]['actual_allowed'],
+        'final_conflict_still_rejected':not checks[5]['actual_allowed'],
+        'caller_final_rules_unchanged':request.model_dump(mode='json')==request_before,
+        'completed_no_replay_gate_still_present':
+            'decomposition repeated an already completed subgoal' in source_text,
+        'parent_absolute_deadline_still_passed_to_workflow': 'absolute_deadline=deadline' in source_text,
+    },
+    'other_material_flaws_found_in_this_change':[],
+    'limits':['The future observation is fabricated for logic verification, not an executed task.',
+              'An allowed pending proposal does not prove its action occurred or that the final task succeeded.',
+              'Fresh post-action checks, immutable final checks, completed-stage guards and independent GUI input/event attribution remain necessary.'],
+    'full_regression_note':'The earlier 2924-pass full004 snapshot predates this fix. Its historical evidence remains unchanged; a new full-run result must separately establish the new version.',
+    'real_GUI_acceptance_success':False,'Week6_complete':False,
+}
+with (OUT/'postfix_audit_001.json').open('x',encoding='utf-8') as handle:
+    handle.write(json.dumps(result,indent=2,ensure_ascii=False)+'\n')
+with (OUT/'postfix_checker_source.py.txt').open('xb') as handle:handle.write(SOURCE.read_bytes())
+with (OUT/'postfix_audit_builder_source.py.txt').open('xb') as handle:handle.write(Path(__file__).read_bytes())
+print(json.dumps({'audit':str(OUT/'postfix_audit_001.json'),'source_sha256':EXPECTED_SHA,
+                  'checks_passed':len(checks),'strong_conjunction_allowed':True,
+                  'label_only_rejected':True,'final_conflict_rejected':True,
+                  'original_counterexample_unchanged':True},indent=2))

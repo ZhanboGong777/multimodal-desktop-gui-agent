@@ -1,0 +1,124 @@
+"""Generic pure-CPU counterexample; no GUI, model, or source mutation."""
+from __future__ import annotations
+
+import hashlib
+import json
+import sys
+from datetime import UTC, datetime
+from pathlib import Path
+
+ROOT=Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+OUT=ROOT/'Document/Week6/results/proposal_constraint_logic_audit_20261025'
+sys.path.insert(0,str(ROOT/'src'))
+from gui_agent.planning.workflow_decomposer import (
+    DecompositionProposal,WorkflowRequest,_check_proposal_constraints,
+)
+from gui_agent.runtime.schemas import ElementRef,ObservationSnapshot,TaskSpec
+from gui_agent.runtime.verification import Verifier
+from gui_agent.schemas import BoundingBox,ScreenInfo
+
+
+def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+SOURCE=ROOT/'src/gui_agent/planning/workflow_decomposer.py'
+before_sha=sha(SOURCE)
+OUT.mkdir(parents=True,exist_ok=False)
+
+
+def frame(identifier,texts):
+    return ObservationSnapshot(observation_id=identifier,captured_at=datetime.now(UTC),
+        screen_info=ScreenInfo(screenshot_width=800,screenshot_height=600,
+                               control_width=800,control_height=600),
+        elements=[ElementRef(element_id=f'{identifier}-e{index:03d}',text=text,
+                    bounding_box=BoundingBox(left=20,top=20+index*60,right=400,bottom=60+index*60),
+                    center=BoundingBox(left=20,top=20+index*60,right=400,bottom=60+index*60).center,
+                    confidence=.99)
+                  for index,text in enumerate(texts)])
+
+
+initial=frame('cpu-initial',('Option A','Option B','Stage selecting'))
+following=frame('cpu-following',('Option A','Stage reviewed'))
+request=WorkflowRequest(workflow_id='GenericLogic',
+    instruction='Choose a local option, then complete the remaining stages',
+    expect_text=['Workflow finished'])
+original_request=request.model_dump(mode='json')
+verifier=Verifier()
+
+
+def evaluate(name,expected,forbidden):
+    task=TaskSpec(case_id='CHECK',instruction='Check proposed local progress only',
+                  expect_text=expected,forbid_text=forbidden)
+    proposal=DecompositionProposal.model_validate({'status':'ready','reason':'','subgoals':[{
+        'instruction':'Advance the current local stage','expect_text':expected,'forbid_text':forbidden}]})
+    error=''
+    try:
+        _check_proposal_constraints(proposal,request,initial,[])
+        allowed=True
+    except ValueError as exc:
+        allowed=False
+        error=str(exc)
+    return {'case':name,'expect_text':expected,'forbid_text':forbidden,
+            'initial_full_check':verifier.check_task(task,initial).model_dump(mode='json'),
+            'following_full_check':verifier.check_task(task,following).model_dump(mode='json'),
+            'current_checker_allowed':allowed,'current_checker_error':error}
+
+
+cases=[
+    evaluate('compound_A_and_not_B',['Option A'],['Option B']),
+    evaluate('weaker_not_B',[],['Option B']),
+    evaluate('button_label_only',['Option A'],[]),
+    evaluate('already_satisfied_combination',['Option A'],['Absent option C']),
+    evaluate('existing_context_plus_new_stage',['Option A','Stage reviewed'],[]),
+    evaluate('caller_final_required_text_forbidden',['Stage reviewed'],['Workflow finished']),
+]
+primary=cases[0]
+assert primary['initial_full_check']['outcome']=='failed'
+assert primary['following_full_check']['outcome']=='passed'
+assert primary['current_checker_allowed'] is False
+assert cases[1]['current_checker_allowed'] is True
+assert cases[2]['initial_full_check']['outcome']=='passed' and not cases[2]['current_checker_allowed']
+assert cases[3]['initial_full_check']['outcome']=='passed' and not cases[3]['current_checker_allowed']
+assert not cases[5]['current_checker_allowed'] and 'conflicts with caller final' in cases[5]['current_checker_error']
+assert request.model_dump(mode='json')==original_request
+after_sha=sha(SOURCE)
+assert before_sha==after_sha
+source_lines=SOURCE.read_text('utf-8').splitlines()
+line_numbers={name:next(index for index,line in enumerate(source_lines,1) if token in line)
+              for name,token in {'old_expected_rejection':'old_expected = [',
+                                 'full_progress_predicate':'progress_unmet = ('}.items()}
+result={
+    'schema':'week6.independent.proposal_constraint_logic_audit.v1',
+    'created_utc':datetime.now(UTC).isoformat(),'source':str(SOURCE),'source_sha256':before_sha,
+    'source_unchanged':before_sha==after_sha,'source_locations':line_numbers,
+    'scope':'Six direct pure-CPU logical checks on fabricated generic observations; no model call, capture, GUI input, or runtime task execution.',
+    'primary_counterexample':'Option A and Option B are initially visible. After a hypothetical stage change, A persists and B disappears. The full conjunction A AND NOT B changes failed to passed, but the checker rejects it because A alone was initially visible.',
+    'cases':cases,
+    'logical_monotonicity_issue':'The checker permits NOT B alone, but rejects the strictly stronger A AND NOT B using the same observations. Adding a true retained-context requirement narrows the accepted successor states; it cannot make this conjunction weaker than the already permitted rule.',
+    'recommendation':{
+        'general_rule':'After immutable-final conflict checks, reject a proposed stage when its entire check conjunction is already passed in the current readable observation. Allow retained expect_text if at least one currently unmet predicate requires an independently observed transition.',
+        'equivalent_progress_condition':'any required expected text absent now OR any forbidden text present now; keep current unreadable/error observations conservative.',
+        'reject_cases':['Only the currently visible operation label is required.',
+                        'Every expected term is already present and every forbidden term is already absent.'],
+        'preserve':['Caller final expect/forbid lists are unchanged.',
+                    'Generated forbid_text conflicting with caller final-required text is refused under the existing conservative policy.',
+                    'Completed instruction/check-signature no-replay gate remains independent and unchanged.',
+                    'All schema/format/constraint repairs remain inside the same request and time budgets.',
+                    'A child and overall success still require fresh observations and independent final checks.'],
+        'not_recommended':'Do not accept a model claim of completion, infer that an input happened from a proposed check, change the final acceptance rules, add fixture-specific strings, or rewrite any prior failed run.'},
+    'limits':['A false initial conjunction and true later conjunction are evidence of a checked state transition, not proof of which physical input caused it.',
+              'OCR misses can imitate disappearance; real fixture events, stable-window checks and one-to-one input attribution remain necessary.',
+              'The later observation here is fabricated solely to demonstrate predicate logic. It is not a successful desktop run.'],
+    'caller_final_rules_unchanged':request.model_dump(mode='json')==original_request,
+    'Week6_complete':False,'real_GUI_acceptance_success':False,
+}
+(OUT/'counterexample.json').write_text(json.dumps(result,indent=2,ensure_ascii=False)+'\n','utf-8')
+(OUT/'generic_initial_observation.json').write_text(initial.model_dump_json(indent=2)+'\n','utf-8')
+(OUT/'generic_following_observation.json').write_text(following.model_dump_json(indent=2)+'\n','utf-8')
+(OUT/'reviewed_checker_source.py.txt').write_bytes(SOURCE.read_bytes())
+(OUT/'audit_builder_source.py.txt').write_bytes(Path(__file__).read_bytes())
+print(json.dumps({'audit':str(OUT/'counterexample.json'),'initial_check':primary['initial_full_check']['outcome'],
+                  'hypothetical_following_check':primary['following_full_check']['outcome'],
+                  'compound_rejected':not primary['current_checker_allowed'],
+                  'weaker_forbid_only_allowed':cases[1]['current_checker_allowed'],
+                  'source_locations':line_numbers,'source_unchanged':before_sha==after_sha},indent=2))

@@ -1,0 +1,56 @@
+"""Full CPU regression after the conjunction-progress correction; preserves both pin maps."""
+from datetime import UTC, datetime
+from pathlib import Path
+import hashlib
+import json
+import os
+import subprocess
+import time
+
+import psutil
+
+ROOT = Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+OUT = ROOT / 'Document/Week6/results/release_validation_completed_20261025_005'
+PYTHON = 'D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe'
+
+
+def pins():
+    paths = [p for name in ('src', 'tests', 'scripts', 'configs')
+             for p in (ROOT / name).rglob('*') if p.is_file() and p.suffix in ('.py', '.json', '.yaml')]
+    paths += [ROOT / 'pyproject.toml', ROOT / 'README.md']
+    return {p.relative_to(ROOT).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(paths)}
+
+
+OUT.mkdir(parents=True, exist_ok=False)
+script_bytes = Path(__file__).read_bytes()
+with (OUT / 'validation_harness.py.txt').open('xb') as f:
+    f.write(script_bytes)
+before = pins()
+env = os.environ.copy()
+env.update(PYTHONUTF8='1', PYTHONIOENCODING='utf-8')
+command = [PYTHON, '-m', 'pytest', '-q', '--basetemp=.pytest-tmp-week6-completed005', '--tb=short']
+start = datetime.now(UTC).isoformat()
+owner = psutil.Process()
+identity = {'actual_pid': os.getpid(), 'create_time': owner.create_time(), 'executable': owner.exe()}
+tick = time.perf_counter()
+with (OUT / 'pytest_stdout.txt').open('w', encoding='utf-8') as log:
+    process = subprocess.Popen(command, cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT)
+    launcher = {'pid': process.pid, 'create_time': psutil.Process(process.pid).create_time(),
+                'meaning': 'Subprocess launcher identity; not assumed to be the actual CPython test process on Windows.'}
+    exit_code = process.wait()
+after = pins()
+result = {'schema': 'week6.release.cpu_validation.v1', 'started_at_utc': start,
+          'finished_at_utc': datetime.now(UTC).isoformat(), 'command': command,
+          'environment_overrides': {'PYTHONUTF8': '1', 'PYTHONIOENCODING': 'utf-8'},
+          'exit_code': exit_code, 'elapsed_seconds': time.perf_counter() - tick,
+          'harness_process': identity, 'test_launcher': launcher,
+          'harness_sha256': hashlib.sha256(script_bytes).hexdigest(),
+          'tested_source_pins_before': before, 'tested_source_pins_after': after,
+          'tested_sources_unchanged': before == after,
+          'changed_tested_sources': sorted(p for p in before.keys() | after.keys() if before.get(p) != after.get(p)),
+          'stdout': 'pytest_stdout.txt'}
+with (OUT / 'validation.json').open('x', encoding='utf-8', newline='\n') as f:
+    f.write(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
+print(json.dumps({k: result[k] for k in ('exit_code', 'elapsed_seconds', 'tested_sources_unchanged')}))
+print((OUT / 'pytest_stdout.txt').read_text(encoding='utf-8')[-1200:])
+raise SystemExit(exit_code)

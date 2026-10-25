@@ -53,6 +53,12 @@ class OcrConfig(ConfigModel):
     # so it adds model downloads and can distort the image; keep it off unless a
     # task really needs it.
     use_doc_preprocessing: bool = False
+    # Opt-in screen OCR: enlarge small glyphs and use sparse UI text layout.
+    # Native preserves the earlier backend and its timing/segmentation behavior.
+    tesseract_profile: Literal["native", "screen"] = "native"
+    tesseract_scale: float = Field(default=2.0, ge=1.0, le=3.0)
+    # Optional private resource folder; never modifies a system installation.
+    tesseract_tessdata_dir: Path | None = None
 
 
 class UiDetectionConfig(ConfigModel):

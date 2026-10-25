@@ -1,0 +1,121 @@
+"""Source-inferred feasibility diagnostic only; never executes the fixture or model."""
+from __future__ import annotations
+
+import ast
+import hashlib
+import json
+import sys
+from datetime import UTC,datetime
+from pathlib import Path
+
+ROOT=Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+PROBE=ROOT/'Document/Week6/results/saved_decomposition_20261025_002'
+OUT=ROOT/'Document/Week6/results/proposal_constraint_logic_audit_20261025'
+FIXTURE=ROOT/'scripts/week6_local_lab.py'
+sys.path.insert(0,str(ROOT/'src'))
+from gui_agent.runtime.schemas import ElementRef,ObservationSnapshot,TaskSpec
+from gui_agent.runtime.verification import Verifier
+from gui_agent.schemas import BoundingBox,ScreenInfo
+
+
+def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+assert not (OUT/'feasibility_review_002.json').exists()
+probe_pins={str(path):sha(path) for path in PROBE.rglob('*') if path.is_file()}
+fixture_sha=sha(FIXTURE)
+source=FIXTURE.read_text('utf-8')
+tree=ast.parse(source)
+functions={node.name:node for node in ast.walk(tree) if isinstance(node,ast.FunctionDef)}
+review=functions['review']
+render=functions['render']
+commit_branch=next(node for node in ast.walk(render) if isinstance(node,ast.If)
+                   and ast.unparse(node.test)=="state['stage'] == 'commit'")
+review_branch=next(node for node in ast.walk(render) if isinstance(node,ast.If)
+                   and ast.unparse(node.test)=="state['stage'] == 'review'")
+commit_assignment=next(node for node in ast.walk(review) if isinstance(node,ast.Assign)
+                       and any(ast.unparse(target)=="state['stage']" for target in node.targets)
+                       and isinstance(node.value,ast.Constant) and node.value.value=='commit')
+assert any(isinstance(node,ast.Call) and ast.unparse(node.func)=='widget.destroy'
+           for node in ast.walk(render))
+
+
+def literal_labels(statements):
+    result=[]
+    for statement in statements:
+        for node in ast.walk(statement):
+            if (isinstance(node,ast.Call) and isinstance(node.func,ast.Name)
+                    and node.func.id in {'label','button'} and node.args
+                    and isinstance(node.args[0],ast.Constant) and isinstance(node.args[0].value,str)):
+                result.append(node.args[0].value)
+    return result
+
+
+commit_labels=literal_labels(commit_branch.body)
+review_labels=literal_labels(review_branch.body)
+assert commit_labels==['Review complete','Commit locally']
+assert review_labels==['Draft ready','Review report']
+summary=json.loads((PROBE/'summary.json').read_bytes())
+workflow=summary['decomposition']['workflow']
+original_workflow=json.dumps(workflow,ensure_ascii=False,sort_keys=True)
+goal=TaskSpec.model_validate(workflow['subgoals'][0])
+final=TaskSpec.model_validate(workflow['final_check'])
+assert goal.expect_text==['Review report'] and goal.forbid_text==['Draft ready']
+texts=['Week6 Local Lab','Offline report preparation','Project ALPHA','Theme GREEN',*commit_labels]
+frame=ObservationSnapshot(observation_id='hypothesis-source-derived-after-review-not-a-capture',
+    captured_at=datetime.now(UTC),image_path=None,
+    screen_info=ScreenInfo(screenshot_width=800,screenshot_height=600,
+                           control_width=800,control_height=600),
+    window_title='Week6 Local Lab',
+    elements=[ElementRef(element_id=f'hypothesis-e{index:03d}',text=text,
+                          bounding_box=BoundingBox(left=20,top=10+index*70,right=600,bottom=60+index*70),
+                          center=BoundingBox(left=20,top=10+index*70,right=600,bottom=60+index*70).center,
+                          confidence=1.0,source='manual') for index,text in enumerate(texts)])
+verifier=Verifier()
+child_result=verifier.check_task(goal,frame)
+final_result=verifier.check_task(final,frame)
+assert child_result.outcome=='failed' and child_result.evidence['missing']==['Review report']
+assert final_result.outcome=='failed'
+assert json.dumps(workflow,ensure_ascii=False,sort_keys=True)==original_workflow
+assert sha(FIXTURE)==fixture_sha
+assert all(sha(Path(path))==digest for path,digest in probe_pins.items())
+result={
+    'schema':'week6.source_inferred.proposal_feasibility_review.v1','created_utc':datetime.now(UTC).isoformat(),
+    'classification':'source_inferred_postcondition_feasibility_concern_not_an_executed_failure',
+    'probe_summary':str(PROBE/'summary.json'),'probe_summary_sha256':sha(PROBE/'summary.json'),
+    'recorded_probe':{'status':summary['decomposition']['status'],'model_requests':summary['decomposition']['model_requests'],
+        'elapsed_seconds':summary['elapsed_seconds'],'desktop_capture_count':summary['desktop_capture_count'],
+        'desktop_input_count':summary['desktop_input_count'],'task_execution_count':summary['task_execution_count'],
+        'meaning':'Ready means the pending conjunction passed structural/pre-execution constraints. It is not an action result, quality score or real task success.'},
+    'original_goal':goal.model_dump(mode='json'),'original_final_check':final.model_dump(mode='json'),
+    'fixture_source':{'path':str(FIXTURE),'sha256':fixture_sha,
+        'review_function_line':review.lineno,'successful_stage_commit_assignment_line':commit_assignment.lineno,
+        'render_function_line':render.lineno,'review_branch_line':review_branch.lineno,
+        'commit_branch_line':commit_branch.lineno,'review_stage_labels':review_labels,
+        'commit_stage_labels':commit_labels,'previous_widgets_destroyed_before_render':True,
+        'derivation':'The success branch of review() assigns stage=commit and calls render(). render destroys old widgets, then the commit branch shows Review complete and Commit locally; it does not retain the Review report button or Draft ready label.'},
+    'hypothetical_following_observation':{
+        'path':'feasibility_hypothetical_post_review_002.json','origin':'AST/source-inferred text set, manually constructed only for a pure CPU Verifier call',
+        'actual_capture':False,'sent_to_model':False,'text_values':texts,
+        'not_a_runtime_observation':'No fixture process, Tk window, click, OCR or screenshot was run to create this observation.'},
+    'real_Verifier_on_hypothetical_following_observation':child_result.model_dump(mode='json'),
+    'caller_final_Verifier_on_same_hypothesis':final_result.model_dump(mode='json'),
+    'finding':'If the fixture follows its normal successful review branch and these labels are perceived correctly, the unmodified generated intermediate checks still fail because Review report is absent. The conjunction being initially pending does not establish that its predicted postcondition is attainable after that operation.',
+    'qualification':'This is a source-derived feasibility concern, not evidence that an actual click failed or that any real runtime reached or verified this hypothetical state. The observation was never supplied to the model.',
+    'preservation':{'original_probe_files_unchanged':True,'fixture_source_unchanged':True,
+        'model_proposal_unchanged':True,'caller_final_checks_unchanged':True,
+        'original_probe_file_sha256':probe_pins},
+    'model_calls_performed_by_this_review':0,'GUI_actions_performed_by_this_review':0,'pytest_runs_performed_by_this_review':0,
+    'next_acceptance_implication':'Model post-state predictions remain unverified. A ready saved-frame proposal must not be reported as the completed fix or real GUI task success; future actual acceptance must check fresh observed outcomes and retain failures.',
+    'real_GUI_acceptance_success':False,'Week6_complete':False,
+}
+with (OUT/'feasibility_review_002.json').open('x',encoding='utf-8') as handle:
+    handle.write(json.dumps(result,indent=2,ensure_ascii=False)+'\n')
+with (OUT/'feasibility_hypothetical_post_review_002.json').open('x',encoding='utf-8') as handle:
+    handle.write(frame.model_dump_json(indent=2)+'\n')
+with (OUT/'feasibility_fixture_source_002.py.txt').open('xb') as handle:handle.write(FIXTURE.read_bytes())
+with (OUT/'feasibility_review_builder_002.py.txt').open('xb') as handle:handle.write(Path(__file__).read_bytes())
+print(json.dumps({'audit':str(OUT/'feasibility_review_002.json'),'probe_status':'ready',
+                  'hypothetical_poststate_check':child_result.outcome,'missing':['Review report'],
+                  'fixture_sha256':fixture_sha,'original_probe_files_unchanged':True,
+                  'actual_GUI_failure_observed':False},indent=2))

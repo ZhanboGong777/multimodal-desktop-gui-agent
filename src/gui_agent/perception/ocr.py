@@ -14,10 +14,13 @@ import time
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
+from math import ceil, floor
+from pathlib import Path
 from typing import Any, NamedTuple
 
+import cv2
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageOps
 
 from ..config import OcrConfig
 from ..schemas import BoundingBox, UIElement
@@ -25,6 +28,7 @@ from ..schemas import BoundingBox, UIElement
 DEFAULT_LANGUAGES: tuple[str, ...] = ("en",)
 DEFAULT_MIN_CONFIDENCE = 0.5
 WHITESPACE = re.compile(r"\s+")
+CJK_WORD_GAP = re.compile(r"(?<=[\u3400-\u9fff])\s+(?=[\u3400-\u9fff])")
 
 # Tesseract and PaddleOCR use different codes for the same language. The
 # configuration stays backend agnostic and each backend translates, otherwise a
@@ -258,10 +262,55 @@ def to_rgb_array(image: Image.Image | np.ndarray) -> np.ndarray:
     return array[:, :, :3]
 
 
+def prepare_screen_text(image: Image.Image | np.ndarray) -> Image.Image:
+    """Normalize UI contrast and remove long control borders on an OCR copy.
+
+    Line lengths scale with the current frame, not a label vocabulary. The mask
+    keeps short glyph strokes; neither original pixels nor contour input change.
+    """
+    gray = ImageOps.grayscale(Image.fromarray(to_rgb_array(image)))
+    if np.median(np.asarray(gray)) < 127:
+        gray = ImageOps.invert(gray)
+    gray = ImageOps.autocontrast(gray)
+    array = np.array(gray)
+    _, ink = cv2.threshold(array, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
+    height, width = array.shape
+    horizontal = cv2.morphologyEx(
+        ink, cv2.MORPH_OPEN, np.ones((1, max(40, round(width * .08))), dtype=np.uint8))
+    vertical = cv2.morphologyEx(
+        ink, cv2.MORPH_OPEN, np.ones((max(40, round(height * .08)), 1), dtype=np.uint8))
+    array[(horizontal > 0) | (vertical > 0)] = 255
+    return Image.fromarray(array)
+
+
 class TesseractOCREngine(OCREngine):
     """Word-level Tesseract backend that keeps confidence and bounding boxes."""
 
     name = "tesseract"
+
+    def __init__(
+        self,
+        default_languages: Iterable[str] = DEFAULT_LANGUAGES,
+        default_min_confidence: float = DEFAULT_MIN_CONFIDENCE,
+        *,
+        profile: str = "native",
+        scale: float = 2.0,
+        tessdata_dir: str | Path | None = None,
+    ) -> None:
+        super().__init__(default_languages, default_min_confidence)
+        if profile not in {"native", "screen"}:
+            raise ValueError("Tesseract profile must be native or screen")
+        if not 1.0 <= scale <= 3.0:
+            raise ValueError("Tesseract scale must be between 1 and 3")
+        if tessdata_dir is not None and '"' in str(tessdata_dir):
+            raise ValueError("Tessdata directory cannot contain a quote")
+        if sys.platform == "win32" and tessdata_dir is not None and any(
+            character.isspace() for character in str(tessdata_dir)
+        ):
+            raise ValueError("On Windows use a tessdata directory without whitespace")
+        self.profile = profile
+        self.scale = float(scale)
+        self.tessdata_dir = tessdata_dir
 
     def recognize(
         self,
@@ -275,10 +324,33 @@ class TesseractOCREngine(OCREngine):
         threshold = self._threshold(min_confidence)
         language = "+".join(to_tesseract_languages(self._languages(languages)))
         started = time.perf_counter()
+        options: dict[str, Any] = {"lang": language, "output_type": pytesseract.Output.DICT}
+        source_size: tuple[int, int] | None = None
+        actual_scale_x = actual_scale_y = 1.0
+        config: list[str] = []
+        if self.profile == "screen":
+            # A single current-frame pass; no vocabulary, fixture labels or
+            # previous screenshot enters recognition. Sparse text segmentation
+            # keeps independent UI controls out of a document-style column.
+            prepared = Image.fromarray(to_rgb_array(image))
+            source_size = prepared.size
+            prepared = prepare_screen_text(prepared)
+            target = (max(1, round(prepared.width * self.scale)),
+                      max(1, round(prepared.height * self.scale)))
+            actual_scale_x, actual_scale_y = target[0] / prepared.width, target[1] / prepared.height
+            image = prepared.resize(target, Image.Resampling.LANCZOS)
+            config.extend(["--psm 11", "--oem 1"])
+        if self.tessdata_dir is not None:
+            value = str(self.tessdata_dir)
+            # pytesseract uses shlex(posix=False) on Windows, which preserves
+            # literal quotes in arguments. The constructor rejects whitespace
+            # there rather than quietly using a different resource directory.
+            config.append(f'--tessdata-dir {value}' if sys.platform == "win32"
+                          else f'--tessdata-dir "{value}"')
+        if config:
+            options["config"] = " ".join(config)
         try:
-            data = pytesseract.image_to_data(
-                image, lang=language, output_type=pytesseract.Output.DICT
-            )
+            data = pytesseract.image_to_data(image, **options)
         except Exception as exc:
             raise OcrError(f"Tesseract failed: {exc}") from exc
 
@@ -318,8 +390,18 @@ class TesseractOCREngine(OCREngine):
 
         elements: list[UIElement] = []
         for line in merge_words_into_lines(rows):
+            text = CJK_WORD_GAP.sub("", line.text) if self.profile == "screen" else line.text
+            left, top = line.left, line.top
+            right, bottom = line.left + line.width, line.top + line.height
+            if source_size is not None:
+                # Outward rounding retains tiny glyphs; clamp to the original
+                # screenshot so scaled-pixel coordinates cannot reach execution.
+                left = max(0, min(source_size[0], floor(left / actual_scale_x)))
+                top = max(0, min(source_size[1], floor(top / actual_scale_y)))
+                right = max(left, min(source_size[0], ceil(right / actual_scale_x)))
+                bottom = max(top, min(source_size[1], ceil(bottom / actual_scale_y)))
             element = make_element(
-                line.text, line.left, line.top, line.width, line.height, line.confidence
+                text, left, top, right - left, bottom - top, line.confidence
             )
             if element is not None:
                 elements.append(element)
@@ -529,12 +611,18 @@ def create_ocr_engine(config: OcrConfig | None = None) -> EngineSelection:
         "default_languages": config.languages,
         "default_min_confidence": config.min_confidence,
     }
+    tesseract_settings = {
+        **settings,
+        "profile": config.tesseract_profile,
+        "scale": config.tesseract_scale,
+        "tessdata_dir": config.tesseract_tessdata_dir,
+    }
     # Only PaddleOCR has a document pipeline; Tesseract must not receive this.
     paddle_settings = {**settings, "use_doc_preprocessing": config.use_doc_preprocessing}
     notices: list[str] = []
 
     if config.engine == "tesseract":
-        return EngineSelection(TesseractOCREngine(**settings), notices)
+        return EngineSelection(TesseractOCREngine(**tesseract_settings), notices)
 
     try:
         primary = PaddleOCREngine(notices=notices, **paddle_settings)
@@ -542,11 +630,11 @@ def create_ocr_engine(config: OcrConfig | None = None) -> EngineSelection:
         notices.append(f"PaddleOCR unavailable ({exc}); falling back to Tesseract.")
         if config.fallback_engine == "none":
             raise
-        return EngineSelection(TesseractOCREngine(**settings), notices)
+        return EngineSelection(TesseractOCREngine(**tesseract_settings), notices)
 
     if config.fallback_engine == "tesseract":
         # The engine may only fail on the first call, so keep Tesseract ready.
         return EngineSelection(
-            FallbackOCREngine(primary, TesseractOCREngine(**settings), notices), notices
+            FallbackOCREngine(primary, TesseractOCREngine(**tesseract_settings), notices), notices
         )
     return EngineSelection(primary, notices)

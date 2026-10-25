@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import contextlib
 import json
+import math
 import re
 import time
 from collections.abc import Callable
@@ -183,7 +184,11 @@ class TaskRunner:
         recorder: TaskRecorder,
         clock: Callable[[], float] = time.monotonic,
         sleep: Callable[[float], None] = time.sleep,
+        absolute_deadline: float | None = None,
     ) -> None:
+        if absolute_deadline is not None and not math.isfinite(absolute_deadline):
+            raise ValueError("task absolute deadline must be finite")
+        self.absolute_deadline = absolute_deadline
         self.observer = observer
         self.planner = planner
         self.adapter = adapter
@@ -245,6 +250,13 @@ class TaskRunner:
         """
         self._recovery_records = []
         started = self.clock()
+        if self.absolute_deadline is not None:
+            # Convert the enclosing absolute deadline once against this exact
+            # entry timestamp. All later relative checks retain the same bound.
+            # Zero means already expired and prevents the initial observation.
+            options = options.model_copy(update={"task_timeout_seconds": max(
+                0.0, min(options.task_timeout_seconds, self.absolute_deadline - started),
+            )})
         self._timings = Timings(started=started)
         self._notes: list[str] = []
         self._pending_dispatch: StepRecord | None = None

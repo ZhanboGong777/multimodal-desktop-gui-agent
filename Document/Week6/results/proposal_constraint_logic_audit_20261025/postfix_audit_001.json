@@ -1,0 +1,259 @@
+{
+  "schema": "week6.independent.proposal_constraint_postfix_audit.v1",
+  "created_utc": "2026-10-25T08:06:06.746240+00:00",
+  "source": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\src\\gui_agent\\planning\\workflow_decomposer.py",
+  "source_sha256": "3bc8ff2accfb32d5e4f58a5461fec0bfd97ee0bc14b5434d047632c5ef3e7a18",
+  "scope": "Six direct pure-CPU checks against the same generic observations used in the original counterexample. No pytest suite, model call, GUI capture/input or window activation.",
+  "original_counterexample": "counterexample.json",
+  "original_audit_files_unchanged": true,
+  "source_unchanged_during_probe": true,
+  "checks": [
+    {
+      "case": "compound_A_and_not_B",
+      "expect_text": [
+        "Option A"
+      ],
+      "forbid_text": [
+        "Option B"
+      ],
+      "expected_allowed": true,
+      "actual_allowed": true,
+      "error": "",
+      "passed": true,
+      "before_fix_allowed": false,
+      "initial_full_check": {
+        "outcome": "failed",
+        "method": "automatic",
+        "detail": "still on screen but should be gone: Option B",
+        "evidence": {
+          "observation_id": "cpu-initial",
+          "unexpected": [
+            "Option B"
+          ]
+        }
+      },
+      "hypothetical_following_full_check": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "cpu-following",
+          "expect_text": [
+            "Option A"
+          ],
+          "forbid_text": [
+            "Option B"
+          ]
+        }
+      }
+    },
+    {
+      "case": "weaker_not_B",
+      "expect_text": [],
+      "forbid_text": [
+        "Option B"
+      ],
+      "expected_allowed": true,
+      "actual_allowed": true,
+      "error": "",
+      "passed": true,
+      "before_fix_allowed": true,
+      "initial_full_check": {
+        "outcome": "failed",
+        "method": "automatic",
+        "detail": "still on screen but should be gone: Option B",
+        "evidence": {
+          "observation_id": "cpu-initial",
+          "unexpected": [
+            "Option B"
+          ]
+        }
+      },
+      "hypothetical_following_full_check": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "cpu-following",
+          "expect_text": [],
+          "forbid_text": [
+            "Option B"
+          ]
+        }
+      }
+    },
+    {
+      "case": "button_label_only",
+      "expect_text": [
+        "Option A"
+      ],
+      "forbid_text": [],
+      "expected_allowed": false,
+      "actual_allowed": false,
+      "error": "subgoal 1 complete conjunction of checks is already satisfied on the current frame; add an expected text absent now or a forbidden text currently visible that should disappear. An already visible expected text alone does not prove progress, but may remain alongside another unmet predicate.",
+      "passed": true,
+      "before_fix_allowed": false,
+      "initial_full_check": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "cpu-initial",
+          "expect_text": [
+            "Option A"
+          ],
+          "forbid_text": []
+        }
+      },
+      "hypothetical_following_full_check": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "cpu-following",
+          "expect_text": [
+            "Option A"
+          ],
+          "forbid_text": []
+        }
+      }
+    },
+    {
+      "case": "already_satisfied_combination",
+      "expect_text": [
+        "Option A"
+      ],
+      "forbid_text": [
+        "Absent option C"
+      ],
+      "expected_allowed": false,
+      "actual_allowed": false,
+      "error": "subgoal 1 complete conjunction of checks is already satisfied on the current frame; add an expected text absent now or a forbidden text currently visible that should disappear. An already visible expected text alone does not prove progress, but may remain alongside another unmet predicate.",
+      "passed": true,
+      "before_fix_allowed": false,
+      "initial_full_check": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "cpu-initial",
+          "expect_text": [
+            "Option A"
+          ],
+          "forbid_text": [
+            "Absent option C"
+          ]
+        }
+      },
+      "hypothetical_following_full_check": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "cpu-following",
+          "expect_text": [
+            "Option A"
+          ],
+          "forbid_text": [
+            "Absent option C"
+          ]
+        }
+      }
+    },
+    {
+      "case": "existing_context_plus_new_stage",
+      "expect_text": [
+        "Option A",
+        "Stage reviewed"
+      ],
+      "forbid_text": [],
+      "expected_allowed": true,
+      "actual_allowed": true,
+      "error": "",
+      "passed": true,
+      "before_fix_allowed": false,
+      "initial_full_check": {
+        "outcome": "failed",
+        "method": "automatic",
+        "detail": "expected on screen but not found: Stage reviewed",
+        "evidence": {
+          "observation_id": "cpu-initial",
+          "missing": [
+            "Stage reviewed"
+          ]
+        }
+      },
+      "hypothetical_following_full_check": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "cpu-following",
+          "expect_text": [
+            "Option A",
+            "Stage reviewed"
+          ],
+          "forbid_text": []
+        }
+      }
+    },
+    {
+      "case": "caller_final_required_text_forbidden",
+      "expect_text": [
+        "Stage reviewed"
+      ],
+      "forbid_text": [
+        "Workflow finished"
+      ],
+      "expected_allowed": false,
+      "actual_allowed": false,
+      "error": "subgoal 1 forbid_text conflicts with caller final expect_text: [('Workflow finished', 'Workflow finished')]. Preserve caller-required final text; propose a different observable progress check.",
+      "passed": true,
+      "before_fix_allowed": false,
+      "initial_full_check": {
+        "outcome": "failed",
+        "method": "automatic",
+        "detail": "expected on screen but not found: Stage reviewed",
+        "evidence": {
+          "observation_id": "cpu-initial",
+          "missing": [
+            "Stage reviewed"
+          ]
+        }
+      },
+      "hypothetical_following_full_check": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "cpu-following",
+          "expect_text": [
+            "Stage reviewed"
+          ],
+          "forbid_text": [
+            "Workflow finished"
+          ]
+        }
+      }
+    }
+  ],
+  "all_checks_passed": true,
+  "core_findings": {
+    "strong_A_and_not_B_allowed_now": true,
+    "label_only_already_satisfied_still_rejected": true,
+    "all_satisfied_conjunction_still_rejected": true,
+    "final_conflict_still_rejected": true,
+    "caller_final_rules_unchanged": true,
+    "completed_no_replay_gate_still_present": true,
+    "parent_absolute_deadline_still_passed_to_workflow": true
+  },
+  "other_material_flaws_found_in_this_change": [],
+  "limits": [
+    "The future observation is fabricated for logic verification, not an executed task.",
+    "An allowed pending proposal does not prove its action occurred or that the final task succeeded.",
+    "Fresh post-action checks, immutable final checks, completed-stage guards and independent GUI input/event attribution remain necessary."
+  ],
+  "full_regression_note": "The earlier 2924-pass full004 snapshot predates this fix. Its historical evidence remains unchanged; a new full-run result must separately establish the new version.",
+  "real_GUI_acceptance_success": false,
+  "Week6_complete": false
+}

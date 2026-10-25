@@ -159,6 +159,24 @@ def test_subgoals_share_actions_planning_calls_and_monotonic_time(tmp_path):
     assert events[-1]["completed"] == 3 and events[-1]["status"] == "succeeded"
 
 
+def test_enclosing_absolute_deadline_cannot_be_renewed_by_child_setup(tmp_path):
+    clock = Clock()
+    factory = Factory(clock, {0: {"setup_seconds": 4}})
+    result = WorkflowRunner(tmp_path / "absolute", factory, clock).run(
+        _spec(1), _options(task_timeout_seconds=20), absolute_deadline=103,
+    )
+    assert result.status == "timed_out"
+    assert not factory.calls  # The enclosing budget expired while constructing the child.
+
+
+@pytest.mark.parametrize("deadline", [float("nan"), float("inf"), -float("inf")])
+def test_nonfinite_absolute_deadline_refused_before_evidence_io(tmp_path, deadline):
+    directory = tmp_path / "invalid_absolute"
+    with pytest.raises(ValueError, match="absolute deadline"):
+        WorkflowRunner(directory, Factory(Clock())).run(_spec(1), _options(), absolute_deadline=deadline)
+    assert not directory.exists()
+
+
 @pytest.mark.parametrize("changes,reason", [
     ({"max_actions": 1}, "action"),
     ({"max_planning_attempts": 1}, "planning"),

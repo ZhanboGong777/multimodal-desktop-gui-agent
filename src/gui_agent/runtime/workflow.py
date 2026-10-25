@@ -254,12 +254,15 @@ class WorkflowRunner:
         return max(0, actions), max(0, calls), max(0, unconfirmed)
 
     def run(
-        self, spec: WorkflowSpec, options: ExecutionOptions, **callbacks: Any,
+        self, spec: WorkflowSpec, options: ExecutionOptions, *,
+        absolute_deadline: float | None = None, **callbacks: Any,
     ) -> WorkflowRunResult:
         spec = WorkflowSpec.model_validate(spec.model_dump())
         options = ExecutionOptions.model_validate(options.model_dump())
         if not math.isfinite(options.task_timeout_seconds):
             raise ValueError("workflow time budget must be finite")
+        if absolute_deadline is not None and not math.isfinite(absolute_deadline):
+            raise ValueError("workflow absolute deadline must be finite")
         child_callbacks = dict(callbacks)
         checkpoint_callback = child_callbacks.pop("on_checkpoint", None)
         unknown = child_callbacks.keys() - {"confirm", "countdown", "high_risk_confirm", "on_plan"}
@@ -269,6 +272,10 @@ class WorkflowRunner:
         if not math.isfinite(started):
             raise ValueError("workflow clock must be finite")
         deadline = started + options.task_timeout_seconds
+        if absolute_deadline is not None:
+            # An enclosing automatic workflow owns its original deadline. Time
+            # spent scheduling or preparing this child cannot renew that budget.
+            deadline = min(deadline, absolute_deadline)
         self.directory.mkdir(parents=True, exist_ok=False)
         self._sequence = 0
         result = WorkflowRunResult(

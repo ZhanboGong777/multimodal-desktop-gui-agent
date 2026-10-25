@@ -27,6 +27,7 @@ from gui_agent.config import load_config
 from gui_agent.control.executor import ActionExecutor
 from gui_agent.models import CLIENTS, create_model_client
 from gui_agent.planning import TaskPlanner
+from gui_agent.planning.workflow_decomposer import AutomaticWorkflowRunner, WorkflowRequest
 from gui_agent.recording import RunSession
 from gui_agent.runtime.action_adapter import ActionAdapter
 from gui_agent.runtime.monitoring import RunMonitor
@@ -40,7 +41,17 @@ from gui_agent.runtime.workflow import WorkflowRunner, WorkflowSpec
 
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--workflow", required=True, type=Path)
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--workflow", type=Path, help="use an existing explicitly checked workflow")
+    mode.add_argument("--instruction", help="ask the model to decompose this overall natural-language task")
+    parser.add_argument("--workflow-id", type=_run_id, default="automatic_workflow")
+    parser.add_argument("--expect-text", action="append", default=[], help="caller-owned final required text")
+    parser.add_argument("--forbid-text", action="append", default=[], help="caller-owned final forbidden text")
+    parser.add_argument("--model-requests", type=_positive_int, default=24,
+                        help="shared decomposition + action HTTP request cap (automatic mode)")
+    parser.add_argument("--max-subgoals", type=_positive_int, default=8)
+    parser.add_argument("--decomposition-rounds", type=_positive_int, default=4,
+                        help="bounded fresh-screen decomposition rounds, 1..8 (automatic mode)")
     parser.add_argument("--validate-only", action="store_true", help="validate the spec without model, capture or input")
     parser.add_argument("--config", default=str(REPO_ROOT / "configs/week4.yaml"))
     parser.add_argument("--execute", action="store_true")
@@ -59,14 +70,30 @@ def parse_args(argv=None):
 
 def main(argv=None):
     args = parse_args(argv)
+    request = None
+    spec = None
     try:
-        spec = WorkflowSpec.model_validate_json(args.workflow.read_text(encoding="utf-8-sig"))
+        if args.workflow:
+            if args.expect_text or args.forbid_text:
+                raise ValueError("--expect-text/--forbid-text require --instruction; workflow final checks are unchanged")
+            spec = WorkflowSpec.model_validate_json(args.workflow.read_text(encoding="utf-8-sig"))
+        else:
+            if args.max_subgoals > 32:
+                raise ValueError("--max-subgoals must be at most 32")
+            if args.decomposition_rounds > 8:
+                raise ValueError("--decomposition-rounds must be at most 8")
+            if args.planning_attempts is not None and args.planning_attempts < 2:
+                raise ValueError("automatic workflow needs at least two planning calls including decomposition")
+            request = WorkflowRequest(workflow_id=args.workflow_id, instruction=args.instruction,
+                                      expect_text=args.expect_text, forbid_text=args.forbid_text)
     except (OSError, ValueError) as exc:
         print(f"Invalid workflow: {exc}", file=sys.stderr)
         return 2
     if args.validate_only:
-        print(json.dumps({"workflow_id": spec.workflow_id, "subgoals": len(spec.subgoals),
-                          "valid": True, "desktop_actions": 0, "model_calls": 0}))
+        print(json.dumps({"workflow_id": spec.workflow_id if spec else request.workflow_id,
+                          "subgoals": len(spec.subgoals) if spec else None,
+                          "valid": True, "desktop_actions": 0, "model_calls": 0,
+                          **({"mode": "automatic", "decomposition_pending": True} if request else {})}))
         return 0
     if args.execute and not _has_interactive_stdin():
         print("--execute requires an interactive terminal for plan confirmations", file=sys.stderr)
@@ -87,17 +114,20 @@ def main(argv=None):
             verification_timeout_seconds=config.execution.verification_timeout_seconds,
             verification_poll_interval_seconds=config.execution.verification_poll_interval_seconds,
         )
+        if request and options.max_planning_attempts < 2:
+            raise ValueError("automatic workflow needs at least two planning calls including decomposition")
         client = create_model_client(config.model)
     except (OSError, ValueError) as exc:
         print(f"Configuration failed: {exc}", file=sys.stderr)
         return 2
     from datetime import UTC, datetime
 
-    run_id = args.run_id or f"{spec.workflow_id}_{datetime.now(UTC):%Y%m%dT%H%M%S_%fZ}"
+    workflow_id = spec.workflow_id if spec else request.workflow_id
+    run_id = args.run_id or f"{workflow_id}_{datetime.now(UTC):%Y%m%dT%H%M%S_%fZ}"
     directory = args.output_directory / run_id
-    active = {"task": spec.subgoals[0], "monitor": None}
+    active = {"task": spec.subgoals[0] if spec else None, "monitor": None}
 
-    def factory(task, index, childdir):
+    def factory(task, index, childdir, budgeted_client=None):
         active["task"] = task
         session = RunSession(session_id=childdir.name, directory=childdir)
         recorder = TaskRecorder(session)
@@ -105,27 +135,44 @@ def main(argv=None):
         return TaskRunner(
             observer=ObservationService(config, max_elements=config.execution.max_elements,
                                         output_directory=childdir, save_images=True),
-            planner=TaskPlanner(client, max_steps=config.planning.max_steps,
+            planner=TaskPlanner(budgeted_client or client, max_steps=config.planning.max_steps,
                                 require_structured_output=config.planning.require_structured_output,
                                 allow_real_execution=args.execute),
             adapter=ActionAdapter(max_wait_seconds=config.execution.max_wait_seconds),
             executor=ActionExecutor(config.control),
             verifier=Verifier(poll_interval_seconds=config.execution.verification_poll_interval_seconds),
             recorder=recorder,
+            absolute_deadline=getattr(budgeted_client, "deadline", None),
         )
 
-    def checkpoint(event):
+    def initial_observer(observation_directory):
+        return ObservationService(
+            config, max_elements=config.execution.max_elements,
+            output_directory=observation_directory, save_images=True,
+        ).observe()
+
+    def ensure_monitor(total):
         if active["monitor"] is None:
             active["monitor"] = RunMonitor(directory)
             active["monitor"].start(
-                case_id=spec.workflow_id, execute=options.execute, max_actions=options.max_actions,
-                max_planning_attempts=options.max_planning_attempts, subgoals_total=len(spec.subgoals),
+                case_id=workflow_id, execute=options.execute, max_actions=options.max_actions,
+                max_planning_attempts=options.max_planning_attempts, subgoals_total=total,
             )
-        active["monitor"].update(
-            "decomposing" if event["status"] == "running" else "subgoal_verification",
-            subgoal_id=event["case_id"], subgoals_completed=event["completed"],
-            actions_used=event["actions"], planning_pass=event["planning_calls"],
-        )
+
+    def decomposition_started(event):
+        # The goal count is unknown until the model returns. Keep decomposition
+        # status in its own evidence; the fixed-count run monitor starts once the
+        # WorkflowRunner supplies the actual count, not an invented denominator.
+        print("Decomposing the overall instruction; caller final checks remain fixed", flush=True)
+
+    def checkpoint(event):
+        if request is None:  # AutomaticWorkflowRunner owns its overall parent monitor.
+            ensure_monitor(event["total"])
+            active["monitor"].update(
+                "decomposing" if event["status"] == "running" else "subgoal_verification",
+                subgoal_id=event["case_id"], subgoals_completed=event["completed"],
+                actions_used=event["actions"], planning_pass=event["planning_calls"],
+            )
         print(f"{event['case_id']}: {event['status']} | verified {event['completed']}/{event['total']} | actions {event['actions']}/{options.max_actions}", flush=True)
 
     callbacks = {"on_checkpoint": checkpoint, "on_plan": _show_plan}
@@ -134,15 +181,23 @@ def main(argv=None):
                          high_risk_confirm=lambda plan: _confirm_high_risk(active["task"], plan))
     print(f"Records: {directory}\nMode: {'execute' if args.execute else 'dry run'}", flush=True)
     try:
-        result = WorkflowRunner(directory, factory).run(spec, options, **callbacks)
+        if request:
+            result = AutomaticWorkflowRunner(
+                directory, client, factory, max_model_requests=args.model_requests,
+                max_subgoals=args.max_subgoals, initial_observer=initial_observer,
+                max_decomposition_rounds=args.decomposition_rounds,
+            ).run(request, options, on_decomposition=decomposition_started, **callbacks)
+        else:
+            result = WorkflowRunner(directory, factory).run(spec, options, **callbacks)
     except (OSError, ValueError) as exc:
         print(f"Workflow refused: {exc}", file=sys.stderr)
         return 2
     if active["monitor"] is not None:
+        outcome = result.workflow_result if request else result
         active["monitor"].finish(
             result.status,
-            actions_used=result.total_actions + result.unconfirmed_action_attempts,
-            detail_code="unconfirmed_dispatch" if result.unconfirmed_action_attempts else "",
+            actions_used=(outcome.total_actions + outcome.unconfirmed_action_attempts) if outcome else 0,
+            detail_code="unconfirmed_dispatch" if outcome and outcome.unconfirmed_action_attempts else "",
         )
     print(result.model_dump_json(indent=2))
     return 0 if result.status in {"succeeded", "dry_run_completed"} else 1
