@@ -1,0 +1,144 @@
+"""Independent CPU guard review. Fabricated frames/results, no model or GUI."""
+from __future__ import annotations
+
+import hashlib
+import importlib
+import json
+import sys
+import types
+from datetime import UTC, datetime, timedelta
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from types import SimpleNamespace
+
+BASE = Path(__file__).resolve().parents[2]
+REPO = BASE / "week6-worktree"
+sys.path.insert(0, str(REPO / "src"))
+runtime = types.ModuleType("gui_agent.runtime")
+runtime.__path__ = [str(REPO / "src/gui_agent/runtime")]
+sys.modules["gui_agent.runtime"] = runtime
+m = importlib.import_module("gui_agent.planning.workflow_decomposer")
+s = importlib.import_module("gui_agent.runtime.schemas")
+common = importlib.import_module("gui_agent.schemas")
+WorkflowSpec = importlib.import_module("gui_agent.runtime.workflow").WorkflowSpec
+Verifier = importlib.import_module("gui_agent.runtime.verification").Verifier
+SOURCE = REPO / "src/gui_agent/planning/workflow_decomposer.py"
+sha_before = hashlib.sha256(SOURCE.read_bytes()).hexdigest()
+rows = []
+stamp = datetime(2026, 10, 25, 10, tzinfo=UTC)
+
+
+def frame(name, texts, **changes):
+    value = s.ObservationSnapshot(
+        observation_id=name, captured_at=stamp + timedelta(seconds=name != "before"),
+        screen_info=common.ScreenInfo(screenshot_width=800, screenshot_height=600,
+                                     control_width=800, control_height=600),
+        window_title="CPU hypothetical application", window_id="cpu-window-1",
+        foreground_stable=True, window_bounds=common.BoundingBox(left=0, top=0, right=800, bottom=600),
+        elements=[s.ElementRef(element_id=f"{name}-{i}", text=text,
+                              bounding_box=common.BoundingBox(left=10, top=10+i*30, right=300, bottom=30+i*30),
+                              center=common.Point(x=155, y=20+i*30), confidence=1)
+                  for i, text in enumerate(texts)],
+    )
+    return value.model_copy(update=changes)
+
+
+def prepare(root):
+    root.mkdir()
+    request = m.WorkflowRequest(instruction="Advance and finish the offline local task", expect_text=["Caller finished"])
+    raw = WorkflowSpec(workflow_id="CPU", instruction=request.instruction,
+                       subgoals=[s.TaskSpec(case_id="G01", instruction="Advance the local stage",
+                                           expect_text=["Advance control"],
+                                           forbid_text=["Pending stage", "Forbidden error"])],
+                       final_check=s.TaskSpec(case_id="FINAL", instruction="Read only", expect_text=request.expect_text))
+    before = frame("before", ["Advance control", "Pending stage"])
+    derived, contract = m._derive_progress_contract(raw, request, before, root / "contract.json")
+    return raw, derived, before, contract
+
+
+def run_case(root, *, post=None, status="succeeded", unknown=0, steps=True,
+             action_type="click", wait_after=False, wrong_id=False, audit_error=None):
+    raw, derived, before, contract = prepare(root)
+    post = post or frame("post", ["Next stage"])
+    frozen = (root / "contract.json").read_bytes()
+    class Child:
+        observer = SimpleNamespace(observe=lambda: post)
+        verifier = Verifier()
+        recorder = SimpleNamespace(directory=root)
+        def run(self, task, options):
+            assert (root / "contract.json").read_bytes() == frozen
+            observed = self.observer.observe()
+            result = self.verifier.check_task(task, observed)
+            if wrong_id:
+                result.evidence["observation_id"] = "never-observed"
+            return s.TaskRunResult(
+                run_id="CPU", case_id=task.case_id, instruction=task.instruction, execute=True,
+                status=status, planning_calls=3, unconfirmed_action_attempts=unknown, verification=result,
+                steps=[s.StepRecord(index=1, step_id="S1", description="CPU fake receipt", action_type=kind,
+                                    action_result={"success": True, "dry_run": False, "error": None, "action": common.DesktopAction(action_type=kind, x=40 if kind == "click" else None, y=40 if kind == "click" else None, duration=.01 if kind == "wait" else None).model_dump(mode="json")}) for kind in ([action_type, "wait"] if wait_after else [action_type])] if steps else [],
+            )
+    audits = []
+    original = m._write_new_json
+    if audit_error:
+        def deny(path, value):
+            if path.name == "progress_verifications.json":
+                raise audit_error("CPU injected audit persistence failure")
+            return original(path, value)
+        m._write_new_json = deny
+    try:
+        outcome = m._ProgressChild(Child(), raw.subgoals[0], derived.subgoals[0], contract, audits, 1).run(
+            derived.subgoals[0], s.ExecutionOptions(execute=True))
+    finally:
+        m._write_new_json = original
+    assert (root / "contract.json").read_bytes() == frozen
+    return outcome, audits
+
+
+with TemporaryDirectory(prefix="week6-independent-progress-") as temporary:
+    root = Path(temporary)
+    outcome, audit = run_case(root / "normal")
+    normal = (outcome.status == "succeeded" and audit[0]["eligible_for_progress_credit"]
+              and audit[0]["raw_proposal_verification"]["outcome"] == "failed"
+              and audit[0]["progress_contract_verification"]["outcome"] == "passed")
+    rows.append({"case": "raw_failed_derived_passed_kept_separate", "passed": normal})
+    faults = {
+        "title_only_blank_ocr": frame("post", []),
+        "changed_window": frame("post", ["Next stage"], window_id="other-window"),
+        "perception_error": frame("post", ["Next stage"], errors=["CPU injected OCR error"]),
+        "reused_baseline_id": frame("before", ["Next stage"]),
+        "forbidden_error_appears": frame("post", ["Next stage", "Forbidden error"]),
+    }
+    for name, post in faults.items():
+        outcome, audit = run_case(root / name, post=post)
+        rows.append({"case": name, "passed": outcome.status != "succeeded" and not audit[0]["eligible_for_progress_credit"]})
+    for name, changes in {
+        "unknown_input": {"unknown": 1}, "no_confirmed_action": {"steps": False},
+        "failed_child": {"status": "failed"}, "cancelled_child": {"status": "cancelled"},
+        "timed_out_child": {"status": "timed_out"}, "unmatched_verdict_frame": {"wrong_id": True},
+    }.items():
+        outcome, audit = run_case(root / name, **changes)
+        rows.append({"case": name, "passed": outcome.status != "succeeded" and not audit[0]["eligible_for_progress_credit"]})
+    for name, exception, expected in [("audit_write_failure", PermissionError, "failed"),
+                                      ("audit_cancel_after_known_result", KeyboardInterrupt, "cancelled")]:
+        outcome, _ = run_case(root / name, audit_error=exception)
+        rows.append({"case": name, "passed": outcome.status == expected and outcome.action_count == 1
+                     and outcome.planning_calls == 3 and outcome.unconfirmed_action_attempts == 0})
+    outcome, audit = run_case(root / "wait_only", action_type="wait")
+    rows.append({"case": "wait_only_has_no_confirmed_OS_input", "passed": outcome.status != "succeeded" and not audit[0]["eligible_for_progress_credit"] and audit[0].get("confirmed_input_count") == 0})
+    wait = {"status": outcome.status, "eligible": audit[0]["eligible_for_progress_credit"],
+            "meaning": "CPU synthetic wait dispatch; no OS input or semantic causality was demonstrated."}
+
+    outcome, audit = run_case(root / "click_then_wait", wait_after=True)
+    rows.append({"case": "click_plus_wait_keeps_one_confirmed_input", "passed": outcome.status == "succeeded" and audit[0]["eligible_for_progress_credit"] and audit[0].get("confirmed_input_count") == 1 and audit[0]["confirmed_action_count"] == 2})
+
+payload = {
+    "schema": "week6.independent_progress_review.v2", "mode": "CPU_fabricated_observations_and_child_results",
+    "source_sha256_before": sha_before, "source_sha256_after": hashlib.sha256(SOURCE.read_bytes()).hexdigest(),
+    "source_unchanged": sha_before == hashlib.sha256(SOURCE.read_bytes()).hexdigest(),
+    "checks": rows, "all_guards_passed": all(row["passed"] for row in rows), "wait_only_observation": wait,
+    "desktop_capture_count": 0, "desktop_input_count": 0, "model_requests": 0, "real_GUI_success": False,
+}
+Path(__file__).with_suffix(".json").write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+print(json.dumps(payload))
+raise SystemExit(0 if payload["all_guards_passed"] and payload["source_unchanged"] else 1)
+

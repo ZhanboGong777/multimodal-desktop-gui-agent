@@ -1,0 +1,44 @@
+{
+  "workflow_id": "lab_auto",
+  "instruction": "In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test, with no external communication. If review is temporarily unavailable, retry within budget.",
+  "subgoals": [
+    {
+      "case_id": "G01",
+      "instruction": "Select the project 'ALPHA'",
+      "target_app": null,
+      "preconditions": [],
+      "success_rules": [],
+      "verification": "automatic",
+      "expect_text": [
+        "ALPHA"
+      ],
+      "forbid_text": [],
+      "requires_processes": [],
+      "forbids_processes": [],
+      "must_exit_processes": [],
+      "risk": "medium",
+      "message_conversation": null,
+      "gate_on_step_verification": true
+    }
+  ],
+  "final_check": {
+    "case_id": "FINAL",
+    "instruction": "Verify caller final rules on a fresh frame",
+    "target_app": null,
+    "preconditions": [],
+    "success_rules": [],
+    "verification": "automatic",
+    "expect_text": [
+      "Project ALPHA",
+      "Theme GREEN",
+      "LOCAL COMPLETE"
+    ],
+    "forbid_text": [],
+    "requires_processes": [],
+    "forbids_processes": [],
+    "must_exit_processes": [],
+    "risk": "low",
+    "message_conversation": null,
+    "gate_on_step_verification": true
+  }
+}

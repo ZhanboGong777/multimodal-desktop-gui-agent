@@ -1,31 +1,76 @@
 {
-  "schema": "week6.implementation.checkpoint.v1",
-  "date": "2026-10-25",
+  "schema": "week6.scoped_engineering_release.v2",
+  "updated_utc": "2026-10-26T11:20:38.660985+00:00",
   "branch": "codex/week6-delivery",
   "version": "2.0.0",
   "delivery_complete": false,
-  "report_ready": false,
-  "state": "implementation regression passed; actual desktop acceptance pending",
-  "cpu_validation": {
-    "path": "results/release_validation_completed_20261025_005/validation.json",
-    "sha256": "2569c0b493cb1a785100de495a99cfe5afcbab836ec890512cd99da6371353cf",
-    "passed": 2927,
-    "pytest_seconds": 428.96,
-    "harness_seconds": 431.5149134999956,
-    "exit_code": 0,
-    "source_before_after_and_current_match": true
+  "report_ready": true,
+  "state": "Validated source and reviewed reports; distribution verification pending.",
+  "closure_kind": "scoped_engineering_delivery",
+  "current_protocol": "week6.rolling_actions.v2",
+  "requirements_closed": {
+    "automatic_decomposition": true,
+    "error_detection_retry": true,
+    "live_monitoring_logs": true,
+    "perception_accuracy_speed": true
   },
-  "changes": [
-    "Automatic natural-language decomposition with caller-owned final criteria, shared deadlines and counted HTTP budgets.",
-    "Reject already-satisfied intermediate check combinations; permit existing expected text alongside an independently unmet progress predicate.",
-    "Opt-in screen OCR profile with frozen accuracy measurements and separately reported processing-time costs."
+  "requirement_scopes": {
+    "automatic_decomposition": {
+      "implementation": "action_level_rolling",
+      "protocol": "week6.rolling_actions.v2",
+      "validation_scope": "Dedicated offline four-stage window, two caller goals, normal and one controlled transient review rejection.",
+      "hierarchical_semantic_subgoals": false,
+      "dependency_management": false,
+      "arbitrary_app_success_rate": null
+    },
+    "error_detection_retry": "Bounded fresh-observation replanning, raw failure retention, unknown-dispatch stop; controlled transient desktop recovery plus CPU counterexamples.",
+    "perception_accuracy_speed": "Frozen held-out OCR accuracy and paired component timings; screen OCR is slower and no general end-to-end speedup is claimed.",
+    "live_monitoring_logs": "Passive stage/status/budget/PID identity records and original per-step logs; no model-internal real-time progress claim."
+  },
+  "cpu_validation": {
+    "path": "Document/Week6/results/release_validation_completed_20261026_006/validation.json",
+    "sha256": "e860d468f1b3240e42e9e1699ed1c58f63227eb28c82ae2e1f70573777515a42",
+    "passed": 3027,
+    "failed": 0,
+    "exit_code": 0,
+    "pytest_seconds": 535.12,
+    "harness_seconds": 566.0270922000054,
+    "source_pin_count": 244,
+    "before_after_current_equal": true,
+    "ruff_src_tests_scripts_exit_code": 0
+  },
+  "real_acceptance": [
+    {
+      "role": "live_acceptance_normal",
+      "path": "Document/Week6/results/live_auto_20261026_normal_017/acceptance.json",
+      "sha256": "0af3a566dd5b97ec28f5913af834deed272ac607e4fc9fc43e00170c7777c4bf"
+    },
+    {
+      "role": "live_acceptance_transient",
+      "path": "Document/Week6/results/live_auto_20261025_transient_015/acceptance.json",
+      "sha256": "10557665b4683644aa16a85721139edd14bccdefb50f9ad89c2c0976c33d8d36"
+    }
   ],
-  "remaining": [
-    "Model-proposed postconditions still have reliability limits; pre-execution acceptance is not proof of future feasibility.",
-    "A complete normal desktop task and a real transient-error recovery task have not passed independent end-state and per-input attribution checks.",
-    "The user is currently unavailable to keep the dedicated desktop window in foreground; no GUI input or activation is being performed.",
-    "The final completed report, verified wheel and complete distribution require the missing acceptance evidence."
+  "reports": {
+    "page_count": 12,
+    "tables": 8,
+    "figures": 1,
+    "docx_sha256": "487d3a18672d2ebbe22f8c7a3b85763ca2deaa601111e3086fb4e78a79327869",
+    "pdf_sha256": "6a3a5821de85d016b7cd7c87b5433771908b1b0cfda6a355634e6d2b3d5c41aa",
+    "markdown_sha256": "985059215bd8eef06695efdccbd3a12e6d4d656df9cd094b06cf0ccf2c3bf02b",
+    "all_pages_actually_viewed": true,
+    "numeric_checks_passed": 45
+  },
+  "capability_limits": [
+    "Hierarchical semantic subgoal sequences and dependency graphs are not implemented by rolling mode.",
+    "Dedicated-window acceptance does not establish arbitrary application or cross-resolution success rates.",
+    "Sky bridge activation and input-service waits are included in elapsed time; unattended execution latency is not established.",
+    "The screen OCR accuracy gain has a processing-time cost; full perception is not generally faster."
   ],
-  "historical_material": "Earlier reports and distribution files are preserved as historical artifacts. They do not establish completion of this ongoing acceptance refresh.",
-  "scope": "Week6 only; no Week7 evaluation, external messages or new Week5 model training."
+  "remaining_delivery_work": [
+    "Verify wheel and source archive bytes, then publish the exact reviewed branch commit."
+  ],
+  "previous_status_archive": "Document/Week6/history/acceptance_pending_20261026/IMPLEMENTATION_STATUS.json",
+  "previous_status_sha256": "57d176224c422cc326650096eea497f2bd37e3bf6413368124240ece28e21556",
+  "week5_c11_sha256_unchanged": "58b005e9fa13e20df15f28ca09c71c0d61c71617abfeb96d17456982a810a54b"
 }

@@ -8,7 +8,8 @@ from types import SimpleNamespace
 import httpx
 import pytest
 from openai import OpenAI
-from test_runtime_runner import FakeExecutor, FakeObserver, FakePlanner, _frame
+from test_runtime_runner import FakeExecutor, FakeObserver, FakePlanner
+from test_runtime_runner import _frame as _base_frame
 
 from gui_agent.models.base import ModelClient, ModelError, ModelResponse
 from gui_agent.models.openai_compatible import OpenAICompatibleClient
@@ -18,6 +19,7 @@ from gui_agent.planning.workflow_decomposer import (
     DecompositionProposal,
     WorkflowDecomposer,
     WorkflowRequest,
+    _caller_anchored_instruction,
 )
 from gui_agent.recording import RunSession
 from gui_agent.runtime.action_adapter import ActionAdapter
@@ -32,6 +34,15 @@ from gui_agent.runtime.schemas import (
     VerificationResult,
 )
 from gui_agent.runtime.verification import Verifier
+from gui_agent.schemas import ActionResult, BoundingBox, DesktopAction
+
+
+def _frame(observation_id, texts):
+    frame = _base_frame(observation_id, texts)
+    frame.window_id = "test-window"
+    frame.window_bounds = BoundingBox(left=0, top=0, right=1470, bottom=956)
+    frame.foreground_stable = True
+    return frame
 
 
 class Clock:
@@ -52,9 +63,20 @@ def ready(*instructions):
     ]})
 
 
+def departure_ready(instruction=None, disappearing="Pending stage"):
+    if instruction is None:
+        instruction = _caller_anchored_instruction(WorkflowRequest(
+            instruction="Open an editor and finish a local draft", expect_text=["USER_FINAL"],
+        ))
+    return json.dumps({"status": "ready", "reason": "Current stage departure only", "subgoals": [
+        {"instruction": instruction, "disappearing_text": disappearing},
+    ]})
+
+
 class ScriptedClient(ModelClient):
     name = "test_explicit_transport"
     transport_attempts_are_explicit = True
+    supports_strict_json_schema = True
 
     def __init__(self, responses, *, clock=None, costs=(), max_retries=0):
         super().__init__(model_name="offline-scripted", max_retries=max_retries, timeout_seconds=90)
@@ -248,26 +270,39 @@ def child_factory(state, clock, *, final_text="USER_FINAL", cost=1, action_attem
         state.append({"task": task, "client": client, "options": None})
         recorder = TaskRecorder(RunSession(session_id=directory.name, directory=directory))
 
+        observations = 0
+
+        def observe():
+            nonlocal observations
+            observations += 1
+            return _frame(f"fresh-final-{observations}", (final_text() if callable(final_text) else final_text,))
+
         class Child:
-            observer = SimpleNamespace(observe=lambda: _frame(
-                "fresh-final", (final_text() if callable(final_text) else final_text,),
-            ))
+            observer = SimpleNamespace(observe=observe)
             verifier = Verifier()
 
             def run(self, goal, options, **callbacks):
                 state[-1]["options"] = options
                 response = client.generate_text(f"Plan {goal.instruction}")
                 clock.advance(cost)
+                post = self.observer.observe() if options.execute else None
                 return TaskRunResult(run_id=directory.name, case_id=goal.case_id, instruction=goal.instruction,
                                      execute=options.execute, planning_calls=1,
                                      steps=[StepRecord(index=number + 1, step_id=f"a{number}", description="explicit simulated input",
-                                                       action_type="wait", action_result={"success": True})
+                                                       action_type="click", action_result=ActionResult(
+                                                           success=True, dry_run=False,
+                                                           action=DesktopAction(action_type="click", x=20, y=20),
+                                                       ).model_dump(mode="json"))
                                             for number in range(action_attempts)],
                                      status=("succeeded" if options.execute else "dry_run_completed") if response.ok else "failed",
-                                     verification=VerificationResult(outcome="passed"))
+                                     verification=VerificationResult(outcome="passed", evidence={
+                                         "observation_id": post.observation_id} if post else {}))
 
         child = Child()
         child.recorder = recorder
+        from gui_agent.planning.planner import TaskPlanner
+
+        child.planner = TaskPlanner(client)
         return child
 
     return factory
@@ -284,7 +319,7 @@ def test_automatic_runner_shares_time_calls_requests_and_does_not_trust_model_fi
     assert state[0]["options"].max_planning_attempts == 4
     assert state[1]["options"].max_planning_attempts == 3
     assert result.elapsed_ms == 7000
-    assert result.workflow_result.final_observation_id == "fresh-final"
+    assert result.workflow_result.final_observation_id.startswith("fresh-final")
     assert result.workflow_result.final_verification.passed
     assert (tmp_path / "auto/decomposition/request.json").is_file()
     assert (tmp_path / "auto/workflow/workflow_summary.json").is_file()
@@ -344,14 +379,14 @@ def test_existing_root_and_invalid_budget_are_refused_before_any_model_call(tmp_
 
 def test_initial_screen_is_available_to_decomposition_with_budget_and_readable_parent_monitor(tmp_path, request_spec):
     clock, state = Clock(), []
-    client = ScriptedClient([ready("Open editor"), "stage plan"])
+    client = ScriptedClient([departure_ready(disappearing="Open draft"), "stage plan"])
     directory = tmp_path / "grounded"
 
     def initial_observer(observation_directory):
         status = read_run_status(directory)
         assert status["trusted"] and status["state"] == "active"
         assert status["snapshot"]["stage"] == "observing"
-        assert observation_directory == directory / "initial_observation"
+        assert observation_directory in {directory / "initial_observation", directory / "contract_before_round_001"}
         clock.advance(4)
         return _frame("initial-screen", ("Visible editor", "Open draft"))
 
@@ -614,7 +649,7 @@ def test_fixed_final_context_is_allowed_with_unsatisfied_progress_but_cannot_pro
 
 
 def test_constraint_failures_never_construct_child_or_rewrite_caller_final_rules(tmp_path, request_spec):
-    bad = proposal_with_checks(expected=["Advance stage"], forbidden=["USER_FINAL"])
+    bad = departure_ready("Advance the local stage", "USER_FINAL")
     client = ScriptedClient([bad, bad, bad])
     directory = tmp_path / "no-execution"
     result = AutomaticWorkflowRunner(
@@ -665,16 +700,16 @@ def test_existing_expected_with_additional_absent_expected_is_pending_until_both
 def test_pending_conjunction_cannot_bypass_fresh_workflow_final_observation(tmp_path, request_spec):
     clock, state = Clock(), []
     before = _frame("initial-observation", ("Retained context", "Alternative available"))
-    proposal = proposal_with_checks(expected=["Retained context"], forbidden=["Alternative available"])
+    proposal = departure_ready(disappearing="Alternative available")
     client = ScriptedClient([proposal, "child action plan"])
     result = AutomaticWorkflowRunner(
         tmp_path / "pending-conjunction", client,
-        child_factory(state, clock, final_text="Retained context"), clock=clock,
+        child_factory(state, clock, final_text="Retained context", action_attempts=1), clock=clock,
         initial_observer=lambda _: before, max_decomposition_rounds=1,
     ).run(request_spec, ExecutionOptions(execute=True, max_planning_attempts=4))
     assert result.decomposition.status == "ready" and len(state) == 1
     assert result.workflow_result.subgoals[0].status == "completed"
-    assert result.workflow_result.final_observation_id == "fresh-final"
+    assert result.workflow_result.final_observation_id.startswith("fresh-final")
     assert result.workflow_result.final_observation_id != before.observation_id
     assert result.workflow_result.final_verification.outcome == "failed"
     assert result.status == "blocked"

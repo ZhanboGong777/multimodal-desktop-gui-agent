@@ -1,0 +1,184 @@
+"""Independent read-only CPU evidence audit; never launches tests, models or GUI."""
+from __future__ import annotations
+
+import hashlib
+import json
+import re
+import subprocess
+import sys
+from datetime import UTC, datetime
+from pathlib import Path
+
+REPO = Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+RESULTS = REPO / 'Document/Week6/results'
+VALIDATION = RESULTS / 'release_validation_completed_20261024_004'
+OUT = RESULTS / 'cpu_release_audit_20261025'
+HARNESS = Path('C:/Users/联想/Documents/ChatGPT/Intern/tmp/week6/validate_completed_004.py')
+OLD_GUI = RESULTS / 'live_auto_20261024_normal_008'
+sys.path.insert(0, str(REPO / 'src'))
+
+from gui_agent.planning.workflow_decomposer import (
+    DecompositionProposal, WorkflowRequest, _check_proposal_constraints,
+)
+from gui_agent.runtime.schemas import ObservationSnapshot
+
+
+def read(path):
+    return json.loads(path.read_bytes())
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def pins():
+    files = [path for name in ('src','tests','scripts','configs')
+             for path in (REPO / name).rglob('*') if path.is_file() and path.suffix in ('.py','.json','.yaml')]
+    files += [REPO/'pyproject.toml',REPO/'README.md']
+    return {path.relative_to(REPO).as_posix():sha(path) for path in sorted(files)}
+
+
+OUT.mkdir(parents=True,exist_ok=False)
+before_current = pins()
+validation = read(VALIDATION/'validation.json')
+stdout = (VALIDATION/'pytest_stdout.txt').read_text('utf-8')
+before_published = validation['tested_source_pins_before']
+new_paths = sorted(before_current.keys()-before_published.keys())
+missing_paths = sorted(before_published.keys()-before_current.keys())
+changed_paths = sorted(path for path in before_published.keys()&before_current.keys()
+                       if before_published[path]!=before_current[path])
+counts = re.findall(r'(?m)^(\d+) passed in ([0-9.]+)s',stdout)
+assert counts == [('2924','485.59')]
+assert validation['exit_code']==0 and validation['tested_sources_unchanged'] is True
+assert validation['changed_tested_sources']==[]
+assert not new_paths and not missing_paths and not changed_paths
+readme = (REPO/'README.md').read_text('utf-8')
+readme_claims = set(re.findall(r'(\d+) tests, ruff clean',readme))
+assert readme_claims == {'2924'}
+harness_text = HARNESS.read_text('utf-8')
+assert 'exit_code\': process.returncode' in harness_text
+assert 'raise SystemExit(process.returncode)' in harness_text
+assert 'subprocess.run(command' in harness_text
+
+old_contract = read(OLD_GUI/'contract.json')
+request = WorkflowRequest.model_validate(old_contract['request'])
+original_final_rules = request.model_dump(mode='json')
+old_proposal = read(OLD_GUI/'automatic/decomposition_round_003/generated_workflow.json')
+observation_path = OLD_GUI/'automatic/observation_round_003/observation.json'
+observation = ObservationSnapshot.model_validate(read(observation_path))
+
+
+def proposal(expected=(),forbidden=()):
+    return DecompositionProposal.model_validate({'status':'ready','reason':'','subgoals':[{
+        'instruction':'Advance the current local stage', 'expect_text':list(expected),
+        'forbid_text':list(forbidden)}]})
+
+
+cases = [
+    ('actual_008_bad_intermediate_proposal', DecompositionProposal.model_validate({
+        'status':'ready','reason':'','subgoals':[{key:goal[key] for key in
+        ('instruction','expect_text','forbid_text')} for goal in old_proposal['subgoals']]}), False),
+    ('case_insensitive_final_forbid_conflict',proposal(['Review complete'],['project alpha']),False),
+    ('substring_final_forbid_conflict',proposal(['Review complete'],['alpha']),False),
+    ('already_visible_operation_label',proposal(['Review report'],['Draft ready']),False),
+    ('persistent_final_context_alone',proposal(['Project ALPHA']),False),
+    ('persistent_context_plus_unmet_progress',proposal(['Project ALPHA','Review complete']),True),
+    ('visible_stage_marker_must_disappear',proposal([],['Draft ready']),True),
+]
+probes=[]
+for name,value,expected_allowed in cases:
+    error=''
+    try:
+        _check_proposal_constraints(value,request,observation,[])
+        allowed=True
+    except ValueError as exc:
+        allowed=False
+        error=str(exc)
+    probes.append({'case':name,'expected_allowed':expected_allowed,'allowed':allowed,
+                   'error':error,'passed':allowed==expected_allowed})
+assert all(row['passed'] for row in probes)
+assert request.model_dump(mode='json')==original_final_rules
+
+module_path=REPO/'src/gui_agent/planning/workflow_decomposer.py'
+module_lines=module_path.read_text('utf-8').splitlines()
+
+
+def location(needle):
+    return next(index for index,line in enumerate(module_lines,1) if needle in line)
+
+
+constraint_review={
+    'source':str(module_path),'sha256':sha(module_path),
+    'called_before_WorkflowSpec_is_constructed': location('_check_proposal_constraints(proposal, request')
+                                              < location('result.workflow = WorkflowSpec('),
+    'constraint_hook_line':location('_check_proposal_constraints(proposal, request'),
+    'generated_workflow_creation_line':location('result.workflow = WorkflowSpec('),
+    'caller_final_rules_are_copied_from_request':
+        'expect_text=list(request.expect_text), forbid_text=list(request.forbid_text)' in module_path.read_text('utf-8'),
+    'default_format_and_constraint_repair_limit':2,
+    'max_requests_with_initial_attempt_and_repairs':3,
+    'constraint_errors_return_to_counted_request_loop':
+        'constraint_or_format_error' in module_path.read_text('utf-8'),
+    'caller_final_rules_unchanged_after_independent_probes':request.model_dump(mode='json')==original_final_rules,
+    'scope_limit':'Conservative proposal checks, not a temporal theorem, semantic idempotency proof, or guarantee of valid GUI execution. Lexical message filtering is not an execution sandbox.',
+    'independent_pure_CPU_probes':probes,
+    'new_model_requests':0,'GUI_captures_or_inputs':0,'pytest_runs_in_this_audit':0,
+}
+assert constraint_review['called_before_WorkflowSpec_is_constructed']
+assert constraint_review['caller_final_rules_are_copied_from_request']
+
+retained=[]
+for source,target_name in [
+    (VALIDATION/'validation.json','original_validation_004.json'),
+    (VALIDATION/'pytest_stdout.txt','original_pytest_stdout_004.txt'),
+    (HARNESS,'validation_harness_004.py.txt'),
+    (module_path,'reviewed_workflow_decomposer.py.txt'),
+    (OLD_GUI/'automatic/decomposition_round_003/generated_workflow.json','original_008_round003_workflow.json'),
+    (observation_path,'original_008_round003_observation.json'),
+]:
+    payload=source.read_bytes()
+    target=OUT/target_name
+    with target.open('xb') as handle:handle.write(payload)
+    assert target.read_bytes()==payload
+    retained.append({'source':str(source),'copy':target_name,'bytes':len(payload),
+                     'sha256':hashlib.sha256(payload).hexdigest(),'copy_matches_original_bytes':True})
+
+after_current=pins()
+assert before_current==after_current
+assert all(sha(Path(row['source']))==row['sha256'] for row in retained)
+branch=subprocess.run(['git','branch','--show-current'],cwd=REPO,capture_output=True,text=True,check=True).stdout.strip()
+head=subprocess.run(['git','rev-parse','HEAD'],cwd=REPO,capture_output=True,text=True,check=True).stdout.strip()
+result={
+    'schema':'week6.independent.cpu_release_audit.v1','created_utc':datetime.now(UTC).isoformat(),
+    'audit_date_label':'20261025','branch':branch,'head':head,
+    'scope':'Read-only verification of existing CPU regression evidence and current source pins, plus seven direct pure-CPU pre-execution constraint probes. No full test repetition, model inference, capture, input, activation or new GUI window.',
+    'original_validation':str(VALIDATION/'validation.json'),
+    'verified_cpu_regression':{'pytest_passed':2924,'pytest_failed':0,'pytest_elapsed_seconds':485.59,
+        'recorded_subprocess_exit_code':validation['exit_code'],'harness_elapsed_seconds':validation['elapsed_seconds'],
+        'started_at_utc':validation['started_at_utc'],'finished_at_utc':validation['finished_at_utc'],
+        'command':validation['command'],'stdout_has_exact_complete_pass_summary':True,
+        'exit_evidence':'The original harness stores subprocess.run(...).returncode and exits with that code; this recorded 0 agrees with the raw pytest complete-pass output. No extra process receipt was invented.',
+        'original_tested_sources_unchanged':validation['tested_sources_unchanged'],
+        'original_changed_tested_sources':validation['changed_tested_sources']},
+    'pin_verification':{'original_pin_count':len(before_published),'current_pin_count':len(before_current),
+        'same_complete_path_set':not new_paths and not missing_paths,
+        'added_paths':new_paths,'missing_paths':missing_paths,'changed_paths':changed_paths,
+        'current_pin_snapshot':'pins_current.json','README_included':True,'README_claims':sorted(readme_claims),
+        'current_sources_unchanged_during_independent_audit':before_current==after_current,
+        'limitation':'Original validation records before hashes and an equality comparison, but not the complete after map; this audit independently re-hashes the complete current path set against those recorded hashes.'},
+    'preexecution_constraint_review':constraint_review,
+    'delivery_state':{'CPU_regression_passed':True,'real_GUI_acceptance_success':False,
+        'Week6_complete':False,'GUI_work_currently_stopped':True,
+        'GUI_stop_origin':'User is not available to keep the desktop fixture in foreground; Root explicitly instructed no activation or new windows.',
+        'remaining':'An independently attributable complete normal complex task and real recoverable-error/negative GUI acceptance have not succeeded. Existing development partial progress must not be represented as complete Week6 delivery.',
+        'development_attempt_008':'The bad intermediate proposal is now rejected by the constraint function, but the original attempt actually stopped on activation waits before executing that proposal. This CPU probe does not retroactively change its cause or count as GUI success.'},
+    'material_new_blocking_code_or_evidence_defects_found':[],
+    'retained_evidence':retained,
+}
+(OUT/'audit.json').write_text(json.dumps(result,indent=2,ensure_ascii=False)+'\n','utf-8')
+(OUT/'pins_current.json').write_text(json.dumps(before_current,indent=2,ensure_ascii=False)+'\n','utf-8')
+(OUT/'constraint_probe.json').write_text(json.dumps(constraint_review,indent=2,ensure_ascii=False)+'\n','utf-8')
+(OUT/'audit_builder_source.py.txt').write_bytes(Path(__file__).read_bytes())
+print(json.dumps({'audit':str(OUT/'audit.json'),'recorded_subprocess_exit':validation['exit_code'],
+                  'pytest_passed':2924,'complete_pin_set_equal':True,'pins':len(before_current),
+                  'constraint_probes_passed':len(probes),'GUI_acceptance_success':False,'Week6_complete':False},indent=2))

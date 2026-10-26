@@ -1,0 +1,230 @@
+{
+  "schema": "week6.live_development_audit.v1",
+  "attempt": 8,
+  "batch": "live_auto_20261024_normal_008",
+  "created_utc": "2026-10-24T08:37:49.468271+00:00",
+  "scope": "Independent read-only audit of closed attempt 008; no model call or GUI input was performed by this audit.",
+  "classification": "partial_attributable_progress_then_activation_service_timeout",
+  "original_status": "failed",
+  "acceptance_flags": {
+    "status": "failed",
+    "runtime_pass": false,
+    "independent_pass": false,
+    "attribution_pass": false,
+    "passed": false
+  },
+  "credit_as_complete_acceptance": false,
+  "include_in_complete_task_quality_score": false,
+  "no_complete_quality_success_rate_computed": true,
+  "process_outcome": {
+    "Root_observed_natural_exit": true,
+    "Root_observed_outer_shell_exit_code": 0,
+    "interpretation": "Outer exit 0 indicates the harness script finished, not that the task passed. All acceptance flags remain false.",
+    "Root_stop_attempt_matched_process": false,
+    "operator_stop_file_exists": false,
+    "evidence_origin_for_process_observations": "Root explicit audit instruction; no synthetic process receipt or stop record was created."
+  },
+  "confirmed_partial_progress": {
+    "bridge_actions": 2,
+    "matching_receipts": 2,
+    "semantic_events": 2,
+    "semantic_order": [
+      "project_selected",
+      "theme_selected"
+    ],
+    "per_input_attribution": [
+      {
+        "request_id": "input_001",
+        "action": {
+          "action_type": "double_click",
+          "x": 1280,
+          "y": 867,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "ALPHA"
+        },
+        "receipt_success": true,
+        "fixture_event": {
+          "utc": "2026-10-24T08:23:26.322741+00:00",
+          "event": "project_selected",
+          "stage": "theme",
+          "project": "ALPHA",
+          "colour": "",
+          "committed": false,
+          "review_attempts": 0,
+          "mode": "normal",
+          "events": 2
+        },
+        "matching_semantic_target": true,
+        "event_between_receipt_times": true
+      },
+      {
+        "request_id": "input_002",
+        "action": {
+          "action_type": "double_click",
+          "x": 1280,
+          "y": 1079,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "GREEN"
+        },
+        "receipt_success": true,
+        "fixture_event": {
+          "utc": "2026-10-24T08:27:03.868300+00:00",
+          "event": "theme_selected",
+          "stage": "review",
+          "project": "ALPHA",
+          "colour": "GREEN",
+          "committed": false,
+          "review_attempts": 0,
+          "mode": "normal",
+          "events": 4
+        },
+        "matching_semantic_target": true,
+        "event_between_receipt_times": true
+      }
+    ],
+    "review_attempts": 0,
+    "committed": false,
+    "meaning": "Two independently attributable model-planned inputs selected ALPHA and GREEN; review and local commit were not executed."
+  },
+  "fixture_debounce": {
+    "configured_guard_ms": 400,
+    "ignored_second_clicks": 2,
+    "observations": [
+      {
+        "first_event": "project_selected",
+        "second_event": "transition_click_ignored",
+        "gap_ms": 153.899,
+        "state_unchanged": true
+      },
+      {
+        "first_event": "theme_selected",
+        "second_event": "transition_click_ignored",
+        "gap_ms": 154.06,
+        "state_unchanged": true
+      }
+    ],
+    "observed_effect": "Second physical clicks were logged as transition_click_ignored without changing the new page state; no cross-page semantic selection was credited."
+  },
+  "observed_unexecuted_intermediate_rule_defect": {
+    "source": "automatic/decomposition_round_003/generated_workflow.json",
+    "instruction": "Click the 'Review report' button to review the report.",
+    "expect_text": [
+      "Review report"
+    ],
+    "forbid_text": [
+      "Draft ready",
+      "Project ALPHA",
+      "Theme GREEN"
+    ],
+    "caller_final_expect_text": [
+      "Project ALPHA",
+      "Theme GREEN",
+      "LOCAL COMPLETE"
+    ],
+    "forbid_conflicts_with_caller_final_required_text": [
+      "Project ALPHA",
+      "Theme GREEN"
+    ],
+    "expectation_is_current_button_label": true,
+    "interpretation": "The proposed intermediate check is inconsistent with the fixture persistent project/theme labels and uses the current Review report control label as its supposed outcome. This is a proposal defect, not an observed post-action verification failure.",
+    "action_executed_for_this_goal": false,
+    "must_not_claim_this_defect_caused_actual_termination": true
+  },
+  "actual_termination": {
+    "cause": "The activation bridge was not serviced while Root diagnosed the run. Pre-action observation and recovery observation separately exhausted about 90 seconds waiting for receipts.",
+    "cause_evidence_origin": "Raw pre-action/recovery timeout records plus Root operator context explaining why activation was not serviced.",
+    "child_status": "failed",
+    "child_stop_reason": "re-planning skipped: observation failed: dedicated-window activation receipt missing",
+    "third_goal_steps": [
+      {
+        "index": 1,
+        "step_id": "s1",
+        "description": "Click the 'Review report' button.",
+        "action_type": "double_click",
+        "observation_id": "obs-0001",
+        "resolved": null,
+        "action_result": null,
+        "verification": null,
+        "error": "observation failed: dedicated-window activation receipt missing",
+        "elapsed_ms": 90032.00000000652,
+        "after_observation_id": null
+      }
+    ],
+    "recovery_records": [
+      {
+        "next_pass": 2,
+        "outcome": "observation_failed",
+        "observation_id": null,
+        "feedback": {
+          "previous_pass": 1,
+          "reason": "pre_action_observation",
+          "failed_step_index": 1,
+          "actions_used": 0,
+          "actions_remaining": 10,
+          "remaining_ms": 513922.0000000205,
+          "recent_steps": [
+            {
+              "index": 1,
+              "action_type": "double_click",
+              "attempted": false,
+              "succeeded": null,
+              "verification": null
+            }
+          ],
+          "omitted_steps": 0,
+          "instruction": "Plan from the current observation; previous attempts do not prove success. Do not replay completed inputs to recreate an earlier state. Existing task checks and remaining budgets still apply."
+        },
+        "elapsed_ms": 90047.00000002049
+      }
+    ],
+    "activation_requests_without_receipts": [
+      "capture_358701343000000",
+      "capture_358791562000000"
+    ],
+    "error_type": "observation/activation service failure before further input",
+    "post_action_rule_failure_was_not_observed": true
+  },
+  "counts_from_original_automatic_summary": {
+    "total_actions": 2,
+    "unconfirmed_action_attempts": 0,
+    "planning_calls": 6,
+    "model_requests": 6,
+    "elapsed_ms": 776391.0000000033,
+    "error": "subgoal did not finish with the required task verification"
+  },
+  "version_specific_cpu_validation_context": {
+    "source": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\release_validation_completed_20261024_003\\validation.json",
+    "exit_code": 0,
+    "passed": 2917,
+    "pytest_elapsed_seconds": 606.57,
+    "harness_elapsed_seconds": 612.299080799974,
+    "tested_sources_unchanged": true,
+    "changed_tested_sources": [],
+    "decomposer_sha256_tested": "3ae4f9ff441b8626fcfb37c998e3cdea7bc5e6519388a3c0ece746e1895b264a",
+    "decomposer_sha256_attempt_008_contract": "3ae4f9ff441b8626fcfb37c998e3cdea7bc5e6519388a3c0ece746e1895b264a",
+    "meaning": "This is a real complete regression pass for its pinned version. It does not certify the later pre-execution consistency constraints now being developed in response to attempt 008."
+  },
+  "evidence_manifest": "evidence_manifest_008.json",
+  "raw_evidence": "raw_evidence/live_auto_20261024_normal_008",
+  "raw_fixture_evidence": "raw_evidence/fixtures/normal_alpha_green_008",
+  "original_source_files_hashed": 197,
+  "structured_evidence_files_copied": 92,
+  "preservation_audit": {
+    "original_attempt_sources_unchanged": true,
+    "copies_match_original_bytes": true,
+    "existing_001_to_007_audit_files_unchanged": true,
+    "prior_audit_files_checked": 163
+  }
+}

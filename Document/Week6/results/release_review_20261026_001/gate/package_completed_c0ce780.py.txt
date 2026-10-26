@@ -1,0 +1,1110 @@
+"""Prepare and package the reviewed Week 6 completion release.
+
+Default mode is read-only preflight. --package is an explicit final operation,
+after Root has reviewed the real acceptance evidence and authorized packaging.
+Old output/week6 artifacts are never overwritten. All commands use the existing
+project environment; this does not prove a clean dependency installation.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import io
+import json
+import math
+import os
+import re
+import subprocess
+import sys
+import tarfile
+import time
+import zipfile
+from datetime import datetime, timezone
+from pathlib import Path, PurePosixPath
+
+WORKSPACE = Path("C:/Users/联想/Documents/ChatGPT/Intern")
+REPO = WORKSPACE / "week6-worktree"
+PYTHON = Path("D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe")
+EXPECTED_BRANCH = "codex/week6-delivery"
+C11 = "artifacts/week5/c11/adapter_model.safetensors"
+C11_SHA256 = "58b005e9fa13e20df15f28ca09c71c0d61c71617abfeb96d17456982a810a54b"
+VERSION = "2.0.0"
+PREFIX = "Week6_system_v2.0/"
+ARCHIVE_NAME = "Week6_system_v2.0_完善版.zip"
+REQUIREMENTS = frozenset({"automatic_decomposition", "error_detection_retry",
+                          "perception_accuracy_speed", "live_monitoring_logs"})
+LIVE_ROLES = {"live_acceptance_normal": "normal", "live_acceptance_transient": "transient"}
+RAW_PREFIXES = ("Document/Week6/results/", "Document/Week6/resources/")
+# This one historical file was published with Git LF before raw-record policy.
+# Retain both its original checkout bytes and its existing committed LF bytes.
+HISTORICAL_TEXT_EXCEPTIONS = frozenset({"Document/Week6/results/phase1_validation.json"})
+
+
+def digest(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def sha(path: Path) -> str:
+    with path.open("rb") as handle:
+        h = hashlib.sha256()
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def load(path: Path) -> dict:
+    return json.loads(path.read_text(encoding="utf-8-sig"))
+
+
+def write(path: Path, value: dict) -> None:
+    if path.exists():
+        raise FileExistsError(path)
+    path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def git(*args: str, binary: bool = False):
+    output = subprocess.check_output(["git", *args], cwd=REPO)
+    return output if binary else output.decode("utf-8").strip()
+
+
+def require(condition: bool, message: str) -> None:
+    if not condition:
+        raise RuntimeError(message)
+
+
+def evidence_path(value: str) -> Path:
+    path = Path(value)
+    return path if path.is_absolute() else REPO / path
+
+
+def validate_requirement_closure(completion: dict) -> dict:
+    requirements = completion.get("requirements_closed", {})
+    require(completion.get("version") == VERSION, "Completion record version differs from package")
+    require(completion.get("report_ready") is True and set(requirements) == REQUIREMENTS
+            and all(value is True for value in requirements.values()),
+            "The four named Week 6 requirements must be independently closed")
+    return requirements
+
+
+def timestamp(value: str) -> datetime:
+    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    require(parsed.tzinfo is not None, "Live acceptance timestamps require explicit time zones")
+    return parsed
+
+
+def audit_departure_protocol(proposal: dict, request: dict, automatic: dict, batch: Path, index: int) -> dict:
+    """Bind the original native response, current candidates and compiled predicate."""
+    sys.path.insert(0, str(REPO / "src"))
+    from gui_agent.planning.workflow_decomposer import (
+        DEPARTURE_PROTOCOL_VERSION, DecompositionProposal, DepartureProposal, ProposedSubgoal,
+        WorkflowRequest, _caller_anchored_instruction, _departure_protocol, _unique_keys,
+    )
+    from gui_agent.runtime.schemas import ObservationSnapshot
+
+    def original(value: str) -> Path:
+        path = Path(value).resolve()
+        require(path.is_relative_to(batch.resolve()) and path.is_file(), "Native protocol reference escaped its original run")
+        return path
+
+    require(DEPARTURE_PROTOCOL_VERSION == "week6.observed_departure.v2"
+            and automatic.get("decomposition_protocol_mode") == proposal.get("protocol_mode") == "observed_departure"
+            and proposal.get("protocol_version") == DEPARTURE_PROTOCOL_VERSION,
+            "Real fresh-observer run does not record the frozen observed-departure protocol")
+    protocol_path = original(proposal["protocol_reference"])
+    require(protocol_path.name == "observed_departure_protocol.json"
+            and protocol_path.parent == Path(proposal["evidence_directory"]).resolve(),
+            "Native protocol is not the original per-round record")
+    protocol = load(protocol_path)
+    bound = ObservationSnapshot.model_validate(protocol["bound_observation"])
+    request_model = WorkflowRequest.model_validate(request)
+    expected_protocol = _departure_protocol(request_model, bound)
+    require(protocol == expected_protocol and bool(protocol["candidates"]),
+            "Native protocol has unknown/empty candidates, unsupported schema or altered snapshot rules")
+    anchor = _caller_anchored_instruction(request_model)
+    require(protocol.get("caller_request") == request_model.model_dump(mode="json")
+            and protocol.get("caller_instruction_anchor") == anchor,
+            "Native protocol truncated or changed the original caller request or its fixed instruction anchor")
+    initial_name = "initial_observation" if index == 1 else f"observation_round_{index:03d}"
+    observation_path = original(str(Path(automatic["evidence_directory"]) / initial_name / "observation.json"))
+    require(load(observation_path) == protocol["bound_observation"], "Native candidate snapshot differs from original saved observation")
+    native_path = original(str(protocol_path.parent / "native_proposal.json"))
+    native = load(native_path)
+    require(native == proposal.get("native_proposal"), "Native model object was replaced by compiled workflow fields")
+    selected = DepartureProposal.model_validate(native, strict=True)
+    require(selected.status == "ready" and len(selected.subgoals) == 1
+            and native["subgoals"][0].get("instruction") == anchor
+            and selected.subgoals[0].disappearing_text in protocol["candidates"],
+            "Native instruction differs from the exact caller anchor or disappearance text is not one current candidate")
+    compiled_path = original(str(protocol_path.parent / "compiled_proposal.json"))
+    compiled = load(compiled_path)
+    expected_compiled = DecompositionProposal(
+        status=selected.status, reason=selected.reason,
+        subgoals=[ProposedSubgoal(instruction=goal.instruction, expect_text=[], forbid_text=[goal.disappearing_text])
+                  for goal in selected.subgoals],
+    ).model_dump(mode="json")
+    marker = selected.subgoals[0].disappearing_text
+    require(compiled.get("schema_version") == DEPARTURE_PROTOCOL_VERSION
+            and Path(compiled["protocol_reference"]).resolve() == protocol_path
+            and compiled.get("native_proposal") == native
+            and compiled.get("original_caller_instruction") == request_model.instruction
+            and compiled.get("caller_instruction_anchor") == anchor
+            and compiled.get("compiled_proposal") == expected_compiled
+            and compiled.get("mapping") == [{"native_instruction": anchor, "compiled_instruction": anchor,
+                                             "native_disappearing_text": marker, "expect_text": [], "forbid_text": [marker]}],
+            "Native-to-compiled mapping changed the original string, fields or schema")
+    raw = proposal.get("raw_workflow") or {}
+    require(len(raw.get("subgoals", [])) == 1 and raw["subgoals"][0].get("instruction") == selected.subgoals[0].instruction
+            and raw["subgoals"][0].get("expect_text") == [] and raw["subgoals"][0].get("forbid_text") == [marker],
+            "Recorded raw WorkflowSpec is not the declared compilation of the native model selection")
+    attempts = proposal.get("format_attempts")
+    require(type(attempts) is int and 1 <= attempts <= 3, "Native schema attempt inventory is invalid")
+    attempt_pins = []
+    for number in range(1, attempts + 1):
+        request_path = original(str(protocol_path.parent / f"attempt_{number:02d}_request.json"))
+        response_path = original(str(protocol_path.parent / f"attempt_{number:02d}_response.json"))
+        sent, received = load(request_path), load(response_path)
+        context = sent.get("context", {})
+        require(sent.get("protocol_mode") == "observed_departure" and sent.get("instruction") == request_model.instruction
+                and sent.get("response_format") == protocol["response_format"]
+                and context.get("final_checks") == {"expect_text": request_model.expect_text, "forbid_text": request_model.forbid_text}
+                and context.get("proposal_protocol", {}).get("schema_version") == DEPARTURE_PROTOCOL_VERSION
+                and context["proposal_protocol"].get("caller_instruction_anchor") == anchor
+                and context["proposal_protocol"].get("disappearing_text_candidates") == protocol["candidates"],
+                "Actual recorded request omitted strict schema, candidates or unchanged caller final checks")
+        if number == attempts:
+            require(not received.get("error") and received.get("provider") == proposal.get("provider")
+                    and received.get("model_name") == proposal.get("model_name")
+                    and json.loads(received["content"], object_pairs_hook=_unique_keys) == native,
+                    "Accepted native object differs from the complete original model reply")
+        attempt_pins.append({"attempt": number, "request_sha256": sha(request_path), "response_sha256": sha(response_path)})
+    return {"protocol_version": DEPARTURE_PROTOCOL_VERSION, "protocol_sha256": sha(protocol_path),
+            "native_proposal_sha256": sha(native_path), "compiled_proposal_sha256": sha(compiled_path),
+            "bound_observation_id": bound.observation_id, "bound_captured_at": bound.captured_at.isoformat(),
+            "bound_window_id": bound.window_id, "bound_window_bounds": bound.window_bounds.model_dump(mode="json"),
+            "caller_instruction_anchor": anchor, "caller_request_sha256": digest(request_model.instruction.encode("utf-8")),
+            "candidate_count": len(protocol["candidates"]), "native_disappearing_text": marker,
+            "attempts": attempt_pins,
+            "meaning": "The model selects an observed departure marker; instruction is the exact full caller anchor. This is rolling current-observation boundary progression, not free semantic sequence generation; reason proves no completion."}
+
+
+def audit_progress_contracts(record: dict, contract: dict, batch: Path) -> dict:
+    """Check original A artifacts and re-evaluate only saved text observations."""
+    sys.path.insert(0, str(REPO / "src"))
+    from gui_agent.runtime.schemas import ObservationSnapshot, TaskSpec
+    from gui_agent.runtime.verification import Verifier
+    from gui_agent.schemas import ActionResult
+
+    def local(value: str) -> Path:
+        path = Path(value).resolve()
+        require(path.is_relative_to(batch.resolve()) and path.is_file(), "Progress evidence escaped its real run")
+        return path
+
+    def snapshot(value: dict):
+        payload = {key: value[key] for key in ObservationSnapshot.model_fields if key in value}
+        payload["notices"] = value.get("notices", value.get("ocr_notices", []))
+        return ObservationSnapshot.model_validate(payload)
+
+    def checks(value: dict) -> dict:
+        return {key: value.get(key, []) for key in ("expect_text", "forbid_text")}
+
+    result = record["automatic_result"]
+    decompositions, rounds = result.get("decompositions", []), result.get("workflow_rounds", [])
+    audits, completed = result.get("progress_verifications", []), result.get("completed_subgoals", [])
+    require(bool(decompositions) and len(decompositions) == len(rounds) == len(audits) == len(completed),
+            "Real A run needs one recorded progress contract and audit per completed round")
+    verifier, summaries, post_frames, post_paths = Verifier(), [], [], []
+    request = contract["request"]
+    final_required = {text.casefold() for text in request.get("expect_text", [])}
+    total_confirmed = total_inputs = 0
+    input_types = {"move", "click", "double_click", "right_click", "drag", "scroll", "type_text", "key_press", "hotkey"}
+    for index, (proposal, round_result) in enumerate(zip(decompositions, rounds), 1):
+        native_audit = audit_departure_protocol(proposal, request, result, batch, index)
+        raw, derived = proposal.get("raw_workflow") or {}, proposal.get("workflow") or {}
+        progress = proposal.get("progress_contract") or {}
+        require(proposal.get("status") == "ready" and len(raw.get("subgoals", [])) == 1
+                and len(derived.get("subgoals", [])) == len(round_result.get("subgoals", [])) == 1,
+                "A requires exactly one raw and derived stage per real execution round")
+        require(progress.get("schema_version") == "week6.preexecution_progress.v1",
+                "Original pre-execution progress contract missing")
+        raw_task, derived_task = raw["subgoals"][0], derived["subgoals"][0]
+        require(raw.get("final_check") == derived.get("final_check")
+                and checks(derived["final_check"]) == checks(request), "A changed caller final checks")
+        require(raw_task.get("instruction") == derived_task.get("instruction")
+                and raw_task.get("case_id") == derived_task.get("case_id"), "A changed the proposed instruction")
+        before = snapshot(progress["before_observation"])
+        require(not before.errors and any(element.text.strip() for element in before.elements)
+                and bool(before.window_id) and before.window_bounds is not None and before.foreground_stable,
+                "Contract before frame is not readable and stably scoped")
+        require(before.captured_at >= timestamp(native_audit["bound_captured_at"])
+                and before.window_id == native_audit["bound_window_id"]
+                and before.window_bounds.model_dump(mode="json") == native_audit["bound_window_bounds"]
+                and native_audit["native_disappearing_text"] in {item.text.strip() for item in before.elements},
+                "A input-before frame predates or changes the native candidate window scope")
+        expected_context = [text for text in raw_task.get("expect_text", []) if text.casefold() not in final_required
+                            and verifier.check_task(TaskSpec(case_id="CONTEXT", instruction="Read saved context", expect_text=[text]), before).outcome == "passed"]
+        require(progress.get("context_expect_text") == expected_context
+                and progress.get("raw_checks") == checks(raw_task)
+                and progress.get("derived_progress_checks") == checks(derived_task)
+                and derived_task.get("expect_text") == [text for text in raw_task.get("expect_text", []) if text not in expected_context]
+                and derived_task.get("forbid_text") == raw_task.get("forbid_text"), "A context classification or kept predicates differ")
+        require(verifier.check_task(TaskSpec.model_validate(derived_task), before).outcome == "failed",
+                "Frozen derived progress predicates were already satisfied or inconclusive before input")
+        contract_path = local(progress["record_reference"])
+        saved = load(contract_path)
+        require(saved.get("raw_workflow") == raw and saved.get("derived_workflow") == derived
+                and {key: saved.get(key) for key in progress} == progress, "Frozen raw/derived contract differs from original file")
+        require(load(local(str(contract_path.parent / "generated_workflow.json"))) == raw
+                and load(local(str(contract_path.parent / "derived_workflow.json"))) == derived,
+                "Original compiled workflow or frozen derived workflow changed")
+        before_path = local(str(Path(result["evidence_directory"]) / f"contract_before_round_{index:03d}" / "observation.json"))
+        require(load(before_path) == progress["before_observation"], "Fresh contract-before observation differs")
+        outcome = round_result["subgoals"][0]
+        child_directory = Path(outcome["evidence_directory"])
+        audit_path = local(str(child_directory / "progress_verifications.json"))
+        audit = load(audit_path)
+        require(audit == audits[index - 1] and audit.get("round") == index
+                and audit.get("case_id") == derived_task["case_id"]
+                and Path(audit["contract_reference"]).resolve() == contract_path,
+                "Original per-stage progress audit differs from acceptance summary")
+        child = load(local(outcome["summary_reference"]))
+        limit_path = local(audit["planning_limit_reference"])
+        require(limit_path == (child_directory / "single_step_planning_limit.json").resolve(),
+                "Single-step planning record is not the original child artifact")
+        limit = load(limit_path)
+        calls = limit.get("calls", [])
+        require(limit.get("schema_version") == "week6.single_step_planning.v1"
+                and limit.get("protocol_version") == native_audit["protocol_version"]
+                and type(limit.get("original_max_steps")) is int and limit["original_max_steps"] > 0
+                and limit.get("applied_max_steps") == 1 and limit.get("restored") is True
+                and limit.get("restored_max_steps") == limit["original_max_steps"] and bool(calls)
+                and len(calls) == child.get("planning_calls")
+                and all(call.get("max_steps") == 1 and type(call.get("ok")) is bool
+                        and ((call.get("returned_steps") is None and not call["ok"])
+                             or (type(call.get("returned_steps")) is int and 0 <= call["returned_steps"] <= 1))
+                        for call in calls)
+                and any(call.get("ok") is True and call.get("returned_steps") == 1 for call in calls),
+                "Child planning did not retain the one-step-per-call limit and final restoration")
+        post_id = audit.get("post_observation_id")
+        require(outcome.get("status") == "completed" and outcome.get("child_status") == "succeeded"
+                and child.get("case_id") == outcome.get("case_id") == derived_task["case_id"]
+                and child.get("verification", {}).get("outcome") == "passed"
+                and outcome.get("verification", {}).get("outcome") == "passed"
+                and child["verification"].get("evidence", {}).get("observation_id") == post_id
+                == outcome["verification"].get("evidence", {}).get("observation_id"),
+                "Original child and workflow verdicts are not bound to the audited exact post frame")
+        confirmed = [step for step in child.get("steps", []) if step.get("action_result") is not None]
+        receipts = [ActionResult.model_validate(step["action_result"]) for step in confirmed]
+        confirmed_inputs = sum(receipt.success and not receipt.dry_run and receipt.action is not None
+                               and receipt.action.action_type == step.get("action_type")
+                               and receipt.action.action_type in input_types for receipt, step in zip(receipts, confirmed))
+        require(child.get("status") == "succeeded" and child.get("execute") is True
+                and child.get("unconfirmed_action_attempts") == 0 and confirmed_inputs > 0
+                and all(receipt.success and not receipt.dry_run for receipt in receipts)
+                and audit.get("confirmed_action_count") == len(confirmed)
+                and audit.get("confirmed_input_count") == confirmed_inputs
+                and audit.get("eligible_for_progress_credit") is True and not audit.get("qualification_error"),
+                "A progress credit lacks confirmed successful non-wait input or has an unknown/failed attempt")
+        post_path = local(str(child_directory / f"{audit['post_observation_id']}.json"))
+        post = snapshot(load(post_path))
+        require(post.observation_id != before.observation_id and post.captured_at >= before.captured_at
+                and not post.errors and any(element.text.strip() for element in post.elements)
+                and post.window_id == before.window_id and post.window_bounds == before.window_bounds
+                and post.foreground_stable, "Progress post frame is stale, unreadable or outside the contract scope")
+        raw_check = verifier.check_task(TaskSpec.model_validate(raw_task), post)
+        derived_check = verifier.check_task(TaskSpec.model_validate(derived_task), post)
+        require(audit.get("raw_proposal_verification", {}).get("outcome") == raw_check.outcome
+                and audit.get("progress_contract_verification", {}).get("outcome") == derived_check.outcome == "passed"
+                and audit["raw_proposal_verification"].get("evidence", {}).get("observation_id") == post.observation_id
+                and audit["progress_contract_verification"].get("evidence", {}).get("observation_id") == post.observation_id,
+                "Saved raw and derived verification outcomes do not independently match the same post frame")
+        credited = completed[index - 1]
+        identity = credited.get("stage_identity", {})
+        require(credited.get("round") == index and credited.get("case_id") == derived_task["case_id"]
+                and credited.get("protocol_version") == native_audit["protocol_version"]
+                and identity.get("protocol_version") == native_audit["protocol_version"]
+                and identity.get("caller_anchor") == native_audit["caller_instruction_anchor"]
+                and checks(identity) == checks(derived_task)
+                and checks(credited) == checks(derived_task) and credited.get("raw_checks") == checks(raw_task)
+                and credited.get("raw_proposal_verification") == audit["raw_proposal_verification"]
+                and credited.get("progress_contract_verification") == audit["progress_contract_verification"],
+                "Completed progress record lost or rewrote raw verification")
+        summaries.append({"round": index, "context_expect_text": expected_context,
+                          "native_departure_protocol": native_audit,
+                          "raw_outcome": raw_check.outcome, "progress_outcome": derived_check.outcome,
+                          "confirmed_action_count": len(confirmed), "confirmed_input_count": confirmed_inputs,
+                          "contract_sha256": sha(contract_path), "audit_sha256": sha(audit_path),
+                          "single_step_planning_limit_sha256": sha(limit_path), "action_planning_calls": len(calls),
+                          "before_observation_id": before.observation_id, "post_observation_id": post.observation_id})
+        post_frames.append(post)
+        post_paths.append(post_path)
+        total_confirmed += len(confirmed)
+        total_inputs += confirmed_inputs
+    require(result.get("total_actions") == total_confirmed, "Global confirmed attempts differ from per-stage original records")
+    final = result["workflow_result"]
+    final_path = local(final["final_observation_reference"])
+    final_frame = snapshot(load(final_path))
+    require(final.get("final_observation_id") == final_frame.observation_id
+            == (final.get("final_verification") or {}).get("evidence", {}).get("observation_id")
+            and final_path.parent == post_paths[-1].parent and final_path != post_paths[-1]
+            and final_frame.observation_id != post_frames[-1].observation_id
+            and final_frame.captured_at >= post_frames[-1].captured_at
+            and final_frame.window_id == post_frames[-1].window_id
+            and final_frame.window_bounds == post_frames[-1].window_bounds and final_frame.foreground_stable,
+            "Caller final verification is not bound to a separate fresh recorded frame")
+    final_check = verifier.check_task(TaskSpec(case_id="FINAL", instruction="Verify caller final checks", **checks(request)), final_frame)
+    require(final_check.outcome == "passed" and final["final_verification"].get("outcome") == "passed",
+            "Independent caller final text rules do not pass on their saved observation")
+    return {"schema": "week6.release.progress_contract.audit.v1", "all_checks_passed": True,
+            "rounds": summaries, "raw_failed_rounds": sum(row["raw_outcome"] == "failed" for row in summaries),
+            "raw_inconclusive_rounds": sum(row["raw_outcome"] == "inconclusive" for row in summaries),
+            "progress_passed_rounds": len(summaries), "confirmed_executor_attempts": total_confirmed,
+            "confirmed_nonwait_inputs": total_inputs, "final_observation_sha256": sha(final_path),
+            "final_outcome": final_check.outcome,
+            "meaning": "Native selection, its raw compiled departure predicate, derived progress and final verification remain separate claims; failures are retained."}
+
+
+def audit_rolling_actions(record: dict, contract: dict, batch: Path) -> dict:
+    """Bind saved native next-action plans to the unchanged caller goal and final."""
+    sys.path.insert(0, str(REPO / "src"))
+    from gui_agent.models.base import ModelRequest
+    from gui_agent.planning.parser import parse_plan
+    from gui_agent.planning.prompts import SYSTEM_PROMPT
+    from gui_agent.planning.workflow_decomposer import (
+        ROLLING_PROTOCOL_VERSION, ROLLING_STEP_POLICY, RollingActionAudit, WorkflowRequest,
+        _caller_anchored_instruction, _rolling_frame_guard,
+    )
+    from gui_agent.runtime.recorder import _mask_step
+    from gui_agent.runtime.schemas import ObservationSnapshot, TaskSpec
+    from gui_agent.runtime.verification import Verifier
+    from gui_agent.schemas import ActionResult
+
+    def local(value: str | Path) -> Path:
+        path = Path(value).resolve()
+        require(path.is_relative_to(batch.resolve()) and path.is_file(), "Rolling evidence escaped the original real run")
+        return path
+
+    def frame(path: Path):
+        value = load(local(path))
+        payload = {key: value[key] for key in ObservationSnapshot.model_fields if key in value}
+        payload["notices"] = value.get("notices", value.get("ocr_notices", []))
+        observed = ObservationSnapshot.model_validate(payload)
+        local(observed.image_path)
+        return observed
+
+    def checks(value: dict) -> dict:
+        return {key: value.get(key, []) for key in ("expect_text", "forbid_text")}
+
+    result = record["automatic_result"]
+    directory = Path(result["evidence_directory"]).resolve()
+    require(directory == (batch / "automatic").resolve(), "Rolling root evidence is not the original automatic directory")
+    require(load(local(directory / "automatic_workflow_summary.json")) == result,
+            "Acceptance embedded a different automatic summary")
+    request = WorkflowRequest.model_validate(contract["request"])
+    require(load(local(directory / "rolling_request.json")) == request.model_dump(mode="json"),
+            "Rolling request truncated or changed the original caller request")
+    decomposition = result.get("decomposition", {})
+    require(result.get("decomposition_protocol_mode") == "rolling_actions"
+            and decomposition.get("status") == "not_requested"
+            and decomposition.get("decomposition_calls") == 0
+            and decomposition.get("protocol_mode") == "rolling_actions"
+            and decomposition.get("protocol_version") == ROLLING_PROTOCOL_VERSION == "week6.rolling_actions.v2"
+            and decomposition.get("intermediate_check_source") == "local_caller_goal"
+            and result.get("decompositions") == [] and result.get("completed_subgoals") == []
+            and result.get("progress_verifications") == [],
+            "Rolling action planning was misrepresented as marker selection or semantic subgoal completion")
+    require(result.get("already_satisfied") is False and result.get("completion_basis") == "executed_caller_goal"
+            and result.get("accounting_complete") is True,
+            "Real acceptance requires newly executed caller goal with complete accounting, not preexisting state")
+    compilation_path = local(directory / "rolling_compilation.json")
+    compilation = load(compilation_path)
+    spec = decomposition.get("workflow") or {}
+    anchor = _caller_anchored_instruction(request, max_length=None)
+    require(compilation.get("schema_version") == ROLLING_PROTOCOL_VERSION
+            and compilation.get("source") == "local_caller_goal_compilation"
+            and compilation.get("gate_on_step_verification") is False
+            and compilation.get("step_verification_policy") == ROLLING_STEP_POLICY
+            and compilation.get("selector_model_requests") == 0
+            and compilation.get("caller_request") == request.model_dump(mode="json")
+            and compilation.get("workflow") == spec and spec.get("instruction") == request.instruction
+            and spec.get("workflow_id") == request.workflow_id and len(spec.get("subgoals", [])) == 1,
+            "Local caller compilation or selector request accounting differs from original caller")
+    task, final = spec["subgoals"][0], spec["final_check"]
+    require(task.get("case_id") == "CALLER_GOAL" and task.get("instruction") == anchor
+            and task.get("gate_on_step_verification") is False
+            and checks(task) == checks(final) == checks(contract["request"])
+            and final.get("case_id") == "FINAL", "Rolling child or independent final changed caller predicates")
+    limits, options = compilation.get("shared_limits", {}), contract["options"]
+    require(limits.get("max_model_requests") == contract["max_model_requests"]
+            and limits.get("max_actions") == options["max_actions"]
+            and limits.get("max_planning_calls") == options["max_planning_attempts"]
+            and limits.get("task_timeout_seconds") == options["task_timeout_seconds"]
+            and isinstance(limits.get("absolute_deadline"), (int, float))
+            and math.isfinite(limits["absolute_deadline"]) and limits["absolute_deadline"] > 0
+            and 0 < result["model_requests"] <= limits["max_model_requests"]
+            and 0 < result["planning_calls"] <= limits["max_planning_calls"]
+            and 0 < result["total_actions"] <= limits["max_actions"]
+            and 0 <= result["elapsed_ms"] < limits["task_timeout_seconds"] * 1000,
+            "Rolling execution exceeded or changed the shared HTTP/action/planning/time limits")
+    initial_path = local(directory / "initial_observation/observation.json")
+    before = frame(initial_path)
+    require(not before.errors and bool(before.window_id) and before.foreground_stable
+            and before.window_bounds is not None and any(item.text.strip() for item in before.elements),
+            "Rolling initial frame lacks explicit stable scope or readable evidence")
+    verifier = Verifier()
+    initial_check = verifier.check_task(TaskSpec.model_validate(final), before)
+    require(initial_check.outcome == "failed" and (result.get("initial_verification") or {}).get("outcome") == "failed",
+            "Rolling caller goal was already satisfied or initially inconclusive")
+    workflow = result["workflow_result"]
+    require(result.get("workflow_rounds") == [workflow] and workflow.get("accounting_complete") is True
+            and len(workflow.get("subgoals", [])) == 1,
+            "Rolling must retain the one caller-goal execution and complete counts")
+    goal = workflow["subgoals"][0]
+    child_directory = (directory / "workflow/001_CALLER_GOAL").resolve()
+    child_path = local(goal["summary_reference"])
+    require(child_path == child_directory / "task_summary.json" and goal.get("case_id") == "CALLER_GOAL"
+            and goal.get("status") == "completed" and goal.get("child_status") == "succeeded",
+            "Rolling child outcome is not the original completed CALLER_GOAL")
+    child = load(child_path)
+    audit_path = local(child_directory / "rolling_actions_audit.json")
+    audit = load(audit_path)
+    RollingActionAudit.model_validate(audit)
+    require(result.get("rolling_actions_audit") == audit
+            and audit.get("schema_version") == ROLLING_PROTOCOL_VERSION
+            and audit.get("gate_on_step_verification") is False
+            and audit.get("step_verification_policy") == ROLLING_STEP_POLICY
+            and audit.get("caller_instruction") == request.instruction
+            and audit.get("compiled_instruction") == child.get("instruction") == anchor
+            and audit.get("child_status") == child.get("status") == "succeeded"
+            and child.get("execute") is True and child.get("case_id") == "CALLER_GOAL"
+            and child.get("provider") == "openai_compatible" and child.get("model_name") == contract["model"]
+            and audit.get("eligible_for_final_verification") is True
+            and audit.get("planning_accounting_complete") is True
+            and audit.get("unconfirmed_action_attempts") == child.get("unconfirmed_action_attempts") == 0,
+            "Original rolling audit, child identity or qualification is incomplete")
+    require([_mask_step(value) for value in audit.get("actions", [])] == child.get("steps"),
+            "Rolling audit actions differ from the original child journal")
+    limit_path = local(audit["planning_limit_reference"])
+    limit = load(limit_path)
+    calls = limit.get("calls", [])
+    require(limit_path == child_directory / "single_step_planning_limit.json"
+            and limit.get("schema_version") == "week6.single_step_planning.v1"
+            and limit.get("protocol_version") == ROLLING_PROTOCOL_VERSION
+            and limit.get("raw_step_verification_policy") == ROLLING_STEP_POLICY
+            and type(limit.get("original_max_steps")) is int and limit["original_max_steps"] >= 1
+            and limit.get("applied_max_steps") == 1 and limit.get("restored") is True
+            and limit.get("restored_max_steps") == limit["original_max_steps"]
+            and calls == audit.get("plans") and len(calls) == child.get("planning_calls") == result["planning_calls"]
+            and bool(calls), "Rolling single-step application, full native call inventory or restoration is missing")
+    observations, native_plans = {}, []
+
+    def saved_observation(observation_id: str):
+        if observation_id not in observations:
+            observed = frame(child_directory / f"{observation_id}.json")
+            require(observed.observation_id == observation_id and not _rolling_frame_guard(before, observed),
+                    "Rolling saved frame changed scope, reused capture provenance or lacks freshness")
+            observations[observation_id] = observed
+        return observations[observation_id]
+
+    for index, call in enumerate(calls, 1):
+        require(call.get("max_steps") == 1 and call.get("returned_steps") in {None, 0, 1}
+                and call.get("instruction") == anchor and call.get("task_id") == "CALLER_GOAL"
+                and type(call.get("model_requests")) is int and call["model_requests"] >= 0
+                and type(call.get("attempts")) is int and call["attempts"] >= 1,
+                "A native rolling planning call changed caller instruction, identity, counts or single-step bound")
+        context = call.get("context") or {}
+        observed = saved_observation(context.get("observation_id", ""))
+        require(Path(call.get("image_path") or "").resolve() == Path(observed.image_path).resolve(),
+                "Native next-action plan used another saved image")
+        response, parsed = call.get("response"), call.get("parsed_plan")
+        if call.get("ok") is True:
+            require(response is not None and response.get("provider") == "openai_compatible"
+                    and response.get("model_name") == contract["model"] and not response.get("error"),
+                    "Native rolling plan lacks the actual configured provider response")
+            reconstructed = parse_plan(response["content"], instruction=anchor, max_steps=1, task_id="CALLER_GOAL")
+            require(reconstructed.model_dump(mode="json") == parsed and len(parsed["steps"]) == call["returned_steps"] == 1,
+                    "Recorded next-action plan differs from the complete original model response")
+            native_plans.extend(parsed["steps"])
+        else:
+            require(call.get("error") is not None, "Failed native planning call lost its error")
+    require(any(value.get("ok") and value.get("returned_steps") == 1 for value in calls),
+            "No original model next-action plan was produced")
+    transport_path = local(directory / "transport_requests.jsonl")
+    dispatches = [json.loads(line) for line in transport_path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    http_count = 0
+    for index, dispatch in enumerate(dispatches, 1):
+        count = dispatch.get("requests_made")
+        require(dispatch.get("dispatch") == index and dispatch.get("count_source") == "httpx_request_event"
+                and type(count) is int and count >= 0, "Real rolling HTTP accounting is incomplete")
+        http_count += count
+        require(dispatch.get("requests_total") == http_count, "Rolling HTTP cumulative count changed")
+    require(http_count == result["model_requests"] == sum(value["model_requests"] for value in calls)
+            and http_count <= contract["max_model_requests"], "Native plans and actual HTTP requests disagree")
+    dispatch_cursor = 0
+    for call in calls:
+        expected_messages = [{"role": "system", "content": SYSTEM_PROMPT}, *ModelRequest(
+            instruction=anchor, context={**(call.get("context") or {}), "max_steps": 1},
+            image_path=call.get("image_path")).to_messages()]
+        call_http, call_replies = 0, []
+        while call_http < call["model_requests"] and dispatch_cursor < len(dispatches):
+            dispatch = dispatches[dispatch_cursor]
+            require(dispatch.get("messages") == expected_messages
+                    and dispatch.get("provider") == "openai_compatible"
+                    and dispatch.get("model_name") == contract["model"],
+                    "Actual HTTP request changed the caller anchor, saved context, image or one-step limit")
+            call_http += dispatch["requests_made"]
+            for http_response in dispatch.get("http_responses", []):
+                body = http_response.get("body") or {}
+                for choice in body.get("choices", []) if isinstance(body, dict) else []:
+                    content = choice.get("message", {}).get("content")
+                    if isinstance(content, str):
+                        call_replies.append(content)
+            dispatch_cursor += 1
+        require(call_http == call["model_requests"], "Native call is not bound to its recorded actual HTTP dispatches")
+        response = call.get("response")
+        if not response or not response.get("content"):
+            continue
+        require(bool(call_replies) and response["content"] == call_replies[-1],
+                "Saved native response differs from the last original HTTP reply in its own native call")
+    require(dispatch_cursor == len(dispatches), "Original HTTP dispatches are missing from native call records")
+    attempts, inputs, failures, planned_cursor = 0, 0, 0, 0
+    raw_verdicts = {"passed": 0, "failed": 0, "inconclusive": 0}
+    raw_step_checks = []
+    input_types = {"move", "click", "double_click", "right_click", "drag", "scroll", "type_text", "key_press", "hotkey"}
+    for step in audit["actions"]:
+        if step.get("observation_id"):
+            saved_observation(step["observation_id"])
+        if step.get("after_observation_id"):
+            saved_observation(step["after_observation_id"])
+        if step.get("action_result") is None:
+            continue
+        receipt = ActionResult.model_validate(step["action_result"])
+        attempts += 1
+        require(not receipt.dry_run and receipt.action is not None
+                and receipt.action.action_type == step["action_type"], "Rolling execution lacks a complete real action result")
+        require(step.get("resolved") is not None and step["resolved"].get("action") == step["action_result"].get("action"),
+                "Known input result differs from the grounded executed action")
+        match = next((number for number in range(planned_cursor, len(native_plans))
+                      if native_plans[number].get("step_id") == step.get("step_id")
+                      and native_plans[number].get("action_type") == step.get("action_type")), None)
+        require(match is not None, "Actual input cannot be traced in order to any original native next-action plan")
+        before_step = saved_observation(step["observation_id"]) if step.get("observation_id") else None
+        after_step = saved_observation(step["after_observation_id"]) if step.get("after_observation_id") else None
+        if before_step is not None and after_step is not None:
+            require(not _rolling_frame_guard(before_step, after_step), "Raw model step check reused its pre-input capture")
+        raw_check = verifier.check_step(expected_result=native_plans[match].get("expected_result"),
+                                       action_type=step["action_type"], before=before_step,
+                                       after=after_step, action_result=receipt).model_dump(mode="json")
+        require(raw_check == step.get("verification"),
+                "Original raw model step verdict was replaced or differs from its exact native expectation and saved frames")
+        raw_verdicts[raw_check["outcome"]] += 1
+        raw_step_checks.append({"step_index": step["index"], "native_step_id": native_plans[match]["step_id"],
+                                "original_expected_result": native_plans[match].get("expected_result"),
+                                "raw_outcome": raw_check["outcome"], "executor_success": receipt.success,
+                                "post_observation_id": step.get("after_observation_id")})
+        planned_cursor = match + 1
+        failures += not receipt.success
+        inputs += bool(receipt.success and step["action_type"] in input_types)
+    require(inputs == audit.get("confirmed_input_count") and inputs > 0
+            and attempts == child.get("action_count") == goal.get("actions") == workflow.get("total_actions") == result["total_actions"]
+            and child.get("planning_calls") == goal.get("planning_calls") == workflow.get("planning_calls")
+            and workflow.get("unconfirmed_action_attempts") == result.get("unconfirmed_action_attempts") == 0,
+            "Known rolling action/input/planning accounting differs among original records")
+    post_id = audit["post_observation_id"]
+    post = saved_observation(post_id)
+    require(audit.get("child_verification") == child.get("verification") == goal.get("verification")
+            and (child.get("verification") or {}).get("outcome") == "passed"
+            and child["verification"].get("evidence", {}).get("observation_id") == post_id
+            and (audit.get("caller_verification") or {}).get("outcome") == "passed"
+            and audit["caller_verification"].get("evidence", {}).get("observation_id") == post_id
+            and verifier.check_task(TaskSpec.model_validate(final), post).outcome == "passed",
+            "Child verdict, saved post frame and unchanged caller predicates are not bound")
+    final_path = local(result["final_observation_reference"])
+    require(final_path.parent == child_directory and final_path != child_directory / f"{post_id}.json"
+            and workflow.get("final_observation_reference") == result["final_observation_reference"]
+            and workflow.get("final_verification") == result.get("final_verification"),
+            "Caller final did not use a separate fresh frame after the child post verification")
+    final_frame = frame(final_path)
+    final_check = verifier.check_task(TaskSpec.model_validate(final), final_frame)
+    require(not _rolling_frame_guard(post, final_frame) and final_frame.observation_id != post_id
+            and (result.get("final_verification") or {}).get("outcome") == final_check.outcome == "passed"
+            and result["final_verification"].get("evidence", {}).get("observation_id") == final_frame.observation_id
+            and workflow.get("final_observation_id") == final_frame.observation_id,
+            "Independent rolling caller final is stale, mis-scoped or did not pass the unchanged rules")
+    return {"schema": "week6.release.rolling_actions.audit.v1", "all_checks_passed": True,
+            "protocol_version": ROLLING_PROTOCOL_VERSION, "completion_basis": result["completion_basis"],
+            "gate_on_step_verification": False, "step_verification_policy": ROLLING_STEP_POLICY,
+            "request_sha256": sha(directory / "rolling_request.json"), "compilation_sha256": sha(compilation_path),
+            "child_summary_sha256": sha(child_path), "rolling_audit_sha256": sha(audit_path),
+            "planning_limit_sha256": sha(limit_path), "transport_sha256": sha(transport_path),
+            "native_planning_calls": len(calls), "actual_http_requests": http_count,
+            "confirmed_executor_attempts": attempts, "known_failed_executor_attempts": failures,
+            "confirmed_nonwait_inputs": inputs, "saved_scoped_frames": len(observations),
+            "raw_model_step_verdict_counts": raw_verdicts, "raw_model_step_checks": raw_step_checks,
+            "initial_outcome": initial_check.outcome, "final_outcome": final_check.outcome,
+            "final_observation_sha256": sha(final_path),
+            "meaning": "Bounded model plan→one-step execution→fresh observation on the immutable caller goal. No marker selection, free semantic subtask sequence or A progress proof is asserted."}
+
+
+def audit_live_acceptance(item: dict, mode: str) -> dict:
+    """Recheck actual saved acceptance, never synthesize or launch a run."""
+    path = evidence_path(item["path"]).resolve()
+    require(path.is_relative_to((REPO / "Document/Week6/results").resolve())
+            and path.name == "acceptance.json" and path.parent.name.startswith("live_auto_"),
+            "Live acceptance must be an original Week 6 real-run record")
+    require(sha(path) == item["sha256"], "Pinned live acceptance changed")
+    record = load(path)
+    require(record.get("status") == "succeeded"
+            and all(record.get(key) is True for key in
+                    ("passed", "runtime_pass", "independent_pass", "attribution_pass", "source_unchanged")),
+            f"Real {mode} acceptance is incomplete or failed")
+    contract_path = path.parent / "contract.json"
+    contract = load(contract_path)
+    require(contract.get("options", {}).get("execute") is True,
+            "Live acceptance must use real execution, not dry-run")
+    source_pins = contract.get("source_sha256", {})
+    expected_source_set = {p.relative_to(REPO).as_posix() for p in (REPO / "src").rglob("*.py")}
+    expected_source_set.update({"scripts/week6_lab_acceptance.py", "scripts/week6_local_lab.py"})
+    require(set(source_pins) == expected_source_set, "Live acceptance source pin inventory incomplete")
+    for name, expected in source_pins.items():
+        require(sha(REPO / name) == expected, f"Live acceptance used another source revision: {name}")
+    result = record.get("automatic_result", {})
+    workflow = result.get("workflow_result", {})
+    require(result.get("schema_version") == "week6.automatic_workflow.v1"
+            and result.get("status") == "succeeded" and workflow.get("execute") is True
+            and workflow.get("status") == "succeeded"
+            and (workflow.get("final_verification") or {}).get("outcome") == "passed",
+            "Independent caller final verification did not pass")
+    request = contract.get("request", {})
+    rolling = result.get("decomposition_protocol_mode") == "rolling_actions"
+    if not rolling:
+        proposals = result.get("decompositions", [])
+        require(bool(proposals), "Real legacy automatic run has no recorded model decomposition")
+        for proposal in proposals:
+            if proposal.get("status") != "ready":
+                continue
+            final = proposal.get("workflow", {}).get("final_check", {})
+            require(proposal.get("provider") == "openai_compatible"
+                    and proposal.get("model_name") == contract.get("model")
+                    and final.get("expect_text") == request.get("expect_text")
+                    and final.get("forbid_text") == request.get("forbid_text")
+                    and proposal.get("final_check_source") == "caller_supplied_unchanged",
+                    "Actual model decomposition changed the caller final rules or provider")
+    require(result.get("model_requests", 0) > 0 and result.get("total_actions", 0) >= 4
+            and result.get("unconfirmed_action_attempts") == 0,
+            "Live acceptance did not record known real model/action execution")
+    execution_audit = (audit_rolling_actions(record, contract, path.parent) if rolling
+                       else audit_progress_contracts(record, contract, path.parent))
+    expected = contract.get("independent_pass", {})
+    state = record.get("state", {})
+    require(state.get("mode") == mode and state.get("stage") == "completed"
+            and state.get("committed") is True and state.get("project") == expected.get("project")
+            and state.get("colour") == expected.get("colour"),
+            "Independent fixture state differs from the caller contract")
+    events = record.get("independent_events", [])
+    semantic = [event for event in events if event.get("event") in {
+        "project_selected", "theme_selected", "review_rejected", "review_accepted", "local_commit"}]
+    order = [event.get("event") for event in semantic]
+    required_order = ["project_selected", "theme_selected"]
+    if mode == "transient":
+        required_order.append("review_rejected")
+    required_order.extend(["review_accepted", "local_commit"])
+    require(order == required_order, "Independent semantic transitions are missing, reordered, or replayed")
+    receipts = record.get("input_receipts", [])
+    require(len({receipt.get("id") for receipt in receipts}) == len(receipts),
+            "Duplicate live input receipt IDs")
+    owners = []
+    for event in semantic:
+        when = timestamp(event["utc"])
+        matched = [receipt["id"] for receipt in receipts
+                   if receipt.get("success") is True and receipt.get("transport") == "Sky click"
+                   and receipt.get("action", {}).get("action_type") in {"click", "double_click"}
+                   and timestamp(receipt["started_utc"]) <= when <= timestamp(receipt["finished_utc"])]
+        require(len(matched) == 1, "Semantic transition lacks exactly one known Sky input receipt")
+        owners.append(matched[0])
+    require(len(set(owners)) == len(owners), "A single input receipt caused multiple semantic transitions")
+    reads = record.get("status_reads", [])
+    require(any(read.get("trusted") is True and read.get("state") == "active" for read in reads)
+            and bool(reads) and reads[-1].get("trusted") is True
+            and reads[-1].get("state") == "finished"
+            and reads[-1].get("snapshot", {}).get("task_status") == "succeeded",
+            "Real-run monitor lacks trustworthy active and successful terminal records")
+    receipt_path = path.parent / "owner_receipt.json"
+    receipt = load(receipt_path)
+    command = receipt.get("command", [])
+    owner_harness_path = path.parent / "owner_harness.py.txt"
+    require(receipt.get("schema") == "week6.live.actual_exit_receipt.v1"
+            and receipt.get("child_exit_code") == 0
+            and owner_harness_path.is_file() and receipt.get("harness_sha256") == sha(owner_harness_path)
+            and len(command) > 3 and Path(command[1]).resolve() == (REPO / "scripts/week6_lab_acceptance.py").resolve()
+            and "--directory" in command and Path(command[command.index("--directory") + 1]).resolve() == path.parent,
+            "Actual owner wait() receipt or original harness invocation is missing")
+    owner = receipt.get("owner", {})
+    require(type(owner.get("pid")) is int and type(owner.get("create_time")) in {int, float}
+            and timestamp(receipt["finished_utc"]) >= timestamp(receipt["started_utc"]),
+            "Owner process identity or actual exit time is incomplete")
+    terminal = reads[-1]["snapshot"]
+    descendants = [receipt.get("launcher", {}), *receipt.get("observed_descendants", [])]
+    require(any(value.get("pid") == terminal.get("pid") and type(value.get("create_time")) in {int, float}
+                and len(value.get("cmdline", [])) > 1
+                and Path(value["cmdline"][1]).resolve() == (REPO / "scripts/week6_lab_acceptance.py").resolve()
+                for value in descendants), "Monitor terminal PID is not one recorded actual harness process")
+    return {"path": path.relative_to(REPO).as_posix(), "sha256": sha(path), "mode": mode,
+            "contract_sha256": sha(contract_path), "semantic_transitions": order,
+            "distinct_input_receipts": owners, "source_pin_count": len(source_pins),
+            ("rolling_actions_audit" if rolling else "progress_contract_audit"): execution_audit,
+            "owner_receipt_sha256": sha(receipt_path), "actual_child_exit_code": receipt["child_exit_code"],
+            "owner_harness_sha256": sha(owner_harness_path),
+            "all_checks_passed": True}
+
+
+def committed_tree() -> dict[str, dict]:
+    tree = {}
+    for line in git("ls-tree", "-rz", "HEAD", binary=True).split(b"\0"):
+        if not line:
+            continue
+        header, name = line.split(b"\t", 1)
+        mode, kind, oid = header.decode("ascii").split()
+        require(kind == "blob" and mode in {"100644", "100755"}, "Unsupported Git tree entry")
+        tree[name.decode("utf-8")] = {"mode": mode, "oid": oid}
+    return tree
+
+
+def production_hashes(tree: dict[str, dict]) -> dict[str, str]:
+    names = sorted(n for n in tree if n.startswith("src/gui_agent/") and n.endswith(".py"))
+    require(bool(names), "No committed production modules")
+    process = subprocess.Popen(["git", "cat-file", "--batch"], cwd=REPO,
+                               stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    # communicate avoids deadlock when all blob bodies exceed the pipe buffer.
+    output, _ = process.communicate("\n".join(tree[n]["oid"] for n in names).encode("ascii") + b"\n")
+    require(process.returncode == 0, "git cat-file failed")
+    stream = io.BytesIO(output)
+    pins = {}
+    for name in names:
+        header = stream.readline().decode("ascii").strip().split()
+        require(len(header) == 3 and header[1] == "blob", "Invalid Git blob response")
+        body = stream.read(int(header[2]))
+        require(stream.read(1) == b"\n", "Incomplete Git blob response")
+        pins[name] = digest(body)
+        require(sha(REPO / name) == pins[name], f"Production working bytes differ from Git: {name}")
+    require(not stream.read(), "Unexpected Git blob tail")
+    return pins
+
+
+def raw_evidence_hashes(tree: dict[str, dict]) -> dict:
+    """Compare original record bytes against committed blobs without text filters."""
+    names = sorted(name for name in tree if name.startswith(RAW_PREFIXES))
+    require(bool(names), "No committed raw Week 6 evidence")
+    process = subprocess.Popen(["git", "cat-file", "--batch"], cwd=REPO,
+                               stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    output, _ = process.communicate("\n".join(tree[name]["oid"] for name in names).encode("ascii") + b"\n")
+    require(process.returncode == 0, "git raw-evidence blob read failed")
+    stream = io.BytesIO(output)
+    pins, exceptions = {}, []
+    for name in names:
+        header = stream.readline().decode("ascii").strip().split()
+        require(len(header) == 3 and header[1] == "blob", "Invalid raw-evidence Git blob response")
+        body = stream.read(int(header[2]))
+        require(stream.read(1) == b"\n", "Incomplete raw-evidence Git blob response")
+        pins[name] = digest(body)
+        original = (REPO / name).read_bytes()
+        if digest(original) != pins[name]:
+            require(name in HISTORICAL_TEXT_EXCEPTIONS and original.replace(b"\r\n", b"\n") == body,
+                    f"Original raw evidence bytes differ from Git: {name}")
+            exceptions.append({"path": name, "working_sha256": digest(original),
+                               "git_blob_sha256": pins[name], "reason": "Retained historical text/LF policy"})
+    require(not stream.read(), "Unexpected raw-evidence Git blob tail")
+    return {"git_blob_sha256": pins, "historical_text_exceptions": exceptions,
+            "raw_file_count": len(names), "all_original_raw_bytes_equal_git_except_declared_history": True}
+
+
+def audit_evidence_files(paths: list[Path]) -> dict:
+    """Content-safe inventory: report only locations/counts, never secret values."""
+    files = sorted({p for base in paths if base.exists() for p in base.rglob("*") if p.is_file()})
+    largest = sorted(files, key=lambda p: p.stat().st_size, reverse=True)[:20]
+    findings = []
+    data_urls = []
+    private_key = re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----")
+    bearer = re.compile(r"(?i)(?:authorization[\"'\s:]+|bearer\s+)([A-Za-z0-9._~+/=-]{16,})")
+    sk = re.compile(r"\bsk-(?:proj-)?[A-Za-z0-9_-]{24,}\b")
+    data_uri = re.compile(r"data:image/[A-Za-z0-9.+-]+;base64,[A-Za-z0-9+/=]+")
+    for path in files:
+        if path.suffix.lower() not in {".json", ".jsonl", ".txt", ".log", ".yaml", ".yml", ".md", ".py"}:
+            continue
+        content = path.read_bytes().decode("utf-8", errors="replace")
+        rel = path.relative_to(REPO).as_posix()
+        for category, pattern in [("private_key_header", private_key), ("openai_key_shape", sk),
+                                  ("authorization_token_shape", bearer)]:
+            matches = list(pattern.finditer(content))
+            if matches:
+                findings.append({"path": rel, "category": category, "count": len(matches),
+                                 "file_sha256": sha(path), "content_not_echoed": True})
+        encoded = list(data_uri.finditer(content))
+        if encoded:
+            data_urls.append({"path": rel, "count": len(encoded),
+                              "largest_encoded_characters": max(len(m.group(0)) for m in encoded)})
+    return {"schema": "week6.release.evidence_inventory.v1", "files_scanned": len(files),
+            "total_bytes": sum(p.stat().st_size for p in files),
+            "largest_files": [{"path": p.relative_to(REPO).as_posix(), "bytes": p.stat().st_size} for p in largest],
+            "credential_shape_findings": findings, "data_url_files": data_urls,
+            "note": "Pattern audit is not proof that images or arbitrary text contain no private data. Root reviews desktop captures separately."}
+
+
+def preflight(args) -> dict:
+    validation = load(args.validation)
+    completion = load(args.completion_record)
+    require(completion.get("status") == "completed", "Final completion status is not completed")
+    requirements = validate_requirement_closure(completion)
+    selected_validation = args.validation.resolve()
+    require(evidence_path(completion.get("validation", "")).resolve() == selected_validation
+            and completion.get("validation_sha256") == sha(selected_validation),
+            "Completion and package select different regression bytes")
+    final_items = [item for item in completion.get("evidence", []) if item.get("role") == "final_validation"]
+    require(len(final_items) == 1
+            and evidence_path(final_items[0].get("path", "")).resolve() == selected_validation
+            and final_items[0].get("sha256") == sha(selected_validation),
+            "Completion needs one exact final_validation evidence role for the selected regression bytes")
+    pins = validation.get("tested_source_pins_before", {})
+    require(bool(pins) and validation.get("tested_source_pins_after") == pins,
+            "Final regression before/after source maps differ or are absent")
+    require(git("branch", "--show-current") == EXPECTED_BRANCH, "Unexpected branch")
+    require(not git("status", "--porcelain"), "Commit reviewed deliverables before final packaging")
+    commit = git("rev-parse", "HEAD")
+    require(args.expected_commit == commit, "Expected commit does not equal clean HEAD")
+    require(re.fullmatch(r"release_validation_completed_\d{8}_\d{3}", args.validation.parent.name)
+            and args.validation.name == "validation.json"
+            and args.validation.resolve().is_relative_to((REPO / "Document/Week6/results").resolve()),
+            "Select a completed regression record inside the Week 6 evidence directory")
+    require(validation.get("exit_code") == 0 and validation.get("tested_sources_unchanged") is True,
+            "Final regression has not passed with unchanged tested sources")
+    require(not validation.get("changed_tested_sources"), "Regression records changed tested sources")
+    for name, expected in pins.items():
+        require(sha(REPO / name) == expected, f"Tested source changed after final regression: {name}")
+    stdout = (args.validation.parent / validation.get("stdout", "pytest_stdout.txt")).read_text(encoding="utf-8")
+    final_line = stdout.strip().splitlines()[-1]
+    match = re.search(r"(\d+) passed(?:[^\n]*?) in ([\d.]+)s", final_line)
+    require(bool(match) and not re.search(r"\b\d+ (?:failed|errors?|skipped)\b", final_line),
+            "Final pytest summary is not a complete pass")
+    require(bool(completion.get("evidence")), "Completion record has no pinned evidence")
+    for item in completion["evidence"]:
+        require(sha(evidence_path(item["path"])) == item["sha256"], "Pinned completion evidence changed")
+    live_records = {}
+    for role, mode in LIVE_ROLES.items():
+        selected = [item for item in completion["evidence"] if item.get("role") == role]
+        require(len(selected) == 1, f"Completion record needs one original {role} evidence item")
+        live_records[mode] = audit_live_acceptance(selected[0], mode)
+    qa = load(args.qa)
+    numeric = load(args.numeric_qa)
+    require(qa.get("all_pages_actually_viewed") is True and qa.get("all_checks_passed") is True,
+            "New report visual QA incomplete")
+    require(numeric.get("all_passed") is True, "New report numeric/structural QA incomplete")
+    pages = qa.get("pages", [])
+    page_count = qa.get("page_count")
+    require(isinstance(page_count, int) and len(pages) == page_count and page_count > 0,
+            "Visual QA page inventory incomplete")
+    require({p.get("page") for p in pages} == set(range(1, page_count + 1)) and
+            all(p.get("passed") is True and p.get("actually_viewed_by") for p in pages),
+            "Every rendered page must have an actual reviewer and pass")
+    docs = [WORKSPACE / "output/docx/Week6_实验报告_完善版.docx",
+            WORKSPACE / "output/pdf/Week6_实验报告_完善版.pdf"]
+    hashes = {p.name: sha(p) for p in docs}
+    for p in docs:
+        require(sha(REPO / "Document/Week6" / p.name) == hashes[p.name], "Report output/repository bytes differ")
+        key = "docx_sha256" if p.suffix == ".docx" else "pdf_sha256"
+        require(qa.get(key) == hashes[p.name] == numeric.get(key), "Report no longer equals reviewed bytes")
+    require(numeric.get("validation_sha256") == sha(args.validation), "Report numeric QA used another validation")
+    require(numeric.get("completion_sha256") == sha(args.completion_record),
+            "Report numeric QA used another completion record")
+    require(sha(REPO / "Document/Week6/Week6_Robustness_Report.md") == numeric.get("markdown_sha256"),
+            "Report Markdown changed after numeric audit")
+    resource_dir = REPO / "Document/Week6/resources/tesseract"
+    provenance = load(resource_dir / "provenance.json")
+    require(provenance.get("license") == "Apache-2.0", "OCR resource license not declared")
+    resources = {}
+    for item in provenance.get("resources", []):
+        path = resource_dir / item["name"]
+        require(path.stat().st_size == item["bytes"] and sha(path) == item["sha256"], "OCR resource provenance mismatch")
+        resources[item["name"]] = item["sha256"]
+    require({"LICENSE", "eng.traineddata", "chi_sim.traineddata"} <= resources.keys(), "OCR resources/license missing")
+    require(sha(REPO / C11) == C11_SHA256, "Accepted Week 5 C11 weights changed")
+    tree = committed_tree()
+    production = production_hashes(tree)
+    raw_evidence = raw_evidence_hashes(tree)
+    inventory = audit_evidence_files([REPO / "Document/Week6/results", REPO / "Document/Week6/resources"])
+    require(not inventory["credential_shape_findings"], "Credential-shaped content requires Root review before distribution")
+    return {"schema": "week6.completed.package.preflight.v1", "checked_at_utc": datetime.now(timezone.utc).isoformat(),
+            "commit": commit, "branch": EXPECTED_BRANCH, "version": VERSION,
+            "validation": {"path": args.validation.relative_to(REPO).as_posix(), "sha256": sha(args.validation),
+                           "tests_passed": int(match.group(1)), "pytest_seconds": float(match.group(2))},
+            "qa": {"path": str(args.qa), "sha256": sha(args.qa), "page_count": page_count},
+            "numeric_qa": {"path": str(args.numeric_qa), "sha256": sha(args.numeric_qa)},
+            "completion": {"path": str(args.completion_record), "sha256": sha(args.completion_record),
+                           "requirements_closed": requirements},
+            "reports": hashes, "ocr_resources": resources, "c11_sha256": C11_SHA256,
+            "production_sha256": production, "raw_evidence": raw_evidence,
+            "live_acceptance": live_records, "inventory": inventory,
+            "tracked_file_count": len(tree), "all_checks_passed": True}
+
+
+def run_logged(command: list[str], cwd: Path, env: dict, path: Path) -> dict:
+    tick = time.perf_counter()
+    with path.open("x", encoding="utf-8") as handle:
+        result = subprocess.run(command, cwd=cwd, env=env, stdout=handle,
+                                stderr=subprocess.STDOUT, check=False)
+    record = {"command": command, "exit_code": result.returncode,
+              "elapsed_seconds": time.perf_counter() - tick, "log": path.name, "log_sha256": sha(path)}
+    require(result.returncode == 0, f"Command failed; see retained {path}")
+    return record
+
+
+def package(args, checked: dict) -> dict:
+    # Exclusive directory is a durable attempt boundary; failures remain intact.
+    args.out.mkdir(parents=True, exist_ok=False)
+    write(args.out / "preflight.json", checked)
+    build_source = args.out / "build_source"
+    build_source.mkdir()
+    tar_bytes = git("archive", "--format=tar", checked["commit"], binary=True)
+    with tarfile.open(fileobj=io.BytesIO(tar_bytes)) as archive:
+        for member in archive.getmembers():
+            path = PurePosixPath(member.name)
+            require(not path.is_absolute() and ".." not in path.parts and not member.issym() and not member.islnk(),
+                    "Unsafe source archive path")
+        archive.extractall(build_source, filter="data")
+    distribution = args.out / "distribution"
+    distribution.mkdir()
+    env = os.environ.copy()
+    env.update(PYTHONUTF8="1", PYTHONIOENCODING="utf-8", PIP_NO_INDEX="1", PIP_DISABLE_PIP_VERSION_CHECK="1")
+    build = run_logged([str(PYTHON), "-m", "pip", "wheel", "--no-deps", "--no-build-isolation", "--no-index",
+                        "--no-cache-dir", "--wheel-dir", str(distribution), str(build_source)],
+                       args.out, env, args.out / "wheel_build.log")
+    wheels = list(distribution.glob("*.whl"))
+    require(len(wheels) == 1, "Expected exactly one fresh wheel")
+    wheel = wheels[0]
+    expected_name = f"multimodal_desktop_gui_agent-{VERSION}-py3-none-any.whl"
+    require(wheel.name == expected_name, "Unexpected wheel version/name")
+    module_pins = checked["production_sha256"]
+    with zipfile.ZipFile(wheel) as archive:
+        require(archive.testzip() is None, "Wheel CRC failure")
+        wheel_modules = {n for n in archive.namelist() if n.startswith("gui_agent/") and n.endswith(".py")}
+        require(wheel_modules == {n.removeprefix("src/") for n in module_pins}, "Wheel module set differs from Git")
+        for name, expected in module_pins.items():
+            require(digest(archive.read(name.removeprefix("src/"))) == expected, f"Wheel module differs from Git: {name}")
+        metadata_names = [n for n in archive.namelist() if n.endswith(".dist-info/METADATA")]
+        require(len(metadata_names) == 1, "Wheel METADATA missing")
+        metadata = archive.read(metadata_names[0]).decode("utf-8").splitlines()
+        require(f"Version: {VERSION}" in metadata and "Requires-Python: <3.14,>=3.11" in metadata,
+                "Wheel metadata differs from intended release")
+    target = args.out / "installed_target"
+    require(not target.exists(), "Fresh wheel installation target already exists")
+    install = run_logged([str(PYTHON), "-m", "pip", "install", "--no-deps", "--no-index", "--no-compile",
+                          "--target", str(target), str(wheel)], args.out, env, args.out / "wheel_install.log")
+    for name, expected in module_pins.items():
+        require(sha(target / name.removeprefix("src/")) == expected, f"Installed module differs from Git: {name}")
+    smoke = args.out / "wheel_smoke.py"
+    smoke.write_text('''import importlib.metadata as metadata\nimport json\nimport sys\nsys.path.insert(0, sys.argv[1])\nimport gui_agent\nfrom gui_agent.planning.workflow_decomposer import WorkflowRequest\nfrom gui_agent.runtime.workflow import WorkflowSpec\nrequest = WorkflowRequest(workflow_id="smoke", instruction="Prepare a local test", expect_text=["Done"])\nspec = WorkflowSpec.model_validate({"workflow_id":"smoke","instruction":"Prepare a local test","subgoals":[{"case_id":"one","instruction":"Prepare test","expect_text":["Done"]}],"final_check":{"case_id":"final","instruction":"Verify test","expect_text":["Done"]}})\nprint(json.dumps({"version":metadata.version("multimodal-desktop-gui-agent"),"import_path":gui_agent.__file__,"request_id":request.workflow_id,"subgoal_count":len(spec.subgoals),"desktop_actions":0,"model_calls":0}))\n''', encoding="utf-8")
+    # This smoke validates installed schema imports only and deliberately performs
+    # no model calls, GUI observations, actions or environment installation.
+    smoke_run = run_logged([str(PYTHON), str(smoke), str(target)], args.out, env, args.out / "wheel_smoke.log")
+    smoke_result = json.loads((args.out / "wheel_smoke.log").read_text(encoding="utf-8").strip().splitlines()[-1])
+    require(smoke_result["version"] == VERSION and Path(smoke_result["import_path"]).is_relative_to(target),
+            "Smoke imported a different installation")
+    wheel_verification = {"schema": "week6.completed.wheel.verification.v1", "wheel": wheel.name,
+                          "sha256": sha(wheel), "production_module_count": len(module_pins),
+                          "all_modules_equal_git_and_installed": True, "wheel_crc_verified": True,
+                          "build": build, "install": install, "smoke": smoke_run, "smoke_result": smoke_result,
+                          "dependency_install": "Existing project venv supplies dependencies. Fresh target uses --no-deps --no-index. No clean dependency installation is claimed."}
+    write(args.out / "wheel_verification.json", wheel_verification)
+    audit_files = {"completion_record.json": args.completion_record,
+                   "visual_qa.json": args.qa, "numeric_qa.json": args.numeric_qa,
+                   "wheel_build.log": args.out / "wheel_build.log",
+                   "wheel_install.log": args.out / "wheel_install.log",
+                   "wheel_smoke.log": args.out / "wheel_smoke.log"}
+    audit_pins = {name: sha(path) for name, path in audit_files.items()}
+    release = {"schema": "week6.system.completed.release.v1", "version": VERSION,
+               "created_at_utc": datetime.now(timezone.utc).isoformat(), "branch": EXPECTED_BRANCH,
+               "commit": checked["commit"], "base_commit": "9149e064d90ab6796e7f25ece6cbbd026785b26c",
+               "validation": checked["validation"], "completion": checked["completion"], "report_qa": checked["qa"],
+               "report_numeric_qa": checked["numeric_qa"], "reports": checked["reports"],
+               "wheel": {"file": wheel.name, "sha256": sha(wheel)},
+               "included_release_audits": {f"distribution/verification/{name}": value for name, value in audit_pins.items()},
+               "c11_sha256_unchanged": C11_SHA256, "ocr_resources": checked["ocr_resources"],
+               "live_acceptance": checked["live_acceptance"],
+               "raw_evidence": {key: value for key, value in checked["raw_evidence"].items()
+                                if key != "git_blob_sha256"},
+               "scope": "Week 6 four-requirement completion evidence is pinned in the reviewed completion record. Retained development failures and independent final checks remain distinguishable. No Week 7 comprehensive success-rate or competitor evaluation is claimed."}
+    partial = args.out / (ARCHIVE_NAME + ".partial")
+    final = args.out / ARCHIVE_NAME
+    subprocess.run(["git", "archive", "--format=zip", f"--prefix={PREFIX}", f"--output={partial}", checked["commit"]],
+                   cwd=REPO, check=True)
+    with zipfile.ZipFile(partial, "a", compression=zipfile.ZIP_DEFLATED) as archive:
+        archive.write(wheel, PREFIX + "distribution/" + wheel.name)
+        archive.writestr(PREFIX + "RELEASE.json", json.dumps(release, ensure_ascii=False, indent=2) + "\n")
+        archive.writestr(PREFIX + "distribution/wheel_verification.json",
+                         json.dumps(wheel_verification, ensure_ascii=False, indent=2) + "\n")
+        for name, path in audit_files.items():
+            archive.write(path, PREFIX + "distribution/verification/" + name)
+    tree = committed_tree()
+    with zipfile.ZipFile(partial) as archive:
+        require(archive.testzip() is None, "Release ZIP CRC failure")
+        entries = archive.namelist()
+        require(len(entries) == len(set(entries)), "Duplicate archive member")
+        require(not any("__pycache__" in n or n.endswith(".pyc") or "/.git/" in n for n in entries),
+                "Generated bytecode/Git internals leaked into release")
+        for name in tree:
+            require(PREFIX + name in entries, f"Tracked source missing from archive: {name}")
+        for name, expected in module_pins.items():
+            require(digest(archive.read(PREFIX + name)) == expected, f"Archive module changed: {name}")
+        for name, expected in checked["raw_evidence"]["git_blob_sha256"].items():
+            require(digest(archive.read(PREFIX + name)) == expected, f"Archive raw evidence changed: {name}")
+        for name, expected in checked["reports"].items():
+            require(digest(archive.read(PREFIX + "Document/Week6/" + name)) == expected, "Archive report changed")
+        for name, expected in checked["ocr_resources"].items():
+            require(digest(archive.read(PREFIX + "Document/Week6/resources/tesseract/" + name)) == expected,
+                    "Archive OCR license/resource changed")
+        require(digest(archive.read(PREFIX + C11)) == C11_SHA256, "Archive Week 5 C11 weights changed")
+        for name, expected in audit_pins.items():
+            require(digest(archive.read(PREFIX + "distribution/verification/" + name)) == expected,
+                    "Archive final audit/log changed")
+        require(json.loads(archive.read(PREFIX + "RELEASE.json"))["commit"] == checked["commit"], "RELEASE commit mismatch")
+    require(git("rev-parse", "HEAD") == checked["commit"] and not git("status", "--porcelain"),
+            "Repository changed during packaging")
+    partial.rename(final)
+    write(args.out / "release_manifest.json", release)
+    receipt = {"schema": "week6.completed.delivery.receipt.v1", "commit": checked["commit"],
+               "archive": str(final), "archive_sha256": sha(final), "archive_bytes": final.stat().st_size,
+               "archive_entry_count": len(entries), "all_tracked_members_present": True,
+               "crc_verified": True, "production_modules_byte_verified": len(module_pins),
+               "reports_and_licenses_byte_verified": True, "source_clean_after_package": True,
+               "raw_evidence_git_blobs_byte_verified": checked["raw_evidence"]["raw_file_count"],
+               "files_sha256": {str(p): sha(p) for p in [final, wheel, WORKSPACE / "output/docx/Week6_实验报告_完善版.docx",
+                                                               WORKSPACE / "output/pdf/Week6_实验报告_完善版.pdf"]},
+               "previous_delivery_preserved": str(WORKSPACE / "output/week6"),
+               "completed_at_utc": datetime.now(timezone.utc).isoformat()}
+    write(args.out / "Week6_completed_delivery_receipt.json", receipt)
+    return receipt
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--expected-commit", required=True)
+    parser.add_argument("--validation", "--validation-record", dest="validation", type=Path,
+                        default=REPO / "Document/Week6/results/release_validation_completed_20261025_005/validation.json",
+                        help="Selected regression attempt 005; success is checked from its actual record, never presumed")
+    parser.add_argument("--completion-record", type=Path, required=True)
+    parser.add_argument("--qa", type=Path, required=True)
+    parser.add_argument("--numeric-qa", type=Path, required=True)
+    parser.add_argument("--out", type=Path, default=WORKSPACE / "output/week6_completed")
+    parser.add_argument("--package", action="store_true", help="Explicit final build/package after Root approval; otherwise read-only preflight")
+    args = parser.parse_args()
+    require(args.out.resolve() != (WORKSPACE / "output/week6").resolve(), "Old delivery destination is forbidden")
+    checked = preflight(args)
+    if args.package:
+        result = package(args, checked)
+    else:
+        result = {"all_checks_passed": True, "mode": "read_only_preflight", "commit": checked["commit"],
+                  "production_module_count": len(checked["production_sha256"]),
+                  "report_pages": checked["qa"]["page_count"], "output_not_created": not args.out.exists()}
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+
+
+if __name__ == "__main__":
+    main()

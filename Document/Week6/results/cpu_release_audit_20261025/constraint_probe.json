@@ -1,0 +1,67 @@
+{
+  "source": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\src\\gui_agent\\planning\\workflow_decomposer.py",
+  "sha256": "ab8d84135804cf6cc5c097f98fd02c88648511d212089d1c041fd7b3faa0be60",
+  "called_before_WorkflowSpec_is_constructed": true,
+  "constraint_hook_line": 463,
+  "generated_workflow_creation_line": 474,
+  "caller_final_rules_are_copied_from_request": true,
+  "default_format_and_constraint_repair_limit": 2,
+  "max_requests_with_initial_attempt_and_repairs": 3,
+  "constraint_errors_return_to_counted_request_loop": true,
+  "caller_final_rules_unchanged_after_independent_probes": true,
+  "scope_limit": "Conservative proposal checks, not a temporal theorem, semantic idempotency proof, or guarantee of valid GUI execution. Lexical message filtering is not an execution sandbox.",
+  "independent_pure_CPU_probes": [
+    {
+      "case": "actual_008_bad_intermediate_proposal",
+      "expected_allowed": false,
+      "allowed": false,
+      "error": "subgoal 1 forbid_text conflicts with caller final expect_text: [('Project ALPHA', 'Project ALPHA'), ('Theme GREEN', 'Theme GREEN')]. Preserve caller-required final text; propose a different observable progress check.",
+      "passed": true
+    },
+    {
+      "case": "case_insensitive_final_forbid_conflict",
+      "expected_allowed": false,
+      "allowed": false,
+      "error": "subgoal 1 forbid_text conflicts with caller final expect_text: [('project alpha', 'Project ALPHA')]. Preserve caller-required final text; propose a different observable progress check.",
+      "passed": true
+    },
+    {
+      "case": "substring_final_forbid_conflict",
+      "expected_allowed": false,
+      "allowed": false,
+      "error": "subgoal 1 forbid_text conflicts with caller final expect_text: [('alpha', 'Project ALPHA')]. Preserve caller-required final text; propose a different observable progress check.",
+      "passed": true
+    },
+    {
+      "case": "already_visible_operation_label",
+      "expected_allowed": false,
+      "allowed": false,
+      "error": "subgoal 1 expect_text is already visible in the current frame: ['Review report']. A current operation label is not post-action evidence. Remove that expect_text; if future wording is unknown, use a currently visible stage marker that must disappear as forbid_text.",
+      "passed": true
+    },
+    {
+      "case": "persistent_final_context_alone",
+      "expected_allowed": false,
+      "allowed": false,
+      "error": "subgoal 1 checks are already satisfied on the current frame; persistent caller context alone cannot prove progress. Add a check that changes after the operation.",
+      "passed": true
+    },
+    {
+      "case": "persistent_context_plus_unmet_progress",
+      "expected_allowed": true,
+      "allowed": true,
+      "error": "",
+      "passed": true
+    },
+    {
+      "case": "visible_stage_marker_must_disappear",
+      "expected_allowed": true,
+      "allowed": true,
+      "error": "",
+      "passed": true
+    }
+  ],
+  "new_model_requests": 0,
+  "GUI_captures_or_inputs": 0,
+  "pytest_runs_in_this_audit": 0
+}

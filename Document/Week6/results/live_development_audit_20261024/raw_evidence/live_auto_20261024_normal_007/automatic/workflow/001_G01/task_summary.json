@@ -1,0 +1,123 @@
+{
+  "run_id": "001_G01",
+  "case_id": "G01",
+  "instruction": "Select the project BETA",
+  "status": "succeeded",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Double click on the BETA button",
+      "action_type": "double_click",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "double_click",
+          "x": 1281,
+          "y": 1031,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "BETA"
+        },
+        "element_id": "obs-0002-e003",
+        "screenshot_point": {
+          "x": 1281,
+          "y": 1031
+        },
+        "control_point": {
+          "x": 1281,
+          "y": 1031
+        },
+        "note": "text 'BETA' -> obs-0002-e003 (re-bound from obs-0001-e003 in an earlier frame)"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "double_click",
+          "x": 1281,
+          "y": 1031,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "BETA"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: project, beta",
+        "evidence": {
+          "observation_id": "obs-0003",
+          "changed": true,
+          "element_count": 8,
+          "expectation_tokens": [
+            "project",
+            "beta"
+          ],
+          "expectation_hits": [
+            "project",
+            "beta"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 77500.0,
+      "after_observation_id": "obs-0003"
+    }
+  ],
+  "verification": {
+    "outcome": "passed",
+    "method": "automatic",
+    "detail": "all success rules matched against the current screen",
+    "evidence": {
+      "observation_id": "obs-0004",
+      "expect_text": [
+        "BETA"
+      ],
+      "forbid_text": []
+    }
+  },
+  "error": null,
+  "elapsed_ms": 259578.00000003772,
+  "execute": true,
+  "model_name": "qwen2.5vl:7b",
+  "provider": "openai_compatible",
+  "notes": [
+    "planned 1 steps from obs-0001"
+  ],
+  "task_id": "G01",
+  "commit": "f0df1e3",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 2560x1600, control 2560x1600",
+  "started_at": "2026-10-24T08:12:40.036695Z",
+  "finished_at": "2026-10-24T08:16:59.614695Z",
+  "planning_attempts": 1,
+  "model_requests": 2,
+  "planning_ms": 115641.00000000326,
+  "confirmation_ms": 15.000000013969839,
+  "execution_ms": 143922.0000000205,
+  "planner_ms": 45641.00000000326,
+  "planning_calls": 1,
+  "system_elapsed_ms": 259563.00000002375,
+  "evidence_directory": "Document\\Week6\\results\\live_auto_20261024_normal_007\\automatic\\workflow\\001_G01",
+  "stop_reason": "",
+  "error_type": "",
+  "failed_step_id": null,
+  "recovery_records": [],
+  "unconfirmed_action_attempts": 0,
+  "action_count": 1
+}

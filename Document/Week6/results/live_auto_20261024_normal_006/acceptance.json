@@ -1,0 +1,123 @@
+{
+  "status": "failed",
+  "runtime_pass": false,
+  "independent_pass": false,
+  "passed": false,
+  "state": {
+    "utc": "2026-10-24T07:55:31.009914+00:00",
+    "event": "started",
+    "stage": "project",
+    "project": "",
+    "colour": "",
+    "committed": false,
+    "review_attempts": 0,
+    "mode": "normal",
+    "events": 1
+  },
+  "independent_events": [
+    {
+      "utc": "2026-10-24T07:55:31.009914+00:00",
+      "event": "started",
+      "stage": "project",
+      "project": "",
+      "colour": "",
+      "committed": false,
+      "review_attempts": 0,
+      "mode": "normal",
+      "events": 1
+    }
+  ],
+  "automatic_result": {
+    "schema_version": "week6.automatic_workflow.v1",
+    "workflow_id": "lab_auto",
+    "status": "failed",
+    "decomposition": {
+      "status": "failed",
+      "workflow": null,
+      "error": "",
+      "decomposition_calls": 0,
+      "format_attempts": 0,
+      "model_requests": 0,
+      "elapsed_ms": 0.0,
+      "provider": "",
+      "model_name": "",
+      "evidence_directory": "",
+      "intermediate_check_source": "model_proposal_untrusted",
+      "final_check_source": "caller_supplied_unchanged"
+    },
+    "decompositions": [],
+    "workflow_result": null,
+    "workflow_rounds": [],
+    "completed_subgoals": [],
+    "total_actions": 0,
+    "unconfirmed_action_attempts": 0,
+    "planning_calls": 0,
+    "model_requests": 0,
+    "elapsed_ms": 31500.0,
+    "error": "RuntimeError: dedicated-window activation refused",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_006\\automatic"
+  },
+  "source_unchanged": true,
+  "status_reads": [
+    {
+      "schema": "week6.status_read.v1",
+      "trusted": true,
+      "age_seconds": 0.004,
+      "state": "active",
+      "snapshot": {
+        "schema": "week6.run_status.v1",
+        "run_id": "9979d90c41dc4d7cbbff7da228787838",
+        "case_id": "lab_auto",
+        "execute": true,
+        "pid": 33448,
+        "process_identity": "windows:134373030414135433",
+        "seq": 2,
+        "event": "updated",
+        "stage": "decomposing",
+        "task_status": null,
+        "updated_at_utc": "2026-10-24T08:10:42.374117+00:00",
+        "elapsed_ms": 0.0,
+        "max_actions": 12,
+        "max_planning_attempts": 12,
+        "planning_pass": 1,
+        "actions_used": 0,
+        "subgoals_total": 0,
+        "subgoals_completed": 0,
+        "subgoal_id": null,
+        "detail_code": "",
+        "write_failures": []
+      },
+      "diagnostics": []
+    },
+    {
+      "schema": "week6.status_read.v1",
+      "trusted": true,
+      "age_seconds": 0.004,
+      "state": "finished",
+      "snapshot": {
+        "schema": "week6.run_status.v1",
+        "run_id": "9979d90c41dc4d7cbbff7da228787838",
+        "case_id": "lab_auto",
+        "execute": true,
+        "pid": 33448,
+        "process_identity": "windows:134373030414135433",
+        "seq": 3,
+        "event": "finished",
+        "stage": "finished",
+        "task_status": "failed",
+        "updated_at_utc": "2026-10-24T08:11:13.922986+00:00",
+        "elapsed_ms": 31562.99999996554,
+        "max_actions": 12,
+        "max_planning_attempts": 12,
+        "planning_pass": 1,
+        "actions_used": 0,
+        "subgoals_total": 0,
+        "subgoals_completed": 0,
+        "subgoal_id": null,
+        "detail_code": "",
+        "write_failures": []
+      },
+      "diagnostics": []
+    }
+  ]
+}

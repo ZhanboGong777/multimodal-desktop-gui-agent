@@ -1,0 +1,30 @@
+{
+  "schema": "week6.accuracy.algorithm_freeze.v1",
+  "frozen_utc": "2026-10-24T07:41:25.627117+00:00",
+  "profile": "screen",
+  "scale": 2.0,
+  "languages": [
+    "en",
+    "zh"
+  ],
+  "method": [
+    "dark-theme ink normalization",
+    "global autocontrast",
+    "horizontal/vertical long-border suppression using current-frame dimensions",
+    "2x Lanczos enlargement",
+    "Tesseract psm11 oem1",
+    "same-line CJK whitespace join",
+    "outward-rounded/clamped original-frame coordinates"
+  ],
+  "development_choice": "development_004: 44/48 matched, precision44/47, recall44/48; failed earlier development runs retained",
+  "holdout_evaluated_before_freeze": false,
+  "source_sha256": {
+    "src/gui_agent/perception/ocr.py": "f02219b84c4d9671fba9e6bf8bb3d9b0e73ec926d5c3d45b8f17e6c2423b3a12",
+    "src/gui_agent/config.py": "8d984b5f67ab0f60c540dbe583a81b0564fc5bb58418056b8a1625d7a729edfc",
+    "src/gui_agent/perception/ui_detection.py": "4cb75d461fd9ef55fbe3671c9efd7fd72a64148a2a6e37eccdf3f7ff3e908a5d",
+    "scripts/week6_benchmark_accuracy.py": "bcfd626bddd53d7e1d7a814ddfea7f3bb45461bd4d1902b64a9bbf38d09135fb",
+    "tests/test_week6_perception_accuracy.py": "c626276a75aa62bac776be608beb2ad0ef284927f6d64920057476a734135750"
+  },
+  "manifest_sha256": "baee79356784cc5bc58bbc766f406d30a3ef37f0388edf1e56f2bdbd53b6d0a5",
+  "notice": "No holdout-driven design or threshold changes after this record"
+}

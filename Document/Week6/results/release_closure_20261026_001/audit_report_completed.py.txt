@@ -1,0 +1,177 @@
+"""Numeric, provenance and structural checks for the revised Week 6 report.
+
+Visual inspection is deliberately recorded separately after opening every PNG.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import re
+import zipfile
+from pathlib import Path
+
+from docx import Document
+from pypdf import PdfReader
+
+from report_evidence import audit_final_evidence
+
+ROOT = Path("C:/Users/联想/Documents/ChatGPT/Intern")
+REPO = ROOT / "week6-worktree"
+DOC_DIR = REPO / "Document/Week6"
+
+
+def load(path):
+    return json.loads(Path(path).read_text(encoding="utf-8-sig"))
+
+
+def digest(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--render", type=Path, required=True)
+    ap.add_argument("--validation", type=Path, required=True)
+    ap.add_argument("--completion-record", type=Path, required=True)
+    ap.add_argument("--output", type=Path, required=True)
+    ap.add_argument("--draft", action="store_true")
+    ap.add_argument("--draft-revision")
+    ap.add_argument("--markdown", type=Path)
+    args = ap.parse_args()
+    if args.output.exists():
+        raise RuntimeError("audit output already exists; retain it and select a new path")
+    suffix = "_" + args.draft_revision if args.draft_revision else ""
+    md_path = args.markdown or (ROOT / "tmp/week6_report/Week6_Robustness_Report_acceptance_pending.md" if args.draft else DOC_DIR / "Week6_Robustness_Report.md")
+    stem = "Week6_实验报告_验收待完成稿" + suffix if args.draft else "Week6_实验报告_完善版"
+    docx = ROOT / f"output/docx/{stem}.docx"
+    pdf = args.render / f"{stem}.pdf"
+    md = md_path.read_text(encoding="utf-8")
+    doc = Document(docx)
+    doc_text = "\n".join([p.text for p in doc.paragraphs] + [c.text for t in doc.tables for r in t.rows for c in r.cells])
+    reader = PdfReader(pdf)
+    pdf_text = "\n".join(p.extract_text() or "" for p in reader.pages)
+    checks = []
+
+    def check(name, passed, detail=None):
+        checks.append({"name": name, "passed": bool(passed), "detail": detail})
+
+    completion = load(args.completion_record)
+    build_manifest_path = ROOT / "tmp/week6_report" / ("acceptance_pending" + suffix if args.draft else "completed") / "build_audit.json"
+    build_manifest = load(build_manifest_path)
+    check("root_completion_record_status", completion.get("report_ready") is (not args.draft))
+    check("completion_bytes_match_build_manifest", build_manifest["completion_sha256"] == digest(args.completion_record))
+    check("rendered_docx_matches_build_manifest", build_manifest["docx_sha256"] == digest(docx) and build_manifest["markdown_sha256"] == digest(md_path))
+    check("selected_validation_matches_build_manifest", build_manifest["validation_sha256"] == digest(args.validation))
+    check("four_requirements_recorded", len(completion.get("requirements_closed", {})) == 4 and (not all(completion["requirements_closed"].values()) if args.draft else all(completion["requirements_closed"].values())))
+    check("no_unresolved_fields", "{{" not in md and "}}" not in md)
+    check("twelve_sections", len(re.findall(r"^## \d+ ", md, re.M)) == 12)
+    manual_pages = md.count("<!-- pagebreak -->") + 1
+    check("rendered_page_count_matches_designed_sections", len(reader.pages) == manual_pages, {"actual": len(reader.pages), "designed": manual_pages})
+    check("all_page_images_exist", all((args.render / f"page-{i}.png").exists() for i in range(1, len(reader.pages) + 1)))
+    check("page_numbers", all(f"第 {i} 页" in (page.extract_text() or "") for i, page in enumerate(reader.pages, 1)))
+    if args.draft:
+        check("pending_status_on_every_page", all("验收待完成稿" in (page.extract_text() or "") for page in reader.pages))
+        check("no_formal_revised_doc_created", not (ROOT / "output/docx/Week6_实验报告_完善版.docx").exists() and not (ROOT / "output/pdf/Week6_实验报告_完善版.pdf").exists())
+    check("black_titles_and_headings", all(not p.runs or all(r.font.color.rgb is None or str(r.font.color.rgb) == "000000" for r in p.runs) for p in doc.paragraphs if p.style.name in {"Title", "Heading 1", "Heading 2"}))
+    with zipfile.ZipFile(docx) as archive:
+        check("no_paragraph_borders", b"<w:pBdr" not in archive.read("word/document.xml") and b"<w:pBdr" not in archive.read("word/styles.xml"))
+        relationships = archive.read("word/_rels/document.xml.rels").decode("utf-8")
+        check("source_hyperlinks_exist", relationships.count("/hyperlink") >= 3)
+        images = [n for n in archive.namelist() if n.startswith("word/media/")]
+        check("retained_failure_figure_present", len(images) >= 1, len(images))
+    check("pdf_source_hyperlinks_exist", sum(len(p.get("/Annots", [])) for p in reader.pages) >= 3)
+
+    perception = load(DOC_DIR / "results/perception_summary.json")
+    check("legacy_ui_medians", all(f"{v:.3f}" in md for v in [perception["paired_ui"]["baseline_median_ms"], perception["paired_ui"]["optimized_median_ms"]]))
+    accuracy = load(DOC_DIR / "results/perception_accuracy_20261024/holdout_001/summary.json")
+    unique = accuracy["unique_frame_first_repetition"]
+    check("holdout_raw_source_unchanged", accuracy["source_unchanged"] is True)
+    check("holdout_unique_counts", all("  ".join(str(unique[arm][k]) for k in ["tp", "fp", "fn"]) in md for arm in ["native_eng", "native_bilingual", "screen_bilingual"]))
+    check("holdout_latency_medians", all(f"{accuracy['arms'][arm]['decode_ocr_ui_median_ms']:.3f}" in md for arm in ["native_eng", "native_bilingual", "screen_bilingual"]))
+    check("accuracy_scope_and_remaining_errors", all(v in md for v in ["46/48", "95.83%", "30/30", "16/18", "9.75%", "资源监测", "显示详情", "54", "独立样本"]))
+    external = load(DOC_DIR / "results/perception_accuracy_live_20261024/external_001/summary.json")
+    check("real_pixel_source_and_gt_unchanged", all(external[k] for k in ["source_unchanged", "ground_truth_unchanged", "probe_source_unchanged", "image_unchanged"]))
+    check("real_pixel_timings_and_scope", all(f"{external['arms'][arm]['stage_timing']['full_ms']['median_ms']:.3f}" in md for arm in ["native_eng", "native_bilingual", "screen_bilingual"]) and external["full_frame_precision"] is None and "没有准确率增益" in md and "不能作为智能体执行成功证据" in md)
+    timing = load(DOC_DIR / "results/perception_accuracy_20261024/holdout_timing_supplement_001.json")
+    check("holdout_p95", all(f"{arm['p95_nearest_rank_ms']:.3f}" in md and arm["n"] == 18 for arm in timing["arms"]))
+    robust = load(DOC_DIR / "results/robustness_20261024_attempt005/summary.json")
+    check("robustness_counts", robust["all_passed"] and sum(len(s["checks"]) for s in robust["scenarios"]) == 218 and "218/218" in md)
+    matrix_match = re.search(r"\| 场景 \|.*?\n(.*?)\n\n", md, re.S)
+    matrix = matrix_match.group(1).splitlines()[1:] if matrix_match else []
+    check("robustness_matrix", len(matrix) == len(robust["scenarios"]) and all([v.strip() for v in line.strip("|").split("|")][1:] == [s["actual"]["status"], str(s["actual"]["total_actions"]), str(s["actual"]["unconfirmed_action_attempts"]), str(s["actual"]["planning_calls"]), str(s["actual"]["recovery_count"])] for line, s in zip(matrix, robust["scenarios"])))
+    model = load(DOC_DIR / "results/model_recovery_20261024_001/summary.json")
+    check("legacy_model_failure_retained", model["actual_http_requests"] == 5 and model["target_checks_passed"] == 2 and "猜选左侧" in md and "省略提示要求" in md)
+    development = load(DOC_DIR / "results/live_development_audit_20261024/summary.json")
+    check("seven_development_attempts_not_credited", len(development["attempts"]) == 7 and not development["complete_acceptance_credited_attempts"] and all(not a["credit_as_complete_acceptance"] and not a["include_in_complete_task_quality_score"] for a in development["attempts"]))
+    check("development_interruption_scope_stated", all(v in md for v in ["149.975", "400 ms", "退出码保持未知", "不计算合并成功率", "实验环境", "636", "160"]))
+    if args.draft:
+        live = load(DOC_DIR / "results/live_auto_20261024_normal_008/acceptance.json")
+        check("attempt008_failed_with_two_attributed_inputs", live["status"] == "failed" and not live["passed"] and not live["attribution_pass"] and len(live["input_receipts"]) == len(live["transition_attribution"]) == 2 and live["source_unchanged"])
+        check("attempt008_counts_and_elapsed", live["automatic_result"]["model_requests"] == 6 and live["automatic_result"]["planning_calls"] == 6 and live["automatic_result"]["total_actions"] == 2 and f"{live['automatic_result']['elapsed_ms']/1000:.3f}" in md)
+        diagnostic = load(DOC_DIR / "results/saved_decomposition_20261025_001/summary.json")
+        check("saved_diagnostic_failed_without_desktop", diagnostic["decomposition"]["status"] == "failed" and diagnostic["decomposition"]["workflow"] is None and diagnostic["decomposition"]["model_requests"] == 3 and all(diagnostic[k] == 0 for k in ["desktop_capture_count", "desktop_input_count", "task_execution_count"]) and diagnostic["source_unchanged"] and diagnostic["archived_inputs_unchanged"])
+        check("saved_diagnostic_wall_and_limit", f"{diagnostic['elapsed_seconds']:.3f}" in md and "三次" in md and "009" in md and "010" in md and "尚未运行" in md)
+        chat_diagnostic = load(DOC_DIR / "results/saved_decomposition_chat_repair_20261025_001/summary.json")
+        check("multi_turn_diagnostic_refused_without_execution", chat_diagnostic["requests"] == 2 and all(not a["proposal_constraints_pass"] for a in chat_diagnostic["attempts"]) and chat_diagnostic["source_unchanged"] and all(chat_diagnostic[k] == 0 for k in ["desktop_capture_count", "desktop_input_count", "task_execution_count"]))
+        check("diagnostic_combined_count_and_wall", ("7 次" if args.draft_revision == "full005" else "5 次真实 HTTP") in md and f"{chat_diagnostic['elapsed_seconds']:.3f}" in md)
+        if args.draft_revision == "full005":
+            field = load(DOC_DIR / "results/saved_field_semantics_20261025_001/summary.json")
+            repaired = load(DOC_DIR / "results/saved_decomposition_20261025_002/summary.json")
+            check("field_negative_history_retained_with_overblock", field["http_requests"] == 2 and all(not item["proposal_constraints_pass"] for item in field["attempts"]) and "误拦" in md and f"{field['elapsed_seconds']:.3f}" in md)
+            check("new_production002_structure_only", repaired["decomposition"]["status"] == "ready" and repaired["decomposition"]["model_requests"] == 1 and repaired["source_unchanged"] and repaired["archived_inputs_unchanged"] and all(repaired[k] == 0 for k in ["desktop_capture_count", "desktop_input_count", "task_execution_count"]) and f"{repaired['elapsed_seconds']:.3f}" in md and "后态可实现性" in md)
+            example = load(DOC_DIR / "results/saved_forbid_example_20261025_001/summary.json")
+            check("private_example_not_integrated_or_task_success", example["http_requests"] == 1 and example["proposal_constraints_pass"] and example["source_unchanged"] and example["archived_inputs_unchanged"] and all(example[k] == 0 for k in ["desktop_capture_count", "desktop_input_count", "executor_creation_count", "executor_call_count"]) and f"{example['elapsed_seconds']:.3f}" in md and "未集成" in md and "9 次请求" in md and "没有真实新 GUI 验收" in md)
+
+    validation = load(args.validation)
+    check("final_validation_exit_and_sources", validation["exit_code"] == 0 and validation["tested_sources_unchanged"] is True)
+    check("selected_validation_referenced", args.validation.parent.name + "/" + args.validation.name in md)
+    stdout_path = args.validation.parent / validation.get("stdout", "pytest_stdout.txt")
+    stdout = stdout_path.read_text(encoding="utf-8")
+    summary = re.findall(r"(\d+) passed(?:[^\n]*?) in ([\d.]+)s", stdout)
+    check("final_pytest_counts_match", bool(summary) and summary[-1][0] in md and summary[-1][1] in md, summary[-1] if summary else None)
+    check("final_regression_no_skips_or_failures", bool(summary) and not re.search(r"\b\d+ (?:failed|error|errors|skipped)\b", stdout.strip().splitlines()[-1]))
+    if args.draft:
+        check("all_frozen_files_still_match_selected_validation", all(digest(REPO / path) == expected for path, expected in validation["tested_source_pins_before"].items()), len(validation["tested_source_pins_before"]))
+        initial = load(ROOT / "tmp/week6_report/completed_preparation_001.json")
+        originals = [item for item in initial["original_inputs"] if item["path"].lower().endswith((".docx", ".pdf"))]
+        check("original_artifacts_unchanged", len(originals) == 2 and all(digest(item["path"]) == item["sha256"] for item in originals))
+    else:
+        final_evidence = audit_final_evidence(args.completion_record, args.validation)
+        check("real_acceptance_and_current_regression_rechecked", final_evidence["all_checks_passed"], final_evidence)
+        check("build_used_same_original_acceptance_bytes", build_manifest.get("final_evidence_audit") == final_evidence)
+        selected_live = list(final_evidence["live_acceptance"].values())
+        rolling_modes = ["rolling_actions_audit" in value for value in selected_live]
+        check("same_final_execution_protocol", all(rolling_modes) or not any(rolling_modes))
+        if all(rolling_modes):
+            check("rolling_action_scope_and_unchanged_final", all(value in md and value in doc_text and value in pdf_text
+                                                                  for value in ["week6.rolling_actions.v2", "max_steps=1", "gate_on_step_verification", "final"])
+                  and all(value in md for value in ["调用方", "语义子任务", "独立", "滚动"]))
+            check("model_step_predictions_and_caller_verdict_separated",
+                  all(value in md for value in ["原始", "step", "failed", "输入", "最终规则"]))
+            check("cli_default_migration_and_api_compatibility_stated",
+                  all(value in md for value in ["CLI", "API", "默认", "observed_departure", "rolling_actions"]))
+            check("scoped_action_level_delivery_and_unimplemented_hierarchy_stated",
+                  all(value in md for value in ["逐动作", "层次化语义子任务", "依赖", "未实现", "专用", "成功率"]))
+        else:
+            check("legacy_native_departure_and_declared_compilation_scope", all(value in md and value in doc_text and value in pdf_text
+                                                                              for value in ["week6.observed_departure.v2", "disappearing_text", "caller_instruction_anchor", "max_steps=1"])
+                  and "编译" in md and "reason" in md)
+    key_numbers = ["14.421", "12.185", "199.343", "342.302", "375.676", "95.83%", "10.569", "2840"]
+    check("key_numbers_in_both_formats", all(v in doc_text and v in pdf_text for v in key_numbers))
+    check("no_internal_labels", not any(v in md for v in ["本地交付包", "authority", "handoff", "质量零分"]))
+    check("week7_scope_stated", "Week 7" in md and "竞品对比" in md)
+    for evidence in completion.get("evidence", []):
+        path = Path(evidence["path"])
+        if not path.is_absolute():
+            path = REPO / path
+        check("completion_evidence_unchanged:" + path.name, digest(path) == evidence["sha256"])
+    result = {"schema": "week6.report.pending.numeric_qa.v1" if args.draft else "week6.report.completed.numeric_qa.v1", "report_ready": completion["report_ready"], "draft": args.draft, "all_passed": all(c["passed"] for c in checks), "page_count": len(reader.pages), "manual_pages": manual_pages, "tables": len(doc.tables), "markdown_sha256": digest(md_path), "docx_sha256": digest(docx), "pdf_sha256": digest(pdf), "validation": str(args.validation), "validation_sha256": digest(args.validation), "completion_record": str(args.completion_record), "completion_sha256": digest(args.completion_record), "build_manifest": str(build_manifest_path), "build_manifest_sha256": digest(build_manifest_path), "checks": checks, "visual_inspection": "separate record required after actual inspection of every rendered PNG"}
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    raise SystemExit(0 if result["all_passed"] else 1)
+
+
+if __name__ == "__main__":
+    main()

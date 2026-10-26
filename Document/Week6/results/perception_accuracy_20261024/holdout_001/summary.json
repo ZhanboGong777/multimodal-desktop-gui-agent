@@ -1,0 +1,177 @@
+{
+  "schema": "week6.ocr_accuracy.result.v1",
+  "split": "holdout",
+  "created_utc": "2026-10-24T07:41:43.228771+00:00",
+  "python": "3.12.4",
+  "tesseract": "5.5.3.20260724",
+  "repeats": 3,
+  "fixture_manifest_sha256": "baee79356784cc5bc58bbc766f406d30a3ef37f0388edf1e56f2bdbd53b6d0a5",
+  "source_sha256": {
+    "src\\gui_agent\\perception\\ocr.py": "f02219b84c4d9671fba9e6bf8bb3d9b0e73ec926d5c3d45b8f17e6c2423b3a12",
+    "src\\gui_agent\\config.py": "8d984b5f67ab0f60c540dbe583a81b0564fc5bb58418056b8a1625d7a729edfc",
+    "src\\gui_agent\\perception\\ui_detection.py": "4cb75d461fd9ef55fbe3671c9efd7fd72a64148a2a6e37eccdf3f7ff3e908a5d",
+    "scripts\\week6_benchmark_accuracy.py": "bcfd626bddd53d7e1d7a814ddfea7f3bb45461bd4d1902b64a9bbf38d09135fb"
+  },
+  "source_unchanged": true,
+  "resource_provenance_sha256": "fd69c8cd6b8f086d5da85781ca311c500d95a9c8742b9f48596dc9ca21a7fc94",
+  "tessdata_directory": "D:\\Developer\\multimodal-desktop-gui-agent\\outputs\\week6_ocr_resources_20261024\\tessdata",
+  "scratch_directory": "D:\\Developer\\multimodal-desktop-gui-agent\\outputs\\week6_ocr_resources_20261024\\scratch",
+  "arms": {
+    "native_eng": {
+      "tp": 84,
+      "fp": 12,
+      "fn": 60,
+      "precision": 0.875,
+      "recall": 0.5833333333333334,
+      "f1": 0.7,
+      "ocr_median_ms": 191.87355000758544,
+      "ui_median_ms": 5.931699997745454,
+      "decode_ocr_ui_median_ms": 199.34289998491295,
+      "by_language": {
+        "en": {
+          "matched": 84,
+          "total": 90
+        },
+        "zh": {
+          "matched": 0,
+          "total": 54
+        }
+      }
+    },
+    "native_bilingual": {
+      "tp": 90,
+      "fp": 33,
+      "fn": 54,
+      "precision": 0.7317073170731707,
+      "recall": 0.625,
+      "f1": 0.6741573033707865,
+      "ocr_median_ms": 333.91270000720397,
+      "ui_median_ms": 5.846850021043792,
+      "decode_ocr_ui_median_ms": 342.3016500310041,
+      "by_language": {
+        "en": {
+          "matched": 84,
+          "total": 90
+        },
+        "zh": {
+          "matched": 6,
+          "total": 54
+        }
+      }
+    },
+    "screen_bilingual": {
+      "tp": 138,
+      "fp": 6,
+      "fn": 6,
+      "precision": 0.9583333333333334,
+      "recall": 0.9583333333333334,
+      "f1": 0.9583333333333334,
+      "ocr_median_ms": 368.57059999601915,
+      "ui_median_ms": 5.400100024417043,
+      "decode_ocr_ui_median_ms": 375.6759999960195,
+      "by_language": {
+        "en": {
+          "matched": 90,
+          "total": 90
+        },
+        "zh": {
+          "matched": 48,
+          "total": 54
+        }
+      }
+    }
+  },
+  "unique_frame_first_repetition": {
+    "native_eng": {
+      "tp": 28,
+      "fp": 4,
+      "fn": 20,
+      "precision": 0.875,
+      "recall": 0.5833333333333334,
+      "f1": 0.7,
+      "ocr_median_ms": 194.98565001413226,
+      "ui_median_ms": 6.475499976659194,
+      "decode_ocr_ui_median_ms": 202.75619995663874,
+      "by_language": {
+        "en": {
+          "matched": 28,
+          "total": 30
+        },
+        "zh": {
+          "matched": 0,
+          "total": 18
+        }
+      }
+    },
+    "native_bilingual": {
+      "tp": 30,
+      "fp": 11,
+      "fn": 18,
+      "precision": 0.7317073170731707,
+      "recall": 0.625,
+      "f1": 0.6741573033707865,
+      "ocr_median_ms": 335.06639997358434,
+      "ui_median_ms": 5.713499995181337,
+      "decode_ocr_ui_median_ms": 343.43800001079217,
+      "by_language": {
+        "en": {
+          "matched": 28,
+          "total": 30
+        },
+        "zh": {
+          "matched": 2,
+          "total": 18
+        }
+      }
+    },
+    "screen_bilingual": {
+      "tp": 46,
+      "fp": 2,
+      "fn": 2,
+      "precision": 0.9583333333333334,
+      "recall": 0.9583333333333334,
+      "f1": 0.9583333333333334,
+      "ocr_median_ms": 360.90145001071505,
+      "ui_median_ms": 5.253949988400564,
+      "decode_ocr_ui_median_ms": 368.1388499971945,
+      "by_language": {
+        "en": {
+          "matched": 30,
+          "total": 30
+        },
+        "zh": {
+          "matched": 16,
+          "total": 18
+        }
+      }
+    }
+  },
+  "contour_controls_all_repetitions": {
+    "native_eng": {
+      "tp": 108,
+      "fp": 63,
+      "fn": 0
+    },
+    "native_bilingual": {
+      "tp": 108,
+      "fp": 27,
+      "fn": 0
+    },
+    "screen_bilingual": {
+      "tp": 108,
+      "fp": 6,
+      "fn": 0
+    }
+  },
+  "runs": 54,
+  "desktop_capture": false,
+  "gpu_model_inference": false,
+  "gpu_frameworks_imported": [],
+  "latency_scope": "PIL PNG decode + actual CPU Tesseract + contour extraction; no OS capture/LLM/action",
+  "all_repetitions_included": true,
+  "limitations": [
+    "Synthetic local fixtures, not desktop task success rate",
+    "GT covers all visible text and all drawn rectangular controls in these fixtures only",
+    "Repeated frames are correlated; counts are frame-repetition results, not independent labels"
+  ]
+}

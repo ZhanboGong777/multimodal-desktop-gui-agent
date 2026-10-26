@@ -1,0 +1,166 @@
+{
+  "schema": "week6.independent.cpu_release_audit.v1",
+  "created_utc": "2026-10-25T07:42:28.437549+00:00",
+  "audit_date_label": "20261025",
+  "branch": "codex/week6-delivery",
+  "head": "f0df1e30977df2423fcd641032fb9c40e287c4f1",
+  "scope": "Read-only verification of existing CPU regression evidence and current source pins, plus seven direct pure-CPU pre-execution constraint probes. No full test repetition, model inference, capture, input, activation or new GUI window.",
+  "original_validation": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\release_validation_completed_20261024_004\\validation.json",
+  "verified_cpu_regression": {
+    "pytest_passed": 2924,
+    "pytest_failed": 0,
+    "pytest_elapsed_seconds": 485.59,
+    "recorded_subprocess_exit_code": 0,
+    "harness_elapsed_seconds": 488.84404400002677,
+    "started_at_utc": "2026-10-24T08:38:30.257107+00:00",
+    "finished_at_utc": "2026-10-24T08:46:39.101694+00:00",
+    "command": [
+      "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+      "-m",
+      "pytest",
+      "-q",
+      "--basetemp=.pytest-tmp-week6-completed004",
+      "--tb=short"
+    ],
+    "stdout_has_exact_complete_pass_summary": true,
+    "exit_evidence": "The original harness stores subprocess.run(...).returncode and exits with that code; this recorded 0 agrees with the raw pytest complete-pass output. No extra process receipt was invented.",
+    "original_tested_sources_unchanged": true,
+    "original_changed_tested_sources": []
+  },
+  "pin_verification": {
+    "original_pin_count": 241,
+    "current_pin_count": 241,
+    "same_complete_path_set": true,
+    "added_paths": [],
+    "missing_paths": [],
+    "changed_paths": [],
+    "current_pin_snapshot": "pins_current.json",
+    "README_included": true,
+    "README_claims": [
+      "2924"
+    ],
+    "current_sources_unchanged_during_independent_audit": true,
+    "limitation": "Original validation records before hashes and an equality comparison, but not the complete after map; this audit independently re-hashes the complete current path set against those recorded hashes."
+  },
+  "preexecution_constraint_review": {
+    "source": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\src\\gui_agent\\planning\\workflow_decomposer.py",
+    "sha256": "ab8d84135804cf6cc5c097f98fd02c88648511d212089d1c041fd7b3faa0be60",
+    "called_before_WorkflowSpec_is_constructed": true,
+    "constraint_hook_line": 463,
+    "generated_workflow_creation_line": 474,
+    "caller_final_rules_are_copied_from_request": true,
+    "default_format_and_constraint_repair_limit": 2,
+    "max_requests_with_initial_attempt_and_repairs": 3,
+    "constraint_errors_return_to_counted_request_loop": true,
+    "caller_final_rules_unchanged_after_independent_probes": true,
+    "scope_limit": "Conservative proposal checks, not a temporal theorem, semantic idempotency proof, or guarantee of valid GUI execution. Lexical message filtering is not an execution sandbox.",
+    "independent_pure_CPU_probes": [
+      {
+        "case": "actual_008_bad_intermediate_proposal",
+        "expected_allowed": false,
+        "allowed": false,
+        "error": "subgoal 1 forbid_text conflicts with caller final expect_text: [('Project ALPHA', 'Project ALPHA'), ('Theme GREEN', 'Theme GREEN')]. Preserve caller-required final text; propose a different observable progress check.",
+        "passed": true
+      },
+      {
+        "case": "case_insensitive_final_forbid_conflict",
+        "expected_allowed": false,
+        "allowed": false,
+        "error": "subgoal 1 forbid_text conflicts with caller final expect_text: [('project alpha', 'Project ALPHA')]. Preserve caller-required final text; propose a different observable progress check.",
+        "passed": true
+      },
+      {
+        "case": "substring_final_forbid_conflict",
+        "expected_allowed": false,
+        "allowed": false,
+        "error": "subgoal 1 forbid_text conflicts with caller final expect_text: [('alpha', 'Project ALPHA')]. Preserve caller-required final text; propose a different observable progress check.",
+        "passed": true
+      },
+      {
+        "case": "already_visible_operation_label",
+        "expected_allowed": false,
+        "allowed": false,
+        "error": "subgoal 1 expect_text is already visible in the current frame: ['Review report']. A current operation label is not post-action evidence. Remove that expect_text; if future wording is unknown, use a currently visible stage marker that must disappear as forbid_text.",
+        "passed": true
+      },
+      {
+        "case": "persistent_final_context_alone",
+        "expected_allowed": false,
+        "allowed": false,
+        "error": "subgoal 1 checks are already satisfied on the current frame; persistent caller context alone cannot prove progress. Add a check that changes after the operation.",
+        "passed": true
+      },
+      {
+        "case": "persistent_context_plus_unmet_progress",
+        "expected_allowed": true,
+        "allowed": true,
+        "error": "",
+        "passed": true
+      },
+      {
+        "case": "visible_stage_marker_must_disappear",
+        "expected_allowed": true,
+        "allowed": true,
+        "error": "",
+        "passed": true
+      }
+    ],
+    "new_model_requests": 0,
+    "GUI_captures_or_inputs": 0,
+    "pytest_runs_in_this_audit": 0
+  },
+  "delivery_state": {
+    "CPU_regression_passed": true,
+    "real_GUI_acceptance_success": false,
+    "Week6_complete": false,
+    "GUI_work_currently_stopped": true,
+    "GUI_stop_origin": "User is not available to keep the desktop fixture in foreground; Root explicitly instructed no activation or new windows.",
+    "remaining": "An independently attributable complete normal complex task and real recoverable-error/negative GUI acceptance have not succeeded. Existing development partial progress must not be represented as complete Week6 delivery.",
+    "development_attempt_008": "The bad intermediate proposal is now rejected by the constraint function, but the original attempt actually stopped on activation waits before executing that proposal. This CPU probe does not retroactively change its cause or count as GUI success."
+  },
+  "material_new_blocking_code_or_evidence_defects_found": [],
+  "retained_evidence": [
+    {
+      "source": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\release_validation_completed_20261024_004\\validation.json",
+      "copy": "original_validation_004.json",
+      "bytes": 27521,
+      "sha256": "9f2499d7c2da3821a070ff830319b088f7be026f290a2b8caa878e1a41611538",
+      "copy_matches_original_bytes": true
+    },
+    {
+      "source": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\release_validation_completed_20261024_004\\pytest_stdout.txt",
+      "copy": "original_pytest_stdout_004.txt",
+      "bytes": 3355,
+      "sha256": "8d4d6b36ae10fa645690efc364b144423e8a4960100c2128d0c79d37f4923ddd",
+      "copy_matches_original_bytes": true
+    },
+    {
+      "source": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6\\validate_completed_004.py",
+      "copy": "validation_harness_004.py.txt",
+      "bytes": 2114,
+      "sha256": "0e20b4347bf09ac6936b7ddca34877fa0ecabb03a32007b104faa5c4708a30c2",
+      "copy_matches_original_bytes": true
+    },
+    {
+      "source": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\src\\gui_agent\\planning\\workflow_decomposer.py",
+      "copy": "reviewed_workflow_decomposer.py.txt",
+      "bytes": 39310,
+      "sha256": "ab8d84135804cf6cc5c097f98fd02c88648511d212089d1c041fd7b3faa0be60",
+      "copy_matches_original_bytes": true
+    },
+    {
+      "source": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\decomposition_round_003\\generated_workflow.json",
+      "copy": "original_008_round003_workflow.json",
+      "bytes": 1461,
+      "sha256": "0117d948182a692170802c6d03cd1378e621a50510d790779d28dc96736d76da",
+      "copy_matches_original_bytes": true
+    },
+    {
+      "source": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\observation_round_003\\observation.json",
+      "copy": "original_008_round003_observation.json",
+      "bytes": 4020,
+      "sha256": "97aab567af8a5c45a06e6fb34f439d11e2affd280637ffcfc5ca6b580db26b39",
+      "copy_matches_original_bytes": true
+    }
+  ]
+}

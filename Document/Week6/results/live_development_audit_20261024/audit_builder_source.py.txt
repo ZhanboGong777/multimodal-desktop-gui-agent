@@ -1,0 +1,181 @@
+"""Audit closed development attempts 001..007; never read or alter active attempt 008."""
+from __future__ import annotations
+
+import hashlib
+import json
+from datetime import UTC, datetime
+from pathlib import Path
+
+REPO = Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+RESULTS = REPO / 'Document/Week6/results'
+OUT = RESULTS / 'live_development_audit_20261024'
+FIXTURES = Path('D:/Developer/multimodal-desktop-gui-agent/outputs/week6_live_acceptance_20261024')
+
+
+def read(path):
+    return json.loads(path.read_bytes())
+
+
+def lines(path):
+    return [json.loads(line) for line in path.read_bytes().splitlines() if line.strip()] if path.exists() else []
+
+
+def digest(payload):
+    return hashlib.sha256(payload).hexdigest()
+
+
+OUT.mkdir(parents=True, exist_ok=False)
+manifest = []
+copied = []
+
+
+def retain(source, destination):
+    payload = source.read_bytes()
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with destination.open('xb') as handle:
+        handle.write(payload)
+    assert destination.read_bytes() == payload
+    record = {'source': str(source), 'copy': destination.relative_to(OUT).as_posix(),
+              'bytes': len(payload), 'sha256': digest(payload), 'copy_matches_source_bytes': True}
+    copied.append(record)
+
+
+fixture_data = {}
+for name in ('normal_alpha', 'normal_beta_004', 'normal_beta_007'):
+    directory = FIXTURES / name
+    fixture_data[name] = {'events': lines(directory / 'independent_events.jsonl'),
+                          'state': read(directory / 'independent_state.json')}
+    for filename in ('independent_events.jsonl', 'independent_state.json'):
+        retain(directory / filename, OUT / 'raw_evidence/fixtures' / name / filename)
+
+classifications = {
+    1: ('model_output_truncated_before_input',
+        '3b action-planning response ended at max_tokens=2200 (finish_reason=length); no bridge input.',
+        'Local model transport/output failure during development; not a completed task or quality score.'),
+    2: ('input_bridge_capability_mismatch_operator_stopped',
+        'The original bridge admitted single clicks only; the model requested double_click, so the bridge refused; Root stopped the redundant development run.',
+        'Harness mismatch and operator stop. The original operator note keeps exit_code=null; Root separately observed outer shell exit 1.'),
+    3: ('external_input_interference_invalid_attribution',
+        'The independent fixture recorded four progress transitions with zero Sky receipts. The local completion cannot be attributed to this agent.',
+        'Exclude from task success credit; a pending bridge request and complete fixture state are not proof of executed agent input.'),
+    4: ('foreground_gate_blocked_before_input',
+        'The child initial observation refused a fixture that was not the stable foreground window; zero action input.',
+        'Safety precondition blocked the run, not a completed task.'),
+    5: ('operator_escape_then_activation_timeout',
+        'Initial activation waited about 90 seconds without a receipt; no model call or action input.',
+        'Root attributed the interruption to the user accidentally pressing Esc. The raw log independently proves the activation timeout, not the key press itself.'),
+    6: ('fixture_window_absent_after_resume',
+        'The activation receipt explicitly reported that no Week6 Local Lab window existed after the user stop; no activation/input was attempted and no model call was made.',
+        'Environment/setup failure before inference, not a model quality failure.'),
+    7: ('cross_page_double_click_fixture_false_positive_risk',
+        'One receipted double_click on BETA triggered project_selected and then theme_selected=GREEN roughly 150 ms later; a separately planned theme selection was not established.',
+        'Root denied completion credit and stopped a later read-only activation with a negative receipt. The run ended failed and uncommitted.'),
+}
+
+attempts = []
+for index in range(1, 8):
+    batch = RESULTS / f'live_auto_20261024_normal_{index:03d}'
+    paths = sorted(path for path in batch.rglob('*') if path.is_file())
+    for path in paths:
+        payload = path.read_bytes()
+        manifest.append({'source': str(path), 'batch': batch.name,
+                         'relative_path': path.relative_to(batch).as_posix(),
+                         'bytes': len(payload), 'sha256': digest(payload)})
+        # Retain every structured record byte-for-byte. Screenshots and source
+        # snapshots retain original paths+hashes, without multiplying their size.
+        if path.suffix in ('.json', '.jsonl') and 'source_snapshot' not in path.parts:
+            retain(path, OUT / 'raw_evidence' / batch.name / path.relative_to(batch))
+    auto_path = batch / 'automatic/automatic_workflow_summary.json'
+    auto = read(auto_path) if auto_path.exists() else None
+    acceptance_path = batch / 'acceptance.json'
+    acceptance = read(acceptance_path) if acceptance_path.exists() else None
+    contract = read(batch / 'contract.json')
+    children = []
+    for path in sorted((batch / 'automatic').rglob('task_summary.json')):
+        child = read(path)
+        children.append({'path': path.relative_to(batch).as_posix(), 'status': child.get('status'),
+                         'stop_reason': child.get('stop_reason'), 'model_name': child.get('model_name'),
+                         'action_count': child.get('action_count'), 'planning_calls': child.get('planning_calls')})
+    requests = [read(path) for path in sorted((batch / 'sky_bridge').glob('*_request.json'))]
+    receipts = [read(path) for path in sorted((batch / 'sky_bridge').glob('*_receipt.json'))]
+    activations = [read(path) for path in sorted((batch / 'sky_activation').glob('*_receipt.json'))]
+    action_records = [record for path in (batch / 'automatic').rglob('steps.jsonl') for record in lines(path)]
+    dispatch_refusals = [record for record in action_records
+                        if isinstance(record.get('action_result'), dict)
+                        and record['action_result'].get('success') is False]
+    fixture_name = 'normal_alpha' if index <= 3 else ('normal_beta_004' if index <= 6 else 'normal_beta_007')
+    code, finding, interpretation = classifications[index]
+    attempt = {
+        'attempt': index, 'batch': batch.name, 'classification': code,
+        'finding': finding, 'interpretation': interpretation,
+        'credit_as_complete_acceptance': False, 'include_in_complete_task_quality_score': False,
+        'original_automatic_status': auto.get('status') if auto else None,
+        'original_automatic_summary_exists': auto is not None,
+        'original_acceptance': {key: acceptance.get(key) for key in ('status', 'runtime_pass', 'independent_pass', 'passed')}
+                               if acceptance else None,
+        'model_name_from_contract': contract.get('model'),
+        'model_requests_from_automatic_summary': auto.get('model_requests') if auto else None,
+        'planning_calls_from_automatic_summary': auto.get('planning_calls') if auto else None,
+        'confirmed_actions_from_automatic_summary': auto.get('total_actions') if auto else None,
+        'unconfirmed_actions_from_automatic_summary': auto.get('unconfirmed_action_attempts') if auto else None,
+        'automatic_error': auto.get('error') if auto else None,
+        'children': children,
+        'bridge_request_count': len(requests), 'bridge_receipt_count': len(receipts),
+        'bridge_success_receipt_count': sum(receipt.get('success') is True for receipt in receipts),
+        'completed_dispatch_refusals_from_step_records': len(dispatch_refusals),
+        'bridge_actions': [request.get('action') for request in requests],
+        'activation_success_receipts': sum(receipt.get('success') is True for receipt in activations),
+        'activation_negative_receipts': [receipt for receipt in activations if receipt.get('success') is False],
+        'independent_fixture_evidence': f'raw_evidence/fixtures/{fixture_name}',
+        'fixture_shared_across_attempts': index <= 6,
+        'raw_evidence': f'raw_evidence/{batch.name}',
+        'process_exit_code_from_original_operator_note': (
+            read(batch / 'operator_stop_001.json').get('exit_code')
+            if (batch / 'operator_stop_001.json').exists() else None),
+    }
+    if index == 2:
+        attempt['outer_shell_exit_code_root_observed'] = 1
+        attempt['outer_shell_exit_evidence_origin'] = 'Root explicit audit instruction; original operator note was not altered.'
+        attempt['operator_note_refusal_count_caution'] = (
+            'The stop note mentions three refusals at its observation time; the retained steps contain '
+            f'{len(dispatch_refusals)} completed action-result refusals. Both records are preserved; do not replace one with the other.')
+    if index == 3:
+        fixture_events = fixture_data['normal_alpha']['events']
+        transitions = [event for event in fixture_events if event['event'] != 'started']
+        attempt['unattributed_fixture_transitions'] = transitions
+        attempt['attribution_conclusion'] = 'No confirmed Sky receipt; fixture transitions must not be counted as agent task completion.'
+    if index == 7:
+        project = next(event for event in fixture_data[fixture_name]['events'] if event['event'] == 'project_selected')
+        theme = next(event for event in fixture_data[fixture_name]['events'] if event['event'] == 'theme_selected')
+        attempt['cross_page_gap_ms'] = (datetime.fromisoformat(theme['utc'])-datetime.fromisoformat(project['utc'])).total_seconds()*1000
+        attempt['fixture_committed'] = fixture_data[fixture_name]['state']['committed']
+    attempts.append(attempt)
+
+# Re-read all original bytes after copying and analysis. This also detects any
+# accidental mutation from another writer; it never repairs the source files.
+changed_sources = [row['source'] for row in manifest
+                   if hashlib.sha256(Path(row['source']).read_bytes()).hexdigest() != row['sha256']]
+changed_copied_sources = [row['source'] for row in copied
+                          if hashlib.sha256(Path(row['source']).read_bytes()).hexdigest() != row['sha256']]
+summary = {
+    'schema': 'week6.live_development_audit.v1', 'created_utc': datetime.now(UTC).isoformat(),
+    'scope': 'Read-only audit of closed development attempts 001..007 only. No model inference, GUI input, or quality evaluation was run by this audit.',
+    'source_policy': 'All original records remain unchanged. Structured evidence copies preserve original bytes and SHA256; missing summaries/exit codes remain unknown.',
+    'not_a_quality_benchmark': True, 'no_aggregate_task_success_rate_computed': True,
+    'complete_acceptance_credited_attempts': [],
+    'attempts': attempts,
+    'source_files_hashed': len(manifest), 'structured_evidence_files_copied': len(copied),
+    'original_source_files_changed_during_audit': changed_sources,
+    'copied_source_files_changed_during_audit': changed_copied_sources,
+    'copies_match_original_bytes': all(row['copy_matches_source_bytes'] for row in copied),
+    'manifest': 'evidence_manifest.json',
+    'future_attempt_boundary': 'Attempt 008 is active and was neither read nor modified by this audit. Root reports a 400 ms fixture transition guard and one-to-one independent event attribution; this is setup information, not an acceptance finding.',
+}
+(OUT / 'summary.json').write_text(json.dumps(summary, indent=2, ensure_ascii=False)+'\n', 'utf-8')
+(OUT / 'evidence_manifest.json').write_text(json.dumps({'original_files': manifest, 'structured_copies': copied}, indent=2, ensure_ascii=False)+'\n', 'utf-8')
+(OUT / 'audit_builder_source.py.txt').write_bytes(Path(__file__).read_bytes())
+assert not changed_sources and not changed_copied_sources
+print(json.dumps({'audit': str(OUT), 'attempts': len(attempts), 'hashes': len(manifest),
+                  'copies': len(copied), 'sources_unchanged': not changed_sources,
+                  'attempt_007_cross_page_gap_ms': attempts[-1]['cross_page_gap_ms'],
+                  'credited_complete_acceptance': []}, indent=2))

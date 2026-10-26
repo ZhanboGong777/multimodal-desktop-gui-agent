@@ -1,0 +1,43 @@
+{
+  "ok": true,
+  "elapsed_ms": 17294.792,
+  "attempts": 1,
+  "error": null,
+  "plan": {
+    "task_id": "t1",
+    "instruction": "..",
+    "summary": "Select project ALPHA.",
+    "steps": [
+      {
+        "step_id": "s1",
+        "description": "Select project ALPHA.",
+        "action_type": "click",
+        "target_text": "ALPHA",
+        "arguments": {
+          "element_id": "obs-0001-e002"
+        },
+        "expected_result": "Project ALPHA is selected.",
+        "status": "pending"
+      }
+    ],
+    "assumptions": [],
+    "requires_confirmation": true,
+    "errors": []
+  },
+  "model": {
+    "provider": "openai_compatible",
+    "model_name": "qwen2.5vl:7b",
+    "latency_ms": 17281.0,
+    "usage": {
+      "prompt_tokens": 5413,
+      "completion_tokens": 75,
+      "total_tokens": 5488
+    },
+    "error": null,
+    "content_length": 299
+  },
+  "response_content": "{\"task_id\":\"t1\",\"instruction\":\"..\",\"summary\":\"Select project ALPHA.\",\"steps\":[{\"step_id\":\"s1\",\"description\":\"Select project ALPHA.\",\"action_type\":\"click\",\"target_text\":\"ALPHA\",\"arguments\":{\"element_id\":\"obs-0001-e002\"},\"expected_result\":\"Project ALPHA is selected.\",\"status\":\"pending\"}],\"errors\":[]}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

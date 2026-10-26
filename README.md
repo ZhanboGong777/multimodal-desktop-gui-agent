@@ -77,7 +77,7 @@ Three properties the loop is built around:
   with an actual current candidate, confirmed against a further screenshot after
   any visual mapping call. Missing, ambiguous or unsafe evidence stops the pass.
 
-2927 tests, ruff clean (current Week6 suite). See `Document/Week4/Week4_Usage.md` for the flags, the
+3027 tests, ruff clean (current Week6 suite). See `Document/Week4/Week4_Usage.md` for the flags, the
 safety model and the record layout.
 
 The Chinese deliverables - `Week4_中文实验报告.(md|docx)`, `Week4_Windows复核手册.md`
@@ -168,7 +168,7 @@ python scripts/week3_model_demo.py --provider mock
 python scripts/week3_planning_demo.py --provider mock --instruction "Open the browser"
 ```
 
-2927 tests, ruff clean (current Week6 suite). The model client's retry, timeout and
+3027 tests, ruff clean (current Week6 suite). The model client's retry, timeout and
 error-classification paths are covered, along with the four vision-payload
 failure modes (missing, empty, oversized, unknown type) and the TaskPlan
 schema boundaries. Dataset and model dependencies live in

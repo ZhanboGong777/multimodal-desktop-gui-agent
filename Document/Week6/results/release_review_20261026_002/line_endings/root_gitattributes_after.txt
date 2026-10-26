@@ -1,0 +1,26 @@
+* text=auto
+.gitattributes text eol=lf
+.gitignore text eol=lf
+
+*.py text eol=lf
+*.toml text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.json text eol=lf
+*.jsonl text eol=lf
+*.svg text eol=lf
+*.sh text eol=lf
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary
+*.safetensors binary
+
+# Preserve the exact root README bytes pinned by the final Week 6 regression.
+/README.md -text -whitespace

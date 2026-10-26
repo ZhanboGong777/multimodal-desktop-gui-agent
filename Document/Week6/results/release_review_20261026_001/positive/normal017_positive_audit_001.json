@@ -1,0 +1,96 @@
+{
+  "schema_version": "week6.private.actual_normal_v2_audit.v1",
+  "created_utc": "2026-10-26T10:56:28.842090+00:00",
+  "audit": {
+    "path": "Document/Week6/results/live_auto_20261026_normal_017/acceptance.json",
+    "sha256": "0af3a566dd5b97ec28f5913af834deed272ac607e4fc9fc43e00170c7777c4bf",
+    "mode": "normal",
+    "contract_sha256": "fbeecdcea51da0243fe3508a3366d04b8d8209a800fef600d128a3ad47b27eb9",
+    "semantic_transitions": [
+      "project_selected",
+      "theme_selected",
+      "review_accepted",
+      "local_commit"
+    ],
+    "distinct_input_receipts": [
+      "input_001",
+      "input_002",
+      "input_003",
+      "input_004"
+    ],
+    "source_pin_count": 90,
+    "rolling_actions_audit": {
+      "schema": "week6.release.rolling_actions.audit.v1",
+      "all_checks_passed": true,
+      "protocol_version": "week6.rolling_actions.v2",
+      "completion_basis": "executed_caller_goal",
+      "gate_on_step_verification": false,
+      "step_verification_policy": "Model step predictions are advisory; unchanged caller final rules are authoritative after each one-step plan.",
+      "request_sha256": "2648934e7fef992c5d52dc89d2a1fb1b40180690ba6f9b28aa5a5a0183c565f4",
+      "compilation_sha256": "b22cfcf3ec75308e61cbbd1835562c7c9b2731835a3893dd8d4d7add3a3423e2",
+      "child_summary_sha256": "1d1d92bd3a86f22ec344c686129848a049eeaface055c9f09db533945bbffdd8",
+      "rolling_audit_sha256": "bb6c562469764533b5efa3a885bd837171fc81b54f5a61d0060c31747d5a1393",
+      "planning_limit_sha256": "75ce8cdc88cac877ae3c9a9a270f0c98fa08f743e940e3b00caada556736ee75",
+      "transport_sha256": "ddb4058660e786b4c99dc37c3e5261ef9590325dabf5a13586c2e5b8b1521660",
+      "native_planning_calls": 4,
+      "actual_http_requests": 4,
+      "confirmed_executor_attempts": 4,
+      "known_failed_executor_attempts": 0,
+      "confirmed_nonwait_inputs": 4,
+      "saved_scoped_frames": 13,
+      "raw_model_step_verdict_counts": {
+        "passed": 4,
+        "failed": 0,
+        "inconclusive": 0
+      },
+      "raw_model_step_checks": [
+        {
+          "step_index": 1,
+          "native_step_id": "s1",
+          "original_expected_result": "Project ALPHA is selected.",
+          "raw_outcome": "passed",
+          "executor_success": true,
+          "post_observation_id": "obs-0003"
+        },
+        {
+          "step_index": 2,
+          "native_step_id": "s1",
+          "original_expected_result": "Theme selected.",
+          "raw_outcome": "passed",
+          "executor_success": true,
+          "post_observation_id": "obs-0007"
+        },
+        {
+          "step_index": 3,
+          "native_step_id": "s1",
+          "original_expected_result": "The report review process should start.",
+          "raw_outcome": "passed",
+          "executor_success": true,
+          "post_observation_id": "obs-0011"
+        },
+        {
+          "step_index": 4,
+          "native_step_id": "s1",
+          "original_expected_result": "The report is committed locally.",
+          "raw_outcome": "passed",
+          "executor_success": true,
+          "post_observation_id": "obs-0015"
+        }
+      ],
+      "initial_outcome": "failed",
+      "final_outcome": "passed",
+      "final_observation_sha256": "4fcfe5e358d2aec0631bfcf01e9a5029c11c1930f8e0eb393b7c716ad471907f",
+      "meaning": "Bounded model plan→one-step execution→fresh observation on the immutable caller goal. No marker selection, free semantic subtask sequence or A progress proof is asserted."
+    },
+    "owner_receipt_sha256": "22df4ddfeb1296271937d0dd2e24a28e21e7638acddd79ced67db2565fa93d19",
+    "actual_child_exit_code": 0,
+    "owner_harness_sha256": "09c008cd3eaef8bf2750024c10ae47e14decb32cb8a30f666b0e0911f8418294",
+    "all_checks_passed": true
+  },
+  "package_checker_sha256": "c0ce78004529b3624030b5a0f65401d73b887012177816088f586339720372c6",
+  "report_evidence_sha256": "83320a14e88cc360117e8a5115df62c73bd45e792d276890a00d88a67603b95a",
+  "all_normal_checks_passed": true,
+  "report_ready": false,
+  "release_ready": false,
+  "scope": "Actual ended normal017 only. This and transient015 support scoped controlled-window action-level validation. Final complete regression and completion record remain required. No model clients, capture, input or executor were created."
+}

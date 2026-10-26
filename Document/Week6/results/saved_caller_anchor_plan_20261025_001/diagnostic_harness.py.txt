@@ -1,0 +1,62 @@
+"""One archived-frame action-planning diagnostic; never resolves or dispatches input."""
+from __future__ import annotations
+import hashlib
+import json
+import shutil
+import sys
+import time
+from pathlib import Path
+from types import SimpleNamespace
+
+ROOT = Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+sys.path.insert(0, str(ROOT / 'src'))
+from gui_agent.models.openai_compatible import OpenAICompatibleClient
+from gui_agent.planning import TaskPlanner
+from gui_agent.planning.workflow_decomposer import BudgetedModelClient, WorkflowRequest
+from gui_agent.runtime.action_adapter import ActionAdapter
+from gui_agent.runtime.runner import TaskRunner
+from gui_agent.runtime.schemas import ExecutionOptions, ObservationSnapshot, TaskSpec
+
+OUT = ROOT/'Document/Week6/results/saved_caller_anchor_plan_20261025_001'
+BATCH = ROOT/'Document/Week6/results/live_auto_20261025_normal_010'
+OUT.mkdir(parents=True, exist_ok=False)
+shutil.copyfile(__file__, OUT/'diagnostic_harness.py.txt')
+def sha(p):
+    return hashlib.sha256(p.read_bytes()).hexdigest()
+def write(name, value):
+    with (OUT/name).open('x', encoding='utf-8', newline='\n') as f:
+        f.write(json.dumps(value, ensure_ascii=False, indent=2)+'\n')
+frame_path=BATCH/'automatic/initial_observation/observation.json'
+request_path=BATCH/'automatic/decomposition/request.json'
+frame=ObservationSnapshot.model_validate_json(frame_path.read_text(encoding='utf-8'))
+request=WorkflowRequest.model_validate_json(request_path.read_text(encoding='utf-8'))
+instruction=('Advance only the currently visible stage of the original caller request. '
+             'Choose operations from the original request and current screen; do not repeat already satisfied selections. '
+             'Plan at most one input, then observe again. Original caller request: '+request.instruction)
+task=TaskSpec(case_id='ANCHOR_PROBE', instruction=instruction, forbid_text=['BETA'])
+options=ExecutionOptions(execute=True, confirm=False,max_actions=12,max_planning_attempts=12,task_timeout_seconds=180)
+context=TaskRunner._context(SimpleNamespace(adapter=ActionAdapter()),frame,task,options)
+image=Path(frame.image_path)
+pins={p.relative_to(ROOT).as_posix():sha(p) for p in sorted((ROOT/'src').rglob('*.py'))}
+input_pins={str(p):sha(p) for p in [frame_path,request_path,image]}
+for i,p in enumerate([frame_path,request_path,image]):
+    shutil.copyfile(p,OUT/f'archived_input_{i}{p.suffix}')
+write('contract.json',{'instruction':instruction,'task':task.model_dump(mode='json'),'context':context,
+      'maximum_model_requests':1,'max_plan_steps':1,'source_pins_before':pins,'input_sha256':input_pins,
+      'not_end_to_end_acceptance':True,'desktop_capture_count':0,'desktop_input_count':0,
+      'meaning':'Original user goal is the instruction authority; the previous wrong BETA proposal is not executed or supplied as an instruction.'})
+tick=time.monotonic()
+client=BudgetedModelClient(OpenAICompatibleClient(model_name='qwen2.5vl:7b',base_url='http://127.0.0.1:11434/v1',
+    api_key='ollama-local',timeout_seconds=180,max_retries=0,temperature=0,max_tokens=2200),
+    max_requests=1,deadline=tick+180,audit_path=OUT/'transport_requests.jsonl')
+planner=TaskPlanner(client,max_steps=1,max_format_retries=0,allow_real_execution=False)
+result=planner.plan(instruction,context=context,image_path=str(image),task_id=task.case_id)
+write('result.json',{**result.as_dict(),'response_content':result.response.content if result.response else None,
+      'raw_response':result.response.raw_response if result.response else None})
+after={p.relative_to(ROOT).as_posix():sha(p) for p in sorted((ROOT/'src').rglob('*.py'))}
+write('summary.json',{'elapsed_seconds':time.monotonic()-tick,'model_requests':client.request_count,
+      'source_unchanged':pins==after,'archived_inputs_unchanged':input_pins=={str(p):sha(p) for p in [frame_path,request_path,image]},
+      'desktop_capture_count':0,'desktop_input_count':0,'task_execution_count':0,
+      'meaning':'Planning diagnostic only; no UI action, outcome or final task success.'})
+print(json.dumps(result.as_dict(),ensure_ascii=False,indent=2))
+print(result.response.content if result.response else 'No response')

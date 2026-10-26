@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen2.5vl:7b",
+  "latency_ms": 19422.0,
+  "usage": {
+    "prompt_tokens": 5773,
+    "completion_tokens": 90,
+    "total_tokens": 5863
+  },
+  "error": null,
+  "content_length": 338,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"The 'Review report' button is currently visible and ready to be clicked.\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Click the 'Review report' button to proceed.\",\n      \"expect_text\": [],\n      \"forbid_text\": [\"Offline report preparation\", \"Draft ready\", \"Week6 Local Lab\", \"—_____ =i.\"]\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

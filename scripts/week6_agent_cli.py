@@ -43,15 +43,19 @@ def parse_args(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--workflow", type=Path, help="use an existing explicitly checked workflow")
-    mode.add_argument("--instruction", help="ask the model to decompose this overall natural-language task")
+    mode.add_argument("--instruction", help="plan and execute this overall natural-language task under shared limits")
+    parser.add_argument("--automatic-protocol", choices=("rolling_actions", "observed_departure"),
+                        default="rolling_actions",
+                        help="automatic mode: fresh single-step action planning (default), or experimental stage-departure checks")
     parser.add_argument("--workflow-id", type=_run_id, default="automatic_workflow")
     parser.add_argument("--expect-text", action="append", default=[], help="caller-owned final required text")
     parser.add_argument("--forbid-text", action="append", default=[], help="caller-owned final forbidden text")
     parser.add_argument("--model-requests", type=_positive_int, default=24,
-                        help="shared decomposition + action HTTP request cap (automatic mode)")
-    parser.add_argument("--max-subgoals", type=_positive_int, default=8)
+                        help="shared HTTP request cap across all automatic planning")
+    parser.add_argument("--max-subgoals", type=_positive_int, default=8,
+                        help="stage proposal limit for observed_departure; rolling_actions plans one next action")
     parser.add_argument("--decomposition-rounds", type=_positive_int, default=4,
-                        help="bounded fresh-screen decomposition rounds, 1..8 (automatic mode)")
+                        help="bounded fresh-screen stage-departure rounds, 1..8 (observed_departure only)")
     parser.add_argument("--validate-only", action="store_true", help="validate the spec without model, capture or input")
     parser.add_argument("--config", default=str(REPO_ROOT / "configs/week4.yaml"))
     parser.add_argument("--execute", action="store_true")
@@ -82,8 +86,9 @@ def main(argv=None):
                 raise ValueError("--max-subgoals must be at most 32")
             if args.decomposition_rounds > 8:
                 raise ValueError("--decomposition-rounds must be at most 8")
-            if args.planning_attempts is not None and args.planning_attempts < 2:
-                raise ValueError("automatic workflow needs at least two planning calls including decomposition")
+            if (args.automatic_protocol == "observed_departure"
+                    and args.planning_attempts is not None and args.planning_attempts < 2):
+                raise ValueError("observed_departure needs at least two planning calls including decomposition")
             request = WorkflowRequest(workflow_id=args.workflow_id, instruction=args.instruction,
                                       expect_text=args.expect_text, forbid_text=args.forbid_text)
     except (OSError, ValueError) as exc:
@@ -114,8 +119,8 @@ def main(argv=None):
             verification_timeout_seconds=config.execution.verification_timeout_seconds,
             verification_poll_interval_seconds=config.execution.verification_poll_interval_seconds,
         )
-        if request and options.max_planning_attempts < 2:
-            raise ValueError("automatic workflow needs at least two planning calls including decomposition")
+        if request and args.automatic_protocol == "observed_departure" and options.max_planning_attempts < 2:
+            raise ValueError("observed_departure needs at least two planning calls including decomposition")
         client = create_model_client(config.model)
     except (OSError, ValueError) as exc:
         print(f"Configuration failed: {exc}", file=sys.stderr)
@@ -186,6 +191,7 @@ def main(argv=None):
                 directory, client, factory, max_model_requests=args.model_requests,
                 max_subgoals=args.max_subgoals, initial_observer=initial_observer,
                 max_decomposition_rounds=args.decomposition_rounds,
+                protocol_mode=args.automatic_protocol,
             ).run(request, options, on_decomposition=decomposition_started, **callbacks)
         else:
             result = WorkflowRunner(directory, factory).run(spec, options, **callbacks)

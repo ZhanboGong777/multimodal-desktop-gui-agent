@@ -1,0 +1,311 @@
+{
+  "fixture": "development_06",
+  "arm": "native_bilingual",
+  "repeat": 2,
+  "decode_ms": 1.5377000090666115,
+  "ocr_ms": 290.5732999788597,
+  "ui_ms": 4.570399993099272,
+  "full_ms": 296.6813999810256,
+  "metrics": {
+    "tp": 3,
+    "fp": 2,
+    "fn": 5,
+    "precision": 0.6,
+    "recall": 0.375,
+    "labels": [
+      {
+        "text": "Draft Editor",
+        "language": "en",
+        "matched": true,
+        "iou": 0.974025974025974
+      },
+      {
+        "text": "Local File",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9615384615384616
+      },
+      {
+        "text": "Save Draft",
+        "language": "en",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "Undo",
+        "language": "en",
+        "matched": false,
+        "iou": 0.313953488372093
+      },
+      {
+        "text": "Finish",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9375
+      },
+      {
+        "text": "草稿编辑",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "保存草稿",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "撤销",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      }
+    ]
+  },
+  "predictions": [
+    {
+      "text": "Draft Editor",
+      "bounding_box": {
+        "left": 36,
+        "top": 36,
+        "right": 111,
+        "bottom": 47
+      },
+      "confidence": 0.88,
+      "center": {
+        "x": 73,
+        "y": 41
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Local File",
+      "bounding_box": {
+        "left": 36,
+        "top": 105,
+        "right": 86,
+        "bottom": 114
+      },
+      "confidence": 0.78,
+      "center": {
+        "x": 61,
+        "y": 109
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "‘Save Draft",
+      "bounding_box": {
+        "left": 35,
+        "top": 182,
+        "right": 91,
+        "bottom": 191
+      },
+      "confidence": 0.89,
+      "center": {
+        "x": 63,
+        "y": 186
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Undo",
+      "bounding_box": {
+        "left": 36,
+        "top": 273,
+        "right": 63,
+        "bottom": 301
+      },
+      "confidence": 0.91,
+      "center": {
+        "x": 49,
+        "y": 287
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Finish",
+      "bounding_box": {
+        "left": 231,
+        "top": 283,
+        "right": 261,
+        "bottom": 292
+      },
+      "confidence": 0.88,
+      "center": {
+        "x": 246,
+        "y": 287
+      },
+      "source": "ocr"
+    }
+  ],
+  "ui_candidates": [
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 539,
+        "top": 270,
+        "right": 679,
+        "bottom": 324
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 609,
+        "y": 297
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 219,
+        "top": 270,
+        "right": 359,
+        "bottom": 324
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 289,
+        "y": 297
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 24,
+        "top": 270,
+        "right": 164,
+        "bottom": 324
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 94,
+        "y": 297
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 539,
+        "top": 169,
+        "right": 679,
+        "bottom": 223
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 609,
+        "y": 196
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 24,
+        "top": 169,
+        "right": 164,
+        "bottom": 223
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 94,
+        "y": 196
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 539,
+        "top": 92,
+        "right": 679,
+        "bottom": 146
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 609,
+        "y": 119
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 550,
+        "top": 182,
+        "right": 599,
+        "bottom": 196
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 574,
+        "y": 189
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 550,
+        "top": 105,
+        "right": 599,
+        "bottom": 119
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 574,
+        "y": 112
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 550,
+        "top": 284,
+        "right": 575,
+        "bottom": 297
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 562,
+        "y": 290
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 551,
+        "top": 107,
+        "right": 562,
+        "bottom": 117
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 556,
+        "y": 112
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 576,
+        "top": 184,
+        "right": 586,
+        "bottom": 194
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 581,
+        "y": 189
+      },
+      "source": "contour"
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,57 @@
+{
+  "status": "ready",
+  "workflow": {
+    "workflow_id": "lab_auto",
+    "instruction": "In Week6 Local Lab, prepare a BLUE report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test, with no external communication. If review is temporarily unavailable, retry within budget.",
+    "subgoals": [
+      {
+        "case_id": "G01",
+        "instruction": "click on the 'ALPHA' button to select the project",
+        "target_app": null,
+        "preconditions": [],
+        "success_rules": [],
+        "verification": "automatic",
+        "expect_text": [
+          "ALPHA"
+        ],
+        "forbid_text": [],
+        "requires_processes": [],
+        "forbids_processes": [],
+        "must_exit_processes": [],
+        "risk": "medium",
+        "message_conversation": null,
+        "gate_on_step_verification": true
+      }
+    ],
+    "final_check": {
+      "case_id": "FINAL",
+      "instruction": "Verify caller final rules on a fresh frame",
+      "target_app": null,
+      "preconditions": [],
+      "success_rules": [],
+      "verification": "automatic",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme BLUE",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [],
+      "requires_processes": [],
+      "forbids_processes": [],
+      "must_exit_processes": [],
+      "risk": "low",
+      "message_conversation": null,
+      "gate_on_step_verification": true
+    }
+  },
+  "error": "",
+  "decomposition_calls": 1,
+  "format_attempts": 1,
+  "model_requests": 1,
+  "elapsed_ms": 55217.99999999348,
+  "provider": "openai_compatible",
+  "model_name": "qwen2.5vl:7b",
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_002\\automatic\\decomposition",
+  "intermediate_check_source": "model_proposal_untrusted",
+  "final_check_source": "caller_supplied_unchanged"
+}

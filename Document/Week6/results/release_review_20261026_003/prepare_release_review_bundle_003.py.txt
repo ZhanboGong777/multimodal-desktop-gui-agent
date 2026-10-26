@@ -1,0 +1,132 @@
+"""Append a byte-exact private packaging-policy review without changing evidence."""
+from pathlib import Path
+import hashlib
+import json
+from datetime import datetime, timezone
+
+WORKSPACE = Path("C:/Users/联想/Documents/ChatGPT/Intern")
+REPO = WORKSPACE / "week6-worktree"
+PRIVATE = Path(__file__).resolve().parent
+DESTINATION = REPO / "Document/Week6/results/release_review_20261026_003"
+
+
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def write_new(path, content):
+    with path.open("x", encoding="utf-8", newline="\n") as handle:
+        handle.write(content)
+
+
+def main():
+    assert not DESTINATION.exists()
+    expected_manifests = {
+        "001": "4821230c3ea35833312fa7dd03d2e552fa2753d9d03c9e3aac243f323923f129",
+        "002": "f722da2573bf1749fff170d00e5c4a69b11632c9877bf7c80c1b5745771b3d29",
+    }
+    prior_bundles = []
+    for number, expected in expected_manifests.items():
+        folder = DESTINATION.parent / f"release_review_20261026_{number}"
+        manifest_path = folder / "copy_manifest_001.json"
+        assert digest(manifest_path) == expected
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8-sig"))
+        for item in manifest["copies"]:
+            path = folder / item["destination_relative"]
+            assert digest(path) == item["source_sha256"] == item["destination_sha256"]
+        prior_bundles.append({"directory": folder.name, "manifest_sha256": expected,
+                              "copied_files_still_equal_manifest": len(manifest["copies"])})
+    audit = json.loads((PRIVATE / "credential_false_positive_audit_001.json").read_text(encoding="utf-8"))
+    assert audit["all_checks_passed"] is True
+    assert digest(WORKSPACE / "tmp/week6/package_completed.py") == audit["checker_after_sha256"]
+    DESTINATION.mkdir()
+    selection = [
+        (PRIVATE / "package_completed_before_c0ce780.py", "package_completed_before_c0ce780.py.txt"),
+        (WORKSPACE / "tmp/week6/package_completed.py", "package_completed_after_4f563154.py.txt"),
+        (PRIVATE / "credential_false_positive_audit_001.json", "credential_false_positive_audit_001.json"),
+        (PRIVATE / "independent_false_positive_review_001.py", "independent_false_positive_review_001.py.txt"),
+        (WORKSPACE / "tmp/week6/final_evidence_inventory_20261026_001.json", "original_unmodified_evidence_inventory_001.json"),
+        (PRIVATE / "exact_original_inventory_after_review_001.json", "exact_original_inventory_after_review_001.json"),
+        (WORKSPACE / "tmp/week6/inspect_inventory_finding_001.py", "root_inspect_inventory_finding_001.py.txt"),
+        (PRIVATE / "baseline_001.json", "checker_baseline_001.json"),
+        (PRIVATE / "checker_edit_receipt_001.json", "checker_edit_receipt_001.json"),
+        (Path(__file__), "prepare_release_review_bundle_003.py.txt"),
+    ]
+    copies = []
+    for source, relative in selection:
+        original = source.read_bytes()
+        destination = DESTINATION / relative
+        with destination.open("xb") as handle:
+            handle.write(original)
+        expected = hashlib.sha256(original).hexdigest()
+        assert digest(destination) == expected
+        copies.append({"source": str(source), "destination_relative": relative,
+                       "source_sha256": expected, "destination_sha256": expected, "bytes": len(original)})
+    readme = """# Week 6 release review 003
+
+This append-only snapshot resolves one exact credential-pattern false positive in
+the unchanged pytest **collection** stdout already archived in review 001. It is
+an offline packaging-policy review, not a test-suite result or GUI success.
+
+The unmodified original inventory and all original detector findings remain
+present. Only the exact original path, whole-file SHA-256, one match at the exact
+span/line, exact captured repository filename, and both CRLF-separated pytest
+node IDs are classified `reviewed_false_positive`. Every unmatched finding
+continues to block preflight. No scanner regex or other package closure check was
+relaxed. The source test definitions and full006 before/after source pins agree.
+
+The original stdout is not duplicated here. It remains byte-for-byte at
+`../release_review_20261026_001/collection/full006_collection_stdout_001.txt`.
+The old c0ce checker and the reviewed new checker are both preserved as `.py.txt`.
+The independent audit records 11 passed offline cases/integration checks, with
+zero model calls, desktop captures, desktop inputs, or pytest execution. Changed
+hash/path/context/newlines, added matches, and literal credential shapes remain
+unresolved and blocked. Synthetic values were temporary and are not published.
+
+To verify this snapshot, run `verify_bundle.py.txt` with Python; it only hashes
+files. To reproduce the private counterexamples on the original workstation,
+copy the independent script and old checker into a fresh private directory,
+rename their `.py.txt` suffixes to `.py`, and run the script while the pinned new
+private checker and original evidence remain at their recorded source paths.
+It writes new outputs exclusively and deliberately refuses to overwrite them.
+
+Final Git/archive byte equivalence and full release preflight remain separate
+Root checks. This bundle does not declare the release packaged or published.
+"""
+    write_new(DESTINATION / "README.md", readme)
+    verify = '''from pathlib import Path
+import hashlib, json
+root = Path(__file__).resolve().parent
+manifest = json.loads((root / "copy_manifest_001.json").read_text(encoding="utf-8"))
+for item in manifest["copies"] + manifest["generated_files"]:
+    data = (root / item["destination_relative"]).read_bytes()
+    assert hashlib.sha256(data).hexdigest() == item["destination_sha256"], item["destination_relative"]
+    assert len(data) == item["bytes"], item["destination_relative"]
+print(json.dumps({"all_hashes_passed": True, "copied_files": len(manifest["copies"]), "generated_files": len(manifest["generated_files"])}))
+'''
+    write_new(DESTINATION / "verify_bundle.py.txt", verify)
+    manifest = {
+        "schema": "week6.readonly.release_review_bundle.v1",
+        "created_utc": datetime.now(timezone.utc).isoformat(),
+        "scope": "Exact private package credential-pattern false-positive review only",
+        "copies": copies,
+        "generated_files": [{"destination_relative": relative, "destination_sha256": digest(DESTINATION / relative),
+                             "bytes": (DESTINATION / relative).stat().st_size}
+                            for relative in ["README.md", "verify_bundle.py.txt"]],
+        "prior_bundles_unchanged": prior_bundles,
+        "raw_original_sha256": audit["original_detector_finding"]["file_sha256"],
+        "checker_before_sha256": audit["checker_before_sha256"],
+        "checker_after_sha256": audit["checker_after_sha256"],
+        "original_detector_findings_preserved": True,
+        "production_tests_root_readme_changed": False,
+    }
+    write_new(DESTINATION / "copy_manifest_001.json", json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
+    assert all(digest(DESTINATION / item["destination_relative"]) == digest(Path(item["source"]))
+               for item in copies)
+    print(json.dumps({"destination": str(DESTINATION), "copied_files": len(copies),
+                      "manifest_sha256": digest(DESTINATION / "copy_manifest_001.json"),
+                      "checker_sha256": audit["checker_after_sha256"]}, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

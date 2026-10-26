@@ -1,0 +1,102 @@
+"""Private saved-frame prompt diagnostic; two-request cap and zero desktop I/O."""
+import hashlib
+import json
+import sys
+import time
+from datetime import UTC, datetime
+from pathlib import Path
+
+R = Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+sys.path.insert(0, str(R / 'src'))
+from gui_agent.models.openai_compatible import OpenAICompatibleClient
+from gui_agent.planning.workflow_decomposer import (
+    SYSTEM_PROMPT, BudgetedModelClient, DecompositionProposal, WorkflowRequest, _check_proposal_constraints,
+)
+from gui_agent.runtime.schemas import ObservationSnapshot
+
+D = R / 'Document/Week6/results/saved_decomposition_chat_repair_20261025_001'
+P = R / 'Document/Week6/results/saved_decomposition_20261025_001'
+
+
+def write(path, value):
+    with path.open('x', encoding='utf-8', newline='\n') as f:
+        f.write(json.dumps(value, ensure_ascii=False, indent=2) + '\n')
+
+
+def issues(proposal, request, observation):
+    visible = [e.text.casefold() for e in observation.elements]
+    errors = []
+    for n, goal in enumerate(proposal.subgoals, 1):
+        conflicts = [(f, required) for f in goal.forbid_text for required in request.expect_text
+                     if f.casefold() in required.casefold()]
+        stale = [e for e in goal.expect_text if e not in request.expect_text and any(e.casefold() in v for v in visible)]
+        if conflicts:
+            errors.append({'subgoal': n, 'field': 'forbid_text', 'error': 'conflicts with immutable final expect_text', 'conflicts': conflicts})
+        if stale:
+            errors.append({'subgoal': n, 'field': 'expect_text', 'error': 'already visible and cannot prove the operation changed the screen', 'values': stale})
+    return errors
+
+
+def main():
+    D.mkdir(parents=True, exist_ok=False)
+    contract = json.loads((P / 'contract.json').read_text(encoding='utf-8'))
+    request = WorkflowRequest.model_validate(contract['request'])
+    completed = contract['completed_subgoals']
+    original_attempt = json.loads((P / 'decomposition/attempt_01_request.json').read_text(encoding='utf-8'))
+    observation_path = P / 'archived_inputs/observation_round_003/observation.json'
+    obs = ObservationSnapshot.model_validate_json(observation_path.read_text(encoding='utf-8'))
+    image_path = R / obs.image_path
+    original_bad = json.loads((P / 'decomposition/attempt_03_response.json').read_text(encoding='utf-8'))['content']
+    paths = sorted((R / 'src').rglob('*.py'))
+    pins = {p.relative_to(R).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
+    write(D / 'contract.json', {'created_at_utc': datetime.now(UTC).isoformat(),
+          'mode': 'archived_image_prompt_diagnostic_no_desktop', 'desktop_input_allowed': False,
+          'maximum_new_requests': 2, 'not_end_to_end_acceptance': True,
+          'request': request.model_dump(mode='json'), 'completed_subgoals': completed,
+          'original_diagnostic': str(P), 'source_pins_before': pins,
+          'image_sha256': hashlib.sha256(image_path.read_bytes()).hexdigest()})
+    client = BudgetedModelClient(OpenAICompatibleClient(
+        model_name='qwen2.5vl:7b', base_url='http://127.0.0.1:11434/v1', api_key='ollama-local',
+        timeout_seconds=180, max_retries=0, temperature=0, max_tokens=2200),
+        max_requests=2, deadline=time.monotonic() + 300, audit_path=D / 'transport_requests.jsonl')
+    messages = [
+        {'role': 'system', 'content': SYSTEM_PROMPT},
+        {'role': 'user', 'content': json.dumps({'instruction': request.instruction, 'context': original_attempt['context']}, ensure_ascii=False)},
+    ]
+    previous = original_bad
+    started = time.monotonic()
+    attempts = []
+    for n in range(1, 3):
+        parsed_previous = DecompositionProposal.model_validate_json(previous, strict=True)
+        errors = issues(parsed_previous, request, obs)
+        messages.extend([
+            {'role': 'assistant', 'content': previous},
+            {'role': 'user', 'content': json.dumps({
+                'instruction': request.instruction,
+                'correction': 'Your previous proposal was rejected before execution. Return a different corrected JSON proposal addressing ALL errors below. Do not repeat the rejected checks. The task, same screenshot, completed stages and final checks are unchanged. When later text is unknown, expect_text may be empty with a grounded changing-stage forbid_text check. Do not invent future labels or replay completed actions.',
+                'errors': errors, 'final_checks': {'expect_text': request.expect_text, 'forbid_text': request.forbid_text},
+            }, ensure_ascii=False)},
+        ])
+        write(D / f'attempt_{n:02d}_request.json', {'messages': messages, 'image_path': str(image_path)})
+        response = client.complete(messages, image_path=str(image_path), response_format={'type': 'json_object'})
+        write(D / f'attempt_{n:02d}_response.json', {**response.as_dict(), 'content': response.content, 'raw_response': response.raw_response})
+        error = ''
+        try:
+            proposal = DecompositionProposal.model_validate_json(response.content, strict=True)
+            _check_proposal_constraints(proposal, request, obs, completed)
+        except ValueError as exc:
+            error = str(exc)
+        attempts.append({'number': n, 'proposal_constraints_pass': not error, 'error': error})
+        if not error:
+            break
+        previous = response.content
+    write(D / 'summary.json', {'finished_at_utc': datetime.now(UTC).isoformat(), 'attempts': attempts,
+          'elapsed_seconds': time.monotonic() - started, 'requests': client.request_count,
+          'source_unchanged': pins == {p.relative_to(R).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths},
+          'desktop_capture_count': 0, 'desktop_input_count': 0, 'task_execution_count': 0,
+          'meaning': 'A prompt diagnostic validates proposals only. It does not demonstrate any action, retry recovery or final task completion.'})
+    print(json.dumps({'attempts': attempts, 'requests': client.request_count}, ensure_ascii=False))
+
+
+if __name__ == '__main__':
+    main()

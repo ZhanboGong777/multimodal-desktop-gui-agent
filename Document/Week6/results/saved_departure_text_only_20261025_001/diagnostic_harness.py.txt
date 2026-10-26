@@ -1,0 +1,49 @@
+"""One retained-request diagnostic omitting the image, never a desktop execution."""
+from __future__ import annotations
+import hashlib
+import json
+import shutil
+import sys
+import time
+from pathlib import Path
+
+ROOT=Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+sys.path.insert(0,str(ROOT/'src'))
+from gui_agent.models.openai_compatible import OpenAICompatibleClient
+from gui_agent.planning.workflow_decomposer import BudgetedModelClient
+
+OUT=ROOT/'Document/Week6/results/saved_departure_text_only_20261025_001'
+BATCH=ROOT/'Document/Week6/results/live_auto_20261025_normal_011/automatic'
+OUT.mkdir(parents=True,exist_ok=False)
+shutil.copyfile(__file__,OUT/'diagnostic_harness.py.txt')
+def sha(p):
+    return hashlib.sha256(p.read_bytes()).hexdigest()
+def write(name,value):
+    with (OUT/name).open('x',encoding='utf-8',newline='\n') as f:
+        f.write(json.dumps(value,ensure_ascii=False,indent=2)+'\n')
+request_path=BATCH/'decomposition/attempt_01_request.json'
+protocol_path=BATCH/'decomposition/observed_departure_protocol.json'
+request=json.loads(request_path.read_text(encoding='utf-8'))
+protocol=json.loads(protocol_path.read_text(encoding='utf-8'))
+pins={p.relative_to(ROOT).as_posix():sha(p) for p in sorted((ROOT/'src').rglob('*.py'))}
+inputs={str(p):sha(p) for p in [request_path,protocol_path]}
+shutil.copyfile(request_path,OUT/'original_request.json')
+shutil.copyfile(protocol_path,OUT/'original_protocol.json')
+write('contract.json',{'purpose':'Repeat the original model request with exactly the saved context/system/schema, omitting only the image attachment.',
+      'source_pins_before':pins,'input_sha256':inputs,'maximum_model_requests':1,'image_attachment_sent':False,
+      'instruction':request['instruction'],'context':request['context'],'system':request['system'],
+      'response_format':protocol['response_format'],'not_end_to_end_acceptance':True,
+      'desktop_capture_count':0,'desktop_input_count':0,'task_execution_count':0})
+tick=time.monotonic()
+client=BudgetedModelClient(OpenAICompatibleClient(model_name='qwen2.5vl:7b',base_url='http://127.0.0.1:11434/v1',
+    api_key='ollama-local',temperature=0,max_tokens=2200,max_retries=0,timeout_seconds=180),
+    max_requests=1,deadline=tick+180,audit_path=OUT/'transport_requests.jsonl')
+response=client.generate_multimodal(request['instruction'],context=request['context'],system=request['system'],
+    image_path=None,response_format=protocol['response_format'])
+write('response.json',{**response.as_dict(),'content':response.content,'raw_response':response.raw_response})
+after={p.relative_to(ROOT).as_posix():sha(p) for p in sorted((ROOT/'src').rglob('*.py'))}
+write('summary.json',{'elapsed_seconds':time.monotonic()-tick,'model_requests':client.request_count,
+      'source_unchanged':pins==after,'original_inputs_unchanged':inputs=={str(p):sha(p) for p in [request_path,protocol_path]},
+      'desktop_capture_count':0,'desktop_input_count':0,'task_execution_count':0,
+      'meaning':'One text-only planning diagnostic; no model status or reason establishes actual success.'})
+print(response.content)

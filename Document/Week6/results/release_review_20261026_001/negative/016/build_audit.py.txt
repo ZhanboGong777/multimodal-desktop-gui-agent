@@ -1,0 +1,123 @@
+"""Index ended normal016, without reading a live fixture or creating model/UI calls."""
+from __future__ import annotations
+
+import hashlib
+import json
+from datetime import UTC, datetime
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[3]
+REPO = ROOT / "week6-worktree"
+BATCH = REPO / "Document/Week6/results/live_auto_20261025_normal_016"
+CHILD = BATCH / "automatic/workflow/001_CALLER_GOAL"
+PINS = {}
+
+
+def pin(path):
+    path = Path(path).resolve()
+    raw = path.read_bytes()
+    value = {"path": str(path), "sha256": hashlib.sha256(raw).hexdigest(), "bytes": len(raw)}
+    assert PINS.setdefault(str(path), value) == value
+    return value
+
+
+def load(path):
+    pin(path)
+    return json.loads(Path(path).read_bytes())
+
+
+def main():
+    output = Path(__file__).parent / "normal016_negative_audit_001.json"
+    assert not output.exists()
+    owner = load(BATCH / "owner_receipt.json")
+    assert owner["child_exit_code"] == 0 and owner["finished_utc"]
+    assert pin(BATCH / "owner_harness.py.txt")["sha256"] == owner["harness_sha256"]
+    acceptance, contract = load(BATCH / "acceptance.json"), load(BATCH / "contract.json")
+    result = acceptance["automatic_result"]
+    child, limit = load(CHILD / "task_summary.json"), load(CHILD / "single_step_planning_limit.json")
+    rolling = load(CHILD / "rolling_actions_audit.json")
+    assert acceptance["status"] == result["status"] == child["status"] == "failed"
+    assert acceptance["independent_pass"] is True and acceptance["source_unchanged"] is True
+    assert all(acceptance[key] is False for key in ["passed", "runtime_pass", "attribution_pass"])
+    assert result["total_actions"] == child["action_count"] == 3
+    assert result["unconfirmed_action_attempts"] == child["unconfirmed_action_attempts"] == 0
+    assert result["accounting_complete"] is True and result["final_verification"] is None
+    assert result["completion_basis"] == ""
+    assert result["rolling_actions_audit"] == rolling and rolling["eligible_for_final_verification"] is False
+    assert load(BATCH / "automatic/automatic_workflow_summary.json") == result
+    assert len(child["steps"]) == 4 and all(step["action_result"]["success"] is True for step in child["steps"][:3])
+    fourth = child["steps"][3]
+    assert fourth["action_result"] is None and fourth["resolved"] is None
+    assert fourth["error"] == "observation failed: dedicated-window activation receipt missing"
+    assert child["stop_reason"] == "re-planning skipped: observation failed: dedicated-window activation receipt missing"
+    assert child["planning_calls"] == result["planning_calls"] == len(limit["calls"]) == 4
+    assert limit["restored"] is True and limit["protocol_version"] == "week6.rolling_actions.v2"
+    for name, expected in contract["source_sha256"].items():
+        assert pin(BATCH / "source_snapshot" / (name + ".txt"))["sha256"] == expected
+        assert pin(REPO / name)["sha256"] == expected
+    transport = BATCH / "automatic/transport_requests.jsonl"
+    pin(transport)
+    rows = [json.loads(line) for line in transport.read_text(encoding="utf-8").splitlines() if line.strip()]
+    total, dispatches = 0, []
+    for index, row in enumerate(rows, 1):
+        assert row["dispatch"] == index and row["count_source"] == "httpx_request_event"
+        total += row["requests_made"]
+        assert row["requests_total"] == total
+        dispatches.append({key: row.get(key) for key in
+                           ["dispatch", "count_source", "requests_made", "requests_total", "elapsed_ms", "error"]})
+    assert total == result["model_requests"] == child["model_requests"] == sum(call["model_requests"] for call in limit["calls"]) == 4
+    inputs = [load(path) for path in sorted((BATCH / "sky_bridge").glob("input_*_receipt.json"))]
+    assert inputs == acceptance["input_receipts"] and len(inputs) == 3
+    assert not (BATCH / "sky_bridge/input_004_receipt.json").exists()
+    semantic_names = {"project_selected", "theme_selected", "review_accepted", "local_commit"}
+    events = [event for event in acceptance["independent_events"] if event["event"] in semantic_names]
+    assert [event["event"] for event in events] == ["project_selected", "theme_selected", "review_accepted", "local_commit"]
+    when = lambda value: datetime.fromisoformat(value.replace("Z", "+00:00"))
+    attribution = []
+    for event in events:
+        matches = [receipt["id"] for receipt in inputs if receipt["success"] is True and receipt["transport"] == "Sky click"
+                   and when(receipt["started_utc"]) <= when(event["utc"]) <= when(receipt["finished_utc"])]
+        attribution.append({"event": event["event"], "utc": event["utc"], "matching_saved_input_receipts": matches})
+    assert [value["matching_saved_input_receipts"] for value in attribution] == [["input_001"], ["input_002"], ["input_003"], []]
+    assert [item["input_receipts"] for item in acceptance["transition_attribution"]] == [["input_001"], ["input_002"], ["input_003"], []]
+    positive015 = ROOT / "tmp/week6_report/rolling_gate_preparation_20261025_001/transient015_positive_audit_001.json"
+    assert pin(positive015)["sha256"] == "c5036cd0dfcb36ec18aa1770088f83e1ad51468bc7729504a70b5ebdc8446f2d"
+    assert all(hashlib.sha256(Path(path).read_bytes()).hexdigest() == value["sha256"] for path, value in PINS.items())
+    audit = {
+        "schema_version": "week6.private.normal016.negative.v1", "created_utc": datetime.now(UTC).isoformat(),
+        "batch": str(BATCH), "classification": "unattributed_terminal_transition_and_pre_dispatch_activation_timeout",
+        "counts_as_success": False, "report_ready": False, "release_ready": False,
+        "owner_child_exit_code": owner["child_exit_code"], "owner_elapsed_seconds": owner["elapsed_seconds"],
+        "acceptance_status": acceptance["status"],
+        "acceptance_flags": {key: acceptance[key] for key in ["passed", "runtime_pass", "independent_pass", "attribution_pass", "source_unchanged"]},
+        "recorded_workflow_decomposer_sha256": contract["source_sha256"]["src/gui_agent/planning/workflow_decomposer.py"],
+        "all_snapshot_and_current_source_pins_match_contract": True,
+        "runtime": {key: result[key] for key in ["status", "total_actions", "unconfirmed_action_attempts", "planning_calls", "model_requests", "elapsed_ms", "accounting_complete", "completion_basis", "final_verification", "error"]},
+        "child": {key: child[key] for key in ["status", "action_count", "unconfirmed_action_attempts", "planning_calls", "model_requests", "elapsed_ms", "stop_reason"]},
+        "actual_http_requests": total, "count_source": "Sum requests_made from httpx_request_event with cumulative requests_total checked.",
+        "transport_dispatches": dispatches, "known_input_receipts": inputs,
+        "native_commit_plan": limit["calls"][3], "fourth_step_preserved": fourth,
+        "fourth_input_receipt_exists": False,
+        "independent_final_state_recorded": acceptance["state"],
+        "independent_events_recorded": acceptance["independent_events"],
+        "recomputed_timestamp_attribution": attribution,
+        "original_transition_attribution": acceptance["transition_attribution"],
+        "rolling_audit_preserved": rolling, "single_step_limit_restored": limit["restored"],
+        "interpretation": "Three actual successful input receipts explain project, theme and review. The independent local_commit event matches no recorded input interval, so its source is unknown here. The fourth model plan proposed Commit locally, but its step failed during required observation before resolution/dispatch, then recovery observation also timed out. Independent application terminal state therefore does not establish runtime or attribution success.",
+        "limitations": ["Do not infer a fourth agent input, automatic fixture action or external actor from the unmatched commit event.",
+                        "The recorded error is dedicated-window activation receipt missing, not a failed known executor result.",
+                        "Zero unconfirmed attempts is consistent with stopping before executor entry; accounting_complete=true describes counts, not success.",
+                        "Owner child exit 0 and independent_pass=true cannot replace missing runtime final verification or complete input attribution.",
+                        "This audit read ended batch records only; no active fixture metadata, pixels or state was accessed."],
+        "positive015_audit_bytes_unchanged": True,
+        "raw_files_pinned": list(PINS.values()), "all_pinned_inputs_unchanged_during_audit": True,
+        "audit_calls": {"models": 0, "http": 0, "gui_capture": 0, "gui_input": 0, "runtime_execution": 0},
+    }
+    output.write_text(json.dumps(audit, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps({"record": str(output), "sha256": hashlib.sha256(output.read_bytes()).hexdigest(),
+                      "actual_http": total, "known_inputs": 3, "unconfirmed": 0,
+                      "owner_exit": 0, "raw_files": len(PINS), "counts_as_success": False}, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

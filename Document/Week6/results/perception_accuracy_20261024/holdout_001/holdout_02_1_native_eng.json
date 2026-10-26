@@ -1,0 +1,287 @@
+{
+  "fixture": "holdout_02",
+  "arm": "native_eng",
+  "repeat": 1,
+  "decode_ms": 1.7274999991059303,
+  "ocr_ms": 201.36489998549223,
+  "ui_ms": 5.3604000131599605,
+  "full_ms": 208.45279999775812,
+  "metrics": {
+    "tp": 5,
+    "fp": 1,
+    "fn": 3,
+    "precision": 0.8333333333333334,
+    "recall": 0.625,
+    "labels": [
+      {
+        "text": "Report Viewer",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9917355371900827
+      },
+      {
+        "text": "Page Number",
+        "language": "en",
+        "matched": true,
+        "iou": 0.98989898989899
+      },
+      {
+        "text": "Print Preview",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9894736842105263
+      },
+      {
+        "text": "Zoom",
+        "language": "en",
+        "matched": true,
+        "iou": 1.0
+      },
+      {
+        "text": "Return",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9583333333333334
+      },
+      {
+        "text": "报告查看",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "打印预览",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "缩放",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      }
+    ]
+  },
+  "control_metrics": {
+    "tp": 6,
+    "fp": 2,
+    "fn": 0,
+    "iou_threshold": 0.8
+  },
+  "predictions": [
+    {
+      "text": "Report Viewer",
+      "bounding_box": {
+        "left": 49,
+        "top": 64,
+        "right": 169,
+        "bottom": 82
+      },
+      "confidence": 0.95,
+      "center": {
+        "x": 109,
+        "y": 73
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Page Number",
+      "bounding_box": {
+        "left": 49,
+        "top": 133,
+        "right": 147,
+        "bottom": 148
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 98,
+        "y": 140
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Print Preview",
+      "bounding_box": {
+        "left": 49,
+        "top": 210,
+        "right": 143,
+        "bottom": 222
+      },
+      "confidence": 0.73,
+      "center": {
+        "x": 96,
+        "y": 216
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "SBS",
+      "bounding_box": {
+        "left": 653,
+        "top": 133,
+        "right": 717,
+        "bottom": 149
+      },
+      "confidence": 0.58,
+      "center": {
+        "x": 685,
+        "y": 141
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Zoom",
+      "bounding_box": {
+        "left": 48,
+        "top": 311,
+        "right": 89,
+        "bottom": 323
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 68,
+        "y": 317
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Return",
+      "bounding_box": {
+        "left": 244,
+        "top": 311,
+        "right": 290,
+        "bottom": 323
+      },
+      "confidence": 0.69,
+      "center": {
+        "x": 267,
+        "y": 317
+      },
+      "source": "ocr"
+    }
+  ],
+  "ui_candidates": [
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 642,
+        "top": 297,
+        "right": 782,
+        "bottom": 351
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 712,
+        "y": 324
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 232,
+        "top": 297,
+        "right": 372,
+        "bottom": 351
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 302,
+        "y": 324
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 37,
+        "top": 297,
+        "right": 177,
+        "bottom": 351
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 324
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 642,
+        "top": 196,
+        "right": 782,
+        "bottom": 250
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 712,
+        "y": 223
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 37,
+        "top": 196,
+        "right": 177,
+        "bottom": 250
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 223
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 642,
+        "top": 119,
+        "right": 782,
+        "bottom": 173
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 712,
+        "y": 146
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 653,
+        "top": 210,
+        "right": 718,
+        "bottom": 228
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 685,
+        "y": 219
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 653,
+        "top": 312,
+        "right": 686,
+        "bottom": 328
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 669,
+        "y": 320
+      },
+      "source": "contour"
+    }
+  ],
+  "errors": []
+}

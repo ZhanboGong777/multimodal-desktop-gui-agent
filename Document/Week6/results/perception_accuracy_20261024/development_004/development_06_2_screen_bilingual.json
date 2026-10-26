@@ -1,0 +1,281 @@
+{
+  "fixture": "development_06",
+  "arm": "screen_bilingual",
+  "repeat": 2,
+  "decode_ms": 1.4900000533089042,
+  "ocr_ms": 353.4900999511592,
+  "ui_ms": 3.9855000213719904,
+  "full_ms": 358.9656000258401,
+  "metrics": {
+    "tp": 7,
+    "fp": 0,
+    "fn": 1,
+    "precision": 1.0,
+    "recall": 0.875,
+    "labels": [
+      {
+        "text": "Draft Editor",
+        "language": "en",
+        "matched": true,
+        "iou": 0.974025974025974
+      },
+      {
+        "text": "Local File",
+        "language": "en",
+        "matched": true,
+        "iou": 1.0
+      },
+      {
+        "text": "Save Draft",
+        "language": "en",
+        "matched": true,
+        "iou": 0.8842105263157894
+      },
+      {
+        "text": "Undo",
+        "language": "en",
+        "matched": true,
+        "iou": 1.0
+      },
+      {
+        "text": "Finish",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9375
+      },
+      {
+        "text": "草稿编辑",
+        "language": "zh",
+        "matched": true,
+        "iou": 0.582995951417004
+      },
+      {
+        "text": "保存草稿",
+        "language": "zh",
+        "matched": true,
+        "iou": 0.5344129554655871
+      },
+      {
+        "text": "撤销",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      }
+    ]
+  },
+  "predictions": [
+    {
+      "text": "Draft Editor",
+      "bounding_box": {
+        "left": 36,
+        "top": 36,
+        "right": 111,
+        "bottom": 47
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 73,
+        "y": 41
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Local File",
+      "bounding_box": {
+        "left": 35,
+        "top": 105,
+        "right": 87,
+        "bottom": 114
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 61,
+        "y": 109
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "草稿编辑",
+      "bounding_box": {
+        "left": 548,
+        "top": 104,
+        "right": 600,
+        "bottom": 123
+      },
+      "confidence": 0.72,
+      "center": {
+        "x": 574,
+        "y": 113
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Save Draft",
+      "bounding_box": {
+        "left": 35,
+        "top": 182,
+        "right": 91,
+        "bottom": 191
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 63,
+        "y": 186
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "保存草稿",
+      "bounding_box": {
+        "left": 548,
+        "top": 181,
+        "right": 600,
+        "bottom": 200
+      },
+      "confidence": 0.86,
+      "center": {
+        "x": 574,
+        "y": 190
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Undo",
+      "bounding_box": {
+        "left": 35,
+        "top": 283,
+        "right": 64,
+        "bottom": 292
+      },
+      "confidence": 0.88,
+      "center": {
+        "x": 49,
+        "y": 287
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Finish",
+      "bounding_box": {
+        "left": 231,
+        "top": 283,
+        "right": 261,
+        "bottom": 292
+      },
+      "confidence": 0.92,
+      "center": {
+        "x": 246,
+        "y": 287
+      },
+      "source": "ocr"
+    }
+  ],
+  "ui_candidates": [
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 539,
+        "top": 270,
+        "right": 679,
+        "bottom": 324
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 609,
+        "y": 297
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 219,
+        "top": 270,
+        "right": 359,
+        "bottom": 324
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 289,
+        "y": 297
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 24,
+        "top": 270,
+        "right": 164,
+        "bottom": 324
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 94,
+        "y": 297
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 539,
+        "top": 169,
+        "right": 679,
+        "bottom": 223
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 609,
+        "y": 196
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 24,
+        "top": 169,
+        "right": 164,
+        "bottom": 223
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 94,
+        "y": 196
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 539,
+        "top": 92,
+        "right": 679,
+        "bottom": 146
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 609,
+        "y": 119
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 550,
+        "top": 284,
+        "right": 575,
+        "bottom": 297
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 562,
+        "y": 290
+      },
+      "source": "contour"
+    }
+  ],
+  "errors": []
+}

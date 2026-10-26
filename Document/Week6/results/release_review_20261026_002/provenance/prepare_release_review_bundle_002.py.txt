@@ -1,0 +1,84 @@
+"""Append exact completed regression and byte-policy review evidence in a new directory."""
+from __future__ import annotations
+
+import hashlib
+import json
+from datetime import UTC, datetime
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+REPO = ROOT/"week6-worktree"
+PRIVATE = ROOT/"tmp/week6_replanning_review"
+TARGET = REPO/"Document/Week6/results/release_review_20261026_002"
+VALIDATION = REPO/"Document/Week6/results/release_validation_completed_20261026_006"
+PREVIOUS = REPO/"Document/Week6/results/release_review_20261026_001"
+
+
+def sha(data): return hashlib.sha256(data).hexdigest()
+
+
+def main():
+    assert not TARGET.exists()
+    assert TARGET.resolve().is_relative_to((REPO/"Document/Week6/results").resolve())
+    old = {path.relative_to(PREVIOUS).as_posix():sha(path.read_bytes()) for path in PREVIOUS.rglob("*") if path.is_file()}
+    assert old["copy_manifest_001.json"]=="4821230c3ea35833312fa7dd03d2e552fa2753d9d03c9e3aac243f323923f129"
+    sources = [
+        (PRIVATE/"line_endings_before_saved_tool_output_001.json","line_endings/before_saved_tool_output_001.json",None),
+        (PRIVATE/"line_endings_after_audit_001.json","line_endings/current_filter_audit_001.json",None),
+        (PRIVATE/"line_endings_readonly_audit_001.py","line_endings/readonly_audit.py.txt",None),
+        (REPO/".gitattributes","line_endings/root_gitattributes_after.txt","a70cfdbd02a90d7b527cd6fc8edca3d4c13a34780acece767d4f97e490a08e4f"),
+        (ROOT/"tmp/week6/create_completion_full006.py","completion/create_completion_full006.py.txt","5cc94193c2b8bc4237f9aca7d09857ca88614c1075304d69f3d0e8e561295893"),
+        (ROOT/"tmp/week6_report/completion_record_full006.json","completion/completion_record_full006.json","aff4d31840ae1286f80814f861140d0b0a3884d09b235b6ac8ad6da70c9318b6"),
+        (ROOT/"tmp/week6_report/completion_evidence_audit_full006.json","completion/completion_evidence_audit_full006.json","52c26acb5a6ca0ca470ec8742299dcf3f59264915c20eb30868776f23b32bd90"),
+        (VALIDATION/"validation.json","full006/validation.json","e860d468f1b3240e42e9e1699ed1c58f63227eb28c82ae2e1f70573777515a42"),
+        (VALIDATION/"pytest_stdout.txt","full006/pytest_stdout.txt","22afc23bfa08c090bf2c52862735d8eaedf13af42e3e2af0c10b75a98c05323d"),
+        (VALIDATION/"validation_harness.py.txt","full006/validation_harness.py.txt","2d02a2fd93fc2db5b3596f555a365b3d7aebc0f4f4d6bb5c220a31df016152c7"),
+        (ROOT/"tmp/week6/verify_tested_git_archive_001.py","provenance/verify_tested_git_archive_001.py.txt","8e15c46403524d6138e0ab916d8db63b7f1c47a8edbeab0aded968df65e7cd8b"),
+        (PRIVATE/"release_review_README_20261026_002.md","README.md",None),
+        (PRIVATE/"verify_release_review_snapshot_002.py","verify_snapshot_bytes.py.txt",None),
+        (Path(__file__).resolve(),"provenance/prepare_release_review_bundle_002.py.txt",None),
+    ]
+    frozen = []
+    for source,relative,expected in sources:
+        data=source.read_bytes(); actual=sha(data)
+        assert expected is None or actual==expected,(source,expected,actual)
+        frozen.append((source,relative,data,actual))
+    validation=json.loads((VALIDATION/"validation.json").read_bytes())
+    assert validation["exit_code"]==0 and validation["tested_sources_unchanged"]
+    assert validation["tested_source_pins_before"]==validation["tested_source_pins_after"]
+    assert len(validation["tested_source_pins_before"])==244
+    assert "3027 passed in 535.12s" in (VALIDATION/"pytest_stdout.txt").read_text(encoding="utf-8").splitlines()[-1]
+    after=json.loads((PRIVATE/"line_endings_after_audit_001.json").read_bytes())
+    assert after["all_checks_passed"] and after["pinned_files"]==244
+    completion=json.loads((ROOT/"tmp/week6_report/completion_record_full006.json").read_bytes())
+    assert completion["status"]=="completed" and completion["report_ready"] is True
+    assert completion["validation_sha256"]==sha((VALIDATION/"validation.json").read_bytes())
+    TARGET.mkdir(parents=True,exist_ok=False)
+    entries=[]
+    for source,relative,data,actual in frozen:
+        destination=TARGET/relative
+        destination.parent.mkdir(parents=True,exist_ok=True)
+        with destination.open("xb") as handle: handle.write(data)
+        assert data==source.read_bytes()==destination.read_bytes()
+        entries.append({"source":str(source),"destination_relative":relative,"source_sha256":actual,
+            "destination_sha256":sha(destination.read_bytes()),"bytes":len(data)})
+    assert old=={path.relative_to(PREVIOUS).as_posix():sha(path.read_bytes()) for path in PREVIOUS.rglob("*") if path.is_file()}
+    manifest={"schema":"week6.readonly.release_review_bundle.v2","created_utc":datetime.now(UTC).isoformat(),
+        "copies":entries,"all_source_target_bytes_equal":True,"previous_review_directory_unchanged":True,
+        "previous_review_manifest_sha256":old["copy_manifest_001.json"],
+        "previous_review_file_sha256":old,"completed_regression":{"passed":3027,"pytest_seconds":535.12,
+            "harness_seconds":validation["elapsed_seconds"],"exit_code":validation["exit_code"],"tested_files":244,
+            "validation_sha256":sha((VALIDATION/"validation.json").read_bytes())},
+        "root_README_raw_sha256":"f3e7fea31e0a587281e11707494d684a54de2fd1e07b623a9972c2696f97d2de",
+        "byte_policy":"Root-only /README.md -text -whitespace preserves the tested CRLF bytes; no source normalization or weaker success predicate.",
+        "post_commit_Git_or_archive_verifier_executed_by_this_preparation":False,
+        "report_generation_evidence_closed":True,"overall_user_delivery_complete_asserted":False,
+        "GUI_model_tests_executed":False,"pinned_source_or_ROOTREADME_modified":False}
+    with (TARGET/"copy_manifest_001.json").open("xb") as handle:
+        handle.write((json.dumps(manifest,ensure_ascii=False,indent=2)+"\n").encode("utf-8"))
+    print(json.dumps({"directory":str(TARGET),"copied_files":len(entries),"copied_bytes":sum(item["bytes"] for item in entries),
+        "manifest_sha256":sha((TARGET/"copy_manifest_001.json").read_bytes()),"prior001_unchanged":True,
+        "all_source_target_bytes_equal":True,"overall_delivery_complete_claimed":False},ensure_ascii=False))
+
+
+if __name__=="__main__": main()

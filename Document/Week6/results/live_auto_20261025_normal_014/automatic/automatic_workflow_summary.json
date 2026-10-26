@@ -1,0 +1,827 @@
+{
+  "schema_version": "week6.automatic_workflow.v1",
+  "workflow_id": "lab_auto",
+  "status": "failed",
+  "decomposition_protocol_mode": "rolling_actions",
+  "rolling_actions_audit": {
+    "schema_version": "week6.rolling_actions.v2",
+    "gate_on_step_verification": false,
+    "step_verification_policy": "Model step predictions are advisory; unchanged caller final rules are authoritative after each one-step plan.",
+    "caller_instruction": "In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test, with no external communication. If review is temporarily unavailable, retry within budget.",
+    "compiled_instruction": "Advance only the currently visible stage of the original caller request. Choose operations from the original request and current screen; do not repeat already satisfied selections. Plan at most one input, then observe again. Original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test, with no external communication. If review is temporarily unavailable, retry within budget.",
+    "planning_limit_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261025_normal_014\\automatic\\workflow\\001_CALLER_GOAL\\single_step_planning_limit.json",
+    "plans": [
+      {
+        "max_steps": 1,
+        "returned_steps": 1,
+        "ok": true,
+        "instruction": "Advance only the currently visible stage of the original caller request. Choose operations from the original request and current screen; do not repeat already satisfied selections. Plan at most one input, then observe again. Original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test, with no external communication. If review is temporarily unavailable, retry within budget.",
+        "context": {
+          "platform": "win32",
+          "observation_id": "obs-0001",
+          "screen": "2560x1600",
+          "target_app": null,
+          "allowed_keys": {
+            "keys": [
+              "0",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+              "a",
+              "b",
+              "backspace",
+              "c",
+              "d",
+              "delete",
+              "down",
+              "e",
+              "end",
+              "enter",
+              "esc",
+              "escape",
+              "f",
+              "f1",
+              "f10",
+              "f11",
+              "f12",
+              "f2",
+              "f3",
+              "f4",
+              "f5",
+              "f6",
+              "f7",
+              "f8",
+              "f9",
+              "g",
+              "h",
+              "home",
+              "i",
+              "j",
+              "k",
+              "l",
+              "left",
+              "m",
+              "n",
+              "o",
+              "p",
+              "pagedown",
+              "pageup",
+              "q",
+              "r",
+              "return",
+              "right",
+              "s",
+              "space",
+              "t",
+              "tab",
+              "u",
+              "up",
+              "v",
+              "w",
+              "x",
+              "y",
+              "z"
+            ],
+            "modifiers": [
+              "alt",
+              "cmd",
+              "command",
+              "control",
+              "ctrl",
+              "shift",
+              "super",
+              "win"
+            ],
+            "hotkey_separator": "+"
+          },
+          "limits": "at most 12 actions and 1184.53 s for the whole task",
+          "visible_text": "obs-0001-e000  'Offline report preparation'  conf=0.96  center=(1280,647)  box=(1101,632,1460,662)\nobs-0001-e001  'ALPHA'  conf=0.96  center=(1280,867)  box=(1218,854,1343,881)\nobs-0001-e002  'BETA'  conf=0.96  center=(1281,1031)  box=(1234,1017,1329,1045)\nobs-0001-e003  'Choose a project'  conf=0.95  center=(1282,741)  box=(1137,719,1427,763)\nobs-0001-e004  'Week6 Local Lab'  conf=0.91  center=(1281,545)  box=(1089,527,1474,564)\nobs-0001-e005  'v'  conf=0.79  center=(1295,967)  box=(1283,955,1307,980)\nobs-0001-e006  <unlabelled box>  conf=0.50  center=(1984,800)  box=(1409,0,2560,1600)\nobs-0001-e007  <unlabelled box>  conf=0.50  center=(1280,1018)  box=(1050,952,1510,1085)\nobs-0001-e008  <unlabelled box>  conf=0.50  center=(1282,869)  box=(1049,810,1516,928)",
+          "success_rules": []
+        },
+        "image_path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261025_normal_014\\automatic\\workflow\\001_CALLER_GOAL\\monitor1_20261025_222824_396.png",
+        "task_id": "CALLER_GOAL",
+        "attempts": 1,
+        "model_requests": 1,
+        "parsed_plan": {
+          "task_id": "t1",
+          "instruction": "..",
+          "summary": "Select project ALPHA.",
+          "steps": [
+            {
+              "step_id": "s1",
+              "description": "Select project ALPHA.",
+              "action_type": "click",
+              "target_text": "ALPHA",
+              "arguments": {
+                "element_id": "obs-0001-e003"
+              },
+              "expected_result": "ALPHA is selected.",
+              "status": "pending"
+            }
+          ],
+          "assumptions": [],
+          "requires_confirmation": true,
+          "errors": []
+        },
+        "response": {
+          "provider": "openai_compatible",
+          "model_name": "qwen2.5vl:7b",
+          "latency_ms": 16938.0,
+          "usage": {
+            "prompt_tokens": 5295,
+            "completion_tokens": 75,
+            "total_tokens": 5370
+          },
+          "error": null,
+          "content_length": 291,
+          "content": "{\"task_id\":\"t1\",\"instruction\":\"..\",\"summary\":\"Select project ALPHA.\",\"steps\":[{\"step_id\":\"s1\",\"description\":\"Select project ALPHA.\",\"action_type\":\"click\",\"target_text\":\"ALPHA\",\"arguments\":{\"element_id\":\"obs-0001-e003\"},\"expected_result\":\"ALPHA is selected.\",\"status\":\"pending\"}],\"errors\":[]}",
+          "raw_response": {
+            "finish_reason": "stop"
+          }
+        },
+        "error": null
+      },
+      {
+        "max_steps": 1,
+        "returned_steps": 1,
+        "ok": true,
+        "instruction": "Advance only the currently visible stage of the original caller request. Choose operations from the original request and current screen; do not repeat already satisfied selections. Plan at most one input, then observe again. Original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test, with no external communication. If review is temporarily unavailable, retry within budget.",
+        "context": {
+          "platform": "win32",
+          "observation_id": "obs-0005",
+          "screen": "2560x1600",
+          "target_app": null,
+          "allowed_keys": {
+            "keys": [
+              "0",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+              "a",
+              "b",
+              "backspace",
+              "c",
+              "d",
+              "delete",
+              "down",
+              "e",
+              "end",
+              "enter",
+              "esc",
+              "escape",
+              "f",
+              "f1",
+              "f10",
+              "f11",
+              "f12",
+              "f2",
+              "f3",
+              "f4",
+              "f5",
+              "f6",
+              "f7",
+              "f8",
+              "f9",
+              "g",
+              "h",
+              "home",
+              "i",
+              "j",
+              "k",
+              "l",
+              "left",
+              "m",
+              "n",
+              "o",
+              "p",
+              "pagedown",
+              "pageup",
+              "q",
+              "r",
+              "return",
+              "right",
+              "s",
+              "space",
+              "t",
+              "tab",
+              "u",
+              "up",
+              "v",
+              "w",
+              "x",
+              "y",
+              "z"
+            ],
+            "modifiers": [
+              "alt",
+              "cmd",
+              "command",
+              "control",
+              "ctrl",
+              "shift",
+              "super",
+              "win"
+            ],
+            "hotkey_separator": "+"
+          },
+          "limits": "at most 12 actions and 1184.53 s for the whole task",
+          "visible_text": "obs-0005-e000  'Offline report preparation'  conf=0.96  center=(1280,597)  box=(1101,582,1460,612)\nobs-0005-e001  'Project ALPHA'  conf=0.96  center=(1282,692)  box=(1155,674,1409,710)\nobs-0005-e002  'BLUE'  conf=0.96  center=(1282,915)  box=(1234,901,1330,929)\nobs-0005-e003  'GREEN'  conf=0.96  center=(1280,1079)  box=(1215,1065,1345,1093)\nobs-0005-e004  'Choose report theme'  conf=0.95  center=(1280,789)  box=(1101,771,1460,807)\nobs-0005-e005  'Week6 Local Lab'  conf=0.90  center=(1281,496)  box=(1089,477,1474,515)\nobs-0005-e006  'v'  conf=0.69  center=(1293,880)  box=(1281,868,1305,893)\nobs-0005-e007  <unlabelled box>  conf=0.50  center=(1984,800)  box=(1409,0,2560,1600)\nobs-0005-e008  <unlabelled box>  conf=0.50  center=(1282,917)  box=(1049,858,1516,976)\nobs-0005-e009  <unlabelled box>  conf=0.50  center=(1282,1080)  box=(1048,1022,1516,1139)",
+          "success_rules": [],
+          "recovery": {
+            "previous_pass": 1,
+            "reason": "task_verification",
+            "failed_step_index": null,
+            "actions_used": 1,
+            "actions_remaining": 11,
+            "remaining_ms": 1101188.0000000237,
+            "recent_steps": [
+              {
+                "index": 1,
+                "action_type": "click",
+                "attempted": true,
+                "succeeded": true,
+                "verification": "passed"
+              }
+            ],
+            "omitted_steps": 0,
+            "instruction": "Plan from the current observation; previous attempts do not prove success. Do not replay completed inputs to recreate an earlier state. Existing task checks and remaining budgets still apply."
+          }
+        },
+        "image_path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261025_normal_014\\automatic\\workflow\\001_CALLER_GOAL\\monitor1_20261025_222937_545.png",
+        "task_id": "CALLER_GOAL",
+        "attempts": 1,
+        "model_requests": 1,
+        "parsed_plan": {
+          "task_id": "t1",
+          "instruction": "Choose the 'GREEN' report theme for Project ALPHA.",
+          "summary": "Select 'GREEN' theme.",
+          "steps": [
+            {
+              "step_id": "s1",
+              "description": "Select the 'GREEN' theme.",
+              "action_type": "click",
+              "target_text": "GREEN",
+              "arguments": {
+                "element_id": "obs-0005-e003"
+              },
+              "expected_result": "Theme selected as 'GREEN'.",
+              "status": "pending"
+            }
+          ],
+          "assumptions": [],
+          "requires_confirmation": true,
+          "errors": []
+        },
+        "response": {
+          "provider": "openai_compatible",
+          "model_name": "qwen2.5vl:7b",
+          "latency_ms": 15891.0,
+          "usage": {
+            "prompt_tokens": 5496,
+            "completion_tokens": 90,
+            "total_tokens": 5586
+          },
+          "error": null,
+          "content_length": 351,
+          "content": "{\"task_id\":\"t1\",\"instruction\":\"Choose the 'GREEN' report theme for Project ALPHA.\",\"summary\":\"Select 'GREEN' theme.\",\"steps\":[{\"step_id\":\"s1\",\"description\":\"Select the 'GREEN' theme.\",\"action_type\":\"click\",\"target_text\":\"GREEN\",\"arguments\":{\"element_id\":\"obs-0005-e003\"},\"expected_result\":\"Theme selected as 'GREEN'.\",\"status\":\"pending\"}],\"errors\":[]}",
+          "raw_response": {
+            "finish_reason": "stop"
+          }
+        },
+        "error": null
+      },
+      {
+        "max_steps": 1,
+        "returned_steps": 1,
+        "ok": true,
+        "instruction": "Advance only the currently visible stage of the original caller request. Choose operations from the original request and current screen; do not repeat already satisfied selections. Plan at most one input, then observe again. Original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test, with no external communication. If review is temporarily unavailable, retry within budget.",
+        "context": {
+          "platform": "win32",
+          "observation_id": "obs-0009",
+          "screen": "2560x1600",
+          "target_app": null,
+          "allowed_keys": {
+            "keys": [
+              "0",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+              "a",
+              "b",
+              "backspace",
+              "c",
+              "d",
+              "delete",
+              "down",
+              "e",
+              "end",
+              "enter",
+              "esc",
+              "escape",
+              "f",
+              "f1",
+              "f10",
+              "f11",
+              "f12",
+              "f2",
+              "f3",
+              "f4",
+              "f5",
+              "f6",
+              "f7",
+              "f8",
+              "f9",
+              "g",
+              "h",
+              "home",
+              "i",
+              "j",
+              "k",
+              "l",
+              "left",
+              "m",
+              "n",
+              "o",
+              "p",
+              "pagedown",
+              "pageup",
+              "q",
+              "r",
+              "return",
+              "right",
+              "s",
+              "space",
+              "t",
+              "tab",
+              "u",
+              "up",
+              "v",
+              "w",
+              "x",
+              "y",
+              "z"
+            ],
+            "modifiers": [
+              "alt",
+              "cmd",
+              "command",
+              "control",
+              "ctrl",
+              "shift",
+              "super",
+              "win"
+            ],
+            "hotkey_separator": "+"
+          },
+          "limits": "at most 12 actions and 1184.53 s for the whole task",
+          "visible_text": "obs-0009-e000  'Offline report preparation'  conf=0.96  center=(1280,630)  box=(1101,615,1460,645)\nobs-0009-e001  'Project ALPHA'  conf=0.96  center=(1282,725)  box=(1155,707,1409,743)\nobs-0009-e002  'Theme GREEN'  conf=0.96  center=(1279,818)  box=(1147,804,1412,833)\nobs-0009-e003  'Review report'  conf=0.96  center=(1282,1049)  box=(1168,1032,1397,1067)\nobs-0009-e004  'Draft ready'  conf=0.95  center=(1281,920)  box=(1188,902,1375,938)\nobs-0009-e005  'Week6 Local Lab'  conf=0.90  center=(1281,529)  box=(1089,510,1474,548)\nobs-0009-e006  '—_____ =i.'  conf=0.46  center=(1179,1096)  box=(1049,1076,1309,1116)\nobs-0009-e007  <unlabelled box>  conf=0.50  center=(1984,800)  box=(1409,0,2560,1600)\nobs-0009-e008  <unlabelled box>  conf=0.50  center=(1282,1047)  box=(1048,988,1516,1106)",
+          "success_rules": [],
+          "recovery": {
+            "previous_pass": 2,
+            "reason": "task_verification",
+            "failed_step_index": null,
+            "actions_used": 2,
+            "actions_remaining": 10,
+            "remaining_ms": 1025891.0000000033,
+            "recent_steps": [
+              {
+                "index": 2,
+                "action_type": "click",
+                "attempted": true,
+                "succeeded": true,
+                "verification": "passed"
+              }
+            ],
+            "omitted_steps": 0,
+            "instruction": "Plan from the current observation; previous attempts do not prove success. Do not replay completed inputs to recreate an earlier state. Existing task checks and remaining budgets still apply."
+          }
+        },
+        "image_path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261025_normal_014\\automatic\\workflow\\001_CALLER_GOAL\\monitor1_20261025_223052_853.png",
+        "task_id": "CALLER_GOAL",
+        "attempts": 1,
+        "model_requests": 1,
+        "parsed_plan": {
+          "task_id": "t1",
+          "instruction": "..",
+          "summary": "Click on 'Review report' to proceed with the report review.",
+          "steps": [
+            {
+              "step_id": "s1",
+              "description": "Click on 'Review report' to proceed with the report review.",
+              "action_type": "click",
+              "target_text": "Review report",
+              "arguments": {
+                "element_id": "obs-0009-e003"
+              },
+              "expected_result": "The report review process should start.",
+              "status": "pending"
+            }
+          ],
+          "assumptions": [],
+          "requires_confirmation": true,
+          "errors": []
+        },
+        "response": {
+          "provider": "openai_compatible",
+          "model_name": "qwen2.5vl:7b",
+          "latency_ms": 16125.0,
+          "usage": {
+            "prompt_tokens": 5444,
+            "completion_tokens": 95,
+            "total_tokens": 5539
+          },
+          "error": null,
+          "content_length": 396,
+          "content": "{\"task_id\":\"t1\",\"instruction\":\"..\",\"summary\":\"Click on 'Review report' to proceed with the report review.\",\"steps\":[{\"step_id\":\"s1\",\"description\":\"Click on 'Review report' to proceed with the report review.\",\"action_type\":\"click\",\"target_text\":\"Review report\",\"arguments\":{\"element_id\":\"obs-0009-e003\"},\"expected_result\":\"The report review process should start.\",\"status\":\"pending\"}],\"errors\":[]}",
+          "raw_response": {
+            "finish_reason": "stop"
+          }
+        },
+        "error": null
+      }
+    ],
+    "actions": [
+      {
+        "index": 1,
+        "step_id": "s1",
+        "description": "Select project ALPHA.",
+        "action_type": "click",
+        "observation_id": "obs-0002",
+        "resolved": {
+          "step_id": "s1",
+          "action": {
+            "action_type": "click",
+            "x": 1280,
+            "y": 867,
+            "start": null,
+            "end": null,
+            "text": null,
+            "key": null,
+            "keys": null,
+            "scroll_amount": null,
+            "duration": null,
+            "target_description": "ALPHA"
+          },
+          "element_id": "obs-0002-e001",
+          "screenshot_point": {
+            "x": 1280,
+            "y": 867
+          },
+          "control_point": {
+            "x": 1280,
+            "y": 867
+          },
+          "note": "text 'ALPHA' -> obs-0002-e001 (re-bound from obs-0001-e003 in an earlier frame)"
+        },
+        "action_result": {
+          "success": true,
+          "dry_run": false,
+          "error": null,
+          "action": {
+            "action_type": "click",
+            "x": 1280,
+            "y": 867,
+            "start": null,
+            "end": null,
+            "text": null,
+            "key": null,
+            "keys": null,
+            "scroll_amount": null,
+            "duration": null,
+            "target_description": "ALPHA"
+          }
+        },
+        "verification": {
+          "outcome": "passed",
+          "method": "automatic",
+          "detail": "expected result observed: alpha",
+          "evidence": {
+            "observation_id": "obs-0003",
+            "changed": true,
+            "element_count": 10,
+            "expectation_tokens": [
+              "alpha"
+            ],
+            "expectation_hits": [
+              "alpha"
+            ]
+          }
+        },
+        "error": null,
+        "elapsed_ms": 49577.99999997951,
+        "after_observation_id": "obs-0003"
+      },
+      {
+        "index": 2,
+        "step_id": "s1",
+        "description": "Select the 'GREEN' theme.",
+        "action_type": "click",
+        "observation_id": "obs-0006",
+        "resolved": {
+          "step_id": "s1",
+          "action": {
+            "action_type": "click",
+            "x": 1280,
+            "y": 1079,
+            "start": null,
+            "end": null,
+            "text": null,
+            "key": null,
+            "keys": null,
+            "scroll_amount": null,
+            "duration": null,
+            "target_description": "GREEN"
+          },
+          "element_id": "obs-0006-e003",
+          "screenshot_point": {
+            "x": 1280,
+            "y": 1079
+          },
+          "control_point": {
+            "x": 1280,
+            "y": 1079
+          },
+          "note": "text 'GREEN' -> obs-0006-e003 (re-bound from obs-0005-e003 in an earlier frame)"
+        },
+        "action_result": {
+          "success": true,
+          "dry_run": false,
+          "error": null,
+          "action": {
+            "action_type": "click",
+            "x": 1280,
+            "y": 1079,
+            "start": null,
+            "end": null,
+            "text": null,
+            "key": null,
+            "keys": null,
+            "scroll_amount": null,
+            "duration": null,
+            "target_description": "GREEN"
+          }
+        },
+        "verification": {
+          "outcome": "passed",
+          "method": "automatic",
+          "detail": "expected result observed: theme, green",
+          "evidence": {
+            "observation_id": "obs-0007",
+            "changed": true,
+            "element_count": 9,
+            "expectation_tokens": [
+              "theme",
+              "green"
+            ],
+            "expectation_hits": [
+              "theme",
+              "green"
+            ]
+          }
+        },
+        "error": null,
+        "elapsed_ms": 51031.00000001723,
+        "after_observation_id": "obs-0007"
+      },
+      {
+        "index": 3,
+        "step_id": "s1",
+        "description": "Click on 'Review report' to proceed with the report review.",
+        "action_type": "click",
+        "observation_id": "obs-0010",
+        "resolved": {
+          "step_id": "s1",
+          "action": {
+            "action_type": "click",
+            "x": 1282,
+            "y": 1049,
+            "start": null,
+            "end": null,
+            "text": null,
+            "key": null,
+            "keys": null,
+            "scroll_amount": null,
+            "duration": null,
+            "target_description": "Review report"
+          },
+          "element_id": "obs-0010-e003",
+          "screenshot_point": {
+            "x": 1282,
+            "y": 1049
+          },
+          "control_point": {
+            "x": 1282,
+            "y": 1049
+          },
+          "note": "text 'Review report' -> obs-0010-e003 (re-bound from obs-0009-e003 in an earlier frame)"
+        },
+        "action_result": null,
+        "verification": null,
+        "error": "executor raised; dispatch outcome is unconfirmed",
+        "elapsed_ms": 217297.0000000205,
+        "after_observation_id": null
+      }
+    ],
+    "child_status": "failed",
+    "child_verification": null,
+    "caller_verification": {
+      "outcome": "inconclusive",
+      "method": "automatic",
+      "detail": "no observation available to verify against",
+      "evidence": {}
+    },
+    "post_observation_id": null,
+    "confirmed_input_count": 2,
+    "unconfirmed_action_attempts": 1,
+    "planning_accounting_complete": true,
+    "eligible_for_final_verification": false,
+    "meaning": "Model-generated next-action plans on the immutable caller goal; no marker or semantic subgoal completion is asserted."
+  },
+  "initial_verification": {
+    "outcome": "failed",
+    "method": "automatic",
+    "detail": "expected on screen but not found: Project ALPHA, Theme GREEN, LOCAL COMPLETE",
+    "evidence": {
+      "observation_id": "obs-0001",
+      "missing": [
+        "Project ALPHA",
+        "Theme GREEN",
+        "LOCAL COMPLETE"
+      ]
+    }
+  },
+  "final_verification": null,
+  "final_observation_reference": "",
+  "already_satisfied": false,
+  "completion_basis": "",
+  "accounting_complete": false,
+  "decomposition": {
+    "status": "not_requested",
+    "workflow": {
+      "workflow_id": "lab_auto",
+      "instruction": "In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test, with no external communication. If review is temporarily unavailable, retry within budget.",
+      "subgoals": [
+        {
+          "case_id": "CALLER_GOAL",
+          "instruction": "Advance only the currently visible stage of the original caller request. Choose operations from the original request and current screen; do not repeat already satisfied selections. Plan at most one input, then observe again. Original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test, with no external communication. If review is temporarily unavailable, retry within budget.",
+          "target_app": null,
+          "preconditions": [],
+          "success_rules": [],
+          "verification": "automatic",
+          "expect_text": [
+            "Project ALPHA",
+            "Theme GREEN",
+            "LOCAL COMPLETE"
+          ],
+          "forbid_text": [],
+          "requires_processes": [],
+          "forbids_processes": [],
+          "must_exit_processes": [],
+          "risk": "medium",
+          "message_conversation": null,
+          "gate_on_step_verification": false
+        }
+      ],
+      "final_check": {
+        "case_id": "FINAL",
+        "instruction": "Independently verify unchanged caller rules on a fresh frame",
+        "target_app": null,
+        "preconditions": [],
+        "success_rules": [],
+        "verification": "automatic",
+        "expect_text": [
+          "Project ALPHA",
+          "Theme GREEN",
+          "LOCAL COMPLETE"
+        ],
+        "forbid_text": [],
+        "requires_processes": [],
+        "forbids_processes": [],
+        "must_exit_processes": [],
+        "risk": "low",
+        "message_conversation": null,
+        "gate_on_step_verification": true
+      }
+    },
+    "raw_workflow": null,
+    "progress_contract": null,
+    "protocol_mode": "rolling_actions",
+    "protocol_version": "week6.rolling_actions.v2",
+    "protocol_reference": "",
+    "native_proposal": null,
+    "error": "",
+    "decomposition_calls": 0,
+    "format_attempts": 0,
+    "model_requests": 0,
+    "elapsed_ms": 0.0,
+    "provider": "",
+    "model_name": "",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261025_normal_014\\automatic",
+    "intermediate_check_source": "local_caller_goal",
+    "final_check_source": "caller_supplied_unchanged"
+  },
+  "decompositions": [],
+  "workflow_result": {
+    "schema_version": "week6.workflow.v1",
+    "workflow_id": "lab_auto",
+    "status": "failed",
+    "execute": true,
+    "subgoals": [
+      {
+        "index": 0,
+        "case_id": "CALLER_GOAL",
+        "status": "failed",
+        "child_status": "failed",
+        "actions": 2,
+        "unconfirmed_action_attempts": 1,
+        "planning_calls": 3,
+        "verification": null,
+        "elapsed_ms": 392187.00000003446,
+        "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261025_normal_014\\automatic\\workflow\\001_CALLER_GOAL",
+        "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261025_normal_014\\automatic\\workflow\\001_CALLER_GOAL\\task_summary.json",
+        "error": null
+      }
+    ],
+    "total_actions": 2,
+    "unconfirmed_action_attempts": 1,
+    "planning_calls": 3,
+    "accounting_complete": false,
+    "elapsed_ms": 392516.00000000326,
+    "final_verification": null,
+    "final_observation_id": null,
+    "final_observation_reference": "",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261025_normal_014\\automatic\\workflow",
+    "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261025_normal_014\\automatic\\workflow\\workflow_summary.json",
+    "checkpoint_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261025_normal_014\\automatic\\workflow\\checkpoints.jsonl",
+    "error": "child dispatch outcome is unconfirmed; no further execution",
+    "notes": [
+      "A child reports unconfirmed dispatch attempts; total_actions is a confirmed lower bound. Later subgoals will not run."
+    ]
+  },
+  "workflow_rounds": [
+    {
+      "schema_version": "week6.workflow.v1",
+      "workflow_id": "lab_auto",
+      "status": "failed",
+      "execute": true,
+      "subgoals": [
+        {
+          "index": 0,
+          "case_id": "CALLER_GOAL",
+          "status": "failed",
+          "child_status": "failed",
+          "actions": 2,
+          "unconfirmed_action_attempts": 1,
+          "planning_calls": 3,
+          "verification": null,
+          "elapsed_ms": 392187.00000003446,
+          "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261025_normal_014\\automatic\\workflow\\001_CALLER_GOAL",
+          "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261025_normal_014\\automatic\\workflow\\001_CALLER_GOAL\\task_summary.json",
+          "error": null
+        }
+      ],
+      "total_actions": 2,
+      "unconfirmed_action_attempts": 1,
+      "planning_calls": 3,
+      "accounting_complete": false,
+      "elapsed_ms": 392516.00000000326,
+      "final_verification": null,
+      "final_observation_id": null,
+      "final_observation_reference": "",
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261025_normal_014\\automatic\\workflow",
+      "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261025_normal_014\\automatic\\workflow\\workflow_summary.json",
+      "checkpoint_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261025_normal_014\\automatic\\workflow\\checkpoints.jsonl",
+      "error": "child dispatch outcome is unconfirmed; no further execution",
+      "notes": [
+        "A child reports unconfirmed dispatch attempts; total_actions is a confirmed lower bound. Later subgoals will not run."
+      ]
+    }
+  ],
+  "completed_subgoals": [],
+  "progress_verifications": [],
+  "total_actions": 2,
+  "unconfirmed_action_attempts": 1,
+  "planning_calls": 3,
+  "model_requests": 3,
+  "elapsed_ms": 407922.0000000205,
+  "error": "child dispatch outcome is unconfirmed; no further execution",
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261025_normal_014\\automatic"
+}

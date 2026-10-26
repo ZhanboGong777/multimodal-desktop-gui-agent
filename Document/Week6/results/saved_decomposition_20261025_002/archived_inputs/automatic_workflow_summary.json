@@ -1,0 +1,459 @@
+{
+  "schema_version": "week6.automatic_workflow.v1",
+  "workflow_id": "lab_auto",
+  "status": "failed",
+  "decomposition": {
+    "status": "ready",
+    "workflow": {
+      "workflow_id": "lab_auto",
+      "instruction": "In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test, with no external communication. If review is temporarily unavailable, retry within budget.",
+      "subgoals": [
+        {
+          "case_id": "G01",
+          "instruction": "Select the project 'ALPHA'",
+          "target_app": null,
+          "preconditions": [],
+          "success_rules": [],
+          "verification": "automatic",
+          "expect_text": [
+            "ALPHA"
+          ],
+          "forbid_text": [],
+          "requires_processes": [],
+          "forbids_processes": [],
+          "must_exit_processes": [],
+          "risk": "medium",
+          "message_conversation": null,
+          "gate_on_step_verification": true
+        }
+      ],
+      "final_check": {
+        "case_id": "FINAL",
+        "instruction": "Verify caller final rules on a fresh frame",
+        "target_app": null,
+        "preconditions": [],
+        "success_rules": [],
+        "verification": "automatic",
+        "expect_text": [
+          "Project ALPHA",
+          "Theme GREEN",
+          "LOCAL COMPLETE"
+        ],
+        "forbid_text": [],
+        "requires_processes": [],
+        "forbids_processes": [],
+        "must_exit_processes": [],
+        "risk": "low",
+        "message_conversation": null,
+        "gate_on_step_verification": true
+      }
+    },
+    "error": "",
+    "decomposition_calls": 1,
+    "format_attempts": 1,
+    "model_requests": 1,
+    "elapsed_ms": 44047.00000002049,
+    "provider": "openai_compatible",
+    "model_name": "qwen2.5vl:7b",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\decomposition",
+    "intermediate_check_source": "model_proposal_untrusted",
+    "final_check_source": "caller_supplied_unchanged"
+  },
+  "decompositions": [
+    {
+      "status": "ready",
+      "workflow": {
+        "workflow_id": "lab_auto",
+        "instruction": "In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test, with no external communication. If review is temporarily unavailable, retry within budget.",
+        "subgoals": [
+          {
+            "case_id": "G01",
+            "instruction": "Select the project 'ALPHA'",
+            "target_app": null,
+            "preconditions": [],
+            "success_rules": [],
+            "verification": "automatic",
+            "expect_text": [
+              "ALPHA"
+            ],
+            "forbid_text": [],
+            "requires_processes": [],
+            "forbids_processes": [],
+            "must_exit_processes": [],
+            "risk": "medium",
+            "message_conversation": null,
+            "gate_on_step_verification": true
+          }
+        ],
+        "final_check": {
+          "case_id": "FINAL",
+          "instruction": "Verify caller final rules on a fresh frame",
+          "target_app": null,
+          "preconditions": [],
+          "success_rules": [],
+          "verification": "automatic",
+          "expect_text": [
+            "Project ALPHA",
+            "Theme GREEN",
+            "LOCAL COMPLETE"
+          ],
+          "forbid_text": [],
+          "requires_processes": [],
+          "forbids_processes": [],
+          "must_exit_processes": [],
+          "risk": "low",
+          "message_conversation": null,
+          "gate_on_step_verification": true
+        }
+      },
+      "error": "",
+      "decomposition_calls": 1,
+      "format_attempts": 1,
+      "model_requests": 1,
+      "elapsed_ms": 44047.00000002049,
+      "provider": "openai_compatible",
+      "model_name": "qwen2.5vl:7b",
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\decomposition",
+      "intermediate_check_source": "model_proposal_untrusted",
+      "final_check_source": "caller_supplied_unchanged"
+    },
+    {
+      "status": "ready",
+      "workflow": {
+        "workflow_id": "lab_auto",
+        "instruction": "In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test, with no external communication. If review is temporarily unavailable, retry within budget.",
+        "subgoals": [
+          {
+            "case_id": "G01",
+            "instruction": "Select the report theme 'GREEN'",
+            "target_app": null,
+            "preconditions": [],
+            "success_rules": [],
+            "verification": "automatic",
+            "expect_text": [
+              "GREEN"
+            ],
+            "forbid_text": [
+              "BLUE"
+            ],
+            "requires_processes": [],
+            "forbids_processes": [],
+            "must_exit_processes": [],
+            "risk": "medium",
+            "message_conversation": null,
+            "gate_on_step_verification": true
+          }
+        ],
+        "final_check": {
+          "case_id": "FINAL",
+          "instruction": "Verify caller final rules on a fresh frame",
+          "target_app": null,
+          "preconditions": [],
+          "success_rules": [],
+          "verification": "automatic",
+          "expect_text": [
+            "Project ALPHA",
+            "Theme GREEN",
+            "LOCAL COMPLETE"
+          ],
+          "forbid_text": [],
+          "requires_processes": [],
+          "forbids_processes": [],
+          "must_exit_processes": [],
+          "risk": "low",
+          "message_conversation": null,
+          "gate_on_step_verification": true
+        }
+      },
+      "error": "",
+      "decomposition_calls": 1,
+      "format_attempts": 1,
+      "model_requests": 1,
+      "elapsed_ms": 41172.00000002049,
+      "provider": "openai_compatible",
+      "model_name": "qwen2.5vl:7b",
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\decomposition_round_002",
+      "intermediate_check_source": "model_proposal_untrusted",
+      "final_check_source": "caller_supplied_unchanged"
+    },
+    {
+      "status": "ready",
+      "workflow": {
+        "workflow_id": "lab_auto",
+        "instruction": "In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test, with no external communication. If review is temporarily unavailable, retry within budget.",
+        "subgoals": [
+          {
+            "case_id": "G01",
+            "instruction": "Click the 'Review report' button to review the report.",
+            "target_app": null,
+            "preconditions": [],
+            "success_rules": [],
+            "verification": "automatic",
+            "expect_text": [
+              "Review report"
+            ],
+            "forbid_text": [
+              "Draft ready",
+              "Project ALPHA",
+              "Theme GREEN"
+            ],
+            "requires_processes": [],
+            "forbids_processes": [],
+            "must_exit_processes": [],
+            "risk": "medium",
+            "message_conversation": null,
+            "gate_on_step_verification": true
+          }
+        ],
+        "final_check": {
+          "case_id": "FINAL",
+          "instruction": "Verify caller final rules on a fresh frame",
+          "target_app": null,
+          "preconditions": [],
+          "success_rules": [],
+          "verification": "automatic",
+          "expect_text": [
+            "Project ALPHA",
+            "Theme GREEN",
+            "LOCAL COMPLETE"
+          ],
+          "forbid_text": [],
+          "requires_processes": [],
+          "forbids_processes": [],
+          "must_exit_processes": [],
+          "risk": "low",
+          "message_conversation": null,
+          "gate_on_step_verification": true
+        }
+      },
+      "error": "",
+      "decomposition_calls": 1,
+      "format_attempts": 1,
+      "model_requests": 1,
+      "elapsed_ms": 40983.99999999674,
+      "provider": "openai_compatible",
+      "model_name": "qwen2.5vl:7b",
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\decomposition_round_003",
+      "intermediate_check_source": "model_proposal_untrusted",
+      "final_check_source": "caller_supplied_unchanged"
+    }
+  ],
+  "workflow_result": {
+    "schema_version": "week6.workflow.v1",
+    "workflow_id": "lab_auto",
+    "status": "failed",
+    "execute": true,
+    "subgoals": [
+      {
+        "index": 0,
+        "case_id": "G01",
+        "status": "failed",
+        "child_status": "failed",
+        "actions": 0,
+        "unconfirmed_action_attempts": 0,
+        "planning_calls": 1,
+        "verification": null,
+        "elapsed_ms": 251467.99999999348,
+        "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow_round_003\\001_G01",
+        "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow_round_003\\001_G01\\task_summary.json",
+        "error": null
+      }
+    ],
+    "total_actions": 0,
+    "unconfirmed_action_attempts": 0,
+    "planning_calls": 1,
+    "accounting_complete": true,
+    "elapsed_ms": 251859.99999998603,
+    "final_verification": null,
+    "final_observation_id": null,
+    "final_observation_reference": "",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow_round_003",
+    "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow_round_003\\workflow_summary.json",
+    "checkpoint_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow_round_003\\checkpoints.jsonl",
+    "error": "subgoal did not finish with the required task verification",
+    "notes": []
+  },
+  "workflow_rounds": [
+    {
+      "schema_version": "week6.workflow.v1",
+      "workflow_id": "lab_auto",
+      "status": "failed",
+      "execute": true,
+      "subgoals": [
+        {
+          "index": 0,
+          "case_id": "G01",
+          "status": "completed",
+          "child_status": "succeeded",
+          "actions": 1,
+          "unconfirmed_action_attempts": 0,
+          "planning_calls": 1,
+          "verification": {
+            "outcome": "passed",
+            "method": "automatic",
+            "detail": "all success rules matched against the current screen",
+            "evidence": {
+              "observation_id": "obs-0004",
+              "expect_text": [
+                "ALPHA"
+              ],
+              "forbid_text": []
+            }
+          },
+          "elapsed_ms": 133812.00000003446,
+          "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow\\001_G01",
+          "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow\\001_G01\\task_summary.json",
+          "error": null
+        }
+      ],
+      "total_actions": 1,
+      "unconfirmed_action_attempts": 0,
+      "planning_calls": 1,
+      "accounting_complete": true,
+      "elapsed_ms": 189375.0,
+      "final_verification": {
+        "outcome": "failed",
+        "method": "automatic",
+        "detail": "expected on screen but not found: Theme GREEN, LOCAL COMPLETE",
+        "evidence": {
+          "observation_id": "obs-0005",
+          "missing": [
+            "Theme GREEN",
+            "LOCAL COMPLETE"
+          ]
+        }
+      },
+      "final_observation_id": "obs-0005",
+      "final_observation_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow\\001_G01\\obs-0005.json",
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow",
+      "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow\\workflow_summary.json",
+      "checkpoint_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow\\checkpoints.jsonl",
+      "error": "final workflow verification did not pass",
+      "notes": []
+    },
+    {
+      "schema_version": "week6.workflow.v1",
+      "workflow_id": "lab_auto",
+      "status": "failed",
+      "execute": true,
+      "subgoals": [
+        {
+          "index": 0,
+          "case_id": "G01",
+          "status": "completed",
+          "child_status": "succeeded",
+          "actions": 1,
+          "unconfirmed_action_attempts": 0,
+          "planning_calls": 1,
+          "verification": {
+            "outcome": "passed",
+            "method": "automatic",
+            "detail": "all success rules matched against the current screen",
+            "evidence": {
+              "observation_id": "obs-0004",
+              "expect_text": [
+                "GREEN"
+              ],
+              "forbid_text": [
+                "BLUE"
+              ]
+            }
+          },
+          "elapsed_ms": 133188.00000002375,
+          "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow_round_002\\001_G01",
+          "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow_round_002\\001_G01\\task_summary.json",
+          "error": null
+        }
+      ],
+      "total_actions": 1,
+      "unconfirmed_action_attempts": 0,
+      "planning_calls": 1,
+      "accounting_complete": true,
+      "elapsed_ms": 169750.0,
+      "final_verification": {
+        "outcome": "failed",
+        "method": "automatic",
+        "detail": "expected on screen but not found: LOCAL COMPLETE",
+        "evidence": {
+          "observation_id": "obs-0005",
+          "missing": [
+            "LOCAL COMPLETE"
+          ]
+        }
+      },
+      "final_observation_id": "obs-0005",
+      "final_observation_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow_round_002\\001_G01\\obs-0005.json",
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow_round_002",
+      "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow_round_002\\workflow_summary.json",
+      "checkpoint_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow_round_002\\checkpoints.jsonl",
+      "error": "final workflow verification did not pass",
+      "notes": []
+    },
+    {
+      "schema_version": "week6.workflow.v1",
+      "workflow_id": "lab_auto",
+      "status": "failed",
+      "execute": true,
+      "subgoals": [
+        {
+          "index": 0,
+          "case_id": "G01",
+          "status": "failed",
+          "child_status": "failed",
+          "actions": 0,
+          "unconfirmed_action_attempts": 0,
+          "planning_calls": 1,
+          "verification": null,
+          "elapsed_ms": 251467.99999999348,
+          "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow_round_003\\001_G01",
+          "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow_round_003\\001_G01\\task_summary.json",
+          "error": null
+        }
+      ],
+      "total_actions": 0,
+      "unconfirmed_action_attempts": 0,
+      "planning_calls": 1,
+      "accounting_complete": true,
+      "elapsed_ms": 251859.99999998603,
+      "final_verification": null,
+      "final_observation_id": null,
+      "final_observation_reference": "",
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow_round_003",
+      "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow_round_003\\workflow_summary.json",
+      "checkpoint_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow_round_003\\checkpoints.jsonl",
+      "error": "subgoal did not finish with the required task verification",
+      "notes": []
+    }
+  ],
+  "completed_subgoals": [
+    {
+      "round": 1,
+      "case_id": "G01",
+      "instruction": "Select the project 'ALPHA'",
+      "expect_text": [
+        "ALPHA"
+      ],
+      "forbid_text": [],
+      "meaning": "Intermediate model-proposed check passed; overall caller final check remains independent."
+    },
+    {
+      "round": 2,
+      "case_id": "G01",
+      "instruction": "Select the report theme 'GREEN'",
+      "expect_text": [
+        "GREEN"
+      ],
+      "forbid_text": [
+        "BLUE"
+      ],
+      "meaning": "Intermediate model-proposed check passed; overall caller final check remains independent."
+    }
+  ],
+  "total_actions": 2,
+  "unconfirmed_action_attempts": 0,
+  "planning_calls": 6,
+  "model_requests": 6,
+  "elapsed_ms": 776391.0000000033,
+  "error": "subgoal did not finish with the required task verification",
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic"
+}

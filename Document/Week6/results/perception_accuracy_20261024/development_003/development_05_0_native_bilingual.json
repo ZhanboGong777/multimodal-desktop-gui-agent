@@ -1,0 +1,296 @@
+{
+  "fixture": "development_05",
+  "arm": "native_bilingual",
+  "repeat": 0,
+  "decode_ms": 1.577800023369491,
+  "ocr_ms": 315.67449995782226,
+  "ui_ms": 5.346900026779622,
+  "full_ms": 322.5992000079714,
+  "metrics": {
+    "tp": 5,
+    "fp": 0,
+    "fn": 3,
+    "precision": 1.0,
+    "recall": 0.625,
+    "labels": [
+      {
+        "text": "System Status",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9918032786885246
+      },
+      {
+        "text": "Queue Size",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9010989010989011
+      },
+      {
+        "text": "Retry Task",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9866666666666667
+      },
+      {
+        "text": "Pause",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9555555555555556
+      },
+      {
+        "text": "Resume",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9666666666666667
+      },
+      {
+        "text": "系统状态",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "重新尝试",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "暂停",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      }
+    ]
+  },
+  "predictions": [
+    {
+      "text": "System Status",
+      "bounding_box": {
+        "left": 36,
+        "top": 37,
+        "right": 157,
+        "bottom": 55
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 96,
+        "y": 46
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Queue Size",
+      "bounding_box": {
+        "left": 36,
+        "top": 106,
+        "right": 118,
+        "bottom": 118
+      },
+      "confidence": 0.94,
+      "center": {
+        "x": 77,
+        "y": 112
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Retry Task",
+      "bounding_box": {
+        "left": 36,
+        "top": 183,
+        "right": 110,
+        "bottom": 198
+      },
+      "confidence": 0.6,
+      "center": {
+        "x": 73,
+        "y": 190
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Pause",
+      "bounding_box": {
+        "left": 36,
+        "top": 284,
+        "right": 79,
+        "bottom": 296
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 57,
+        "y": 290
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Resume",
+      "bounding_box": {
+        "left": 231,
+        "top": 284,
+        "right": 289,
+        "bottom": 296
+      },
+      "confidence": 0.92,
+      "center": {
+        "x": 260,
+        "y": 290
+      },
+      "source": "ocr"
+    }
+  ],
+  "ui_candidates": [
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 539,
+        "top": 270,
+        "right": 679,
+        "bottom": 324
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 609,
+        "y": 297
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 219,
+        "top": 270,
+        "right": 359,
+        "bottom": 324
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 289,
+        "y": 297
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 24,
+        "top": 270,
+        "right": 164,
+        "bottom": 324
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 94,
+        "y": 297
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 539,
+        "top": 169,
+        "right": 679,
+        "bottom": 223
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 609,
+        "y": 196
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 24,
+        "top": 169,
+        "right": 164,
+        "bottom": 223
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 94,
+        "y": 196
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 539,
+        "top": 92,
+        "right": 679,
+        "bottom": 146
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 609,
+        "y": 119
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 550,
+        "top": 183,
+        "right": 615,
+        "bottom": 201
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 582,
+        "y": 192
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 550,
+        "top": 106,
+        "right": 615,
+        "bottom": 124
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 582,
+        "y": 115
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 550,
+        "top": 284,
+        "right": 583,
+        "bottom": 302
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 566,
+        "y": 293
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 568,
+        "top": 287,
+        "right": 578,
+        "bottom": 297
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 573,
+        "y": 292
+      },
+      "source": "contour"
+    }
+  ],
+  "errors": []
+}

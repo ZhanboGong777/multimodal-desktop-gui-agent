@@ -1,22 +1,32 @@
 # 系统 v2.0.0 发布说明
 
-日期：2026-10-24（Australia/Sydney）。开发分支：`codex/week6-delivery`。
-最终全量检查：`2840 项通过，0 失败，pytest 443.05 秒，退出码 0`；原始验证记录：`results/release_validation_20261024_attempt004/validation.json`。
+日期：2026年10月26日 Australia/Sydney。开发分支：`codex/week6-delivery`。本次按受限工程范围整理Week6交付，完整CPU回归为3027项通过、0失败，pytest 535.12秒，封装墙钟566.027秒，真实exit 0；244份文件的before、after与当前SHA完全一致。本版按上述受限工程范围闭合实现与证据；报告和分发文件按独立生成与发布清单核验。
 
-## 本版变化
+## 当前能力与范围
 
-- 调用方定义有序子目标和独立总体文字检查，各阶段共用动作、规划调用及时间预算。已验证阶段不重放，旧日志不能触发自动恢复执行。
-- 重规划获得结构化失败反馈；执行异常产生未知派发记录时停止自动重试，确认动作数只作为下界。
-- 感知记录各处理阶段耗时，并优化候选框去重。配对测量保留完整候选与计时；没有证明整个观察流程普遍加速。
-- 新增运行状态快照、事件日志及只读状态工具。Windows 原子替换遇短暂 PermissionError 时仅有限重试文件操作，不重复动作或事件追加。
+CLI整体指令入口默认迁移到 `rolling_actions`。模型依据整体调用方请求与当前截图逐动作在线规划，每次计划硬限 `max_steps=1`；输入后重新观察，最终文字规则由调用方保有。`CALLER_GOAL`是本地容器，层次化语义子任务生成与依赖管理未实现。Python API默认仍保留 `observed_departure`；固定 `--workflow` 有序阶段入口和严格检查行为不变。
 
-工作流本版需要显式文字检查，不接受消息工作流；总体检查不支持进程规则。原单任务执行边界继续保留。Week 5 的 C11 权重、历史训练与资源结果独立保留，本版不追加训练或消息发送。
+`week6.rolling_actions.v2` 在输入前声明 `gate_on_step_verification=false`。模型自写的step预测只作原始诊断，failed与inconclusive均保留；新帧调用方规则与另一张独立final帧决定任务完成。实际执行失败、未知派发、取消和超时继续按原运行器分支处理。预算覆盖动作、规划、实际HTTP与截止时间，恢复不重置额度。
 
-## 从源码安装
+重规划读取当前帧和结构化失败反馈；进入执行器后无完整结果时停止自动重放。状态快照、事件、输入意图和真实终态分别记录，只读状态工具核验进程身份与数据可信度。逐输入详情位于 `workflow/001_CALLER_GOAL`，根状态主要反映整体生命周期。
 
-支持范围由 `pyproject.toml` 声明为 Python 3.11–3.13；本次验证环境是 Windows、Python 3.12。其他操作系统尚未形成同等的本版验证记录。
+双语screen OCR保留现成英中语言资源与Apache 2.0许可证。冻结6帧留出中识别46/48，精确率、召回率、F1均95.83%；同双语native为30/48，但screen整帧中位耗时增加9.75%。局部轮廓提取配对中位14.421→12.185 ms，未证明整个智能体普遍加速。错误与真实英文保存图无增益结果均保留。
 
-在源码包根目录创建环境并安装：
+## 真实验证与历史失败
+
+同份冻结源下，正常017完成ALPHA/GREEN，4次HTTP、4规划、4输入、652.750秒；瞬态015完成BETA/BLUE，首次审阅拒绝后恢复，5次HTTP、5规划、5输入、275.703秒。两批运行器、独立终态、不同输入回执逐项归因、源码未变和真实owner exit0共同通过，未知派发0。瞬态提交后的模型step预测仍failed，原始记录未改写，调用方final通过。
+
+瞬态拒绝发生在应用审阅层，两批已知执行器失败数均为0；原step failed不等于执行器失败，执行器失败恢复分支另以CPU场景解释。
+
+这两个受控专用窗口案例不构成任意应用成功率；经过时间包含截屏、OCR、模型和operator桥接等待，不能据分日耗时比较恢复性能。验收使用限制于专用窗口的Sky桥接，不能替代普通PyAutoGUI执行器的跨应用验证。
+
+旧开发尝试、保存图探针和源码阶段全部保留。012是旧v1源码下的正常通过；013受控停止真实exit15且缺完整acceptance；014有2个已知输入和1未知派发；016独立终态通过但提交无输入归因，随后激活超时，整体失败。旧阶段CPU通过不拼接为新源码全量通过，也不合并开发成功率。
+
+完整CPU回归为3027项通过、0失败，pytest 535.12秒，封装墙钟566.027秒，真实exit 0；244份文件的before、after与当前SHA完全一致。
+
+## 从源码安装与首次检查
+
+声明支持Python 3.11至3.13，本次验证为Windows和Python 3.12。其他操作系统未形成相同范围的实测记录。在源码包根目录创建环境：
 
 ```powershell
 python -m venv .venv
@@ -26,41 +36,20 @@ python -m pip install -e .
 python -c "import gui_agent; print(gui_agent.__version__)"
 ```
 
-版本输出应为 `2.0.0`。项目尚未将运行依赖写入 wheel 的安装元数据，因此只安装 wheel 不会自动安装 `requirements.txt`。CLI、配置、示例页面和实验记录从完整源码包使用；本版没有声明独立的已安装命令入口。
+版本输出应为2.0.0。wheel元数据没有完整运行依赖，单装wheel不会自动安装requirements.txt；CLI、配置及实验记录从完整源码使用。本次从已有项目环境构建和检查wheel，不声明干净依赖环境安装已经验证。
 
-真实 OCR 还需要本机 Tesseract 可执行文件及所需语言包。当前测量使用英文配置，本机没有中文语言数据，不能据此声称支持中文界面。默认工作流不要求安装训练框架；数据集或 LangChain 相关功能另见 `requirements-agent.txt`。
-
-## 首次检查与演示
+真实OCR需要Tesseract可执行文件及语言数据；双语资源与Windows路径设置见 [使用说明](README.md)。默认工作流不要求训练框架；数据集或LangChain功能另见requirements-agent.txt。
 
 ```powershell
-python scripts/week6_agent_cli.py --workflow configs/week6_example_workflow.json --validate-only
+python scripts/week6_agent_cli.py --instruction "Complete the local task" --expect-text "Expected final marker" --validate-only
 python scripts/week6_robustness_demo.py --output-dir outputs/week6_first_check
-```
-
-第一条只验证工作流定义；第二条在模拟后端上运行真实生产运行器，不操作桌面、不加载模型。输出目录必须是新的。示例页面和真实执行命令见 [使用说明](README.md)；默认 dry-run，真实执行仍需要交互终端和各阶段计划确认。
-
-只读检查已有运行状态：
-
-```powershell
 python -S scripts/week6_status.py --run-dir outputs/week6/your_run_id
 ```
 
-该命令只读取指定目录，不启动模型或桌面。`finished` 表示终态记录可信，具体成功与否仍看 `task_status`。
+输入验证不调用模型或桌面；故障演示使用模拟后端；状态命令只读指定目录。默认dry-run会观察和规划，真实输入需加execute并在交互终端逐计划确认。
 
-## 回归检查
+## 保留与后续评估
 
-开发测试需要 `requirements-dev.txt`；涉及数据集、LangChain 等可选模块的检查还需要对应依赖。完整数量以记录的环境为准，缺少可选模块产生的跳过不能当作完整全量通过。
+Week5 C11权重、原训练、质量及资源补测结论不变，本周不新增训练或消息发送。Week7的综合任务集、跨应用、分辨率及竞品比较另行开展。层次化语义计划、依赖管理、广泛应用质量和一般任务成功率尚未实现或未测。
 
-```powershell
-python -m pip install -r requirements-dev.txt -r requirements-agent.txt
-$env:PYTHONUTF8 = "1"
-$env:PYTHONIOENCODING = "utf-8"
-python -m pytest -q
-python -m ruff check .
-```
-
-## 已知限制
-
-真实本地模型探测只有三个固定合成界面条件。两个目标对照正确，但双同名按钮未请求澄清；三个最终计划均缺少提示要求的 `finish`。当前 ID 有效不代表语义已消歧。该结果不是真实桌面任务成功率，也不证明模型质量提升。
-
-本轮没有真实应用中的复杂任务执行结果。故障模拟、固定图像 OCR/候选测量与本地模型保存图规划分别解释，详情及保留的失败见 [鲁棒性报告](Week6_Robustness_Report.md)。
+原报告、DOCX/PDF、源码包及初始发布说明保留为历史。更新结果与具体证据见 [实验报告](Week6_Robustness_Report.md)，最终源码/报告/wheel/压缩包字节由交付审计单独核验。

@@ -1,0 +1,87 @@
+"""Copy completed review evidence exclusively; never read an active test result."""
+from __future__ import annotations
+
+import hashlib
+import json
+from datetime import UTC, datetime
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+REPO = ROOT / "week6-worktree"
+PRIVATE = ROOT / "tmp/week6_replanning_review"
+TARGET = REPO / "Document/Week6/results/release_review_20261026_001"
+EXPECTED_CHECKER = "c0ce78004529b3624030b5a0f65401d73b887012177816088f586339720372c6"
+
+
+def sha(data): return hashlib.sha256(data).hexdigest()
+
+
+def main():
+    assert not TARGET.exists(), "An existing review attempt is never overwritten"
+    assert TARGET.resolve().is_relative_to((REPO / "Document/Week6/results").resolve())
+    sources = [
+        (PRIVATE/"full006_collection_stdout_001.json", "collection/full006_collection_stdout_001.json", None),
+        (PRIVATE/"full006_collection_stdout_001.txt", "collection/full006_collection_stdout_001.txt", "b2d8a0a1977d3eee792771b7d19a8d064a1e5b1206afa2fa370d6df15bb175f9"),
+        (PRIVATE/"independent_rolling_v2_priority_audit_001.py", "independent/independent_rolling_v2_priority_audit_001.py.txt", None),
+        (PRIVATE/"independent_rolling_v2_priority_audit_001.json", "independent/independent_rolling_v2_priority_audit_001.json", None),
+        (ROOT/"tmp/week6/package_completed.py", "gate/package_completed_c0ce780.py.txt", EXPECTED_CHECKER),
+        (ROOT/"tmp/week6_report/private_completion_binding_20261025_001/check_negative_inputs.py", "gate/check_negative_inputs.py.txt", None),
+        (ROOT/"tmp/week6_report/private_completion_binding_20261025_001/negative_selection_audit_001.json", "gate/negative_selection_audit_001.json", "0585527a4f58c5933116ba0e0d5b60aa1e5c5600bd41a6229ee4c1383f8dd45d"),
+        (ROOT/"tmp/week6_report/rolling_gate_preparation_20261025_001/transient015_positive_audit_001.json", "positive/transient015_positive_audit_001.json", "c5036cd0dfcb36ec18aa1770088f83e1ad51468bc7729504a70b5ebdc8446f2d"),
+        (ROOT/"tmp/week6_report/rolling_gate_preparation_20261025_001/normal017_positive_audit_001.json", "positive/normal017_positive_audit_001.json", "f202f9a43e12be1f8db6b57f516e8542ff8efd56c13d5cdfe59e24431a637995"),
+        (ROOT/"tmp/week6_report/negative_014_20261025_001/build_audit.py", "negative/014/build_audit.py.txt", None),
+        (ROOT/"tmp/week6_report/negative_014_20261025_001/bridge_timeout_014_audit_001.json", "negative/014/bridge_timeout_014_audit_001.json", "2b4766a7437c9be3b64bf5299027098b87cec8e6183c6aa49833a268756198d3"),
+        (ROOT/"tmp/week6_report/negative_016_20261026_001/build_audit.py", "negative/016/build_audit.py.txt", None),
+        (ROOT/"tmp/week6_report/negative_016_20261026_001/normal016_negative_audit_001.json", "negative/016/normal016_negative_audit_001.json", "c8a9bf82fa03294a246dab08797a29f80f70316cc8d7155812a1bbff1abf6ada"),
+        (ROOT/"tmp/week6/full006_process_observation_001.json", "observations/full006_process_observation_001.json", None),
+        (PRIVATE/"verify_release_review_bundle_001.py", "verify_bundle.py.txt", None),
+        (PRIVATE/"release_review_README_20261026_001.md", "README.md", None),
+        (Path(__file__).resolve(), "provenance/prepare_release_review_bundle_001.py.txt", None),
+    ]
+    frozen = []
+    for source, relative, expected in sources:
+        data = source.read_bytes()
+        actual = sha(data)
+        assert expected is None or actual == expected, f"Completed input changed: {source}"
+        frozen.append((source, relative, data, actual))
+    collection = json.loads((PRIVATE/"full006_collection_stdout_001.json").read_bytes())
+    assert collection["exit_code"] == 0 and collection["actual_test_execution"] is False
+    assert "3027 tests collected" in collection["last_lines"][-1]
+    assert sha((PRIVATE/"full006_collection_stdout_001.txt").read_bytes()) == collection["stdout_sha256"]
+    cpu = json.loads((PRIVATE/"independent_rolling_v2_priority_audit_001.json").read_bytes())
+    assert cpu["all_checks_passed"] and cpu["source_unchanged"] and len(cpu["checks"]) == 23
+    assert not cpu["real_GUI_success"]
+    for source, relative, data, actual in frozen:
+        if relative.startswith("positive/"):
+            record = json.loads(data)
+            assert record["package_checker_sha256"] == EXPECTED_CHECKER
+            assert record["audit"]["all_checks_passed"] and record["audit"]["actual_child_exit_code"] == 0
+    TARGET.mkdir(parents=True, exist_ok=False)
+    entries = []
+    for source, relative, data, actual in frozen:
+        destination = TARGET / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        with destination.open("xb") as handle:
+            handle.write(data)
+        assert destination.read_bytes() == data == source.read_bytes()
+        entries.append({"source":str(source),"destination_relative":relative,
+            "source_sha256":actual,"destination_sha256":sha(destination.read_bytes()),"bytes":len(data)})
+    manifest = {"schema":"week6.readonly.release_review_bundle.v1","created_utc":datetime.now(UTC).isoformat(),
+        "repository_original_path":str(REPO),"copies":entries,"all_source_target_bytes_equal":True,
+        "central_checker":{"sha256":EXPECTED_CHECKER,"snapshot_relative":"gate/package_completed_c0ce780.py.txt"},
+        "selected_positive_audits":[{"mode":"transient","audit_relative":"positive/transient015_positive_audit_001.json"},
+                                    {"mode":"normal","audit_relative":"positive/normal017_positive_audit_001.json"}],
+        "collection":{"count":3027,"is_collection_not_test_pass":True,"original_harness_kind":"inline_command_no_separate_script_saved"},
+        "independent_counterexamples":{"count":23,"actual_Runtime":"TaskRunner","actual_model_HTTP_GUI_calls":0,"not_GUI_success":True},
+        "full006_exit_or_test_success_asserted":False,"report_ready":False,"release_ready":False,
+        "operation_scope":"Copy completed evidence and write an explanatory read-only verifier. No src/tests/scripts/ROOTREADME change, no GUI/model/test execution, no active full006 output read.",
+        "large_original_evidence":"Retained once in each original repository run directory; not duplicated here."}
+    with (TARGET/"copy_manifest_001.json").open("xb") as handle:
+        handle.write((json.dumps(manifest,ensure_ascii=False,indent=2)+"\n").encode("utf-8"))
+    print(json.dumps({"directory":str(TARGET),"copied_files":len(entries),"copied_bytes":sum(row["bytes"] for row in entries),
+        "manifest_sha256":sha((TARGET/"copy_manifest_001.json").read_bytes()),"central_checker_sha256":EXPECTED_CHECKER,
+        "all_source_target_bytes_equal":True,"full006_completion_claimed":False},ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

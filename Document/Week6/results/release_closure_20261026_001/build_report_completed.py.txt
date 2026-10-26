@@ -1,0 +1,346 @@
+"""Build the completed Week 6 revision from evidence-checked Markdown.
+
+The retained original report is never overwritten. A root-supplied completion
+record and the final regression record are required before this can author DOCX.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import re
+import textwrap
+from pathlib import Path
+
+from docx import Document
+from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT, WD_TABLE_ALIGNMENT
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+from docx.opc.constants import RELATIONSHIP_TYPE
+from docx.shared import Inches, Pt, RGBColor
+
+from report_evidence import audit_final_evidence
+
+WORKSPACE = Path("C:/Users/联想/Documents/ChatGPT/Intern")
+REPO = WORKSPACE / "week6-worktree"
+SOURCE = REPO / "Document/Week6/Week6_Robustness_Report.md"
+OUT = WORKSPACE / "output/docx/Week6_实验报告_完善版.docx"
+QA = WORKSPACE / "tmp/week6_report/completed"
+LOCAL_LINKS = False
+
+
+def sha(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def font(run, size=11, bold=False, east="STSong", latin="Times New Roman"):
+    run.font.name = latin
+    run.font.size = Pt(size)
+    run.font.bold = bold
+    run.font.color.rgb = RGBColor(0, 0, 0)
+    rpr = run._element.get_or_add_rPr()
+    rfonts = rpr.rFonts
+    if rfonts is None:
+        rfonts = OxmlElement("w:rFonts")
+        rpr.insert(0, rfonts)
+    rfonts.set(qn("w:eastAsia"), east)
+
+
+def inline(paragraph, text: str, size=11, bold=False):
+    for token in re.split(r"(`[^`]+`|\[[^\]]+\]\([^)]+\))", text):
+        link = re.fullmatch(r"\[([^\]]+)\]\(([^)]+)\)", token)
+        if link:
+            label, target = link.groups()
+            if not re.match(r"https?://", target):
+                if LOCAL_LINKS:
+                    local_target = (SOURCE.parent / target).resolve()
+                    if not local_target.exists():
+                        raise RuntimeError(f"Local draft source link missing: {local_target}")
+                    target = local_target.as_uri()
+                else:
+                    target = "https://github.com/ZhanboGong777/multimodal-desktop-gui-agent/blob/codex/week6-delivery/Document/Week6/" + target
+            rel = paragraph.part.relate_to(target, RELATIONSHIP_TYPE.HYPERLINK, is_external=True)
+            hyperlink = OxmlElement("w:hyperlink")
+            hyperlink.set(qn("r:id"), rel)
+            run = OxmlElement("w:r")
+            rpr = OxmlElement("w:rPr")
+            color = OxmlElement("w:color")
+            color.set(qn("w:val"), "244A69")
+            rpr.append(color)
+            size_el = OxmlElement("w:sz")
+            size_el.set(qn("w:val"), str(round(size * 2)))
+            rpr.append(size_el)
+            run.append(rpr)
+            label_el = OxmlElement("w:t")
+            label_el.text = label
+            run.append(label_el)
+            hyperlink.append(run)
+            paragraph._p.append(hyperlink)
+            continue
+        is_code = token.startswith("`") and token.endswith("`")
+        run = paragraph.add_run(token[1:-1] if is_code else token)
+        font(run, size - 0.6 if is_code else size, bold, latin="Consolas" if is_code else "Times New Roman")
+
+
+def style_document(doc: Document, version: str, draft=False):
+    doc.settings.odd_and_even_pages_header_footer = False
+    section = doc.sections[0]
+    section.different_first_page_header_footer = False
+    section.page_width = Inches(8.5)
+    section.page_height = Inches(11)
+    section.top_margin = Inches(0.78)
+    section.bottom_margin = Inches(0.78)
+    section.left_margin = Inches(1.0)
+    section.right_margin = Inches(1.0)
+    section.header_distance = Inches(0.3)
+    section.footer_distance = Inches(0.3)
+    for name, size in [("Normal", 11), ("Title", 20), ("Heading 1", 15), ("Heading 2", 13)]:
+        style = doc.styles[name]
+        style.font.name = "Times New Roman"
+        style.font.size = Pt(size)
+        style.font.color.rgb = RGBColor(0, 0, 0)
+        style.element.get_or_add_rPr().get_or_add_rFonts().set(qn("w:eastAsia"), "黑体" if name != "Normal" else "STSong")
+        style.paragraph_format.line_spacing = Pt(17 if name == "Normal" else size * 1.4)
+        style.paragraph_format.space_after = Pt(6)
+        if name.startswith("Heading"):
+            style.paragraph_format.space_before = Pt(0)
+            style.paragraph_format.space_after = Pt(13)
+    doc.styles["Normal"].paragraph_format.widow_control = True
+    header = section.header.paragraphs[0]
+    header.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    font(header.add_run(f"Week 6  高级功能与鲁棒性优化  v{version}" + ("  验收待完成稿" if draft else "")), 8.5)
+    footer = section.footer.paragraphs[0]
+    footer.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    font(footer.add_run("第 "), 9)
+    field = OxmlElement("w:fldSimple")
+    field.set(qn("w:instr"), "PAGE")
+    field_run = OxmlElement("w:r")
+    field_rpr = OxmlElement("w:rPr")
+    field_size = OxmlElement("w:sz")
+    field_size.set(qn("w:val"), "18")
+    field_rpr.append(field_size)
+    field_run.append(field_rpr)
+    field_text = OxmlElement("w:t")
+    field_text.text = "1"
+    field_run.append(field_text)
+    field.append(field_run)
+    footer._p.append(field)
+    font(footer.add_run(" 页"), 9)
+    settings = doc.settings.element
+    update = OxmlElement("w:updateFields")
+    update.set(qn("w:val"), "true")
+    settings.append(update)
+
+
+def add_table(doc: Document, rows: list[list[str]]):
+    columns = len(rows[0])
+    table = doc.add_table(rows=1, cols=columns)
+    table.alignment = WD_TABLE_ALIGNMENT.CENTER
+    table.autofit = False
+    width_sets = {
+        3: [1.1, 2.6, 2.8],
+        4: [2.6, 0.7, 1.3, 1.9],
+        5: [1.35, 1.05, 1.05, 1.75, 1.3],
+        6: [2.35, 1.55, 0.8, 0.6, 0.6, 0.6],
+    }
+    widths = width_sets.get(columns, [6.5 / columns] * columns)
+    if rows[0][0] == "实际截图配置":
+        widths = [2.15, 1.5, 1.2, 1.65]
+    for i, width in enumerate(widths):
+        table.columns[i].width = Inches(width)
+    for ri, values in enumerate(rows):
+        cells = table.rows[0].cells if ri == 0 else table.add_row().cells
+        trpr = table.rows[ri]._tr.get_or_add_trPr()
+        cant = OxmlElement("w:cantSplit")
+        trpr.append(cant)
+        if ri == 0:
+            repeat = OxmlElement("w:tblHeader")
+            trpr.append(repeat)
+        for ci, value in enumerate(values):
+            cell = cells[ci]
+            cell.width = Inches(widths[ci])
+            cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
+            tcpr = cell._tc.get_or_add_tcPr()
+            borders = OxmlElement("w:tcBorders")
+            for edge in ("top", "left", "bottom", "right"):
+                e = OxmlElement("w:" + edge)
+                e.set(qn("w:val"), "single")
+                e.set(qn("w:sz"), "4")
+                e.set(qn("w:color"), "D9D9D9")
+                borders.append(e)
+            tcpr.append(borders)
+            margins = OxmlElement("w:tcMar")
+            for edge in ("top", "bottom"):
+                e = OxmlElement("w:" + edge)
+                e.set(qn("w:w"), "65")
+                e.set(qn("w:type"), "dxa")
+                margins.append(e)
+            for edge in ("left", "right"):
+                e = OxmlElement("w:" + edge)
+                e.set(qn("w:w"), "95")
+                e.set(qn("w:type"), "dxa")
+                margins.append(e)
+            tcpr.append(margins)
+            if ri == 0:
+                shd = OxmlElement("w:shd")
+                shd.set(qn("w:fill"), "DCE6EF")
+                tcpr.append(shd)
+            p = cell.paragraphs[0]
+            p.paragraph_format.line_spacing = Pt(14)
+            p.paragraph_format.space_after = Pt(0)
+            p.paragraph_format.space_before = Pt(0)
+            p.alignment = WD_ALIGN_PARAGRAPH.LEFT if ci == 0 or columns == 3 else WD_ALIGN_PARAGRAPH.CENTER
+            inline(p, value, size=10.3, bold=ri == 0)
+    spacer = doc.add_paragraph()
+    spacer.paragraph_format.space_after = Pt(1)
+    spacer.paragraph_format.space_before = Pt(0)
+    font(spacer.add_run(""), 2)
+
+
+def build(args):
+    global OUT, QA, LOCAL_LINKS
+    if args.draft_revision and (not args.draft or not re.fullmatch(r"full\d{3}", args.draft_revision)):
+        raise RuntimeError("A draft revision must be fullNNN and may only be used with --draft")
+    if args.draft:
+        suffix = "_" + args.draft_revision if args.draft_revision else ""
+        OUT = WORKSPACE / f"output/docx/Week6_实验报告_验收待完成稿{suffix}.docx"
+        QA = WORKSPACE / f"tmp/week6_report/acceptance_pending{suffix}"
+        LOCAL_LINKS = True
+    source = Path(args.source) if args.source else SOURCE
+    text = source.read_text(encoding="utf-8")
+    if "{{" in text or "}}" in text:
+        raise RuntimeError("Report still contains unresolved validation fields")
+    completion_path = Path(args.completion_record)
+    completion = json.loads(completion_path.read_text(encoding="utf-8-sig"))
+    if args.draft:
+        if completion.get("report_ready") is not False or completion.get("status") != "acceptance_pending":
+            raise RuntimeError("A draft requires an explicit not-ready acceptance_pending record")
+        if "验收待完成稿" not in text:
+            raise RuntimeError("The pending report must visibly identify its status")
+    else:
+        if completion.get("report_ready") is not True:
+            raise RuntimeError("Root completion record does not yet permit a final report")
+        required = {"automatic_decomposition", "error_detection_retry", "perception_accuracy_speed", "live_monitoring_logs"}
+        if set(completion.get("requirements_closed", {})) != required or not all(completion["requirements_closed"].values()):
+            raise RuntimeError("All four original Week 6 requirements need recorded closure")
+    for evidence in completion.get("evidence", []):
+        evidence_path = Path(evidence["path"])
+        if not evidence_path.is_absolute():
+            evidence_path = REPO / evidence_path
+        if sha(evidence_path) != evidence["sha256"]:
+            raise RuntimeError(f"Completion evidence changed: {evidence_path}")
+    validation_path = Path(args.validation_record)
+    if not validation_path.is_absolute():
+        validation_path = REPO / validation_path
+    validation = json.loads(validation_path.read_text(encoding="utf-8-sig"))
+    if validation.get("exit_code") != 0 or validation.get("tested_sources_unchanged") is not True:
+        raise RuntimeError("Final validation must record exit 0 and unchanged tested sources")
+    final_evidence = None if args.draft else audit_final_evidence(completion_path, validation_path)
+    if OUT.exists():
+        audit = QA / "build_audit.json"
+        previous = json.loads(audit.read_text(encoding="utf-8")) if audit.exists() else {}
+        if previous.get("docx_sha256") != sha(OUT):
+            raise RuntimeError("Output exists and differs from the last builder output; preserve edits first")
+    doc = Document()
+    style_document(doc, completion["version"], args.draft)
+    lines = text.splitlines()
+    i = 0
+    pages = 1
+    images = []
+    pending_page_break = False
+    while i < len(lines):
+        line = lines[i]
+        if not line.strip():
+            i += 1
+            continue
+        if line == "<!-- pagebreak -->":
+            pending_page_break = True
+            pages += 1
+        elif line.startswith("# "):
+            p = doc.add_paragraph(style="Title")
+            p.paragraph_format.space_after = Pt(12)
+            font(p.add_run(line[2:]), 20, True, east="黑体")
+        elif line.startswith("## "):
+            p = doc.add_paragraph(style="Heading 1")
+            p.paragraph_format.page_break_before = pending_page_break
+            pending_page_break = False
+            font(p.add_run(line[3:]), 15, True, east="黑体")
+        elif line.startswith("!["):
+            alt, relative = re.fullmatch(r"!\[(.*?)\]\((.*?)\)", line).groups()
+            picture = (Path(args.images_base) / relative).resolve()
+            p = doc.add_paragraph()
+            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            p.paragraph_format.space_after = Pt(3)
+            p.paragraph_format.line_spacing = 1.0
+            p.paragraph_format.keep_with_next = True
+            shape = p.add_run().add_picture(str(picture), width=Inches(4.4 if "f003" in relative else 4.9))
+            shape._inline.docPr.set("descr", alt)
+            images.append({"path": str(picture), "sha256": sha(picture), "alt": alt})
+        elif line.startswith("图 "):
+            p = doc.add_paragraph()
+            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            p.paragraph_format.space_after = Pt(8)
+            font(p.add_run(line), 9.3)
+        elif line.startswith("|"):
+            rows = []
+            while i < len(lines) and lines[i].startswith("|"):
+                values = [v.strip() for v in lines[i].strip("|").split("|")]
+                if not all(re.fullmatch(r":?-+:?", v) for v in values):
+                    rows.append(values)
+                i += 1
+            add_table(doc, rows)
+            continue
+        elif line.startswith("```"):
+            i += 1
+            while i < len(lines) and not lines[i].startswith("```"):
+                command = lines[i]
+                wrapped = textwrap.wrap(command, width=88, break_long_words=False, break_on_hyphens=False)
+                for wi, wline in enumerate(wrapped):
+                    p = doc.add_paragraph()
+                    p.paragraph_format.space_after = Pt(1)
+                    p.paragraph_format.line_spacing = 1.05
+                    font(p.add_run(("  " if wi else "") + wline + (" `" if wi < len(wrapped) - 1 else "")), 8.9, latin="Consolas")
+                i += 1
+        else:
+            p = doc.add_paragraph()
+            inline(p, line)
+        i += 1
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+    QA.mkdir(parents=True, exist_ok=True)
+    doc.core_properties.title = "Week 6 多模态桌面智能体" + ("验收待完成稿" if args.draft else "实验报告")
+    doc.core_properties.subject = f"系统 v{completion['version']} 高级功能与鲁棒性优化" + (" 验收待完成" if args.draft else "")
+    doc.core_properties.author = ""
+    doc.core_properties.keywords = "Week 6 子目标 恢复 感知 运行监测"
+    for root in (doc.element, doc.styles.element):
+        for border in root.xpath(".//w:pBdr"):
+            border.getparent().remove(border)
+    doc.save(OUT)
+    data = {
+        "markdown": str(source), "markdown_sha256": sha(source),
+        "docx": str(OUT), "docx_sha256": sha(OUT),
+        "manual_pages": pages, "paragraphs": len(doc.paragraphs),
+        "tables": len(doc.tables), "images": images,
+        "validation_record": str(validation_path),
+        "validation_sha256": sha(validation_path),
+        "validation_exit_code": validation["exit_code"],
+        "tested_sources_unchanged": validation["tested_sources_unchanged"],
+        "completion_record": str(completion_path), "completion_sha256": sha(completion_path),
+        "version": completion["version"],
+        "report_ready": completion["report_ready"], "draft": args.draft,
+        "final_evidence_audit": final_evidence,
+    }
+    (QA / "build_audit.json").write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(json.dumps(data, ensure_ascii=False, indent=2))
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--validation-record", required=True)
+    parser.add_argument("--completion-record", required=True)
+    parser.add_argument("--source")
+    parser.add_argument("--images-base", default=str(SOURCE.parent))
+    parser.add_argument("--draft", action="store_true")
+    parser.add_argument("--draft-revision")
+    build(parser.parse_args())

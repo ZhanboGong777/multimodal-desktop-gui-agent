@@ -1,0 +1,97 @@
+{
+  "schema": "week6.real_screenshot.manual_gt.v1",
+  "annotated_utc": "2026-10-24T07:53:25.959706+00:00",
+  "annotation_precedes_all_probe_predictions": true,
+  "annotation_source": "manual visual inspection of saved full screenshot and a coordinate-grid crop; no observation.json/OCR/model predictions read",
+  "source_path": "Document\\Week6\\results\\live_auto_20261024_normal_003\\automatic\\initial_observation\\monitor1_20261024_185119_639.png",
+  "source_sha256": "c3fe725f8b67bff3b21790e99e0e7c538928ab36c32286d57ec5747754e1be9e",
+  "image_size": [
+    2560,
+    1600
+  ],
+  "roi": [
+    1000,
+    480,
+    1600,
+    1130
+  ],
+  "roi_policy": "Evaluate predictions whose bounding-box center is inside the fixed ROI. All five visible text labels and both visible buttons inside ROI are annotated. External desktop UI is not annotated and full-frame precision is undefined.",
+  "labels": [
+    {
+      "text": "Week6 Local Lab",
+      "language": "en",
+      "box": [
+        1088,
+        525,
+        1474,
+        565
+      ]
+    },
+    {
+      "text": "Offline report preparation",
+      "language": "en",
+      "box": [
+        1100,
+        630,
+        1463,
+        662
+      ]
+    },
+    {
+      "text": "Choose a project",
+      "language": "en",
+      "box": [
+        1136,
+        723,
+        1429,
+        762
+      ]
+    },
+    {
+      "text": "ALPHA",
+      "language": "en",
+      "box": [
+        1218,
+        853,
+        1343,
+        882
+      ]
+    },
+    {
+      "text": "BETA",
+      "language": "en",
+      "box": [
+        1232,
+        1017,
+        1330,
+        1046
+      ]
+    }
+  ],
+  "controls": [
+    [
+      1050,
+      810,
+      1514,
+      927
+    ],
+    [
+      1050,
+      974,
+      1514,
+      1090
+    ]
+  ],
+  "label_metric": "case-sensitive whitespace-normalized exact text and one-to-one IoU >= .5",
+  "control_metric": "one-to-one IoU >= .8",
+  "method_frozen_before_this_image": "perception_accuracy_20261024/algorithm_freeze_001.json",
+  "freeze_sources_match": {
+    "src/gui_agent/perception/ocr.py": true,
+    "src/gui_agent/config.py": true,
+    "src/gui_agent/perception/ui_detection.py": true,
+    "scripts/week6_benchmark_accuracy.py": true,
+    "tests/test_week6_perception_accuracy.py": true
+  },
+  "no_parameter_retuning": true,
+  "scope": "Saved screenshot of local lab; one easy English screen, not a broad desktop accuracy estimate"
+}

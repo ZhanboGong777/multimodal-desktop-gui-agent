@@ -1,0 +1,70 @@
+"""Audit current Git filters without adding files, objects, or modifying the index.
+
+Saved after the original inline pre-override audit. This is a reusable equivalent
+of that read-only operation, not a claim that an original harness was saved.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import subprocess
+from datetime import UTC, datetime
+from pathlib import Path
+
+ROOT = Path("C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+VALIDATION = ROOT / "Document/Week6/results/release_validation_completed_20261026_006/validation.json"
+
+
+def digest(data): return hashlib.sha256(data).hexdigest()
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", type=Path)
+    args = parser.parse_args()
+    validation = json.loads(VALIDATION.read_bytes())
+    pins = validation["tested_source_pins_before"]
+    assert validation["exit_code"] == 0 and pins == validation["tested_source_pins_after"]
+    names = list(pins)
+    output = subprocess.run(["git", "hash-object", "--stdin-paths"],input="\n".join(names)+"\n",
+        cwd=ROOT,encoding="utf-8",capture_output=True,check=True)
+    hashes = output.stdout.splitlines()
+    assert len(hashes) == len(names)
+    rows, first, changed, crlf, mismatches = [], {}, [], [], []
+    for name, filtered in zip(names, hashes):
+        data = (ROOT/name).read_bytes()
+        current = digest(data)
+        first[name] = current
+        raw = hashlib.sha1(b"blob "+str(len(data)).encode()+b"\0"+data).hexdigest()
+        row = {"path":name,"regression_sha256":pins[name],"current_sha256":current,
+            "raw_git_blob_sha1":raw,"filtered_git_blob_sha1":filtered,"bytes":len(data),
+            "CRLF_pairs":data.count(b"\r\n"),"LF_total":data.count(b"\n")}
+        rows.append(row)
+        if raw != filtered: changed.append(name)
+        if b"\r\n" in data: crlf.append(name)
+        if current != pins[name]: mismatches.append(name)
+    after = {name:digest((ROOT/name).read_bytes()) for name in names}
+    attributes = subprocess.check_output(["git","check-attr","text","eol","whitespace","--",
+        "README.md","Document/Week6/README.md"],cwd=ROOT,text=True,encoding="utf-8").splitlines()
+    expected = ["README.md: text: unset","README.md: whitespace: unset","Document/Week6/README.md: text: set"]
+    result = {"schema":"week6.line_endings.current_filter_audit.v1","created_utc":datetime.now(UTC).isoformat(),
+        "phase":"after_root_README_exact_path_attribute_override","validation_sha256":digest(VALIDATION.read_bytes()),
+        "pinned_files":len(names),"current_regression_sha_mismatches":mismatches,
+        "source_bytes_unchanged_during_readonly_audit":first==after,"pinned_files_containing_CRLF":crlf,
+        "git_filter_byte_change_paths":changed,"root_and_child_attributes":attributes,
+        "root_attribute_scope_verified":all(value in attributes for value in expected),
+        "gitattributes_sha256":digest((ROOT/".gitattributes").read_bytes()),
+        "gitattributes_excluded_from_244_regression_pins":".gitattributes" not in pins,
+        "files":rows,"git_objects_or_index_modified":False,
+        "final_commit_or_archive_comparison_performed":False,"model_or_GUI_or_tests_executed":False,
+        "all_checks_passed":not mismatches and not changed and first==after and all(value in attributes for value in expected)}
+    if args.output:
+        with args.output.open("x",encoding="utf-8",newline="\n") as handle:
+            handle.write(json.dumps(result,ensure_ascii=False,indent=2)+"\n")
+    print(json.dumps({key:result[key] for key in ("phase","pinned_files","current_regression_sha_mismatches",
+        "git_filter_byte_change_paths","root_attribute_scope_verified","gitattributes_sha256","all_checks_passed")},ensure_ascii=False))
+    raise SystemExit(0 if result["all_checks_passed"] else 1)
+
+
+if __name__ == "__main__": main()

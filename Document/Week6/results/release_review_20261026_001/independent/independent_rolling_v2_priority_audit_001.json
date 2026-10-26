@@ -1,0 +1,136 @@
+{
+  "schema": "week6.independent_rolling_v2_priority_review.v1",
+  "mode": "CPU_actual_TaskRunner_with_fabricated_frames_and_offline_model_and_executor",
+  "source_sha256_before": {
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\src\\gui_agent\\planning\\workflow_decomposer.py": "706d98f6156f01224c3fcb99b971623553f91e732249818c029b46665efd6940",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\src\\gui_agent\\runtime\\runner.py": "e3fe1cfd49f338afa29c5cae2b13c12fa972a694327b9def13a97c0d803ffe56"
+  },
+  "source_sha256_after": {
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\src\\gui_agent\\planning\\workflow_decomposer.py": "706d98f6156f01224c3fcb99b971623553f91e732249818c029b46665efd6940",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\src\\gui_agent\\runtime\\runner.py": "e3fe1cfd49f338afa29c5cae2b13c12fa972a694327b9def13a97c0d803ffe56"
+  },
+  "source_unchanged": true,
+  "checks": [
+    {
+      "case": "model_step_miss_does_not_trigger_extra_plan_or_input_after_actual_caller_goal",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "case": "raw_failed_model_step_is_preserved_beside_passed_caller_and_independent_final",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "case": "v2_priority_is_declared_before_execution_only_on_caller_child",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "case": "planner_one_step_limit_is_restored_after_model_step_miss",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "case": "manual_TaskRunner_default_keeps_strict_model_step_gate",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "case": "failed_executor_receipt_cannot_be_rescued_by_visible_caller_text",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "case": "unknown_dispatch_stops_without_replanning_or_caller_rescue",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "case": "declined_confirmation_stays_cancelled_without_input",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "case": "dry_run_is_never_executed_caller_success",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "case": "wait_alone_cannot_gain_caller_input_credit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "case": "post_blank_cannot_gain_caller_credit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "case": "post_window_cannot_gain_caller_credit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "case": "post_error_cannot_gain_caller_credit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "case": "independent_final_blank_blocks",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "case": "independent_final_window_blocks",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "case": "independent_final_stale_blocks",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "case": "failed_raw_step_plus_caller_failure_does_not_become_success",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "case": "caller_priority_does_not_renew_actions_budget",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "case": "caller_priority_does_not_renew_planning_budget",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "case": "caller_priority_does_not_renew_http_budget",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "case": "late_model_reply_cannot_dispatch_or_renew_deadline",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "case": "two_model_steps_still_refused_before_any_input",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "case": "known_failed_receipt_needs_a_new_successful_input_before_caller_completion",
+      "passed": true,
+      "detail": null
+    }
+  ],
+  "all_checks_passed": true,
+  "actual_model_requests": 0,
+  "actual_HTTP_requests": 0,
+  "desktop_capture_count": 0,
+  "desktop_input_count": 0,
+  "real_GUI_success": false
+}

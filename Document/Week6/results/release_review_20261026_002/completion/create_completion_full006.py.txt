@@ -1,0 +1,86 @@
+"""Create the scoped report-generation record only after original evidence closes."""
+from datetime import UTC, datetime
+from pathlib import Path
+import hashlib
+import importlib.util
+import json
+import re
+
+ROOT = Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+PRIVATE = ROOT.parent / 'tmp'
+VALIDATION = ROOT / 'Document/Week6/results/release_validation_completed_20261026_006/validation.json'
+OUTPUT = PRIVATE / 'week6_report/completion_record_full006.json'
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def load(path):
+    return json.loads(path.read_text(encoding='utf-8-sig'))
+
+
+def main():
+    spec = importlib.util.spec_from_file_location('completed_gate', PRIVATE / 'week6/package_completed.py')
+    gate = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(gate)
+    validation = load(VALIDATION)
+    assert validation['exit_code'] == 0 and validation['tested_sources_unchanged'] is True
+    before = validation['tested_source_pins_before']
+    assert before == validation['tested_source_pins_after']
+    assert before and all(sha(ROOT / name) == expected for name, expected in before.items())
+    stdout = (VALIDATION.parent / validation['stdout']).read_text(encoding='utf-8')
+    summary = stdout.strip().splitlines()[-1]
+    assert re.search(r'3027 passed in [\d.]+s', summary), summary
+    assert not re.search(r'\b(?:failed|error|skipped|deselected)\b', summary, re.I), summary
+    evidence = [{'role': 'final_validation', 'path': VALIDATION.relative_to(ROOT).as_posix(),
+                 'sha256': sha(VALIDATION)}]
+    audits = {}
+    for role, mode, batch in [
+        ('live_acceptance_normal', 'normal', 'live_auto_20261026_normal_017'),
+        ('live_acceptance_transient', 'transient', 'live_auto_20261025_transient_015'),
+    ]:
+        path = ROOT / 'Document/Week6/results' / batch / 'acceptance.json'
+        item = {'role': role, 'path': path.relative_to(ROOT).as_posix(), 'sha256': sha(path)}
+        audits[mode] = gate.audit_live_acceptance(item, mode)
+        evidence.append(item)
+    record = {
+        'schema': 'week6.report.completion.v3', 'created_utc': datetime.now(UTC).isoformat(),
+        'version': '2.0.0', 'revision': 'full006', 'status': 'completed', 'report_ready': True,
+        'closure_kind': 'scoped_engineering_delivery',
+        'meaning': 'Implementation and evidence permit final report generation. Final report QA and distribution verification must still finish before overall user delivery is complete.',
+        'requirements_closed': {name: True for name in sorted(gate.REQUIREMENTS)},
+        'requirement_scopes': {
+            'automatic_decomposition': {
+                'implementation': 'action_level_rolling', 'protocol': 'week6.rolling_actions.v2',
+                'validation_scope': 'Dedicated offline four-stage window, two caller goals, normal and one controlled transient review rejection.',
+                'hierarchical_semantic_subgoals': False, 'dependency_management': False,
+                'arbitrary_app_success_rate': None,
+            },
+            'error_detection_retry': 'Bounded fresh-observation replanning, raw failure retention, unknown-dispatch stop; controlled transient desktop recovery plus CPU counterexamples.',
+            'perception_accuracy_speed': 'Frozen held-out OCR accuracy and paired component timings; screen OCR is slower and no general end-to-end speedup is claimed.',
+            'live_monitoring_logs': 'Passive stage/status/budget/PID identity records and original per-step logs; no model-internal real-time progress claim.',
+        },
+        'validation': VALIDATION.relative_to(ROOT).as_posix(), 'validation_sha256': sha(VALIDATION),
+        'evidence': evidence,
+        'remaining': [
+            'Hierarchical semantic subgoal sequences and dependency graphs are not implemented by rolling mode.',
+            'Dedicated-window acceptance does not establish arbitrary application or cross-resolution success rates.',
+            'Sky bridge activation and input-service waits are included in elapsed time; unattended execution latency is not established.',
+            'The screen OCR accuracy gain has a processing-time cost; full perception is not generally faster.',
+        ],
+    }
+    gate.validate_requirement_closure(record)
+    with OUTPUT.open('x', encoding='utf-8', newline='\n') as stream:
+        stream.write(json.dumps(record, ensure_ascii=False, indent=2) + '\n')
+    audit_output = OUTPUT.with_name('completion_evidence_audit_full006.json')
+    with audit_output.open('x', encoding='utf-8', newline='\n') as stream:
+        stream.write(json.dumps({'record_sha256': sha(OUTPUT), 'validation_sha256': sha(VALIDATION),
+                                 'current_source_count': len(before), 'live_audits': audits},
+                                ensure_ascii=False, indent=2) + '\n')
+    print(json.dumps({'completion': str(OUTPUT), 'sha256': sha(OUTPUT),
+                      'overall_delivery_complete': False}, ensure_ascii=False))
+
+
+if __name__ == '__main__':
+    main()

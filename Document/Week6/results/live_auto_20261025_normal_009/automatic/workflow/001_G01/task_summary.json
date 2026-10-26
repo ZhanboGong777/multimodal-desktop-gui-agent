@@ -1,0 +1,125 @@
+{
+  "run_id": "001_G01",
+  "case_id": "G01",
+  "instruction": "Select the project 'ALPHA' to proceed with the report preparation.",
+  "status": "succeeded",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Select project 'ALPHA'",
+      "action_type": "double_click",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "double_click",
+          "x": 1280,
+          "y": 867,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "ALPHA"
+        },
+        "element_id": "obs-0002-e001",
+        "screenshot_point": {
+          "x": 1280,
+          "y": 867
+        },
+        "control_point": {
+          "x": 1280,
+          "y": 867
+        },
+        "note": "text 'ALPHA' -> obs-0002-e001 (re-bound from obs-0001-e001 in an earlier frame)"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "double_click",
+          "x": 1280,
+          "y": 867,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "ALPHA"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: project, alpha",
+        "evidence": {
+          "observation_id": "obs-0003",
+          "changed": true,
+          "element_count": 10,
+          "expectation_tokens": [
+            "project",
+            "alpha"
+          ],
+          "expectation_hits": [
+            "project",
+            "alpha"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 28859.99999998603,
+      "after_observation_id": "obs-0003"
+    }
+  ],
+  "verification": {
+    "outcome": "passed",
+    "method": "automatic",
+    "detail": "all success rules matched against the current screen",
+    "evidence": {
+      "observation_id": "obs-0004",
+      "expect_text": [],
+      "forbid_text": [
+        "BETA"
+      ],
+      "verification_source": "preexecuted_progress_contract",
+      "progress_contract_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261025_normal_009\\automatic\\decomposition\\progress_contract.json"
+    }
+  },
+  "error": null,
+  "elapsed_ms": 60375.0,
+  "execute": true,
+  "model_name": "qwen2.5vl:7b",
+  "provider": "openai_compatible",
+  "notes": [
+    "planned 1 steps from obs-0001"
+  ],
+  "task_id": "G01",
+  "commit": "1307076",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 2560x1600, control 2560x1600",
+  "started_at": "2026-10-25T10:00:34.400199Z",
+  "finished_at": "2026-10-25T10:01:34.775199Z",
+  "planning_attempts": 1,
+  "model_requests": 2,
+  "planning_ms": 23516.00000000326,
+  "confirmation_ms": 15.000000013969839,
+  "execution_ms": 36843.99999998277,
+  "planner_ms": 16657.00000000652,
+  "planning_calls": 1,
+  "system_elapsed_ms": 60359.99999998603,
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261025_normal_009\\automatic\\workflow\\001_G01",
+  "stop_reason": "",
+  "error_type": "",
+  "failed_step_id": null,
+  "recovery_records": [],
+  "unconfirmed_action_attempts": 0,
+  "action_count": 1
+}

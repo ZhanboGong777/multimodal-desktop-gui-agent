@@ -1,0 +1,281 @@
+{
+  "fixture": "development_03",
+  "arm": "native_bilingual",
+  "repeat": 1,
+  "decode_ms": 1.5536000137217343,
+  "ocr_ms": 310.9616999863647,
+  "ui_ms": 5.02870004856959,
+  "full_ms": 317.544000048656,
+  "metrics": {
+    "tp": 5,
+    "fp": 2,
+    "fn": 3,
+    "precision": 0.7142857142857143,
+    "recall": 0.625,
+    "labels": [
+      {
+        "text": "Workspace",
+        "language": "en",
+        "matched": true,
+        "iou": 0.99
+      },
+      {
+        "text": "Status Ready",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9192961165048543
+      },
+      {
+        "text": "Run Analysis",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9897959183673469
+      },
+      {
+        "text": "Reset",
+        "language": "en",
+        "matched": true,
+        "iou": 0.882051282051282
+      },
+      {
+        "text": "Back",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9473684210526315
+      },
+      {
+        "text": "工作空间",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "任务列表",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "完成",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      }
+    ]
+  },
+  "predictions": [
+    {
+      "text": "Workspace",
+      "bounding_box": {
+        "left": 35,
+        "top": 37,
+        "right": 134,
+        "bottom": 56
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 84,
+        "y": 46
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Status Ready",
+      "bounding_box": {
+        "left": 36,
+        "top": 107,
+        "right": 137,
+        "bottom": 122
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 86,
+        "y": 114
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Run Analysis",
+      "bounding_box": {
+        "left": 36,
+        "top": 184,
+        "right": 133,
+        "bottom": 199
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 84,
+        "y": 191
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "工作 空间",
+      "bounding_box": {
+        "left": 550,
+        "top": 107,
+        "right": 617,
+        "bottom": 123
+      },
+      "confidence": 0.95,
+      "center": {
+        "x": 583,
+        "y": 115
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "任务 列表",
+      "bounding_box": {
+        "left": 550,
+        "top": 184,
+        "right": 618,
+        "bottom": 200
+      },
+      "confidence": 0.92,
+      "center": {
+        "x": 584,
+        "y": 192
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Reset",
+      "bounding_box": {
+        "left": 36,
+        "top": 285,
+        "right": 79,
+        "bottom": 297
+      },
+      "confidence": 0.92,
+      "center": {
+        "x": 57,
+        "y": 291
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Back",
+      "bounding_box": {
+        "left": 231,
+        "top": 285,
+        "right": 267,
+        "bottom": 297
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 249,
+        "y": 291
+      },
+      "source": "ocr"
+    }
+  ],
+  "ui_candidates": [
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 539,
+        "top": 270,
+        "right": 679,
+        "bottom": 324
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 609,
+        "y": 297
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 219,
+        "top": 270,
+        "right": 359,
+        "bottom": 324
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 289,
+        "y": 297
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 24,
+        "top": 270,
+        "right": 164,
+        "bottom": 324
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 94,
+        "y": 297
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 539,
+        "top": 169,
+        "right": 679,
+        "bottom": 223
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 609,
+        "y": 196
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 24,
+        "top": 169,
+        "right": 164,
+        "bottom": 223
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 94,
+        "y": 196
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 539,
+        "top": 92,
+        "right": 679,
+        "bottom": 146
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 609,
+        "y": 119
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 550,
+        "top": 284,
+        "right": 585,
+        "bottom": 303
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 567,
+        "y": 293
+      },
+      "source": "contour"
+    }
+  ],
+  "errors": []
+}

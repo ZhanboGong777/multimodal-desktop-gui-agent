@@ -1,0 +1,102 @@
+"""Exercise the actual private preflight with invalid in-memory selections only.
+
+No valid completed record is written. Git and downstream release operations are
+sentinels: each case must stop at the intended selection check before reaching
+them. The genuine historical regression remains untouched.
+"""
+from __future__ import annotations
+
+import copy
+import importlib.util
+import json
+from datetime import UTC, datetime
+from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
+
+ROOT = Path(__file__).resolve().parents[3]
+REPO = ROOT / "week6-worktree"
+CHECKER = ROOT / "tmp/week6/package_completed.py"
+
+
+def main():
+    spec = importlib.util.spec_from_file_location("week6_completion_selection_negative", CHECKER)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    selected = REPO / "Document/Week6/results/release_validation_completed_20261025_005/validation.json"
+    validation = module.load(selected)
+    digest = module.sha(selected)
+    assert validation["tested_source_pins_before"] == validation["tested_source_pins_after"]
+    actual_pending = ROOT / "tmp/week6_report/acceptance_pending_record_full005.json"
+    output = Path(__file__).parent / "negative_selection_audit_001.json"
+    assert not output.exists()
+    sentinel = Path(__file__).parent / "IN_MEMORY_INVALID_INPUT_ONLY_NOT_A_FILE.json"
+    assert not sentinel.exists()
+    # This is an in-memory mutation scaffold, never a completed experiment or file.
+    base = {"version": module.VERSION, "status": "completed", "report_ready": True,
+            "requirements_closed": {key: True for key in module.REQUIREMENTS},
+            "validation": str(selected), "validation_sha256": digest,
+            "evidence": [{"role": "final_validation", "path": str(selected), "sha256": digest}]}
+    cases = []
+
+    def run(name, completion, record, expected, completion_path=sentinel):
+        args = SimpleNamespace(validation=selected, completion_record=completion_path)
+
+        def read_only_load(path):
+            if Path(path).resolve() == selected.resolve():
+                return copy.deepcopy(record)
+            if Path(path).resolve() == completion_path.resolve():
+                return copy.deepcopy(completion)
+            raise AssertionError("Unexpected downstream read")
+
+        with patch.object(module, "load", side_effect=read_only_load), patch.object(
+            module, "git", side_effect=AssertionError("Selection guard was bypassed before Git/release checks")
+        ):
+            try:
+                module.preflight(args)
+            except RuntimeError as exc:
+                assert expected in str(exc), (name, expected, str(exc))
+                cases.append({"name": name, "rejected_by_actual_preflight": True,
+                              "expected_selection_guard": expected, "actual_reason": str(exc),
+                              "kind": "actual_retained_pending" if completion_path == actual_pending else "synthetic_invalid_in_memory_only"})
+            else:
+                raise AssertionError("Invalid selection reached a successful preflight")
+
+    run("actual_pending_full005", module.load(actual_pending), validation, "status is not completed", actual_pending)
+    value = copy.deepcopy(base); value["status"] = "acceptance_pending"
+    run("pending_status_with_other_fields_present", value, validation, "status is not completed")
+    value = copy.deepcopy(base); value["report_ready"] = False
+    run("explicit_report_not_ready", value, validation, "four named Week 6 requirements")
+    value = copy.deepcopy(base); value["validation"] = str(selected.parent.parent / "release_validation_completed_20261025_004/validation.json")
+    run("different_completion_validation_path", value, validation, "select different regression bytes")
+    value = copy.deepcopy(base); value["validation_sha256"] = "0" * 64
+    run("different_completion_validation_sha256", value, validation, "select different regression bytes")
+    value = copy.deepcopy(base); value["evidence"] = []
+    run("missing_final_validation_role", value, validation, "one exact final_validation")
+    value = copy.deepcopy(base); value["evidence"] *= 2
+    run("duplicate_final_validation_roles", value, validation, "one exact final_validation")
+    value = copy.deepcopy(base); value["evidence"][0]["path"] = str(selected.parent.parent / "release_validation_completed_20261025_004/validation.json")
+    run("different_final_validation_role_path", value, validation, "one exact final_validation")
+    value = copy.deepcopy(base); value["evidence"][0]["sha256"] = "0" * 64
+    run("different_final_validation_role_sha256", value, validation, "one exact final_validation")
+    record = copy.deepcopy(validation); record.pop("tested_source_pins_after")
+    run("missing_after_source_pin_map", base, record, "before/after source maps differ or are absent")
+    record = copy.deepcopy(validation); first = next(iter(record["tested_source_pins_after"])); record["tested_source_pins_after"][first] = "0" * 64
+    run("different_after_source_pin_map", base, record, "before/after source maps differ or are absent")
+    assert not sentinel.exists() and module.sha(selected) == digest
+    audit = {"schema_version": "week6.private.preflight_selection.negative.v1", "created_utc": datetime.now(UTC).isoformat(),
+             "checker": str(CHECKER), "checker_sha256": module.sha(CHECKER),
+             "genuine_validation": str(selected), "genuine_validation_sha256": digest,
+             "genuine_pending_record": str(actual_pending), "genuine_pending_sha256": module.sha(actual_pending),
+             "cases": cases, "all_checks_passed": True,
+             "test_method": "Actual package.preflight invoked. Invalid in-memory load values only; actual historical validation SHA retained. Git/downstream release checks are assertion sentinels, proving each specific selection guard ran before them.",
+             "no_completed_record_written": True, "no_valid_success_fixture_written_or_executed": True,
+             "report_ready": False, "release_ready": False, "new_model_or_gui_calls": 0,
+             "production_or_tracked_document_changes": False}
+    output.write_text(json.dumps(audit, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps({"record": str(output), "sha256": module.sha(output), "negative_cases": len(cases),
+                      "all_checks_passed": True, "checker_sha256": module.sha(CHECKER)}, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

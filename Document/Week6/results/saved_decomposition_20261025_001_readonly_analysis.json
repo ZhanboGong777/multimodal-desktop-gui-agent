@@ -1,0 +1,164 @@
+{
+  "schema": "week6.decomposition.readonly_diagnosis.v1",
+  "created_at_utc": "2026-10-25T07:47:07.779904+00:00",
+  "mode": "saved_evidence_only_no_model_capture_or_input",
+  "source_batch": "Document/Week6/results/saved_decomposition_20261025_001",
+  "sources": [
+    {
+      "path": "Document/Week6/results/saved_decomposition_20261025_001/contract.json",
+      "sha256": "87da54a3a380d8028133f8f4f05cdd61cd481e8a58cfbf4037a5e332fa7bc568"
+    },
+    {
+      "path": "Document/Week6/results/saved_decomposition_20261025_001/summary.json",
+      "sha256": "f555edddbe380289f2b52da9dc7a8d0b37f4f1bb6246f10332be897904a38a77"
+    },
+    {
+      "path": "Document/Week6/results/saved_decomposition_20261025_001/decomposition/system_prompt.txt",
+      "sha256": "69508bfc077911dc5c680d9f5c8d62af27e45aa0570a0c0bbed2fb1695f46a30"
+    },
+    {
+      "path": "Document/Week6/results/saved_decomposition_20261025_001/decomposition/transport_requests.jsonl",
+      "sha256": "aab2bcce17c240472639cf6a31509ac0f90c0871d4f5772919b63e641ce69508"
+    },
+    {
+      "path": "Document/Week6/results/saved_decomposition_20261025_001/decomposition/attempt_01_request.json",
+      "sha256": "4fc8e7bb5dba329acc2ab857c569b93eed91946af8cfce3f6f72a75d7dd9018f"
+    },
+    {
+      "path": "Document/Week6/results/saved_decomposition_20261025_001/decomposition/attempt_02_request.json",
+      "sha256": "cbc4a19e7c9a5fa675dce9e4af27fc582ecc8d2ee180d7311410e5801e5ab489"
+    },
+    {
+      "path": "Document/Week6/results/saved_decomposition_20261025_001/decomposition/attempt_03_request.json",
+      "sha256": "3c7eac45a0d2e2f0129ba36d5ea9c25733bf7c7d15e90b9c3d99ed96f9a6012d"
+    },
+    {
+      "path": "Document/Week6/results/saved_decomposition_20261025_001/decomposition/attempt_01_response.json",
+      "sha256": "989e0dc867e2e2f24535e84df2b2c313053037852e9e04e37a355203de84484f"
+    },
+    {
+      "path": "Document/Week6/results/saved_decomposition_20261025_001/decomposition/attempt_02_response.json",
+      "sha256": "85a502fcb558813ec1990de40e59f3a77f2b8eafb27e52a0749904e450e4415f"
+    },
+    {
+      "path": "Document/Week6/results/saved_decomposition_20261025_001/decomposition/attempt_03_response.json",
+      "sha256": "8641b1d109e3611822c424c4d1d8a259aeea93a0f340f19f22336772a3652c21"
+    }
+  ],
+  "observed_evidence": {
+    "attempts": [
+      {
+        "index": 1,
+        "roles": [
+          "system",
+          "user"
+        ],
+        "message_chars": [
+          2442,
+          2429
+        ],
+        "system_matches_saved_prompt": true,
+        "correction_context_keys": [],
+        "http_statuses": [
+          200
+        ],
+        "usage": {
+          "prompt_tokens": 5321,
+          "completion_tokens": 50,
+          "total_tokens": 5371
+        },
+        "finish_reason": "stop",
+        "output_sha256": "fbcc75afd50c91982d469425ad585efa7a00cb5a3eb3dd9f64a8d7db75def828"
+      },
+      {
+        "index": 2,
+        "roles": [
+          "system",
+          "user"
+        ],
+        "message_chars": [
+          2442,
+          3184
+        ],
+        "system_matches_saved_prompt": true,
+        "correction_context_keys": [
+          "format_error",
+          "constraint_or_format_error",
+          "previous_response"
+        ],
+        "http_statuses": [
+          200
+        ],
+        "usage": {
+          "prompt_tokens": 5483,
+          "completion_tokens": 49,
+          "total_tokens": 5532
+        },
+        "finish_reason": "stop",
+        "output_sha256": "09e3daff25715f1171487aa325841450b53e9d2376a7d20f0eabfcb05b5ce0af"
+      },
+      {
+        "index": 3,
+        "roles": [
+          "system",
+          "user"
+        ],
+        "message_chars": [
+          2442,
+          3182
+        ],
+        "system_matches_saved_prompt": true,
+        "correction_context_keys": [
+          "format_error",
+          "constraint_or_format_error",
+          "previous_response"
+        ],
+        "http_statuses": [
+          200
+        ],
+        "usage": {
+          "prompt_tokens": 5483,
+          "completion_tokens": 48,
+          "total_tokens": 5531
+        },
+        "finish_reason": "stop",
+        "output_sha256": "09e3daff25715f1171487aa325841450b53e9d2376a7d20f0eabfcb05b5ce0af"
+      }
+    ],
+    "all_three_parsed_proposals_equal": true,
+    "repair_two_and_three_byte_equal": true,
+    "correction_error_reports_first_forbid_conflict_only": true,
+    "response_format_in_current_source": {
+      "type": "json_object"
+    },
+    "response_format_caveat": "Code inspection shows JSON-object formatting only. These saved transport records do not separately retain the outbound response_format value.",
+    "root_reported_runtime_context": {
+      "num_ctx": 32768,
+      "source": "Root reported a read-only local /api/show observation during this review; this subagent did not query the server."
+    },
+    "truncation_conclusion": "No direct evidence of input truncation. The 5,483 prompt-token report being smaller than num_ctx=32,768 is consistent with sufficient capacity, but does not prove that the server never truncated or transformed messages. All outputs stopped normally, rather than finish_reason=length."
+  },
+  "supported_diagnosis": [
+    "The correction fields and unchanged system prompt reached each recorded client request; they were not omitted by local message construction.",
+    "Every attempt remained a new two-turn system/user exchange. The previous invalid proposal and the corrective error were embedded as JSON context data rather than an assistant reply followed by an explicit corrective user turn.",
+    "The validator fails at the first forbid/final conflict, so the subsequent current-visible-expect violation was not included in the concrete correction error.",
+    "JSON-object response formatting enforces syntax, not semantic postcondition consistency; independent local rejection remains necessary."
+  ],
+  "inferences_not_proven": [
+    "The two-turn nested correction may have encouraged repetition or made correction less salient; a controlled saved-frame chat-repair probe is needed to test this.",
+    "The model may be interpreting forbid_text as do-not-click/do-not-repeat rather than text that must be absent after the operation. The forbidden values match completed results, but its internal interpretation cannot be established from output alone."
+  ],
+  "generic_repair_recommendation": [
+    "Keep the source unchanged until Root validates explicit chat correction using the same archived frame, whole instruction and caller final checks.",
+    "If the probe succeeds, represent the invalid proposal as an assistant turn and add a last user correction turn listing all detected field-level constraint violations; continue to count every transport attempt and retain every reply.",
+    "Clarify generic postcondition semantics: expect_text must be present after the goal, forbid_text must be absent after the goal; forbid_text does not mean an operation should not be repeated or a completed context is irrelevant.",
+    "Do not replace model-generated checks in code or insert a fixture-specific successful subgoal. The model must supply a corrected proposal and the same independent validation must accept it before any input."
+  ],
+  "source_sha256_before": "ab8d84135804cf6cc5c097f98fd02c88648511d212089d1c041fd7b3faa0be60",
+  "source_sha256_after": "ab8d84135804cf6cc5c097f98fd02c88648511d212089d1c041fd7b3faa0be60",
+  "model_requests_performed_by_analysis": 0,
+  "desktop_capture_count": 0,
+  "desktop_input_count": 0,
+  "task_execution_count": 0,
+  "no_source_mutations": true
+}

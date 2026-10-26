@@ -1,0 +1,39 @@
+"""Private CPU counterexample: no desktop capture, input or model requests."""
+from __future__ import annotations
+
+import importlib
+import json
+import sys
+import types
+from datetime import UTC, datetime
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parents[2] / "week6-worktree"
+sys.path.insert(0, str(REPO / "src"))
+runtime = types.ModuleType("gui_agent.runtime")
+runtime.__path__ = [str(REPO / "src/gui_agent/runtime")]
+sys.modules["gui_agent.runtime"] = runtime
+schema = importlib.import_module("gui_agent.runtime.schemas")
+Verifier = importlib.import_module("gui_agent.runtime.verification").Verifier
+screen = importlib.import_module("gui_agent.schemas").ScreenInfo(
+    screenshot_width=800, screenshot_height=600, control_width=800, control_height=600,
+)
+snapshot = schema.ObservationSnapshot(
+    observation_id="private-hypothesis-title-only-no-capture",
+    captured_at=datetime.now(UTC), screen_info=screen, elements=[],
+    window_title="Expected application", window_id="123", foreground_stable=True,
+)
+check = schema.TaskSpec(case_id="NEGATIVE", instruction="Observe marker disappearance", forbid_text=["Pending stage"])
+result = Verifier().check_task(check, snapshot)
+payload = {
+    "schema": "week6.private_negative_evidence_counterexample.v1",
+    "mode": "CPU_only_fabricated_snapshot_not_desktop",
+    "production_verifier_result": result.model_dump(mode="json"),
+    "expected_progress_qualification": "inconclusive",
+    "reason": "An application title with no readable element text cannot establish disappearance of an in-content marker.",
+    "desktop_capture_count": 0, "desktop_input_count": 0, "model_requests": 0,
+    "real_GUI_success": False,
+}
+target = Path(__file__).with_suffix(".json")
+target.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+print(json.dumps(payload))

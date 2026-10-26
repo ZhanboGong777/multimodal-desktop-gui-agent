@@ -1,0 +1,29 @@
+{
+  "schema": "week6.progress_contract.implementation.v1",
+  "created_at_utc": "2026-10-25T09:58:50.997472+00:00",
+  "frozen": true,
+  "source_before_sha256": "3bc8ff2accfb32d5e4f58a5461fec0bfd97ee0bc14b5434d047632c5ef3e7a18",
+  "after_sha256": {
+    "src/gui_agent/planning/workflow_decomposer.py": "9ddd9c13f733634be3ff6abc33590062a1aea6bbd04a1d1ea12dad86c2f13c1b",
+    "tests/test_week6_automatic_decomposition.py": "160a9e54894535e0177ced486c6a29c33e33b734a6c8331166ed698d03af26b2",
+    "tests/test_week6_auto_cli.py": "cb91b7fc11d99aca7bc463fd9dc70562d453150ac13a96b97ae55f632334213a",
+    "tests/test_week6_progress_contract.py": "b824f18476b730c477a8a318f51b8757693eef3dda2f285d58a16a949a6f61fb"
+  },
+  "files_modified_by_this_change": [
+    "src/gui_agent/planning/workflow_decomposer.py",
+    "tests/test_week6_automatic_decomposition.py",
+    "tests/test_week6_auto_cli.py",
+    "tests/test_week6_progress_contract.py"
+  ],
+  "runtime_cli_readme_modified": false,
+  "new_test_collection_delta": 26,
+  "prior_targeted_count": 91,
+  "targeted_count": 117,
+  "targeted_command": "python -m pytest -q tests/test_week6_progress_contract.py tests/test_week6_automatic_decomposition.py tests/test_week6_auto_cli.py tests/test_week6_cli.py --basetemp=.pytest-tmp-week6-progress015 --tb=short",
+  "scope": "Preexecution automatic-mode progress contract; no production model/GUI calls performed by this implementation task. Raw and progress predicates remain separately recorded; caller final is unchanged.",
+  "independent_review_before_wait_fix": {
+    "guards_passed": 14,
+    "path": "C:/Users/联想/Documents/ChatGPT/Intern/tmp/week6_replanning_review/independent_progress_audit.json"
+  },
+  "wait_fix": "At least one complete confirmed successful non-dry-run supported OS-input ActionResult is required. Wait-only is not input credit; click plus wait is accepted. confirmed_action_count and confirmed_input_count are separate."
+}

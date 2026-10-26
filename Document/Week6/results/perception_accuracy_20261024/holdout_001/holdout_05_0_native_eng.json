@@ -1,0 +1,302 @@
+{
+  "fixture": "holdout_05",
+  "arm": "native_eng",
+  "repeat": 0,
+  "decode_ms": 1.838899974245578,
+  "ocr_ms": 193.7562000239268,
+  "ui_ms": 6.669099966529757,
+  "full_ms": 202.26419996470213,
+  "metrics": {
+    "tp": 5,
+    "fp": 0,
+    "fn": 3,
+    "precision": 1.0,
+    "recall": 0.625,
+    "labels": [
+      {
+        "text": "Calendar Event",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9855072463768116
+      },
+      {
+        "text": "Event Title",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9113924050632911
+      },
+      {
+        "text": "Add Reminder",
+        "language": "en",
+        "matched": true,
+        "iou": 0.990909090909091
+      },
+      {
+        "text": "Today",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9782608695652174
+      },
+      {
+        "text": "Delete",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9042386185243328
+      },
+      {
+        "text": "日历事件",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "添加提醒",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "删除",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      }
+    ]
+  },
+  "control_metrics": {
+    "tp": 6,
+    "fp": 4,
+    "fn": 0,
+    "iou_threshold": 0.8
+  },
+  "predictions": [
+    {
+      "text": "Calendar Event",
+      "bounding_box": {
+        "left": 49,
+        "top": 64,
+        "right": 185,
+        "bottom": 79
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 117,
+        "y": 71
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Event Title",
+      "bounding_box": {
+        "left": 49,
+        "top": 134,
+        "right": 127,
+        "bottom": 146
+      },
+      "confidence": 0.91,
+      "center": {
+        "x": 88,
+        "y": 140
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Add Reminder",
+      "bounding_box": {
+        "left": 48,
+        "top": 211,
+        "right": 157,
+        "bottom": 223
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 102,
+        "y": 217
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Today",
+      "bounding_box": {
+        "left": 48,
+        "top": 312,
+        "right": 93,
+        "bottom": 327
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 70,
+        "y": 319
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Delete",
+      "bounding_box": {
+        "left": 244,
+        "top": 312,
+        "right": 292,
+        "bottom": 324
+      },
+      "confidence": 0.93,
+      "center": {
+        "x": 268,
+        "y": 318
+      },
+      "source": "ocr"
+    }
+  ],
+  "ui_candidates": [
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 37,
+        "top": 196,
+        "right": 182,
+        "bottom": 250
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 109,
+        "y": 223
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 642,
+        "top": 297,
+        "right": 782,
+        "bottom": 351
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 712,
+        "y": 324
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 232,
+        "top": 297,
+        "right": 372,
+        "bottom": 351
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 302,
+        "y": 324
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 37,
+        "top": 297,
+        "right": 177,
+        "bottom": 351
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 324
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 642,
+        "top": 196,
+        "right": 782,
+        "bottom": 250
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 712,
+        "y": 223
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 642,
+        "top": 119,
+        "right": 782,
+        "bottom": 173
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 712,
+        "y": 146
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 653,
+        "top": 210,
+        "right": 722,
+        "bottom": 229
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 687,
+        "y": 219
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 670,
+        "top": 133,
+        "right": 722,
+        "bottom": 152
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 696,
+        "y": 142
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 653,
+        "top": 312,
+        "right": 688,
+        "bottom": 330
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 670,
+        "y": 321
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 655,
+        "top": 134,
+        "right": 669,
+        "bottom": 151
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 662,
+        "y": 142
+      },
+      "source": "contour"
+    }
+  ],
+  "errors": []
+}

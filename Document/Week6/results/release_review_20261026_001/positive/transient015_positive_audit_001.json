@@ -1,0 +1,106 @@
+{
+  "schema_version": "week6.private.actual_transient_v2_audit.v1",
+  "created_utc": "2026-10-25T11:41:37.585721+00:00",
+  "audit": {
+    "path": "Document/Week6/results/live_auto_20261025_transient_015/acceptance.json",
+    "sha256": "10557665b4683644aa16a85721139edd14bccdefb50f9ad89c2c0976c33d8d36",
+    "mode": "transient",
+    "contract_sha256": "d1fa134a92ce166648d82d5ec890101c85d2c1bfe5db7385a9e16d77937edec1",
+    "semantic_transitions": [
+      "project_selected",
+      "theme_selected",
+      "review_rejected",
+      "review_accepted",
+      "local_commit"
+    ],
+    "distinct_input_receipts": [
+      "input_001",
+      "input_002",
+      "input_003",
+      "input_004",
+      "input_005"
+    ],
+    "source_pin_count": 90,
+    "rolling_actions_audit": {
+      "schema": "week6.release.rolling_actions.audit.v1",
+      "all_checks_passed": true,
+      "protocol_version": "week6.rolling_actions.v2",
+      "completion_basis": "executed_caller_goal",
+      "gate_on_step_verification": false,
+      "step_verification_policy": "Model step predictions are advisory; unchanged caller final rules are authoritative after each one-step plan.",
+      "request_sha256": "f691a74ff2c058e574b0e240a905341f471c1e1bb5a6ddd85a7442710ef707fa",
+      "compilation_sha256": "20cbb8c347d9c67026822fe7c21549c53ab7e6fe0efe034720b39e4022e15a6d",
+      "child_summary_sha256": "9982df673cfb08231fe795d110069304bb2cd871e96e16dfdf557957d92b1d24",
+      "rolling_audit_sha256": "00115cc5325c08183ab4b85533cf17d6f862d7e98de763338fe05708ea4cd606",
+      "planning_limit_sha256": "6c831ec03ed7480dbd715d65c47b6153af11d85f0339d680c615e923a01f3bd7",
+      "transport_sha256": "61ff95e561ad32a8dea81ad5d265a2d900dbb43bf73d14b6844c202c23ac99e2",
+      "native_planning_calls": 5,
+      "actual_http_requests": 5,
+      "confirmed_executor_attempts": 5,
+      "known_failed_executor_attempts": 0,
+      "confirmed_nonwait_inputs": 5,
+      "saved_scoped_frames": 16,
+      "raw_model_step_verdict_counts": {
+        "passed": 4,
+        "failed": 1,
+        "inconclusive": 0
+      },
+      "raw_model_step_checks": [
+        {
+          "step_index": 1,
+          "native_step_id": "s1",
+          "original_expected_result": "Project BETA is selected.",
+          "raw_outcome": "passed",
+          "executor_success": true,
+          "post_observation_id": "obs-0003"
+        },
+        {
+          "step_index": 2,
+          "native_step_id": "s1",
+          "original_expected_result": "The 'BLUE' theme is selected.",
+          "raw_outcome": "passed",
+          "executor_success": true,
+          "post_observation_id": "obs-0007"
+        },
+        {
+          "step_index": 3,
+          "native_step_id": "s1",
+          "original_expected_result": "The report review process should start.",
+          "raw_outcome": "passed",
+          "executor_success": true,
+          "post_observation_id": "obs-0011"
+        },
+        {
+          "step_index": 4,
+          "native_step_id": "s1",
+          "original_expected_result": "The report review process should start.",
+          "raw_outcome": "passed",
+          "executor_success": true,
+          "post_observation_id": "obs-0015"
+        },
+        {
+          "step_index": 5,
+          "native_step_id": "s1",
+          "original_expected_result": "Commit locally action completed",
+          "raw_outcome": "failed",
+          "executor_success": true,
+          "post_observation_id": "obs-0019"
+        }
+      ],
+      "initial_outcome": "failed",
+      "final_outcome": "passed",
+      "final_observation_sha256": "7a245b9d12eda5a732c78748840abe13d3b214a8bb75acea29e08e21a37bd150",
+      "meaning": "Bounded model plan→one-step execution→fresh observation on the immutable caller goal. No marker selection, free semantic subtask sequence or A progress proof is asserted."
+    },
+    "owner_receipt_sha256": "705ab42730d84957ca323577b6182a07d2bec970947311743792af8fa1186c2e",
+    "actual_child_exit_code": 0,
+    "owner_harness_sha256": "09c008cd3eaef8bf2750024c10ae47e14decb32cb8a30f666b0e0911f8418294",
+    "all_checks_passed": true
+  },
+  "package_checker_sha256": "c0ce78004529b3624030b5a0f65401d73b887012177816088f586339720372c6",
+  "report_evidence_sha256": "83320a14e88cc360117e8a5115df62c73bd45e792d276890a00d88a67603b95a",
+  "all_transient_checks_passed": true,
+  "report_ready": false,
+  "release_ready": false,
+  "scope": "Actual ended transient015 only. New-source normal acceptance and complete regression remain required. Saved original native raw step predictions and their failed/inconclusive outcomes retained; no model, capture, input or executor created."
+}

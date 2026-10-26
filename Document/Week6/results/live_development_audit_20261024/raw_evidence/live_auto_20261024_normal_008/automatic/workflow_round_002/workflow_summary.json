@@ -1,0 +1,58 @@
+{
+  "schema_version": "week6.workflow.v1",
+  "workflow_id": "lab_auto",
+  "status": "failed",
+  "execute": true,
+  "subgoals": [
+    {
+      "index": 0,
+      "case_id": "G01",
+      "status": "completed",
+      "child_status": "succeeded",
+      "actions": 1,
+      "unconfirmed_action_attempts": 0,
+      "planning_calls": 1,
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "obs-0004",
+          "expect_text": [
+            "GREEN"
+          ],
+          "forbid_text": [
+            "BLUE"
+          ]
+        }
+      },
+      "elapsed_ms": 133188.00000002375,
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow_round_002\\001_G01",
+      "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow_round_002\\001_G01\\task_summary.json",
+      "error": null
+    }
+  ],
+  "total_actions": 1,
+  "unconfirmed_action_attempts": 0,
+  "planning_calls": 1,
+  "accounting_complete": true,
+  "elapsed_ms": 169750.0,
+  "final_verification": {
+    "outcome": "failed",
+    "method": "automatic",
+    "detail": "expected on screen but not found: LOCAL COMPLETE",
+    "evidence": {
+      "observation_id": "obs-0005",
+      "missing": [
+        "LOCAL COMPLETE"
+      ]
+    }
+  },
+  "final_observation_id": "obs-0005",
+  "final_observation_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow_round_002\\001_G01\\obs-0005.json",
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow_round_002",
+  "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow_round_002\\workflow_summary.json",
+  "checkpoint_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow_round_002\\checkpoints.jsonl",
+  "error": "final workflow verification did not pass",
+  "notes": []
+}

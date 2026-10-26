@@ -1,0 +1,428 @@
+{
+  "run_id": "001_CALLER_GOAL",
+  "case_id": "CALLER_GOAL",
+  "instruction": "Advance only the currently visible stage of the original caller request. Choose operations from the original request and current screen; do not repeat already satisfied selections. Plan at most one input, then observe again. Original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test, with no external communication. If review is temporarily unavailable, retry within budget.",
+  "status": "succeeded",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Select project ALPHA.",
+      "action_type": "click",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "click",
+          "x": 1280,
+          "y": 867,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "ALPHA"
+        },
+        "element_id": "obs-0002-e001",
+        "screenshot_point": {
+          "x": 1280,
+          "y": 867
+        },
+        "control_point": {
+          "x": 1280,
+          "y": 867
+        },
+        "note": "text 'ALPHA' -> obs-0002-e001 (re-bound from obs-0001-e003 in an earlier frame)"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "click",
+          "x": 1280,
+          "y": 867,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "ALPHA"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: project, alpha",
+        "evidence": {
+          "observation_id": "obs-0003",
+          "changed": true,
+          "element_count": 10,
+          "expectation_tokens": [
+            "project",
+            "alpha"
+          ],
+          "expectation_hits": [
+            "project",
+            "alpha"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 35765.00000001397,
+      "after_observation_id": "obs-0003"
+    },
+    {
+      "index": 2,
+      "step_id": "s1",
+      "description": "Select 'GREEN' report theme.",
+      "action_type": "click",
+      "observation_id": "obs-0006",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "click",
+          "x": 1280,
+          "y": 1079,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "GREEN"
+        },
+        "element_id": "obs-0006-e003",
+        "screenshot_point": {
+          "x": 1280,
+          "y": 1079
+        },
+        "control_point": {
+          "x": 1280,
+          "y": 1079
+        },
+        "note": "text 'GREEN' -> obs-0006-e003 (re-bound from obs-0005-e003 in an earlier frame)"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "click",
+          "x": 1280,
+          "y": 1079,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "GREEN"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: green, theme",
+        "evidence": {
+          "observation_id": "obs-0007",
+          "changed": true,
+          "element_count": 9,
+          "expectation_tokens": [
+            "green",
+            "theme"
+          ],
+          "expectation_hits": [
+            "green",
+            "theme"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 27906.00000001723,
+      "after_observation_id": "obs-0007"
+    },
+    {
+      "index": 3,
+      "step_id": "s1",
+      "description": "Click on 'Review report' to proceed with the report review.",
+      "action_type": "click",
+      "observation_id": "obs-0010",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "click",
+          "x": 1282,
+          "y": 1049,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Review report"
+        },
+        "element_id": "obs-0010-e003",
+        "screenshot_point": {
+          "x": 1282,
+          "y": 1049
+        },
+        "control_point": {
+          "x": 1282,
+          "y": 1049
+        },
+        "note": "text 'Review report' -> obs-0010-e003 (re-bound from obs-0009-e003 in an earlier frame)"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "click",
+          "x": 1282,
+          "y": 1049,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Review report"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: report, review",
+        "evidence": {
+          "observation_id": "obs-0011",
+          "changed": true,
+          "element_count": 22,
+          "expectation_tokens": [
+            "report",
+            "review",
+            "process",
+            "should",
+            "start"
+          ],
+          "expectation_hits": [
+            "report",
+            "review"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 17016.00000000326,
+      "after_observation_id": "obs-0011"
+    },
+    {
+      "index": 4,
+      "step_id": "s1",
+      "description": "Click on the 'Commit locally' button.",
+      "action_type": "click",
+      "observation_id": "obs-0014",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "click",
+          "x": 1193,
+          "y": 1050,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Commit locally"
+        },
+        "element_id": "obs-0014-e014",
+        "screenshot_point": {
+          "x": 1193,
+          "y": 1050
+        },
+        "control_point": {
+          "x": 1193,
+          "y": 1050
+        },
+        "note": "element obs-0014-e014"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "click",
+          "x": 1193,
+          "y": 1050,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Commit locally"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: report",
+        "evidence": {
+          "observation_id": "obs-0015",
+          "changed": true,
+          "element_count": 14,
+          "expectation_tokens": [
+            "report",
+            "committed",
+            "locally"
+          ],
+          "expectation_hits": [
+            "report"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 30827.99999997951,
+      "after_observation_id": "obs-0015"
+    }
+  ],
+  "verification": {
+    "outcome": "passed",
+    "method": "automatic",
+    "detail": "all success rules matched against the current screen",
+    "evidence": {
+      "observation_id": "obs-0016",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [],
+      "verification_source": "immutable_caller_goal_rolling_actions"
+    }
+  },
+  "error": null,
+  "elapsed_ms": 223750.0,
+  "execute": true,
+  "model_name": "qwen2.5vl:7b",
+  "provider": "openai_compatible",
+  "notes": [
+    "planned 1 steps from obs-0001",
+    "task verification: expected on screen but not found: Theme GREEN, LOCAL COMPLETE",
+    "re-planned from obs-0005: attempt 2 of at most 12",
+    "task verification: expected on screen but not found: LOCAL COMPLETE",
+    "re-planned from obs-0009: attempt 3 of at most 12",
+    "task verification: expected on screen but not found: LOCAL COMPLETE",
+    "re-planned from obs-0013: attempt 4 of at most 12",
+    "s1: grounded obs-0013-e014 from obs-0013 to obs-0014-e014 in obs-0014 (pixel_match)"
+  ],
+  "task_id": "CALLER_GOAL",
+  "commit": "1307076",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 2560x1600, control 2560x1600",
+  "started_at": "2026-10-25T11:06:06.436343Z",
+  "finished_at": "2026-10-25T11:09:50.186343Z",
+  "planning_attempts": 4,
+  "model_requests": 4,
+  "planning_ms": 28468.99999998277,
+  "confirmation_ms": 16.00000000325963,
+  "execution_ms": 195265.00000001397,
+  "planner_ms": 68453.00000003772,
+  "planning_calls": 4,
+  "system_elapsed_ms": 223733.99999999674,
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261025_normal_012\\automatic\\workflow\\001_CALLER_GOAL",
+  "stop_reason": "",
+  "error_type": "",
+  "failed_step_id": null,
+  "recovery_records": [
+    {
+      "next_pass": 2,
+      "outcome": "plan_ready",
+      "observation_id": "obs-0005",
+      "feedback": {
+        "previous_pass": 1,
+        "reason": "task_verification",
+        "failed_step_index": null,
+        "actions_used": 1,
+        "actions_remaining": 11,
+        "remaining_ms": 1106608.9999999967,
+        "recent_steps": [
+          {
+            "index": 1,
+            "action_type": "click",
+            "attempted": true,
+            "succeeded": true,
+            "verification": "passed"
+          }
+        ],
+        "omitted_steps": 0,
+        "instruction": "Plan from the current observation; previous attempts do not prove success. Do not replay completed inputs to recreate an earlier state. Existing task checks and remaining budgets still apply."
+      },
+      "elapsed_ms": 23516.00000000326
+    },
+    {
+      "next_pass": 3,
+      "outcome": "plan_ready",
+      "observation_id": "obs-0009",
+      "feedback": {
+        "previous_pass": 2,
+        "reason": "task_verification",
+        "failed_step_index": null,
+        "actions_used": 2,
+        "actions_remaining": 10,
+        "remaining_ms": 1054297.0000000205,
+        "recent_steps": [
+          {
+            "index": 2,
+            "action_type": "click",
+            "attempted": true,
+            "succeeded": true,
+            "verification": "passed"
+          }
+        ],
+        "omitted_steps": 0,
+        "instruction": "Plan from the current observation; previous attempts do not prove success. Do not replay completed inputs to recreate an earlier state. Existing task checks and remaining budgets still apply."
+      },
+      "elapsed_ms": 20030.99999995902
+    },
+    {
+      "next_pass": 4,
+      "outcome": "plan_ready",
+      "observation_id": "obs-0013",
+      "feedback": {
+        "previous_pass": 3,
+        "reason": "task_verification",
+        "failed_step_index": null,
+        "actions_used": 3,
+        "actions_remaining": 9,
+        "remaining_ms": 1010733.9999999967,
+        "recent_steps": [
+          {
+            "index": 3,
+            "action_type": "click",
+            "attempted": true,
+            "succeeded": true,
+            "verification": "passed"
+          }
+        ],
+        "omitted_steps": 0,
+        "instruction": "Plan from the current observation; previous attempts do not prove success. Do not replay completed inputs to recreate an earlier state. Existing task checks and remaining budgets still apply."
+      },
+      "elapsed_ms": 20969.00000004098
+    }
+  ],
+  "unconfirmed_action_attempts": 0,
+  "action_count": 4
+}

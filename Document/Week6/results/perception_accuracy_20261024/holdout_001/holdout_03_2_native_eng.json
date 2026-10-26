@@ -1,0 +1,302 @@
+{
+  "fixture": "holdout_03",
+  "arm": "native_eng",
+  "repeat": 2,
+  "decode_ms": 1.9736000103875995,
+  "ocr_ms": 188.39950003894046,
+  "ui_ms": 6.150399975012988,
+  "full_ms": 196.52350002434105,
+  "metrics": {
+    "tp": 5,
+    "fp": 1,
+    "fn": 3,
+    "precision": 0.8333333333333334,
+    "recall": 0.625,
+    "labels": [
+      {
+        "text": "Package Manager",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9824561403508771
+      },
+      {
+        "text": "Version List",
+        "language": "en",
+        "matched": true,
+        "iou": 1.0
+      },
+      {
+        "text": "Check Updates",
+        "language": "en",
+        "matched": true,
+        "iou": 0.983739837398374
+      },
+      {
+        "text": "Install",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9361702127659575
+      },
+      {
+        "text": "Remove",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9701492537313433
+      },
+      {
+        "text": "软件管理",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "检查更新",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "安装",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      }
+    ]
+  },
+  "control_metrics": {
+    "tp": 6,
+    "fp": 3,
+    "fn": 0,
+    "iou_threshold": 0.8
+  },
+  "predictions": [
+    {
+      "text": "Package Manager",
+      "bounding_box": {
+        "left": 50,
+        "top": 73,
+        "right": 218,
+        "bottom": 92
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 134,
+        "y": 82
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Version List",
+      "bounding_box": {
+        "left": 48,
+        "top": 142,
+        "right": 141,
+        "bottom": 155
+      },
+      "confidence": 0.94,
+      "center": {
+        "x": 94,
+        "y": 148
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Check Updates",
+      "bounding_box": {
+        "left": 49,
+        "top": 219,
+        "right": 170,
+        "bottom": 236
+      },
+      "confidence": 0.95,
+      "center": {
+        "x": 109,
+        "y": 227
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Install",
+      "bounding_box": {
+        "left": 50,
+        "top": 320,
+        "right": 94,
+        "bottom": 333
+      },
+      "confidence": 0.9,
+      "center": {
+        "x": 72,
+        "y": 326
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Remove",
+      "bounding_box": {
+        "left": 244,
+        "top": 320,
+        "right": 309,
+        "bottom": 333
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 276,
+        "y": 326
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "RE",
+      "bounding_box": {
+        "left": 653,
+        "top": 321,
+        "right": 689,
+        "bottom": 338
+      },
+      "confidence": 0.77,
+      "center": {
+        "x": 671,
+        "y": 329
+      },
+      "source": "ocr"
+    }
+  ],
+  "ui_candidates": [
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 37,
+        "top": 204,
+        "right": 196,
+        "bottom": 258
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 116,
+        "y": 231
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 642,
+        "top": 305,
+        "right": 782,
+        "bottom": 359
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 712,
+        "y": 332
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 232,
+        "top": 305,
+        "right": 372,
+        "bottom": 359
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 302,
+        "y": 332
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 37,
+        "top": 305,
+        "right": 177,
+        "bottom": 359
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 332
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 642,
+        "top": 204,
+        "right": 782,
+        "bottom": 258
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 712,
+        "y": 231
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 642,
+        "top": 127,
+        "right": 782,
+        "bottom": 181
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 712,
+        "y": 154
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 653,
+        "top": 219,
+        "right": 726,
+        "bottom": 239
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 689,
+        "y": 229
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 653,
+        "top": 142,
+        "right": 726,
+        "bottom": 162
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 689,
+        "y": 152
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 691,
+        "top": 146,
+        "right": 706,
+        "bottom": 160
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 698,
+        "y": 153
+      },
+      "source": "contour"
+    }
+  ],
+  "errors": []
+}

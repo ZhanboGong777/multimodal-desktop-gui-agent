@@ -1,0 +1,32 @@
+{
+  "schema_version": "week6.observed_departure_implementation.v1",
+  "source_path": "src/gui_agent/planning/workflow_decomposer.py",
+  "source_sha256_before": "9ddd9c13f733634be3ff6abc33590062a1aea6bbd04a1d1ea12dad86c2f13c1b",
+  "source_sha256_frozen": "c0ad9b81ea9060cf561d6ebe019c6d01b376e240b8d1a4468cec6e5c9664003c",
+  "protocol": "week6.observed_departure.v1",
+  "default_api_protocol": "postconditions",
+  "automatic_fresh_observer_protocol": "observed_departure",
+  "native_fields": ["status", "reason", "subgoals"],
+  "native_subgoal_fields": ["instruction", "disappearing_text"],
+  "ready_subgoal_count": 1,
+  "nonready_subgoal_count": 0,
+  "compilation": "expect_text=[]; forbid_text=[native disappearing_text unchanged]",
+  "records": ["observed_departure_protocol.json", "native_proposal.json", "compiled_proposal.json", "attempt_N_request.json", "attempt_N_response.json", "generated_workflow.json", "result.json"],
+  "new_test_file": "tests/test_week6_observed_departure.py",
+  "new_test_sha256": "6fd80af2b708f1430f522adc45c7c0c993d03364457d789386b49fb7341baed9",
+  "new_collected_cases": 30,
+  "targeted_command": "python -m pytest -q tests/test_week6_observed_departure.py tests/test_week6_progress_contract.py tests/test_week6_automatic_decomposition.py tests/test_week6_auto_cli.py tests/test_week6_cli.py --basetemp=.pytest-tmp-week6-departure002 --tb=short",
+  "targeted_passed": 147,
+  "targeted_pytest_seconds": 8.33,
+  "targeted_exit_code": 0,
+  "ruff_exit_code": 0,
+  "model_requests_during_implementation": 0,
+  "desktop_captures_during_implementation": 0,
+  "desktop_inputs_during_implementation": 0,
+  "limitations": [
+    "A model-selected departure marker is an untrusted process witness until independently observed after a confirmed input.",
+    "Persistent-label or additive-only operations may not be expressible by this protocol.",
+    "Native reason never proves completion; caller final checks remain immutable and independently observed.",
+    "This CPU implementation validation is not live desktop acceptance."
+  ]
+}

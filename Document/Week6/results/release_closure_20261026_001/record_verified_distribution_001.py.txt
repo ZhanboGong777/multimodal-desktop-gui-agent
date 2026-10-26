@@ -1,0 +1,54 @@
+"""Update release status only after a real same-source distribution has verified."""
+from datetime import UTC, datetime
+import hashlib
+import json
+from pathlib import Path
+import shutil
+import subprocess
+
+ROOT = Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+CANDIDATE = ROOT.parent / 'tmp/week6/package_candidate_20261026_001'
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def main():
+    receipt = json.loads((CANDIDATE / 'Week6_completed_delivery_receipt.json').read_text(encoding='utf-8'))
+    head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
+    assert receipt['commit'] == head
+    assert receipt['crc_verified'] and receipt['production_modules_byte_verified'] > 0
+    assert receipt['reports_and_licenses_byte_verified'] and receipt['source_clean_after_package']
+    archive = Path(receipt['archive'])
+    assert sha(archive) == receipt['archive_sha256']
+    validation = json.loads((ROOT / 'Document/Week6/results/release_validation_completed_20261026_006/validation.json').read_text(encoding='utf-8'))
+    assert all(sha(ROOT / name) == value for name, value in validation['tested_source_pins_before'].items())
+    destination = ROOT / 'Document/Week6/results/distribution_candidate_verification_20261026_001'
+    destination.mkdir(exist_ok=False)
+    files = []
+    for name in ['Week6_completed_delivery_receipt.json', 'release_manifest.json', 'wheel_verification.json']:
+        original = CANDIDATE / name
+        copied = destination / name
+        shutil.copyfile(original, copied)
+        assert sha(original) == sha(copied)
+        files.append({'source': str(original), 'destination': copied.relative_to(ROOT).as_posix(), 'sha256': sha(original)})
+    (destination / 'copy_manifest_001.json').open('x', encoding='utf-8', newline='\n').write(
+        json.dumps({'files': files, 'all_bytes_equal': True, 'meaning': 'Earlier verified candidate uses the same tested code and reviewed reports; final archive has a separate exact commit and receipt.'}, ensure_ascii=False, indent=2) + '\n')
+    status_path = ROOT / 'Document/Week6/IMPLEMENTATION_STATUS.json'
+    status = json.loads(status_path.read_text(encoding='utf-8'))
+    assert status['delivery_complete'] is False and status['report_ready'] is True
+    status.update({'updated_utc': datetime.now(UTC).isoformat(), 'delivery_complete': True,
+                   'state': 'Scoped engineering delivery verified; exact final archive and publication bytes are identified by the external distribution receipt.',
+                   'remaining_delivery_work': [],
+                   'verified_distribution_candidate': {'commit': receipt['commit'], 'archive_sha256': receipt['archive_sha256'],
+                                                       'crc_verified': True, 'production_modules_byte_verified': receipt['production_modules_byte_verified'],
+                                                       'reports_and_licenses_byte_verified': True,
+                                                       'receipt': (destination / 'Week6_completed_delivery_receipt.json').relative_to(ROOT).as_posix()},
+                   'final_archive_receipt': 'Week6_completed_delivery_receipt.json accompanies the final distribution; its digest is external to avoid self-reference.'})
+    status_path.open('w', encoding='utf-8', newline='\n').write(json.dumps(status, ensure_ascii=False, indent=2) + '\n')
+    print(json.dumps({'status_sha256': sha(status_path), 'verified_candidate_commit': head, 'delivery_complete': True}))
+
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,58 @@
+"""Read-only bundle verification; optional pure recheck of ended selected runs."""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import importlib.machinery
+import importlib.util
+import json
+import sys
+from pathlib import Path
+
+sys.dont_write_bytecode = True
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--bundle", type=Path, default=Path(__file__).resolve().parent)
+    parser.add_argument("--check-original-sources", action="store_true")
+    parser.add_argument("--recheck-selected-gates", action="store_true",
+                        help="Read original ended 015/017 records with the archived central checker; no GUI/model/tests")
+    args = parser.parse_args()
+    root = args.bundle.resolve()
+    manifest = json.loads((root / "copy_manifest_001.json").read_bytes())
+    verified = []
+    for item in manifest["copies"]:
+        destination = (root / item["destination_relative"]).resolve()
+        assert destination.is_relative_to(root) and destination.is_file(), item
+        data = destination.read_bytes()
+        assert hashlib.sha256(data).hexdigest() == item["source_sha256"] == item["destination_sha256"], item
+        assert len(data) == item["bytes"], item
+        if args.check_original_sources:
+            source = Path(item["source"])
+            assert source.read_bytes() == data, item
+        verified.append(item["destination_relative"])
+    gate_results = {}
+    if args.recheck_selected_gates:
+        repository = Path(manifest["repository_original_path"])
+        sys.path.insert(0, str(repository / "src"))
+        checker = root / manifest["central_checker"]["snapshot_relative"]
+        loader = importlib.machinery.SourceFileLoader("week6_archived_release_review_checker", str(checker))
+        spec = importlib.util.spec_from_loader(loader.name, loader)
+        module = importlib.util.module_from_spec(spec)
+        loader.exec_module(module)
+        assert module.REPO.resolve() == repository.resolve()
+        for item in manifest["selected_positive_audits"]:
+            saved = json.loads((root / item["audit_relative"]).read_bytes())["audit"]
+            actual = module.audit_live_acceptance({"path":saved["path"],"sha256":saved["sha256"]},item["mode"])
+            assert actual == saved, item
+            gate_results[item["mode"]] = {"all_checks_passed":actual["all_checks_passed"],
+                                          "acceptance_sha256":actual["sha256"]}
+    print(json.dumps({"all_bundle_bytes_verified":True,"files":len(verified),
+        "original_sources_checked":args.check_original_sources,"selected_saved_gate_rechecks":gate_results,
+        "model_requests":0,"HTTP_requests":0,"GUI_captures":0,"GUI_inputs":0,"tests_executed":0,
+        "full006_exit_or_pass_claimed":False,"release_ready_claimed":False},ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

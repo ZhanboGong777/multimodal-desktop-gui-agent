@@ -1,0 +1,180 @@
+"""Append a closed-attempt 008 audit without changing the 001..007 audit."""
+from __future__ import annotations
+
+import hashlib
+import json
+from datetime import UTC, datetime
+from pathlib import Path
+
+REPO = Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+RESULTS = REPO / 'Document/Week6/results'
+BATCH = RESULTS / 'live_auto_20261024_normal_008'
+OUT = RESULTS / 'live_development_audit_20261024'
+FIXTURE = Path('D:/Developer/multimodal-desktop-gui-agent/outputs/week6_live_acceptance_20261024/normal_alpha_green_008')
+VALIDATION = RESULTS / 'release_validation_completed_20261024_003'
+
+
+def read(path):
+    return json.loads(path.read_bytes())
+
+
+def rows(path):
+    return [json.loads(line) for line in path.read_bytes().splitlines() if line.strip()]
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+assert OUT.is_dir() and not (OUT / 'development_audit_008.json').exists()
+existing_audit_pins = {str(path): sha(path) for path in OUT.rglob('*') if path.is_file()}
+source_manifest = []
+copies = []
+
+
+def retain(path, relative):
+    payload = path.read_bytes()
+    destination = OUT / relative
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with destination.open('xb') as handle:
+        handle.write(payload)
+    assert destination.read_bytes() == payload
+    copies.append({'source': str(path), 'copy': relative.as_posix(), 'bytes': len(payload),
+                   'sha256': hashlib.sha256(payload).hexdigest(), 'copy_matches_original_bytes': True})
+
+
+for path in sorted(p for p in BATCH.rglob('*') if p.is_file()):
+    source_manifest.append({'source': str(path), 'relative_path': path.relative_to(BATCH).as_posix(),
+                            'bytes': path.stat().st_size, 'sha256': sha(path)})
+    if path.suffix in ('.json', '.jsonl') and 'source_snapshot' not in path.parts:
+        retain(path, Path('raw_evidence') / BATCH.name / path.relative_to(BATCH))
+for filename in ('independent_events.jsonl', 'independent_state.json'):
+    retain(FIXTURE / filename, Path('raw_evidence/fixtures/normal_alpha_green_008') / filename)
+
+acceptance = read(BATCH / 'acceptance.json')
+automatic = read(BATCH / 'automatic/automatic_workflow_summary.json')
+contract = read(BATCH / 'contract.json')
+events = rows(FIXTURE / 'independent_events.jsonl')
+semantic_events = [event for event in events if event['event'] in
+                   {'project_selected', 'theme_selected', 'review_accepted', 'local_commit'}]
+ignored = [event for event in events if event['event'] == 'transition_click_ignored']
+requests = [read(path) for path in sorted((BATCH / 'sky_bridge').glob('*_request.json'))]
+receipts = [read(path) for path in sorted((BATCH / 'sky_bridge').glob('*_receipt.json'))]
+attribution = []
+for request, receipt, event in zip(requests, receipts, semantic_events, strict=True):
+    assert request['id'] == receipt['id'] and request['action'] == receipt['action']
+    attribution.append({'request_id': request['id'], 'action': request['action'],
+                        'receipt_success': receipt.get('success'), 'fixture_event': event,
+                        'matching_semantic_target': request['action']['target_description'] in
+                                                   {event.get('project'), event.get('colour')},
+                        'event_between_receipt_times': (
+                            datetime.fromisoformat(receipt['started_utc'].replace('Z','+00:00'))
+                            <= datetime.fromisoformat(event['utc'])
+                            <= datetime.fromisoformat(receipt['finished_utc'].replace('Z','+00:00')))})
+debounce = []
+for event in ignored:
+    before = events[events.index(event)-1]
+    debounce.append({'first_event': before['event'], 'second_event': event['event'],
+                     'gap_ms': (datetime.fromisoformat(event['utc'])-datetime.fromisoformat(before['utc'])).total_seconds()*1000,
+                     'state_unchanged': all(event.get(key)==before.get(key) for key in
+                                            ('stage','project','colour','committed','review_attempts'))})
+
+third = read(BATCH / 'automatic/decomposition_round_003/generated_workflow.json')
+third_goal = third['subgoals'][0]
+final_required = third['final_check']['expect_text']
+contradictions = sorted(set(third_goal['forbid_text']) & set(final_required))
+third_child_dir = BATCH / 'automatic/workflow_round_003/001_G01'
+third_child = read(third_child_dir / 'task_summary.json')
+third_steps = rows(third_child_dir / 'steps.jsonl')
+recovery = third_child.get('recovery_records', [])
+activation_requests = {path.name.removesuffix('_request.json'): path for path in (BATCH / 'sky_activation').glob('*_request.json')}
+activation_receipts = {path.name.removesuffix('_receipt.json'): path for path in (BATCH / 'sky_activation').glob('*_receipt.json')}
+missing_activation_receipts = sorted(activation_requests.keys()-activation_receipts.keys())
+
+validation = read(VALIDATION / 'validation.json')
+validation_stdout = (VALIDATION / 'pytest_stdout.txt').read_text('utf-8')
+assert '2917 passed in 606.57s' in validation_stdout and validation['exit_code']==0
+assert validation['tested_sources_unchanged'] is True
+decomposer_relative = 'src/gui_agent/planning/workflow_decomposer.py'
+source_pins = contract.get('source_sha256', {})
+result = {
+    'schema': 'week6.live_development_audit.v1', 'attempt': 8, 'batch': BATCH.name,
+    'created_utc': datetime.now(UTC).isoformat(),
+    'scope': 'Independent read-only audit of closed attempt 008; no model call or GUI input was performed by this audit.',
+    'classification': 'partial_attributable_progress_then_activation_service_timeout',
+    'original_status': automatic['status'],
+    'acceptance_flags': {key: acceptance.get(key) for key in
+                         ('status','runtime_pass','independent_pass','attribution_pass','passed')},
+    'credit_as_complete_acceptance': False, 'include_in_complete_task_quality_score': False,
+    'no_complete_quality_success_rate_computed': True,
+    'process_outcome': {
+        'Root_observed_natural_exit': True, 'Root_observed_outer_shell_exit_code': 0,
+        'interpretation': 'Outer exit 0 indicates the harness script finished, not that the task passed. All acceptance flags remain false.',
+        'Root_stop_attempt_matched_process': False,
+        'operator_stop_file_exists': (BATCH / 'operator_stop_001.json').exists(),
+        'evidence_origin_for_process_observations': 'Root explicit audit instruction; no synthetic process receipt or stop record was created.',
+    },
+    'confirmed_partial_progress': {
+        'bridge_actions': len(requests), 'matching_receipts': len(receipts),
+        'semantic_events': len(semantic_events), 'semantic_order': [event['event'] for event in semantic_events],
+        'per_input_attribution': attribution,
+        'review_attempts': acceptance['state']['review_attempts'],
+        'committed': acceptance['state']['committed'],
+        'meaning': 'Two independently attributable model-planned inputs selected ALPHA and GREEN; review and local commit were not executed.',
+    },
+    'fixture_debounce': {
+        'configured_guard_ms': 400, 'ignored_second_clicks': len(ignored), 'observations': debounce,
+        'observed_effect': 'Second physical clicks were logged as transition_click_ignored without changing the new page state; no cross-page semantic selection was credited.',
+    },
+    'observed_unexecuted_intermediate_rule_defect': {
+        'source': 'automatic/decomposition_round_003/generated_workflow.json',
+        'instruction': third_goal['instruction'], 'expect_text': third_goal['expect_text'],
+        'forbid_text': third_goal['forbid_text'], 'caller_final_expect_text': final_required,
+        'forbid_conflicts_with_caller_final_required_text': contradictions,
+        'expectation_is_current_button_label': third_goal['expect_text']==['Review report'],
+        'interpretation': 'The proposed intermediate check is inconsistent with the fixture persistent project/theme labels and uses the current Review report control label as its supposed outcome. This is a proposal defect, not an observed post-action verification failure.',
+        'action_executed_for_this_goal': False,
+        'must_not_claim_this_defect_caused_actual_termination': True,
+    },
+    'actual_termination': {
+        'cause': 'The activation bridge was not serviced while Root diagnosed the run. Pre-action observation and recovery observation separately exhausted about 90 seconds waiting for receipts.',
+        'cause_evidence_origin': 'Raw pre-action/recovery timeout records plus Root operator context explaining why activation was not serviced.',
+        'child_status': third_child['status'], 'child_stop_reason': third_child['stop_reason'],
+        'third_goal_steps': third_steps, 'recovery_records': recovery,
+        'activation_requests_without_receipts': missing_activation_receipts,
+        'error_type': 'observation/activation service failure before further input',
+        'post_action_rule_failure_was_not_observed': True,
+    },
+    'counts_from_original_automatic_summary': {key: automatic.get(key) for key in
+                                               ('total_actions','unconfirmed_action_attempts','planning_calls','model_requests','elapsed_ms','error')},
+    'version_specific_cpu_validation_context': {
+        'source': str(VALIDATION / 'validation.json'), 'exit_code': validation['exit_code'],
+        'passed': 2917, 'pytest_elapsed_seconds': 606.57, 'harness_elapsed_seconds': validation['elapsed_seconds'],
+        'tested_sources_unchanged': validation['tested_sources_unchanged'],
+        'changed_tested_sources': validation.get('changed_tested_sources'),
+        'decomposer_sha256_tested': validation['tested_source_pins_before'][decomposer_relative],
+        'decomposer_sha256_attempt_008_contract': source_pins.get(decomposer_relative),
+        'meaning': 'This is a real complete regression pass for its pinned version. It does not certify the later pre-execution consistency constraints now being developed in response to attempt 008.',
+    },
+    'evidence_manifest': 'evidence_manifest_008.json',
+    'raw_evidence': 'raw_evidence/live_auto_20261024_normal_008',
+    'raw_fixture_evidence': 'raw_evidence/fixtures/normal_alpha_green_008',
+    'original_source_files_hashed': len(source_manifest), 'structured_evidence_files_copied': len(copies),
+}
+original_changes = [row['source'] for row in source_manifest if sha(Path(row['source']))!=row['sha256']]
+copy_source_changes = [row['source'] for row in copies if sha(Path(row['source']))!=row['sha256']]
+old_audit_changes = [path for path,digest in existing_audit_pins.items() if sha(Path(path))!=digest]
+assert not original_changes and not copy_source_changes and not old_audit_changes
+result['preservation_audit'] = {'original_attempt_sources_unchanged': True,
+                                'copies_match_original_bytes': True, 'existing_001_to_007_audit_files_unchanged': True,
+                                'prior_audit_files_checked': len(existing_audit_pins)}
+with (OUT / 'development_audit_008.json').open('x',encoding='utf-8') as handle:
+    handle.write(json.dumps(result,indent=2,ensure_ascii=False)+'\n')
+with (OUT / 'evidence_manifest_008.json').open('x',encoding='utf-8') as handle:
+    handle.write(json.dumps({'original_sources':source_manifest,'structured_copies':copies},indent=2,ensure_ascii=False)+'\n')
+with (OUT / 'audit_builder_008_source.py.txt').open('xb') as handle:
+    handle.write(Path(__file__).read_bytes())
+print(json.dumps({'audit':str(OUT/'development_audit_008.json'),'source_files_hashed':len(source_manifest),
+                  'copies':len(copies),'partial_semantic_inputs':len(semantic_events),
+                  'ignored_second_clicks':len(ignored),'original_and_prior_audit_unchanged':True,
+                  'complete_acceptance_credit':False},indent=2))

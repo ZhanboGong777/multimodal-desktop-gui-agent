@@ -1,0 +1,19 @@
+from pathlib import Path
+import hashlib
+import json
+import re
+
+p = Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/release_review_20261026_001/collection/full006_collection_stdout_001.txt')
+s = p.read_text(encoding='utf-8')
+pattern = re.compile(r'''(?i)(?:authorization["'\s:]+|bearer\s+)([A-Za-z0-9._~+/=-]{16,})''')
+rows = []
+for match in pattern.finditer(s):
+    a = s.rfind('\n', 0, match.start()) + 1
+    b = s.find('\n', match.end())
+    b = len(s) if b < 0 else b
+    token = match.group(1)
+    line = s[a:b].replace(token, '<VALUE_REDACTED>')
+    rows.append({'line': s.count('\n', 0, match.start()) + 1, 'context': line,
+                 'matched_token_length': len(token),
+                 'matched_token_sha256': hashlib.sha256(token.encode()).hexdigest()})
+print(json.dumps(rows, ensure_ascii=False, indent=2))

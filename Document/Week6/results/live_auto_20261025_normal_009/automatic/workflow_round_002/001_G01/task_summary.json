@@ -1,0 +1,125 @@
+{
+  "run_id": "001_G01",
+  "case_id": "G01",
+  "instruction": "Select the 'GREEN' theme for the report.",
+  "status": "succeeded",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Click on the 'GREEN' theme.",
+      "action_type": "double_click",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "double_click",
+          "x": 1280,
+          "y": 1079,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "GREEN"
+        },
+        "element_id": "obs-0002-e003",
+        "screenshot_point": {
+          "x": 1280,
+          "y": 1079
+        },
+        "control_point": {
+          "x": 1280,
+          "y": 1079
+        },
+        "note": "text 'GREEN' -> obs-0002-e003 (re-bound from obs-0001-e003 in an earlier frame)"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "double_click",
+          "x": 1280,
+          "y": 1079,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "GREEN"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: green, theme",
+        "evidence": {
+          "observation_id": "obs-0003",
+          "changed": true,
+          "element_count": 9,
+          "expectation_tokens": [
+            "green",
+            "theme"
+          ],
+          "expectation_hits": [
+            "green",
+            "theme"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 18265.00000001397,
+      "after_observation_id": "obs-0003"
+    }
+  ],
+  "verification": {
+    "outcome": "passed",
+    "method": "automatic",
+    "detail": "all success rules matched against the current screen",
+    "evidence": {
+      "observation_id": "obs-0004",
+      "expect_text": [],
+      "forbid_text": [
+        "BLUE"
+      ],
+      "verification_source": "preexecuted_progress_contract",
+      "progress_contract_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261025_normal_009\\automatic\\decomposition_round_002\\progress_contract.json"
+    }
+  },
+  "error": null,
+  "elapsed_ms": 45765.00000001397,
+  "execute": true,
+  "model_name": "qwen2.5vl:7b",
+  "provider": "openai_compatible",
+  "notes": [
+    "planned 1 steps from obs-0001"
+  ],
+  "task_id": "G01",
+  "commit": "1307076",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 2560x1600, control 2560x1600",
+  "started_at": "2026-10-25T10:02:09.297043Z",
+  "finished_at": "2026-10-25T10:02:55.062043Z",
+  "planning_attempts": 1,
+  "model_requests": 4,
+  "planning_ms": 23577.99999997951,
+  "confirmation_ms": 0.0,
+  "execution_ms": 22187.00000003446,
+  "planner_ms": 16000.0,
+  "planning_calls": 1,
+  "system_elapsed_ms": 45765.00000001397,
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261025_normal_009\\automatic\\workflow_round_002\\001_G01",
+  "stop_reason": "",
+  "error_type": "",
+  "failed_step_id": null,
+  "recovery_records": [],
+  "unconfirmed_action_attempts": 0,
+  "action_count": 1
+}

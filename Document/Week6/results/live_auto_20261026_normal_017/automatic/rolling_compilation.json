@@ -1,0 +1,71 @@
+{
+  "schema_version": "week6.rolling_actions.v2",
+  "source": "local_caller_goal_compilation",
+  "gate_on_step_verification": false,
+  "step_verification_policy": "Model step predictions are advisory; unchanged caller final rules are authoritative after each one-step plan.",
+  "caller_request": {
+    "workflow_id": "lab_auto",
+    "instruction": "In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test, with no external communication. If review is temporarily unavailable, retry within budget.",
+    "expect_text": [
+      "Project ALPHA",
+      "Theme GREEN",
+      "LOCAL COMPLETE"
+    ],
+    "forbid_text": []
+  },
+  "workflow": {
+    "workflow_id": "lab_auto",
+    "instruction": "In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test, with no external communication. If review is temporarily unavailable, retry within budget.",
+    "subgoals": [
+      {
+        "case_id": "CALLER_GOAL",
+        "instruction": "Advance only the currently visible stage of the original caller request. Choose operations from the original request and current screen; do not repeat already satisfied selections. Plan at most one input, then observe again. Original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test, with no external communication. If review is temporarily unavailable, retry within budget.",
+        "target_app": null,
+        "preconditions": [],
+        "success_rules": [],
+        "verification": "automatic",
+        "expect_text": [
+          "Project ALPHA",
+          "Theme GREEN",
+          "LOCAL COMPLETE"
+        ],
+        "forbid_text": [],
+        "requires_processes": [],
+        "forbids_processes": [],
+        "must_exit_processes": [],
+        "risk": "medium",
+        "message_conversation": null,
+        "gate_on_step_verification": false
+      }
+    ],
+    "final_check": {
+      "case_id": "FINAL",
+      "instruction": "Independently verify unchanged caller rules on a fresh frame",
+      "target_app": null,
+      "preconditions": [],
+      "success_rules": [],
+      "verification": "automatic",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [],
+      "requires_processes": [],
+      "forbids_processes": [],
+      "must_exit_processes": [],
+      "risk": "low",
+      "message_conversation": null,
+      "gate_on_step_verification": true
+    }
+  },
+  "selector_model_requests": 0,
+  "shared_limits": {
+    "max_model_requests": 24,
+    "max_actions": 12,
+    "max_planning_calls": 12,
+    "task_timeout_seconds": 1200.0,
+    "absolute_deadline": 540742.937
+  },
+  "meaning": "The model supplies bounded next-action plans on the whole caller goal. This is not a model-generated semantic subtask sequence or marker proposal."
+}

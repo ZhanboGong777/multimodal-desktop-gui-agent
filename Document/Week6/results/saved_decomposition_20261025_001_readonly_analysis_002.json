@@ -1,0 +1,112 @@
+{
+  "schema": "week6.decomposition.readonly_diagnosis.addendum.v1",
+  "created_at_utc": "2026-10-25T07:57:23.032426+00:00",
+  "predecessor": {
+    "path": "Document/Week6/results/saved_decomposition_20261025_001_readonly_analysis.json",
+    "sha256": "56b8133315ca4762de1a5e495310c8c421c97a146c01c3873daaeb5f3ce83152",
+    "bytes_preserved": true
+  },
+  "sources": [
+    {
+      "path": "Document/Week6/results/saved_decomposition_20261025_001_readonly_analysis.json",
+      "sha256": "56b8133315ca4762de1a5e495310c8c421c97a146c01c3873daaeb5f3ce83152"
+    },
+    {
+      "path": "Document/Week6/results/saved_decomposition_chat_repair_20261025_001/summary.json",
+      "sha256": "43edd70bb0decf7ea248c1e58ed9d55b2bbdc3d391d76cb152346072fe1e40df"
+    },
+    {
+      "path": "Document/Week6/results/saved_decomposition_chat_repair_20261025_001/transport_requests.jsonl",
+      "sha256": "a5e7dbb8f5b98b9ae6548f38eaf5883e5b9c4528510592cb80fdf680c81cbbca"
+    },
+    {
+      "path": "Document/Week6/results/saved_decomposition_chat_repair_20261025_001/harness_provenance.json",
+      "sha256": "a1c479fd5553a74d0bc28a29b3981dbdd8cf1ada472942d7266a4a21f5d9b508"
+    },
+    {
+      "path": "Document/Week6/results/saved_field_semantics_20261025_001/contract.json",
+      "sha256": "6b4fcb7bd4ae9acd631d610ad89e241397bf9c54781d9c51f43742d1036de88e"
+    },
+    {
+      "path": "Document/Week6/results/saved_field_semantics_20261025_001/summary.json",
+      "sha256": "daa9dd9678f18cc1b42b9f8d677eee8313f0dc585146ebb5ab0f13b23adf4eb7"
+    },
+    {
+      "path": "Document/Week6/results/saved_field_semantics_20261025_001/transport_requests.jsonl",
+      "sha256": "f46ced78928f7c5b51db9c0e78b56716ad85d23d1569bef02323f0c0e0304639"
+    },
+    {
+      "path": "Document/Week6/results/saved_field_semantics_20261025_001/harness_provenance.json",
+      "sha256": "3b817bc2c713376c87a872b4e33c2b4ff46f476bd037e8f398f700fc354ff93a"
+    }
+  ],
+  "chat_repair": {
+    "real_http_requests": 2,
+    "elapsed_seconds": 24.21799999999348,
+    "accepted_proposals": 0,
+    "source_unchanged": true,
+    "interpretation": "Explicit multi-turn correction on the same archived image also failed to produce an accepted proposal. The earlier salience hypothesis was tested and did not fix this observed failure; do not implement it as a proven repair."
+  },
+  "field_semantics_probe": {
+    "real_http_requests": 2,
+    "maximum_authorized": 3,
+    "reserved_third_request_used": false,
+    "elapsed_seconds": 26.43700000003446,
+    "accepted_proposals": 0,
+    "attempts": [
+      {
+        "number": 1,
+        "case": "review_saved_frame",
+        "proposal_constraints_pass": false,
+        "error": "ValueError: subgoal 1 expect_text is already visible in the current frame: ['Review report']. A current operation label is not post-action evidence. Remove that expect_text; if future wording is unknown, use a currently visible stage marker that must disappear as forbid_text.",
+        "requests": 1,
+        "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Click on the 'Review report' button to proceed.\",\n      \"expect_text\": [\"Review report\"],\n      \"forbid_text\": []\n    }\n  ]\n}",
+        "not_action_or_task_success": true
+      },
+      {
+        "number": 2,
+        "case": "initial_selection_saved_frame",
+        "proposal_constraints_pass": false,
+        "error": "ValueError: subgoal 1 expect_text is already visible in the current frame: ['ALPHA']. A current operation label is not post-action evidence. Remove that expect_text; if future wording is unknown, use a currently visible stage marker that must disappear as forbid_text.",
+        "requests": 1,
+        "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Select the 'ALPHA' project.\",\n      \"expect_text\": [\"ALPHA\"],\n      \"forbid_text\": [\"BETA\"]\n    }\n  ]\n}",
+        "not_action_or_task_success": true
+      }
+    ],
+    "source_unchanged": true,
+    "archived_inputs_unchanged": true,
+    "per_http_usage": [
+      {
+        "prompt_tokens": 5067,
+        "prompt_tokens_details": {
+          "cached_tokens": 3
+        },
+        "completion_tokens": 59,
+        "total_tokens": 5126
+      },
+      {
+        "prompt_tokens": 5097,
+        "prompt_tokens_details": {
+          "cached_tokens": 399
+        },
+        "completion_tokens": 59,
+        "total_tokens": 5156
+      }
+    ],
+    "interpretation": "The review proposal stopped forbidding retained caller-final context, but still used the already visible operation control as expected postcondition. The initial-selection proposal also used an already visible selection control as expected postcondition. Both remain rejected by unchanged production validation. This is a changed error pattern, not a validated generation fix or a task success rate.",
+    "private_import_boundary": "The exact saved harness declared gui_agent.runtime.__path__ without running its aggregation __init__, then imported the unmodified production decomposer, schema and validator. This prevented importing executor. It does not model ordinary CLI startup and is not end-to-end evidence."
+  },
+  "runtime_context_observation": {
+    "num_ctx": 32768,
+    "active_context_length": 32768,
+    "model_digest": "c82e67b1ceeeca8a1bbc93a7c3478934b42398d90d71ffc616b00c0f2b30e292",
+    "source": "Root reported read-only /api/show and /api/ps observations; this addendum made no metadata request.",
+    "qualification": "Reported token counts fit within reported context capacity. No direct evidence establishes either input truncation or absolute absence of server-side truncation/transformation."
+  },
+  "production_changes": 0,
+  "desktop_capture_count": 0,
+  "desktop_input_count": 0,
+  "task_execution_count": 0,
+  "scope": "All saved diagnostics are development proposal probes only. They do not measure end-to-end desktop task success, recovery execution or final task completion.",
+  "decision": "Keep source frozen. Do not spend the reserved request, rerun the unchanged regression suite, edit final rules, or promote either private prompt as proven effective. Real desktop acceptance and release/report readiness remain incomplete."
+}

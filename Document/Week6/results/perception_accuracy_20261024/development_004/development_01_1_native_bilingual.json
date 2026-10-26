@@ -1,0 +1,281 @@
+{
+  "fixture": "development_01",
+  "arm": "native_bilingual",
+  "repeat": 1,
+  "decode_ms": 1.7586000030860305,
+  "ocr_ms": 334.4041999662295,
+  "ui_ms": 5.522200022824109,
+  "full_ms": 341.68499999213964,
+  "metrics": {
+    "tp": 6,
+    "fp": 2,
+    "fn": 2,
+    "precision": 0.75,
+    "recall": 0.75,
+    "labels": [
+      {
+        "text": "Account Settings",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9834710743801653
+      },
+      {
+        "text": "User Name",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9848484848484849
+      },
+      {
+        "text": "Open Project",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9868421052631579
+      },
+      {
+        "text": "Apply",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9411764705882353
+      },
+      {
+        "text": "Cancel",
+        "language": "en",
+        "matched": true,
+        "iou": 0.975
+      },
+      {
+        "text": "用户设置",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "保存修改",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "退出",
+        "language": "zh",
+        "matched": true,
+        "iou": 0.8875739644970414
+      }
+    ]
+  },
+  "predictions": [
+    {
+      "text": "Account Settings",
+      "bounding_box": {
+        "left": 35,
+        "top": 36,
+        "right": 154,
+        "bottom": 51
+      },
+      "confidence": 0.87,
+      "center": {
+        "x": 94,
+        "y": 43
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "User Name",
+      "bounding_box": {
+        "left": 36,
+        "top": 105,
+        "right": 101,
+        "bottom": 115
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 68,
+        "y": 110
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Open Project",
+      "bounding_box": {
+        "left": 36,
+        "top": 182,
+        "right": 111,
+        "bottom": 195
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 73,
+        "y": 188
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "用 户 设置",
+      "bounding_box": {
+        "left": 550,
+        "top": 102,
+        "right": 606,
+        "bottom": 126
+      },
+      "confidence": 0.83,
+      "center": {
+        "x": 578,
+        "y": 114
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "保存 修改",
+      "bounding_box": {
+        "left": 546,
+        "top": 179,
+        "right": 602,
+        "bottom": 203
+      },
+      "confidence": 0.66,
+      "center": {
+        "x": 574,
+        "y": 191
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Apply",
+      "bounding_box": {
+        "left": 35,
+        "top": 283,
+        "right": 67,
+        "bottom": 296
+      },
+      "confidence": 0.88,
+      "center": {
+        "x": 51,
+        "y": 289
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Cancel",
+      "bounding_box": {
+        "left": 231,
+        "top": 283,
+        "right": 270,
+        "bottom": 293
+      },
+      "confidence": 0.91,
+      "center": {
+        "x": 250,
+        "y": 288
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "退出",
+      "bounding_box": {
+        "left": 550,
+        "top": 284,
+        "right": 575,
+        "bottom": 296
+      },
+      "confidence": 0.95,
+      "center": {
+        "x": 562,
+        "y": 290
+      },
+      "source": "ocr"
+    }
+  ],
+  "ui_candidates": [
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 539,
+        "top": 270,
+        "right": 679,
+        "bottom": 324
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 609,
+        "y": 297
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 219,
+        "top": 270,
+        "right": 359,
+        "bottom": 324
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 289,
+        "y": 297
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 24,
+        "top": 270,
+        "right": 164,
+        "bottom": 324
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 94,
+        "y": 297
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 539,
+        "top": 169,
+        "right": 679,
+        "bottom": 223
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 609,
+        "y": 196
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 24,
+        "top": 169,
+        "right": 164,
+        "bottom": 223
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 94,
+        "y": 196
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 539,
+        "top": 92,
+        "right": 679,
+        "bottom": 146
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 609,
+        "y": 119
+      },
+      "source": "contour"
+    }
+  ],
+  "errors": []
+}

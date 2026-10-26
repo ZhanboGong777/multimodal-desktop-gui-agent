@@ -1,0 +1,97 @@
+{
+  "schema_version": "week6.private.preflight_selection.negative.v1",
+  "created_utc": "2026-10-25T11:41:04.230706+00:00",
+  "checker": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6\\package_completed.py",
+  "checker_sha256": "c0ce78004529b3624030b5a0f65401d73b887012177816088f586339720372c6",
+  "genuine_validation": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\release_validation_completed_20261025_005\\validation.json",
+  "genuine_validation_sha256": "2569c0b493cb1a785100de495a99cfe5afcbab836ec890512cd99da6371353cf",
+  "genuine_pending_record": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_report\\acceptance_pending_record_full005.json",
+  "genuine_pending_sha256": "9031270e0ed0b3887d3f77107c9930fb7ae73cce0415005e5380ca17a9602656",
+  "cases": [
+    {
+      "name": "actual_pending_full005",
+      "rejected_by_actual_preflight": true,
+      "expected_selection_guard": "status is not completed",
+      "actual_reason": "Final completion status is not completed",
+      "kind": "actual_retained_pending"
+    },
+    {
+      "name": "pending_status_with_other_fields_present",
+      "rejected_by_actual_preflight": true,
+      "expected_selection_guard": "status is not completed",
+      "actual_reason": "Final completion status is not completed",
+      "kind": "synthetic_invalid_in_memory_only"
+    },
+    {
+      "name": "explicit_report_not_ready",
+      "rejected_by_actual_preflight": true,
+      "expected_selection_guard": "four named Week 6 requirements",
+      "actual_reason": "The four named Week 6 requirements must be independently closed",
+      "kind": "synthetic_invalid_in_memory_only"
+    },
+    {
+      "name": "different_completion_validation_path",
+      "rejected_by_actual_preflight": true,
+      "expected_selection_guard": "select different regression bytes",
+      "actual_reason": "Completion and package select different regression bytes",
+      "kind": "synthetic_invalid_in_memory_only"
+    },
+    {
+      "name": "different_completion_validation_sha256",
+      "rejected_by_actual_preflight": true,
+      "expected_selection_guard": "select different regression bytes",
+      "actual_reason": "Completion and package select different regression bytes",
+      "kind": "synthetic_invalid_in_memory_only"
+    },
+    {
+      "name": "missing_final_validation_role",
+      "rejected_by_actual_preflight": true,
+      "expected_selection_guard": "one exact final_validation",
+      "actual_reason": "Completion needs one exact final_validation evidence role for the selected regression bytes",
+      "kind": "synthetic_invalid_in_memory_only"
+    },
+    {
+      "name": "duplicate_final_validation_roles",
+      "rejected_by_actual_preflight": true,
+      "expected_selection_guard": "one exact final_validation",
+      "actual_reason": "Completion needs one exact final_validation evidence role for the selected regression bytes",
+      "kind": "synthetic_invalid_in_memory_only"
+    },
+    {
+      "name": "different_final_validation_role_path",
+      "rejected_by_actual_preflight": true,
+      "expected_selection_guard": "one exact final_validation",
+      "actual_reason": "Completion needs one exact final_validation evidence role for the selected regression bytes",
+      "kind": "synthetic_invalid_in_memory_only"
+    },
+    {
+      "name": "different_final_validation_role_sha256",
+      "rejected_by_actual_preflight": true,
+      "expected_selection_guard": "one exact final_validation",
+      "actual_reason": "Completion needs one exact final_validation evidence role for the selected regression bytes",
+      "kind": "synthetic_invalid_in_memory_only"
+    },
+    {
+      "name": "missing_after_source_pin_map",
+      "rejected_by_actual_preflight": true,
+      "expected_selection_guard": "before/after source maps differ or are absent",
+      "actual_reason": "Final regression before/after source maps differ or are absent",
+      "kind": "synthetic_invalid_in_memory_only"
+    },
+    {
+      "name": "different_after_source_pin_map",
+      "rejected_by_actual_preflight": true,
+      "expected_selection_guard": "before/after source maps differ or are absent",
+      "actual_reason": "Final regression before/after source maps differ or are absent",
+      "kind": "synthetic_invalid_in_memory_only"
+    }
+  ],
+  "all_checks_passed": true,
+  "test_method": "Actual package.preflight invoked. Invalid in-memory load values only; actual historical validation SHA retained. Git/downstream release checks are assertion sentinels, proving each specific selection guard ran before them.",
+  "no_completed_record_written": true,
+  "no_valid_success_fixture_written_or_executed": true,
+  "report_ready": false,
+  "release_ready": false,
+  "new_model_or_gui_calls": 0,
+  "production_or_tracked_document_changes": false
+}

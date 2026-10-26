@@ -1,0 +1,123 @@
+{
+  "run_id": "001_G01",
+  "case_id": "G01",
+  "instruction": "Select the report theme 'GREEN'",
+  "status": "succeeded",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Select the 'GREEN' theme",
+      "action_type": "double_click",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "double_click",
+          "x": 1280,
+          "y": 1079,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "GREEN"
+        },
+        "element_id": "obs-0002-e003",
+        "screenshot_point": {
+          "x": 1280,
+          "y": 1079
+        },
+        "control_point": {
+          "x": 1280,
+          "y": 1079
+        },
+        "note": "text 'GREEN' -> obs-0002-e003 (re-bound from obs-0001-e003 in an earlier frame)"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "double_click",
+          "x": 1280,
+          "y": 1079,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "GREEN"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: theme",
+        "evidence": {
+          "observation_id": "obs-0003",
+          "changed": true,
+          "element_count": 9,
+          "expectation_tokens": [
+            "theme"
+          ],
+          "expectation_hits": [
+            "theme"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 76828.00000003772,
+      "after_observation_id": "obs-0003"
+    }
+  ],
+  "verification": {
+    "outcome": "passed",
+    "method": "automatic",
+    "detail": "all success rules matched against the current screen",
+    "evidence": {
+      "observation_id": "obs-0004",
+      "expect_text": [
+        "GREEN"
+      ],
+      "forbid_text": [
+        "BLUE"
+      ]
+    }
+  },
+  "error": null,
+  "elapsed_ms": 133188.00000002375,
+  "execute": true,
+  "model_name": "qwen2.5vl:7b",
+  "provider": "openai_compatible",
+  "notes": [
+    "planned 1 steps from obs-0001"
+  ],
+  "task_id": "G01",
+  "commit": "f0df1e3",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 2560x1600, control 2560x1600",
+  "started_at": "2026-10-24T08:25:46.942121Z",
+  "finished_at": "2026-10-24T08:28:00.130121Z",
+  "planning_attempts": 1,
+  "model_requests": 4,
+  "planning_ms": 46593.99999998277,
+  "confirmation_ms": 0.0,
+  "execution_ms": 86594.00000004098,
+  "planner_ms": 42905.99999995902,
+  "planning_calls": 1,
+  "system_elapsed_ms": 133188.00000002375,
+  "evidence_directory": "Document\\Week6\\results\\live_auto_20261024_normal_008\\automatic\\workflow_round_002\\001_G01",
+  "stop_reason": "",
+  "error_type": "",
+  "failed_step_id": null,
+  "recovery_records": [],
+  "unconfirmed_action_attempts": 0,
+  "action_count": 1
+}

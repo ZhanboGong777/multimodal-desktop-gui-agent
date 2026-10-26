@@ -1,0 +1,41 @@
+{
+  "schema_version": "week6.observed_departure_implementation.v2",
+  "source_path": "src/gui_agent/planning/workflow_decomposer.py",
+  "source_sha256_before": "c0ad9b81ea9060cf561d6ebe019c6d01b376e240b8d1a4468cec6e5c9664003c",
+  "source_sha256_frozen": "762203bfa164872307b2254fbdba5af5d69f4c9506682c9afb7b51f7c08624b5",
+  "source_lf_sha256": "762203bfa164872307b2254fbdba5af5d69f4c9506682c9afb7b51f7c08624b5",
+  "protocol": "week6.observed_departure.v2",
+  "default_api_protocol": "postconditions",
+  "caller_anchor_helper": "_caller_anchored_instruction",
+  "anchor_authority": "Fixed template plus the entire validated caller instruction, without truncation; above 4000 characters fails before a model request.",
+  "native_instruction_rule": "Native original JSON instruction must exactly equal the sole caller anchor schema enum; normalization is not accepted.",
+  "compilation": "instruction=native exact caller anchor; expect_text=[]; forbid_text=[native disappearing_text unchanged]",
+  "replay_identity": "Protocol version, caller anchor, and raw/derived literal check signatures. Repeated caller anchor alone is not a repeated stage. This does not prove semantic idempotency.",
+  "completed_context": "Only prior verified witness checks are projected to the model. The full historical ledger remains in the result.",
+  "planning_limit_record": "single_step_planning_limit.json",
+  "planning_limit": "A dedicated real TaskPlanner is temporarily limited to one step per plan, including recovery planning; original max_steps and method binding are restored in finally.",
+  "planning_limit_record_fields": ["schema_version", "protocol_version", "original_max_steps", "applied_max_steps", "calls", "restored", "restored_max_steps", "meaning"],
+  "test_pins": {
+    "tests/test_week6_observed_departure.py": "6783960bec854eebda4b6e38f57906c38918cf9f2a27722df4c0586f92a248f1",
+    "tests/test_week6_automatic_decomposition.py": "b28ec24c5d06982f1160c3b110f706b0461113eabcd26f4c7d5b1365378000ad",
+    "tests/test_week6_auto_cli.py": "f0a9218278c9e404df8ab7184284c702870b0771ea61a31fb7d2d1b212e8ec05",
+    "tests/test_week6_progress_contract.py": "b824f18476b730c477a8a318f51b8757693eef3dda2f285d58a16a949a6f61fb"
+  },
+  "additional_collected_cases_since_v1": 15,
+  "observed_protocol_test_file_cases": 45,
+  "targeted_command": "python -m pytest -q tests/test_week6_observed_departure.py tests/test_week6_progress_contract.py tests/test_week6_automatic_decomposition.py tests/test_week6_auto_cli.py tests/test_week6_cli.py --basetemp=.pytest-tmp-week6-anchor003 --tb=short",
+  "targeted_passed": 162,
+  "targeted_pytest_seconds": 8.93,
+  "targeted_exit_code": 0,
+  "ruff_exit_code": 0,
+  "model_requests_during_implementation": 0,
+  "desktop_captures_during_implementation": 0,
+  "desktop_inputs_during_implementation": 0,
+  "limitations": [
+    "The model chooses a current-stage departure witness; it does not freely generate a complete semantic subtask sequence.",
+    "One step per plan is not one input for the entire child; bounded recovery calls may consume multiple shared inputs.",
+    "A departed marker is process evidence rather than proof of semantic goal completion; caller final checks remain independent.",
+    "Additive-only and persistent-label operations may not be representable.",
+    "This CPU validation is not live desktop acceptance."
+  ]
+}

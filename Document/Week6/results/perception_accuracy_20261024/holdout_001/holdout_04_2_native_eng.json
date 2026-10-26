@@ -1,0 +1,287 @@
+{
+  "fixture": "holdout_04",
+  "arm": "native_eng",
+  "repeat": 2,
+  "decode_ms": 2.1496000117622316,
+  "ocr_ms": 201.07589999679476,
+  "ui_ms": 6.601300032343715,
+  "full_ms": 209.8268000409007,
+  "metrics": {
+    "tp": 5,
+    "fp": 0,
+    "fn": 3,
+    "precision": 1.0,
+    "recall": 0.625,
+    "labels": [
+      {
+        "text": "Image Gallery",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9910714285714286
+      },
+      {
+        "text": "Image Size",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9866666666666667
+      },
+      {
+        "text": "Rotate Image",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9888888888888889
+      },
+      {
+        "text": "Select",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9534883720930233
+      },
+      {
+        "text": "Clear",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9459459459459459
+      },
+      {
+        "text": "图片浏览",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "旋转图片",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "选择",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      }
+    ]
+  },
+  "control_metrics": {
+    "tp": 6,
+    "fp": 3,
+    "fn": 0,
+    "iou_threshold": 0.8
+  },
+  "predictions": [
+    {
+      "text": "Image Gallery",
+      "bounding_box": {
+        "left": 49,
+        "top": 56,
+        "right": 160,
+        "bottom": 73
+      },
+      "confidence": 0.92,
+      "center": {
+        "x": 104,
+        "y": 64
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Image Size",
+      "bounding_box": {
+        "left": 49,
+        "top": 125,
+        "right": 123,
+        "bottom": 139
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 86,
+        "y": 132
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Rotate Image",
+      "bounding_box": {
+        "left": 49,
+        "top": 202,
+        "right": 138,
+        "bottom": 216
+      },
+      "confidence": 0.95,
+      "center": {
+        "x": 93,
+        "y": 209
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Select",
+      "bounding_box": {
+        "left": 49,
+        "top": 303,
+        "right": 90,
+        "bottom": 314
+      },
+      "confidence": 0.93,
+      "center": {
+        "x": 69,
+        "y": 308
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Clear",
+      "bounding_box": {
+        "left": 244,
+        "top": 303,
+        "right": 279,
+        "bottom": 314
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 261,
+        "y": 308
+      },
+      "source": "ocr"
+    }
+  ],
+  "ui_candidates": [
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 642,
+        "top": 289,
+        "right": 782,
+        "bottom": 343
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 712,
+        "y": 316
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 232,
+        "top": 289,
+        "right": 372,
+        "bottom": 343
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 302,
+        "y": 316
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 37,
+        "top": 289,
+        "right": 177,
+        "bottom": 343
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 316
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 642,
+        "top": 188,
+        "right": 782,
+        "bottom": 242
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 712,
+        "y": 215
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 37,
+        "top": 188,
+        "right": 177,
+        "bottom": 242
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 215
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 642,
+        "top": 111,
+        "right": 782,
+        "bottom": 165
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 712,
+        "y": 138
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 653,
+        "top": 125,
+        "right": 715,
+        "bottom": 142
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 684,
+        "y": 133
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 653,
+        "top": 202,
+        "right": 714,
+        "bottom": 218
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 683,
+        "y": 210
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 653,
+        "top": 303,
+        "right": 685,
+        "bottom": 319
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 669,
+        "y": 311
+      },
+      "source": "contour"
+    }
+  ],
+  "errors": []
+}

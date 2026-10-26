@@ -1,0 +1,63 @@
+{
+  "schema_version": "week6.workflow.v1",
+  "workflow_id": "lab_auto",
+  "status": "succeeded",
+  "execute": true,
+  "subgoals": [
+    {
+      "index": 0,
+      "case_id": "CALLER_GOAL",
+      "status": "completed",
+      "child_status": "succeeded",
+      "actions": 4,
+      "unconfirmed_action_attempts": 0,
+      "planning_calls": 4,
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "obs-0016",
+          "expect_text": [
+            "Project ALPHA",
+            "Theme GREEN",
+            "LOCAL COMPLETE"
+          ],
+          "forbid_text": [],
+          "verification_source": "immutable_caller_goal_rolling_actions"
+        }
+      },
+      "elapsed_ms": 619266.0000000615,
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261026_normal_017\\automatic\\workflow\\001_CALLER_GOAL",
+      "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261026_normal_017\\automatic\\workflow\\001_CALLER_GOAL\\task_summary.json",
+      "error": null
+    }
+  ],
+  "total_actions": 4,
+  "unconfirmed_action_attempts": 0,
+  "planning_calls": 4,
+  "accounting_complete": true,
+  "elapsed_ms": 624093.9999999246,
+  "final_verification": {
+    "outcome": "passed",
+    "method": "automatic",
+    "detail": "all success rules matched against the current screen",
+    "evidence": {
+      "observation_id": "obs-0017",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [],
+      "verification_source": "immutable_caller_goal_rolling_actions"
+    }
+  },
+  "final_observation_id": "obs-0017",
+  "final_observation_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261026_normal_017\\automatic\\workflow\\001_CALLER_GOAL\\obs-0017.json",
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261026_normal_017\\automatic\\workflow",
+  "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261026_normal_017\\automatic\\workflow\\workflow_summary.json",
+  "checkpoint_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261026_normal_017\\automatic\\workflow\\checkpoints.jsonl",
+  "error": null,
+  "notes": []
+}

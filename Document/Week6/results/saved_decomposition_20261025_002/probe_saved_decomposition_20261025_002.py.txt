@@ -1,0 +1,96 @@
+"""Read-only real-model diagnostic on an archived frame; no desktop APIs or executor."""
+from __future__ import annotations
+
+import hashlib
+import json
+import shutil
+import sys
+import time
+import urllib.request
+from datetime import UTC, datetime
+from pathlib import Path
+
+REPO = Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+sys.path.insert(0, str(REPO / 'src'))
+from gui_agent.models.openai_compatible import OpenAICompatibleClient
+from gui_agent.planning.workflow_decomposer import WorkflowDecomposer, WorkflowRequest
+from gui_agent.runtime.schemas import ObservationSnapshot
+
+DEST = REPO / 'Document/Week6/results/saved_decomposition_20261025_002'
+ORIGINAL = REPO / 'Document/Week6/results/live_auto_20261024_normal_008/automatic'
+
+
+def sha(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def write(path: Path, value) -> None:
+    with path.open('x', encoding='utf-8', newline='\n') as stream:
+        stream.write(json.dumps(value, ensure_ascii=False, indent=2) + '\n')
+
+
+def main() -> None:
+    DEST.mkdir(parents=True, exist_ok=False)
+    source_paths = sorted((REPO / 'src').rglob('*.py'))
+    pins = {p.relative_to(REPO).as_posix(): sha(p) for p in source_paths}
+    observation_path = ORIGINAL / 'observation_round_003/observation.json'
+    observation = ObservationSnapshot.model_validate_json(observation_path.read_text(encoding='utf-8'))
+    image_path = REPO / observation.image_path
+    original_request = ORIGINAL / 'decomposition_round_003/request.json'
+    request = WorkflowRequest.model_validate_json(original_request.read_text(encoding='utf-8'))
+    completed = json.loads((ORIGINAL / 'automatic_workflow_summary.json').read_text(encoding='utf-8'))['completed_subgoals']
+    inputs = [observation_path, image_path, original_request,
+              ORIGINAL / 'automatic_workflow_summary.json',
+              ORIGINAL / 'decomposition_round_003/attempt_01_response.json']
+    input_hashes = {p.relative_to(REPO).as_posix(): sha(p) for p in inputs}
+    for path in inputs:
+        copy_path = DEST / 'archived_inputs' / path.relative_to(ORIGINAL)
+        copy_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(path, copy_path)
+    for path in source_paths:
+        copy_path = DEST / 'source_snapshot' / path.relative_to(REPO)
+        copy_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(path, copy_path.with_suffix('.py.txt'))
+    # Only this already archived image is sent to the local model. No current
+    # screenshot, fixture state, click, input bridge or TaskRunner is invoked.
+    observation.image_path = str(image_path.resolve())
+    with urllib.request.urlopen('http://127.0.0.1:11434/api/tags', timeout=10) as response:
+        matching = [m for m in json.load(response)['models'] if m['name'] == 'qwen2.5vl:7b']
+    if len(matching) != 1:
+        raise RuntimeError('exact local model identity unavailable')
+    write(DEST / 'contract.json', {
+        'schema': 'week6.saved_frame.decomposition_diagnostic.v1',
+        'created_at_utc': datetime.now(UTC).isoformat(),
+        'mode': 'archived_frame_only_no_desktop_input',
+        'not_end_to_end_acceptance': True,
+        'purpose': 'Observe current proposal constraints on the archived round003 frame; do not rewrite previous evidence.',
+        'expected_scope': 'At most three counted local HTTP requests; no task execution or task success claim.',
+        'request': request.model_dump(mode='json'), 'completed_subgoals': completed,
+        'input_sha256': input_hashes, 'source_pins_before': pins,
+        'model': matching[0], 'maximum_model_requests': 3, 'deadline_seconds': 300,
+    })
+    started = time.monotonic()
+    client = OpenAICompatibleClient(model_name='qwen2.5vl:7b', base_url='http://127.0.0.1:11434/v1',
+                                    api_key='ollama-local', timeout_seconds=180, max_retries=0,
+                                    temperature=0, max_tokens=2200)
+    result = WorkflowDecomposer(client).decompose(
+        request, evidence_directory=DEST / 'decomposition', deadline=started + 300,
+        max_model_requests=3, initial_observation=observation, completed_subgoals=completed,
+    )
+    after = {p.relative_to(REPO).as_posix(): sha(p) for p in source_paths}
+    summary = {
+        'finished_at_utc': datetime.now(UTC).isoformat(),
+        'elapsed_seconds': time.monotonic() - started,
+        'decomposition': result.model_dump(mode='json'),
+        'source_unchanged': pins == after,
+        'archived_inputs_unchanged': input_hashes == {p.relative_to(REPO).as_posix(): sha(p) for p in inputs},
+        'desktop_capture_count': 0, 'desktop_input_count': 0, 'task_execution_count': 0,
+        'interpretation': 'Proposal diagnostic only. No fresh screen, action, retry recovery or final task success was verified.',
+    }
+    write(DEST / 'summary.json', summary)
+    print(json.dumps({k: v for k, v in summary.items() if k != 'decomposition'}, ensure_ascii=False))
+    print(result.model_dump_json(indent=2))
+
+
+if __name__ == '__main__':
+    main()

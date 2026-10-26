@@ -1,0 +1,67 @@
+"""Read-only byte comparison of every final-regression input with Git and optional ZIP."""
+import argparse
+from datetime import UTC, datetime
+import hashlib
+import io
+import json
+from pathlib import Path
+import subprocess
+import zipfile
+
+ROOT = Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+VALIDATION = ROOT / 'Document/Week6/results/release_validation_completed_20261026_006/validation.json'
+
+
+def digest(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--archive', type=Path)
+    args = parser.parse_args()
+    record = json.loads(VALIDATION.read_text(encoding='utf-8'))
+    pins = record['tested_source_pins_before']
+    assert record['exit_code'] == 0 and record['tested_sources_unchanged'] is True
+    assert pins == record['tested_source_pins_after']
+    commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
+    names = sorted(pins)
+    query = ''.join(f'{commit}:{name}\n' for name in names).encode('utf-8')
+    child = subprocess.Popen(['git', 'cat-file', '--batch'], cwd=ROOT,
+                             stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    bodies, _ = child.communicate(query)
+    assert child.returncode == 0
+    stream = io.BytesIO(bodies)
+    rows = []
+    for name in names:
+        header = stream.readline().decode('ascii').strip().split()
+        assert len(header) == 3 and header[1] == 'blob', (name, header)
+        body = stream.read(int(header[2]))
+        assert stream.read(1) == b'\n'
+        current = digest((ROOT / name).read_bytes())
+        assert current == digest(body) == pins[name], name
+        rows.append({'path': name, 'sha256': current, 'git_blob': header[0], 'bytes': len(body)})
+    assert not stream.read()
+    archive_data = None
+    if args.archive:
+        with zipfile.ZipFile(args.archive) as archive:
+            assert archive.testzip() is None
+            release = json.loads(archive.read('Week6_system_v2.0/RELEASE.json'))
+            assert release['commit'] == commit
+            for item in rows:
+                assert digest(archive.read('Week6_system_v2.0/' + item['path'])) == item['sha256'], item['path']
+        archive_data = {'path': str(args.archive), 'sha256': digest(args.archive.read_bytes()),
+                        'all_244_tested_inputs_equal_archive': True}
+    result = {'schema': 'week6.regression.git.archive.byte_audit.v1',
+              'created_utc': datetime.now(UTC).isoformat(), 'commit': commit,
+              'validation_sha256': digest(VALIDATION.read_bytes()), 'tested_input_count': len(rows),
+              'all_tested_inputs_equal_current_and_git': True, 'files': rows, 'archive': archive_data}
+    with args.output.open('x', encoding='utf-8', newline='\n') as handle:
+        handle.write(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
+    print(json.dumps({'output': str(args.output), 'commit': commit, 'tested_input_count': len(rows),
+                      'all_passed': True, 'archive_checked': args.archive is not None}, ensure_ascii=False))
+
+
+if __name__ == '__main__':
+    main()

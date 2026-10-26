@@ -1,0 +1,48 @@
+{
+  "schema": "week6.release.evidence_inventory.v1",
+  "files_scanned": 2,
+  "total_bytes": 315172,
+  "largest_files": [
+    {
+      "path": "Document/Week6/results/release_review_20261026_001/collection/full006_collection_stdout_001.txt",
+      "bytes": 314173
+    },
+    {
+      "path": "Document/Week6/results/release_review_20261026_001/collection/full006_collection_stdout_001.json",
+      "bytes": 999
+    }
+  ],
+  "credential_shape_findings": [
+    {
+      "path": "Document/Week6/results/release_review_20261026_001/collection/full006_collection_stdout_001.txt",
+      "category": "authorization_token_shape",
+      "count": 1,
+      "file_sha256": "b2d8a0a1977d3eee792771b7d19a8d064a1e5b1206afa2fa370d6df15bb175f9",
+      "content_not_echoed": true
+    }
+  ],
+  "data_url_files": [],
+  "reviewed_false_positive_findings": [
+    {
+      "classification": "reviewed_false_positive",
+      "detector_finding": {
+        "path": "Document/Week6/results/release_review_20261026_001/collection/full006_collection_stdout_001.txt",
+        "category": "authorization_token_shape",
+        "count": 1,
+        "file_sha256": "b2d8a0a1977d3eee792771b7d19a8d064a1e5b1206afa2fa370d6df15bb175f9",
+        "content_not_echoed": true
+      },
+      "review_reference": "Document/Week6/results/release_review_20261026_003/credential_false_positive_audit_001.json",
+      "reviewed_by": "/root/week6_replanning_review",
+      "matched_capture_sha256": "5bc43dedd231556743f7b96a64596b268aad859c2840176997371677e5559e55",
+      "exact_match_span": [
+        313731,
+        313774
+      ],
+      "context_start_line": 3023,
+      "reason": "Unchanged pytest collection node IDs: the detector spans the CRLF after a test name and captures the next repository test filename."
+    }
+  ],
+  "unresolved_credential_shape_findings": [],
+  "note": "Pattern audit is not proof that images or arbitrary text contain no private data. Root reviews desktop captures separately."
+}

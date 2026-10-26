@@ -1,0 +1,34 @@
+{
+  "finished_at_utc": "2026-10-25T07:56:05.177909+00:00",
+  "elapsed_seconds": 26.43700000003446,
+  "attempts": [
+    {
+      "number": 1,
+      "case": "review_saved_frame",
+      "proposal_constraints_pass": false,
+      "error": "ValueError: subgoal 1 expect_text is already visible in the current frame: ['Review report']. A current operation label is not post-action evidence. Remove that expect_text; if future wording is unknown, use a currently visible stage marker that must disappear as forbid_text.",
+      "requests": 1,
+      "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Click on the 'Review report' button to proceed.\",\n      \"expect_text\": [\"Review report\"],\n      \"forbid_text\": []\n    }\n  ]\n}",
+      "not_action_or_task_success": true
+    },
+    {
+      "number": 2,
+      "case": "initial_selection_saved_frame",
+      "proposal_constraints_pass": false,
+      "error": "ValueError: subgoal 1 expect_text is already visible in the current frame: ['ALPHA']. A current operation label is not post-action evidence. Remove that expect_text; if future wording is unknown, use a currently visible stage marker that must disappear as forbid_text.",
+      "requests": 1,
+      "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Select the 'ALPHA' project.\",\n      \"expect_text\": [\"ALPHA\"],\n      \"forbid_text\": [\"BETA\"]\n    }\n  ]\n}",
+      "not_action_or_task_success": true
+    }
+  ],
+  "http_requests": 2,
+  "maximum_total_http_requests": 3,
+  "reserved_request_unused": true,
+  "source_unchanged": true,
+  "archived_inputs_unchanged": true,
+  "no_executor_import": true,
+  "desktop_capture_count": 0,
+  "desktop_input_count": 0,
+  "task_execution_count": 0,
+  "meaning": "Proposal diagnostic only. Constraint validity does not prove future checks are achievable, any action succeeded, recovery worked or a task completed."
+}

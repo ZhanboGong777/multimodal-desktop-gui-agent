@@ -1,0 +1,40 @@
+{
+  "created_utc": "2026-10-24T07:45:40.013909+00:00",
+  "checks": {
+    "all_12_fixture_sha_match": true,
+    "baseline_sha_match": true,
+    "algorithm_freeze_sources_match": true,
+    "freeze_manifest_match": true,
+    "holdout_manifest_match": true,
+    "holdout_before_after_source_unchanged": true,
+    "holdout_benchmark_hash_matches_freeze": true,
+    "all_54_records_saved": true,
+    "all_54_records_error_free": true,
+    "no_gpu_framework_imported": true,
+    "48_labels_per_split": true,
+    "36_controls_per_split": true,
+    "all_repetitions_same_predictions": true,
+    "native_eng_weights_identical_to_installed": true
+  },
+  "all_passed": true,
+  "versions": {
+    "cv2": "4.10.0",
+    "numpy": "2.3.5",
+    "pillow": "12.3.0",
+    "pytesseract": "0.3.13",
+    "tesseract": "5.5.3.20260724"
+  },
+  "validation": {
+    "command": "python -m pytest -q tests/test_week6_perception_accuracy.py tests/test_week6_perception.py tests/test_ocr.py tests/test_ui_detection.py tests/test_runtime_observation.py tests/test_config.py --basetemp=.pytest-tmp-week6-accuracy-broad --tb=short",
+    "passed": 141,
+    "failed": 0,
+    "seconds": 4.01,
+    "ruff": "all changed production/benchmark/test files passed"
+  },
+  "holdout_remaining_errors": [
+    "holdout_06:资源监测",
+    "holdout_06:显示详情"
+  ],
+  "late_parameter_changes": false,
+  "observed_holdout_frame_visual": "holdout_06.png actual visual inspection; both expected Chinese labels visibly present; predictions retained unchanged"
+}

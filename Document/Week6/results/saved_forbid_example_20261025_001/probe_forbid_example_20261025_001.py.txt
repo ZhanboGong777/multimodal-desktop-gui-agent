@@ -1,0 +1,127 @@
+"""One saved-frame schema-example diagnostic; no production or desktop operations."""
+from __future__ import annotations
+
+import difflib
+import hashlib
+import json
+import shutil
+import sys
+import time
+from datetime import UTC, datetime
+from pathlib import Path
+
+ROOT = Path("C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+OUT = ROOT / "Document/Week6/results/saved_forbid_example_20261025_001"
+PRIOR = ROOT / "Document/Week6/results/saved_decomposition_20261025_001"
+sys.path.insert(0, str(ROOT / "src"))
+
+from gui_agent.models.openai_compatible import OpenAICompatibleClient
+from gui_agent.planning.workflow_decomposer import (
+    SYSTEM_PROMPT,
+    BudgetedModelClient,
+    DecompositionProposal,
+    WorkflowRequest,
+    _check_proposal_constraints,
+    _unique_keys,
+)
+from gui_agent.runtime.schemas import ObservationSnapshot
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def write(path, value):
+    with path.open("x", encoding="utf-8", newline="\n") as handle:
+        json.dump(value, handle, ensure_ascii=False, indent=2)
+        handle.write("\n")
+
+
+def main():
+    OUT.mkdir(parents=True, exist_ok=False)
+    old = '"expect_text":["literal visible text"],"forbid_text":[]'
+    new = '"expect_text":[],"forbid_text":["current stage marker that should disappear"]'
+    assert SYSTEM_PROMPT.count(old) == 1
+    system = SYSTEM_PROMPT.replace(old, new, 1)
+    assert system.replace(new, old, 1) == SYSTEM_PROMPT
+    contract = json.loads((PRIOR / "contract.json").read_text("utf-8"))
+    request = WorkflowRequest.model_validate(contract["request"])
+    completed = contract["completed_subgoals"]
+    original = json.loads((PRIOR / "decomposition/attempt_01_request.json").read_text("utf-8"))
+    context = original["context"]
+    observation_path = PRIOR / "archived_inputs/observation_round_003/observation.json"
+    observation = ObservationSnapshot.model_validate_json(observation_path.read_text("utf-8"))
+    image_path = ROOT / observation.image_path
+    files = sorted((ROOT / "src").rglob("*.py"))
+    source_pins = {path.relative_to(ROOT).as_posix(): sha(path) for path in files}
+    input_files = [PRIOR / "contract.json", PRIOR / "decomposition/attempt_01_request.json",
+                   observation_path, image_path]
+    input_pins = {path.relative_to(ROOT).as_posix(): sha(path) for path in input_files}
+    shutil.copyfile(__file__, OUT / "probe_forbid_example_20261025_001.py.txt")
+    write(OUT / "contract.json", {
+        "schema": "week6.saved_forbid_example.diagnostic.v1",
+        "created_at_utc": datetime.now(UTC).isoformat(),
+        "maximum_total_http_requests": 1, "format_or_transport_retries": 0,
+        "only_prompt_mutation": {"original_example_fragment": old, "replacement_example_fragment": new},
+        "original_system_sha256": hashlib.sha256(SYSTEM_PROMPT.encode()).hexdigest(),
+        "diagnostic_system_sha256": hashlib.sha256(system.encode()).hexdigest(),
+        "system_diff": "".join(difflib.unified_diff(SYSTEM_PROMPT.splitlines(keepends=True), system.splitlines(keepends=True),
+                                                fromfile="production_SYSTEM", tofile="private_example_variant")),
+        "request": request.model_dump(mode="json"), "completed_subgoals": completed,
+        "source_pins_before": source_pins, "input_sha256_before": input_pins,
+        "model": {"name": "qwen2.5vl:7b", "temperature": 0, "max_tokens": 2200,
+                  "max_retries": 0, "metadata_requests": 0},
+        "no_fixture_specific_prompt_examples": True,
+        "desktop_capture_count": 0, "desktop_input_count": 0, "executor_creation_count": 0,
+        "executor_call_count": 0, "not_end_to_end_acceptance": True,
+    })
+    messages = [{"role": "system", "content": system},
+                {"role": "user", "content": json.dumps({"instruction": request.instruction, "context": context},
+                                                        ensure_ascii=False)}]
+    write(OUT / "attempt_01_request.json", {"messages": messages, "image_path": str(image_path),
+                                           "image_sha256": sha(image_path), "response_format": {"type": "json_object"}})
+    started = time.monotonic()
+    client = BudgetedModelClient(OpenAICompatibleClient(
+        model_name="qwen2.5vl:7b", base_url="http://127.0.0.1:11434/v1", api_key="ollama-local",
+        timeout_seconds=180, max_retries=0, temperature=0, max_tokens=2200,
+    ), max_requests=1, deadline=started + 180, audit_path=OUT / "transport_requests.jsonl")
+    error = ""
+    content = ""
+    proposal = None
+    try:
+        response = client.complete(messages, image_path=str(image_path), response_format={"type": "json_object"})
+        content = response.content
+        write(OUT / "attempt_01_response.json", {**response.as_dict(), "content": content,
+                                                "raw_response": response.raw_response})
+        if not response.ok:
+            raise ValueError(response.error or "empty model response")
+        proposal = DecompositionProposal.model_validate(json.loads(content, object_pairs_hook=_unique_keys), strict=True)
+        _check_proposal_constraints(proposal, request, observation, completed)
+        if proposal.status != "ready":
+            error = f"non-ready proposal: {proposal.status}: {proposal.reason}"
+    except Exception as exc:
+        error = f"{type(exc).__name__}: {exc}"
+        if not (OUT / "attempt_01_response.json").exists():
+            write(OUT / "attempt_01_response.json", {"error": error})
+    summary = {
+        "finished_at_utc": datetime.now(UTC).isoformat(), "elapsed_seconds": time.monotonic() - started,
+        "http_requests": client.request_count, "maximum_total_http_requests": 1,
+        "proposal_constraints_pass": not error, "error": error, "content": content,
+        "proposal": proposal.model_dump(mode="json") if proposal else None,
+        "source_unchanged": source_pins == {path.relative_to(ROOT).as_posix(): sha(path) for path in files},
+        "archived_inputs_unchanged": input_pins == {path.relative_to(ROOT).as_posix(): sha(path) for path in input_files},
+        "desktop_capture_count": 0, "desktop_input_count": 0, "executor_creation_count": 0, "executor_call_count": 0,
+        "meaning": "One private prompt diagnostic on an archived frame. Accepted proposal constraints are not proof of action, recovery or task success.",
+    }
+    write(OUT / "summary.json", summary)
+    write(OUT / "harness_provenance.json", {
+        "script_path": str(Path(__file__).resolve()), "script_copy": "probe_forbid_example_20261025_001.py.txt",
+        "sha256": sha(Path(__file__)), "copy_exact": sha(Path(__file__)) == sha(OUT / "probe_forbid_example_20261025_001.py.txt"),
+        "import_mode": "normal production package imports; no executor instantiated or called",
+        "wrapper_exit_meaning": "Diagnostic artifacts written; not proposal or task success.",
+    })
+    print(json.dumps(summary, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

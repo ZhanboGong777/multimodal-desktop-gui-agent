@@ -1,0 +1,79 @@
+{
+  "schema": "week6.progress_contract_review_copy.v4",
+  "created_at_utc": "2026-10-25T11:27:38.041913+00:00",
+  "copies": [
+    {
+      "source": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_replanning_review\\independent_rolling_actions_audit_001.py",
+      "target": "Document/Week6/results/progress_contract_review_20261025/independent_rolling_actions_audit_001.py.txt",
+      "source_sha256": "3389f73a4514e04cf81ef7d1f5530b2f40d1e4241d61d3f3460e5d95ef4fac83",
+      "target_sha256": "3389f73a4514e04cf81ef7d1f5530b2f40d1e4241d61d3f3460e5d95ef4fac83",
+      "bytes": 16369
+    },
+    {
+      "source": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_replanning_review\\independent_rolling_actions_audit_001.json",
+      "target": "Document/Week6/results/progress_contract_review_20261025/independent_rolling_actions_audit_001.json",
+      "source_sha256": "8bfbff5e73d787dadd850a5a90dacb9ce813cf4a962c3096623f6216206b2ec2",
+      "target_sha256": "8bfbff5e73d787dadd850a5a90dacb9ce813cf4a962c3096623f6216206b2ec2",
+      "bytes": 4505
+    },
+    {
+      "source": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_replanning_review\\independent_rolling_v2_priority_audit_001.py",
+      "target": "Document/Week6/results/progress_contract_review_20261025/independent_rolling_v2_priority_audit_001.py.txt",
+      "source_sha256": "b4b8b5354160db293735f4574b61224061fa9f6462397cc873413063352d81d5",
+      "target_sha256": "b4b8b5354160db293735f4574b61224061fa9f6462397cc873413063352d81d5",
+      "bytes": 14211
+    },
+    {
+      "source": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_replanning_review\\independent_rolling_v2_priority_audit_001.json",
+      "target": "Document/Week6/results/progress_contract_review_20261025/independent_rolling_v2_priority_audit_001.json",
+      "source_sha256": "fbe82642588829d0368fd25b9f51878de94704aeb1764d68f4351da38f23c69e",
+      "target_sha256": "fbe82642588829d0368fd25b9f51878de94704aeb1764d68f4351da38f23c69e",
+      "bytes": 4139
+    }
+  ],
+  "reviews": [
+    {
+      "name": "independent_rolling_actions_audit_001",
+      "reviewed_source_sha256": "631354278ab7bc1df811bff62949e1b27b342347e661f83068ecbfab862c6ce1",
+      "checks_passed": 33,
+      "checks_total": 33,
+      "meaning": "Frozen rolling v1 guard review with fabricated frames and an offline TaskRunner subclass."
+    },
+    {
+      "name": "independent_rolling_v2_priority_audit_001",
+      "reviewed_source_sha256": {
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\src\\gui_agent\\planning\\workflow_decomposer.py": "706d98f6156f01224c3fcb99b971623553f91e732249818c029b46665efd6940",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\src\\gui_agent\\runtime\\runner.py": "e3fe1cfd49f338afa29c5cae2b13c12fa972a694327b9def13a97c0d803ffe56"
+      },
+      "checks_passed": 23,
+      "checks_total": 23,
+      "meaning": "Frozen rolling v2 declared caller-goal priority with real TaskRunner plus invented frames and an offline executor/model; raw model step misses remain failed."
+    }
+  ],
+  "all_source_target_bytes_equal": true,
+  "preexisting_files_sha256": {
+    "copy_manifest_001.json": "79e772e9dc0fbd6a311fead198230f69efb9d2db0a1db7e731c6bd813f6123ed",
+    "copy_manifest_002.json": "3f281afce48df4ec1314754a6033839a241836e9fb4d45da519295471547bbc4",
+    "copy_manifest_003.json": "19203a1d3030de48f44eb0889dd739e95d16327d6351e2e60565b4204311e001",
+    "independent_caller_anchor_audit_001.json": "4fc58e0373b37238a4debb6ed58504e9ebfebefc2ada65af427c59b62a3f5877",
+    "independent_caller_anchor_audit_001.py.txt": "c38bd231bf402af5c5d87c2c57f176adfa54d18b39fea618377ffd0d12b1506b",
+    "independent_departure_audit_001.json": "3a2119d6309ec3064e2db080a6a494169d53c214ba977bb0481b13612cca6574",
+    "independent_departure_audit_001.py.txt": "ee9c78882486442beeec0310a46a703f5957e1cfc1c9a68e22559a2418b4b9be",
+    "independent_progress_audit.json": "0ad00bfdde24c196f5f353696345ba6f1d7547d3c60c51c8431ce1a094fff3e2",
+    "independent_progress_audit.py.txt": "b4ce83d6fa3ac131cf005e3aa0d353ab21b9f3bb714fb1dfeecd13f20ac12a46",
+    "independent_progress_audit_v2.json": "e1771bc0daa8e8a9de92202f28b33e321cade1796696fd165a62bbe8d70a1f32",
+    "independent_progress_audit_v2.py.txt": "48dbf3002ad4b140daf22b38a34b40aecf12d59f5d2f3a5ec24342436fe79c86",
+    "negative_evidence_baseline.json": "1e5d259832d692eb52ffa2ec79eafc822bc38fb7091955233d569b8dcfba13a8",
+    "negative_evidence_baseline.py.txt": "da52d67349b9ebab924defbbb44b837221e8664dc6e1821e13bf74f753e57f31",
+    "normal009_owner_start_observed_001.json": "af9ce7d692cbec3e20246f7407e22b08e117af9ce513b98014876b1cdfe22dc4",
+    "normal009_process_identity_observation_001.json": "3ec85a386370864bffbb9bc34781f37d03a87d0e84cc9807051e7a6f1e7eaffa",
+    "normal009_run_status_observed_001.json": "3020521c57965ada45cea173989cbcff55dda5b7742df88d0cb90d6f59881953"
+  },
+  "preexisting_files_unchanged": true,
+  "meaning": "Two independent CPU review scopes. They are not desktop execution, task acceptance, free semantic subtask proof, or a combined live success rate.",
+  "actual_model_requests": 0,
+  "actual_HTTP_requests": 0,
+  "desktop_capture_count": 0,
+  "desktop_input_count": 0,
+  "real_GUI_success_established": false
+}

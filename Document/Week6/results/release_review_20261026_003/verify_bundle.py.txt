@@ -1,0 +1,9 @@
+from pathlib import Path
+import hashlib, json
+root = Path(__file__).resolve().parent
+manifest = json.loads((root / "copy_manifest_001.json").read_text(encoding="utf-8"))
+for item in manifest["copies"] + manifest["generated_files"]:
+    data = (root / item["destination_relative"]).read_bytes()
+    assert hashlib.sha256(data).hexdigest() == item["destination_sha256"], item["destination_relative"]
+    assert len(data) == item["bytes"], item["destination_relative"]
+print(json.dumps({"all_hashes_passed": True, "copied_files": len(manifest["copies"]), "generated_files": len(manifest["generated_files"])}))

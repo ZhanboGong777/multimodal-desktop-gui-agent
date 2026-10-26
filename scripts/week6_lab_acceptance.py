@@ -157,6 +157,8 @@ def main():
             "project_and_theme_selected_exactly_once": True,
         },
         "input_transport": "Sky bridge; production adapter coordinates unchanged; no PyAutoGUI input",
+        "automatic_protocol": "rolling_actions",
+        "intermediate_checks": "Model-generated one-step action plans are execution proposals, not verified semantic subgoals or stage-departure proofs. Fresh unchanged caller final rules establish overall success.",
         "model": args.model,
         "baseline": "prior explicit-subgoal workflow cannot accept this overall instruction",
         "source_sha256": source_pins,
@@ -170,7 +172,8 @@ def main():
         return instance
 
     def factory(task, index, directory, budgeted_client):
-        # The generated task and its checks flow through unmodified.
+        # The automatic runner constrains each real model plan to one step.
+        # Caller-owned final checks remain unchanged across bounded recovery.
         return TaskRunner(observer=observer(directory),
                           planner=TaskPlanner(budgeted_client, max_steps=4, allow_real_execution=True),
                           adapter=ActionAdapter(), executor=executor,
@@ -185,7 +188,8 @@ def main():
         monitors.append(read_run_status(workflow_dir))
 
     result = AutomaticWorkflowRunner(workflow_dir, client, factory, max_model_requests=24,
-                                     initial_observer=lambda d: observer(d).observe()).run(
+                                     initial_observer=lambda d: observer(d).observe(),
+                                     protocol_mode="rolling_actions").run(
         request, options, on_checkpoint=checkpoint,
     )
     monitors.append(read_run_status(workflow_dir))

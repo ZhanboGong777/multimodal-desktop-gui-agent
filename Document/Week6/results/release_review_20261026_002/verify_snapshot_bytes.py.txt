@@ -1,0 +1,21 @@
+"""Read and hash archived copies only; does not run a regression or create evidence."""
+import argparse
+import hashlib
+import json
+from pathlib import Path
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--original-sources",action="store_true")
+args = parser.parse_args()
+root = Path(__file__).resolve().parent
+manifest = json.loads((root/"copy_manifest_001.json").read_bytes())
+for item in manifest["copies"]:
+    destination = (root/item["destination_relative"]).resolve()
+    assert destination.is_relative_to(root)
+    data = destination.read_bytes()
+    assert len(data)==item["bytes"]
+    assert hashlib.sha256(data).hexdigest()==item["source_sha256"]==item["destination_sha256"]
+    if args.original_sources: assert Path(item["source"]).read_bytes()==data
+print(json.dumps({"all_archived_bytes_verified":True,"files":len(manifest["copies"]),
+    "original_sources_checked":args.original_sources,"model_GUI_tests_run":False,
+    "Git_HEAD_or_ZIP_compared_by_this_verifier":False,"overall_delivery_complete_claimed":False}))

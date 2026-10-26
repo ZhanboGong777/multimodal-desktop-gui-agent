@@ -1,0 +1,94 @@
+{
+  "schema": "week6.ocr_accuracy.result.v1",
+  "split": "development",
+  "created_utc": "2026-10-24T07:37:40.838288+00:00",
+  "python": "3.12.4",
+  "tesseract": "5.5.3.20260724",
+  "repeats": 3,
+  "fixture_manifest_sha256": "baee79356784cc5bc58bbc766f406d30a3ef37f0388edf1e56f2bdbd53b6d0a5",
+  "source_sha256": {
+    "src\\gui_agent\\perception\\ocr.py": "ca77f607cf65fe059a14cd5603d8d456b60b5b4d5b102cb0ef264c6c6e2d3414",
+    "src\\gui_agent\\config.py": "8d984b5f67ab0f60c540dbe583a81b0564fc5bb58418056b8a1625d7a729edfc",
+    "src\\gui_agent\\perception\\ui_detection.py": "4cb75d461fd9ef55fbe3671c9efd7fd72a64148a2a6e37eccdf3f7ff3e908a5d",
+    "scripts\\week6_benchmark_accuracy.py": "e2f52b977688bf4a4bd082e616d444056b595d889ad992fa8a406ae63bd96845"
+  },
+  "source_unchanged": true,
+  "resource_provenance_sha256": "fd69c8cd6b8f086d5da85781ca311c500d95a9c8742b9f48596dc9ca21a7fc94",
+  "tessdata_directory": "D:\\Developer\\multimodal-desktop-gui-agent\\outputs\\week6_ocr_resources_20261024\\tessdata",
+  "scratch_directory": "D:\\Developer\\multimodal-desktop-gui-agent\\outputs\\week6_ocr_resources_20261024\\scratch",
+  "arms": {
+    "native_eng": {
+      "tp": 81,
+      "fp": 12,
+      "fn": 63,
+      "precision": 0.8709677419354839,
+      "recall": 0.5625,
+      "f1": 0.6835443037974683,
+      "ocr_median_ms": 182.87499999860302,
+      "ui_median_ms": 5.016400013118982,
+      "decode_ocr_ui_median_ms": 189.75260001025163,
+      "by_language": {
+        "en": {
+          "matched": 81,
+          "total": 90
+        },
+        "zh": {
+          "matched": 0,
+          "total": 54
+        }
+      }
+    },
+    "native_bilingual": {
+      "tp": 90,
+      "fp": 27,
+      "fn": 54,
+      "precision": 0.7692307692307693,
+      "recall": 0.625,
+      "f1": 0.6896551724137931,
+      "ocr_median_ms": 310.1644499984104,
+      "ui_median_ms": 4.983799997717142,
+      "decode_ocr_ui_median_ms": 316.6752500110306,
+      "by_language": {
+        "en": {
+          "matched": 81,
+          "total": 90
+        },
+        "zh": {
+          "matched": 9,
+          "total": 54
+        }
+      }
+    },
+    "screen_bilingual": {
+      "tp": 99,
+      "fp": 42,
+      "fn": 45,
+      "precision": 0.7021276595744681,
+      "recall": 0.6875,
+      "f1": 0.6947368421052632,
+      "ocr_median_ms": 353.29274999094196,
+      "ui_median_ms": 4.73005001549609,
+      "decode_ocr_ui_median_ms": 359.9737499898765,
+      "by_language": {
+        "en": {
+          "matched": 63,
+          "total": 90
+        },
+        "zh": {
+          "matched": 36,
+          "total": 54
+        }
+      }
+    }
+  },
+  "runs": 54,
+  "desktop_capture": false,
+  "gpu_loaded": false,
+  "latency_scope": "PIL PNG decode + actual CPU Tesseract + contour extraction; no OS capture/LLM/action",
+  "all_repetitions_included": true,
+  "limitations": [
+    "Synthetic local fixtures, not desktop task success rate",
+    "GT covers all visible text, contour candidates have partial annotations only",
+    "Repeated frames are correlated; counts are frame-repetition results, not independent labels"
+  ]
+}

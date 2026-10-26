@@ -1,0 +1,91 @@
+"""Promote finalized draft prose once, preserving the initial report sources.
+
+Does not touch ROOT README or production/test sources. Unrelated/user edits to
+the three destination documents are a hard stop for manual reconciliation.
+"""
+from __future__ import annotations
+
+import hashlib
+import argparse
+import json
+import shutil
+from datetime import UTC, datetime
+from pathlib import Path
+
+from report_evidence import audit_final_evidence
+
+ROOT = Path("C:/Users/联想/Documents/ChatGPT/Intern")
+REPO = ROOT / "week6-worktree"
+PRIVATE = ROOT / "tmp/week6_report"
+DOCS = REPO / "Document/Week6"
+
+
+def sha(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def main(args):
+    evidence_audit = audit_final_evidence(args.completion_record, args.validation_record)
+    preparation = json.loads((PRIVATE / "completed_preparation_001.json").read_text(encoding="utf-8-sig"))
+    expected = {str(Path(item["path"]).resolve()): item["sha256"] for item in preparation["original_inputs"]}
+    historical = dict(expected)
+    baseline_path = PRIVATE / "publication_source_baselines_002.json"
+    baselines = json.loads(baseline_path.read_text(encoding="utf-8-sig")) if baseline_path.exists() else {"destinations": []}
+    reconciled = {}
+    for item in baselines["destinations"]:
+        key = str(Path(item["path"]).resolve())
+        if historical.get(key) != item["historical_sha256"] or sha(item["historical_archive"]) != item["historical_sha256"]:
+            raise RuntimeError("Historical publication input differs from the preserved bytes")
+        expected[key] = item["current_sha256"]
+        reconciled[key] = item.get("reconciled_draft_sha256")
+    pairs = [
+        (PRIVATE / "Week6_Robustness_Report_completed.draft.md", DOCS / "Week6_Robustness_Report.md"),
+        (PRIVATE / "README_completed.draft.md", DOCS / "README.md"),
+        (PRIVATE / "Release_Notes_completed.draft.md", DOCS / "Release_Notes.md"),
+    ]
+    for draft, destination in pairs:
+        text = draft.read_text(encoding="utf-8")
+        if "{{" in text or "}}" in text:
+            raise RuntimeError(f"Unresolved report fields in {draft}")
+        if sha(destination) != expected[str(destination.resolve())]:
+            raise RuntimeError(f"Destination changed since preparation; reconcile its edits before publishing: {destination}")
+        key = str(destination.resolve())
+        if key in reconciled and reconciled[key] != sha(draft):
+            raise RuntimeError(f"Draft has not been explicitly reconciled with the current usage revision: {draft}")
+    archive = DOCS / "history/v2_initial_20261024"
+    archive.mkdir(parents=True, exist_ok=True)
+    for _, destination in pairs:
+        preserved = archive / destination.name
+        if preserved.exists() and sha(preserved) != historical[str(destination.resolve())]:
+            raise RuntimeError(f"Preserve differing historical input: {preserved}")
+    record = {"created_utc": datetime.now(UTC).isoformat(), "archive": str(archive),
+              "final_evidence_audit": evidence_audit, "files": []}
+    for draft, destination in pairs:
+        preserved = archive / destination.name
+        before = sha(destination)
+        if not preserved.exists():
+            shutil.copyfile(destination, preserved)
+        previous = preserved
+        if before != sha(preserved):
+            previous = DOCS / "history/usage_full005_20261025" / destination.name
+            previous.parent.mkdir(parents=True, exist_ok=True)
+            if previous.exists() and sha(previous) != before:
+                raise RuntimeError(f"Preserve differing current-usage archive: {previous}")
+            if not previous.exists():
+                shutil.copyfile(destination, previous)
+        shutil.copyfile(draft, destination)
+        record["files"].append({"destination": str(destination), "previous_sha256": before,
+                                "archive": str(previous), "archive_sha256": sha(previous),
+                                "initial_archive": str(preserved), "initial_archive_sha256": sha(preserved),
+                                "new_sha256": sha(destination)})
+    out = PRIVATE / "completed/publication_001.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(record, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(json.dumps(record, ensure_ascii=False, indent=2))
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--completion-record", type=Path, required=True)
+    parser.add_argument("--validation-record", type=Path, required=True)
+    main(parser.parse_args())

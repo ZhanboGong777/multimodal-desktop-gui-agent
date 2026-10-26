@@ -1,0 +1,54 @@
+{
+  "schema": "week6.report.completion.v3",
+  "created_utc": "2026-10-26T11:06:14.938908+00:00",
+  "version": "2.0.0",
+  "revision": "full006",
+  "status": "completed",
+  "report_ready": true,
+  "closure_kind": "scoped_engineering_delivery",
+  "meaning": "Implementation and evidence permit final report generation. Final report QA and distribution verification must still finish before overall user delivery is complete.",
+  "requirements_closed": {
+    "automatic_decomposition": true,
+    "error_detection_retry": true,
+    "live_monitoring_logs": true,
+    "perception_accuracy_speed": true
+  },
+  "requirement_scopes": {
+    "automatic_decomposition": {
+      "implementation": "action_level_rolling",
+      "protocol": "week6.rolling_actions.v2",
+      "validation_scope": "Dedicated offline four-stage window, two caller goals, normal and one controlled transient review rejection.",
+      "hierarchical_semantic_subgoals": false,
+      "dependency_management": false,
+      "arbitrary_app_success_rate": null
+    },
+    "error_detection_retry": "Bounded fresh-observation replanning, raw failure retention, unknown-dispatch stop; controlled transient desktop recovery plus CPU counterexamples.",
+    "perception_accuracy_speed": "Frozen held-out OCR accuracy and paired component timings; screen OCR is slower and no general end-to-end speedup is claimed.",
+    "live_monitoring_logs": "Passive stage/status/budget/PID identity records and original per-step logs; no model-internal real-time progress claim."
+  },
+  "validation": "Document/Week6/results/release_validation_completed_20261026_006/validation.json",
+  "validation_sha256": "e860d468f1b3240e42e9e1699ed1c58f63227eb28c82ae2e1f70573777515a42",
+  "evidence": [
+    {
+      "role": "final_validation",
+      "path": "Document/Week6/results/release_validation_completed_20261026_006/validation.json",
+      "sha256": "e860d468f1b3240e42e9e1699ed1c58f63227eb28c82ae2e1f70573777515a42"
+    },
+    {
+      "role": "live_acceptance_normal",
+      "path": "Document/Week6/results/live_auto_20261026_normal_017/acceptance.json",
+      "sha256": "0af3a566dd5b97ec28f5913af834deed272ac607e4fc9fc43e00170c7777c4bf"
+    },
+    {
+      "role": "live_acceptance_transient",
+      "path": "Document/Week6/results/live_auto_20261025_transient_015/acceptance.json",
+      "sha256": "10557665b4683644aa16a85721139edd14bccdefb50f9ad89c2c0976c33d8d36"
+    }
+  ],
+  "remaining": [
+    "Hierarchical semantic subgoal sequences and dependency graphs are not implemented by rolling mode.",
+    "Dedicated-window acceptance does not establish arbitrary application or cross-resolution success rates.",
+    "Sky bridge activation and input-service waits are included in elapsed time; unattended execution latency is not established.",
+    "The screen OCR accuracy gain has a processing-time cost; full perception is not generally faster."
+  ]
+}

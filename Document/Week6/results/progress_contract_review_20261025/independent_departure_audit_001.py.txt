@@ -1,0 +1,132 @@
+"""Independent offline protocol review; fabricated observations, no API or GUI."""
+from __future__ import annotations
+
+import hashlib
+import importlib
+import json
+import sys
+import time
+import types
+from datetime import UTC, datetime, timedelta
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+BASE = Path(__file__).resolve().parents[2]
+REPO = BASE / "week6-worktree"
+sys.path.insert(0, str(REPO / "src"))
+runtime = types.ModuleType("gui_agent.runtime")
+runtime.__path__ = [str(REPO / "src/gui_agent/runtime")]
+sys.modules["gui_agent.runtime"] = runtime
+m = importlib.import_module("gui_agent.planning.workflow_decomposer")
+s = importlib.import_module("gui_agent.runtime.schemas")
+c = importlib.import_module("gui_agent.schemas")
+b = importlib.import_module("gui_agent.models.base")
+source = REPO / "src/gui_agent/planning/workflow_decomposer.py"
+source_before = hashlib.sha256(source.read_bytes()).hexdigest()
+rows = []
+
+
+def frame(name="initial", words=("Application", "Pending stage", "Caller finished", "pending STAGE")):
+    return s.ObservationSnapshot(observation_id=name, captured_at=datetime.now(UTC),
+        screen_info=c.ScreenInfo(screenshot_width=800, screenshot_height=600, control_width=800, control_height=600),
+        window_title="Application", window_id="cpu-window", foreground_stable=True,
+        window_bounds=c.BoundingBox(left=0, top=0, right=800, bottom=600),
+        elements=[s.ElementRef(element_id=f"{name}-{i}", text=word,
+                   bounding_box=c.BoundingBox(left=1, top=1+i*20, right=200, bottom=20+i*20),
+                   center=c.Point(x=100, y=10+i*20), confidence=1) for i, word in enumerate(words)])
+
+
+def native(text="Pending stage", **changes):
+    payload = {"status": "ready", "reason": "Untrusted claim: all work complete", "subgoals": [
+        {"instruction": "Advance the current local stage", "disappearing_text": text}]}
+    payload.update(changes)
+    return payload
+
+
+class Offline(b.ModelClient):
+    name = "mock"
+    supports_strict_json_schema = True
+    def __init__(self, content, *, supported=True, reject=False):
+        super().__init__(model_name="CPU-no-model", max_retries=0)
+        self.content, self.calls, self.reject = content, [], reject
+        self.supports_strict_json_schema = supported
+    def complete(self, messages, **kwargs):
+        self.calls.append({"messages": messages, "kwargs": kwargs})
+        if self.reject:
+            raise b.ModelError("CPU simulated schema endpoint rejection")
+        return b.ModelResponse(content=self.content, model_name=self.model_name, provider=self.name)
+
+
+request = m.WorkflowRequest(instruction="Advance the offline local stage then finish", expect_text=["Caller finished"])
+with TemporaryDirectory(prefix="week6-independent-departure-") as temporary:
+    root = Path(temporary)
+    def run(name, proposal, *, initial=None, supported=True, reject=False, mode="observed_departure"):
+        client = Offline(proposal if isinstance(proposal, str) else json.dumps(proposal), supported=supported, reject=reject)
+        result = m.WorkflowDecomposer(client, max_format_retries=0).decompose(
+            request, evidence_directory=root/name, deadline=time.monotonic()+60,
+            initial_observation=frame() if initial is None else initial, protocol_mode=mode)
+        return result, client
+    valid, client = run("valid", native())
+    protocol = json.loads((root/"valid/observed_departure_protocol.json").read_text(encoding="utf-8"))
+    compiled = json.loads((root/"valid/compiled_proposal.json").read_text(encoding="utf-8"))
+    rows.append({"case": "strict_schema_exact_candidates_and_raw_mapping", "passed": (
+        valid.status == "ready" and protocol["candidates"] == ["Pending stage"]
+        and protocol["response_format"] == client.calls[0]["kwargs"]["response_format"]
+        and protocol["response_format"]["json_schema"]["strict"] is True
+        and protocol["response_format"]["json_schema"]["schema"]["additionalProperties"] is False
+        and compiled["native_proposal"] == native() == valid.native_proposal
+        and compiled["mapping"] == [{"native_disappearing_text":"Pending stage", "expect_text":[], "forbid_text":["Pending stage"]}]
+        and valid.workflow.subgoals[0].expect_text == [] and valid.workflow.subgoals[0].forbid_text == ["Pending stage"]
+        and valid.workflow.final_check.expect_text == request.expect_text
+        and json.loads((root/"valid/generated_workflow.json").read_text(encoding="utf-8")) == valid.workflow.model_dump(mode="json"))})
+    for name, value in {"unobserved":"Unseen marker", "wrong_case":"pending stage", "leading_space":" Pending stage",
+                        "empty":"", "caller_final":"Caller finished", "window_title":"Application"}.items():
+        result, client = run(name, native(value))
+        rows.append({"case": name, "passed": result.status == "failed" and result.workflow is None
+                     and len(client.calls) == result.model_requests == 1 and not (root/name/"compiled_proposal.json").exists()})
+    extras = native(); extras["invented_final"] = True
+    child_extra = native(); child_extra["subgoals"][0]["expect_text"] = ["Invented future"]
+    two = native(); two["subgoals"] *= 2
+    duplicate = json.dumps(native()).replace('"status": "ready"', '"status":"ready","status":"refused"')
+    for name, proposal in {"extra_root":extras, "extra_child":child_extra, "two_stages":two, "duplicate_key":duplicate}.items():
+        result, client = run(name, proposal)
+        rows.append({"case": name, "passed": result.status == "failed" and result.workflow is None and len(client.calls) == 1})
+    for name, initial, supported in [
+        ("empty_candidates", frame(words=("Application", "Caller finished")), True),
+        ("empty_elements", frame(words=()), True),
+        ("unsupported_transport", frame(), False),
+        ("errored_observation", frame().model_copy(update={"errors":["CPU injected"]}), True),
+    ]:
+        result, client = run(name, native(), initial=initial, supported=supported)
+        rows.append({"case":name, "passed": result.status == "failed" and result.workflow is None
+                     and len(client.calls) == result.model_requests == result.format_attempts == 0})
+    result, client = run("schema_rejection", native(), reject=True)
+    rows.append({"case":"schema_rejection_has_no_plain_json_fallback", "passed": result.status == "failed"
+                 and len(client.calls) == result.model_requests == 1 and client.calls[0]["kwargs"]["response_format"]["type"] == "json_schema"})
+    for status in ("refused", "needs_clarification"):
+        result, _ = run(status, {"status":status, "reason":"No justified departure", "subgoals":[]})
+        rows.append({"case": status, "passed": result.status == status and result.workflow is None})
+    legacy = {"status":"ready", "reason":"", "subgoals":[{"instruction":"Advance local stage", "expect_text":["Future stage"], "forbid_text":[]}]}
+    result, client = run("legacy", legacy, mode="postconditions")
+    rows.append({"case":"legacy_default_unchanged", "passed": result.status == "ready" and result.protocol_mode == "postconditions"
+                 and result.workflow.subgoals[0].expect_text == ["Future stage"] and client.calls[0]["kwargs"]["response_format"] == {"type":"json_object"}})
+    initial, changed = frame(), frame("before", ("Pending stage extension",))
+    snapshots = iter((initial, changed))
+    created = []
+    client = Offline(json.dumps(native()))
+    result = m.AutomaticWorkflowRunner(root/"changed", client, lambda *args: created.append(args),
+                                      initial_observer=lambda _: next(snapshots)).run(
+        request, s.ExecutionOptions(execute=True, max_planning_attempts=4))
+    rows.append({"case":"fresh_before_requires_exact_marker_not_substring", "passed": result.status == "failed"
+                 and not created and result.total_actions == 0 and result.model_requests == 1})
+
+payload = {"schema":"week6.independent_departure_review.v1", "mode":"CPU_fabricated_snapshots_and_offline_transport",
+           "source_sha256_before":source_before, "source_sha256_after":hashlib.sha256(source.read_bytes()).hexdigest(),
+           "source_unchanged":source_before == hashlib.sha256(source.read_bytes()).hexdigest(),
+           "checks":rows, "all_checks_passed":all(row["passed"] for row in rows),
+           "actual_model_requests":0, "actual_HTTP_requests":0, "desktop_capture_count":0, "desktop_input_count":0,
+           "real_GUI_success":False}
+Path(__file__).with_suffix(".json").write_text(json.dumps(payload, indent=2)+"\n", encoding="utf-8")
+print(json.dumps(payload))
+raise SystemExit(0 if payload["all_checks_passed"] and payload["source_unchanged"] else 1)
+

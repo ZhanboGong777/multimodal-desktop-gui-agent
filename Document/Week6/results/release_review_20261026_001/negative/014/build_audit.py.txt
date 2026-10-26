@@ -1,0 +1,116 @@
+"""Read the ended normal014 records; never call a model or desktop interface."""
+from __future__ import annotations
+
+import hashlib
+import json
+from datetime import UTC, datetime
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[3]
+REPO = ROOT / "week6-worktree"
+BATCH = REPO / "Document/Week6/results/live_auto_20261025_normal_014"
+CHILD = BATCH / "automatic/workflow/001_CALLER_GOAL"
+PINS = {}
+
+
+def pin(path):
+    path = Path(path).resolve()
+    raw = path.read_bytes()
+    value = {"path": str(path), "sha256": hashlib.sha256(raw).hexdigest(), "bytes": len(raw)}
+    assert PINS.setdefault(str(path), value) == value
+    return value
+
+
+def load(path):
+    pin(path)
+    return json.loads(Path(path).read_bytes())
+
+
+def main():
+    output = Path(__file__).parent / "bridge_timeout_014_audit_001.json"
+    assert not output.exists()
+    # Confirm actual completion of the owner before inspecting the ended batch.
+    owner = load(BATCH / "owner_receipt.json")
+    assert owner["schema"] == "week6.live.actual_exit_receipt.v1" and owner["child_exit_code"] == 0
+    assert owner["finished_utc"]
+    assert pin(BATCH / "owner_harness.py.txt")["sha256"] == owner["harness_sha256"]
+    acceptance, contract = load(BATCH / "acceptance.json"), load(BATCH / "contract.json")
+    result = acceptance["automatic_result"]
+    assert acceptance["status"] == result["status"] == "failed"
+    assert acceptance["source_unchanged"] is True
+    assert all(acceptance[key] is False for key in ["passed", "runtime_pass", "independent_pass", "attribution_pass"])
+    assert result["total_actions"] == 2 and result["unconfirmed_action_attempts"] == 1
+    assert result["accounting_complete"] is False and result["final_verification"] is None
+    assert result["completion_basis"] == ""
+    assert load(BATCH / "automatic/automatic_workflow_summary.json") == result
+    child, limit = load(CHILD / "task_summary.json"), load(CHILD / "single_step_planning_limit.json")
+    rolling = load(CHILD / "rolling_actions_audit.json")
+    assert result["rolling_actions_audit"] == rolling and rolling["eligible_for_final_verification"] is False
+    assert child["action_count"] == 2 and child["unconfirmed_action_attempts"] == 1
+    assert len(child["steps"]) == 3 and child["steps"][2]["action_result"] is None
+    assert child["steps"][2]["error"] == "executor raised; dispatch outcome is unconfirmed"
+    assert all(step["action_result"]["success"] is True for step in child["steps"][:2])
+    assert child["planning_calls"] == result["planning_calls"] == len(limit["calls"]) == 3
+    assert limit["protocol_version"] == "week6.rolling_actions.v2" and limit["restored"] is True
+    for name, expected in contract["source_sha256"].items():
+        assert pin(BATCH / "source_snapshot" / (name + ".txt"))["sha256"] == expected
+        assert pin(REPO / name)["sha256"] == expected
+    transport_path = BATCH / "automatic/transport_requests.jsonl"
+    pin(transport_path)
+    rows = [json.loads(line) for line in transport_path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    total, dispatches = 0, []
+    for index, row in enumerate(rows, 1):
+        assert row["dispatch"] == index and row["count_source"] == "httpx_request_event"
+        total += row["requests_made"]
+        assert row["requests_total"] == total
+        dispatches.append({key: row.get(key) for key in
+                           ["dispatch", "count_source", "requests_made", "requests_total", "elapsed_ms", "error"]})
+    assert total == result["model_requests"] == child["model_requests"] == sum(call["model_requests"] for call in limit["calls"]) == 3
+    inputs = [load(path) for path in sorted((BATCH / "sky_bridge").glob("input_*_receipt.json"))]
+    assert inputs == acceptance["input_receipts"] and len(inputs) == 2
+    third_request = load(BATCH / "sky_bridge/input_003_request.json")
+    assert third_request["id"] == "input_003" and not (BATCH / "sky_bridge/input_003_receipt.json").exists()
+    intents_path = CHILD / "dispatch_intents.jsonl"
+    pin(intents_path)
+    intents = [json.loads(line) for line in intents_path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    assert len(intents) == 3
+    assert [event["event"] for event in acceptance["independent_events"]] == ["started", "project_selected", "theme_selected"]
+    assert len(acceptance["transition_attribution"]) == 2
+    assert all(hashlib.sha256(Path(path).read_bytes()).hexdigest() == value["sha256"] for path, value in PINS.items())
+    audit = {
+        "schema_version": "week6.private.bridge_timeout_negative.v1", "created_utc": datetime.now(UTC).isoformat(),
+        "batch": str(BATCH), "classification": "bridge_timeout_with_unconfirmed_runtime_dispatch",
+        "counts_as_success": False, "report_ready": False, "release_ready": False,
+        "owner_child_exit_code": owner["child_exit_code"], "owner_elapsed_seconds": owner["elapsed_seconds"],
+        "acceptance_status": acceptance["status"],
+        "acceptance_flags": {key: acceptance[key] for key in ["passed", "runtime_pass", "independent_pass", "attribution_pass", "source_unchanged"]},
+        "recorded_workflow_decomposer_sha256": contract["source_sha256"]["src/gui_agent/planning/workflow_decomposer.py"],
+        "all_snapshot_and_current_source_pins_match_contract": True,
+        "runtime": {key: result[key] for key in ["total_actions", "unconfirmed_action_attempts", "planning_calls", "model_requests", "elapsed_ms", "accounting_complete", "completion_basis", "final_verification", "error"]},
+        "child": {key: child[key] for key in ["status", "action_count", "unconfirmed_action_attempts", "planning_calls", "model_requests", "elapsed_ms", "stop_reason"]},
+        "actual_http_requests": total, "count_source": "Sum requests_made from httpx_request_event; every cumulative requests_total checked.",
+        "transport_dispatches": dispatches, "known_input_receipts": inputs,
+        "third_input_request": third_request, "third_input_receipt_exists": False,
+        "third_step_record": child["steps"][2], "dispatch_intents": intents,
+        "independent_events": acceptance["independent_events"],
+        "transition_attribution": acceptance["transition_attribution"],
+        "single_step_limit_restored": limit["restored"],
+        "operator_observation": {"source": "Parent task's direct observation of executeInput result, supplied with this audit assignment.",
+                                 "reported_result": "Expired input", "reported_third_os_click_performed": False,
+                                 "not_a_claim_from_the_raw_runtime_journal": True},
+        "interpretation": "The runtime has two complete successful input results and one unconfirmed executor attempt, then stops without replay. Its actual owner exit 0 is a normal script return, not task success. Operator observation identifies the bridge input as expired; the raw runtime independently proves missing receipt/incomplete accounting, not a third successful input. No code defect is inferred from this bridge timeout.",
+        "limitations": ["Do not convert the unconfirmed runtime attempt to a fabricated failed or successful ActionResult.",
+                        "Dispatch intents are not proof of OS input. The known action count is a lower bound whenever accounting is incomplete.",
+                        "The exact Expired input tool result is supplied by the parent observation, not present as a third receipt in this batch.",
+                        "New final evidence may use arbitrary independently validated positive batch paths; normal014 is a retained failure, not a required final role."],
+        "raw_files_pinned": list(PINS.values()), "all_pinned_inputs_unchanged_during_audit": True,
+        "audit_calls": {"models": 0, "http": 0, "gui_capture": 0, "gui_input": 0, "runtime_execution": 0},
+    }
+    output.write_text(json.dumps(audit, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps({"record": str(output), "sha256": hashlib.sha256(output.read_bytes()).hexdigest(),
+                      "actual_http": total, "known_inputs": 2, "unconfirmed": 1,
+                      "owner_exit": owner["child_exit_code"], "raw_files": len(PINS), "counts_as_success": False}, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

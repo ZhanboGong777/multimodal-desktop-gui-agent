@@ -1,0 +1,287 @@
+{
+  "fixture": "holdout_05",
+  "arm": "screen_bilingual",
+  "repeat": 0,
+  "decode_ms": 2.548099961131811,
+  "ocr_ms": 390.9643000224605,
+  "ui_ms": 5.308799969498068,
+  "full_ms": 398.8211999530904,
+  "metrics": {
+    "tp": 8,
+    "fp": 0,
+    "fn": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "labels": [
+      {
+        "text": "Calendar Event",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9927536231884058
+      },
+      {
+        "text": "Event Title",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9113924050632911
+      },
+      {
+        "text": "Add Reminder",
+        "language": "en",
+        "matched": true,
+        "iou": 0.990909090909091
+      },
+      {
+        "text": "Today",
+        "language": "en",
+        "matched": true,
+        "iou": 1.0
+      },
+      {
+        "text": "Delete",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9042386185243328
+      },
+      {
+        "text": "日历事件",
+        "language": "zh",
+        "matched": true,
+        "iou": 0.9705882352941176
+      },
+      {
+        "text": "添加提醒",
+        "language": "zh",
+        "matched": true,
+        "iou": 1.0
+      },
+      {
+        "text": "删除",
+        "language": "zh",
+        "matched": true,
+        "iou": 1.0
+      }
+    ]
+  },
+  "control_metrics": {
+    "tp": 6,
+    "fp": 0,
+    "fn": 0,
+    "iou_threshold": 0.8
+  },
+  "predictions": [
+    {
+      "text": "Calendar Event",
+      "bounding_box": {
+        "left": 49,
+        "top": 64,
+        "right": 186,
+        "bottom": 79
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 117,
+        "y": 71
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Event Title",
+      "bounding_box": {
+        "left": 49,
+        "top": 134,
+        "right": 127,
+        "bottom": 146
+      },
+      "confidence": 0.95,
+      "center": {
+        "x": 88,
+        "y": 140
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "日历事件",
+      "bounding_box": {
+        "left": 655,
+        "top": 134,
+        "right": 721,
+        "bottom": 150
+      },
+      "confidence": 0.86,
+      "center": {
+        "x": 688,
+        "y": 142
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Add Reminder",
+      "bounding_box": {
+        "left": 48,
+        "top": 211,
+        "right": 157,
+        "bottom": 223
+      },
+      "confidence": 0.89,
+      "center": {
+        "x": 102,
+        "y": 217
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "添加提醒",
+      "bounding_box": {
+        "left": 653,
+        "top": 211,
+        "right": 721,
+        "bottom": 228
+      },
+      "confidence": 0.52,
+      "center": {
+        "x": 687,
+        "y": 219
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Today",
+      "bounding_box": {
+        "left": 48,
+        "top": 312,
+        "right": 94,
+        "bottom": 327
+      },
+      "confidence": 0.92,
+      "center": {
+        "x": 71,
+        "y": 319
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Delete",
+      "bounding_box": {
+        "left": 244,
+        "top": 312,
+        "right": 292,
+        "bottom": 324
+      },
+      "confidence": 0.91,
+      "center": {
+        "x": 268,
+        "y": 318
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "删除",
+      "bounding_box": {
+        "left": 653,
+        "top": 312,
+        "right": 687,
+        "bottom": 329
+      },
+      "confidence": 0.78,
+      "center": {
+        "x": 670,
+        "y": 320
+      },
+      "source": "ocr"
+    }
+  ],
+  "ui_candidates": [
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 37,
+        "top": 196,
+        "right": 182,
+        "bottom": 250
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 109,
+        "y": 223
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 642,
+        "top": 297,
+        "right": 782,
+        "bottom": 351
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 712,
+        "y": 324
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 232,
+        "top": 297,
+        "right": 372,
+        "bottom": 351
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 302,
+        "y": 324
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 37,
+        "top": 297,
+        "right": 177,
+        "bottom": 351
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 324
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 642,
+        "top": 196,
+        "right": 782,
+        "bottom": 250
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 712,
+        "y": 223
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 642,
+        "top": 119,
+        "right": 782,
+        "bottom": 173
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 712,
+        "y": 146
+      },
+      "source": "contour"
+    }
+  ],
+  "errors": []
+}

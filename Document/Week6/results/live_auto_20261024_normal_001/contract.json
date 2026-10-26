@@ -1,0 +1,42 @@
+{
+  "request": {
+    "workflow_id": "lab_auto",
+    "instruction": "In Week6 Local Lab, prepare a BLUE report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test, with no external communication. If review is temporarily unavailable, retry within budget.",
+    "expect_text": [
+      "Project ALPHA",
+      "Theme BLUE",
+      "LOCAL COMPLETE"
+    ],
+    "forbid_text": []
+  },
+  "options": {
+    "execute": true,
+    "max_actions": 12,
+    "task_timeout_seconds": 1200.0,
+    "verification_timeout_seconds": 0.8,
+    "verification_poll_interval_seconds": 0.2,
+    "confirm": false,
+    "require_preconditions": true,
+    "max_planning_attempts": 12
+  },
+  "max_model_requests": 24,
+  "independent_pass": {
+    "project": "ALPHA",
+    "colour": "BLUE",
+    "stage": "completed",
+    "committed": true,
+    "event_order": [
+      "project_selected",
+      "theme_selected",
+      "review_accepted",
+      "local_commit"
+    ],
+    "project_and_theme_selected_exactly_once": true
+  },
+  "input_transport": "Sky bridge; production adapter coordinates unchanged; no PyAutoGUI input",
+  "baseline": "prior explicit-subgoal workflow cannot accept this overall instruction",
+  "source_sha256": {
+    "scripts\\week6_lab_acceptance.py": "5d416aa6f71d743bd6e859e81f28cce094f4c5151c8fa51275645e80c10cc8f4",
+    "scripts\\week6_local_lab.py": "fc317a1310fc6a23725ced955bddb00820ff8b24b0cab870814fee09bbe087d7"
+  }
+}

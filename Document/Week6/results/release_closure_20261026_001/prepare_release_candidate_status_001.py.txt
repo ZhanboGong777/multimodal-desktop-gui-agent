@@ -1,0 +1,54 @@
+"""Record verified source/report state without claiming distribution completion."""
+from datetime import UTC, datetime
+import hashlib
+import json
+from pathlib import Path
+import shutil
+
+ROOT = Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+PRIVATE = ROOT.parent / 'tmp/week6_report'
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def main():
+    completion = json.loads((PRIVATE / 'completion_record_full006.json').read_text(encoding='utf-8'))
+    numeric = json.loads((PRIVATE / 'completed/numeric_audit_002.json').read_text(encoding='utf-8'))
+    visual = json.loads((PRIVATE / 'completed/visual_qa_002.json').read_text(encoding='utf-8'))
+    assert completion['report_ready'] and numeric['all_passed'] and visual['all_checks_passed']
+    status_path = ROOT / 'Document/Week6/IMPLEMENTATION_STATUS.json'
+    archive = ROOT / 'Document/Week6/history/acceptance_pending_20261026/IMPLEMENTATION_STATUS.json'
+    archive.parent.mkdir(parents=True, exist_ok=True)
+    assert not archive.exists()
+    shutil.copyfile(status_path, archive)
+    record = {
+        'schema': 'week6.scoped_engineering_release.v2', 'updated_utc': datetime.now(UTC).isoformat(),
+        'branch': 'codex/week6-delivery', 'version': '2.0.0', 'delivery_complete': False,
+        'report_ready': True, 'state': 'Validated source and reviewed reports; distribution verification pending.',
+        'closure_kind': completion['closure_kind'], 'current_protocol': 'week6.rolling_actions.v2',
+        'requirements_closed': completion['requirements_closed'],
+        'requirement_scopes': completion['requirement_scopes'],
+        'cpu_validation': {'path': completion['validation'], 'sha256': completion['validation_sha256'],
+                           'passed': 3027, 'failed': 0, 'exit_code': 0, 'pytest_seconds': 535.12,
+                           'harness_seconds': 566.0270922000054, 'source_pin_count': 244,
+                           'before_after_current_equal': True, 'ruff_src_tests_scripts_exit_code': 0},
+        'real_acceptance': [item for item in completion['evidence'] if item['role'].startswith('live_acceptance_')],
+        'reports': {'page_count': 12, 'tables': 8, 'figures': 1,
+                    'docx_sha256': numeric['docx_sha256'], 'pdf_sha256': numeric['pdf_sha256'],
+                    'markdown_sha256': numeric['markdown_sha256'],
+                    'all_pages_actually_viewed': True, 'numeric_checks_passed': 45},
+        'capability_limits': completion['remaining'],
+        'remaining_delivery_work': ['Verify wheel and source archive bytes, then publish the exact reviewed branch commit.'],
+        'previous_status_archive': archive.relative_to(ROOT).as_posix(),
+        'previous_status_sha256': sha(archive),
+        'week5_c11_sha256_unchanged': '58b005e9fa13e20df15f28ca09c71c0d61c71617abfeb96d17456982a810a54b',
+    }
+    with status_path.open('w', encoding='utf-8', newline='\n') as stream:
+        stream.write(json.dumps(record, ensure_ascii=False, indent=2) + '\n')
+    print(json.dumps({'status': str(status_path), 'sha256': sha(status_path), 'delivery_complete': False}))
+
+
+if __name__ == '__main__':
+    main()

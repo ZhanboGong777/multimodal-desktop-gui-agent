@@ -1,0 +1,205 @@
+"""Offline independent review of one exact distribution-scan false positive.
+
+No model, GUI, pytest execution, original log mutation, or production edits.
+Synthetic credential shapes exist only in temporary files, never in outputs.
+"""
+from __future__ import annotations
+
+import ast
+import hashlib
+import importlib.util
+import json
+import re
+import tempfile
+from datetime import datetime, timezone
+from pathlib import Path
+
+WORKSPACE = Path("C:/Users/联想/Documents/ChatGPT/Intern")
+REPO = WORKSPACE / "week6-worktree"
+DIRECTORY = Path(__file__).resolve().parent
+CHECKER = WORKSPACE / "tmp/week6/package_completed.py"
+BEFORE = DIRECTORY / "package_completed_before_c0ce780.py"
+RELATIVE = "Document/Week6/results/release_review_20261026_001/collection/full006_collection_stdout_001.txt"
+ORIGINAL = REPO / RELATIVE
+EXPECTED_SHA = "b2d8a0a1977d3eee792771b7d19a8d064a1e5b1206afa2fa370d6df15bb175f9"
+BEFORE_SHA = "c0ce78004529b3624030b5a0f65401d73b887012177816088f586339720372c6"
+AFTER_SHA = "4f5631543312fc8ca71a087da65cb36a1f386e3ab29dd90a2337417616e2fb3f"
+PATTERN = re.compile(r"(?i)(?:authorization[\"'\s:]+|bearer\s+)([A-Za-z0-9._~+/=-]{16,})")
+
+
+def digest(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def load(path):
+    return json.loads(path.read_text(encoding="utf-8-sig"))
+
+
+def write_new(path, value):
+    with path.open("x", encoding="utf-8", newline="\n") as handle:
+        json.dump(value, handle, ensure_ascii=False, indent=2)
+        handle.write("\n")
+
+
+def main():
+    original_bytes = ORIGINAL.read_bytes()
+    original_content = original_bytes.decode("utf-8")
+    assert digest(original_bytes) == EXPECTED_SHA
+    assert digest(BEFORE.read_bytes()) == BEFORE_SHA
+    assert digest(CHECKER.read_bytes()) == AFTER_SHA
+    spec = importlib.util.spec_from_file_location("private_release_checker_review", CHECKER)
+    checker = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(checker)
+
+    # Verify the exact previous detector pattern and every unrelated function.
+    old_tree = ast.parse(BEFORE.read_text(encoding="utf-8"))
+    new_tree = ast.parse(CHECKER.read_text(encoding="utf-8"))
+    old_functions = {node.name: node for node in old_tree.body if isinstance(node, ast.FunctionDef)}
+    new_functions = {node.name: node for node in new_tree.body if isinstance(node, ast.FunctionDef)}
+    assert set(new_functions) - set(old_functions) == {"reviewed_credential_false_positive"}
+    for name in set(old_functions) - {"audit_evidence_files", "preflight"}:
+        assert ast.dump(old_functions[name]) == ast.dump(new_functions[name]), name
+    old_patterns = [node.value for node in ast.walk(old_functions["audit_evidence_files"])
+                    if isinstance(node, ast.Constant) and isinstance(node.value, str)
+                    and node.value.startswith(("(?i)", "-----BEGIN", "\\bsk-", "data:image/"))]
+    new_patterns = [node.value for node in ast.walk(new_functions["audit_evidence_files"])
+                    if isinstance(node, ast.Constant) and isinstance(node.value, str)
+                    and node.value.startswith(("(?i)", "-----BEGIN", "\\bsk-", "data:image/"))]
+    assert old_patterns == new_patterns and PATTERN.pattern in old_patterns
+    old_preflight = ast.get_source_segment(BEFORE.read_text(encoding="utf-8"), old_functions["preflight"])
+    new_preflight = ast.get_source_segment(CHECKER.read_text(encoding="utf-8"), new_functions["preflight"])
+    assert new_preflight.replace(
+        'inventory["unresolved_credential_shape_findings"], "Unreviewed credential-shaped',
+        'inventory["credential_shape_findings"], "Credential-shaped',
+    ) == old_preflight
+
+    original_inventory = load(WORKSPACE / "tmp/week6/final_evidence_inventory_20261026_001.json")
+    expected_finding = original_inventory["credential_shape_findings"][0]
+    assert len(original_inventory["credential_shape_findings"]) == 1
+    assert expected_finding["path"] == RELATIVE
+    matches = list(PATTERN.finditer(original_content))
+    assert len(matches) == 1 and matches[0].group(1) == "tests/test_week6_workflow.py"
+    reviewed = checker.reviewed_credential_false_positive(expected_finding, original_content, matches)
+    assert reviewed and reviewed["classification"] == "reviewed_false_positive"
+    assert reviewed["detector_finding"] == expected_finding
+
+    results = []
+
+    def rejected(name, finding=None, content=None, selected_matches=None):
+        f = expected_finding if finding is None else finding
+        c = original_content if content is None else content
+        m = list(PATTERN.finditer(c)) if selected_matches is None else selected_matches
+        value = checker.reviewed_credential_false_positive(f, c, m)
+        assert value is None, name
+        results.append({"case": name, "reviewed": False, "blocked": True})
+
+    rejected("changed_whole_file_sha", finding={**expected_finding, "file_sha256": "0" * 64})
+    rejected("changed_relative_path", finding={**expected_finding, "path": RELATIVE.replace("001/", "002/", 1)})
+    rejected("changed_context_with_original_claimed_sha", content=original_content.replace(
+        "::test_mutated_spec_is_revalidated_before_directory_creation", "::test_changed_context", 1))
+    rejected("changed_bytes_outside_context", content=original_content + "\nadditional byte\n")
+    rejected("line_endings_normalized", content=original_content.replace("\r\n", "\n"))
+    rejected("second_match_count", finding={**expected_finding, "count": 2}, selected_matches=matches * 2)
+    rejected("wrong_detector_category", finding={**expected_finding, "category": "openai_key_shape"})
+    synthetic = "Author" + "ization: " + "SYNTHETIC_NOT_A_SECRET_0123456789"
+    rejected("genuine_literal_shape_with_original_claimed_sha", content=synthetic)
+    rejected("different_crossline_capture_with_original_content", selected_matches=list(PATTERN.finditer(synthetic)))
+
+    # Actual detector integration with the original two-file collection directory.
+    real_inventory = checker.audit_evidence_files([ORIGINAL.parent])
+    assert real_inventory["credential_shape_findings"] == [expected_finding]
+    assert real_inventory["reviewed_false_positive_findings"] == [reviewed]
+    assert real_inventory["unresolved_credential_shape_findings"] == []
+    results.append({"case": "unchanged_original_detector_finding_preserved", "reviewed": True,
+                    "blocked": False, "actual_files_scanned": real_inventory["files_scanned"]})
+
+    # Other literals/categories remain detected and unresolved. No token is printed.
+    original_root = checker.REPO
+    try:
+        with tempfile.TemporaryDirectory(prefix="week6_credential_counterexample_") as directory:
+            root = Path(directory)
+            checker.REPO = root
+            target = root / RELATIVE
+            target.parent.mkdir(parents=True)
+            target.write_bytes(original_bytes + ("\r\n" + synthetic).encode())
+            extra = root / "other"
+            extra.mkdir()
+            (extra / "key.txt").write_text("s" + "k-" + "A" * 30, encoding="utf-8")
+            (extra / "private.txt").write_text("-----BEGIN " + "PRIVATE KEY-----", encoding="utf-8")
+            mixed = checker.audit_evidence_files([root])
+            assert mixed["reviewed_false_positive_findings"] == []
+            assert mixed["unresolved_credential_shape_findings"] == mixed["credential_shape_findings"]
+            assert {item["category"] for item in mixed["credential_shape_findings"]} == {
+                "authorization_token_shape", "openai_key_shape", "private_key_header"}
+            assert next(item for item in mixed["credential_shape_findings"]
+                        if item["category"] == "authorization_token_shape")["count"] == 2
+            try:
+                checker.require(not mixed["unresolved_credential_shape_findings"], "Unreviewed credential-shaped content")
+            except RuntimeError:
+                pass
+            else:
+                raise AssertionError("Unresolved credential shapes passed the preflight condition")
+            results.append({"case": "actual_detector_all_other_categories_and_second_literal_block",
+                            "reviewed": False, "blocked": True, "finding_categories": sorted(
+                                item["category"] for item in mixed["credential_shape_findings"])})
+    finally:
+        checker.REPO = original_root
+
+    test_file = REPO / "tests/test_week6_workflow.py"
+    source = test_file.read_bytes()
+    definitions = ast.parse(source.decode("utf-8"))
+    names = {node.name: node.lineno for node in definitions.body if isinstance(node, ast.FunctionDef)}
+    first = "test_callbacks_reach_children_unchanged_and_do_not_supply_new_authorization"
+    second = "test_mutated_spec_is_revalidated_before_directory_creation"
+    assert names[first] == 477 and names[second] == 485
+    validation_path = REPO / "Document/Week6/results/release_validation_completed_20261026_006/validation.json"
+    validation = load(validation_path)
+    test_sha = digest(source)
+    assert validation["tested_source_pins_before"]["tests/test_week6_workflow.py"] == test_sha
+    assert validation["tested_source_pins_after"]["tests/test_week6_workflow.py"] == test_sha
+    collection_path = WORKSPACE / "tmp/week6_replanning_review/full006_collection_stdout_001.json"
+    collection = load(collection_path)
+    original_source = Path(collection["stdout"])
+    assert digest(original_source.read_bytes()) == EXPECTED_SHA == collection["stdout_sha256"]
+    manifest_path = REPO / "Document/Week6/results/release_review_20261026_001/copy_manifest_001.json"
+    manifest = load(manifest_path)
+    entry = next(item for item in manifest["copies"]
+                 if item["destination_relative"] == "collection/full006_collection_stdout_001.txt")
+    assert entry["source_sha256"] == EXPECTED_SHA == entry["destination_sha256"]
+    assert digest(ORIGINAL.read_bytes()) == EXPECTED_SHA
+    audit = {
+        "schema": "week6.release.credential_false_positive_review.v1",
+        "created_at_utc": datetime.now(timezone.utc).isoformat(),
+        "reviewer": "/root/week6_replanning_review",
+        "checker_before_sha256": BEFORE_SHA,
+        "checker_after_sha256": AFTER_SHA,
+        "original_inventory": {"path": "tmp/week6/final_evidence_inventory_20261026_001.json",
+                               "sha256": digest((WORKSPACE / "tmp/week6/final_evidence_inventory_20261026_001.json").read_bytes())},
+        "original_detector_finding": expected_finding,
+        "reviewed_classification": reviewed,
+        "raw_original_file_unchanged": True,
+        "original_patterns_unchanged": True,
+        "all_unrelated_checker_functions_and_preflight_checks_unchanged": True,
+        "test_node_provenance": {"source_path": "tests/test_week6_workflow.py", "source_sha256": test_sha,
+                                 "definitions": {first: names[first], second: names[second]},
+                                 "matching_final_regression_before_after_pins": True,
+                                 "validation_sha256": digest(validation_path.read_bytes()),
+                                 "collection_receipt_sha256": digest(collection_path.read_bytes()),
+                                 "original_copy_manifest_sha256": digest(manifest_path.read_bytes()),
+                                 "capture": matches[0].group(1), "capture_sha256": digest(matches[0].group(1).encode())},
+        "counterexamples_and_integration": results,
+        "all_checks_passed": True,
+        "actual_model_requests": 0, "desktop_captures": 0, "desktop_inputs": 0,
+        "test_suite_execution": False,
+        "limits": "This exact review permits one immutable pytest collection cross-line false positive. It does not prove arbitrary content or screenshots contain no sensitive information."
+    }
+    write_new(DIRECTORY / "credential_false_positive_audit_001.json", audit)
+    write_new(DIRECTORY / "exact_original_inventory_after_review_001.json", real_inventory)
+    print(json.dumps({"cases_passed": len(results), "all_checks_passed": True,
+                      "checker_sha256": AFTER_SHA,
+                      "audit_sha256": digest((DIRECTORY / "credential_false_positive_audit_001.json").read_bytes()),
+                      "original_finding_retained": True}, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

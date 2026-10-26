@@ -1,0 +1,87 @@
+"""Own one actual acceptance subprocess; record its real wait() exit separately."""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import shutil
+import subprocess
+import time
+from datetime import UTC, datetime
+from pathlib import Path
+
+import psutil
+
+REPO = Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+PYTHON = 'D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe'
+
+
+def write(path: Path, value: dict) -> None:
+    with path.open('x', encoding='utf-8', newline='\n') as stream:
+        stream.write(json.dumps(value, ensure_ascii=False, indent=2) + '\n')
+
+
+def identity(process: psutil.Process) -> dict:
+    return {'pid': process.pid, 'create_time': process.create_time(),
+            'exe': process.exe(), 'cmdline': process.cmdline()}
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--batch-name', required=True)
+    parser.add_argument('--fixture-directory', type=Path, required=True)
+    parser.add_argument('--project', choices=['ALPHA', 'BETA'], required=True)
+    parser.add_argument('--colour', choices=['BLUE', 'GREEN'], required=True)
+    args = parser.parse_args()
+    if Path(args.batch_name).name != args.batch_name or not args.batch_name.startswith('live_auto_'):
+        raise ValueError('batch must be one new live_auto_ directory name')
+    batch = REPO / 'Document/Week6/results' / args.batch_name
+    if batch.exists():
+        raise FileExistsError(batch)
+    log = Path(__file__).parent / (args.batch_name + '_stdout.txt')
+    command = [PYTHON, str(REPO / 'scripts/week6_lab_acceptance.py'),
+               '--directory', str(batch), '--fixture-directory', str(args.fixture_directory),
+               '--project', args.project, '--colour', args.colour, '--activation-bridge']
+    env = os.environ.copy()
+    env.update(PYTHONUTF8='1', PYTHONIOENCODING='utf-8')
+    started = datetime.now(UTC).isoformat()
+    tick = time.monotonic()
+    owner = identity(psutil.Process())
+    with log.open('x', encoding='utf-8') as stream:
+        child = subprocess.Popen(command, cwd=REPO, env=env, stdout=stream,
+                                 stderr=subprocess.STDOUT)
+        launcher = identity(psutil.Process(child.pid))
+        seen = {}
+        while child.poll() is None:
+            try:
+                for process in psutil.Process(child.pid).children(recursive=True):
+                    key = (process.pid, process.create_time())
+                    if key not in seen:
+                        seen[key] = identity(process)
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                pass
+            if batch.exists() and not (batch / 'owner_start.json').exists():
+                write(batch / 'owner_start.json', {'started_utc': started, 'owner': owner,
+                      'launcher': launcher, 'command': command,
+                      'meaning': 'Only this new subprocess was started; acceptance is decided independently.'})
+                shutil.copyfile(__file__, batch / 'owner_harness.py.txt')
+            time.sleep(.25)
+        exit_code = child.wait()
+    if batch.exists():
+        shutil.copyfile(log, batch / 'owner_stdout.txt')
+        write(batch / 'owner_receipt.json', {
+            'schema': 'week6.live.actual_exit_receipt.v1', 'started_utc': started,
+            'finished_utc': datetime.now(UTC).isoformat(),
+            'elapsed_seconds': time.monotonic() - tick, 'owner': owner,
+            'launcher': launcher, 'observed_descendants': list(seen.values()),
+            'child_exit_code': exit_code, 'command': command,
+            'harness_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            'meaning': 'Real wait() exit; exit 0 alone does not establish desktop acceptance.'})
+    print(json.dumps({'batch': str(batch), 'real_child_exit_code': exit_code}))
+    print(log.read_text(encoding='utf-8')[-1800:])
+    return exit_code
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

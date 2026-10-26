@@ -1,0 +1,384 @@
+{
+  "status": "blocked",
+  "runtime_pass": false,
+  "independent_pass": false,
+  "passed": false,
+  "state": {
+    "utc": "2026-10-24T07:55:31.009914+00:00",
+    "event": "started",
+    "stage": "project",
+    "project": "",
+    "colour": "",
+    "committed": false,
+    "review_attempts": 0,
+    "mode": "normal",
+    "events": 1
+  },
+  "independent_events": [
+    {
+      "utc": "2026-10-24T07:55:31.009914+00:00",
+      "event": "started",
+      "stage": "project",
+      "project": "",
+      "colour": "",
+      "committed": false,
+      "review_attempts": 0,
+      "mode": "normal",
+      "events": 1
+    }
+  ],
+  "automatic_result": {
+    "schema_version": "week6.automatic_workflow.v1",
+    "workflow_id": "lab_auto",
+    "status": "blocked",
+    "decomposition": {
+      "status": "ready",
+      "workflow": {
+        "workflow_id": "lab_auto",
+        "instruction": "In Week6 Local Lab, prepare a GREEN report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test, with no external communication. If review is temporarily unavailable, retry within budget.",
+        "subgoals": [
+          {
+            "case_id": "G01",
+            "instruction": "Select project BETA",
+            "target_app": null,
+            "preconditions": [],
+            "success_rules": [],
+            "verification": "automatic",
+            "expect_text": [
+              "BETA"
+            ],
+            "forbid_text": [],
+            "requires_processes": [],
+            "forbids_processes": [],
+            "must_exit_processes": [],
+            "risk": "medium",
+            "message_conversation": null,
+            "gate_on_step_verification": true
+          }
+        ],
+        "final_check": {
+          "case_id": "FINAL",
+          "instruction": "Verify caller final rules on a fresh frame",
+          "target_app": null,
+          "preconditions": [],
+          "success_rules": [],
+          "verification": "automatic",
+          "expect_text": [
+            "Project BETA",
+            "Theme GREEN",
+            "LOCAL COMPLETE"
+          ],
+          "forbid_text": [],
+          "requires_processes": [],
+          "forbids_processes": [],
+          "must_exit_processes": [],
+          "risk": "low",
+          "message_conversation": null,
+          "gate_on_step_verification": true
+        }
+      },
+      "error": "",
+      "decomposition_calls": 1,
+      "format_attempts": 1,
+      "model_requests": 1,
+      "elapsed_ms": 30781.00000001723,
+      "provider": "openai_compatible",
+      "model_name": "qwen2.5vl:7b",
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_004\\automatic\\decomposition",
+      "intermediate_check_source": "model_proposal_untrusted",
+      "final_check_source": "caller_supplied_unchanged"
+    },
+    "decompositions": [
+      {
+        "status": "ready",
+        "workflow": {
+          "workflow_id": "lab_auto",
+          "instruction": "In Week6 Local Lab, prepare a GREEN report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test, with no external communication. If review is temporarily unavailable, retry within budget.",
+          "subgoals": [
+            {
+              "case_id": "G01",
+              "instruction": "Select project BETA",
+              "target_app": null,
+              "preconditions": [],
+              "success_rules": [],
+              "verification": "automatic",
+              "expect_text": [
+                "BETA"
+              ],
+              "forbid_text": [],
+              "requires_processes": [],
+              "forbids_processes": [],
+              "must_exit_processes": [],
+              "risk": "medium",
+              "message_conversation": null,
+              "gate_on_step_verification": true
+            }
+          ],
+          "final_check": {
+            "case_id": "FINAL",
+            "instruction": "Verify caller final rules on a fresh frame",
+            "target_app": null,
+            "preconditions": [],
+            "success_rules": [],
+            "verification": "automatic",
+            "expect_text": [
+              "Project BETA",
+              "Theme GREEN",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": [],
+            "requires_processes": [],
+            "forbids_processes": [],
+            "must_exit_processes": [],
+            "risk": "low",
+            "message_conversation": null,
+            "gate_on_step_verification": true
+          }
+        },
+        "error": "",
+        "decomposition_calls": 1,
+        "format_attempts": 1,
+        "model_requests": 1,
+        "elapsed_ms": 30781.00000001723,
+        "provider": "openai_compatible",
+        "model_name": "qwen2.5vl:7b",
+        "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_004\\automatic\\decomposition",
+        "intermediate_check_source": "model_proposal_untrusted",
+        "final_check_source": "caller_supplied_unchanged"
+      }
+    ],
+    "workflow_result": {
+      "schema_version": "week6.workflow.v1",
+      "workflow_id": "lab_auto",
+      "status": "blocked",
+      "execute": true,
+      "subgoals": [
+        {
+          "index": 0,
+          "case_id": "G01",
+          "status": "blocked",
+          "child_status": "blocked",
+          "actions": 0,
+          "unconfirmed_action_attempts": 0,
+          "planning_calls": 0,
+          "verification": null,
+          "elapsed_ms": 1500.0,
+          "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_004\\automatic\\workflow\\001_G01",
+          "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_004\\automatic\\workflow\\001_G01\\task_summary.json",
+          "error": null
+        }
+      ],
+      "total_actions": 0,
+      "unconfirmed_action_attempts": 0,
+      "planning_calls": 0,
+      "accounting_complete": true,
+      "elapsed_ms": 1780.9999999590218,
+      "final_verification": null,
+      "final_observation_id": null,
+      "final_observation_reference": "",
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_004\\automatic\\workflow",
+      "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_004\\automatic\\workflow\\workflow_summary.json",
+      "checkpoint_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_004\\automatic\\workflow\\checkpoints.jsonl",
+      "error": "subgoal did not finish with the required task verification",
+      "notes": []
+    },
+    "workflow_rounds": [
+      {
+        "schema_version": "week6.workflow.v1",
+        "workflow_id": "lab_auto",
+        "status": "blocked",
+        "execute": true,
+        "subgoals": [
+          {
+            "index": 0,
+            "case_id": "G01",
+            "status": "blocked",
+            "child_status": "blocked",
+            "actions": 0,
+            "unconfirmed_action_attempts": 0,
+            "planning_calls": 0,
+            "verification": null,
+            "elapsed_ms": 1500.0,
+            "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_004\\automatic\\workflow\\001_G01",
+            "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_004\\automatic\\workflow\\001_G01\\task_summary.json",
+            "error": null
+          }
+        ],
+        "total_actions": 0,
+        "unconfirmed_action_attempts": 0,
+        "planning_calls": 0,
+        "accounting_complete": true,
+        "elapsed_ms": 1780.9999999590218,
+        "final_verification": null,
+        "final_observation_id": null,
+        "final_observation_reference": "",
+        "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_004\\automatic\\workflow",
+        "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_004\\automatic\\workflow\\workflow_summary.json",
+        "checkpoint_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_004\\automatic\\workflow\\checkpoints.jsonl",
+        "error": "subgoal did not finish with the required task verification",
+        "notes": []
+      }
+    ],
+    "completed_subgoals": [],
+    "total_actions": 0,
+    "unconfirmed_action_attempts": 0,
+    "planning_calls": 1,
+    "model_requests": 1,
+    "elapsed_ms": 33733.99999999674,
+    "error": "subgoal did not finish with the required task verification",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\live_auto_20261024_normal_004\\automatic"
+  },
+  "source_unchanged": true,
+  "status_reads": [
+    {
+      "schema": "week6.status_read.v1",
+      "trusted": true,
+      "age_seconds": 0.005,
+      "state": "active",
+      "snapshot": {
+        "schema": "week6.run_status.v1",
+        "run_id": "be0a1ef34b8e4f3690f3045d82e5a2f8",
+        "case_id": "lab_auto",
+        "execute": true,
+        "pid": 30192,
+        "process_identity": "windows:134373021424019950",
+        "seq": 2,
+        "event": "updated",
+        "stage": "decomposing",
+        "task_status": null,
+        "updated_at_utc": "2026-10-24T07:55:43.520410+00:00",
+        "elapsed_ms": 14.999999955762178,
+        "max_actions": 12,
+        "max_planning_attempts": 12,
+        "planning_pass": 1,
+        "actions_used": 0,
+        "subgoals_total": 0,
+        "subgoals_completed": 0,
+        "subgoal_id": null,
+        "detail_code": "",
+        "write_failures": []
+      },
+      "diagnostics": []
+    },
+    {
+      "schema": "week6.status_read.v1",
+      "trusted": true,
+      "age_seconds": 0.008,
+      "state": "active",
+      "snapshot": {
+        "schema": "week6.run_status.v1",
+        "run_id": "be0a1ef34b8e4f3690f3045d82e5a2f8",
+        "case_id": "lab_auto",
+        "execute": true,
+        "pid": 30192,
+        "process_identity": "windows:134373021424019950",
+        "seq": 3,
+        "event": "updated",
+        "stage": "subgoal_verification",
+        "task_status": null,
+        "updated_at_utc": "2026-10-24T07:56:15.505608+00:00",
+        "elapsed_ms": 32000.0,
+        "max_actions": 12,
+        "max_planning_attempts": 12,
+        "planning_pass": 1,
+        "actions_used": 0,
+        "subgoals_total": 0,
+        "subgoals_completed": 0,
+        "subgoal_id": null,
+        "detail_code": "",
+        "write_failures": []
+      },
+      "diagnostics": []
+    },
+    {
+      "schema": "week6.status_read.v1",
+      "trusted": true,
+      "age_seconds": 0.008,
+      "state": "active",
+      "snapshot": {
+        "schema": "week6.run_status.v1",
+        "run_id": "be0a1ef34b8e4f3690f3045d82e5a2f8",
+        "case_id": "lab_auto",
+        "execute": true,
+        "pid": 30192,
+        "process_identity": "windows:134373021424019950",
+        "seq": 4,
+        "event": "updated",
+        "stage": "subgoal_verification",
+        "task_status": null,
+        "updated_at_utc": "2026-10-24T07:56:15.561769+00:00",
+        "elapsed_ms": 32046.99999996228,
+        "max_actions": 12,
+        "max_planning_attempts": 12,
+        "planning_pass": 1,
+        "actions_used": 0,
+        "subgoals_total": 0,
+        "subgoals_completed": 0,
+        "subgoal_id": "G01",
+        "detail_code": "",
+        "write_failures": []
+      },
+      "diagnostics": []
+    },
+    {
+      "schema": "week6.status_read.v1",
+      "trusted": true,
+      "age_seconds": 0.003,
+      "state": "active",
+      "snapshot": {
+        "schema": "week6.run_status.v1",
+        "run_id": "be0a1ef34b8e4f3690f3045d82e5a2f8",
+        "case_id": "lab_auto",
+        "execute": true,
+        "pid": 30192,
+        "process_identity": "windows:134373021424019950",
+        "seq": 5,
+        "event": "updated",
+        "stage": "subgoal_verification",
+        "task_status": null,
+        "updated_at_utc": "2026-10-24T07:56:17.232622+00:00",
+        "elapsed_ms": 33718.99999998277,
+        "max_actions": 12,
+        "max_planning_attempts": 12,
+        "planning_pass": 1,
+        "actions_used": 0,
+        "subgoals_total": 0,
+        "subgoals_completed": 0,
+        "subgoal_id": "G01",
+        "detail_code": "",
+        "write_failures": []
+      },
+      "diagnostics": []
+    },
+    {
+      "schema": "week6.status_read.v1",
+      "trusted": true,
+      "age_seconds": 0.005,
+      "state": "finished",
+      "snapshot": {
+        "schema": "week6.run_status.v1",
+        "run_id": "be0a1ef34b8e4f3690f3045d82e5a2f8",
+        "case_id": "lab_auto",
+        "execute": true,
+        "pid": 30192,
+        "process_identity": "windows:134373021424019950",
+        "seq": 6,
+        "event": "finished",
+        "stage": "finished",
+        "task_status": "blocked",
+        "updated_at_utc": "2026-10-24T07:56:17.294709+00:00",
+        "elapsed_ms": 33780.99999995902,
+        "max_actions": 12,
+        "max_planning_attempts": 12,
+        "planning_pass": 1,
+        "actions_used": 0,
+        "subgoals_total": 0,
+        "subgoals_completed": 0,
+        "subgoal_id": null,
+        "detail_code": "",
+        "write_failures": []
+      },
+      "diagnostics": []
+    }
+  ]
+}

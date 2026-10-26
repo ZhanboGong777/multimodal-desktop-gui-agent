@@ -1,0 +1,95 @@
+"""Small read-only bridge to the existing package acceptance checks.
+
+This does not create completion records, model requests, screenshots or inputs.
+"""
+from __future__ import annotations
+
+import importlib.util
+import json
+import os
+import re
+import subprocess
+from pathlib import Path
+
+ROOT = Path("C:/Users/联想/Documents/ChatGPT/Intern")
+REPO = ROOT / "week6-worktree"
+
+
+def package_checks():
+    path = ROOT / "tmp/week6/package_completed.py"
+    spec = importlib.util.spec_from_file_location("week6_report_package_checks", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def audit_live_with_project_runtime(package, item: dict, mode: str) -> dict:
+    """Use existing runtime dependencies for pure saved-frame/schema checks.
+
+    The document runtime lacks PyYAML. This invokes the same central checker in
+    the project interpreter; it creates no model client, screenshot or input.
+    """
+    code = """import importlib.util,json,sys
+from pathlib import Path
+payload=json.load(sys.stdin)
+path=Path(payload['checker'])
+spec=importlib.util.spec_from_file_location('week6_saved_report_check',path)
+module=importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+value=module.audit_live_acceptance(payload['item'],payload['mode'])
+print(json.dumps(value,ensure_ascii=False))
+"""
+    process = subprocess.run(
+        [str(package.PYTHON), "-c", code],
+        input=json.dumps({"checker": str(ROOT / "tmp/week6/package_completed.py"), "item": item, "mode": mode}),
+        capture_output=True, text=True, encoding="utf-8", cwd=REPO,
+        env={**os.environ, "PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"},
+    )
+    package.require(process.returncode == 0,
+                    "Saved real acceptance failed in project runtime: " + process.stderr[-3000:])
+    return json.loads(process.stdout)
+
+
+def audit_final_evidence(completion_path: Path, validation_path: Path) -> dict:
+    """Recheck selected saved evidence before report generation or promotion."""
+    package = package_checks()
+    completion_path, validation_path = Path(completion_path).resolve(), Path(validation_path).resolve()
+    completion = package.load(completion_path)
+    package.validate_requirement_closure(completion)
+    package.require(completion.get("status") == "completed", "Final completion status is not completed")
+    selected = package.evidence_path(completion["validation"]).resolve()
+    package.require(selected == validation_path and completion.get("validation_sha256") == package.sha(validation_path),
+                    "Completion and report select different regression bytes")
+    package.require(validation_path.is_relative_to((REPO / "Document/Week6/results").resolve())
+                    and validation_path.name == "validation.json"
+                    and re.fullmatch(r"release_validation_completed_\d{8}_\d{3}", validation_path.parent.name),
+                    "Select original complete Week6 regression evidence")
+    validation = package.load(validation_path)
+    package.require(validation.get("exit_code") == 0 and validation.get("tested_sources_unchanged") is True
+                    and not validation.get("changed_tested_sources"), "Final regression is not an unchanged-source pass")
+    pins = validation.get("tested_source_pins_before", {})
+    package.require(bool(pins) and validation.get("tested_source_pins_after") == pins,
+                    "Final regression before/after source maps differ or are absent")
+    for name, expected in pins.items():
+        package.require(package.sha(REPO / name) == expected, f"Final tested source changed: {name}")
+    stdout = (validation_path.parent / validation.get("stdout", "pytest_stdout.txt")).read_text(encoding="utf-8")
+    final_line = stdout.strip().splitlines()[-1]
+    match = re.search(r"(\d+) passed(?:[^\n]*?) in ([\d.]+)s", final_line)
+    package.require(bool(match) and not re.search(r"\b\d+ (?:failed|errors?|skipped)\b", final_line),
+                    "Selected final pytest record is not a complete pass")
+    evidence = completion.get("evidence", [])
+    package.require(bool(evidence), "Completion evidence is missing")
+    for item in evidence:
+        package.require(package.sha(package.evidence_path(item["path"])) == item["sha256"],
+                        "Pinned completion evidence changed")
+    final_items = [item for item in evidence if item.get("role") == "final_validation"]
+    package.require(len(final_items) == 1 and package.evidence_path(final_items[0]["path"]).resolve() == validation_path,
+                    "Completion needs one exact final_validation evidence role")
+    live = {}
+    for role, mode in package.LIVE_ROLES.items():
+        items = [item for item in evidence if item.get("role") == role]
+        package.require(len(items) == 1, f"Completion needs one original {role}")
+        live[mode] = audit_live_with_project_runtime(package, items[0], mode)
+    return {"completion_sha256": package.sha(completion_path), "validation_sha256": package.sha(validation_path),
+            "tests_passed": int(match.group(1)), "pytest_seconds": float(match.group(2)),
+            "source_pin_count": len(pins), "live_acceptance": live, "all_checks_passed": True}
