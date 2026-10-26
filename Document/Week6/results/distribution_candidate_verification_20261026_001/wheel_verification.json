@@ -1,0 +1,65 @@
+{
+  "schema": "week6.completed.wheel.verification.v1",
+  "wheel": "multimodal_desktop_gui_agent-2.0.0-py3-none-any.whl",
+  "sha256": "2fccc1c84a23728c9c475e70855ccf3ea0f1faeda66c18253576e5fe1a9487db",
+  "production_module_count": 88,
+  "all_modules_equal_git_and_installed": true,
+  "wheel_crc_verified": true,
+  "build": {
+    "command": [
+      "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe",
+      "-m",
+      "pip",
+      "wheel",
+      "--no-deps",
+      "--no-build-isolation",
+      "--no-index",
+      "--no-cache-dir",
+      "--wheel-dir",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6\\package_candidate_20261026_001\\distribution",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6\\package_candidate_20261026_001\\build_source"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 16.716144899954088,
+    "log": "wheel_build.log",
+    "log_sha256": "732c255ee04c1eb945bcbb093d4ba1277232695fa8b77a9a99249080382339ce"
+  },
+  "install": {
+    "command": [
+      "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe",
+      "-m",
+      "pip",
+      "install",
+      "--no-deps",
+      "--no-index",
+      "--no-compile",
+      "--target",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6\\package_candidate_20261026_001\\installed_target",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6\\package_candidate_20261026_001\\distribution\\multimodal_desktop_gui_agent-2.0.0-py3-none-any.whl"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 1.7227629999397323,
+    "log": "wheel_install.log",
+    "log_sha256": "90b7ab2534d44aeddfacffe742521eb3cac1ab7e44b1707d017f7c208f3b1ca2"
+  },
+  "smoke": {
+    "command": [
+      "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6\\package_candidate_20261026_001\\wheel_smoke.py",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6\\package_candidate_20261026_001\\installed_target"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.8844618999864906,
+    "log": "wheel_smoke.log",
+    "log_sha256": "042f10d3729b1c9d2b4f3beb53e85c4056b30b4574d3845b687485fc6edcf168"
+  },
+  "smoke_result": {
+    "version": "2.0.0",
+    "import_path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6\\package_candidate_20261026_001\\installed_target\\gui_agent\\__init__.py",
+    "request_id": "smoke",
+    "subgoal_count": 1,
+    "desktop_actions": 0,
+    "model_calls": 0
+  },
+  "dependency_install": "Existing project venv supplies dependencies. Fresh target uses --no-deps --no-index. No clean dependency installation is claimed."
+}

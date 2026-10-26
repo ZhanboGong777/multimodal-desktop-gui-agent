@@ -1,11 +1,11 @@
 {
   "schema": "week6.scoped_engineering_release.v2",
-  "updated_utc": "2026-10-26T11:20:38.660985+00:00",
+  "updated_utc": "2026-10-26T11:37:47.350766+00:00",
   "branch": "codex/week6-delivery",
   "version": "2.0.0",
-  "delivery_complete": false,
+  "delivery_complete": true,
   "report_ready": true,
-  "state": "Validated source and reviewed reports; distribution verification pending.",
+  "state": "Scoped engineering delivery verified; exact final archive and publication bytes are identified by the external distribution receipt.",
   "closure_kind": "scoped_engineering_delivery",
   "current_protocol": "week6.rolling_actions.v2",
   "requirements_closed": {
@@ -67,10 +67,17 @@
     "Sky bridge activation and input-service waits are included in elapsed time; unattended execution latency is not established.",
     "The screen OCR accuracy gain has a processing-time cost; full perception is not generally faster."
   ],
-  "remaining_delivery_work": [
-    "Verify wheel and source archive bytes, then publish the exact reviewed branch commit."
-  ],
+  "remaining_delivery_work": [],
   "previous_status_archive": "Document/Week6/history/acceptance_pending_20261026/IMPLEMENTATION_STATUS.json",
   "previous_status_sha256": "57d176224c422cc326650096eea497f2bd37e3bf6413368124240ece28e21556",
-  "week5_c11_sha256_unchanged": "58b005e9fa13e20df15f28ca09c71c0d61c71617abfeb96d17456982a810a54b"
+  "week5_c11_sha256_unchanged": "58b005e9fa13e20df15f28ca09c71c0d61c71617abfeb96d17456982a810a54b",
+  "verified_distribution_candidate": {
+    "commit": "d6b41f91cf011d022eb3ada0ee8e574431a69d86",
+    "archive_sha256": "3b2777b1741f526bd8280850fcf5df7917f7006104e58622a02a85adc2c3bc99",
+    "crc_verified": true,
+    "production_modules_byte_verified": 88,
+    "reports_and_licenses_byte_verified": true,
+    "receipt": "Document/Week6/results/distribution_candidate_verification_20261026_001/Week6_completed_delivery_receipt.json"
+  },
+  "final_archive_receipt": "Week6_completed_delivery_receipt.json accompanies the final distribution; its digest is external to avoid self-reference."
 }
