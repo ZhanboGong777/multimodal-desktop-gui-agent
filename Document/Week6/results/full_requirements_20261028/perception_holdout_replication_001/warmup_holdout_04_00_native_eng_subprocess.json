@@ -1,0 +1,293 @@
+{
+  "fixture": "holdout_04",
+  "arm": "native_eng_subprocess",
+  "phase": "warmup",
+  "repeat": 0,
+  "image_sha256": "b0cbca1ddcfc0a5edf58215e78fc5be9efe31163add0724419c1beb64a359574",
+  "started_perf_counter": 674787.5347713,
+  "status": "completed",
+  "ended_perf_counter": 674787.7306596,
+  "engine_creation_ms": 0.001800013706088066,
+  "decode_ms": 1.751899952068925,
+  "ocr_ms": 188.09670000337064,
+  "ui_ms": 6.037899991497397,
+  "full_ms": 195.88829996064305,
+  "metrics": {
+    "tp": 5,
+    "fp": 0,
+    "fn": 3,
+    "precision": 1.0,
+    "recall": 0.625,
+    "labels": [
+      {
+        "text": "Device Center",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9901960784313726
+      },
+      {
+        "text": "Battery Level",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9736842105263158
+      },
+      {
+        "text": "Pair Device",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9848484848484849
+      },
+      {
+        "text": "Connect",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9795918367346939
+      },
+      {
+        "text": "Disconnect",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9846153846153847
+      },
+      {
+        "text": "设备中心",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "配对设备",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "断开",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      }
+    ]
+  },
+  "control_metrics": {
+    "tp": 6,
+    "fp": 3,
+    "fn": 0,
+    "iou_threshold": 0.8
+  },
+  "predictions": [
+    {
+      "text": "Device Center",
+      "bounding_box": {
+        "left": 43,
+        "top": 37,
+        "right": 144,
+        "bottom": 49
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 93,
+        "y": 43
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Battery Level",
+      "bounding_box": {
+        "left": 43,
+        "top": 114,
+        "right": 117,
+        "bottom": 127
+      },
+      "confidence": 0.9,
+      "center": {
+        "x": 80,
+        "y": 120
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Pair Device",
+      "bounding_box": {
+        "left": 43,
+        "top": 200,
+        "right": 108,
+        "bottom": 210
+      },
+      "confidence": 0.95,
+      "center": {
+        "x": 75,
+        "y": 205
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Connect",
+      "bounding_box": {
+        "left": 43,
+        "top": 304,
+        "right": 91,
+        "bottom": 314
+      },
+      "confidence": 0.75,
+      "center": {
+        "x": 67,
+        "y": 309
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Disconnect",
+      "bounding_box": {
+        "left": 257,
+        "top": 304,
+        "right": 321,
+        "bottom": 314
+      },
+      "confidence": 0.9,
+      "center": {
+        "x": 289,
+        "y": 309
+      },
+      "source": "ocr"
+    }
+  ],
+  "ui_candidates": [
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 692,
+        "top": 291,
+        "right": 847,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 769,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 244,
+        "top": 291,
+        "right": 399,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 321,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 30,
+        "top": 291,
+        "right": 185,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 692,
+        "top": 187,
+        "right": 847,
+        "bottom": 244
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 769,
+        "y": 215
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 30,
+        "top": 187,
+        "right": 185,
+        "bottom": 244
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 215
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 692,
+        "top": 101,
+        "right": 847,
+        "bottom": 158
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 769,
+        "y": 129
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 704,
+        "top": 114,
+        "right": 757,
+        "bottom": 129
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 730,
+        "y": 121
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 704,
+        "top": 200,
+        "right": 756,
+        "bottom": 215
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 730,
+        "y": 207
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 704,
+        "top": 304,
+        "right": 732,
+        "bottom": 319
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 718,
+        "y": 311
+      },
+      "source": "contour"
+    }
+  ],
+  "errors": []
+}

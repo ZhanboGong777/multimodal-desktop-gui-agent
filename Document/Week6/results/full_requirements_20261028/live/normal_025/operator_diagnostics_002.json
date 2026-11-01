@@ -1,0 +1,116 @@
+{
+  "schema": "week6.live.operator_diagnostics.v2",
+  "operator": "Root sole native operator; no independent human sign-off",
+  "utc": "2026-10-31T12:12:53.428930+00:00",
+  "source_freeze": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\recovery_feedback_schema_001\\final_source_freeze_001.json",
+    "sha256": "ee7e2c8c6cc2b6a14349baaf15468367cc3fd41c9c537ee1644823b0c8a612e5"
+  },
+  "owner_receipt": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_025\\owner_receipt.json",
+    "sha256": "c9714904c064676878064a0fc74a6f0977e71626f476059f018973851672c65c"
+  },
+  "wrapper_proof": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_025\\exec_wrapper_wait_001.json",
+    "sha256": "e62a724e660f145efd8d6d1e5a11a5ff89d6ea0e4b312c9374048dbc8599fe6c"
+  },
+  "operator_notes": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_normal025_independent_audit_20261031\\operator_notes_001.json",
+    "sha256": "8c61f1a61fce631351131b0aa57b2e0fe74fecbab96f5b35a06580ab580c87df"
+  },
+  "notes": {
+    "operator": "Root sole native operator",
+    "native_selection": "Sky list_apps duplicated the same Lab window seven times; Sky list_windows returned one actual Week6 Local Lab window, id6424388/app process:D:\\anaconda\\python.exe. This unique returned object was rehydrated before any activation/input.",
+    "environment": "Full 2560x1600 screenshot, origin0. Lower-right Lenovo uninstall-leftover notification remained untouched outside Lab controls. No cursor parking, model-goal editing or target substitution.",
+    "inputs": [
+      {
+        "id": "input_001",
+        "action": "native double_click ALPHA at1280,867",
+        "observed_result": "Project ALPHA with BLUE/GREEN theme choices"
+      },
+      {
+        "id": "input_002",
+        "action": "native double_click GREEN at1280,1079",
+        "observed_result": "Project ALPHA,Theme GREEN,Draft ready,Review report"
+      },
+      {
+        "id": "input_003",
+        "action": "native click Review report at1282,1049",
+        "observed_result": "Review complete and Commit locally; this happened during the first prepare_report goal, whose predicted Draft Saved condition remained failed"
+      },
+      {
+        "id": "input_004",
+        "action": "native click at1281,1053; raw OCR target_description Commiyocally retained",
+        "observed_result": "Project ALPHA,Theme GREEN,LOCAL COMPLETE; no text/ID/coordinate correction by operator"
+      }
+    ],
+    "semantic_concern_for_ended_review": "Initial preparation instruction requested save but input003 performed review early. This first goal remains failed. Revised native compound goal explicitly requests review and local commit while ensuring review precedes commit; its pre-state already contains Review complete and only input004 commits. Review must not be misattributed to revised stage or retroactively credit the failed prepare goal. Root must assess this original ordering and partial-progress context rather than accept only the final scene.",
+    "actual_midrun_monitor": "Actual CLI at11:58:43UTC had actions1/pass2/verified0of2; at12:10:36 after physical commit it still had actions4/pass6/verified0of1. These are separate real read-only calls, not task exits.",
+    "operation_protocol": "For each input, one cell sampled start, awaited the exact native Sky click, sampled dispatch return and refresh start, awaited immediate same-window fresh state, and sampled refresh finish. finished_utc reused that same refresh-finish string. A subsequent cell wrote the exclusive receipt after inspection. No grace interval or old timestamp repair.",
+    "wrapper": "Actual write_stdin session51943 closed with exit_code0, chunk5d59a2. Owner result separately retained. No further native GUI calls after closure.",
+    "overall_delivery_complete": false
+  },
+  "original_process_identities_gone": [
+    {
+      "pid": 30740,
+      "expected_create_time": 1793447648.5310853,
+      "observed_create_time": null,
+      "same_identity_alive": false
+    },
+    {
+      "pid": 36168,
+      "expected_create_time": 1793447648.6989748,
+      "observed_create_time": null,
+      "same_identity_alive": false
+    },
+    {
+      "pid": 25532,
+      "expected_create_time": 1793447648.7252257,
+      "observed_create_time": null,
+      "same_identity_alive": false
+    },
+    {
+      "pid": 26180,
+      "expected_create_time": 1793447996.3460298,
+      "observed_create_time": null,
+      "same_identity_alive": false
+    },
+    {
+      "pid": 4144,
+      "expected_create_time": 1793448171.345094,
+      "observed_create_time": null,
+      "same_identity_alive": false
+    },
+    {
+      "pid": 38524,
+      "expected_create_time": 1793448171.3642747,
+      "observed_create_time": null,
+      "same_identity_alive": false
+    }
+  ],
+  "capture_count": 22,
+  "input_count": 4,
+  "input_receipt_refs": [
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_025\\run\\sky_bridge\\input_001_receipt.json",
+      "sha256": "489cc61d3f5a48872d57a9e920cfcd2b57e34fa753716be6564a148fa4f1de42"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_025\\run\\sky_bridge\\input_002_receipt.json",
+      "sha256": "206d073b9d5e9d9cc749990194110e6b68da4332f9a6a7b0cb644198acc6da32"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_025\\run\\sky_bridge\\input_003_receipt.json",
+      "sha256": "dd5e7bd2c379a80b1472577d6147d07cb140369a1c4441b2c3dd7d4b8b2bf89a"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_025\\run\\sky_bridge\\input_004_receipt.json",
+      "sha256": "ab99a65a234d361566ab5178d482c23ad1427a565235df5233b2908fc0b62fad"
+    }
+  ],
+  "all_inputs_known_success": true,
+  "pending": [],
+  "code_and_readme_dev_unchanged": true,
+  "raw_evidence_not_repaired": true,
+  "separate_semantic_review_required": true
+}

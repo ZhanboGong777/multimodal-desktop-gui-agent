@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "gemma3:4b",
+  "latency_ms": 23672.0,
+  "usage": {
+    "prompt_tokens": 1545,
+    "completion_tokens": 333,
+    "total_tokens": 1878
+  },
+  "error": null,
+  "content_length": 1433,
+  "content": "{\"status\": \"ready\", \"reason\": \"Initial plan to prepare, review, and commit the report.\", \"subgoals\": [{\"instruction\": \"Navigate to the project BETA selection and select it from the available options using the visible controls.\", \"expect_text\": [\"Project BETA\"], \"forbid_text\": [],\"goal_id\": \"select_project\"}, {\"instruction\": \"Select the 'Theme BLUE' option to generate a report with the specified color scheme using the visible controls.\", \"expect_text\": [\"Theme BLUE\"], \"forbid_text\": [],\"goal_id\": \"select_theme\"}, {\"instruction\": \"Initiate the report generation process using the visible controls to create the report.\", \"expect_text\": [\"Report Generated\"], \"forbid_text\": [\"Connection error\", \"External sync required\"],\"goal_id\": \"generate_report\"}, {\"instruction\": \"Locate the review option and attempt to review the generated report using the visible controls.\", \"expect_text\": [], \"forbid_text\": [\"Review unavailable\"],\"goal_id\": \"review_report\"}, {\"instruction\": \"If the review option is temporarily unavailable, retry the review operation within the budget constraints using the visible controls.\", \"expect_text\": [], \"forbid_text\": [\"Review unavailable\", \"Connection error\", \"External sync required\"],\"goal_id\": \"retry_review\"}, {\"instruction\": \"Locate the commit option and commit the reviewed report locally using the visible controls.\", \"expect_text\": [\"LOCAL COMPLETE\"], \"forbid_text\": [],\"goal_id\": \"commit_report\"}]}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

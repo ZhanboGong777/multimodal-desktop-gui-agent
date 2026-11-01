@@ -1,0 +1,224 @@
+{
+  "run_id": "001_prepare_green_report",
+  "case_id": "prepare_green_report",
+  "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Prepare a GREEN report for project ALPHA in Week6 Local Lab.\nComplete original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+  "status": "failed",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Select project ALPHA.",
+      "action_type": "click",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "click",
+          "x": 1280,
+          "y": 867,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "ALPHA"
+        },
+        "element_id": "obs-0002-e000",
+        "screenshot_point": {
+          "x": 1280,
+          "y": 867
+        },
+        "control_point": {
+          "x": 1280,
+          "y": 867
+        },
+        "note": "text 'ALPHA' -> obs-0002-e000 (re-bound from obs-0001-e003 in an earlier frame)"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "click",
+          "x": 1280,
+          "y": 867,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "ALPHA"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: project, alpha",
+        "evidence": {
+          "observation_id": "obs-0003",
+          "changed": true,
+          "element_count": 8,
+          "expectation_tokens": [
+            "project",
+            "alpha"
+          ],
+          "expectation_hits": [
+            "project",
+            "alpha"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 40922.00000002049,
+      "after_observation_id": "obs-0003"
+    },
+    {
+      "index": 2,
+      "step_id": "s1",
+      "description": "Select the 'GREEN' report theme.",
+      "action_type": "click",
+      "observation_id": "obs-0006",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "click",
+          "x": 1282,
+          "y": 917,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "GREEN"
+        },
+        "element_id": "obs-0006-e006",
+        "screenshot_point": {
+          "x": 1282,
+          "y": 917
+        },
+        "control_point": {
+          "x": 1282,
+          "y": 917
+        },
+        "note": "element obs-0006-e006"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "click",
+          "x": 1282,
+          "y": 917,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "GREEN"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: theme",
+        "evidence": {
+          "observation_id": "obs-0007",
+          "changed": true,
+          "element_count": 7,
+          "expectation_tokens": [
+            "green",
+            "theme"
+          ],
+          "expectation_hits": [
+            "theme"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 59155.99999995902,
+      "after_observation_id": "obs-0007"
+    }
+  ],
+  "verification": {
+    "outcome": "failed",
+    "method": "automatic",
+    "detail": "expected on screen but not found: Theme GREEN",
+    "evidence": {
+      "observation_id": "obs-0008",
+      "missing": [
+        "Theme GREEN"
+      ],
+      "verification_source": "frozen_model_semantic_subtask_postconditions"
+    }
+  },
+  "error": null,
+  "elapsed_ms": 240952.9999999795,
+  "execute": true,
+  "model_name": "qwen2.5vl:7b",
+  "provider": "openai_compatible",
+  "notes": [
+    "planned 1 steps from obs-0001",
+    "task verification: expected on screen but not found: Theme GREEN",
+    "re-planned from obs-0005: attempt 2 of at most 3",
+    "s1: grounded obs-0005-e006 from obs-0005 to obs-0006-e006 in obs-0006 (pixel_match)",
+    "task verification: expected on screen but not found: Theme GREEN"
+  ],
+  "task_id": "prepare_green_report",
+  "commit": "482895f",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 2560x1600, control 2560x1600",
+  "started_at": "2026-10-28T09:59:48.965193Z",
+  "finished_at": "2026-10-28T10:03:49.918193Z",
+  "planning_attempts": 2,
+  "model_requests": 3,
+  "planning_ms": 33484.99999998603,
+  "confirmation_ms": 15.000000013969839,
+  "execution_ms": 207452.9999999795,
+  "planner_ms": 33157.00000000652,
+  "planning_calls": 2,
+  "system_elapsed_ms": 240937.99999996554,
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_010\\run\\automatic\\goal_001_001_prepare_green_report\\001_prepare_green_report",
+  "stop_reason": "task verification: expected on screen but not found: Theme GREEN",
+  "error_type": "",
+  "failed_step_id": null,
+  "recovery_records": [
+    {
+      "next_pass": 2,
+      "outcome": "plan_ready",
+      "observation_id": "obs-0005",
+      "feedback": {
+        "previous_pass": 1,
+        "reason": "task_verification",
+        "failed_step_index": null,
+        "actions_used": 1,
+        "actions_remaining": 19,
+        "remaining_ms": 7021702.9999999795,
+        "recent_steps": [
+          {
+            "index": 1,
+            "action_type": "click",
+            "attempted": true,
+            "succeeded": true,
+            "verification": "passed"
+          }
+        ],
+        "omitted_steps": 0,
+        "instruction": "Plan from the current observation; previous attempts do not prove success. Do not replay completed inputs to recreate an earlier state. Existing task checks and remaining budgets still apply."
+      },
+      "elapsed_ms": 36094.00000004098
+    }
+  ],
+  "unconfirmed_action_attempts": 0,
+  "action_count": 2
+}

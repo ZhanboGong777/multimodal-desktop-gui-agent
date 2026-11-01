@@ -1,0 +1,219 @@
+"""Read only ended normal010, binding raw native/inputs/events without fixture reads."""
+from __future__ import annotations
+import ast
+import hashlib
+import importlib.util
+import json
+import sys
+from datetime import UTC,datetime
+from pathlib import Path
+
+ROOT=Path(r"C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+BATCH=ROOT/"Document/Week6/results/full_requirements_20261028/live/normal_010"
+RUN=BATCH/"run"
+BASE=RUN/"automatic"
+OUT=ROOT/"Document/Week6/results/full_requirements_20261028/review/negative_normal010_audit_001.json"
+assert not OUT.exists()
+sys.path.insert(0,str(ROOT/"src"))
+spec=importlib.util.spec_from_file_location("normal010_readonly_reader",ROOT/"scripts/week6_audit_semantic_acceptance.py")
+reader=importlib.util.module_from_spec(spec);spec.loader.exec_module(reader)
+from gui_agent.planning import semantic_workflow as semantic
+from gui_agent.runtime.schemas import TaskSpec
+e=reader.Evidence(BATCH)
+def load(p):return e.load(p,run_only=p.is_relative_to(RUN))
+def lines(p):return e.lines(p)
+def stamp(v):return reader.timestamp(v)
+def digest(p):return reader.sha(p)
+claim,start,owner=(load(BATCH/name) for name in ("owner_claim.json","owner_start.json","owner_receipt.json"))
+assert type(owner["child_exit_code"]) is int and owner["child_exit_code"]==1
+assert claim["owner"]==start["owner"]==owner["owner"] and start["launcher"]==owner["launcher"]
+assert claim["command"]==start["command"]==owner["command"]
+assert claim["started_utc"]==start["started_utc"]==owner["started_utc"]
+assert abs((stamp(owner["finished_utc"])-stamp(owner["started_utc"])).total_seconds()-owner["elapsed_seconds"])<.01
+harness=Path(r"C:/Users/联想/Documents/ChatGPT/Intern/tmp/week6_full_requirements_20261028/run_owned.py")
+assert [value for value in owner["owner"]["cmdline"] if value.endswith("run_owned.py")]==[str(harness).replace("\\", "/")]
+assert digest(e.external(harness,"explicit_owner_harness"))==digest(e.bind(BATCH/"owner_harness.py.txt"))==owner["owner_harness_sha256"]==start["owner_harness_sha256"]
+e.bind(BATCH/"stdout.txt")
+contract=load(RUN/"contract.json")
+runtime=load(RUN/"runtime_result.json")
+acceptance=load(RUN/"acceptance_observed.json")
+assert runtime==load(BASE/"automatic_workflow_summary.json")==acceptance["automatic_result"]
+assert runtime["status"]=="needs_clarification" and runtime["accounting_complete"] is True
+assert runtime["total_actions"]==3 and runtime["planning_calls"]==runtime["model_requests"]==5
+assert runtime["unconfirmed_action_attempts"]==0 and not runtime["completed_subgoals"]
+assert runtime["final_verification"] is None and not acceptance["runtime_independent_gates_passed"]
+assert acceptance["source_unchanged"] is True
+freeze_path=ROOT/"Document/Week6/results/full_requirements_20261028/semantic_predicted_postconditions_001/final_source_freeze_001.json"
+freeze=json.loads(e.external(freeze_path,"explicit_historical_v6_freeze").read_bytes())
+assert digest(freeze_path)=="235166e04a5d697a500831ccff49bc50ad0aba45c4733cb54ef6073eebd336b5"
+for name,sha in contract["source_sha256"].items():
+    snapshot=RUN/"source_snapshot"/(name+".txt")
+    assert digest(e.bind(snapshot))==sha==freeze["code_pins"][name],name
+assert contract["source_sha256"]["src/gui_agent/planning/semantic_workflow.py"]==digest(ROOT/"src/gui_agent/planning/semantic_workflow.py")
+request=semantic.WorkflowRequest.model_validate(contract["request"])
+initial=e.frame(BASE/"initial_observation/observation.json")
+before=e.frame(BASE/"contract_before_001_001/observation.json")
+goal_contract=load(BASE/"goal_contract_001_001.json")
+child=next(BASE.glob("goal_*/001_*"))
+task_summary=load(child/"task_summary.json")
+audit=load(child/"semantic_goal_audit.json")
+step_rows=lines(child/"steps.jsonl")
+assert task_summary["steps"]==step_rows and len(step_rows)==3
+assert [reader._mask_step(row) for row in audit["steps"]]==step_rows
+assert audit["confirmed_input_count"]==3 and audit["eligible_for_semantic_credit"] is False
+task=TaskSpec.model_validate(audit["frozen_task"])
+assert task.model_dump(mode="json")==goal_contract["task"] and goal_contract["postconditions_fixed_before_input"] is True
+assert goal_contract["caller_final"]==semantic._final_task(request).model_dump(mode="json")
+assert reader.Verifier().check_task(task,before).outcome=="failed"
+post=e.frame(child/(audit["post_observation_id"]+".json"))
+postcheck=reader.Verifier().check_task(task,post)
+assert postcheck.model_dump(mode="json")==audit["semantic_postcondition_verification"]
+assert postcheck.outcome=="failed" and postcheck.evidence["missing"]==["Theme GREEN"]
+assert runtime["goal_outcomes"]==load(BASE/"semantic_goal_ledger.json") and len(runtime["goal_outcomes"])==1
+assert runtime["goal_outcomes"][0]["status"]=="failed" and task_summary["status"]=="failed"
+assert all(row["action_result"]["success"] is True and row["action_result"]["dry_run"] is False for row in step_rows)
+limit=load(child/"single_step_planning_limit.json")
+assert limit["applied_max_steps"]==1 and limit["restored"] is True and limit["restored_max_steps"]==limit["original_max_steps"]==4
+assert len(limit["calls"])==task_summary["planning_calls"]==3
+assert all(call["max_steps"]==call["returned_steps"]==call["model_requests"]==1 and call["ok"] for call in limit["calls"])
+
+calls=[]
+natives=[]
+for index,record in enumerate(runtime["plans"],1):
+    directory=BASE/f"semantic_plan_round_{index:03d}"
+    assert load(directory/"result.json")==record and record["planning_calls"]==record["model_requests"]==1
+    native=load(directory/"native_proposal.json")
+    reader.audit_native_predicates(native,request)
+    parsed=semantic.SemanticPlan.model_validate(native,strict=True)
+    assert parsed.model_dump(mode="json")==native==record["proposal"]
+    snapshot=initial if index==1 else e.frame(BASE/"revision_observation_001/observation.json")
+    semantic.SemanticDecomposer()._validate(parsed,request,snapshot,[],index>1)
+    archived=reader.audit_snapshot_archive(e,directory,snapshot,[],None if index==1 else runtime["goal_outcomes"][0])
+    protocol=load(directory/"protocol.json")
+    sent=load(directory/"attempt_01_request.json");response=load(directory/"attempt_01_response.json")
+    assert protocol["schema_version"]=="week6.semantic_subtasks.v6"
+    assert protocol["postcondition_source"]=="untrusted_model_prediction" and "predicate_pools" not in protocol
+    assert protocol["caller_request"]==contract["request"] and sent["instruction"]==request.instruction
+    assert json.loads(response["content"],object_pairs_hook=reader.unique)==native
+    assert sent["response_format"]==protocol["response_format"]==semantic._semantic_response_format(request,8)
+    reader.audit_highlevel_intent_binding(sent,protocol,record,snapshot,archived)
+    calls.append({"system":sent["system"],"instruction":sent["instruction"],"context":sent["context"],
+        "image_path":None,"response":response,"requests":1,"kind":"semantic_decomposition"})
+    natives.append({"round":index,"status":native["status"],"reason":native["reason"],"subgoals":native["subgoals"],
+        "raw_content_sha256":hashlib.sha256(response["content"].encode("utf8")).hexdigest()})
+    if index==1:
+        compiled=load(directory/"compiled_workflow.json")
+        expected=semantic.WorkflowSpec(workflow_id=request.workflow_id,instruction=request.instruction,
+            subgoals=[semantic._goal_task(goal,request) for goal in parsed.subgoals],final_check=semantic._final_task(request))
+        assert compiled["native_proposal"]==native and compiled["workflow"]==expected.model_dump(mode="json")==record["workflow"]
+        assert compiled["mapping"]==reader.expected_native_mapping(native,parsed,expected.subgoals)
+        for call in limit["calls"]:
+            frame=e.frame(child/(call["context"]["observation_id"]+".json"))
+            reader.audit_lowlevel_image_binding(call,frame)
+            rebuilt=reader.parse_plan(call["response"]["content"],instruction=task.instruction,max_steps=1,task_id=task.case_id)
+            assert rebuilt.model_dump(mode="json")==call["parsed_plan"]
+            calls.append({"system":reader.SYSTEM_PROMPT,"instruction":task.instruction,
+                "context":{**call["context"],"max_steps":1},"image_path":call["image_path"],
+                "response":call["response"],"requests":call["model_requests"],"kind":"primitive_action_plan"})
+assert [row["status"] for row in natives]==["ready","needs_clarification"]
+assert len(natives[0]["subgoals"])==3 and not natives[1]["subgoals"]
+http=reader.transport_audit(e,BASE,calls,5,contract)
+
+receipts=[]
+for index,row in enumerate(step_rows,1):
+    req=load(RUN/f"sky_bridge/input_{index:03d}_request.json")
+    receipt=load(RUN/f"sky_bridge/input_{index:03d}_receipt.json")
+    assert req["id"]==receipt["id"]==f"input_{index:03d}"
+    assert req["action"]==receipt["action"]==row["action_result"]["action"]==row["resolved"]["action"]
+    assert receipt["success"] is True and receipt["transport"]=="Sky click"
+    before_frame=e.frame(child/(row["observation_id"]+".json"))
+    after_frame=e.frame(child/(row["after_observation_id"]+".json"))
+    assert before_frame.captured_at<=stamp(receipt["started_utc"])<=stamp(receipt["finished_utc"])<=after_frame.captured_at
+    receipts.append(receipt)
+assert acceptance["input_receipts"]==receipts
+events=acceptance["independent_events"]
+assert [event["event"] for event in events]==["started","project_selected","theme_selected","review_accepted"]
+transitions=[]
+for event in events[1:]:
+    match=[rec for rec in receipts if stamp(rec["started_utc"])<=stamp(event["utc"])<=stamp(rec["finished_utc"])]
+    assert len(match)==1
+    assert stamp(owner["started_utc"])<=stamp(event["utc"])<=stamp(owner["finished_utc"])
+    transitions.append({"event":event["event"],"receipt":match[0]["id"],"utc":event["utc"],"project":event["project"],"colour":event["colour"]})
+assert len({x["receipt"] for x in transitions})==3
+assert events[2]["colour"]==events[3]["colour"]=="BLUE" and contract["independent_expected"]["colour"]=="GREEN"
+assert acceptance["state"]==events[-1] and not acceptance["state"]["committed"]
+assert acceptance["transition_attribution"]==[{"event":x["event"],"utc":x["utc"],"input_receipts":[x["receipt"]]} for x in transitions]
+
+source=e.frame(child/"obs-0005.json");fresh=e.frame(child/"obs-0006.json")
+native_step=limit["calls"][1]["parsed_plan"]["steps"][0]
+selected=source.element(native_step["arguments"]["element_id"])
+actual=step_rows[1]
+fresh_selected=fresh.element(actual["resolved"]["element_id"])
+green=[x for x in source.elements if x.text=="GREEN"]
+blue=[x for x in source.elements if x.text=="BLUE"]
+assert len(green)==len(blue)==1 and native_step["target_text"]=="GREEN"
+assert selected.text==fresh_selected.text=="" and selected.source==fresh_selected.source=="contour"
+assert selected.bounding_box==fresh_selected.bounding_box and selected.center==fresh_selected.center
+box=selected.bounding_box
+def contains(point):return box.left<=point.x<=box.right and box.top<=point.y<=box.bottom
+assert contains(blue[0].center) and not contains(green[0].center)
+assert actual["resolved"]["action"]["x"]==selected.center.x==1282
+assert actual["resolved"]["action"]["y"]==selected.center.y==917
+assert source.screen_info.scale_x==source.screen_info.scale_y==fresh.screen_info.scale_x==fresh.screen_info.scale_y==1
+assert actual["verification"]["outcome"]=="passed" and actual["verification"]["evidence"]["expectation_hits"]==["theme"]
+assert actual["verification"]["evidence"]["expectation_tokens"]==["green","theme"]
+diagnostic_path=Path(r"C:/Users/联想/Documents/ChatGPT/Intern/tmp/week6_normal010_grounding_readonly_20261028_001/diagnostic.json")
+diagnostic=json.loads(e.external(diagnostic_path,"explicit_readonly_grounding_diagnostic").read_bytes())
+assert diagnostic["native_step"]==native_step
+assert diagnostic["selected_source_element"]==selected.model_dump(mode="json")
+assert diagnostic["selected_fresh_element"]==fresh_selected.model_dump(mode="json")
+assert diagnostic["actual_input_receipt"]==receipts[1]
+source_module=RUN/"source_snapshot/src/gui_agent/runtime/action_adapter.py.txt"
+tree=ast.parse(e.bind(source_module).read_bytes())
+adapter=next(n for n in tree.body if isinstance(n,ast.ClassDef) and n.name=="ActionAdapter")
+locate=next(n for n in adapter.body if isinstance(n,ast.FunctionDef) and n.name=="_locate")
+assert any(isinstance(n,ast.Return) and isinstance(n.value,ast.Tuple) and len(n.value.elts)==3
+    and ast.unparse(n.value.elts[0])=="found.center" for n in ast.walk(locate))
+review_image=e.bind(Path(fresh.image_path))
+monitor=load(BASE/"run_status.json")
+assert monitor["event"]=="finished" and monitor["task_status"]=="needs_clarification"
+assert monitor["actions_used"]==3 and monitor["planning_pass"]==5 and monitor["subgoals_completed"]==0
+actual_identity=[x for x in owner["observed_descendants"] if x["pid"]==monitor["pid"]]
+assert len(actual_identity)==1
+assert abs(int(monitor["process_identity"].split(":")[1])/1e7-11644473600-actual_identity[0]["create_time"])<.001
+
+# Recheck every selected original; source fixes happening elsewhere are not compared to this historical run.
+for label,sha in dict(e.files).items():
+    path=freeze_path if label=="explicit_historical_v6_freeze" else harness if label=="explicit_owner_harness" else diagnostic_path if label=="explicit_readonly_grounding_diagnostic" else BATCH/label
+    assert digest(path)==sha,("evidence_changed",label)
+out={"schema_version":"week6.semantic_live.negative_normal010_review.v1","created_utc":datetime.now(UTC).isoformat(),
+    "reviewer":"/root/week6_replanning_review","audit_checks_passed":True,"run_accepted":False,
+    "classification":"real_grounding_target_text_id_conflict_followed_by_failed_semantic_postcondition_and_valid_nonready_revision",
+    "actual_owner_child_exit_code":1,"owner_elapsed_seconds":owner["elapsed_seconds"],"runtime_elapsed_ms":runtime["elapsed_ms"],
+    "runtime_status":runtime["status"],"raw_revision_reason":runtime["error"],"planning_calls":5,"actual_http_requests":http,
+    "actual_task_inputs":3,"unknown_task_inputs":0,"completed_semantic_goals":0,
+    "source":{"saved_before_snapshots_and_historical_freeze_match":True,"executed_pin_count":len(contract["source_sha256"]),
+        "source_unchanged_recorded":acceptance["source_unchanged"],"separate_historical_after_map_available":False,
+        "current_adapter_runner_not_used_to_reinterpret_historical_run":True},
+    "native_plans":natives,"independent_event_attribution":transitions,
+    "actual_wrong_target":{"native_step":native_step,"source_candidate":selected.model_dump(mode="json"),
+        "fresh_candidate":fresh_selected.model_dump(mode="json"),"requested_text_candidate":green[0].model_dump(mode="json"),
+        "competing_text_candidate":blue[0].model_dump(mode="json"),"actual_receipt":receipts[1],
+        "raw_advisory_step_verification":actual["verification"],
+        "strong_predeclared_goal_after_verification":postcheck.model_dump(mode="json"),
+        "geometry":{"chosen_contains_blue_center":True,"chosen_contains_green_center":False,"source_fresh_boxes_equal":True,
+            "actual_input_equals_chosen_center":True,"screenshot_control_scale_x":1,"screenshot_control_scale_y":1}},
+    "saved_visual_review":{"image":str(review_image),"sha256":digest(review_image),"reviewer":"/root/week6_replanning_review",
+        "method":"view_image requested original; tool displayed a resized 1996x1248 view of the existing 2560x1600 PNG",
+        "observed":"Upper button reads BLUE and lower button reads GREEN. Pointer appears over upper button. This does not establish why the model chose its ID."},
+    "scope_limits":["No detector label-coordinate swap or screenshot/control scaling bug is supported by these saved records.",
+        "Input success establishes dispatch and event attribution, not semantic correctness.",
+        "Only the saved embedded ended-run fixture observations were read, not the original fixture state used by later runs.",
+        "Future review/commit native predicates were not credited as completed.",
+        "Global requests are 5; child TaskRunner model_requests is its saved cumulative shared-client value and is not relabeled as 4 new child-only HTTP calls."],
+    "operations":{"model_calls":0,"gui_operations":0,"test_runs":0},"original_fixture_state_reads":0,
+    "raw_evidence_modified":False,"audit_script_sha256":digest(Path(__file__)),"evidence_sha256":e.files}
+OUT.write_text(json.dumps(out,ensure_ascii=False,indent=2)+"\n",encoding="utf8")
+OUT.with_suffix(".py.txt").write_bytes(Path(__file__).read_bytes())
+print(json.dumps({"out":str(OUT),"sha256":digest(OUT),"bound_files":len(e.files),"run_accepted":False},ensure_ascii=False))
+

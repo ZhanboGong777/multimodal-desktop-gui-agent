@@ -1,0 +1,48 @@
+from pathlib import Path
+from datetime import datetime, timezone
+import hashlib
+import json
+import os
+import subprocess
+import time
+
+root = Path(r"C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+base = root / "Document/Week6/results/full_requirements_20261028/semantic_repair_feedback_001"
+out = base / "producer_assertion_repair_002/single_test_validation_001"
+out.mkdir(exist_ok=False)
+(out / "owner_harness.py.txt").write_bytes(Path(__file__).read_bytes())
+test = "tests/test_week6_semantic_repair_feedback.py"
+old = json.loads((base / "root_semantic_validation_001/tested_code_pins_after.json").read_text("utf8"))
+def current():
+    return {key: hashlib.sha256((root / key).read_bytes()).hexdigest() for key in old}
+before = current()
+assert {key for key in before if old[key] != before[key]} == {test}
+def save(name, value):
+    with (out / name).open("x", encoding="utf8", newline="\n") as handle:
+        json.dump(value, handle, ensure_ascii=False, indent=2)
+        handle.write("\n")
+save("pins_before.json", before)
+python = r"D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe"
+commands = [("ruff", [python, "-m", "ruff", "check", test]),
+    ("pytest", [python, "-X", "utf8", "-m", "pytest", "-q", test + "::test_system_repair_does_not_grant_an_extra_transport_request", "--basetemp", str(out / "pytest_tmp")])]
+receipts = []
+for name, command in commands:
+    started_at = datetime.now(timezone.utc).isoformat()
+    started = time.monotonic()
+    with (out / (name + ".stdout.txt")).open("xb") as stdout, (out / (name + ".stderr.txt")).open("xb") as stderr:
+        child = subprocess.Popen(command, cwd=root, stdout=stdout, stderr=stderr,
+                                 env={**os.environ, "PYTHONUTF8": "1"})
+        code = child.wait()
+    receipt = {"command": command, "launcher_pid": child.pid, "actual_wait_exit_code": code,
+        "started_at_utc": started_at, "elapsed_seconds": time.monotonic() - started}
+    save(name + ".receipt.json", receipt)
+    receipts.append(receipt)
+after = current()
+save("pins_after.json", after)
+save("validation.json", {"schema": "week6.semantic_repair_feedback.producer_assertion_fix.single_test.v1",
+    "receipts": receipts, "pin_count": len(before), "pins_unchanged": before == after,
+    "only_new_test_differs_from_failed_formal": True, "production_and_auditor_unchanged": True,
+    "not_a_formal_semantic_or_full_suite_pass_claim": True, "actual_external_model_gui_calls": 0})
+print(json.dumps({"path": str(out / "validation.json"), "pins_unchanged": before == after,
+    "test_sha256": after[test], "receipts": receipts}, ensure_ascii=False))
+raise SystemExit(0 if before == after and all(item["actual_wait_exit_code"] == 0 for item in receipts) else 1)

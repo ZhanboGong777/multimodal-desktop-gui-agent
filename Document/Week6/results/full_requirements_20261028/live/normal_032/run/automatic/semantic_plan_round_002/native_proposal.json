@@ -1,0 +1,20 @@
+{
+  "status": "ready",
+  "reason": "The previous goal failed due to missing 'Saved Locally' text, but the caller's intent remains unchanged. The current plan focuses on completing the review and commit steps to satisfy the final state.",
+  "subgoals": [
+    {
+      "instruction": "Review the GREEN report for project ALPHA and ensure the review is completed locally.",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [
+        "Review unavailable",
+        "Connection error",
+        "Commit failed"
+      ],
+      "goal_id": "review_and_commit"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+........................................................................ [  8%]
+........................................................................ [ 17%]
+........................................................................ [ 25%]
+........................................................................ [ 34%]
+........................................................................ [ 42%]
+........................................................................ [ 51%]
+........................................................................ [ 60%]
+........................................................................ [ 68%]
+...................................F.................................... [ 77%]
+........................................................................ [ 85%]
+........................................................................ [ 94%]
+..............................................                           [100%]
+================================== FAILURES ===================================
+_ test_real_runtime_rolls_one_action_at_a_time_on_full_goal_without_selector_or_marker_claims _
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/action_output_contract_001/root_affected_validation_001/pytest_tmp/test_real_runtime_rolls_one_ac0')
+
+    def test_real_runtime_rolls_one_action_at_a_time_on_full_goal_without_selector_or_marker_claims(tmp_path):
+        runner, request, state, client, _ = lab(tmp_path)
+        result = runner.run(request, options())
+        assert result.status == "succeeded" and result.completion_basis == "executed_caller_goal"
+        assert state.attempts == result.total_actions == result.planning_calls == result.model_requests == 2
+        assert result.decomposition.status == "not_requested" and result.decomposition.decomposition_calls == 0
+        assert result.decomposition_protocol_mode == "rolling_actions" and result.completed_subgoals == result.progress_verifications == []
+        assert result.final_verification.passed and result.accounting_complete
+        assert state.planners[0].max_steps == 6 and "plan" not in state.planners[0].__dict__
+        assert result.rolling_actions_audit.eligible_for_final_verification
+        assert result.rolling_actions_audit.planning_accounting_complete
+        assert result.rolling_actions_audit.confirmed_input_count == 2
+        assert len(result.rolling_actions_audit.plans) == 2
+        assert all(value.max_steps == value.returned_steps == 1 for value in result.rolling_actions_audit.plans)
+        assert all(request.instruction in value.instruction for value in result.rolling_actions_audit.plans)
+        assert all(value.context["observation_id"] and value.image_path and value.response["raw_response"]
+                   and value.parsed_plan["steps"] for value in result.rolling_actions_audit.plans)
+        final = json.loads(Path(result.final_observation_reference).read_text(encoding="utf-8"))
+        assert final["observation_id"] != result.rolling_actions_audit.post_observation_id
+        assert final["window_id"] == "test-window" and final["foreground_stable"]
+>       assert len(client.calls) == 2 and all("response_format" not in value["kwargs"] for value in client.calls)
+E       assert (2 == 2 and False)
+E        +  where 2 = len([{'messages': [{'role': 'system', 'content': 'Plan GUI actions: ONE JSON object.\n\n{"task_id":"t1","instruction":".."...ion': 'A validated plan: the only thing the planner is allowed to emit.', 'properties': {...}, ...}}}}, 'timeout': 90}])
+E        +    where [{'messages': [{'role': 'system', 'content': 'Plan GUI actions: ONE JSON object.\n\n{"task_id":"t1","instruction":".."...ion': 'A validated plan: the only thing the planner is allowed to emit.', 'properties': {...}, ...}}}}, 'timeout': 90}] = <test_week6_automatic_decomposition.ScriptedClient object at 0x00000270F2823560>.calls
+E        +  and   False = all(<generator object test_real_runtime_rolls_one_action_at_a_time_on_full_goal_without_selector_or_marker_claims.<locals>.<genexpr> at 0x00000270F2860110>)
+
+tests\test_week6_rolling_actions.py:125: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_week6_rolling_actions.py::test_real_runtime_rolls_one_action_at_a_time_on_full_goal_without_selector_or_marker_claims
+1 failed, 837 passed in 166.98s (0:02:46)

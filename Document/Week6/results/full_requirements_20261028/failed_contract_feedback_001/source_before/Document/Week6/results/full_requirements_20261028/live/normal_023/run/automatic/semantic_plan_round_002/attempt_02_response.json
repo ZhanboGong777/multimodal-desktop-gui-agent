@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 21422.0,
+  "usage": {
+    "prompt_tokens": 2165,
+    "completion_tokens": 236,
+    "total_tokens": 2401
+  },
+  "error": null,
+  "content_length": 1051,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"Corrected postcondition polarity: expect_text must be visible after each goal, forbid_text must be absent after each goal. No literal appears in both lists. Caller-required final text 'LOCAL COMPLETE' is preserved in expect_text, not forbidden. No forbidden text is unjustified.\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Prepare the GREEN report for project ALPHA using visible controls.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"prepare_report\"\n    },\n    {\n      \"instruction\": \"Review the prepared GREEN report for project ALPHA using visible controls.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\", \"Review completed\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"review_report\"\n    },\n    {\n      \"instruction\": \"Commit the reviewed GREEN report for project ALPHA locally using visible controls.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"commit_report\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

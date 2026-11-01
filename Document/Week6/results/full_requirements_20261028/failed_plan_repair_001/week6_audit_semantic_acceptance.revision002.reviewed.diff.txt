@@ -1,0 +1,134 @@
+--- scripts/week6_audit_semantic_acceptance.py
++++ scripts/week6_audit_semantic_acceptance.py
+@@ -46,6 +46,7 @@
+     SEMANTIC_PROTOCOL_VERSION,
+     SEMANTIC_REASON_MAX_CHARACTERS,
+     SEMANTIC_REPAIR_POLICY_VERSION,
++    SEMANTIC_REPEATED_OBJECTIVE_REPAIR,
+     SEMANTIC_STEP_POLICY,
+     SEMANTIC_SYSTEM_PROMPT,
+     SemanticDecomposer,
+@@ -56,6 +57,7 @@
+     _goal_task,
+     _initial_guard,
+     _PreexistingSemanticPostconditionsError,
++    _RepeatedSemanticObjectiveError,
+     _semantic_response_format,
+     _unique_keys,
+     _validate_native_predicates,
+@@ -344,7 +346,8 @@
+ 
+ def _audit_semantic_repair_category(evidence: Evidence, directory: Path, index: int, saved: dict,
+                                     request: WorkflowRequest, before: ObservationSnapshot,
+-                                    completed: list[dict], maximum: int, revision: bool) -> tuple[str | None, str | None]:
++                                    completed: list[dict], maximum: int, revision: bool,
++                                    blocked_signatures: tuple[tuple[Any, ...], ...] = ()) -> tuple[str | None, str | None]:
+     """Recompute the previous local rejection; never trust an error's claimed type."""
+     audit_repair_context(evidence, directory, index, saved["context"], inline_previous_response=False)
+     category = None
+@@ -359,13 +362,16 @@
+             native = json.loads(content, object_pairs_hook=_unique_keys)
+             _validate_native_predicates(native, request)
+             parsed = SemanticPlan.model_validate(native, strict=True)
+-            SemanticDecomposer(max_subgoals=maximum)._validate(parsed, request, before, completed, revision)
++            SemanticDecomposer(max_subgoals=maximum)._validate(
++                parsed, request, before, completed, revision, blocked_signatures=blocked_signatures)
+         except ValueError as exc:
+             require(error.get("error") == str(exc), "semantic_repair_error_not_reproduced_from_original_reply")
+             if isinstance(exc, _DuplicateSemanticPostconditionsError):
+                 category = "duplicate_postconditions"
+             elif isinstance(exc, _PreexistingSemanticPostconditionsError):
+                 category = "preexisting_postconditions"
++            elif isinstance(exc, _RepeatedSemanticObjectiveError):
++                category = "repeated_objective"
+         else:
+             raise AuditError("semantic_repair_after_locally_valid_reply")
+     return category, content
+@@ -374,10 +380,11 @@
+ def _audited_semantic_system(protocol: dict, category: str | None) -> str:
+     require(protocol.get("repair_policy") == {
+         "schema_version": SEMANTIC_REPAIR_POLICY_VERSION,
+-        "trigger": "local_validation_error_with_typed_duplicate_or_preexisting_category",
++        "trigger": "local_validation_error_with_typed_duplicate_preexisting_or_repeated_category",
+         "system_feedback_sha256": hashlib.sha256(SEMANTIC_DUPLICATE_POSTCONDITIONS_REPAIR.encode()).hexdigest(),
+         "generic_feedback_sha256": hashlib.sha256(SEMANTIC_GENERIC_REPAIR.encode()).hexdigest(),
+         "preexisting_feedback_sha256": hashlib.sha256(SEMANTIC_PREEXISTING_POSTCONDITIONS_REPAIR.encode()).hexdigest(),
++        "repeated_feedback_sha256": hashlib.sha256(SEMANTIC_REPEATED_OBJECTIVE_REPAIR.encode()).hexdigest(),
+         "placement": "fixed_system_hint_before_exact_response_schema_and_final_user_repair",
+         "messages": "system_base_user_optional_previous_assistant_final_user",
+         "history": "immediately_previous_reply_only_rebuilt_from_base",
+@@ -390,6 +397,8 @@
+         instructions += "\n" + SEMANTIC_DUPLICATE_POSTCONDITIONS_REPAIR + "\n"
+     elif category == "preexisting_postconditions":
+         instructions += "\n" + SEMANTIC_PREEXISTING_POSTCONDITIONS_REPAIR + "\n"
++    elif category == "repeated_objective":
++        instructions += "\n" + SEMANTIC_REPEATED_OBJECTIVE_REPAIR + "\n"
+     system = (instructions + "\nExact response JSON schema (also supplied as response_format):\n"
+               + json.dumps(protocol["response_format"]["json_schema"]["schema"],
+                            ensure_ascii=False, sort_keys=True))
+@@ -398,9 +407,10 @@
+ 
+ def audit_semantic_repair_system(evidence: Evidence, directory: Path, index: int, saved: dict,
+                                 protocol: dict, request: WorkflowRequest, before: ObservationSnapshot,
+-                                completed: list[dict], maximum: int, revision: bool) -> str:
++                                completed: list[dict], maximum: int, revision: bool,
++                                blocked_signatures: tuple[tuple[Any, ...], ...] = ()) -> str:
+     category, _ = _audit_semantic_repair_category(evidence, directory, index, saved, request,
+-                                                before, completed, maximum, revision)
++                                                before, completed, maximum, revision, blocked_signatures)
+     system = _audited_semantic_system(protocol, category)
+     require(saved.get("system") == system, "semantic_repair_system_not_exactly_bound_to_typed_prior_rejection")
+     return system
+@@ -409,9 +419,10 @@
+ def audit_semantic_repair_messages(evidence: Evidence, directory: Path, index: int, saved: dict,
+                                   protocol: dict, request: WorkflowRequest, before: ObservationSnapshot,
+                                   completed: list[dict], maximum: int, revision: bool,
+-                                  base_context: dict) -> list[dict]:
++                                  base_context: dict,
++                                  blocked_signatures: tuple[tuple[Any, ...], ...] = ()) -> list[dict]:
+     category, content = _audit_semantic_repair_category(evidence, directory, index, saved, request,
+-                                                      before, completed, maximum, revision)
++                                                      before, completed, maximum, revision, blocked_signatures)
+     system = _audited_semantic_system(protocol, category)
+     require(saved.get("system") == system, "semantic_repair_system_not_exactly_bound_to_typed_prior_rejection")
+     messages = [{"role": "system", "content": system},
+@@ -429,6 +440,8 @@
+             repair_instruction = SEMANTIC_DUPLICATE_POSTCONDITIONS_REPAIR
+         elif category == "preexisting_postconditions":
+             repair_instruction = SEMANTIC_PREEXISTING_POSTCONDITIONS_REPAIR
++        elif category == "repeated_objective":
++            repair_instruction = SEMANTIC_REPEATED_OBJECTIVE_REPAIR
+         messages.append({"role": "user", "content": json.dumps({
+             "instruction": request.instruction, "context": context, "repair_instruction": repair_instruction,
+         }, ensure_ascii=False)})
+@@ -998,6 +1011,11 @@
+     workflow_cursor, failure = 0, None
+     rejected_contracts, rejected_signatures = [], set()
+     for round_index, plan_record in enumerate(raw["plans"], 1):
++        blocked_signatures = tuple(rejected_signatures | {
++            (row["instruction"].casefold(), tuple(sorted(x.casefold() for x in row["expect_text"])),
++             tuple(sorted(x.casefold() for x in row["forbid_text"])))
++            for row in outcomes if row["status"] != "succeeded"
++        })
+         directory = root / f"semantic_plan_round_{round_index:03d}"
+         require(Path(plan_record["evidence_directory"]).resolve() == directory.resolve()
+                 and evidence.load(directory / "result.json") == plan_record
+@@ -1045,7 +1063,7 @@
+             context = saved["context"]
+             messages = audit_semantic_repair_messages(evidence, directory, index, saved, protocol,
+                                                       request, latest, completed, maximum, round_index > 1,
+-                                                      expected_context)
++                                                      expected_context, blocked_signatures)
+             system = messages[0]["content"]
+             require(saved["instruction"] == request.instruction
+                     and saved["response_format"] == protocol["response_format"]
+@@ -1062,7 +1080,8 @@
+                                 "semantic_attempt_index": index})
+         require(json.loads(response["content"], object_pairs_hook=unique) == native,
+                 "native_proposal_differs_from_last_accepted_raw_reply")
+-        SemanticDecomposer(max_subgoals=maximum)._validate(parsed, request, latest, completed, round_index > 1)
++        SemanticDecomposer(max_subgoals=maximum)._validate(
++            parsed, request, latest, completed, round_index > 1, blocked_signatures=blocked_signatures)
+         compilation = evidence.load(directory / "compiled_workflow.json")
+         expected_tasks = [_goal_task(goal, request) for goal in parsed.subgoals]
+         require(compilation["native_proposal"] == native and compilation["schema_version"] == SEMANTIC_PROTOCOL_VERSION

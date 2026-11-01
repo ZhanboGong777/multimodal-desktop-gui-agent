@@ -1,0 +1,905 @@
+"""The adapter must refuse rather than guess.
+
+Every failure here is a case where a plausible-looking implementation would pick
+something and click it: the first of several matches, a coordinate from a stale
+frame, or a key the plan invented.
+"""
+
+from __future__ import annotations
+
+from datetime import UTC, datetime
+
+import pytest
+
+from gui_agent.planning.schemas import PlanStep
+from gui_agent.runtime.action_adapter import (
+    ActionAdapter,
+    ActionResolutionError,
+    _in_icon_column,
+)
+from gui_agent.runtime.schemas import ElementRef, ObservationSnapshot
+from gui_agent.schemas import BoundingBox, Point, ScreenInfo
+
+
+def _snapshot(
+    observation_id: str = "obs-0001", texts: tuple[str, ...] = ("File", "Edit", "Search")
+) -> ObservationSnapshot:
+    elements = [
+        ElementRef(
+            element_id=f"{observation_id}-e{index:03d}",
+            text=text,
+            bounding_box=BoundingBox(
+                left=10 + index * 100, top=20, right=80 + index * 100, bottom=40
+            ),
+            center=__import__("gui_agent.schemas", fromlist=["Point"]).Point(
+                x=45 + index * 100, y=30
+            ),
+            confidence=0.9,
+        )
+        for index, text in enumerate(texts)
+    ]
+    return ObservationSnapshot(
+        observation_id=observation_id,
+        captured_at=datetime.now(UTC),
+        screen_info=ScreenInfo(
+            screenshot_width=1470, screenshot_height=956, control_width=1470, control_height=956
+        ),
+        elements=elements,
+    )
+
+
+def _step(**kwargs) -> PlanStep:
+    payload = {"step_id": "s1", "description": "do it", "action_type": "click"}
+    payload.update(kwargs)
+    return PlanStep(**payload)
+
+
+@pytest.fixture
+def adapter() -> ActionAdapter:
+    return ActionAdapter(platform="darwin")
+
+
+def test_a_label_is_never_typed_as_if_it_were_the_text():
+    """The `target_text` fallback is gone, and this is the measurement that removed it.
+
+    `T05_20261007_011805`: the model planned `type_text` for a task whose goal is to **close
+    an application**, named the close control `"关闭"`, and left `arguments` empty. The old
+    fallback accepted `target_text` when it had no whitespace, was one line and was short -
+    and `"关闭"` satisfied all three. So the run typed two Chinese characters into a text
+    editor: a step that could not possibly have achieved the goal was dispatched, and
+    `ActionResult.success` reported it as a success because the event was sent.
+
+    No local test separates a literal from a label; they are the same shape. What separates
+    them is the task, and `resolve()` receives no task. So the adapter infers nothing, and the
+    runner - which can check an inference against `task.expect_text` - is the only place a
+    literal may come from.
+    """
+    adapter = ActionAdapter(platform="win32")
+
+    for label in ("关闭", "Close", "Cancel", "OK"):
+        step = PlanStep(
+            step_id="s1",
+            description="Close the text editor application",
+            action_type="type_text",
+            target_text=label,
+            arguments={},
+        )
+        with pytest.raises(ActionResolutionError):
+            adapter.resolve(step, None)
+
+
+def test_explicit_text_is_still_typed():
+    """The other direction: removing the fallback must not remove the ordinary path."""
+    adapter = ActionAdapter(platform="win32")
+    step = PlanStep(
+        step_id="s1",
+        description="type the marker",
+        action_type="type_text",
+        arguments={"text": "WEEK4_MESSAGE_CHECK_1"},
+    )
+    resolved = adapter.resolve(step, None)
+    assert resolved.action.text == "WEEK4_MESSAGE_CHECK_1"
+    assert resolved.action.action_type == "type_text"
+
+
+def test_a_unique_text_target_resolves(adapter: ActionAdapter) -> None:
+    resolved = adapter.resolve(_step(target_text="Edit"), _snapshot())
+    assert resolved.action.action_type == "click"
+    assert (resolved.action.x, resolved.action.y) == (145, 30)
+    assert resolved.element_id == "obs-0001-e001"
+
+
+def test_an_element_id_from_this_frame_resolves(adapter: ActionAdapter) -> None:
+    resolved = adapter.resolve(_step(arguments={"element_id": "obs-0001-e002"}), _snapshot())
+    assert resolved.element_id == "obs-0001-e002"
+
+
+@pytest.mark.parametrize("blank_text", ["", "   "])
+def test_an_unlabelled_element_id_resolves_through_control_scaling(
+    adapter: ActionAdapter, blank_text: str
+) -> None:
+    """Anonymous T04 controls use the same mapping and bounds checks as OCR targets."""
+    snapshot = _snapshot(texts=(blank_text,))
+    snapshot.elements[0] = snapshot.elements[0].model_copy(update={"source": "contour"})
+    snapshot.screen_info = ScreenInfo(
+        screenshot_width=2940, screenshot_height=1912,
+        control_width=1470, control_height=956, scale_x=0.5, scale_y=0.5,
+    )
+
+    resolved = adapter.resolve(_step(arguments={"element_id": "obs-0001-e000"}), snapshot)
+
+    assert resolved.element_id == "obs-0001-e000"
+    assert resolved.screenshot_point == Point(x=45, y=30)
+    assert resolved.control_point == Point(x=22, y=15)
+    assert (resolved.action.x, resolved.action.y) == (22, 15)
+
+
+@pytest.mark.parametrize("target_text", [None, "<unlabelled box>", "send button"])
+def test_a_stale_unlabelled_id_cannot_rebind_by_position_or_placeholder(
+    adapter: ActionAdapter, target_text: str | None
+) -> None:
+    """A new contour at the old geometry is not evidence of the same control.
+
+    The runner observes again before acting. Rendering a contour must not grant
+    permission to reuse an old id or treat the placeholder as observed text.
+    """
+    earlier = _snapshot(texts=("",))
+    current = _snapshot("obs-0002", texts=("",))
+    assert earlier.elements[0].bounding_box == current.elements[0].bounding_box
+    step = _step(arguments={"element_id": earlier.elements[0].element_id}, target_text=target_text)
+
+    with pytest.raises(ActionResolutionError, match="not from observation|no element matches"):
+        adapter.resolve(step, current)
+
+
+def test_an_element_id_from_another_frame_is_refused(adapter: ActionAdapter) -> None:
+    """The same id in a new frame means a different element, so it must not resolve."""
+    stale = _step(arguments={"element_id": "obs-0001-e000"})
+    with pytest.raises(ActionResolutionError, match="not from observation"):
+        adapter.resolve(stale, _snapshot("obs-0002"))
+
+
+def test_an_ambiguous_query_is_refused_not_first_matched(adapter: ActionAdapter) -> None:
+    snapshot = _snapshot(texts=("Open", "Open", "Close"))
+    with pytest.raises(ActionResolutionError, match="elements match"):
+        adapter.resolve(_step(target_text="Open"), snapshot)
+
+
+def test_a_missing_target_is_refused(adapter: ActionAdapter) -> None:
+    with pytest.raises(ActionResolutionError, match="no element matches"):
+        adapter.resolve(_step(target_text="Nowhere"), _snapshot())
+
+
+def test_a_click_without_any_target_is_refused(adapter: ActionAdapter) -> None:
+    with pytest.raises(ActionResolutionError, match="needs target_text"):
+        adapter.resolve(_step(), _snapshot())
+
+
+def test_scroll_without_a_coordinate_is_refused(adapter: ActionAdapter) -> None:
+    with pytest.raises(ActionResolutionError):
+        adapter.resolve(_step(action_type="scroll", target_text="Nowhere"), _snapshot())
+
+
+def test_scroll_needs_an_amount(adapter: ActionAdapter) -> None:
+    with pytest.raises(ActionResolutionError, match="scroll_amount"):
+        adapter.resolve(_step(action_type="scroll", target_text="Edit"), _snapshot())
+
+
+def test_type_text_rejects_blank_input(adapter: ActionAdapter) -> None:
+    with pytest.raises(ActionResolutionError, match="non-empty"):
+        adapter.resolve(_step(action_type="type_text", arguments={"text": "   "}), _snapshot())
+
+
+def test_type_text_accepts_real_input(adapter: ActionAdapter) -> None:
+    resolved = adapter.resolve(
+        _step(action_type="type_text", arguments={"text": "GUI agent research"}), _snapshot()
+    )
+    assert resolved.action.text == "GUI agent research"
+
+
+def test_an_unsupported_key_is_refused(adapter: ActionAdapter) -> None:
+    with pytest.raises(ActionResolutionError, match="allowed key set"):
+        adapter.resolve(_step(action_type="key_press", arguments={"key": "rm"}), _snapshot())
+
+
+def test_a_supported_key_is_case_folded(adapter: ActionAdapter) -> None:
+    resolved = adapter.resolve(
+        _step(action_type="key_press", arguments={"key": "Enter"}), _snapshot()
+    )
+    assert resolved.action.key == "enter"
+
+
+def test_a_hotkey_is_translated_for_the_platform() -> None:
+    step = _step(action_type="hotkey", arguments={"keys": ["ctrl", "l"]})
+    on_mac = ActionAdapter(platform="darwin").resolve(step, _snapshot())
+    on_windows = ActionAdapter(platform="win32").resolve(step, _snapshot())
+    assert on_mac.action.keys == ["command", "l"]
+    assert on_windows.action.keys == ["ctrl", "l"]
+
+
+def test_an_over_long_wait_is_clamped_rather_than_refused(adapter: ActionAdapter) -> None:
+    """A wait that overshoots the ceiling is taken at the ceiling, not thrown away.
+
+    Measured on T02: the model wrote `wait 10.0` against a 5 s ceiling, and a resolution
+    error ends the whole run - so a nine-step plan that had already clicked, typed and
+    submitted the search stopped on a wait, with the results page visible in the frames
+    that followed. Refusing a *target that is not on screen* is right, because the step
+    cannot be carried out at all; asking to wait longer is not that, and waiting longer
+    cannot do the wrong thing to the screen.
+    """
+    resolved = adapter.resolve(_step(action_type="wait", arguments={"duration": 600}), _snapshot())
+
+    assert resolved.action.action_type == "wait"
+    assert resolved.action.duration == 5
+    assert "clamped" in resolved.note, resolved.note
+
+
+def test_a_non_positive_wait_is_still_refused(adapter: ActionAdapter) -> None:
+    """The ceiling is forgiving; the floor is not, because zero and negative are meaningless."""
+    with pytest.raises(ActionResolutionError, match="positive"):
+        adapter.resolve(_step(action_type="wait", arguments={"duration": 0}), _snapshot())
+
+
+def test_the_wait_bound_comes_from_the_run_configuration() -> None:
+    """10.3 suggests max_wait_seconds = 5, and the run's own limit is what applies.
+
+    Hard-coding it meant the configured value could not have any effect - the same
+    trap as a config key nothing reads.
+    """
+    strict = ActionAdapter(platform="darwin", max_wait_seconds=2)
+
+    clamped = strict.resolve(_step(action_type="wait", arguments={"duration": 3}), _snapshot())
+    assert clamped.action.duration == 2, "the configured ceiling is what applies"
+    assert "clamped" in clamped.note
+
+    allowed = strict.resolve(_step(action_type="wait", arguments={"duration": 2}), _snapshot())
+    assert allowed.action.action_type == "wait"
+    assert allowed.action.duration == 2
+    assert "clamped" not in allowed.note
+
+
+def test_finish_is_never_turned_into_an_action(adapter: ActionAdapter) -> None:
+    """finish closes the plan; the runner verifies the task instead."""
+    with pytest.raises(ActionResolutionError, match="never executed"):
+        adapter.resolve(_step(action_type="finish"), _snapshot())
+
+
+def test_coordinates_are_scaled_into_control_space(adapter: ActionAdapter) -> None:
+    """A scaled screenshot must not produce a click at the wrong place."""
+    snapshot = _snapshot()
+    scaled = snapshot.model_copy(
+        update={
+            "screen_info": ScreenInfo(
+                screenshot_width=2940,
+                screenshot_height=1912,
+                control_width=1470,
+                control_height=956,
+            )
+        }
+    )
+    resolved = adapter.resolve(_step(arguments={"element_id": "obs-0001-e000"}), scaled)
+    # element centre is (45,30) in a 2940-wide screenshot -> (22,15) in control space
+    assert (resolved.control_point.x, resolved.control_point.y) == (22, 15)
+    assert (resolved.screenshot_point.x, resolved.screenshot_point.y) == (45, 30)
+
+
+def test_a_stale_id_with_a_text_target_is_rebound_in_the_new_frame(adapter: ActionAdapter) -> None:
+    """A plan is written from one frame and executed after another.
+
+    Refusing every stale id would make element targeting unusable, since the
+    runner always re-observes before acting. The spec allows a re-bind when the
+    step also says, in words, what it is aiming at.
+    """
+    step = _step(arguments={"element_id": "obs-0001-e001"}, target_text="Edit")
+    resolved = adapter.resolve(step, _snapshot("obs-0002"))
+    assert resolved.element_id == "obs-0002-e001"
+    assert "re-bound from obs-0001-e001" in resolved.note
+
+
+def test_a_stale_id_without_a_text_target_is_still_refused(adapter: ActionAdapter) -> None:
+    """Nothing to re-locate against: guessing would be worse than stopping."""
+    step = _step(arguments={"element_id": "obs-0001-e001"})
+    with pytest.raises(ActionResolutionError, match="names no text target"):
+        adapter.resolve(step, _snapshot("obs-0002"))
+
+
+def _word_snapshot(
+    observation_id: str = "obs-0002",
+    words: tuple[tuple[str, int, int], ...] = (),
+) -> ObservationSnapshot:
+    """A frame whose elements are word-sized, the way a word-level backend emits them."""
+    elements = [
+        ElementRef(
+            element_id=f"{observation_id}-e{index:03d}",
+            text=text,
+            bounding_box=BoundingBox(left=left, top=top, right=left + 60, bottom=top + 20),
+            center=Point(x=left + 30, y=top + 10),
+            confidence=0.9,
+        )
+        for index, (text, left, top) in enumerate(words)
+    ]
+    return ObservationSnapshot(
+        observation_id=observation_id,
+        captured_at=datetime.now(UTC),
+        screen_info=ScreenInfo(
+            screenshot_width=1470, screenshot_height=956, control_width=1470, control_height=956
+        ),
+        elements=elements,
+    )
+
+
+def test_a_target_split_across_word_elements_is_joined(adapter: ActionAdapter) -> None:
+    """Word-level OCR never produces the multi-word label a model asks for.
+
+    "Summary (required)" arrives as two elements, so an exact-text search finds
+    nothing even though the label is plainly on screen. This is what stopped every
+    real target from resolving on the Windows review machine.
+    """
+    snapshot = _word_snapshot(words=(("Summary", 10, 40), ("(required)", 80, 40)))
+    resolved = adapter.resolve(_step(target_text="Summary (required)"), snapshot)
+    assert resolved.element_id == "obs-0002-e000+obs-0002-e001"
+    assert "joined from 2 adjacent elements" in resolved.note
+
+
+def test_the_joined_target_is_centred_on_the_whole_label(adapter: ActionAdapter) -> None:
+    snapshot = _word_snapshot(words=(("Current", 10, 10), ("repository", 80, 10)))
+    resolved = adapter.resolve(_step(target_text="Current repository"), snapshot)
+    # Union box is (10,10)-(140,30), so the click lands at its centre.
+    assert (resolved.screenshot_point.x, resolved.screenshot_point.y) == (75, 20)
+
+
+def test_a_stale_id_split_across_words_is_rebound_to_the_joined_target(
+    adapter: ActionAdapter,
+) -> None:
+    """Both repairs have to work at once: planning ids go stale by design."""
+    snapshot = _word_snapshot(words=(("Fetch", 10, 10), ("origin", 80, 10)))
+    step = _step(arguments={"element_id": "obs-0001-e003"}, target_text="Fetch origin")
+    resolved = adapter.resolve(step, snapshot)
+    assert resolved.element_id == "obs-0002-e000+obs-0002-e001"
+    assert "re-bound from obs-0001-e003" in resolved.note
+
+
+def test_two_matching_runs_are_refused(adapter: ActionAdapter) -> None:
+    """The same label twice on screen is an ambiguity, not a reason to take the first."""
+    snapshot = _word_snapshot(
+        words=(
+            ("Current", 10, 10),
+            ("repository", 80, 10),
+            ("Current", 10, 100),
+            ("repository", 80, 100),
+        )
+    )
+    with pytest.raises(ActionResolutionError, match="element runs match"):
+        adapter.resolve(_step(target_text="Current repository"), snapshot)
+
+
+def test_a_run_must_consume_the_whole_query(adapter: ActionAdapter) -> None:
+    """A run that only covers part of the query is not a match."""
+    snapshot = _word_snapshot(words=(("Current", 10, 10), ("repository", 80, 10)))
+    with pytest.raises(ActionResolutionError, match="no element matches"):
+        adapter.resolve(_step(target_text="Current repository main"), snapshot)
+
+
+def _element(element_id: str, text: str, left: int, top: int, right: int, bottom: int,
+             confidence: float = 0.96) -> ElementRef:
+    """An element whose centre follows from its box, as the observation builds it."""
+    box = BoundingBox(left=left, top=top, right=right, bottom=bottom)
+    return ElementRef(
+        element_id=element_id, text=text, bounding_box=box, center=box.center,
+        confidence=confidence,
+    )
+
+
+def test_a_desktop_shortcut_is_clicked_on_its_icon_not_its_label(
+    adapter: ActionAdapter,
+) -> None:
+    """The label is not the shortcut. OCR sees only the name, which is drawn under it.
+
+    Measured on the Windows node: 'Microsoft' spans (2433,379)-(2513,393) with 'Edge'
+    beneath it, and double-clicking that label's centre at 0.15 s, 0.30 s and 0.45 s
+    intervals left the process count at zero every time, while a double-click inside the
+    icon above it reached the shortcut. Synthetic input was never at fault - typing into
+    Notepad and the Win key both worked throughout - so the click point was.
+
+    The lift is 0.98 of the label's width above the label's top, which is where the icon
+    was measured to start, and it is gated on the frame being a real desktop width and on
+    the pixel belonging to the shell. In a test the shell check cannot succeed, so what
+    this asserts is the gate that does apply: a 2560-wide frame puts x=2433 inside the
+    right-hand icon strip.
+    """
+    snapshot = ObservationSnapshot(
+        observation_id="obs-0001",
+        captured_at=datetime.now(UTC),
+        screen_info=ScreenInfo(
+            screenshot_width=2560, screenshot_height=1600,
+            control_width=2560, control_height=1600, scale_x=1.0, scale_y=1.0,
+        ),
+        elements=[_element("obs-0001-e011", "Microsoft Edge", 2433, 379, 2513, 393)],
+    )
+    resolved = adapter.resolve(_step(target_text="Microsoft Edge"), snapshot)
+    assert _in_icon_column(2433, 2560), "the label must be recognised as a shortcut column"
+    # With no shell to confirm against, the point stays put; the note must not claim a lift.
+    assert "lifted" not in resolved.note
+
+
+def test_a_label_in_a_narrow_frame_is_left_where_it_is(adapter: ActionAdapter) -> None:
+    """The lift is gated on a real desktop width, and that gate has a reason.
+
+    A 1470-wide frame is a fixture or a scaled capture. Treating 12% of it as an icon
+    strip put x=145 inside one and moved a click from y=30 to y=1 in two existing tests,
+    so the assumption is stated here rather than rediscovered.
+    """
+    assert not _in_icon_column(145, 1470)
+    assert not _in_icon_column(75, 1470)
+    resolved = adapter.resolve(_step(target_text="Edit"), _snapshot())
+    assert resolved.screenshot_point.y == 30
+
+
+def test_a_stacked_shortcut_label_is_joined_across_an_interleaved_neighbour(
+    adapter: ActionAdapter,
+) -> None:
+    """The two lines of a desktop shortcut are adjacent on screen, not in sort order.
+
+    Measured on the Windows review machine: the Microsoft Edge shortcut is two OCR
+    elements, 'Microsoft' at (2433,379)-(2513,393) and 'Edge' at (2452,403)-(2494,421).
+    A top-to-bottom sort puts 'MySQL' at (403,412) between them, because its y sits
+    between the two lines. The run search therefore never saw the halves as
+    neighbours, and T01 failed with "no element matches 'Microsoft Edge'" while the
+    icon was plainly on screen and both words were in the element list.
+    """
+    snapshot = ObservationSnapshot(
+        observation_id="obs-0002",
+        captured_at=datetime.now(UTC),
+        screen_info=ScreenInfo(
+            screenshot_width=2560, screenshot_height=1600,
+            control_width=2560, control_height=1600, scale_x=1.0, scale_y=1.0,
+        ),
+        elements=[
+            _element("obs-0002-e009", "Microsoft", 2433, 379, 2513, 393),
+            # A different column, whose vertical position falls between the two lines.
+            _element("obs-0002-e021", "MySQL", 380, 405, 426, 419, confidence=0.94),
+            _element("obs-0002-e010", "Edge", 2452, 403, 2494, 421),
+        ],
+    )
+    resolved = adapter.resolve(_step(target_text="Microsoft Edge"), snapshot)
+    assert resolved.element_id == "obs-0002-e009+obs-0002-e010"
+    assert "joined from 2 adjacent elements" in resolved.note
+
+
+def test_a_stacked_run_still_refuses_two_of_the_same_shortcut(
+    adapter: ActionAdapter,
+) -> None:
+    """Two shortcuts with the same label remain an ambiguity, not a first-match win."""
+    def _pair(top: int) -> list[ElementRef]:
+        base = top
+        return [
+            _element(f"obs-0002-e{base:03d}", "Microsoft", 2433, top, 2513, top + 14),
+            _element(f"obs-0002-e{base + 1:03d}", "Edge", 2452, top + 24, 2494, top + 42),
+        ]
+
+    snapshot = ObservationSnapshot(
+        observation_id="obs-0002",
+        captured_at=datetime.now(UTC),
+        screen_info=ScreenInfo(
+            screenshot_width=2560, screenshot_height=1600,
+            control_width=2560, control_height=1600, scale_x=1.0, scale_y=1.0,
+        ),
+        elements=_pair(100) + _pair(400),
+    )
+    with pytest.raises(ActionResolutionError, match="element runs match"):
+        adapter.resolve(_step(target_text="Microsoft Edge"), snapshot)
+
+
+def test_a_target_that_maps_outside_the_monitor_is_refused(adapter: ActionAdapter) -> None:
+    """7.3.6: an illegal coordinate is refused, never clamped to the edge.
+
+    The realistic shape of this is a screenshot whose scale was never applied: the
+    element sits well inside the image, and the control point lands past the edge of
+    the monitor. Clamping would still click something - just not the thing asked for.
+    """
+    snapshot = ObservationSnapshot(
+        observation_id="obs-0001",
+        captured_at=datetime.now(UTC),
+        screen_info=ScreenInfo(
+            screenshot_width=2940,
+            screenshot_height=1912,
+            control_width=1470,
+            control_height=956,
+            scale_x=1.0,
+            scale_y=1.0,
+        ),
+        elements=[
+            ElementRef(
+                element_id="obs-0001-e000",
+                text="Far away",
+                bounding_box=BoundingBox(left=2000, top=100, right=2060, bottom=120),
+                center=Point(x=2030, y=110),
+                confidence=0.9,
+            )
+        ],
+    )
+
+    with pytest.raises(ActionResolutionError, match="outside the captured monitor"):
+        adapter.resolve(_step(target_text="Far away"), snapshot)
+
+
+def test_a_scroll_amount_of_the_wrong_type_is_refused(adapter: ActionAdapter) -> None:
+    """8.3.4 wants parameters complete *and* correctly typed.
+
+    int() on a non-numeric string raises ValueError, and the runner catches
+    ActionResolutionError - so an unguarded conversion would leave the run as a
+    traceback instead of a recorded failure.
+    """
+    step = _step(action_type="scroll", target_text="Edit", arguments={"scroll_amount": "lots"})
+
+    with pytest.raises(ActionResolutionError, match="must be a number"):
+        adapter.resolve(step, _snapshot())
+
+
+def test_a_drag_duration_of_the_wrong_type_is_refused(adapter: ActionAdapter) -> None:
+    step = _step(
+        action_type="drag",
+        arguments={
+            "start_element_id": "obs-0001-e000",
+            "end_element_id": "obs-0001-e001",
+            "duration": "slowly",
+        },
+    )
+
+    with pytest.raises(ActionResolutionError, match="must be a number"):
+        adapter.resolve(step, _snapshot())
+
+
+def test_a_drag_resolves_to_both_endpoints(adapter: ActionAdapter) -> None:
+    """A whole action type had no success path under test.
+
+    `_resolve_drag` was only ever exercised by its error branches, so a drag that
+    actually resolves had never been checked end to end - including that both
+    points go through the coordinate mapping.
+    """
+    step = _step(
+        action_type="drag",
+        arguments={"start_element_id": "obs-0001-e000", "end_element_id": "obs-0001-e002"},
+    )
+
+    resolved = adapter.resolve(step, _snapshot())
+
+    assert resolved.action.action_type == "drag"
+    assert (resolved.action.start.x, resolved.action.start.y) == (45, 30)
+    assert (resolved.action.end.x, resolved.action.end.y) == (245, 30)
+    assert resolved.action.duration == 0.5, "the default, when the plan names none"
+
+
+def test_a_drag_naming_an_element_from_nowhere_is_refused(adapter: ActionAdapter) -> None:
+    step = _step(
+        action_type="drag",
+        arguments={"start_element_id": "obs-0001-e000", "end_element_id": "obs-0009-e000"},
+    )
+
+    with pytest.raises(ActionResolutionError, match="not from observation"):
+        adapter.resolve(step, _snapshot())
+
+
+def test_a_missing_type_text_argument_is_refused_however_the_target_reads(
+    adapter: ActionAdapter,
+) -> None:
+    """`target_text` is not a source for typed content, and the measurement says why.
+
+    It used to be. T04, four passes running, produced
+    `type_text text=None target='WEEK4_MESSAGE_CHECK_'` - the right verb, the right string, in
+    the wrong field - and inferring from `target_text` rescued a plan that was otherwise
+    correct. The guard was "no whitespace, one line, short", reasoning that a description with
+    no spaces is not a thing anyone writes.
+
+    Then `T05_20261007_011805` measured the hole. The model planned `type_text` for a task that
+    **closes an application**, named the close control `"关闭"`, and left `arguments` empty.
+    Two characters, no whitespace, far under the ceiling - so the guard passed it and the run
+    typed two Chinese characters into a text editor. A step that could not possibly have
+    achieved the goal was dispatched, and the action reported success because the event was
+    sent.
+
+    A literal and a label are the same shape locally; what separates them is the task, and
+    `resolve()` receives no task. So the adapter infers nothing, and the runner - which can
+    check an inference against `task.expect_text` - is the only place a literal may come from.
+    """
+    for target in (
+        "WEEK4_MESSAGE_CHECK_",          # the string the old fallback existed for
+        "关闭",                           # the label that broke it
+        "Close",
+        "the message box in the week4 test conversation",
+        "   ",
+    ):
+        with pytest.raises(ActionResolutionError, match="non-empty arguments.text"):
+            adapter.resolve(_step(action_type="type_text", target_text=target), _snapshot())
+
+    supplied = adapter.resolve(
+        _step(action_type="type_text", target_text="field", arguments={"text": "hello world"}),
+        _snapshot(),
+    )
+    assert supplied.action.text == "hello world", "an explicit argument is what gets typed"
+
+
+def test_a_hotkey_without_any_keys_is_refused(adapter: ActionAdapter) -> None:
+    with pytest.raises(ActionResolutionError, match="non-empty arguments.keys"):
+        adapter.resolve(_step(action_type="hotkey", arguments={}), _snapshot())
+
+
+def test_a_hotkey_token_outside_the_whitelist_is_refused(adapter: ActionAdapter) -> None:
+    """The whitelist is what stops the model from driving a shell through a chord."""
+    step = _step(action_type="hotkey", arguments={"keys": ["ctrl", "rm"]})
+
+    with pytest.raises(ActionResolutionError, match="not allowed"):
+        adapter.resolve(step, _snapshot())
+
+
+def test_blank_hotkey_tokens_are_skipped(adapter: ActionAdapter) -> None:
+    step = _step(action_type="hotkey", arguments={"keys": ["", "  ", "c"]})
+
+    assert adapter.resolve(step, _snapshot()).action.keys == ["c"]
+
+
+def test_a_hotkey_that_boils_down_to_nothing_is_refused(adapter: ActionAdapter) -> None:
+    step = _step(action_type="hotkey", arguments={"keys": ["", "   "]})
+
+    with pytest.raises(ActionResolutionError, match="empty key list"):
+        adapter.resolve(step, _snapshot())
+
+
+def test_key_press_without_a_key_is_refused(adapter: ActionAdapter) -> None:
+    with pytest.raises(ActionResolutionError, match="requires arguments.key"):
+        adapter.resolve(_step(action_type="key_press", arguments={}), _snapshot())
+
+
+def _grounding_frames(tmp_path):
+    """Saved, synthetic pixels; these mapping tests never observe the desktop."""
+    from PIL import Image, ImageDraw
+
+    frames = []
+    for observation_id, left, color in (("old", 20, "red"), ("new", 60, "green")):
+        box = BoundingBox(left=left, top=40, right=left + 30, bottom=70)
+        image = Image.new("RGB", (200, 140), "white")
+        ImageDraw.Draw(image).rectangle(
+            (box.left, box.top, box.right - 1, box.bottom - 1), fill=color
+        )
+        path = tmp_path / f"{observation_id}.png"
+        image.save(path)
+        frames.append(
+            ObservationSnapshot(
+                observation_id=observation_id,
+                captured_at=datetime.now(UTC),
+                image_path=str(path),
+                screen_info=ScreenInfo(
+                    screenshot_width=200,
+                    screenshot_height=140,
+                    control_width=100,
+                    control_height=70,
+                ),
+                elements=[ElementRef(
+                    element_id=f"{observation_id}-e000",
+                    text="",
+                    bounding_box=box,
+                    center=box.center,
+                    confidence=0.5,
+                    source="contour",
+                )],
+                window_title="WeChat - 文件传输助手",
+                window_class="WeChatMainWndForPC",
+                window_id="123:456",
+                window_bounds=BoundingBox(left=5, top=5, right=195, bottom=135),
+                foreground_stable=True,
+            )
+        )
+    return frames
+
+
+def _grounding_client(content, error=None):
+    from gui_agent.models.base import ModelClient, ModelResponse
+
+    class Client(ModelClient):
+        name = "offline-grounding"
+
+        def __init__(self):
+            super().__init__(model_name="offline-grounding", max_retries=0)
+            self.received = []
+
+        def complete(self, messages, **kwargs):
+            self.received.append((messages, kwargs))
+            return ModelResponse(
+                content=content,
+                model_name=self.model_name,
+                provider=self.name,
+                error=error,
+            )
+
+    return Client()
+
+
+@pytest.mark.parametrize("alias", ["element_id", "target_element", "both"])
+def test_anonymous_model_mapping_changes_only_the_approved_target_id(tmp_path, alias):
+    import json
+
+    from PIL import Image
+
+    from gui_agent.runtime.target_grounding import TargetGrounder
+
+    old, current = _grounding_frames(tmp_path)
+    arguments = {"text": "WEEK4_MESSAGE_CHECK_20261006", "recipient": "文件传输助手"}
+    for key in (("element_id", "target_element") if alias == "both" else (alias,)):
+        arguments[key] = "old-e000"
+    step = _step(
+        target_text="发送",
+        arguments=arguments,
+        expected_result="the approved marker is sent",
+    )
+    original = step.model_dump(mode="json")
+    client = _grounding_client('{"candidate_ids":["new-e000"]}')
+
+    mapped = TargetGrounder(client).ground(step, old, current, tmp_path / "comparisons")
+
+    assert step.model_dump(mode="json") == original
+    expected = {**original, "arguments": {**arguments}}
+    for key in (("element_id", "target_element") if alias == "both" else (alias,)):
+        expected["arguments"][key] = "new-e000"
+    assert mapped.model_dump(mode="json") == expected
+    resolved = ActionAdapter(platform="win32").resolve(mapped, current)
+    assert resolved.element_id == "new-e000"
+    assert resolved.screenshot_point == Point(x=75, y=55)
+    assert resolved.control_point == Point(x=38, y=28)
+    assert client.request_count == 1
+    messages, kwargs = client.received[0]
+    payload = json.loads(messages[-1]["content"])
+    assert payload["context"]["approved_step"] == original
+    assert payload["context"]["current_candidates"][0]["element_id"] == "new-e000"
+    # Both frames travel as real pixels in the attachment, rather than old paths
+    # written in context that a vision provider would never open.
+    with Image.open(kwargs["image_path"]) as comparison:
+        assert comparison.getpixel((25, 24 + 45)) == (255, 0, 0)
+        assert comparison.getpixel((200 + 65, 24 + 45)) == (0, 128, 0)
+
+
+@pytest.mark.parametrize("reply", [
+    '{"candidate_ids":[]}',
+    '{"candidate_ids":["new-e000","new-e000"]}',
+    '{"candidate_ids":["missing-id"]}',
+    '{"candidate_ids":["old-e000"]}',
+    '{"candidate_ids":[1]}',
+    '{"candidate_ids":"new-e000"}',
+    '{"candidate_ids":["new-e000"],"action_type":"click"}',
+    '{"candidate_ids":["new-e000"],"text":"different message"}',
+    '{"candidate_ids":[],"candidate_ids":["new-e000"]}',
+    '```json\n{"candidate_ids":["new-e000"]}\n```',
+    '[]',
+])
+def test_anonymous_model_mapping_refuses_ambiguous_or_semantic_output(tmp_path, reply):
+    from gui_agent.runtime.target_grounding import TargetGrounder
+    from gui_agent.runtime.visual_grounding import GroundingError
+
+    old, current = _grounding_frames(tmp_path)
+    client = _grounding_client(reply)
+    step = _step(arguments={"element_id": "old-e000"})
+
+    with pytest.raises(GroundingError):
+        TargetGrounder(client).ground(step, old, current, tmp_path / "comparisons")
+
+    assert client.request_count == 1, "invalid output never starts a format retry"
+    assert step.arguments == {"element_id": "old-e000"}
+
+
+@pytest.mark.parametrize("change", [
+    "window_id", "window_title", "window_class", "unstable", "errors", "missing_image",
+    "unknown_source", "labelled_source", "manual_source", "outside_candidate", "giant_candidate",
+    "wrong_id_prefix", "alias_conflict", "non_point_action", "duplicate_source",
+    "duplicate_current", "low_confidence",
+])
+def test_anonymous_model_mapping_refuses_invalid_evidence_before_request(tmp_path, change):
+    from gui_agent.runtime.target_grounding import TargetGrounder
+    from gui_agent.runtime.visual_grounding import GroundingError
+
+    old, current = _grounding_frames(tmp_path)
+    step = _step(arguments={"element_id": "old-e000"})
+    if change in {"window_id", "window_title", "window_class"}:
+        current = current.model_copy(update={change: "different"})
+    elif change == "unstable":
+        current = current.model_copy(update={"foreground_stable": False})
+    elif change == "errors":
+        current = current.model_copy(update={"errors": ["capture incomplete"]})
+    elif change == "missing_image":
+        current = current.model_copy(update={"image_path": str(tmp_path / "missing.png")})
+    elif change == "unknown_source":
+        step = _step(arguments={"element_id": "old-e999"})
+    elif change == "labelled_source":
+        old.elements[0] = old.elements[0].model_copy(update={"text": "Send"})
+    elif change == "manual_source":
+        old.elements[0] = old.elements[0].model_copy(update={"source": "manual"})
+    elif change in {"outside_candidate", "giant_candidate"}:
+        box = (
+            BoundingBox(left=0, top=0, right=30, bottom=30)
+            if change == "outside_candidate"
+            else BoundingBox(left=5, top=5, right=195, bottom=135)
+        )
+        current.elements[0] = current.elements[0].model_copy(
+            update={"bounding_box": box, "center": box.center}
+        )
+    elif change == "wrong_id_prefix":
+        current.elements[0] = current.elements[0].model_copy(update={"element_id": "stale-e000"})
+    elif change == "alias_conflict":
+        step = _step(arguments={"element_id": "old-e000", "target_element": "old-e001"})
+    elif change == "non_point_action":
+        step = _step(action_type="type_text", arguments={"element_id": "old-e000", "text": "x"})
+    elif change == "duplicate_source":
+        old.elements.append(old.elements[0].model_copy())
+    elif change == "duplicate_current":
+        # Even an excluded duplicate must refuse: ActionAdapter.element() would
+        # otherwise return the excluded first id instead of the chosen candidate.
+        current.elements.insert(0, current.elements[0].model_copy(update={"source": "manual"}))
+    elif change == "low_confidence":
+        current.elements[0] = current.elements[0].model_copy(update={"confidence": 0.2})
+    client = _grounding_client('{"candidate_ids":["new-e000"]}')
+
+    with pytest.raises(GroundingError):
+        TargetGrounder(client).ground(step, old, current, tmp_path / "comparisons")
+
+    assert client.request_count == 0
+    assert not client.received
+
+
+def test_anonymous_model_mapping_refuses_provider_failure_without_retry(tmp_path):
+    from gui_agent.runtime.target_grounding import TargetGrounder
+    from gui_agent.runtime.visual_grounding import GroundingError
+
+    old, current = _grounding_frames(tmp_path)
+    client = _grounding_client("", error="offline provider failure")
+
+    with pytest.raises(GroundingError, match="offline provider failure"):
+        TargetGrounder(client).ground(
+            _step(arguments={"element_id": "old-e000"}), old, current, tmp_path / "comparisons"
+        )
+
+    assert client.request_count == 1
+
+
+@pytest.mark.parametrize("reply", ["new-e000", "new-e001"])
+def test_mapping_candidate_scope_keeps_an_eligible_other_role_out_of_the_request(tmp_path, reply):
+    import json
+
+    from gui_agent.runtime.target_grounding import TargetGrounder
+    from gui_agent.runtime.visual_grounding import GroundingError
+
+    old, current = _grounding_frames(tmp_path)
+    box = BoundingBox(left=120, top=90, right=165, bottom=115)
+    current.elements.append(ElementRef(
+        element_id="new-e001", text="Send", bounding_box=box, center=box.center,
+        confidence=0.9, source="ocr",
+    ))
+    client = _grounding_client(json.dumps({"candidate_ids": [reply]}))
+    step = _step(arguments={"element_id": "old-e000"})
+    if reply == "new-e001":
+        with pytest.raises(GroundingError, match="not an eligible CURRENT candidate"):
+            TargetGrounder(client).ground(
+                step, old, current, tmp_path / "comparisons",
+                allowed_candidate_ids=frozenset({"new-e000"}),
+            )
+    else:
+        mapped = TargetGrounder(client).ground(
+            step, old, current, tmp_path / "comparisons",
+            allowed_candidate_ids=frozenset({"new-e000"}),
+        )
+        assert mapped.arguments == {"element_id": "new-e000"}
+    context = json.loads(client.received[0][0][-1]["content"])["context"]
+    assert [item["element_id"] for item in context["current_candidates"]] == ["new-e000"]
+    assert client.request_count == 1 and step.arguments == {"element_id": "old-e000"}
+
+
+@pytest.mark.parametrize("scope", [frozenset(), frozenset({"missing"}), frozenset({"new-e000", "missing"})])
+def test_mapping_candidate_scope_must_be_complete_and_eligible_before_any_request(tmp_path, scope):
+    from gui_agent.runtime.target_grounding import TargetGrounder
+    from gui_agent.runtime.visual_grounding import GroundingError
+
+    old, current = _grounding_frames(tmp_path)
+    client = _grounding_client('{"candidate_ids":["new-e000"]}')
+    with pytest.raises(GroundingError, match="authorised mapping candidates"):
+        TargetGrounder(client).ground(
+            _step(arguments={"element_id": "old-e000"}), old, current, tmp_path / "comparisons",
+            allowed_candidate_ids=scope,
+        )
+    assert client.request_count == 0 and not client.received

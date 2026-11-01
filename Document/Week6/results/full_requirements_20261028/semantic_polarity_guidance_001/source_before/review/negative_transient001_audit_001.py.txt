@@ -1,0 +1,149 @@
+"""Read only ended transient001 records; explain the preserved negative outcome."""
+from collections import Counter
+from datetime import datetime, timezone
+import hashlib
+import importlib.util
+import json
+from pathlib import Path
+import sys
+
+ROOT = Path("C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+BASE = ROOT / "Document/Week6/results/full_requirements_20261028"
+CASE = BASE / "live/transient_001"
+FIXTURE = BASE / "live/fixture_transient_001"
+DIRECTORY = CASE / "run/automatic/semantic_plan_round_001"
+OUT = BASE / "review/negative_transient001_audit_001.json"
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def load(path):
+    return json.loads(path.read_text("utf-8"))
+
+
+def inventory(directory):
+    return {path.relative_to(directory).as_posix(): sha(path) for path in directory.rglob("*") if path.is_file()}
+
+
+assert not OUT.exists()
+process_path = BASE / "review/transient001_independent_process_001/process_summary.json"
+assert sha(process_path) == "5f22bcc963ae6b09aa94fb0915601e4da1cf44cc0528e48ee6104ed52a669016"
+process = load(process_path)
+raw_before, fixture_before = inventory(CASE), inventory(FIXTURE)
+assert raw_before == process["original_case_files"] and fixture_before == process["original_fixture_files"]
+pins = process["code_pins_after"]
+assert {path: sha(ROOT / path) for path in pins} == pins and len(pins) == 274
+auditor_path = ROOT / "scripts/week6_audit_semantic_acceptance.py"
+assert sha(auditor_path) == "eb2e3c4ed8da2a6b7b347381e820c028a23af5c4bb45fb47ebd2160b02baa68d"
+spec = importlib.util.spec_from_file_location("transient_saved_record_auditor", auditor_path)
+auditor = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = auditor
+spec.loader.exec_module(auditor)
+evidence = auditor.Evidence(CASE)
+protocol = evidence.load(DIRECTORY / "protocol.json")
+request = auditor.WorkflowRequest.model_validate(protocol["caller_request"])
+before = auditor.ObservationSnapshot.model_validate(evidence.load(DIRECTORY / "snapshot_archive.json"))
+transport = evidence.lines(CASE / "run/automatic/transport_requests.jsonl")
+assert len(transport) == 3 and sum(row["requests_made"] for row in transport) == 3
+attempts, content_digests = [], []
+base_context = evidence.load(DIRECTORY / "attempt_01_request.json")["context"]
+polarity_rule = "Never forbid any text required by the unchanged caller final check."
+for index in range(1, 4):
+    saved = evidence.load(DIRECTORY / f"attempt_{index:02d}_request.json")
+    response = evidence.load(DIRECTORY / f"attempt_{index:02d}_response.json")
+    error = evidence.load(DIRECTORY / f"attempt_{index:02d}_error.json")
+    native = json.loads(response["content"])
+    auditor.Draft202012Validator(protocol["response_format"]["json_schema"]["schema"]).validate(native)
+    messages = auditor.audit_semantic_repair_messages(evidence, DIRECTORY, index, saved, protocol,
+        request, before, [], 8, False, base_context)
+    assert messages == transport[index - 1]["messages"]
+    assert saved["response_format"] == protocol["response_format"] == transport[index - 1]["response_format"]
+    assert saved["system"] == messages[0]["content"] and polarity_rule in saved["system"]
+    assert transport[index - 1]["response"]["content"] == response["content"]
+    assert response["error"] is None and transport[index - 1]["error"] == ""
+    assert len(transport[index - 1]["http_responses"]) == 1
+    http = transport[index - 1]["http_responses"][0]
+    assert http["status_code"] == 200 and http["body"]["choices"][0]["message"]["content"] == response["content"]
+    try:
+        auditor._validate_native_predicates(native, request)
+        auditor.SemanticPlan.model_validate(native, strict=True)
+    except ValueError as exc:
+        reproduced = str(exc)
+        assert reproduced == error["error"]
+        rejection_class = type(exc).__name__
+        assert not isinstance(exc, auditor._DuplicateSemanticPostconditionsError)
+    else:
+        raise AssertionError("The contradictory native proposal unexpectedly passed")
+    overlaps = [{"goal_id": row["goal_id"], "required_and_forbidden":
+                 [word for word in row["expect_text"] if word.casefold() in {item.casefold() for item in row["forbid_text"]}]}
+                for row in native["subgoals"]]
+    digest = hashlib.sha256(response["content"].encode("utf-8")).hexdigest()
+    content_digests.append(digest)
+    final = json.loads(messages[-1]["content"])
+    if index > 1:
+        assert final["repair_instruction"] == auditor.SEMANTIC_GENERIC_REPAIR
+        assert final["context"]["constraint_error"] == reproduced
+        assert messages[2]["role"] == "assistant" and messages[2]["content"] == response["content"]
+    attempts.append({"attempt": index, "response_content_sha256": digest, "content_length": len(response["content"]),
+        "original_native_proposal": native, "original_local_error": error["error"],
+        "local_rejection_class": rejection_class, "raw_shape_and_endpoint_schema_valid": True,
+        "overlapping_predicates": overlaps, "actual_roles": [message["role"] for message in messages],
+        "saved_messages_independently_reconstructed_and_equal_transport": True,
+        "endpoint_schema_equals_predeclared": True, "fixed_caller_final_polarity_rule_transmitted": True,
+        "duplicate_typed_system_hint_present": auditor.SEMANTIC_DUPLICATE_POSTCONDITIONS_REPAIR in saved["system"],
+        "repair_path": "initial" if index == 1 else "generic_final_user_with_exact_validation_error_and_previous_assistant_reply",
+        "repair_instruction": None if index == 1 else final["repair_instruction"],
+        "raw_prior_reply_assistant_preserved": None if index == 1 else True,
+        "response_usage": response["usage"], "finish_reason": response["raw_response"]["finish_reason"]})
+assert len(set(content_digests)) == 1
+runtime = load(CASE / "run/runtime_result.json")
+summary = load(CASE / "run/automatic/automatic_workflow_summary.json")
+owner = load(CASE / "owner_receipt.json")
+assert owner["child_exit_code"] == 1 and summary["status"] == "failed"
+assert summary["total_actions"] == 0 and summary["planning_calls"] == summary["model_requests"] == 3
+assert summary["unconfirmed_action_attempts"] == 0 and summary["goal_outcomes"] == []
+assert not (DIRECTORY / "compiled_workflow.json").exists() and not list((CASE / "run/sky_bridge").glob("*_request.json"))
+events_path = FIXTURE / "independent_events.jsonl"
+events = [json.loads(line) for line in events_path.read_text("utf-8").splitlines() if line]
+assert [event["event"] for event in events] == ["started"]
+warnings = Counter(CASE.joinpath("stdout.txt").read_text("utf-8").splitlines())
+assert raw_before == inventory(CASE) and fixture_before == inventory(FIXTURE)
+assert {path: sha(ROOT / path) for path in pins} == pins
+record = {"schema": "week6.transient001.independent_negative_audit.v1", "case_accepted": False,
+    "reviewer": "/root/week6_replanning_review (agent)", "created_utc": datetime.now(timezone.utc).isoformat(),
+    "original_owner_exit": owner["child_exit_code"], "owner_started_utc": owner["started_utc"],
+    "owner_finished_utc": owner["finished_utc"], "original_owner_receipt_sha256": sha(CASE / "owner_receipt.json"),
+    "actual_audit_exits": {row["audit_kind"]: row["actual_child_exit_code"] for row in process["actual_audit_receipts"]},
+    "strict_error": load(BASE / "review/transient001_strict_audit_001.json")["error"],
+    "protocol_error": load(BASE / "review/transient001_receipt_protocol_audit_001.json")["error"],
+    "process_summary": {"path": str(process_path), "sha256": sha(process_path)},
+    "strict_audit_sha256": sha(BASE / "review/transient001_strict_audit_001.json"),
+    "protocol_audit_sha256": sha(BASE / "review/transient001_receipt_protocol_audit_001.json"),
+    "runtime_status": runtime.get("status"), "counts": {key: summary[key] for key in
+        ("total_actions", "planning_calls", "model_requests", "unconfirmed_action_attempts", "semantic_goals_total")},
+    "native_proposals_identical": True, "response_content_sha256": content_digests[0], "attempts": attempts,
+    "independent_events": events, "warning_or_stdout_line_counts": dict(warnings),
+    "diagnosis": {"failure_boundary": "Local semantic native-plan validation before any action child/input.",
+        "contradiction": "prepare_report requires and forbids both Project BETA and Theme BLUE; it also forbids caller-required LOCAL COMPLETE.",
+        "guards_held": "All three proposals were refused, with no compiled workflow, goal credit, input, review or transient-recovery attempt.",
+        "feedback_was_not_missing": "The unchanged SYSTEM forbids excluding caller-final text. Both repair turns preserved exact rejected assistant content plus the specific Pydantic contradiction error and generic fixed repair instruction.",
+        "typed_limit": "Only duplicate postcondition conjunctions have a typed high-priority hint. This Pydantic ValidationError selects repair_category=None and the generic repair path; no contradiction-specific SYSTEM repair is present.",
+        "category_precision": "There is no literal invalid_native_reply category in the actual correction context: failure remains null; constraint_error contains the exact concrete validation error.",
+        "schema_limit": "The endpoint schema checks shape/length, not cross-list logical disjointness. Raw JSON schema validity is not semantic validity.",
+        "unknown_cause": "No claim that context truncation, transport loss, review controls, the application transient fault or a GUI action caused this failure.",
+        "no_proposed_scene_answer": "No replacement predicates, local plan edit, forced-ready or additional experiment is performed."},
+    "source_pin_count": len(pins), "source_pins_equal_freeze_and_unchanged": True,
+    "readme_sha256": sha(ROOT / "README.md"), "requirements_dev_sha256": sha(ROOT / "requirements-dev.txt"),
+    "all_case_raw_sha256": raw_before, "all_fixture_raw_sha256": fixture_before,
+    "specific_evidence_sha256": evidence.files, "auditor_source_sha256": sha(auditor_path),
+    "reader_source_sha256": sha(Path(__file__)), "raw_evidence_unchanged": True,
+    "operations": {"model": 0, "gui": 0, "ocr": 0, "process_control": 0, "training": 0, "experiment_reruns": 0},
+    "meaning": "The reader can exit0 when these negative-evidence checks hold; that is not a task or acceptance exit0."}
+with OUT.open("x", encoding="utf-8", newline="\n") as stream:
+    json.dump(record, stream, ensure_ascii=False, indent=2)
+    stream.write("\n")
+with OUT.with_suffix(".py.txt").open("xb") as stream:
+    stream.write(Path(__file__).read_bytes())
+print(json.dumps({"negative_audit": str(OUT), "sha256": sha(OUT), "case_accepted": False}))

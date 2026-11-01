@@ -1,0 +1,104 @@
+{
+  "schema": "week6.report.semantic_operation_review.v1",
+  "reviewer": "Root",
+  "reviewer_kind": "Codex Root agent review, not human sign-off",
+  "approved": true,
+  "reviewed_utc": "2026-10-29T02:12:00.032584+00:00",
+  "source_freeze": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\failed_contract_feedback_001\\final_source_freeze_001.json",
+    "sha256": "a2e222b18889df5736c4abf2a45f71bae79a24013f5afe9896539c4560568c35"
+  },
+  "independent_audit": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\transient002_strict_audit_001.json",
+    "sha256": "6b195cc8a6e1b068da780ef2c8edb9787269ba7885c39d0be818abe0ae13baf8"
+  },
+  "runtime": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\runtime_result.json",
+    "sha256": "5ba51c693fd1e49f4c775b67177b77d42452094a428c23195eb1618170838020"
+  },
+  "container": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002",
+  "stages": [
+    {
+      "stage_key": "1:1:prepare_report",
+      "native_instruction": "Prepare the BLUE report for project BETA by selecting the correct project and theme, then save the draft locally.",
+      "independent_transitions": [
+        "project_selected",
+        "theme_selected"
+      ],
+      "semantic_alignment_passed": true,
+      "rationale": "Reviewed as a retained FAILED attempt, not completed preparation. Inputs001/002 selected BETA then BLUE, independently recorded as project_selected/theme_selected. Input003 double-clicked the project title and produced no business transition. Saved pixels show Draft ready, not the predicted Draft Saved; the fixed condition failed and this attempt received no completion credit. The instruction's requested save was not performed. Later completion does not repair this historical status.",
+      "original_status": "failed"
+    },
+    {
+      "stage_key": "2:1:review_report",
+      "native_instruction": "Review the BLUE report for project BETA using the visible controls, ensuring the review is completed locally without external sync.",
+      "independent_transitions": [
+        "review_rejected",
+        "review_accepted"
+      ],
+      "semantic_alignment_passed": true,
+      "rationale": "The original round2 instruction explicitly performs local review. Before this goal, saved pixels show BETA/BLUE, Draft ready and Review report, with Review Complete absent. Input004 clicked Review report and caused the original review_rejected event and visible Review unavailable. Please retry. banner. After a fresh observation, the native planner selected the shifted Review report button at y1094; input005 caused review_accepted and Review complete. Both inputs belong to the same frozen goal; independent events, original v2 receipts and reviewed before/after pixels agree. No operator supplied a replacement goal, parked the cursor or replayed the old coordinates.",
+      "original_status": "succeeded"
+    },
+    {
+      "stage_key": "2:2:commit_report",
+      "native_instruction": "Commit the reviewed BLUE report for project BETA locally using the visible controls, ensuring no external communication or sync occurs.",
+      "independent_transitions": [
+        "local_commit"
+      ],
+      "semantic_alignment_passed": true,
+      "rationale": "The separate original round2 instruction explicitly commits the reviewed BETA/BLUE report locally. Its pre-input image shows Review complete and Commit locally, while LOCAL COMPLETE is absent. Native input006 clicked Commit locally; the independently recorded local_commit falls inside the original operation interval, and subsequent original pixels show Project BETA, Theme BLUE and LOCAL COMPLETE. Caller final passed separately. This goal does not grant completion credit to the earlier failed prepare_report.",
+      "original_status": "succeeded"
+    }
+  ],
+  "actually_viewed_saved_original_pixels": [
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\initial_observation\\monitor1_20261029_123513_427.png",
+      "sha256": "a9b634bbd620d4dbb2eabc3b722ed3ea941f296aaa892344eddf8f475c04be25"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\monitor1_20261029_124424_834.png",
+      "sha256": "d4332ef9ca6e21529964d0698276c7562f34b7f082ed69f16b66a99f2e4f5a9d"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\monitor1_20261029_124801_701.png",
+      "sha256": "b4e1ca38741780fce56b581e1b0a4b736a0091f32441f4aea4c7590fccc20d2d"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\contract_before_002_001\\monitor1_20261029_124912_185.png",
+      "sha256": "b4e1ca38741780fce56b581e1b0a4b736a0091f32441f4aea4c7590fccc20d2d"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_002_001_review_report\\001_review_report\\monitor1_20261029_125315_341.png",
+      "sha256": "efa25233e0794155ef73cf9f0a40aa38552473466c5b499d1e344c983746f7bc"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_002_001_review_report\\001_review_report\\monitor1_20261029_125806_533.png",
+      "sha256": "ce6b334440b49f4046c5159044a4f41052c37e9e9b51fbc0ce2e94862ccfabe6"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\contract_before_002_002\\monitor1_20261029_125829_576.png",
+      "sha256": "ce6b334440b49f4046c5159044a4f41052c37e9e9b51fbc0ce2e94862ccfabe6"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\caller_final_round_002\\monitor1_20261029_130334_384.png",
+      "sha256": "95982ce51d5d2ae25a43d43596c688331877a0aa002e4465c1559db6d0a3e559"
+    }
+  ],
+  "rejected_pre_input_contracts_reviewed": [],
+  "rejected_contract_rationale": "The strict audit records no pre-input contract rejection in this case. The executed first goal failed its fixed postcondition and remains failed. The application review rejection is a distinct event inside the second goal, not a pre-input contract rejection or executor exception.",
+  "caveats": [
+    "Controlled four-stage local fixture only; no arbitrary-application success rate, human sign-off or overall delivery approval is implied.",
+    "6 confirmed executor calls include three double_click calls and one title noop; repeated physical mouse events and ignored fixture events are retained, not counted as separate executor calls.",
+    "The first goal's raw step checks all passed while its semantic condition failed. Raw step checks do not establish the predicted save or completed preparation.",
+    "The native round2 reason incorrectly described unavailable forbidden-text feedback null as no forbidden text. The original null and reason remain unchanged and are not used as a validator pass.",
+    "The pointer overlaps the project title in saved draft images; no causal isolation of its OCR effect was performed. No cursor manipulation was used to improve the observation.",
+    "The lower-right Lenovo store notification remained visible and was not interacted with. It lies outside the fixture controls.",
+    "The original v2 interval includes immediate fresh-state acquisition; fixture review/commit events occur shortly after dispatch return but within that original interval. No grace period or timestamp extension was introduced.",
+    "1741.813 seconds is owned wall time including model, bridge, observations and logging; it is not pure model compute time or a causal speed comparison against normal024."
+  ],
+  "manual_findings": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_transient002_independent_audit_20261029\\root_manual_findings_001.json",
+    "sha256": "c409562ec60de86ffcad9dba8fbdfe63f0faa325f099730fb735f44ee913c0b7"
+  }
+}

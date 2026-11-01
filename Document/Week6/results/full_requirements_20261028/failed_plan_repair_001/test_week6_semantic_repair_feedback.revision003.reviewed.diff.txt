@@ -1,0 +1,23 @@
+--- tests/test_week6_semantic_repair_feedback.py
++++ tests/test_week6_semantic_repair_feedback.py
+@@ -20,6 +20,7 @@
+     SEMANTIC_GENERIC_REPAIR,
+     SEMANTIC_PREEXISTING_POSTCONDITIONS_REPAIR,
+     SEMANTIC_REPAIR_POLICY_VERSION,
++    SEMANTIC_REPEATED_OBJECTIVE_REPAIR,
+     SEMANTIC_SYSTEM_PROMPT,
+     _semantic_attempt_system,
+ )
+@@ -67,10 +68,11 @@
+     assert system(bodies[1]).count(SEMANTIC_DUPLICATE_POSTCONDITIONS_REPAIR) == 1
+     assert protocol["repair_policy"] == {
+         "schema_version": SEMANTIC_REPAIR_POLICY_VERSION,
+-        "trigger": "local_validation_error_with_typed_duplicate_or_preexisting_category",
++        "trigger": "local_validation_error_with_typed_duplicate_preexisting_or_repeated_category",
+         "system_feedback_sha256": hashlib.sha256(SEMANTIC_DUPLICATE_POSTCONDITIONS_REPAIR.encode()).hexdigest(),
+         "generic_feedback_sha256": hashlib.sha256(SEMANTIC_GENERIC_REPAIR.encode()).hexdigest(),
+         "preexisting_feedback_sha256": hashlib.sha256(SEMANTIC_PREEXISTING_POSTCONDITIONS_REPAIR.encode()).hexdigest(),
++        "repeated_feedback_sha256": hashlib.sha256(SEMANTIC_REPEATED_OBJECTIVE_REPAIR.encode()).hexdigest(),
+         "placement": "fixed_system_hint_before_exact_response_schema_and_final_user_repair",
+         "messages": "system_base_user_optional_previous_assistant_final_user",
+         "history": "immediately_previous_reply_only_rebuilt_from_base",

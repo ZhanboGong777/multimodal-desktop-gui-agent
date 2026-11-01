@@ -1,0 +1,38 @@
+{
+  "schema": "week6.semantic_repair_feedback.static_validation.v1",
+  "command": [
+    "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+    "-m",
+    "ruff",
+    "check",
+    "src/gui_agent/planning/semantic_workflow.py",
+    "tests/test_week6_semantic_repair_feedback.py"
+  ],
+  "launcher_pid": 83136,
+  "started_at_utc": "2026-10-28T11:03:44.594630+00:00",
+  "elapsed_seconds": 0.23499999998603016,
+  "actual_wait_exit_code": 0,
+  "owned_pins_before": {
+    "src/gui_agent/planning/semantic_workflow.py": "8019728a21f8c64ac7b19f52f33d0324380458a04033979bcea1ea1c7d630694",
+    "tests/test_week6_semantic_repair_feedback.py": "a0617a89717ee7cf7d2c70be5e13a67da5c3c7d934d5fe3a066413e7aabc43db"
+  },
+  "owned_pins_after": {
+    "src/gui_agent/planning/semantic_workflow.py": "8019728a21f8c64ac7b19f52f33d0324380458a04033979bcea1ea1c7d630694",
+    "tests/test_week6_semantic_repair_feedback.py": "a0617a89717ee7cf7d2c70be5e13a67da5c3c7d934d5fe3a066413e7aabc43db"
+  },
+  "owned_pins_unchanged": true,
+  "ast_syntax_valid": true,
+  "unchanged_native_and_preflight_AST": {
+    "_caller_contract_issue": true,
+    "_validate_native_predicates": true,
+    "_semantic_response_format": true,
+    "SemanticGoal": true,
+    "SemanticPlan": true,
+    "SemanticPlanResult": true
+  },
+  "validator_AST_identical_except_exception_subclass": true,
+  "base_system_constant_identical": true,
+  "pytest_or_collection_executed": false,
+  "no_actual_model_gui_calls": true,
+  "not_combined_or_full_validation": true
+}

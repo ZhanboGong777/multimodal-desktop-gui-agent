@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "multimodal-desktop-gui-agent"
+version = "2.1.0"
+description = "A multimodal LLM-powered desktop GUI agent prototype."
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+# Keep test scratch space inside the repository.
+#
+# The default is %TEMP%/pytest-of-<user>, and on a Windows machine whose account
+# name is not ASCII that directory has repeatedly come back "Access is denied"
+# (WinError 5) before a single test runs - a locked or half-removed folder that
+# pytest cannot rotate. A project-local base directory sidesteps it, and it is
+# ignored by Git either way.
+addopts = "--basetemp=.pytest-tmp"
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.coverage.run]
+source = ["gui_agent"]
+
+[tool.coverage.report]
+show_missing = true

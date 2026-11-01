@@ -1,0 +1,62 @@
+{
+  "schema": "week6.semantic_live.v6.existing_vl3b_candidate_preregistration.v1",
+  "protocol": "week6.semantic_subtasks.v6",
+  "freeze": "../model_candidate_vl3b_001/final_source_freeze_001.json",
+  "freeze_sha256": "f45685bbf863f8decf72a1ced94329938904d8b0884cdad57111853eeeb7c0ff",
+  "semantic_source_sha256": "ae50b05e029e0ee5330430ec67d5a5bb0d49fe62487d47ecb34b914fcb0d8337",
+  "contract": "../review/acceptance_contract_amendment_005.md",
+  "contract_sha256": "64ec7ba8e40fb3f64872ee260a3a1b277e71926b7491dc5c32cc9b481eae2062",
+  "previous_development_failures": "normal001 through013 remain unaccepted; normal013 used actual v2 role conversations and still returned duplicate goal checks before any input. Different model configurations are kept separate.",
+  "explicit_design_change": "Model-proposed intermediate literal postconditions are untrusted predictions. The v5 caller-final-only enum/membership and pool-specific caller count/length preflight restrictions are removed. No local plan authoring/merging or forced two-goal skeleton.",
+  "unchanged_task_and_environment": true,
+  "model": "qwen2.5vl:3b",
+  "model_digest": "fb90415cde1ef08aa669ae74b082d49b158729b6db1ab183c941417d507e71a1",
+  "configuration": "configs/week6_accuracy_persistent.yaml",
+  "temperature": 0,
+  "max_tokens": 4096,
+  "sdk_retries": 0,
+  "model_timeout_seconds": 900,
+  "global_timeout_seconds": 7200,
+  "global_max_actions": 20,
+  "global_max_planning_attempts": 24,
+  "global_max_http_dispatches": 32,
+  "normal": {
+    "name": "normal_014",
+    "project": "ALPHA",
+    "colour": "GREEN",
+    "fixture": "fixture_normal_010",
+    "reuse": "New independent fixture"
+  },
+  "transient": {
+    "name": "transient_001",
+    "project": "BETA",
+    "colour": "BLUE",
+    "fixture": "fixture_transient_001",
+    "application_review_rejections": 1
+  },
+  "caller": "Unchanged full natural-language instruction and three caller-final checks constructed by scripts/week6_semantic_acceptance.py. No milestone vocabulary or goal sequence supplied by the program.",
+  "required_evidence": [
+    "Initial native plan >=2 distinct meaningful objectives and exact raw-to-compiled origin",
+    "Each completed goal contract fixed before input, full predicate false on fresh before, confirmed real input, fresh verified post",
+    "No failed/unknown/cancel rescue, no completed-goal replay, shared budgets",
+    "Fresh immutable caller-final independent of model conditions",
+    "Independent project/theme/review/commit events in exact order with one unique actual Sky receipt per event",
+    "Actual owner wait0, unchanged pinned code and separate v6 machine auditor",
+    "Root agent reviews each native instruction against its actual business transitions; no human sign-off is claimed"
+  ],
+  "limits": "Before-false/after-true literal evidence alone is not semantic proof. Casefold substring is not a general negation recognizer. Future labels may be guessed incorrectly and must then fail. These are two controlled functional cases, not an arbitrary-app success-rate study.",
+  "final_full_regression": "Required after both accepted real cases. Current 3380 is collection only; full004 is not yet passed.",
+  "registered_utc": "2026-10-28T11:51:31.177202+00:00",
+  "added_generic_grounding": "Original-frame and refreshed-frame observable native text/ID conflicts are refused without dispatch or local ID replacement, with bounded replanning. Unique OCR labels may use native text-only targets. Same action/planning/HTTP/time budgets.",
+  "added_live_monitoring": "Parent counts relay persisted child events before child return; semantic completion remains outer-ledger gated. Ordinary observer faults do not retry input; cancellation propagates. Status elapsed uses a separate monitor clock.",
+  "model_metadata": {
+    "name": "qwen2.5vl:3b",
+    "digest": "fb90415cde1ef08aa669ae74b082d49b158729b6db1ab183c941417d507e71a1",
+    "size": 3200627168,
+    "meaning": "Already installed VL model; read-only tags, no download or generation"
+  },
+  "repair_experiment": "The same frozen week6.semantic_repair_feedback.v2 bounded role-conversation strategy is used without code changes. This separately registered candidate changes the runtime model to the already installed qwen2.5vl3b for both roles; it does not reclassify any old 7B failure.",
+  "runtime_model_change": "Both semantic and action roles use the existing qwen2.5vl3b CLI model option. It is a VL model, not a dedicated text model. Source/caller/OCR/budgets unchanged; not a same-model comparison.",
+  "owner_harness": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_full_requirements_20261028\\run_owned_model.py",
+  "owner_harness_sha256": "bbe7cc2f8d220a39f03710a71ea9f7fc83311aaa4f9dcaaa395e2cd7f8cb5a5d"
+}

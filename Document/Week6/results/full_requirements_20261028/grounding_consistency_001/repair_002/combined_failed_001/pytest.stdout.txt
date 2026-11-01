@@ -1,0 +1,405 @@
+........................................................................ [  9%]
+........................................................................ [ 18%]
+........................................................................ [ 27%]
+........................................................................ [ 36%]
+........................................................................ [ 45%]
+........................................................................ [ 54%]
+........................................................................ [ 63%]
+......................................FFFFFFFF....F.FFFF.FFF............ [ 72%]
+........................................................................ [ 81%]
+........................................................................ [ 90%]
+........................................................................ [ 99%]
+.......                                                                  [100%]
+================================== FAILURES ===================================
+_ test_t04_actual_planner_receives_nested_typing_then_send_only_without_changing_task _
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/grounding_consistency_001/root_combined_validation_001/pytest_tmp/test_t04_actual_planner_receiv0')
+
+    def test_t04_actual_planner_receives_nested_typing_then_send_only_without_changing_task(tmp_path):
+        runner, task, options, chat, client, recorder = _simulated_t04(tmp_path, fault="draft_only")
+        # Add prepared complete roles only for this prompt-contract test. The other
+        # synthetic runner fixtures intentionally have two anonymous controls.
+        observe = chat.observe
+        def observe_roles(**kwargs):
+            frame = observe(**kwargs)
+            _chat_controls(chat, frame)
+            return frame
+        chat.observe = observe_roles
+        options.max_planning_attempts = 2
+        original_instruction = task.instruction
+        marker = task.expect_text[0]
+        requests = _capture_t04_stage_transport(client)
+        result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+>       assert result.status == "succeeded" and chat.sent == marker
+E       AssertionError: assert ('failed' == 'succeeded'
+E         
+E         - succeeded
+E         + failed)
+
+tests\test_runtime_runner.py:2811: AssertionError
+_ test_t04_full_prompt_uses_the_current_authorised_ids_and_actual_ocr_text[\u53d1\u9001] _
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/grounding_consistency_001/root_combined_validation_001/pytest_tmp/test_t04_full_prompt_uses_the_0')
+send_text = '发送'
+
+    @pytest.mark.parametrize("send_text", ["发送", "SeNd"])
+    def test_t04_full_prompt_uses_the_current_authorised_ids_and_actual_ocr_text(tmp_path, send_text):
+        runner, task, options, chat, client, source = _approved_message_context(tmp_path)
+        current = chat.observe()
+        _chat_controls(chat, current)
+        current.element(f"{current.observation_id}-e091").text = send_text
+        requests = _capture_t04_stage_transport(client)
+        original_instruction = task.instruction
+        runner._plan_from(current, task, options, Timings(started=runner.clock()))
+>       assert len(requests) == 1 and not chat.actions
+E       assert (0 == 1)
+E        +  where 0 = len([])
+
+tests\test_runtime_runner.py:2864: AssertionError
+_ test_t04_full_prompt_uses_the_current_authorised_ids_and_actual_ocr_text[SeNd] _
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/grounding_consistency_001/root_combined_validation_001/pytest_tmp/test_t04_full_prompt_uses_the_1')
+send_text = 'SeNd'
+
+    @pytest.mark.parametrize("send_text", ["发送", "SeNd"])
+    def test_t04_full_prompt_uses_the_current_authorised_ids_and_actual_ocr_text(tmp_path, send_text):
+        runner, task, options, chat, client, source = _approved_message_context(tmp_path)
+        current = chat.observe()
+        _chat_controls(chat, current)
+        current.element(f"{current.observation_id}-e091").text = send_text
+        requests = _capture_t04_stage_transport(client)
+        original_instruction = task.instruction
+        runner._plan_from(current, task, options, Timings(started=runner.clock()))
+>       assert len(requests) == 1 and not chat.actions
+E       assert (0 == 1)
+E        +  where 0 = len([])
+
+tests\test_runtime_runner.py:2864: AssertionError
+_ test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example[editor] _
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/grounding_consistency_001/root_combined_validation_001/pytest_tmp/test_t04_incomplete_roles_keep0')
+missing_role = 'editor'
+
+    @pytest.mark.parametrize("missing_role", ["editor", "send", "ambiguous_editor", "ambiguous_send", "unauthorised"])
+    def test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example(tmp_path, missing_role):
+        runner, task, options, chat, client, source = _approved_message_context(tmp_path)
+        if missing_role == "unauthorised":
+            runner._message_composer = None
+        else:
+            number = 90 if "editor" in missing_role else 91
+            element = source.element(f"{source.observation_id}-e{number:03d}")
+            if missing_role.startswith("ambiguous"):
+                source.elements.append(element.model_copy(update={"element_id": f"{source.observation_id}-e098"}))
+            else:
+                source.elements.remove(element)
+        requests = _capture_t04_stage_transport(client)
+        runner._plan_from(source, task, options, Timings(started=runner.clock()))
+>       assert len(requests) == 1 and not chat.actions
+E       assert (0 == 1)
+E        +  where 0 = len([])
+
+tests\test_runtime_runner.py:2890: AssertionError
+_ test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example[send] _
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/grounding_consistency_001/root_combined_validation_001/pytest_tmp/test_t04_incomplete_roles_keep1')
+missing_role = 'send'
+
+    @pytest.mark.parametrize("missing_role", ["editor", "send", "ambiguous_editor", "ambiguous_send", "unauthorised"])
+    def test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example(tmp_path, missing_role):
+        runner, task, options, chat, client, source = _approved_message_context(tmp_path)
+        if missing_role == "unauthorised":
+            runner._message_composer = None
+        else:
+            number = 90 if "editor" in missing_role else 91
+            element = source.element(f"{source.observation_id}-e{number:03d}")
+            if missing_role.startswith("ambiguous"):
+                source.elements.append(element.model_copy(update={"element_id": f"{source.observation_id}-e098"}))
+            else:
+                source.elements.remove(element)
+        requests = _capture_t04_stage_transport(client)
+        runner._plan_from(source, task, options, Timings(started=runner.clock()))
+>       assert len(requests) == 1 and not chat.actions
+E       assert (0 == 1)
+E        +  where 0 = len([])
+
+tests\test_runtime_runner.py:2890: AssertionError
+_ test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example[ambiguous_editor] _
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/grounding_consistency_001/root_combined_validation_001/pytest_tmp/test_t04_incomplete_roles_keep2')
+missing_role = 'ambiguous_editor'
+
+    @pytest.mark.parametrize("missing_role", ["editor", "send", "ambiguous_editor", "ambiguous_send", "unauthorised"])
+    def test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example(tmp_path, missing_role):
+        runner, task, options, chat, client, source = _approved_message_context(tmp_path)
+        if missing_role == "unauthorised":
+            runner._message_composer = None
+        else:
+            number = 90 if "editor" in missing_role else 91
+            element = source.element(f"{source.observation_id}-e{number:03d}")
+            if missing_role.startswith("ambiguous"):
+                source.elements.append(element.model_copy(update={"element_id": f"{source.observation_id}-e098"}))
+            else:
+                source.elements.remove(element)
+        requests = _capture_t04_stage_transport(client)
+        runner._plan_from(source, task, options, Timings(started=runner.clock()))
+>       assert len(requests) == 1 and not chat.actions
+E       assert (0 == 1)
+E        +  where 0 = len([])
+
+tests\test_runtime_runner.py:2890: AssertionError
+_ test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example[ambiguous_send] _
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/grounding_consistency_001/root_combined_validation_001/pytest_tmp/test_t04_incomplete_roles_keep3')
+missing_role = 'ambiguous_send'
+
+    @pytest.mark.parametrize("missing_role", ["editor", "send", "ambiguous_editor", "ambiguous_send", "unauthorised"])
+    def test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example(tmp_path, missing_role):
+        runner, task, options, chat, client, source = _approved_message_context(tmp_path)
+        if missing_role == "unauthorised":
+            runner._message_composer = None
+        else:
+            number = 90 if "editor" in missing_role else 91
+            element = source.element(f"{source.observation_id}-e{number:03d}")
+            if missing_role.startswith("ambiguous"):
+                source.elements.append(element.model_copy(update={"element_id": f"{source.observation_id}-e098"}))
+            else:
+                source.elements.remove(element)
+        requests = _capture_t04_stage_transport(client)
+        runner._plan_from(source, task, options, Timings(started=runner.clock()))
+>       assert len(requests) == 1 and not chat.actions
+E       assert (0 == 1)
+E        +  where 0 = len([])
+
+tests\test_runtime_runner.py:2890: AssertionError
+_ test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example[unauthorised] _
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/grounding_consistency_001/root_combined_validation_001/pytest_tmp/test_t04_incomplete_roles_keep4')
+missing_role = 'unauthorised'
+
+    @pytest.mark.parametrize("missing_role", ["editor", "send", "ambiguous_editor", "ambiguous_send", "unauthorised"])
+    def test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example(tmp_path, missing_role):
+        runner, task, options, chat, client, source = _approved_message_context(tmp_path)
+        if missing_role == "unauthorised":
+            runner._message_composer = None
+        else:
+            number = 90 if "editor" in missing_role else 91
+            element = source.element(f"{source.observation_id}-e{number:03d}")
+            if missing_role.startswith("ambiguous"):
+                source.elements.append(element.model_copy(update={"element_id": f"{source.observation_id}-e098"}))
+            else:
+                source.elements.remove(element)
+        requests = _capture_t04_stage_transport(client)
+        runner._plan_from(source, task, options, Timings(started=runner.clock()))
+>       assert len(requests) == 1 and not chat.actions
+E       assert (0 == 1)
+E        +  where 0 = len([])
+
+tests\test_runtime_runner.py:2890: AssertionError
+_________ test_t04_send_only_stage_still_rejects_an_uncommitted_draft _________
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/grounding_consistency_001/root_combined_validation_001/pytest_tmp/test_t04_send_only_stage_still0')
+
+    def test_t04_send_only_stage_still_rejects_an_uncommitted_draft(tmp_path):
+        runner, task, options, chat, client, recorder = _simulated_t04(tmp_path, fault="draft_only")
+        options.max_planning_attempts = 3
+        requests = _capture_t04_stage_transport(client)
+        checks = []
+        def uncommitted(spec, frame):
+            checks.append((spec.expect_text, frame.observation_id))
+            return VerificationResult(
+                outcome="failed", detail="prepared uncommitted IME draft",
+                evidence={"composition_pending": True, "actual_draft": chat.draft},
+            )
+        runner.verifier.check_message_draft = uncommitted
+        original_instruction = task.instruction
+        marker = task.expect_text[0]
+        result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+        assert result.status == "failed" and not chat.sent and len(chat.actions) == 3
+>       assert len(requests) == 2 and requests[1]["instruction"] != original_instruction
+E       assert (0 == 2)
+E        +  where 0 = len([])
+
+tests\test_runtime_runner.py:2941: AssertionError
+_ test_t04_planning_failures_keep_actual_request_and_response_or_exception[invalid_response] _
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/grounding_consistency_001/root_combined_validation_001/pytest_tmp/test_t04_planning_failures_kee0')
+failure = 'invalid_response'
+
+    @pytest.mark.parametrize("failure", ["invalid_response", "provider_exception", "interrupted"])
+    def test_t04_planning_failures_keep_actual_request_and_response_or_exception(tmp_path, failure):
+        from gui_agent.models.base import ModelResponse
+        runner, task, options, chat, client, recorder = _simulated_t04(tmp_path)
+        original = client.complete
+        def complete(messages, **kwargs):
+            if messages[0]["content"].startswith("Plan GUI actions"):
+                if failure == "provider_exception":
+                    raise RuntimeError("prepared provider failure")
+                if failure == "interrupted":
+                    raise KeyboardInterrupt
+                return ModelResponse(content="invalid prepared response", model_name=client.model_name,
+                                     provider=client.name)
+            return original(messages, **kwargs)
+        client.complete = complete
+        result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+>       assert result.status == ("cancelled" if failure == "interrupted" else "blocked") and not chat.actions
+E       AssertionError: assert ('succeeded' == 'blocked'
+E         
+E         - blocked
+E         + succeeded)
+
+tests\test_runtime_runner.py:2984: AssertionError
+_ test_t04_planning_failures_keep_actual_request_and_response_or_exception[provider_exception] _
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/grounding_consistency_001/root_combined_validation_001/pytest_tmp/test_t04_planning_failures_kee1')
+failure = 'provider_exception'
+
+    @pytest.mark.parametrize("failure", ["invalid_response", "provider_exception", "interrupted"])
+    def test_t04_planning_failures_keep_actual_request_and_response_or_exception(tmp_path, failure):
+        from gui_agent.models.base import ModelResponse
+        runner, task, options, chat, client, recorder = _simulated_t04(tmp_path)
+        original = client.complete
+        def complete(messages, **kwargs):
+            if messages[0]["content"].startswith("Plan GUI actions"):
+                if failure == "provider_exception":
+                    raise RuntimeError("prepared provider failure")
+                if failure == "interrupted":
+                    raise KeyboardInterrupt
+                return ModelResponse(content="invalid prepared response", model_name=client.model_name,
+                                     provider=client.name)
+            return original(messages, **kwargs)
+        client.complete = complete
+        result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+>       assert result.status == ("cancelled" if failure == "interrupted" else "blocked") and not chat.actions
+E       AssertionError: assert ('succeeded' == 'blocked'
+E         
+E         - blocked
+E         + succeeded)
+
+tests\test_runtime_runner.py:2984: AssertionError
+_ test_t04_planning_failures_keep_actual_request_and_response_or_exception[interrupted] _
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/grounding_consistency_001/root_combined_validation_001/pytest_tmp/test_t04_planning_failures_kee2')
+failure = 'interrupted'
+
+    @pytest.mark.parametrize("failure", ["invalid_response", "provider_exception", "interrupted"])
+    def test_t04_planning_failures_keep_actual_request_and_response_or_exception(tmp_path, failure):
+        from gui_agent.models.base import ModelResponse
+        runner, task, options, chat, client, recorder = _simulated_t04(tmp_path)
+        original = client.complete
+        def complete(messages, **kwargs):
+            if messages[0]["content"].startswith("Plan GUI actions"):
+                if failure == "provider_exception":
+                    raise RuntimeError("prepared provider failure")
+                if failure == "interrupted":
+                    raise KeyboardInterrupt
+                return ModelResponse(content="invalid prepared response", model_name=client.model_name,
+                                     provider=client.name)
+            return original(messages, **kwargs)
+        client.complete = complete
+        result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+>       assert result.status == ("cancelled" if failure == "interrupted" else "blocked") and not chat.actions
+E       AssertionError: assert ('succeeded' == 'cancelled'
+E         
+E         - cancelled
+E         + succeeded)
+
+tests\test_runtime_runner.py:2984: AssertionError
+_ test_t04_automated_planning_evidence_time_is_never_subtracted_as_human_confirmation _
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/grounding_consistency_001/root_combined_validation_001/pytest_tmp/test_t04_automated_planning_ev0')
+
+    def test_t04_automated_planning_evidence_time_is_never_subtracted_as_human_confirmation(tmp_path):
+        clock = _ManualRuntimeClock()
+        runner, task, options, _, client, recorder = _simulated_t04(tmp_path, clock=clock)
+        original_complete = client.complete
+        def complete(messages, **kwargs):
+            if messages[0]["content"].startswith("Plan GUI actions"):
+                clock.value += 2
+            return original_complete(messages, **kwargs)
+        client.complete = complete
+        original_save = recorder.session.save_json
+        def save_json(name, payload):
+            if name.startswith("planning_"):
+                clock.value += 3
+            return original_save(name, payload)
+        recorder.session.save_json = save_json
+        def confirm(_plan):
+            clock.value += 2
+            return True
+        result = runner.run(task, options, confirm=confirm, high_risk_confirm=confirm)
+        assert result.status == "succeeded"
+>       assert result.planner_ms == 2_000, "request/response recording is outside the actual planner call"
+E       AssertionError: request/response recording is outside the actual planner call
+E       assert 0.0 == 2000
+E        +  where 0.0 = TaskRunResult(run_id='simulated-T04', case_id='T04', instruction='Type WEEK4_MESSAGE_CHECK_20261006_110000 into the me...simulated-T04', stop_reason='', error_type='', failed_step_id=None, recovery_records=[], unconfirmed_action_attempts=0).planner_ms
+
+tests\test_runtime_runner.py:3015: AssertionError
+__ test_t04_editor_role_survives_translation_and_original_rgb_checks[False] ___
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/grounding_consistency_001/root_combined_validation_001/pytest_tmp/test_t04_editor_role_survives_0')
+change_pixels = False
+
+    @pytest.mark.parametrize("change_pixels", [False, True])
+    def test_t04_editor_role_survives_translation_and_original_rgb_checks(tmp_path, change_pixels):
+        runner, task, options, chat, _, contexts = _prepared_editor_mapping_run(tmp_path, change_pixels=change_pixels)
+        result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+>       assert result.status == "succeeded" and chat.sent == task.expect_text[0]
+E       AssertionError: assert ('failed' == 'succeeded'
+E         
+E         - succeeded
+E         + failed)
+
+tests\test_runtime_runner.py:3116: AssertionError
+___ test_t04_editor_role_survives_translation_and_original_rgb_checks[True] ___
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/grounding_consistency_001/root_combined_validation_001/pytest_tmp/test_t04_editor_role_survives_1')
+change_pixels = True
+
+    @pytest.mark.parametrize("change_pixels", [False, True])
+    def test_t04_editor_role_survives_translation_and_original_rgb_checks(tmp_path, change_pixels):
+        runner, task, options, chat, _, contexts = _prepared_editor_mapping_run(tmp_path, change_pixels=change_pixels)
+        result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+>       assert result.status == "succeeded" and chat.sent == task.expect_text[0]
+E       AssertionError: assert ('failed' == 'succeeded'
+E         
+E         - succeeded
+E         + failed)
+
+tests\test_runtime_runner.py:3116: AssertionError
+_ test_t04_editor_role_or_post_mapping_evidence_change_stops_all_input[source_ambiguous] _
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/grounding_consistency_001/root_combined_validation_001/pytest_tmp/test_t04_editor_role_or_post_m0')
+phase_fault = 'source_ambiguous'
+
+    @pytest.mark.parametrize("phase_fault", [
+        "source_ambiguous", "current_missing", "current_ambiguous", "post_missing", "post_ambiguous",
+        "post_rgb", "post_header", "post_window", "post_foreground",
+    ])
+    def test_t04_editor_role_or_post_mapping_evidence_change_stops_all_input(tmp_path, phase_fault):
+        runner, task, options, chat, _, contexts = _prepared_editor_mapping_run(tmp_path, phase_fault=phase_fault)
+        result = runner.run(task, options, confirm=lambda _: True, high_risk_confirm=lambda _: True)
+>       assert result.status == "failed" and not chat.actions and not chat.draft and not chat.sent
+E       AssertionError: assert ('failed' == 'failed'
+E         
+E           failed and not [(DesktopAction(action_type='click', x=371, y=350, start=None, end=None, text=None, key=None, keys=None, scroll_amount...rt=None, end=None, text=None, key=None, keys=None, scroll_amount=None, duration=None, target_description=None), False)])
+E        +  where [(DesktopAction(action_type='click', x=371, y=350, start=None, end=None, text=None, key=None, keys=None, scroll_amount...rt=None, end=None, text=None, key=None, keys=None, scroll_amount=None, duration=None, target_description=None), False)] = <test_runtime_runner.SimulatedChat object at 0x000002256B8BDD60>.actions
+
+tests\test_runtime_runner.py:3134: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_runtime_runner.py::test_t04_actual_planner_receives_nested_typing_then_send_only_without_changing_task
+FAILED tests/test_runtime_runner.py::test_t04_full_prompt_uses_the_current_authorised_ids_and_actual_ocr_text[\u53d1\u9001]
+FAILED tests/test_runtime_runner.py::test_t04_full_prompt_uses_the_current_authorised_ids_and_actual_ocr_text[SeNd]
+FAILED tests/test_runtime_runner.py::test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example[editor]
+FAILED tests/test_runtime_runner.py::test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example[send]
+FAILED tests/test_runtime_runner.py::test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example[ambiguous_editor]
+FAILED tests/test_runtime_runner.py::test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example[ambiguous_send]
+FAILED tests/test_runtime_runner.py::test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example[unauthorised]
+FAILED tests/test_runtime_runner.py::test_t04_send_only_stage_still_rejects_an_uncommitted_draft
+FAILED tests/test_runtime_runner.py::test_t04_planning_failures_keep_actual_request_and_response_or_exception[invalid_response]
+FAILED tests/test_runtime_runner.py::test_t04_planning_failures_keep_actual_request_and_response_or_exception[provider_exception]
+FAILED tests/test_runtime_runner.py::test_t04_planning_failures_keep_actual_request_and_response_or_exception[interrupted]
+FAILED tests/test_runtime_runner.py::test_t04_automated_planning_evidence_time_is_never_subtracted_as_human_confirmation
+FAILED tests/test_runtime_runner.py::test_t04_editor_role_survives_translation_and_original_rgb_checks[False]
+FAILED tests/test_runtime_runner.py::test_t04_editor_role_survives_translation_and_original_rgb_checks[True]
+FAILED tests/test_runtime_runner.py::test_t04_editor_role_or_post_mapping_evidence_change_stops_all_input[source_ambiguous]
+16 failed, 783 passed in 298.59s (0:04:58)

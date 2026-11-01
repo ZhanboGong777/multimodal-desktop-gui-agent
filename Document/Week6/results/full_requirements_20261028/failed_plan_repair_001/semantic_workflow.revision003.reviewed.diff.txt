@@ -1,0 +1,188 @@
+--- src/gui_agent/planning/semantic_workflow.py
++++ src/gui_agent/planning/semantic_workflow.py
+@@ -47,7 +47,7 @@
+ SEMANTIC_INSTRUCTION_MAX_CHARACTERS = 600
+ SEMANTIC_CHECK_MAX_CHARACTERS = 200
+ SEMANTIC_CHECKS_PER_LIST = 8
+-SEMANTIC_REPAIR_POLICY_VERSION = "week6.semantic_repair_feedback.v3"
++SEMANTIC_REPAIR_POLICY_VERSION = "week6.semantic_repair_feedback.v4"
+ SEMANTIC_FAILED_CONTRACT_REPAIR = (
+     "The previous model's predicted conditions were not achieved; the caller "
+     "request has not changed. Missing predicted text is not missing caller "
+@@ -57,6 +57,7 @@
+     "Plan only unfinished operations, do not replay completed selections or "
+     "verified objectives, and do not repeat the failed contract unchanged. "
+     "Use a justified distinguishable outcome within the same remaining budgets."
++    ' present_expected_text contains only original expected literals matched in that failed verification; null is unknown. A match is context, not operation or objective completion credit. Do not restart already established selections just to reproduce a guessed missing caption. For a revision, prefer grouping unfinished requested operations that culminate in the same final outcome into one objective. Its instruction must explicitly name every merged operation. Split remaining work only when each earlier objective can pass without performing any later objective. Never predict final persistence in an earlier review-only objective, or invent another final success banner for a later objective. This is guidance, not permission to force ready or claim old failed work succeeded.'
+ )
+ SEMANTIC_DUPLICATE_POSTCONDITIONS_REPAIR = (
+     "Repair instruction for this attempt: The preceding answer reused one complete "
+@@ -96,6 +97,19 @@
+     "supported verifiable remaining workflow is justified, return "
+     "needs_clarification or refused without forcing ready."
+ )
++SEMANTIC_REPEATED_OBJECTIVE_REPAIR = (
++    "Your preceding answer repeats a failed model-predicted contract and cannot run. "
++    "Generate a genuinely revised remaining workflow. The missing predicted caption "
++    "was your prediction, not evidence that the caller changed or omitted a parameter. "
++    "If a predicted literal is absent from the original caller predicates, do not "
++    "keep requiring it solely because you wrote it before. Preserve every unfinished "
++    "caller operation explicitly in the new instructions and preserve the caller's "
++    "final predicates. Do not restart selections or completed work. Select justified "
++    "distinguishable outcomes for remaining operations; do not invent application "
++    "features to obtain a failed prediction. Renaming a goal is not a revision. "
++    "Return needs_clarification with no goals if no supported revised workflow is "
++    "justified; never force ready. Only a new native reply can replace the proposal."
++)
+ _INLINE_CORRECTION_MAX_CHARACTERS = 2000
+ _INPUT_TYPES = {"click", "double_click", "right_click", "drag", "scroll", "type_text", "key_press", "hotkey"}
+ _PRIMITIVE_ONLY = re.compile(r"^(?:click|double[_ -]?click|right[_ -]?click|move|drag|type_text|key_press|hotkey|scroll|wait|finish)\b", re.IGNORECASE)
+@@ -111,18 +125,24 @@
+     """The existing full-predicate before check alone supplies this category."""
+ 
+ 
++class _RepeatedSemanticObjectiveError(ValueError):
++    """A previously failed/rejected native objective must not be dispatched again."""
++
++
+ def _semantic_attempt_system(
+     response_format: dict[str, Any],
+-    repair_category: Literal["duplicate_postconditions", "preexisting_postconditions"] | None = None,
++    repair_category: Literal["duplicate_postconditions", "preexisting_postconditions", "repeated_objective"] | None = None,
+ ) -> str:
+     """Rebuild exactly one attempt's instructions; raw model data never enters them."""
+-    if repair_category not in {None, "duplicate_postconditions", "preexisting_postconditions"}:
++    if repair_category not in {None, "duplicate_postconditions", "preexisting_postconditions", "repeated_objective"}:
+         raise ValueError("unknown semantic repair category")
+     instructions = SEMANTIC_SYSTEM_PROMPT
+     if repair_category == "duplicate_postconditions":
+         instructions += "\n" + SEMANTIC_DUPLICATE_POSTCONDITIONS_REPAIR + "\n"
+     elif repair_category == "preexisting_postconditions":
+         instructions += "\n" + SEMANTIC_PREEXISTING_POSTCONDITIONS_REPAIR + "\n"
++    elif repair_category == "repeated_objective":
++        instructions += "\n" + SEMANTIC_REPEATED_OBJECTIVE_REPAIR + "\n"
+     schema_text = json.dumps(response_format["json_schema"]["schema"], ensure_ascii=False, sort_keys=True)
+     return instructions + "\nExact response JSON schema (also supplied as response_format):\n" + schema_text
+ 
+@@ -131,10 +151,11 @@
+     """Exact role/history policy; none of the native validation rules change."""
+     return {
+         "schema_version": SEMANTIC_REPAIR_POLICY_VERSION,
+-        "trigger": "local_validation_error_with_typed_duplicate_or_preexisting_category",
++        "trigger": "local_validation_error_with_typed_duplicate_preexisting_or_repeated_category",
+         "system_feedback_sha256": hashlib.sha256(SEMANTIC_DUPLICATE_POSTCONDITIONS_REPAIR.encode()).hexdigest(),
+         "generic_feedback_sha256": hashlib.sha256(SEMANTIC_GENERIC_REPAIR.encode()).hexdigest(),
+         "preexisting_feedback_sha256": hashlib.sha256(SEMANTIC_PREEXISTING_POSTCONDITIONS_REPAIR.encode()).hexdigest(),
++        "repeated_feedback_sha256": hashlib.sha256(SEMANTIC_REPEATED_OBJECTIVE_REPAIR.encode()).hexdigest(),
+         "placement": "fixed_system_hint_before_exact_response_schema_and_final_user_repair",
+         "messages": "system_base_user_optional_previous_assistant_final_user",
+         "history": "immediately_previous_reply_only_rebuilt_from_base",
+@@ -148,10 +169,10 @@
+     instruction: str, base_context: dict[str, Any], system: str, *,
+     correction_context: dict[str, Any] | None = None,
+     previous_response: str | None = None,
+-    repair_category: Literal["duplicate_postconditions", "preexisting_postconditions"] | None = None,
++    repair_category: Literal["duplicate_postconditions", "preexisting_postconditions", "repeated_objective"] | None = None,
+ ) -> list[dict[str, Any]]:
+     """Keep the first caller packet immutable; repair only the preceding reply."""
+-    if repair_category not in {None, "duplicate_postconditions", "preexisting_postconditions"}:
++    if repair_category not in {None, "duplicate_postconditions", "preexisting_postconditions", "repeated_objective"}:
+         raise ValueError("unknown semantic repair category")
+     messages = [{"role": "system", "content": system},
+                 *ModelRequest(instruction=instruction, context=base_context).to_messages()]
+@@ -168,6 +189,8 @@
+         repair_instruction = SEMANTIC_DUPLICATE_POSTCONDITIONS_REPAIR
+     elif repair_category == "preexisting_postconditions":
+         repair_instruction = SEMANTIC_PREEXISTING_POSTCONDITIONS_REPAIR
++    elif repair_category == "repeated_objective":
++        repair_instruction = SEMANTIC_REPEATED_OBJECTIVE_REPAIR
+     messages.append({"role": "user", "content": json.dumps({
+         "instruction": instruction, "context": correction_context,
+         "repair_instruction": repair_instruction,
+@@ -312,10 +335,13 @@
+                 raise ValueError("failed semantic verifier feedback is not a subset of its native contract")
+             return list(values)
+ 
++        missing = native_literals("missing", goal["expect_text"])
+         return {"category": "semantic_postconditions_unsatisfied", "failed_goal": goal,
+                 "predicate_feedback": {
+-                    "missing_expected_text": native_literals("missing", goal["expect_text"]),
++                    "missing_expected_text": missing,
+                     "present_forbidden_text": native_literals("unexpected", goal["forbid_text"]),
++                    "present_expected_text": (None if missing is None else
++                                              [value for value in goal["expect_text"] if value not in missing]),
+                 }, "required_revision": SEMANTIC_FAILED_CONTRACT_REPAIR}
+     category = ("semantic_postconditions_unsatisfied" if status == "failed" else
+                 "caller_final_unsatisfied" if "reason" in failure else "previous_objective_not_completed")
+@@ -378,7 +404,8 @@
+     def decompose(self, request: WorkflowRequest, *, evidence_directory: Path,
+                   budgeted_client: BudgetedModelClient, initial_observation: ObservationSnapshot,
+                   completed_subgoals: list[dict[str, Any]], max_calls: int, deadline: float,
+-                  revision: bool = False, failure: dict[str, Any] | None = None) -> SemanticPlanResult:
++                  revision: bool = False, failure: dict[str, Any] | None = None,
++                  blocked_signatures: tuple[tuple[Any, ...], ...] = ()) -> SemanticPlanResult:
+         directory = Path(evidence_directory)
+         directory.mkdir(parents=True, exist_ok=False)
+         started, before_requests = self.clock(), budgeted_client.request_count
+@@ -435,7 +462,7 @@
+                     "oversized_previous_response": "archived_in_full_not_repeated_in_correction_context",
+                 },
+             })
+-            repair_category: Literal["duplicate_postconditions", "preexisting_postconditions"] | None = None
++            repair_category: Literal["duplicate_postconditions", "preexisting_postconditions", "repeated_objective"] | None = None
+             correction_context: dict[str, Any] | None = None
+             previous_response: str | None = None
+             for attempt in range(min(max_calls, self.max_format_retries + 1)):
+@@ -471,14 +498,18 @@
+                     native = json.loads(response.content, object_pairs_hook=_unique_keys)
+                     _validate_native_predicates(native, request)
+                     proposal = SemanticPlan.model_validate(native, strict=True)
+-                    self._validate(proposal, request, initial_observation, completed_subgoals, revision)
++                    self._validate(proposal, request, initial_observation, completed_subgoals, revision,
++                                   blocked_signatures=blocked_signatures)
+                 except ValueError as exc:
++                    result.status = "blocked" if isinstance(exc, _RepeatedSemanticObjectiveError) else "failed"
+                     result.error = str(exc)
+                     repair_category = None
+                     if isinstance(exc, _DuplicateSemanticPostconditionsError):
+                         repair_category = "duplicate_postconditions"
+                     elif isinstance(exc, _PreexistingSemanticPostconditionsError):
+                         repair_category = "preexisting_postconditions"
++                    elif isinstance(exc, _RepeatedSemanticObjectiveError):
++                        repair_category = "repeated_objective"
+                     _write_new_json(directory / f"attempt_{attempt + 1:02d}_error.json", {"error": str(exc)})
+                     correction_context = {**base_context, "constraint_error": str(exc),
+                         "previous_response_record": str((directory / f"attempt_{attempt + 1:02d}_response.json").resolve()),
+@@ -515,7 +546,8 @@
+         return result
+ 
+     def _validate(self, proposal: SemanticPlan, request: WorkflowRequest, before: ObservationSnapshot,
+-                  completed: list[dict[str, Any]], revision: bool) -> None:
++                  completed: list[dict[str, Any]], revision: bool, *,
++                  blocked_signatures: tuple[tuple[Any, ...], ...] = ()) -> None:
+         if proposal.status != "ready":
+             return
+         if not (1 if revision else 2) <= len(proposal.subgoals) <= self.max_subgoals:
+@@ -553,6 +585,12 @@
+         if Verifier().check_task(_goal_task(proposal.subgoals[0], request), before).passed:
+             raise _PreexistingSemanticPostconditionsError(
+                 "first semantic goal postconditions already hold; existing context cannot prove execution"
++            )
++        if any(_signature(goal) in blocked_signatures for goal in proposal.subgoals):
++            raise _RepeatedSemanticObjectiveError(
++                "semantic replanning repeated an unchanged failed/rejected objective; "
++                "regenerate only unfinished work without replaying that native contract. "
++                "Do not rename it or claim the missing predicted caption is a caller requirement."
+             )
+ 
+ 
+@@ -741,7 +779,8 @@
+                     evidence_directory=self.directory / f"semantic_plan_round_{round_index:03d}",
+                     budgeted_client=client, initial_observation=before, completed_subgoals=result.completed_subgoals,
+                     max_calls=options.max_planning_attempts - result.planning_calls - 1, deadline=deadline,
+-                    revision=round_index > 1, failure=failure)
++                    revision=round_index > 1, failure=failure,
++                    blocked_signatures=tuple(failed_objectives))
+                 result.plans.append(plan)
+                 result.planning_calls += plan.planning_calls
+                 if plan.status != "ready" or plan.workflow is None or plan.proposal is None:

@@ -1,0 +1,28 @@
+{
+  "schema_version": "week6.semantic_subtasks.v6",
+  "caller_request": {
+    "workflow_id": "SemanticLab",
+    "instruction": "Set the requested preference and persist the configuration",
+    "expect_text": [
+      "Verified part 1",
+      "Verified part 2",
+      "Final accepted"
+    ],
+    "forbid_text": [
+      "ERROR"
+    ]
+  },
+  "options": {
+    "execute": true,
+    "max_actions": 8,
+    "task_timeout_seconds": 240.0,
+    "verification_timeout_seconds": 0.0,
+    "verification_poll_interval_seconds": 0.5,
+    "confirm": false,
+    "require_preconditions": true,
+    "max_planning_attempts": 8
+  },
+  "absolute_deadline": 340.0,
+  "max_model_requests": 1,
+  "max_goal_planning_calls": 3
+}

@@ -1,0 +1,64 @@
+{
+  "schema": "week6.local_model.acquisition.actual_exit.v1",
+  "owner": {
+    "pid": 24208,
+    "create_time": 1793455667.1768656,
+    "exe": "D:\\anaconda\\python.exe",
+    "cmdline": [
+      "D:\\anaconda\\python.exe",
+      "-X",
+      "utf8",
+      "tmp/week6_full_requirements_20261028/acquire_gemma3_001.py"
+    ]
+  },
+  "launcher": {
+    "pid": 22812,
+    "create_time": 1793455667.5777705,
+    "exe": "D:\\Developer\\Ollama\\ollama.exe",
+    "cmdline": [
+      "D:/Developer/Ollama/ollama.exe",
+      "pull",
+      "gemma3:4b"
+    ]
+  },
+  "command": [
+    "D:/Developer/Ollama/ollama.exe",
+    "pull",
+    "gemma3:4b"
+  ],
+  "started_utc": "2026-10-31T14:07:47.548210+00:00",
+  "finished_utc": "2026-10-31T14:12:46.898083+00:00",
+  "elapsed_seconds": 299.3429999999971,
+  "actual_child_exit_code": 0,
+  "model": "gemma3:4b",
+  "installed": true,
+  "selected_model": {
+    "name": "gemma3:4b",
+    "model": "gemma3:4b",
+    "modified_at": "2026-11-01T01:12:46.2874911+11:00",
+    "size": 3350272403,
+    "digest": "68ceab7e468a31c988b44d5a4984a0e21f58c4f7158c6ce29c1804babac38df7",
+    "details": {
+      "parent_model": "dhiltgen/gemma3:4b-it-q4_K_M-llamacpp",
+      "format": "gguf",
+      "family": "gemma3",
+      "families": [
+        "gemma3",
+        "clip"
+      ],
+      "parameter_size": "3.9B",
+      "quantization_level": "Q4_K_M",
+      "context_length": 131072,
+      "embedding_length": 2560
+    },
+    "capabilities": [
+      "completion",
+      "vision"
+    ]
+  },
+  "code_and_readme_unchanged": true,
+  "inference_requested": false,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "9b6c985bcd2ed3e8e8ede12043bd30bbb60f2ef3d26d31e94572735024765c32",
+  "meaning": "Actual download CLI wait only; not a model/GUI task or acceptance result."
+}

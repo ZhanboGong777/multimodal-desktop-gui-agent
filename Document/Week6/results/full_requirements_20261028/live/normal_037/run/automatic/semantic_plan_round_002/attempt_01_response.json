@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 20406.0,
+  "usage": {
+    "prompt_tokens": 1635,
+    "completion_tokens": 228,
+    "total_tokens": 1863
+  },
+  "error": null,
+  "content_length": 1019,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"Revision plan focuses on completing the missing 'Report Generated' condition by explicitly performing the report generation step, then proceeding to review and commit. The final state requires 'LOCAL COMPLETE' as the only persistent postcondition.\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Generate the GREEN report for project ALPHA by selecting the project, choosing the GREEN theme, and clicking the visible 'Generate Report' control.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\", \"Report Generated\"],\n      \"forbid_text\": [\"ERROR\", \"UNAVAILABLE\", \"RETRY\"],\n      \"goal_id\": \"generate_report\"\n    },\n    {\n      \"instruction\": \"Review the generated GREEN report for project ALPHA by clicking the visible 'Review' control, then commit it locally by clicking the 'Commit Locally' control.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [\"ERROR\", \"UNAVAILABLE\", \"RETRY\"],\n      \"goal_id\": \"review_and_commit\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

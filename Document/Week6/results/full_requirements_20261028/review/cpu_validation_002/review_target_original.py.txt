@@ -1,0 +1,299 @@
+"""Independent CPU counterexamples for the new Week6 acceptance contract.
+
+All observations, model replies and executors below are offline doubles. These
+tests verify control flow and evidence boundaries; they do not establish real
+window success or the semantic adequacy of a live model's decomposition.
+"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pytest
+from test_week6_automatic_decomposition import _frame
+from test_week6_rolling_actions import options, plan
+from test_week6_semantic_subtasks import lab, proposal
+
+from gui_agent.planning import semantic_workflow as semantic
+from gui_agent.runtime.monitoring import read_run_status
+from gui_agent.runtime.schemas import VerificationResult
+
+
+def _audit_files(directory: Path):
+    return sorted(directory.glob("goal_*/001_*/semantic_goal_audit.json"))
+
+
+def test_review_bare_drag_is_a_primitive_name_not_a_semantic_objective():
+    with pytest.raises(ValueError, match="semantic|primitive"):
+        semantic.SemanticGoal(goal_id="BarePrimitive", instruction="drag", expect_text=["Changed"])
+
+
+@pytest.mark.parametrize("identity", ["id", "instruction", "checks"])
+def test_review_completed_objective_cannot_be_reintroduced_under_partial_renaming(identity):
+    original = json.loads(proposal())["subgoals"][0]
+    changed = {**original, "goal_id": "NewIdentity", "instruction": "Complete a renamed semantic objective",
+               "expect_text": ["New postcondition"]}
+    if identity == "id":
+        changed["goal_id"] = original["goal_id"].lower()
+    elif identity == "instruction":
+        changed["instruction"] = original["instruction"].upper()
+    else:
+        changed["expect_text"] = [text.upper() for text in original["expect_text"]]
+    parsed = semantic.SemanticPlan.model_validate(json.loads(proposal(changed)))
+    request = semantic.WorkflowRequest(instruction="Set preference and persist it", expect_text=["Final accepted"])
+    with pytest.raises(ValueError, match="completed"):
+        semantic.SemanticDecomposer()._validate(parsed, request, _frame("before", ["Pending"]),
+                                               [original], revision=True)
+
+
+def test_review_failed_semantic_goal_is_not_rescued_by_visible_caller_final(tmp_path):
+    native = json.loads(proposal())
+    native["subgoals"][1]["expect_text"] = ["Never observed objective result"]
+    runner, request, state, client, _ = lab(tmp_path,
+        responses=[json.dumps(native), plan(), plan()], rounds=3, goal_calls=1)
+    result = runner.run(request, options())
+    assert state.stage == 2  # The fake screen now contains the caller final.
+    assert result.status != "succeeded" and result.final_verification is None
+    assert [entry["status"] for entry in result.goal_outcomes] == ["succeeded", "failed"]
+    assert [entry["goal_id"] for entry in result.completed_subgoals] == ["SetPreference"]
+    assert result.total_actions == state.attempts == 2
+    assert result.model_requests == result.planning_calls == len(client.calls) == 3
+    assert len(result.plans) == 1  # No post-hoc rewriting or retry of the failed plan.
+
+
+def test_review_raw_action_prediction_failure_does_not_rewrite_the_semantic_goal(tmp_path):
+    native_action = json.loads(plan())
+    native_action["steps"][0]["expected_result"] = "Model predicted text that never exists"
+    runner, request, state, client, _ = lab(tmp_path,
+        responses=[proposal(), json.dumps(native_action), json.dumps(native_action)])
+    result = runner.run(request, options())
+    assert result.status == "succeeded" and state.attempts == 2
+    assert result.planning_calls == len(client.calls) == 3
+    audits = [json.loads(path.read_text("utf8")) for path in _audit_files(tmp_path / "semantic")]
+    assert len(audits) == 2
+    for audit in audits:
+        assert audit["eligible_for_semantic_credit"]
+        assert audit["semantic_postcondition_verification"]["outcome"] == "passed"
+        assert audit["steps"][0]["verification"]["outcome"] == "failed"
+        assert audit["frozen_task"]["expect_text"] != [native_action["steps"][0]["expected_result"]]
+
+
+def test_review_delegate_verifier_cannot_supply_false_semantic_success(tmp_path):
+    native = json.loads(proposal())
+    native["subgoals"][0]["expect_text"] = ["Never observed objective result"]
+    runner, request, state, _, _ = lab(tmp_path,
+        responses=[json.dumps(native), plan()], goal_calls=1)
+    factory = runner.runner_factory
+
+    class LyingVerifier(semantic.Verifier):
+        def check_task(self, _task, observation):
+            return VerificationResult(outcome="passed", evidence={"observation_id": observation.observation_id})
+
+    def wrapped(task, index, directory, client):
+        child = factory(task, index, directory, client)
+        child.verifier = LyingVerifier()
+        return child
+
+    runner.runner_factory = wrapped
+    result = runner.run(request, options())
+    assert result.status != "succeeded" and not result.completed_subgoals
+    assert result.total_actions == state.attempts == 1
+
+
+def test_review_factory_cannot_replace_a_frozen_goal_with_preexisting_context(tmp_path):
+    runner, request, state, client, _ = lab(tmp_path)
+    factory = runner.runner_factory
+
+    def wrapped(task, index, directory, budgeted):
+        task.expect_text[:] = ["Advance control"]
+        return factory(task, index, directory, budgeted)
+
+    runner.runner_factory = wrapped
+    result = runner.run(request, options())
+    assert result.status != "succeeded" and not result.completed_subgoals
+    assert state.attempts == result.total_actions == 0
+    assert len(client.calls) == result.model_requests == result.planning_calls == 1
+
+
+def test_review_caller_owned_request_alias_is_not_a_way_to_change_final_mid_run(tmp_path):
+    runner, request, state, _, _ = lab(tmp_path)
+    original = request.model_copy(deep=True)
+
+    def callback(_event):
+        request.expect_text[:] = ["Never accepted by frozen caller request"]
+        request.forbid_text.clear()
+
+    result = runner.run(request, options(), on_decomposition=callback)
+    assert result.status == "succeeded" and state.attempts == 2
+    stored = json.loads((tmp_path / "semantic/semantic_request.json").read_text("utf8"))
+    assert stored["caller_request"] == original.model_dump(mode="json")
+    final = json.loads((tmp_path / "semantic/semantic_plan_round_001/compiled_workflow.json").read_text("utf8"))
+    assert final["workflow"]["final_check"]["expect_text"] == original.expect_text
+    assert final["workflow"]["final_check"]["forbid_text"] == original.forbid_text
+
+
+def test_review_decomposition_result_write_failure_preserves_consumed_counts(tmp_path, monkeypatch):
+    runner, request, state, client, _ = lab(tmp_path)
+    write = semantic._write_new_json
+
+    def fail_final_plan_record(path, value):
+        if path.name == "result.json" and path.parent.name.startswith("semantic_plan_round_"):
+            raise PermissionError("independent injected result persistence fault")
+        return write(path, value)
+
+    monkeypatch.setattr(semantic, "_write_new_json", fail_final_plan_record)
+    result = runner.run(request, options())
+    assert result.status != "succeeded" and state.attempts == 0
+    assert result.model_requests == result.planning_calls == len(client.calls) == 1
+    assert "persist" in result.error.lower() or "audit" in result.error.lower()
+
+
+@pytest.mark.parametrize("kind", ["goal_audit", "goal_ledger", "root_summary"])
+def test_review_post_input_persistence_failure_keeps_known_receipts_without_success(tmp_path, monkeypatch, kind):
+    runner, request, state, client, _ = lab(tmp_path)
+    if kind == "goal_audit":
+        original = semantic._write_new_json
+
+        def write(path, value):
+            if path.name == "semantic_goal_audit.json":
+                raise PermissionError("independent injected semantic goal audit fault")
+            return original(path, value)
+
+        monkeypatch.setattr(semantic, "_write_new_json", write)
+    else:
+        original = semantic._write_json
+        target = "semantic_goal_ledger.json" if kind == "goal_ledger" else "automatic_workflow_summary.json"
+
+        def write(path, value):
+            if path.name == target:
+                raise PermissionError("independent injected root record fault")
+            return original(path, value)
+
+        monkeypatch.setattr(semantic, "_write_json", write)
+    result = runner.run(request, options())
+    assert result.status != "succeeded"
+    assert result.total_actions == state.attempts > 0
+    assert result.model_requests == result.planning_calls == len(client.calls)
+    assert all(child.planner.max_steps == 7 and "plan" not in child.planner.__dict__ for child in state.children)
+
+
+def test_review_callback_keyboard_interrupt_does_not_erase_confirmed_inputs_or_replay(tmp_path):
+    runner, request, state, client, _ = lab(tmp_path, rounds=3)
+
+    def interrupt(event):
+        if event["actions"]:
+            raise KeyboardInterrupt
+
+    result = runner.run(request, options(), on_checkpoint=interrupt)
+    assert result.status == "cancelled"
+    assert result.total_actions == state.attempts == 1
+    assert result.model_requests == result.planning_calls == len(client.calls) == 2
+    assert len(result.plans) == 1 and not result.completed_subgoals
+    assert state.children[0].planner.max_steps == 7 and "plan" not in state.children[0].planner.__dict__
+
+
+def test_review_duplicate_json_keys_are_not_normalized_into_an_accepted_plan(tmp_path):
+    native = proposal().replace('"status": "ready"', '"status": "refused", "status": "ready"')
+    runner, request, state, client, _ = lab(tmp_path, responses=[native])
+    result = runner.run(request, options())
+    assert result.status != "succeeded" and state.attempts == 0 and not result.completed_subgoals
+    assert result.planning_calls == len(client.calls) == 1
+    saved = json.loads((tmp_path / "semantic/semantic_plan_round_001/attempt_01_response.json").read_text("utf8"))
+    assert saved["content"] == native
+    assert "duplicate" in result.plans[0].error.lower()
+
+
+def test_review_unsupported_schema_transport_does_not_spend_http_or_input(tmp_path):
+    runner, request, state, client, _ = lab(tmp_path)
+    client.supports_strict_json_schema = False
+    result = runner.run(request, options())
+    assert result.status != "succeeded" and state.attempts == 0
+    assert result.model_requests == result.planning_calls == len(client.calls) == 0
+
+
+def test_review_wait_receipt_alone_is_not_semantic_input_credit(tmp_path):
+    action = json.loads(plan())
+    action["steps"][0].update(action_type="wait", target_text="", arguments={"seconds": 0.01})
+    runner, request, state, _, _ = lab(tmp_path,
+        responses=[proposal(), json.dumps(action)], goal_calls=1)
+    result = runner.run(request, options())
+    assert state.stage == 1  # Even an independently changed screen does not make wait an OS input.
+    assert result.status != "succeeded" and not result.completed_subgoals
+    audit = json.loads(_audit_files(tmp_path / "semantic")[0].read_text("utf8"))
+    assert audit["confirmed_input_count"] == 0 and not audit["eligible_for_semantic_credit"]
+
+
+def test_review_two_primitive_steps_cannot_escape_the_one_step_planning_contract(tmp_path):
+    runner, request, state, client, _ = lab(tmp_path, responses=[proposal(), plan(2)])
+    result = runner.run(request, options())
+    assert result.status != "succeeded" and state.attempts == 0
+    assert result.planning_calls == result.model_requests == len(client.calls) == 2
+    assert state.children[0].planner.max_steps == 7 and "plan" not in state.children[0].planner.__dict__
+
+
+@pytest.mark.parametrize("reuse", ["time", "path", "id"])
+def test_review_child_reused_capture_provenance_stops_before_credit(tmp_path, reuse):
+    runner, request, state, client, _ = lab(tmp_path, rounds=3)
+    factory = runner.runner_factory
+
+    def wrapped(task, index, directory, budgeted):
+        child = factory(task, index, directory, budgeted)
+        capture, prior = child.observer.observe, []
+
+        def observe(**kwargs):
+            frame = capture(**kwargs)
+            if prior and state.attempts:
+                if reuse == "time":
+                    frame.captured_at = prior[0].captured_at
+                elif reuse == "path":
+                    frame.image_path = prior[0].image_path
+                else:
+                    frame.observation_id = prior[0].observation_id
+            prior.append(frame.model_copy(deep=True))
+            return frame
+
+        child.observer.observe = observe
+        return child
+
+    runner.runner_factory = wrapped
+    result = runner.run(request, options())
+    assert result.status != "succeeded" and not result.completed_subgoals
+    assert result.total_actions == state.attempts == 1
+    assert len(result.plans) == 1 and len(client.calls) == result.model_requests == 2
+
+
+def test_review_root_monitor_agrees_with_verified_goal_ledger_and_shared_counts(tmp_path):
+    runner, request, state, _, _ = lab(tmp_path)
+    result = runner.run(request, options())
+    assert result.status == "succeeded"
+    directory = tmp_path / "semantic"
+    status = read_run_status(directory)
+    final = status["snapshot"]
+    assert final["subgoals_total"] == final["subgoals_completed"] == len(result.completed_subgoals) == 2
+    assert final["actions_used"] == result.total_actions == state.attempts
+    assert final["planning_pass"] == result.planning_calls
+    events = [json.loads(line) for line in (directory / "status_events.jsonl").read_text("utf8").splitlines()]
+    active_ids = {entry["subgoal_id"] for entry in events if entry["subgoal_id"]}
+    assert active_ids == {"SetPreference", "PersistConfig"}
+    assert all(entry["subgoals_total"] >= entry["subgoals_completed"] for entry in events)
+    assert any(entry["subgoals_completed"] == 1 for entry in events)
+    assert final["event"] == "finished" and final["task_status"] == result.status
+
+
+def test_review_monitor_revision_keeps_confirmed_goal_count_monotonic(tmp_path):
+    original = json.loads(proposal())
+    original["subgoals"][1]["expect_text"] = ["Unobserved former objective"]
+    revised = proposal({"goal_id": "Remaining", "instruction": "Persist the remaining approved configuration",
+                        "expect_text": ["Verified part 3"], "forbid_text": []})
+    runner, request, state, _, _ = lab(tmp_path,
+        responses=[json.dumps(original), plan(), plan(), revised, plan()], rounds=2, goal_calls=1)
+    request.expect_text = ["Verified part 3"]
+    result = runner.run(request, options())
+    assert result.status == "succeeded" and state.attempts == 3
+    events = [json.loads(line) for line in (tmp_path / "semantic/status_events.jsonl").read_text("utf8").splitlines()]
+    completed = [event["subgoals_completed"] for event in events]
+    assert completed == sorted(completed) and completed[-1] == len(result.completed_subgoals) == 2
+    assert all(event["subgoals_total"] >= event["subgoals_completed"] for event in events)
+    assert events[-1]["actions_used"] == result.total_actions
+    assert events[-1]["planning_pass"] == result.planning_calls

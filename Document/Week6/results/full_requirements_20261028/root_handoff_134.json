@@ -1,0 +1,64 @@
+{
+  "schema": "week6.root.recoverable_handoff.v1",
+  "utc": "2026-11-01 12:14:49 UTC",
+  "status": "full007_running_after_auditor_only_sync",
+  "branch": "codex/week6-full-requirements",
+  "freeze": "auditor_prompt_sync_001/final_source_freeze_001.json",
+  "freeze_sha256": "0be4751f70acd61e378c63e42f38d88d24e39a02b7dab978e1ebcf69d491f6ae",
+  "auditor_sha256": "eb85461fd47936a406821807276f8b4590ea83546978c95df7d7c427c1bb12f6",
+  "full006": {
+    "actual_exec": {
+      "chunk_id": "9b0586",
+      "wall_time_seconds": 0.0000091,
+      "exit_code": 1,
+      "original_token_count": 59,
+      "output": "{\"directory\": \"C:\\\\Users\\\\\\u8054\\u60f3\\\\Documents\\\\ChatGPT\\\\Intern\\\\week6-worktree\\\\Document\\\\Week6\\\\results\\\\full_requirements_20261028\\\\full_validation_006\", \"actual_checks_passed\": false, \"exits\": [1, 0], \"code_unchanged\": true}\r\n"
+    },
+    "pytest_failed": 11,
+    "pytest_passed": 3792,
+    "pytest_seconds": 690.29,
+    "real_exits": [
+      1,
+      0
+    ],
+    "retained": true,
+    "cause": "11 producer/auditor fixed required_revision literal mismatches; only independent auditor subsequently fixed."
+  },
+  "targeted156_actual": {
+    "chunk_id": "b7b909",
+    "wall_time_seconds": 1.2161894,
+    "exit_code": 0,
+    "original_token_count": 177,
+    "output": "{\"schema\": \"week6.role_model_routing.offline.actual.v1\", \"scope\": \"semantic_contract_safety_repair_budget_and_monitoring\", \"started_utc\": \"2026-11-01T12:12:16.000504+00:00\", \"finished_utc\": \"2026-11-01T12:13:04.710028+00:00\", \"elapsed_seconds\": 48.70299999999406, \"code_pin_count\": 286, \"code_unchanged\": true, \"requirements_dev_sha256_before\": \"31b4bba08667510fa824a01634563e7cd5c30eac77ca8ddfba3aa6cb21643918\", \"requirements_dev_sha256_after\": \"31b4bba08667510fa824a01634563e7cd5c30eac77ca8ddfba3aa6cb21643918\", \"targeted_tests_passed\": 156, \"targeted_failed_count\": 0, \"targeted_pytest_seconds\": 35.08, \"collected_test_count\": 3803, \"checks_passed\": true, \"model_gui_calls\": 0, \"full_regression\": false}\r\n"
+  },
+  "freeze_reaudit_actual": {
+    "chunk_id": "46cb02",
+    "wall_time_seconds": 5.4332677,
+    "exit_code": 0,
+    "original_token_count": 224,
+    "output": "{\"freeze\": {\"path\": \"C:\\\\Users\\\\\\u8054\\u60f3\\\\Documents\\\\ChatGPT\\\\Intern\\\\week6-worktree\\\\Document\\\\Week6\\\\results\\\\full_requirements_20261028\\\\auditor_prompt_sync_001\\\\final_source_freeze_001.json\", \"sha256\": \"0be4751f70acd61e378c63e42f38d88d24e39a02b7dab978e1ebcf69d491f6ae\"}, \"targeted_tests\": 156, \"collected\": 3803, \"reaudited\": [{\"path\": \"C:\\\\Users\\\\\\u8054\\u60f3\\\\Documents\\\\ChatGPT\\\\Intern\\\\week6-worktree\\\\Document\\\\Week6\\\\results\\\\full_requirements_20261028\\\\auditor_prompt_sync_001\\\\normal048_runtime_equivalence_001.json\", \"sha256\": \"65762d5611d3b7dcd7011286c45d804cd645a8936205c6beffcfb13a3038f3cc\"}, {\"path\": \"C:\\\\Users\\\\\\u8054\\u60f3\\\\Documents\\\\ChatGPT\\\\Intern\\\\week6-worktree\\\\Document\\\\Week6\\\\results\\\\full_requirements_20261028\\\\auditor_prompt_sync_001\\\\transient027_runtime_equivalence_001.json\", \"sha256\": \"275cee1eb8360c8a0dfa15467573de99ee9d95286176c8f443765ee9811005ed\"}]}\r\n"
+  },
+  "normal048_acceptance": "review/normal048_root_acceptance_002.json",
+  "transient027_acceptance": "review/transient027_root_acceptance_002.json",
+  "original_physical_pair_same": true,
+  "all_other_285_pins_unchanged": true,
+  "no_new_GUI": true,
+  "full007_actual_start": {
+    "chunk_id": "b9dd36",
+    "wall_time_seconds": 10.0046643,
+    "session_id": 95246,
+    "original_token_count": 0,
+    "output": ""
+  },
+  "actual_exec_session": 95246,
+  "report_base": "C:/Users/联想/Documents/ChatGPT/Intern/tmp/week6_full_report_20261028/draft_052/report.md",
+  "base_sha256": "e6adfe28bcf8ec5781fe5ca8de2e9ea30b9e40cb6589446135f154a1f8fe9440",
+  "architecture": "architecture_preparation_021.json",
+  "assembler": "assemble_completed_evidence_v5.py",
+  "prose_helper": "prepare_final_prose_004.py",
+  "updater": "C:/Users/联想/Documents/ChatGPT/Intern/tmp/week6_full_requirements_20261028/update_final_documents_014.py",
+  "history_index": "live_attempts_index_015.json",
+  "prior_docs": "Document/Week6/history/pre_final_acceptance_20261101_016/manifest.json",
+  "overall_week6_complete": false,
+  "next": "Wait same95246, save actualwait, audit full007 expected3803 against new freeze; assembler v5 with originalcases normal_048 transient_027/base052 to newgate. Prose004/check/build/render/actuallyvieweverypage/QA. Updater014 only afterall QA then wheel stagecommitpublishZIP. Do not edit production/README during full007; no new GUI."
+}

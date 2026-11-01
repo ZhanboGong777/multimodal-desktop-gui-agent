@@ -1,0 +1,16 @@
+SIM102 Use a single `if` statement instead of nested `if` statements
+   --> src\gui_agent\runtime\monitoring.py:399:17
+    |
+397 |                       if event[key] != previous[key]:
+398 |                           diagnostics.append("journal_identity_mismatch")
+399 | /                 if event["subgoals_total"] != previous["subgoals_total"]:
+400 | |                     if (event["schema"] != SEMANTIC_STATUS_SCHEMA
+401 | |                             or previous["schema"] != SEMANTIC_STATUS_SCHEMA
+402 | |                             or event["stage"] != "decomposing" or event["event"] != "updated"):
+    | |_______________________________________________________________________________________________^
+403 |                           diagnostics.append("journal_identity_mismatch")
+404 |                   for key in ("elapsed_ms", "planning_pass", "actions_used", "subgoals_completed"):
+    |
+help: Combine `if` statements using `and`
+
+Found 1 error.

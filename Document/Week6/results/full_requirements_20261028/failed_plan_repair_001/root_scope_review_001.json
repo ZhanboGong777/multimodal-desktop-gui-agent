@@ -1,0 +1,41 @@
+{
+  "schema": "week6.failed_plan_repair.root_scope_review.v1",
+  "utc": "2026-11-01T06:31:43.191126+00:00",
+  "reviewer": "Root agent",
+  "records": [
+    {
+      "path": "scripts/week6_audit_semantic_acceptance.py",
+      "before_sha256": "765733849846ee998a506195ec2f2037629a837bab245ae21656eaeae52ad273",
+      "after_sha256": "ad5d3c0907e7d5fe89ac2bbf21fe562f88415dd82f64c9f655e98cb2164782aa",
+      "approved_function_scopes": [
+        "_audit_semantic_repair_category",
+        "audit",
+        "audit_semantic_repair_messages",
+        "audit_semantic_repair_system"
+      ],
+      "all_other_ast_identical": true,
+      "diff": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\failed_plan_repair_001\\week6_audit_semantic_acceptance.reviewed.diff.txt",
+        "sha256": "d31e7405b4500d94dae33c10db78bc2447107957b3d257c17379b56b38fbebe6"
+      }
+    },
+    {
+      "path": "src/gui_agent/planning/semantic_workflow.py",
+      "before_sha256": "8f69c28c3240cccdfce2d5708b06df141f319028ca3b9671cfdd19e24ff68eeb",
+      "after_sha256": "74522e98109f07ceba5e4448a507fd7a16c02de71c3305498b3363745ac631f7",
+      "approved_function_scopes": [
+        "SemanticDecomposer._validate",
+        "SemanticDecomposer.decompose",
+        "SemanticWorkflowRunner.run"
+      ],
+      "all_other_ast_identical": true,
+      "diff": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\failed_plan_repair_001\\semantic_workflow.reviewed.diff.txt",
+        "sha256": "df8249ced164988318f57be626cfd699f641d24e788ee7bef68ae02d8d00302b"
+      }
+    }
+  ],
+  "all_other_prior_pins_byte_identical": 281,
+  "added_test": "tests/test_week6_semantic_failed_plan_repair.py",
+  "meaning": "Exact prior failed/rejected signature is rejected inside the original bounded generation-repair loop, before dispatch. Runner passes its existing failed set; outer plan/signature guard and all action credit, verification, budgets, deadline and perception rules retained. Auditor reconstructs signature set from actual preceding outcomes/rejections and reproduces raw response rejection; it never trusts a supplied error label. No local goal/condition rewrite. Native efficacy still pending."
+}

@@ -1,0 +1,297 @@
+"""Ended normal018: functional completion versus strict attribution rejection.
+
+Read-only saved-record validation. No model, OCR, capture, input, process control,
+receipt rewriting, timing tolerance or experiment rerun is performed.
+"""
+from __future__ import annotations
+
+import hashlib
+import importlib.util
+import json
+from collections import Counter
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path("C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+BASE = ROOT / "Document/Week6/results/full_requirements_20261028"
+CASE = BASE / "live/normal_018"
+RUN = CASE / "run"
+AUTO = RUN / "automatic"
+FREEZE = BASE / "observed_query_constraints_001/final_source_freeze_001.json"
+PREREG = BASE / "live/preregistered_v6_010.json"
+OUT = BASE / "review/negative_normal018_audit_001.json"
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def load(path):
+    return json.loads(path.read_bytes())
+
+
+def bound(path):
+    return {"path": str(path), "sha256": sha(path), "bytes": path.stat().st_size}
+
+
+def inventory():
+    return {path.relative_to(CASE).as_posix(): sha(path) for path in CASE.rglob("*") if path.is_file()}
+
+
+def microseconds(delta):
+    return delta.days * 86_400_000_000 + delta.seconds * 1_000_000 + delta.microseconds
+
+
+def main():
+    assert not OUT.exists()
+    assert sha(FREEZE) == "93c839778aa31111ff9931e70a3d1a20214d2cea8d13194955f6ef1eeef9a6d4"
+    assert sha(PREREG) == "047d4a23fac0841201f8f6f2db03966e6c0498b5b0dbcf6d4a4098fbdb9f3386"
+    freeze, prereg = load(FREEZE), load(PREREG)
+    pins = {name: sha(ROOT / name) for name in freeze["code_pins"]}
+    assert len(pins) == 274 and pins == freeze["code_pins"]
+    assert sha(ROOT / "README.md") == freeze["readme_sha256"]
+    assert sha(ROOT / "requirements-dev.txt") == freeze["requirements_dev_sha256"]
+    process = load(BASE / "review/normal018_independent_process_001/process_summary.json")
+    strict = load(BASE / "review/normal018_strict_audit_001.json")
+    assert process["actual_audit_receipt"]["actual_child_exit_code"] == 1
+    assert strict["passed"] is False and strict["error"] == "owner_did_not_observe_real_exit_zero"
+    before = inventory()
+    assert before == process["original_case_files"]
+    owner, start, claim = [load(CASE / name) for name in ("owner_receipt.json", "owner_start.json", "owner_claim.json")]
+    assert owner["owner"] == start["owner"] == claim["owner"]
+    assert owner["command"] == start["command"] == claim["command"]
+    assert owner["child_exit_code"] == 1 and abs(owner["elapsed_seconds"] - 629.359) < .001
+    handoff = load(CASE / "operator_handoff_004.json")
+    assert sha(CASE / "operator_handoff_004.json") == "8b0343fb645c42abcb15fd7965a52b3e7c93f3e1fd99bc5fb95ed0ff38a49696"
+    assert handoff["terminal"] is True and handoff["gui_stopped"] is True and handoff["pending"] == []
+    assert handoff["owner_receipt"] == owner and handoff["exec_actual_wait"]["session_closed"] is True
+    assert handoff["exec_session"] == 12027 and handoff["exec_actual_wait"]["exit_code"] == 1
+    contract, result, acceptance = [load(RUN / name) for name in ("contract.json", "runtime_result.json", "acceptance_observed.json")]
+    assert result == acceptance["automatic_result"] and result["status"] == "succeeded"
+    assert result["planning_calls"] == result["model_requests"] == 7 and result["total_actions"] == 6
+    assert result["unconfirmed_action_attempts"] == 0 and result["accounting_complete"] is True
+    assert len(result["completed_subgoals"]) == result["semantic_goals_total"] == 2
+    assert acceptance["runtime_pass"] is True and acceptance["independent_pass"] is True
+    assert acceptance["attribution_pass"] is False and acceptance["source_unchanged"] is True
+    path = ROOT / "scripts/week6_audit_semantic_acceptance.py"
+    spec = importlib.util.spec_from_file_location("independent_normal018_reader", path)
+    auditor = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(auditor)
+    from gui_agent.planning.planner import _task_plan_response_format
+    from gui_agent.runtime.action_adapter import validate_target_consistency
+
+    evidence = auditor.Evidence(CASE)
+    source_proof = auditor.source_audit(evidence, contract, owner["command"])
+    request = auditor.WorkflowRequest.model_validate(contract["request"])
+    final_task, verifier = auditor._final_task(request), auditor.Verifier()
+    initial = evidence.frame(AUTO / "initial_observation/observation.json")
+    assert verifier.check_task(final_task, initial).outcome == "failed"
+    directory = AUTO / "semantic_plan_round_001"
+    native, protocol, saved, response = [evidence.load(directory / name) for name in (
+        "native_proposal.json", "protocol.json", "attempt_01_request.json", "attempt_01_response.json")]
+    auditor.audit_native_predicates(native, request)
+    proposal = auditor.SemanticPlan.model_validate(native, strict=True)
+    auditor.SemanticDecomposer(max_subgoals=8)._validate(proposal, request, initial, [], False)
+    assert proposal.status == "ready" and len(proposal.subgoals) == 2
+    context = {"original_caller_request": contract["request"], "minimum_objectives": 2, "maximum_objectives": 8,
+        "revision": False, "completed_subgoals": [], "failure": None, "input_modality": "caller_intent_only", "image_attached": False}
+    messages = auditor.audit_semantic_repair_messages(evidence, directory, 1, saved, protocol, request,
+        initial, [], 8, False, context)
+    auditor.audit_snapshot_archive(evidence, directory, initial, [], None)
+    assert native == result["plans"][0]["proposal"] == json.loads(response["content"])
+    tasks = [auditor._goal_task(goal, request) for goal in proposal.subgoals]
+    compiled = evidence.load(directory / "compiled_workflow.json")
+    assert compiled["native_proposal"] == native and compiled["mapping"] == auditor.expected_native_mapping(native, proposal, tasks)
+    assert compiled["workflow"]["subgoals"] == [task.model_dump(mode="json") for task in tasks]
+    assert compiled["workflow"]["final_check"] == final_task.model_dump(mode="json")
+    calls_for_transport = [{"kind": "semantic_decomposition", "messages": messages, "system": saved["system"],
+        "instruction": request.instruction, "context": saved["context"], "image_path": None,
+        "response": response, "response_format": protocol["response_format"], "requests": 1}]
+    attempts = evidence.lines(AUTO / "action_planning_attempts.jsonl")
+    assert len(attempts) == 6
+    cursor, stages, inputs = 0, [], []
+    prior = initial
+    for index, (goal, task, outcome) in enumerate(zip(proposal.subgoals, tasks, result["goal_outcomes"], strict=True), 1):
+        before_frame = evidence.frame(AUTO / f"contract_before_001_{index:03d}/observation.json")
+        assert not auditor._rolling_frame_guard(prior, before_frame)
+        fixed = evidence.load(AUTO / f"goal_contract_001_{index:03d}.json")
+        assert fixed["task"] == task.model_dump(mode="json") and fixed["caller_final"] == final_task.model_dump(mode="json")
+        assert fixed["before"] == before_frame.model_dump(mode="json") and fixed["postconditions_fixed_before_input"] is True
+        precheck = verifier.check_task(task, before_frame)
+        assert precheck.outcome == "failed"
+        child_dir = AUTO / f"goal_001_{index:03d}_{goal.goal_id}" / f"001_{goal.goal_id}"
+        child, limit, semantic = [evidence.load(child_dir / name) for name in (
+            "task_summary.json", "single_step_planning_limit.json", "semantic_goal_audit.json")]
+        assert child["status"] == outcome["status"] == "succeeded" and child["action_count"] == 3
+        assert child["unconfirmed_action_attempts"] == 0 and semantic["steps"] == child["steps"]
+        assert evidence.lines(child_dir / "steps.jsonl") == child["steps"]
+        assert limit["restored"] is True and limit["original_max_steps"] == limit["restored_max_steps"] == 4
+        assert limit["applied_max_steps"] == 1 and len(limit["calls"]) == child["planning_calls"] == 3
+        assert evidence.lines(child_dir / "recovery.jsonl") == child["recovery_records"]
+        plans = []
+        for call_index, (call, step_record) in enumerate(zip(limit["calls"], child["steps"], strict=True)):
+            source = evidence.frame(child_dir / (call["context"]["observation_id"] + ".json"))
+            fresh = evidence.frame(child_dir / (step_record["observation_id"] + ".json"))
+            assert not auditor._rolling_frame_guard(before_frame, source) and not auditor._rolling_frame_guard(source, fresh)
+            policy = auditor.audit_generation_targeting_policy(call["context"],
+                previous_pass_steps=None if call_index == 0 else [child["steps"][call_index - 1]])
+            assert policy == prereg["generation_targeting_policy"]
+            if call_index:
+                recovery = child["recovery_records"][call_index - 1]
+                assert recovery["outcome"] == "plan_ready" and recovery["feedback"] == call["context"]["recovery"]
+                assert recovery["observation_id"] == source.observation_id and recovery["next_pass"] == call_index + 1
+            bindings = auditor.audit_target_bindings(call["context"], source)
+            fmt = _task_plan_response_format(1, target_bindings=bindings)
+            assert call["attempts"] == call["model_requests"] == 1 and call["ok"] is True
+            row = attempts[cursor]
+            calls_for_transport.extend(auditor.audit_action_attempts(call, source, [row], fmt))
+            cursor += 1
+            parsed = auditor.parse_plan(call["response"]["content"], instruction=task.instruction, max_steps=1, task_id=goal.goal_id)
+            assert parsed.as_dict() == call["parsed_plan"] and row["parse_error"] is None
+            step = parsed.steps[0]
+            validate_target_consistency(step, source)
+            receipt = auditor.ActionResult.model_validate(step_record["action_result"])
+            assert receipt.success and not receipt.dry_run
+            assert receipt.action.model_dump(mode="json") == step_record["resolved"]["action"]
+            after = evidence.frame(child_dir / (step_record["after_observation_id"] + ".json"))
+            assert not auditor._rolling_frame_guard(fresh, after)
+            check = verifier.check_step(expected_result=step.expected_result, action_type=step.action_type,
+                before=fresh, after=after, action_result=receipt)
+            assert auditor.same_check(step_record["verification"], check)
+            input_row = {"stage_key": f"1:{index}:{goal.goal_id}", "native": json.loads(call["response"]["content"]),
+                "action": receipt.action.model_dump(mode="json"), "step": step_record,
+                "source_frame": bound(child_dir / (source.observation_id + ".json")), "source_pixels": bound(Path(source.image_path)),
+                "fresh_frame": bound(child_dir / (fresh.observation_id + ".json")), "post_frame": bound(child_dir / (after.observation_id + ".json")),
+                "before_captured_at": fresh.captured_at.isoformat(), "after_captured_at": after.captured_at.isoformat(),
+                "generation_schema_and_query_contract_qualified": True,
+                "native_selected_binding": next((item for item in bindings["candidates"]
+                    if item["element_id"] == (step.arguments.get("element_id") or step.arguments.get("target_element"))), None)}
+            inputs.append(input_row)
+            plans.append(input_row)
+        post = evidence.frame(child_dir / (semantic["post_observation_id"] + ".json"))
+        postcheck = verifier.check_task(task, post)
+        assert postcheck.passed and auditor.same_check(semantic["semantic_postcondition_verification"], postcheck)
+        assert semantic["eligible_for_semantic_credit"] is True and semantic["confirmed_input_count"] == 3
+        outer = evidence.frame(child_dir / (outcome["verification"]["evidence"]["observation_id"] + ".json"))
+        assert not auditor._rolling_frame_guard(post, outer) and verifier.check_task(task, outer).passed
+        prior = outer
+        stages.append({"stage_key": f"1:{index}:{goal.goal_id}", "instruction": goal.instruction,
+            "expect_text": goal.expect_text, "forbid_text": goal.forbid_text, "before_check": precheck.model_dump(mode="json"),
+            "post_check": postcheck.model_dump(mode="json"), "outer_check": verifier.check_task(task, outer).model_dump(mode="json"),
+            "semantic_audit": semantic, "native_calls": plans})
+    assert cursor == len(attempts) == len(inputs) == 6
+    assert result["completed_subgoals"] == result["goal_outcomes"]
+    final_path = Path(result["final_observation_reference"])
+    final = evidence.frame(final_path)
+    assert not auditor._rolling_frame_guard(prior, final)
+    finalcheck = verifier.check_task(final_task, final)
+    assert finalcheck.passed and auditor.same_check(result["final_verification"], finalcheck)
+    assert auditor.transport_audit(evidence, AUTO, calls_for_transport, 7, contract) == 7
+    transports = evidence.lines(AUTO / "transport_requests.jsonl")
+    assert len(transports) == 7 and all(row["requests_made"] == 1 and row["error"] == "" for row in transports)
+    assert all([response["status_code"] for response in row["http_responses"]] == [200] for row in transports)
+    fixture = Path(owner["command"][owner["command"].index("--fixture-directory") + 1])
+    state = load(fixture / "independent_state.json")
+    events = [json.loads(line) for line in (fixture / "independent_events.jsonl").read_text("utf8").splitlines() if line]
+    assert state == acceptance["state"] and events == acceptance["independent_events"]
+    assert state["committed"] is True and state["stage"] == "completed" and state["project"] == "ALPHA" and state["colour"] == "GREEN"
+    assert [item["event"] for item in events] == ["started", "project_selected", "theme_selected", "review_accepted", "transition_click_ignored", "local_commit"]
+    receipts = []
+    for path, input_row in zip(sorted((RUN / "sky_bridge").glob("*_request.json")), inputs, strict=True):
+        asked, answered = evidence.load(path), evidence.load(path.with_name(path.name.replace("_request.json", "_receipt.json")))
+        assert asked["id"] == answered["id"] and answered["success"] is True and answered["transport"] == "Sky click"
+        assert asked["action"] == answered["action"] == input_row["action"]
+        assert auditor.timestamp(input_row["before_captured_at"]) <= auditor.timestamp(answered["started_utc"]) <= auditor.timestamp(answered["finished_utc"]) <= auditor.timestamp(input_row["after_captured_at"])
+        receipts.append(answered)
+    assert receipts == acceptance["input_receipts"] and len(receipts) == 6
+    candidate_ids = {"project_selected": "input_002", "theme_selected": "input_003", "review_accepted": "input_004", "local_commit": "input_006"}
+    attribution = []
+    for event in [item for item in events if item["event"] in candidate_ids]:
+        i = int(candidate_ids[event["event"]].split("_")[-1]) - 1
+        receipt, input_row = receipts[i], inputs[i]
+        when = auditor.timestamp(event["utc"])
+        strict_matches = [item["id"] for item in receipts
+            if auditor.timestamp(item["started_utc"]) <= when <= auditor.timestamp(item["finished_utc"])]
+        frame_matches = [receipts[j]["id"] for j, row in enumerate(inputs)
+            if auditor.timestamp(row["before_captured_at"]) <= when <= auditor.timestamp(row["after_captured_at"])]
+        assert frame_matches == [receipt["id"]]  # Descriptive frame relation, not a relaxed receipt gate.
+        delta_us = microseconds(when - auditor.timestamp(receipt["finished_utc"]))
+        attribution.append({"event": event, "candidate_input": receipt["id"], "stage_key": input_row["stage_key"],
+            "original_receipt": receipt, "event_minus_click_return_microseconds": delta_us,
+            "event_minus_click_return_ms": delta_us / 1000,
+            "strict_original_receipt_interval_matches": strict_matches, "strict_interval_passed": strict_matches == [receipt["id"]],
+            "saved_before_after_frame_matches": frame_matches,
+            "before_frame": input_row["fresh_frame"], "after_frame": input_row["post_frame"],
+            "meaning": "Frame and action ordering are preserved as descriptive evidence, not substituted for the original strict interval requirement."})
+    assert [row["event_minus_click_return_microseconds"] for row in attribution] == [2781, 4019, -143080, 2424]
+    assert [row["strict_interval_passed"] for row in attribution] == [False, False, True, False]
+    noops = [inputs[0], inputs[4]]
+    assert [row["action"]["target_description"] for row in noops] == ["Choose a project", "Review complete"]
+    assert "commit" in inputs[4]["native"]["steps"][0]["description"].casefold()
+    assert inputs[5]["action"]["target_description"] == "Commit locally"
+    assert inputs[5]["native_selected_binding"]["classification"] == "anonymous_with_single_ocr"
+    assert inputs[5]["native_selected_binding"]["element_id"] == "obs-0009-e007"
+    assert inputs[5]["native_selected_binding"]["compatible_texts"] == ["Commit locally"]
+    assert all(not [event for event in events[1:] if auditor.timestamp(row["before_captured_at"]) <= auditor.timestamp(event["utc"]) <= auditor.timestamp(row["after_captured_at"])] for row in noops)
+    activation_paths = sorted((RUN / "sky_activation").glob("*_request.json"))
+    assert len(activation_paths) == handoff["bridge"]["sky_activation"]["requests"] == 30
+    for path in activation_paths:
+        asked, answered = evidence.load(path), evidence.load(path.with_name(path.name.replace("_request.json", "_receipt.json")))
+        assert asked["id"] == answered["id"] and answered["success"] is True
+    chronology = handoff["post_sky_refresh_chronology"]
+    assert len(chronology) == 6
+    for row, receipt in zip(chronology, receipts, strict=True):
+        assert row["input_id"] == receipt["id"] and row["started_utc"] == receipt["started_utc"]
+        assert row["original_finished_utc_click_return"] == receipt["finished_utc"]
+        assert row["post_refresh_exact_utc"] is None and row["refresh_success_known"] is True
+    monitor_cli = load(CASE / "after_first_known_input_001.json")
+    assert monitor_cli["actual_monitor_cli_exit"] == 0 and monitor_cli["script_sha256"] == sha(ROOT / "scripts/week6_status.py")
+    monitor = evidence.load(AUTO / "run_status.json")
+    assert monitor["task_status"] == "succeeded" and monitor["actions_used"] == 6 and monitor["planning_pass"] == 7
+    assert monitor["subgoals_completed"] == monitor["subgoals_total"] == 2
+    stdout_counts = dict(Counter(line for line in (CASE / "stdout.txt").read_text("utf8").splitlines() if line))
+    assert stdout_counts == handoff["stdout_distinct_line_counts"]
+    assert pins == {name: sha(ROOT / name) for name in freeze["code_pins"]} and before == inventory()
+    archive = OUT.with_suffix(".py.txt")
+    with archive.open("xb") as stream:
+        stream.write(Path(__file__).read_bytes())
+    audit = {"schema": "week6.independent.functional_completion_attribution_rejection.v1",
+        "reviewed_utc": datetime.now(timezone.utc).isoformat(), "reviewer": "/root/week6_replanning_review (independent Codex agent, not human sign-off)",
+        "scope": "Ended normal018 saved evidence and pure validators only; no timing tolerance, altered receipts, experiment rerun, model, OCR or GUI.",
+        "freeze": bound(FREEZE), "preregistration": bound(PREREG), "owner_receipt": owner,
+        "strict_gate": bound(BASE / "review/normal018_strict_audit_001.json"), "strict_process": bound(BASE / "review/normal018_independent_process_001/process_summary.json"),
+        "preflight_metadata_failure_separate_from_actual_owner_and_strict_exit": bound(BASE / "review/normal018_preflight_failure_001/observation.json"),
+        "totals": {"runtime_status": "succeeded", "owner_exit": 1, "owner_seconds": owner["elapsed_seconds"],
+            "runtime_elapsed_ms": result["elapsed_ms"], "known_inputs": 6, "unknown_inputs": 0,
+            "planning_calls": 7, "actual_http": 7, "completed_goals": 2, "proposed_goals": 2,
+            "runtime_pass": True, "independent_state_pass": True, "attribution_pass": False, "overall_acceptance": False},
+        "source": source_proof, "all_274_pins_unchanged": True, "code_pins": pins,
+        "readme_sha256": freeze["readme_sha256"], "requirements_dev_sha256": freeze["requirements_dev_sha256"],
+        "native_proposal": native, "semantic_stages": stages, "original_inputs": inputs,
+        "title_inputs_with_no_business_transition_retained": noops,
+        "final_caller_check": finalcheck.model_dump(mode="json"), "final_frame": bound(final_path),
+        "independent_state": state, "independent_events": events,
+        "independent_originals": [bound(fixture / "independent_state.json"), bound(fixture / "independent_events.jsonl")],
+        "event_interval_analysis": attribution,
+        "ignored_event_preserved": next(event for event in events if event["event"] == "transition_click_ignored"),
+        "original_receipts": receipts, "operator_refresh_chronology": chronology,
+        "missing_refresh_timestamps_remain_null": True,
+        "generation_contracts": {"all_six_v2_action_attempts_exactly_rebuilt": True,
+            "all_observed_queries_scoped_and_metadata_hashes_verified": True, "all_native_schemas_qualified": True,
+            "format_retries": 0, "all_seven_actual_transport_messages_schema_and_replies_bound": True,
+            "wire_scope": "Pre-encoding messages/schema and actual HTTP events/response bodies, not captured original outgoing wire bodies.",
+            "commit_used_existing_ocr": True, "no_ocr_visual_path_success_claim": False},
+        "monitor_cli": monitor_cli, "terminal_monitor": monitor, "stdout_distinct_lines_preserved": stdout_counts,
+        "conclusion": "Runtime completed both semantic objectives and the immutable caller final, independently corroborated by the completed fixture state. Six OS inputs include two status/title no-ops. Three required business events fell 2.781/4.019/2.424 ms after the original click-return receipt ends, so the predeclared attribution gate and real owner exit remain nonzero. No time grace, rewritten receipt or post-refresh timestamp is supplied. This run is not promoted to overall acceptance or Week6 completion.",
+        "all_normal001_through018_remain_unaccepted_overall": True,
+        "original_case_files": [{"path": str(CASE / name), "sha256": digest} for name, digest in sorted(before.items())],
+        "bound_evidence": evidence.files, "audit_script": bound(archive)}
+    with OUT.open("x", encoding="utf8", newline="\n") as stream:
+        json.dump(audit, stream, ensure_ascii=False, indent=2)
+        stream.write("\n")
+    print(json.dumps({"audit": str(OUT), "sha256": sha(OUT), "raw_files": len(before),
+        "runtime_completed": True, "overall_acceptance": False}, ensure_ascii=True))
+
+
+if __name__ == "__main__":
+    main()

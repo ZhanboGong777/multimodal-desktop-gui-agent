@@ -1,0 +1,80 @@
+"""Preserve the ended failing run, then migrate one obsolete interface assertion."""
+from __future__ import annotations
+
+import hashlib
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path("C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+BASE = ROOT / "Document/Week6/results/full_requirements_20261028/action_output_contract_001"
+OLD_RUN = BASE / "root_affected_validation_001"
+OUT = BASE / "legacy_rolling_assertion_migration_001"
+RELATIVE = "tests/test_week6_rolling_actions.py"
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def main():
+    OUT.mkdir(exist_ok=False)
+    source = ROOT / RELATIVE
+    pins = json.loads((OLD_RUN / "tested_code_pins_after.json").read_text("utf8"))
+    before = {name: sha(ROOT / name) for name in pins}
+    assert before == pins and len(before) == 267
+    failed = json.loads((OLD_RUN / "validation.json").read_text("utf8"))
+    assert failed["targeted_failed_count"] == 1 and failed["targeted_tests_passed"] == 837
+    assert failed["checks_passed"] is False and failed["code_unchanged"] is True
+    files = []
+    for original in [source, *sorted(path for path in OLD_RUN.iterdir() if path.is_file())]:
+        archive = OUT / ("source_before/" + RELATIVE + ".txt" if original == source else "affected001/" + original.name)
+        archive.parent.mkdir(parents=True, exist_ok=True)
+        with archive.open("xb") as handle:
+            handle.write(original.read_bytes())
+        assert sha(archive) == sha(original)
+        files.append({"source": str(original), "archive": str(archive), "sha256": sha(original),
+                      "bytes": original.stat().st_size})
+    with (OUT / "before_manifest.json").open("x", encoding="utf8") as handle:
+        json.dump({"schema": "week6.legacy_rolling_assertion.before.v1",
+                   "saved_utc": datetime.now(timezone.utc).isoformat(), "files": files,
+                   "original_affected_run_actual_pytest_exit": 1, "original_failure_not_reclassified": True,
+                   "all_267_current_code_pins": before, "scratch_directory_not_copied_or_modified": str(OLD_RUN / "pytest_tmp")},
+                  handle, ensure_ascii=False, indent=2)
+        handle.write("\n")
+    old = b'    assert len(client.calls) == 2 and all("response_format" not in value["kwargs"] for value in client.calls)'
+    replacement = '\n'.join([
+        '    assert len(client.calls) == 2',
+        '    for value in client.calls:',
+        '        response_format = value["kwargs"]["response_format"]',
+        '        assert response_format["type"] == "json_schema"',
+        '        assert response_format["json_schema"]["name"] == "gui_task_plan"',
+        '        assert response_format["json_schema"]["strict"] is False',
+        '        schema = response_format["json_schema"]["schema"]',
+        '        assert "steps" in schema["required"] and schema["properties"]["steps"]["maxItems"] == 1',
+        '        assert "subgoals" not in schema["properties"]',
+        '        assert not {"disappearing_text", "caller_instruction_anchor", "candidates",',
+        '                    "raw_checks", "derived_progress_checks"} & schema["properties"].keys()',
+    ]).encode('utf8')
+    original_bytes = source.read_bytes()
+    assert original_bytes.count(old) == 1
+    newline = b'\r\n' if b'\r\n' in original_bytes else b'\n'
+    updated = original_bytes.replace(old, replacement.replace(b'\n', newline))
+    source.write_bytes(updated)
+    after = {name: sha(ROOT / name) for name in pins}
+    assert [name for name in before if before[name] != after[name]] == [RELATIVE]
+    with (OUT / "migration.json").open("x", encoding="utf8") as handle:
+        json.dump({"schema": "week6.legacy_rolling_assertion.migration.v1",
+                   "changed_path": RELATIVE, "old_sha256": before[RELATIVE], "new_sha256": after[RELATIVE],
+                   "cause": "TaskPlanner.require_structured_output has always defaulted to true but was previously unused. Its now-authorized action schema makes the old no-response_format assertion obsolete. This is an explicit low-level transport interface change, not a change to rolling goal semantics.",
+                   "replacement": "Both low-level requests must carry gui_task_plan, strict:false, required steps and one-step bound. A high-level subgoals/selector/marker schema is forbidden.",
+                   "other_test_assertions_unchanged": True, "production_parser_prompt_changes": False,
+                   "original_affected001_still_exit1": True, "new_quickcheck_pending": True,
+                   "code_pins_after_single_authorized_test_change": after}, handle, ensure_ascii=False, indent=2)
+        handle.write("\n")
+    print(json.dumps({"migration": str(OUT / "migration.json"), "sha256": sha(OUT / "migration.json"),
+                      "test_sha256": after[RELATIVE], "archived_files": len(files)}, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

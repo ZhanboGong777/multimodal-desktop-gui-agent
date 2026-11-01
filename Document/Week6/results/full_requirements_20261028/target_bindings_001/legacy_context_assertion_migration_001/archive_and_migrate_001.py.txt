@@ -1,0 +1,81 @@
+"""Archive a true failed regression and migrate one context-key assertion."""
+from __future__ import annotations
+
+import hashlib
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path("C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+BASE = ROOT / "Document/Week6/results/full_requirements_20261028/target_bindings_001"
+OLD_RUN = BASE / "root_affected_validation_001"
+OUT = BASE / "legacy_context_assertion_migration_001"
+RELATIVE = "tests/test_runtime_runner.py"
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def main():
+    OUT.mkdir(exist_ok=False)
+    paths = json.loads((OLD_RUN / "tested_code_pins_after.json").read_text("utf8"))
+    before = {name: sha(ROOT / name) for name in paths}
+    assert before == paths and len(before) == 270
+    result = json.loads((OLD_RUN / "validation.json").read_text("utf8"))
+    assert result["targeted_tests_passed"] == 1025 and result["targeted_failed_count"] == 1
+    assert result["checks_passed"] is False and result["code_unchanged"] is True
+    source = ROOT / RELATIVE
+    files = []
+    for original in [source, ROOT / "requirements-dev.txt", *sorted(path for path in OLD_RUN.iterdir() if path.is_file())]:
+        if original == source:
+            archive = OUT / "source_before" / (RELATIVE + ".txt")
+        elif original == ROOT / "requirements-dev.txt":
+            archive = OUT / "requirements-dev.before.txt"
+        else:
+            archive = OUT / "affected001" / original.name
+        archive.parent.mkdir(parents=True, exist_ok=True)
+        with archive.open("xb") as handle:
+            handle.write(original.read_bytes())
+        assert sha(archive) == sha(original)
+        files.append({"source": str(original), "archive": str(archive), "sha256": sha(original), "bytes": original.stat().st_size})
+    (OUT / "before_manifest.json").write_text(json.dumps({
+        "schema": "week6.target_binding.context_migration.before.v1", "utc": datetime.now(timezone.utc).isoformat(),
+        "files": files, "all_270_current_code_pins": before,
+        "original_affected001_actual_pytest_exit": 1, "original_1025pass1fail_not_reclassified": True,
+        "original_pytest_scratch_untouched_not_duplicated": str(OLD_RUN / "pytest_tmp")}, ensure_ascii=False, indent=2) + "\n", encoding="utf8")
+    raw = source.read_bytes()
+    old = b'    assert set(context) == {"platform", "observation_id", "screen", "target_app", "allowed_keys", "limits", "visible_text", "success_rules"}'
+    replacement = b'    assert set(context) == {"platform", "observation_id", "screen", "target_app", "allowed_keys", "limits", "visible_text", "success_rules", "target_bindings"}'
+    assert raw.count(old) == 1
+    changed = raw.replace(old, replacement)
+    tail = b'    assert "Sidebar" in context["visible_text"] and "Other app" in context["visible_text"]'
+    assert changed.count(tail) == 1
+    new_assertions = '\n'.join([
+        '    bindings = context["target_bindings"]',
+        '    assert bindings["schema_version"] == "gui_agent.target_bindings.v1"',
+        '    assert bindings["observation_id"] == context["observation_id"] == source.observation_id',
+        '    assert bindings["scope"] == "all_snapshot_candidates"',
+        '    assert bindings["min_confidence"] == runner.adapter.min_confidence',
+        '    assert [(item["element_id"], item["text"]) for item in bindings["candidates"]] == [',
+        '        (element.element_id, element.text) for element in source.elements',
+        '    ]',
+    ]).encode("utf8")
+    newline = b"\r\n" if b"\r\n" in raw else b"\n"
+    changed = changed.replace(tail, tail + newline + new_assertions.replace(b"\n", newline))
+    source.write_bytes(changed)
+    after = {name: sha(ROOT / name) for name in paths}
+    assert [name for name in paths if before[name] != after[name]] == [RELATIVE]
+    (OUT / "migration.json").write_text(json.dumps({
+        "schema": "week6.target_binding.context_migration.v1", "path": RELATIVE,
+        "old_sha256": before[RELATIVE], "new_sha256": after[RELATIVE],
+        "reason": "The authorised additive target_bindings context field makes the old exact key set obsolete. The non-message frame is still complete; the replacement independently asserts that every ID and original text from the same source snapshot is retained, with all-snapshot scope and the adapter confidence threshold.",
+        "all_other_existing_assertions_unchanged": True, "production_auditor_other_tests_unchanged": True,
+        "original_affected_exit1_retained": True, "code_pins_after": after,
+        "requirements_dev_sha256": sha(ROOT / "requirements-dev.txt")}, ensure_ascii=False, indent=2) + "\n", encoding="utf8")
+    print(json.dumps({"migration": str(OUT / "migration.json"), "sha256": sha(OUT / "migration.json"),
+                      "test_sha256": after[RELATIVE], "archived_files": len(files)}, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

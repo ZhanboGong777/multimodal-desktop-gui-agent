@@ -1,0 +1,48 @@
+{
+  "status": "ready",
+  "reason": "The previous goal failed due to missing 'Report Generated' text, indicating the report was not fully created. The current plan will ensure the report is prepared, reviewed, and committed locally without external sync. The workflow remains unchanged except for the revised conditions to reflect actual",
+  "subgoals": [
+    {
+      "instruction": "Prepare a BLUE report for project BETA by selecting the project, choosing the BLUE theme, and generating the report using visible controls.",
+      "expect_text": [
+        "Project BETA",
+        "Theme BLUE",
+        "Report Generated"
+      ],
+      "forbid_text": [
+        "Review unavailable",
+        "Connection error",
+        "External sync required"
+      ],
+      "goal_id": "prepare_report"
+    },
+    {
+      "instruction": "Review the generated BLUE report for project BETA using visible controls.",
+      "expect_text": [
+        "Project BETA",
+        "Theme BLUE",
+        "Review Complete"
+      ],
+      "forbid_text": [
+        "Review unavailable",
+        "Connection error",
+        "External sync required"
+      ],
+      "goal_id": "review_report"
+    },
+    {
+      "instruction": "Commit the reviewed BLUE report for project BETA locally using visible controls.",
+      "expect_text": [
+        "Project BETA",
+        "Theme BLUE",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [
+        "Connection error",
+        "External sync required",
+        "Review unavailable"
+      ],
+      "goal_id": "commit_report"
+    }
+  ]
+}

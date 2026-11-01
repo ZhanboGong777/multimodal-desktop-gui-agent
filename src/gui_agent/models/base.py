@@ -102,6 +102,12 @@ class ModelClient(ABC):
     def complete(self, messages: Sequence[Mapping[str, Any]], **kwargs: Any) -> ModelResponse:
         """Send already-built messages. Subclasses implement this one method."""
 
+    def model_for_request(
+        self, messages: Sequence[Mapping[str, Any]], *, image_path: str | None = None,
+    ) -> str:
+        """Name of the configured model that will receive this request."""
+        return self.model_name
+
     def generate_text(self, prompt: str, *, system: str | None = None) -> ModelResponse:
         messages: list[dict[str, Any]] = []
         if system:

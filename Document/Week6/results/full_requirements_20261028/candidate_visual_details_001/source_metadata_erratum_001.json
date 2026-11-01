@@ -1,0 +1,32 @@
+{
+  "schema": "week6.source_metadata_erratum.v1",
+  "utc": "2026-11-01T10:26:02.885287+00:00",
+  "root_reviewed": true,
+  "original_freeze": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\candidate_visual_details_001\\final_source_freeze_001.json",
+    "sha256": "75e7e4967ffdabc2c374ef6b8d62fc4d9dd9e33461f06fc1dd7358045c425eac"
+  },
+  "original_preregistration": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\preregistered_v6_043.json",
+    "sha256": "fe5d6227641707ac658ea9c221583f0360a1c0a4497cf4c26dd1adce99dcad5b"
+  },
+  "original_bytes_preserved": true,
+  "source_pin_table_is_unchanged": true,
+  "actual_pin_count": 286,
+  "correct_auditor_sha256_from_pre_run_pin_table": "508c58d234eae1cfce8b254488f39deaa55e36235aa70251c0bec1b0e44c78e7",
+  "original_scalar_fields": {
+    "freeze.code_pin_count": 285,
+    "prereg.auditor_source_sha256": "4d23b82553ed2d6066332732d0916ce38854e06be2f9a80b5875a956d7f67541"
+  },
+  "before_and_after_tested_code_pin_tables": [
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\candidate_visual_details_001\\targeted_validation_002\\tested_code_pins_before.json",
+      "sha256": "498a500769439525b0945c42653f329fd74aee018b1b53ed164431068c02f1ae"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\candidate_visual_details_001\\targeted_validation_002\\tested_code_pins_after.json",
+      "sha256": "498a500769439525b0945c42653f329fd74aee018b1b53ed164431068c02f1ae"
+    }
+  ],
+  "meaning": "The new test added one pin and the auditor implementation changed. Freeze construction copied two stale summary scalars from the preceding candidate. The complete 286-file SHA table, actual 819-test before/after tables, preregistered freeze SHA and external pre-owner window acknowledgement already bound the actual source before the native run. This addendum changes no source, binding table, native records, condition, budget, result or pre-run timestamp. Independent audit must still verify all286exact hashes and actual auditor hash from that original table, plus retain/report the two contradictory scalar fields. A consistent scalar may never substitute for an exact source check. This is a documentation erratum, not a rerun, new source candidate, or retrospective native acceptance."
+}

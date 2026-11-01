@@ -1,0 +1,31 @@
+........................................................................ [ 10%]
+........................................................................ [ 20%]
+........................................................................ [ 30%]
+.........................................F.............................. [ 40%]
+........................................................................ [ 50%]
+........................................................................ [ 61%]
+........................................................................ [ 71%]
+........................................................................ [ 81%]
+........................................................................ [ 91%]
+..........................................................               [100%]
+================================== FAILURES ===================================
+____ test_unchanged_rejected_contract_is_not_executed_under_a_new_goal_id _____
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/failed_plan_repair_001/targeted_validation_001/pytest_tmp/test_unchanged_rejected_contra0')
+
+    def test_unchanged_rejected_contract_is_not_executed_under_a_new_goal_id(tmp_path):
+        repeated = json.loads(initial_proposal())["subgoals"][1]
+        repeated["goal_id"] = "RenamedStillPreexisting"
+        runner, request, state, client, _ = lab(
+            tmp_path, responses=[initial_proposal(), plan(), proposal(repeated)], rounds=2)
+        result = runner.run(request, options())
+>       assert result.status == "failed" and state.attempts == 1 and len(client.calls) == 3
+E       AssertionError: assert ('blocked' == 'failed'
+E         
+E         - failed
+E         + blocked)
+
+tests\test_week6_preexisting_contract_recovery.py:86: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_week6_preexisting_contract_recovery.py::test_unchanged_rejected_contract_is_not_executed_under_a_new_goal_id
+1 failed, 705 passed in 178.52s (0:02:58)

@@ -1,0 +1,12 @@
+--- tests/test_week6_full_requirements_review.py
++++ tests/test_week6_full_requirements_review.py
+@@ -322,7 +322,8 @@
+     assert failure["category"] == "semantic_postconditions_unsatisfied"
+     assert failure["failed_goal"] == original["subgoals"][1]
+     assert failure["predicate_feedback"] == {
+-        "missing_expected_text": ["Unobserved former objective"], "present_forbidden_text": None}
++        "missing_expected_text": ["Unobserved former objective"], "present_forbidden_text": None,
++        "present_expected_text": []}
+     assert "caller request has not changed" in failure["required_revision"]
+     assert all(set(entry) == {"goal_id", "instruction", "expect_text", "forbid_text"}
+                for entry in saved["context"]["completed_subgoals"])

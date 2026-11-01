@@ -1,0 +1,143 @@
+{
+  "schema_version": "week6.review.v5_to_v6_migration.v1",
+  "created_utc": "2026-10-28T09:43:47.907660+00:00",
+  "reviewer": "/root/week6_replanning_review",
+  "purpose": "Explicit predicate-source expansion with retained execution/evidence guards, not real-window acceptance.",
+  "before_binding": {
+    "path": "Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_auditor_v005_pre_v6\\binding_001.json",
+    "sha256": "a85dbf44c3ad20119219842bf9b343dfb213e7a32704c942eca3a43da76eb112"
+  },
+  "contract": {
+    "path": "Document\\Week6\\results\\full_requirements_20261028\\review\\acceptance_contract_amendment_005.md",
+    "sha256": "64ec7ba8e40fb3f64872ee260a3a1b277e71926b7491dc5c32cc9b481eae2062"
+  },
+  "files": [
+    {
+      "source": "scripts/week6_audit_semantic_acceptance.py",
+      "destination": "Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_auditor_v006\\week6_audit_semantic_acceptance.py.txt",
+      "before_sha256": "41f7d1669eea3aedc382e58c86d68e9aa8e03f65be1564e659e42c5530435732",
+      "after_sha256": "2491b56a4d4cce826f8238f08b33daf71bd35dd80dcd3674385a8724871a1515"
+    },
+    {
+      "source": "tests/test_week6_full_requirements_review.py",
+      "destination": "Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_auditor_v006\\test_week6_full_requirements_review.py.txt",
+      "before_sha256": "58916c5cbcc82cc470a78476eae79b8aa5faa48b56f69e525f2ec0dec332dfa0",
+      "after_sha256": "448a5a6ecca04db745018acd2dd64a1994d3cbdc325056b20b9d4f25727cab33"
+    }
+  ],
+  "original_test_coverage": {
+    "previous_parameterized_cases": 65,
+    "current_parameterized_cases": 79,
+    "unchanged_original_test_functions_ast": [
+      "test_review_bare_drag_is_a_primitive_name_not_a_semantic_objective",
+      "test_review_completed_objective_cannot_be_reintroduced_under_partial_renaming",
+      "test_review_failed_semantic_goal_is_not_rescued_by_visible_caller_final",
+      "test_review_raw_action_prediction_failure_does_not_rewrite_the_semantic_goal",
+      "test_review_delegate_verifier_cannot_supply_false_semantic_success",
+      "test_review_factory_cannot_replace_a_frozen_goal_with_preexisting_context",
+      "test_review_caller_owned_request_alias_is_not_a_way_to_change_final_mid_run",
+      "test_review_decomposition_result_write_failure_preserves_consumed_counts",
+      "test_review_post_input_persistence_failure_keeps_known_receipts_without_success",
+      "test_review_callback_keyboard_interrupt_does_not_erase_confirmed_inputs_or_replay",
+      "test_review_duplicate_json_keys_are_not_normalized_into_an_accepted_plan",
+      "test_review_unsupported_schema_transport_does_not_spend_http_or_input",
+      "test_review_wait_receipt_alone_is_not_semantic_input_credit",
+      "test_review_two_primitive_steps_cannot_escape_the_one_step_planning_contract",
+      "test_review_child_reused_capture_provenance_stops_before_credit",
+      "test_review_root_monitor_agrees_with_verified_goal_ledger_and_shared_counts",
+      "test_review_monitor_revision_keeps_confirmed_goal_count_monotonic",
+      "test_audit_reader_rejects_cross_run_evidence_even_if_the_other_file_exists",
+      "test_audit_reader_does_not_repair_duplicate_json_keys",
+      "test_audit_reader_detects_source_evidence_changes_during_one_read_session",
+      "test_audit_reader_requires_real_owner_receipt_before_reading_a_fixture",
+      "test_audit_reader_rejects_unknown_boolean_or_nonzero_child_exit",
+      "test_audit_reader_v2_repair_keeps_full_archive_and_exact_context_binding",
+      "test_audit_reader_v2_repair_rejects_unbound_or_silently_truncated_context",
+      "test_audit_reader_v2_mapping_separates_raw_whitespace_from_validated_instruction",
+      "test_audit_reader_v5_intent_input_preserves_snapshot_only_in_archive",
+      "test_audit_reader_v5_rejects_faked_intent_flags_or_dropped_archive_evidence",
+      "test_audit_reader_v3_lowlevel_cannot_drop_or_borrow_the_action_image",
+      "test_audit_reader_v3_preencoding_message_cannot_switch_modalities",
+      "test_review_v5_reserved_unresolved_literal_stops_before_observation_and_http",
+      "test_review_v5_multiple_final_predicates_do_not_prove_multiple_stage_boundaries",
+      "test_audit_reader_v5_rejects_runtime_evidence_leaking_into_intent_context",
+      "test_audit_reader_v5_archived_pixels_and_runtime_sources_are_independently_bound"
+    ],
+    "explicitly_revised_three_parameter_cases": {
+      "before_function": "test_review_v5_native_caller_pool_membership_is_checked_before_normalization",
+      "after_function": "test_review_v6_predicted_source_changes_without_removing_runtime_or_conflict_checks",
+      "whitespace": "Still rejected before any child/input; raw response unchanged.",
+      "unknown_predicate": "New source is allowed but nonexistent postcondition requires an actual CPU input then literal failure and zero completed credit.",
+      "opposite_polarity": "Forbidding caller-required text still conflicts with immutable final and is rejected before input."
+    },
+    "new_case_functions": [
+      "test_review_v6_current_action_caption_alone_cannot_receive_progress_credit",
+      "test_review_v6_literal_substring_matching_does_not_resolve_negated_state_semantics",
+      "test_review_v6_one_caller_final_does_not_remove_distinct_goal_checks",
+      "test_review_v6_raw_predictions_cannot_be_repaired_by_normalization"
+    ],
+    "new_parameterized_cases": 14,
+    "scope": "Offline scripted observations/model replies/CPU executor doubles. No real GUI or model call."
+  },
+  "auditor_changed_functions": [
+    "audit_native_predicates",
+    "audit"
+  ],
+  "auditor_other_functions_ast_equal": [
+    "require",
+    "sha",
+    "unique",
+    "timestamp",
+    "same_check",
+    "command_value",
+    "audit_repair_context",
+    "expected_native_mapping",
+    "audit_highlevel_intent_binding",
+    "audit_snapshot_archive",
+    "audit_lowlevel_image_binding",
+    "audit_message_modality",
+    "owner_audit",
+    "source_audit",
+    "semantic_input_types",
+    "transport_audit",
+    "monitor_audit",
+    "fixture_audit",
+    "main"
+  ],
+  "new_source_check": {
+    "schema_version": "week6.semantic_subtasks.v6",
+    "postcondition_source": "untrusted_model_prediction",
+    "dynamic_caller_pool_removed": true,
+    "native_strict_shape_and_no_stripping": true,
+    "native_parsed_saved_proposal_equal_required": true,
+    "caller_final_immutable_and_fresh": true,
+    "all_independent_operation_events_and_unique_receipts_required": true,
+    "manual_native_instruction_to_actual_event_meaning_review_still_required": true,
+    "substring_negation_limit_preserved_not_fixed": true,
+    "pool_specific_caller_minimum_and_length_preflight_removed": true
+  },
+  "independent_target": {
+    "path": "Document\\Week6\\results\\full_requirements_20261028\\review\\cpu_validation_008\\audit.json",
+    "sha256": "db51781bc02b4b566fa8d79c4924baf0830d3f010c455da1196ea53851d5716e",
+    "actual_returncode": 0,
+    "ruff_returncode": 0,
+    "collected_testcases": 79,
+    "selected_source_before": {
+      "scripts/week6_audit_semantic_acceptance.py": "2491b56a4d4cce826f8238f08b33daf71bd35dd80dcd3674385a8724871a1515",
+      "src/gui_agent/planning/semantic_workflow.py": "ad85ade57519bcdcd4e0496ac8c1d6693a9666032f3e443913a6a8eea0ff3d53",
+      "src/gui_agent/planning/workflow_decomposer.py": "d9881631677d4223c16669bee7a7780bb4c6014ffe9066a488ad37683bfbe826",
+      "src/gui_agent/planning/planner.py": "afa72e8faa640d9c8127154f283828105fb0d53d2ea21ca1f36843ca0e18bb6d",
+      "src/gui_agent/runtime/monitoring.py": "039cc68fba5bf7aec9848120a8456a21d7fc8887166a6f0ecf6c2c7e728dfb8d",
+      "src/gui_agent/runtime/workflow.py": "13a6ae067662b2ceda1f5082bb9ed0c544f201be06b5fb21cabdf7f7098fe889",
+      "src/gui_agent/runtime/runner.py": "e3fe1cfd49f338afa29c5cae2b13c12fa972a694327b9def13a97c0d803ffe56",
+      "src/gui_agent/runtime/schemas.py": "06aa355ba24ed50a6307d7fc84cd920dc91b81dc7d844ec68c461cb614b5f6f7",
+      "src/gui_agent/runtime/verification.py": "abc72375f2959fb765fb53dbf4bbf63401513e5cdfeaeb445d0c148b0be1cd4c",
+      "tests/test_week6_full_requirements_review.py": "448a5a6ecca04db745018acd2dd64a1994d3cbdc325056b20b9d4f25727cab33",
+      "tests/test_week6_semantic_subtasks.py": "a0fa608d2e893e4a3bf5072591edc5e7b24411a27807c9cef534eda7cfee66e5",
+      "tests/test_week6_automatic_decomposition.py": "b28ec24c5d06982f1160c3b110f706b0461113eabcd26f4c7d5b1365378000ad",
+      "tests/test_week6_rolling_actions.py": "fe669d6e50df3dc1e1b44b5aaa81b1c770a4c5b516a9df73cd120d047d9a9193"
+    },
+    "selected_source_unchanged": true,
+    "pytest_reported_seconds": 27.46
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "schema": "week6.failed_feedback.root_scope_review.v1",
+  "reviewer": "Root agent",
+  "reviewed_utc": "2026-10-29T00:48:48.480586+00:00",
+  "scope_review_passed": true,
+  "changed_paths": [
+    "scripts/week6_audit_semantic_acceptance.py",
+    "src/gui_agent/planning/semantic_workflow.py",
+    "tests/test_week6_failed_contract_feedback.py"
+  ],
+  "source_before_manifest_sha256": "accee2c6fe736b597afcecf4c0a6e0ae2d2836bb6a1f64215085fa7fd185ffcc",
+  "production_change": "Only generic sufficient-predicate generation guidance, new fixed feedback text and filtered failed-contract logical feedback.",
+  "auditor_change": "Stable producer wire order; independently rebuilt native-only logical failure; exact allowed rich logical shapes. Main native/context comparison and all other audit logic unchanged by AST normalization.",
+  "unchanged": [
+    "original predicates and caller final",
+    "false-before/known-input/fresh-after gates",
+    "no unknown/cancelled replay",
+    "all action/planning/HTTP/round/deadline budgets",
+    "native plan/target authority",
+    "original failed outcomes and completion ledger"
+  ],
+  "code_pin_count": 277,
+  "new_test_sha256": "b790679398f9cb59f1e6acbb03138ab80bb4546fd1afb012069f057bacd0b108",
+  "real_model_effectiveness_claimed": false,
+  "model_gui_calls": 0,
+  "review_harness_sha256": "05f51d56201b76a5cda7e3487fae2a4f6634e8fd8d10e5f81c0c3ade7ae50340"
+}

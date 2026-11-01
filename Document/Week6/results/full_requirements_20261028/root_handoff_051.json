@@ -1,0 +1,173 @@
+{
+  "schema": "week6.full_requirements.handoff.v4",
+  "previous": {
+    "path": "root_handoff_050.json",
+    "sha256": "43c42064a650e06424d91657f388442d73ed5277e84d5699c675adc1eeeba5f8"
+  },
+  "updated_utc": "2026-10-28T14:27:19.608991+00:00",
+  "status": "in_progress",
+  "branch": "codex/week6-full-requirements",
+  "phase": "normal018_real_model_gui_running",
+  "freeze": {
+    "path": "observed_query_constraints_001/final_source_freeze_001.json",
+    "sha256": "93c839778aa31111ff9931e70a3d1a20214d2cea8d13194955f6ef1eeef9a6d4"
+  },
+  "preregistration": {
+    "path": "live/preregistered_v6_010.json",
+    "sha256": "047d4a23fac0841201f8f6f2db03966e6c0498b5b0dbcf6d4a4098fbdb9f3386"
+  },
+  "code_pin_count": 274,
+  "package_python_count": 91,
+  "readme_sha256": "72be47c3626c4877e24880e2254585bd2748fbf8ae82e9f175e72f9a201eb0bd",
+  "requirements_dev_sha256": "31b4bba08667510fa824a01634563e7cd5c30eac77ca8ddfba3aa6cb21643918",
+  "all_source_writers_stopped": true,
+  "active_cpu_task": null,
+  "validation": {
+    "path": "observed_query_constraints_001/root_affected_validation_001/validation.json",
+    "sha256": "d2c55f80992e042509464c6df908021ce69bad520f88188ee67fd1a0c81f0fd9",
+    "actual_exec_session": 52880,
+    "actual_exec_exit": 0,
+    "session_closed": true,
+    "elapsed_seconds": 190.906,
+    "passed": 1123,
+    "pytest_seconds": 177.49,
+    "ruff_exit": 0,
+    "all_pins_and_dev_stable": true,
+    "collected_only": 3620,
+    "full004_run": false
+  },
+  "root_scope_review": {
+    "path": "observed_query_constraints_001/root_scope_review_001.json",
+    "sha256": "bf5d70c346c86588cafee5c0f449732d131d911718518f8e9ebfc30b05a5a7d6"
+  },
+  "active_model_or_gui_task": {
+    "case": "normal_018",
+    "fixture": "fixture_normal_014",
+    "operator": "/root/week6_live_operator",
+    "state": "Actual owner/launcher/CPython identities verified alive; soleoperator autonomous service",
+    "project": "ALPHA",
+    "colour": "GREEN",
+    "mode": "normal",
+    "model": "qwen2.5vl:3b",
+    "model_digest": "fb90415cde1ef08aa669ae74b082d49b158729b6db1ab183c941417d507e71a1",
+    "budgets": "same20actions/24planning/32HTTP/7200s task/900s model; single step and3pergoalpasses",
+    "exec_session": 12027,
+    "actual_processes": [
+      {
+        "pid": 85424,
+        "create_time": 1793197593.9419434,
+        "exe": "D:\\anaconda\\python.exe",
+        "cmdline": [
+          "D:\\anaconda\\python.exe",
+          "-X",
+          "utf8",
+          "C:/Users/联想/Documents/ChatGPT/Intern/tmp/week6_full_requirements_20261028/run_owned_model.py",
+          "--name",
+          "normal_018",
+          "--fixture-directory",
+          "C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/live/fixture_normal_014",
+          "--project",
+          "ALPHA",
+          "--colour",
+          "GREEN",
+          "--mode",
+          "normal",
+          "--model",
+          "qwen2.5vl:3b",
+          "--config",
+          "C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/configs/week6_accuracy_persistent.yaml",
+          "--task-timeout",
+          "7200",
+          "--model-timeout",
+          "900"
+        ],
+        "ppid": 77188,
+        "status": "running"
+      },
+      {
+        "pid": 78992,
+        "create_time": 1793197594.1665003,
+        "exe": "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe",
+        "cmdline": [
+          "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+          "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_semantic_acceptance.py",
+          "--directory",
+          "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_018\\run",
+          "--fixture-directory",
+          "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\fixture_normal_014",
+          "--project",
+          "ALPHA",
+          "--colour",
+          "GREEN",
+          "--mode",
+          "normal",
+          "--config",
+          "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\configs\\week6_accuracy_persistent.yaml",
+          "--task-timeout",
+          "7200.0",
+          "--model-timeout",
+          "900.0",
+          "--model",
+          "qwen2.5vl:3b"
+        ],
+        "ppid": 85424,
+        "status": "running"
+      },
+      {
+        "pid": 70284,
+        "create_time": 1793197594.195413,
+        "exe": "D:\\anaconda\\python.exe",
+        "cmdline": [
+          "D:\\anaconda\\python.exe",
+          "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_semantic_acceptance.py",
+          "--directory",
+          "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_018\\run",
+          "--fixture-directory",
+          "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\fixture_normal_014",
+          "--project",
+          "ALPHA",
+          "--colour",
+          "GREEN",
+          "--mode",
+          "normal",
+          "--config",
+          "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\configs\\week6_accuracy_persistent.yaml",
+          "--task-timeout",
+          "7200.0",
+          "--model-timeout",
+          "900.0",
+          "--model",
+          "qwen2.5vl:3b"
+        ],
+        "ppid": 78992,
+        "status": "running"
+      }
+    ],
+    "started_utc": "2026-10-28T14:26:34.162732+00:00"
+  },
+  "last_case": {
+    "name": "normal_017",
+    "actual_task_exit": 1,
+    "completed_goals": "1/2",
+    "actions": 3,
+    "planning_http": 6,
+    "unknown": 0,
+    "negative_audit_sha256": "1c4523e3714f294cc62a5d320208c42abc0bfa68450b468922ca7193c743539c",
+    "fixture013_exact_closed_actual_exit": 15
+  },
+  "source_change": "Explicit schema.v2 finite snapshot-only generation query set and source/cap/search metadata. All packetv1/runtime/parser/SYSTEM/semantic/budgets unchanged. No gallery; native chooses target and no local rewriting.",
+  "private_tooling_diagnostics": "Two scope normalizer import omissions and one valid-directory Markdown-link check failure are preserved as real private-tool exit1 diagnostics; corrected without project source/test changes. Not model/runtime exits.",
+  "next": "Sole operator serves every fresh capture/native input request autonomously. Record actual PID/create times and after-first-known-input read-only CLI while child executing. Reviewer prepares ended audit only; no active journal reads. No Root GUI or heavy CPU. After actualowner/session end inspect true outcome, current strict audit and Root semantic/telemetry review; only then fresh transient if accepted.",
+  "remaining": [
+    "normal and transient real acceptance",
+    "full004 full pytest/Ruff on final freeze",
+    "final report natural prose and all-page rendering QA",
+    "wheel/source ZIP/index/branch commit and delivery audit"
+  ],
+  "overall_complete": false,
+  "ended_audit_helper": {
+    "path": "C:/Users/联想/Documents/ChatGPT/Intern/tmp/week6_normal018_independent_audit_20261029/run_ended_audit_001.py",
+    "sha256": "806db54c59ad7ebc557465560f0ca188b11875a7e5dedca34028aeb227daf341",
+    "state": "prepared only; explicit actualended confirmation required"
+  }
+}

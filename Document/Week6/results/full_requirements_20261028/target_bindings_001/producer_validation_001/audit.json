@@ -1,0 +1,170 @@
+{
+  "receipts": [
+    {
+      "command": [
+        "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+        "-m",
+        "ruff",
+        "check",
+        "src/gui_agent/planning/planner.py",
+        "src/gui_agent/planning/target_bindings.py",
+        "src/gui_agent/runtime/runner.py",
+        "tests/test_week6_target_bindings.py"
+      ],
+      "launcher": {
+        "pid": 30268,
+        "create_time": 1793192136.8660812,
+        "exe": "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe",
+        "cmdline": [
+          "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+          "-m",
+          "ruff",
+          "check",
+          "src/gui_agent/planning/planner.py",
+          "src/gui_agent/planning/target_bindings.py",
+          "src/gui_agent/runtime/runner.py",
+          "tests/test_week6_target_bindings.py"
+        ]
+      },
+      "observed_descendants": [
+        {
+          "pid": 81108,
+          "create_time": 1793192136.8864236,
+          "exe": "D:\\anaconda\\python.exe",
+          "cmdline": [
+            "D:\\anaconda\\python.exe",
+            "-m",
+            "ruff",
+            "check",
+            "src/gui_agent/planning/planner.py",
+            "src/gui_agent/planning/target_bindings.py",
+            "src/gui_agent/runtime/runner.py",
+            "tests/test_week6_target_bindings.py"
+          ]
+        },
+        {
+          "pid": 73968,
+          "create_time": 1793192136.974512,
+          "exe": "D:\\Developer\\multimodal-desktop-gui-agent\\.venv\\Scripts\\ruff.exe",
+          "cmdline": [
+            "D:\\Developer\\multimodal-desktop-gui-agent\\.venv\\Scripts\\ruff.exe",
+            "check",
+            "src/gui_agent/planning/planner.py",
+            "src/gui_agent/planning/target_bindings.py",
+            "src/gui_agent/runtime/runner.py",
+            "tests/test_week6_target_bindings.py"
+          ]
+        }
+      ],
+      "actual_child_exit_code": 0,
+      "elapsed_seconds": 0.21899999992456287
+    },
+    {
+      "command": [
+        "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+        "-X",
+        "utf8",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_week6_target_bindings.py",
+        "--basetemp",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\target_bindings_001\\producer_validation_001\\pytest_tmp"
+      ],
+      "launcher": {
+        "pid": 85724,
+        "create_time": 1793192137.0801804,
+        "exe": "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe",
+        "cmdline": [
+          "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+          "-X",
+          "utf8",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_week6_target_bindings.py",
+          "--basetemp",
+          "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\target_bindings_001\\producer_validation_001\\pytest_tmp"
+        ]
+      },
+      "observed_descendants": [
+        {
+          "pid": 87528,
+          "create_time": 1793192137.1022463,
+          "exe": "D:\\anaconda\\python.exe",
+          "cmdline": [
+            "D:\\anaconda\\python.exe",
+            "-X",
+            "utf8",
+            "-m",
+            "pytest",
+            "-q",
+            "tests/test_week6_target_bindings.py",
+            "--basetemp",
+            "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\target_bindings_001\\producer_validation_001\\pytest_tmp"
+          ]
+        },
+        {
+          "pid": 77760,
+          "create_time": 1793192144.1759264,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 72236,
+          "create_time": 1793192144.2919424,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 87812,
+          "create_time": 1793192144.6389203,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 75976,
+          "create_time": 1793192144.6578524,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40280,
+          "create_time": 1793192144.7487364,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        }
+      ],
+      "actual_child_exit_code": 0,
+      "elapsed_seconds": 8.327999999979511
+    }
+  ],
+  "owned_source_unchanged": true,
+  "checks_passed": true,
+  "scope": "producer file only, not combined source regression or live acceptance"
+}

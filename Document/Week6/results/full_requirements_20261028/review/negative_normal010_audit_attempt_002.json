@@ -1,0 +1,12 @@
+{
+  "schema_version": "week6.review.private_helper_attempt.v1",
+  "actual_helper_returncode": 1,
+  "error": "AssertionError: monitor task_status was assumed equal to runtime needs_clarification",
+  "observed_monitor_task_status": "blocked",
+  "executed_source_behavior": "SemanticWorkflowRunner explicitly maps refused and needs_clarification to monitor blocked. Exact runtime status stays separately saved.",
+  "scope": "Private read-only audit helper assertion; not a failed experiment monitor or a fabricated owner exit.",
+  "failed_helper_snapshot": "negative_normal010_audit_attempt_002.py.txt",
+  "resolution": "Require actual monitor blocked and preserve both statuses and the executed mapping in the negative audit.",
+  "raw_experiment_modified": false,
+  "model_gui_test_operations": 0
+}

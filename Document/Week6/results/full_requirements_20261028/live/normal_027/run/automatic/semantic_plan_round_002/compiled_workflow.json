@@ -1,0 +1,100 @@
+{
+  "schema_version": "week6.semantic_subtasks.v6",
+  "native_proposal": {
+    "status": "ready",
+    "reason": "The previous goal 'review_report' failed due to missing expected text, but the caller request remains unchanged. The current plan focuses on completing the remaining operation: committing the GREEN report for project ALPHA locally. The final state requires 'LOCAL COMPLETE' to be visible, with no 'RE",
+    "subgoals": [
+      {
+        "instruction": "Commit the prepared GREEN report for project ALPHA locally using the visible commit controls.",
+        "expect_text": [
+          "LOCAL COMPLETE"
+        ],
+        "forbid_text": [
+          "Review Pending",
+          "Review Failed",
+          "Review Error",
+          "Review Timeout",
+          "Review Cancelled",
+          "Review Not Started",
+          "Review In Progress",
+          "Review Unavailable"
+        ],
+        "goal_id": "commit_report"
+      }
+    ]
+  },
+  "workflow": {
+    "workflow_id": "semantic_lab",
+    "instruction": "In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+    "subgoals": [
+      {
+        "case_id": "commit_report",
+        "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Commit the prepared GREEN report for project ALPHA locally using the visible commit controls.\nComplete original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+        "target_app": null,
+        "preconditions": [],
+        "success_rules": [],
+        "verification": "automatic",
+        "expect_text": [
+          "LOCAL COMPLETE"
+        ],
+        "forbid_text": [
+          "Review Pending",
+          "Review Failed",
+          "Review Error",
+          "Review Timeout",
+          "Review Cancelled",
+          "Review Not Started",
+          "Review In Progress",
+          "Review Unavailable"
+        ],
+        "requires_processes": [],
+        "forbids_processes": [],
+        "must_exit_processes": [],
+        "risk": "medium",
+        "message_conversation": null,
+        "gate_on_step_verification": false
+      }
+    ],
+    "final_check": {
+      "case_id": "FINAL",
+      "instruction": "Independently read unchanged caller final predicates",
+      "target_app": null,
+      "preconditions": [],
+      "success_rules": [],
+      "verification": "automatic",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [],
+      "requires_processes": [],
+      "forbids_processes": [],
+      "must_exit_processes": [],
+      "risk": "low",
+      "message_conversation": null,
+      "gate_on_step_verification": true
+    }
+  },
+  "mapping": [
+    {
+      "goal_id": "commit_report",
+      "native_instruction": "Commit the prepared GREEN report for project ALPHA locally using the visible commit controls.",
+      "validated_instruction": "Commit the prepared GREEN report for project ALPHA locally using the visible commit controls.",
+      "compiled_instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Commit the prepared GREEN report for project ALPHA locally using the visible commit controls.\nComplete original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+      "expect_text": [
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [
+        "Review Pending",
+        "Review Failed",
+        "Review Error",
+        "Review Timeout",
+        "Review Cancelled",
+        "Review Not Started",
+        "Review In Progress",
+        "Review Unavailable"
+      ]
+    }
+  ]
+}

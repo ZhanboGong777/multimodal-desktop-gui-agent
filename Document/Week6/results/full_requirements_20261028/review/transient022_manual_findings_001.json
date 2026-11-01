@@ -1,0 +1,40 @@
+{
+  "reviewer": "Root",
+  "approved": true,
+  "case": "transient_022",
+  "operator_chronology_reviewed": true,
+  "stages": [
+    {
+      "stage_key": "1:1:prepare_review",
+      "semantic_alignment_passed": true,
+      "rationale": "Original native objective explicitly requests preparation and review, with Project BETA,Theme BLUE,Review Complete as its predeclared result. Inputs001/002 selected BETA then BLUE, and003 actually attempted review. Immediate fresh pixels and independent events show the application rejected that first review. The original objective remains FAILED and receives no completion credit; raw passed step hints do not override its failed frozen conditions. No later commit was prematurely credited."
+    },
+    {
+      "stage_key": "2:1:review_report",
+      "semantic_alignment_passed": true,
+      "rationale": "The revised native objective explicitly requests reviewing the BETA/BLUE report. Original contract-before pixels show the previous Review unavailable message and no Review complete. Input004 is the original native double-click1282,1094 on the currently observed Review report control. Fresh pixels show Review complete, and uniquely attributed review_accepted plus two fresh same-scope checks support this new objective. It performs no selections or commit and leaves the earlier failure unchanged."
+    },
+    {
+      "stage_key": "2:2:commit_report",
+      "semantic_alignment_passed": true,
+      "rationale": "The separate native objective explicitly requests local commit after review. Saved before pixels show BETA/BLUE,Review complete,Commit locally and no LOCAL COMPLETE. Original native input005 is the single click1281,1049. Immediate fresh pixels, attributed local_commit, fresh goal checks and separate original caller-final pixels all confirm BETA/BLUE/LOCAL COMPLETE. No local instruction or target rewrite, pointer parking or control substitution was used."
+    }
+  ],
+  "actually_viewed_saved_original_pixels": [
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_022\\run\\automatic\\initial_observation\\monitor1_20261101_211901_584.png",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_022\\run\\automatic\\contract_before_002_001\\monitor1_20261101_212229_649.png",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_022\\run\\automatic\\contract_before_002_002\\monitor1_20261101_212327_175.png",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_022\\run\\automatic\\caller_final_round_002\\monitor1_20261101_212421_002.png"
+  ],
+  "rejected_contract_count_reviewed": 0,
+  "rejected_contract_rationale": "No pre-input contract rejected. The executed original preparation/review objective failed after actual application rejection and remains failed. Revised review and commit separately succeed.",
+  "caveats": [
+    "One controlled local recovery case, not general desktop reliability.",
+    "Five confirmed input calls,7planning/7HTTP,unknown0; one application review rejection,zero executor errors; first objective remainsfailed.",
+    "Root actually read the active CLI at actions1/20,passes2/24,verified0/2 and reviewed each actual immediate refresh. Root is the agent operator/reviewer,not independent human sign-off.",
+    "The optional detail profile preserves original pixels and scoped IDs; it does not guarantee correct target selection or improve measured OCR.",
+    "Original freeze scalar count285 and standalone prereg auditor hash were inherited stale; all286exact pre-run source hashes were already bound by original table and tested before/after pins. Erratum explicitly preserves contradictions and independent audit requires correct original-table identities. No source or original registration was overwritten.",
+    "The expected case-copy claim filename was added after actual exit from exact pre-owner external bytes before terminal; original pre-owner native_window_claim copy and acknowledgement remain. Original claim timing/identity is external and unchanged.",
+    "Actual task/wrapper0,strict0,receipt-protocol0 are distinct. Normal-case qualification,full006,report and distribution remain pending."
+  ]
+}

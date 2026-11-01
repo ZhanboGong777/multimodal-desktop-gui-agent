@@ -1,0 +1,3074 @@
+{
+  "schema": "week6.role_model_routing.offline.actual.v1",
+  "scope": "semantic_contract_safety_repair_budget_and_monitoring",
+  "started_utc": "2026-11-01T10:34:53.904237+00:00",
+  "finished_utc": "2026-11-01T10:37:59.053043+00:00",
+  "elapsed_seconds": 185.15699999999197,
+  "receipts": [
+    {
+      "name": "ruff",
+      "command": [
+        "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+        "-m",
+        "ruff",
+        "check",
+        "src",
+        "tests",
+        "scripts"
+      ],
+      "launcher": {
+        "pid": 27892,
+        "create_time": 1793529293.9094152,
+        "exe": "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe",
+        "cmdline": [
+          "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+          "-m",
+          "ruff",
+          "check",
+          "src",
+          "tests",
+          "scripts"
+        ]
+      },
+      "observed_descendants": [
+        {
+          "pid": 24372,
+          "create_time": 1793529293.9344099,
+          "exe": "D:\\anaconda\\python.exe",
+          "cmdline": [
+            "D:\\anaconda\\python.exe",
+            "-m",
+            "ruff",
+            "check",
+            "src",
+            "tests",
+            "scripts"
+          ]
+        }
+      ],
+      "started_utc": "2026-11-01T10:34:53.906237+00:00",
+      "finished_utc": "2026-11-01T10:34:54.187575+00:00",
+      "elapsed_seconds": 0.28099999998812564,
+      "actual_child_exit_code": 0
+    },
+    {
+      "name": "pytest",
+      "command": [
+        "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+        "-X",
+        "utf8",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_week6_quoted_target_consistency.py",
+        "tests/test_action_adapter.py",
+        "tests/test_runtime_runner.py",
+        "tests/test_week6_grounding_consistency.py",
+        "tests/test_week6_grounding_consistency_review.py",
+        "tests/test_week6_semantic_subtasks.py",
+        "tests/test_week6_semantic_recovery_observation_terminal.py",
+        "tests/test_week6_semantic_predicted_postconditions.py",
+        "tests/test_week6_full_requirements_review.py",
+        "tests/test_week6_rolling_actions.py",
+        "tests/test_week6_recovery_feedback_roundtrip.py",
+        "tests/test_week6_visual_target_guidance_review.py",
+        "tests/test_week6_target_bindings_review.py",
+        "tests/test_week6_candidate_visual_details.py",
+        "tests/test_week6_target_bindings.py",
+        "tests/test_week6_action_output_contract.py",
+        "tests/test_week6_action_output_contract_review.py",
+        "tests/test_week6_auto_cli.py",
+        "tests/test_week6_role_model_routing.py",
+        "tests/test_model_config.py",
+        "tests/test_config.py",
+        "tests/test_planner.py",
+        "tests/test_week6_semantic_repair_feedback.py",
+        "tests/test_week6_semantic_repair_feedback_review.py",
+        "tests/test_week6_semantic_caller_scope_repair.py",
+        "--basetemp",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\compact_text_anchor_001\\targeted_validation_001\\pytest_tmp"
+      ],
+      "launcher": {
+        "pid": 2472,
+        "create_time": 1793529294.1930535,
+        "exe": "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe",
+        "cmdline": [
+          "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+          "-X",
+          "utf8",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_week6_quoted_target_consistency.py",
+          "tests/test_action_adapter.py",
+          "tests/test_runtime_runner.py",
+          "tests/test_week6_grounding_consistency.py",
+          "tests/test_week6_grounding_consistency_review.py",
+          "tests/test_week6_semantic_subtasks.py",
+          "tests/test_week6_semantic_recovery_observation_terminal.py",
+          "tests/test_week6_semantic_predicted_postconditions.py",
+          "tests/test_week6_full_requirements_review.py",
+          "tests/test_week6_rolling_actions.py",
+          "tests/test_week6_recovery_feedback_roundtrip.py",
+          "tests/test_week6_visual_target_guidance_review.py",
+          "tests/test_week6_target_bindings_review.py",
+          "tests/test_week6_candidate_visual_details.py",
+          "tests/test_week6_target_bindings.py",
+          "tests/test_week6_action_output_contract.py",
+          "tests/test_week6_action_output_contract_review.py",
+          "tests/test_week6_auto_cli.py",
+          "tests/test_week6_role_model_routing.py",
+          "tests/test_model_config.py",
+          "tests/test_config.py",
+          "tests/test_planner.py",
+          "tests/test_week6_semantic_repair_feedback.py",
+          "tests/test_week6_semantic_repair_feedback_review.py",
+          "tests/test_week6_semantic_caller_scope_repair.py",
+          "--basetemp",
+          "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\compact_text_anchor_001\\targeted_validation_001\\pytest_tmp"
+        ]
+      },
+      "observed_descendants": [
+        {
+          "pid": 35820,
+          "create_time": 1793529294.219677,
+          "exe": "D:\\anaconda\\python.exe",
+          "cmdline": [
+            "D:\\anaconda\\python.exe",
+            "-X",
+            "utf8",
+            "-m",
+            "pytest",
+            "-q",
+            "tests/test_week6_quoted_target_consistency.py",
+            "tests/test_action_adapter.py",
+            "tests/test_runtime_runner.py",
+            "tests/test_week6_grounding_consistency.py",
+            "tests/test_week6_grounding_consistency_review.py",
+            "tests/test_week6_semantic_subtasks.py",
+            "tests/test_week6_semantic_recovery_observation_terminal.py",
+            "tests/test_week6_semantic_predicted_postconditions.py",
+            "tests/test_week6_full_requirements_review.py",
+            "tests/test_week6_rolling_actions.py",
+            "tests/test_week6_recovery_feedback_roundtrip.py",
+            "tests/test_week6_visual_target_guidance_review.py",
+            "tests/test_week6_target_bindings_review.py",
+            "tests/test_week6_candidate_visual_details.py",
+            "tests/test_week6_target_bindings.py",
+            "tests/test_week6_action_output_contract.py",
+            "tests/test_week6_action_output_contract_review.py",
+            "tests/test_week6_auto_cli.py",
+            "tests/test_week6_role_model_routing.py",
+            "tests/test_model_config.py",
+            "tests/test_config.py",
+            "tests/test_planner.py",
+            "tests/test_week6_semantic_repair_feedback.py",
+            "tests/test_week6_semantic_repair_feedback_review.py",
+            "tests/test_week6_semantic_caller_scope_repair.py",
+            "--basetemp",
+            "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\compact_text_anchor_001\\targeted_validation_001\\pytest_tmp"
+          ]
+        },
+        {
+          "pid": 41756,
+          "create_time": 1793529300.438001,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 21092,
+          "create_time": 1793529300.4605713,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 14048,
+          "create_time": 1793529301.7520862,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 16868,
+          "create_time": 1793529302.2808692,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 2248,
+          "create_time": 1793529303.0372057,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 41296,
+          "create_time": 1793529303.0580153,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 41720,
+          "create_time": 1793529303.7965336,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 16060,
+          "create_time": 1793529303.8184097,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 27568,
+          "create_time": 1793529314.7524085,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 25356,
+          "create_time": 1793529314.772718,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 3588,
+          "create_time": 1793529315.5322733,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 24904,
+          "create_time": 1793529315.5544856,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 16848,
+          "create_time": 1793529315.8401575,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 13996,
+          "create_time": 1793529316.8563368,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40876,
+          "create_time": 1793529316.8792348,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 41396,
+          "create_time": 1793529317.6223025,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 5672,
+          "create_time": 1793529317.64338,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 27908,
+          "create_time": 1793529317.9270933,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 27840,
+          "create_time": 1793529318.65783,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 31920,
+          "create_time": 1793529318.6811194,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 14812,
+          "create_time": 1793529319.475392,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 16828,
+          "create_time": 1793529319.4975553,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 41100,
+          "create_time": 1793529321.000477,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 15176,
+          "create_time": 1793529321.022523,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 41976,
+          "create_time": 1793529321.7731447,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 27300,
+          "create_time": 1793529322.5579937,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 39244,
+          "create_time": 1793529322.57946,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 29728,
+          "create_time": 1793529323.3506465,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 21240,
+          "create_time": 1793529323.3728554,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 33600,
+          "create_time": 1793529323.6664412,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 9560,
+          "create_time": 1793529324.6746736,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 31568,
+          "create_time": 1793529324.695545,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 6148,
+          "create_time": 1793529325.1691296,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 42464,
+          "create_time": 1793529325.4793231,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 9592,
+          "create_time": 1793529326.2541234,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 39248,
+          "create_time": 1793529326.2750852,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 41240,
+          "create_time": 1793529326.7480872,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 26992,
+          "create_time": 1793529326.7710268,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 30644,
+          "create_time": 1793529327.0424683,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 41416,
+          "create_time": 1793529328.1056235,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 13344,
+          "create_time": 1793529328.3321047,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 29724,
+          "create_time": 1793529328.3546388,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 24952,
+          "create_time": 1793529329.9238803,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 14940,
+          "create_time": 1793529331.1968932,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 17080,
+          "create_time": 1793529331.2174072,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 41340,
+          "create_time": 1793529331.9799013,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 4772,
+          "create_time": 1793529331.999845,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 21320,
+          "create_time": 1793529332.512658,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 10400,
+          "create_time": 1793529332.5344486,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 41148,
+          "create_time": 1793529334.0282547,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 6964,
+          "create_time": 1793529334.8430452,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 22772,
+          "create_time": 1793529334.8657527,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 32716,
+          "create_time": 1793529335.67338,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 12256,
+          "create_time": 1793529337.2143757,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 41664,
+          "create_time": 1793529337.2373228,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 24428,
+          "create_time": 1793529338.2247353,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 27904,
+          "create_time": 1793529338.2449753,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 39676,
+          "create_time": 1793529340.0395453,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 42916,
+          "create_time": 1793529340.06094,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 29252,
+          "create_time": 1793529340.3476512,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 24864,
+          "create_time": 1793529341.641378,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40044,
+          "create_time": 1793529341.6607726,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 33628,
+          "create_time": 1793529342.9719584,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 19208,
+          "create_time": 1793529343.7479448,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 33236,
+          "create_time": 1793529344.0113442,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 10560,
+          "create_time": 1793529344.7281508,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 8540,
+          "create_time": 1793529344.754362,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 24012,
+          "create_time": 1793529345.052286,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 7660,
+          "create_time": 1793529345.5136151,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 36912,
+          "create_time": 1793529345.5352967,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 1200,
+          "create_time": 1793529346.295478,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 39316,
+          "create_time": 1793529346.3171084,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40968,
+          "create_time": 1793529346.6152167,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 27440,
+          "create_time": 1793529346.8060236,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40124,
+          "create_time": 1793529346.8288765,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 28020,
+          "create_time": 1793529347.1347196,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 21040,
+          "create_time": 1793529348.3961563,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 18452,
+          "create_time": 1793529348.4269557,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40064,
+          "create_time": 1793529349.9778793,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 9016,
+          "create_time": 1793529350.0021644,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40792,
+          "create_time": 1793529352.843763,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40000,
+          "create_time": 1793529352.866599,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40348,
+          "create_time": 1793529353.9323025,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40804,
+          "create_time": 1793529355.7329805,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 11188,
+          "create_time": 1793529355.7548337,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 22720,
+          "create_time": 1793529356.7807684,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 9592,
+          "create_time": 1793529356.8031137,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 26108,
+          "create_time": 1793529357.5635676,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 37088,
+          "create_time": 1793529357.584772,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 34516,
+          "create_time": 1793529358.8971145,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40352,
+          "create_time": 1793529359.6257796,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 22848,
+          "create_time": 1793529359.6507852,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 29240,
+          "create_time": 1793529361.4937105,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 12052,
+          "create_time": 1793529362.7555013,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 37360,
+          "create_time": 1793529362.7741604,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 692,
+          "create_time": 1793529363.53189,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 4384,
+          "create_time": 1793529363.5505035,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 41116,
+          "create_time": 1793529365.3521624,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 24112,
+          "create_time": 1793529367.9876945,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 6964,
+          "create_time": 1793529368.013452,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 14648,
+          "create_time": 1793529369.018584,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 18764,
+          "create_time": 1793529369.039492,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 27568,
+          "create_time": 1793529369.809338,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 21316,
+          "create_time": 1793529369.8304193,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40876,
+          "create_time": 1793529373.49336,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 3316,
+          "create_time": 1793529373.7070823,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 42456,
+          "create_time": 1793529373.7309115,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 29252,
+          "create_time": 1793529375.043084,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 27804,
+          "create_time": 1793529375.0660577,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40308,
+          "create_time": 1793529376.5935316,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 24248,
+          "create_time": 1793529376.615582,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 10560,
+          "create_time": 1793529377.6257646,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 39320,
+          "create_time": 1793529377.6439843,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 36828,
+          "create_time": 1793529378.6807008,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 31964,
+          "create_time": 1793529378.7017305,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40952,
+          "create_time": 1793529381.071408,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 37712,
+          "create_time": 1793529382.3114064,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 16924,
+          "create_time": 1793529382.3329,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 32328,
+          "create_time": 1793529382.854186,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 20368,
+          "create_time": 1793529382.8751633,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 39172,
+          "create_time": 1793529385.2220736,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 25612,
+          "create_time": 1793529385.955362,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 29816,
+          "create_time": 1793529385.9780269,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 18508,
+          "create_time": 1793529387.3294475,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 41304,
+          "create_time": 1793529388.5937407,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 42664,
+          "create_time": 1793529388.613863,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 16500,
+          "create_time": 1793529389.6483035,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 27664,
+          "create_time": 1793529389.6699595,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 28328,
+          "create_time": 1793529390.4587204,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 26108,
+          "create_time": 1793529390.9227982,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 4244,
+          "create_time": 1793529390.9473696,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 31976,
+          "create_time": 1793529391.4782174,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 39912,
+          "create_time": 1793529391.4996417,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 28828,
+          "create_time": 1793529391.971806,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 39464,
+          "create_time": 1793529391.9897363,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 26104,
+          "create_time": 1793529393.8279107,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 4916,
+          "create_time": 1793529393.8484592,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 42712,
+          "create_time": 1793529394.3676212,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 38948,
+          "create_time": 1793529395.8997562,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 1652,
+          "create_time": 1793529395.919161,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 11976,
+          "create_time": 1793529396.4384222,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 6200,
+          "create_time": 1793529396.4610784,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 36288,
+          "create_time": 1793529396.9398465,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 18100,
+          "create_time": 1793529396.9622955,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 39672,
+          "create_time": 1793529397.4963217,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 39808,
+          "create_time": 1793529397.9944608,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 10572,
+          "create_time": 1793529398.0184703,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40344,
+          "create_time": 1793529398.527779,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 30236,
+          "create_time": 1793529398.5496533,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 612,
+          "create_time": 1793529399.028185,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 1836,
+          "create_time": 1793529399.0518973,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40020,
+          "create_time": 1793529400.09363,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 16260,
+          "create_time": 1793529400.5902112,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 39500,
+          "create_time": 1793529400.6126966,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40436,
+          "create_time": 1793529401.1060455,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 39788,
+          "create_time": 1793529401.1303139,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 19932,
+          "create_time": 1793529401.6501544,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 21152,
+          "create_time": 1793529401.6724837,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 6488,
+          "create_time": 1793529405.8521063,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 27096,
+          "create_time": 1793529406.3267183,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 4360,
+          "create_time": 1793529406.3474865,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 15200,
+          "create_time": 1793529407.3982546,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 32344,
+          "create_time": 1793529407.4189684,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40832,
+          "create_time": 1793529407.9019861,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 30936,
+          "create_time": 1793529407.9231231,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 41056,
+          "create_time": 1793529408.4006264,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 31596,
+          "create_time": 1793529408.421893,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 27616,
+          "create_time": 1793529409.2113996,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 16144,
+          "create_time": 1793529409.2346272,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40388,
+          "create_time": 1793529409.7012296,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 12952,
+          "create_time": 1793529409.7241993,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 42152,
+          "create_time": 1793529410.2813833,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 18816,
+          "create_time": 1793529410.755432,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 10860,
+          "create_time": 1793529410.778011,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 17816,
+          "create_time": 1793529411.831778,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 35828,
+          "create_time": 1793529411.8549569,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 39800,
+          "create_time": 1793529412.3704565,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 39180,
+          "create_time": 1793529412.836111,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 22388,
+          "create_time": 1793529412.858502,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40676,
+          "create_time": 1793529413.403592,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 19372,
+          "create_time": 1793529414.1381545,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 6548,
+          "create_time": 1793529414.1598804,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 30888,
+          "create_time": 1793529415.2360275,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 17460,
+          "create_time": 1793529415.7646143,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 23356,
+          "create_time": 1793529416.8039837,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 37636,
+          "create_time": 1793529417.8268833,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 30640,
+          "create_time": 1793529417.8541937,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 19220,
+          "create_time": 1793529418.3015728,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 33064,
+          "create_time": 1793529418.327712,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 9348,
+          "create_time": 1793529419.3724153,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 14024,
+          "create_time": 1793529419.3939104,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 41096,
+          "create_time": 1793529420.412433,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 4708,
+          "create_time": 1793529420.436673,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 34936,
+          "create_time": 1793529420.9134424,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 17092,
+          "create_time": 1793529420.9370027,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 39888,
+          "create_time": 1793529424.34557,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 9396,
+          "create_time": 1793529424.3678193,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40324,
+          "create_time": 1793529424.5986311,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 41720,
+          "create_time": 1793529424.620704,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 17356,
+          "create_time": 1793529425.8954105,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40768,
+          "create_time": 1793529425.9168892,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 13700,
+          "create_time": 1793529426.9302368,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40876,
+          "create_time": 1793529426.9525416,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 35252,
+          "create_time": 1793529427.480067,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 7472,
+          "create_time": 1793529428.21101,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 24084,
+          "create_time": 1793529428.2324984,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40308,
+          "create_time": 1793529428.748716,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40652,
+          "create_time": 1793529428.7774227,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 33236,
+          "create_time": 1793529429.8155625,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 15248,
+          "create_time": 1793529429.838478,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 39240,
+          "create_time": 1793529431.1051593,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 25008,
+          "create_time": 1793529431.1291757,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 41816,
+          "create_time": 1793529432.13245,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 36188,
+          "create_time": 1793529432.1579168,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 5508,
+          "create_time": 1793529432.436628,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 39860,
+          "create_time": 1793529432.6471643,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 10312,
+          "create_time": 1793529432.670048,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 35936,
+          "create_time": 1793529433.9854307,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 41292,
+          "create_time": 1793529434.0063784,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 12296,
+          "create_time": 1793529434.270694,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 39368,
+          "create_time": 1793529434.7648745,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 41024,
+          "create_time": 1793529434.7878668,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 27504,
+          "create_time": 1793529436.8563907,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 8720,
+          "create_time": 1793529436.8800857,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 32552,
+          "create_time": 1793529437.8844063,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 20040,
+          "create_time": 1793529437.9068568,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40244,
+          "create_time": 1793529439.4508352,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40924,
+          "create_time": 1793529439.4839911,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 41384,
+          "create_time": 1793529439.9779356,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 10280,
+          "create_time": 1793529439.9991877,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 18508,
+          "create_time": 1793529440.2705436,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 17868,
+          "create_time": 1793529441.0562773,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 12016,
+          "create_time": 1793529445.7029147,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 15484,
+          "create_time": 1793529445.7265964,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 34744,
+          "create_time": 1793529446.217492,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 3480,
+          "create_time": 1793529446.2395773,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 10236,
+          "create_time": 1793529448.060038,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 41716,
+          "create_time": 1793529448.0826564,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 38924,
+          "create_time": 1793529448.619197,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40400,
+          "create_time": 1793529449.3868444,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 2248,
+          "create_time": 1793529449.409508,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 39888,
+          "create_time": 1793529450.6751006,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 28340,
+          "create_time": 1793529450.6963687,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 18820,
+          "create_time": 1793529451.222802,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 3132,
+          "create_time": 1793529451.9433975,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 39364,
+          "create_time": 1793529451.9652987,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 22876,
+          "create_time": 1793529452.5084612,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 37944,
+          "create_time": 1793529452.5297523,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 40200,
+          "create_time": 1793529459.233172,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 30872,
+          "create_time": 1793529461.5893667,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 20724,
+          "create_time": 1793529461.6161568,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 15552,
+          "create_time": 1793529464.9986112,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 42568,
+          "create_time": 1793529465.0244367,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 17640,
+          "create_time": 1793529465.551153,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 19408,
+          "create_time": 1793529466.2716997,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 12420,
+          "create_time": 1793529466.2952452,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 31008,
+          "create_time": 1793529466.809886,
+          "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "cmdline": [
+            "git",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        },
+        {
+          "pid": 39816,
+          "create_time": 1793529466.8334436,
+          "exe": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+          "cmdline": [
+            "git.exe",
+            "rev-parse",
+            "--short",
+            "HEAD"
+          ]
+        }
+      ],
+      "started_utc": "2026-11-01T10:34:54.188586+00:00",
+      "finished_utc": "2026-11-01T10:37:48.684899+00:00",
+      "elapsed_seconds": 174.48500000000058,
+      "actual_child_exit_code": 0
+    },
+    {
+      "name": "collection",
+      "command": [
+        "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+        "-X",
+        "utf8",
+        "-m",
+        "pytest",
+        "--collect-only",
+        "-q"
+      ],
+      "launcher": {
+        "pid": 28020,
+        "create_time": 1793529468.6916358,
+        "exe": "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe",
+        "cmdline": [
+          "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+          "-X",
+          "utf8",
+          "-m",
+          "pytest",
+          "--collect-only",
+          "-q"
+        ]
+      },
+      "observed_descendants": [
+        {
+          "pid": 10524,
+          "create_time": 1793529468.735706,
+          "exe": "D:\\anaconda\\python.exe",
+          "cmdline": [
+            "D:\\anaconda\\python.exe",
+            "-X",
+            "utf8",
+            "-m",
+            "pytest",
+            "--collect-only",
+            "-q"
+          ]
+        }
+      ],
+      "started_utc": "2026-11-01T10:37:48.687909+00:00",
+      "finished_utc": "2026-11-01T10:37:58.885607+00:00",
+      "elapsed_seconds": 10.188000000009197,
+      "actual_child_exit_code": 0
+    }
+  ],
+  "code_pin_count": 286,
+  "code_unchanged": true,
+  "requirements_dev_sha256_before": "31b4bba08667510fa824a01634563e7cd5c30eac77ca8ddfba3aa6cb21643918",
+  "requirements_dev_sha256_after": "31b4bba08667510fa824a01634563e7cd5c30eac77ca8ddfba3aa6cb21643918",
+  "targeted_tests_passed": 823,
+  "targeted_failed_count": 0,
+  "targeted_pytest_seconds": 172.3,
+  "collected_test_count": 3803,
+  "checks_passed": true,
+  "model_gui_calls": 0,
+  "full_regression": false
+}

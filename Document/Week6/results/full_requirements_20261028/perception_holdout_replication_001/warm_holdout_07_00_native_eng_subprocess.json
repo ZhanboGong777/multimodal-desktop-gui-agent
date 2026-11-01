@@ -1,0 +1,293 @@
+{
+  "fixture": "holdout_07",
+  "arm": "native_eng_subprocess",
+  "phase": "warm",
+  "repeat": 0,
+  "image_sha256": "e855f47cd35d1c359791bc8b20d340194345153f5c7268ead3b7f9e993622e28",
+  "started_perf_counter": 674822.6804787,
+  "status": "completed",
+  "ended_perf_counter": 674822.8968979,
+  "engine_creation_ms": 0.003400025889277458,
+  "decode_ms": 2.9021999798715115,
+  "ocr_ms": 208.08780007064342,
+  "ui_ms": 5.425799987278879,
+  "full_ms": 216.4192000636831,
+  "metrics": {
+    "tp": 5,
+    "fp": 0,
+    "fn": 3,
+    "precision": 1.0,
+    "recall": 0.625,
+    "labels": [
+      {
+        "text": "Map Explorer",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9772727272727273
+      },
+      {
+        "text": "Route Length",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9824561403508771
+      },
+      {
+        "text": "Locate Address",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9847328244274809
+      },
+      {
+        "text": "Navigate",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9733333333333334
+      },
+      {
+        "text": "Pin",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9259259259259259
+      },
+      {
+        "text": "地图浏览",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "定位地址",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "路线",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      }
+    ]
+  },
+  "control_metrics": {
+    "tp": 6,
+    "fp": 3,
+    "fn": 0,
+    "iou_threshold": 0.8
+  },
+  "predictions": [
+    {
+      "text": "Map Explorer",
+      "bounding_box": {
+        "left": 44,
+        "top": 38,
+        "right": 173,
+        "bottom": 58
+      },
+      "confidence": 0.94,
+      "center": {
+        "x": 108,
+        "y": 48
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Route Length",
+      "bounding_box": {
+        "left": 43,
+        "top": 116,
+        "right": 155,
+        "bottom": 134
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 99,
+        "y": 125
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Locate Address",
+      "bounding_box": {
+        "left": 43,
+        "top": 202,
+        "right": 172,
+        "bottom": 216
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 107,
+        "y": 209
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Navigate",
+      "bounding_box": {
+        "left": 43,
+        "top": 306,
+        "right": 116,
+        "bottom": 324
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 79,
+        "y": 315
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Pin",
+      "bounding_box": {
+        "left": 257,
+        "top": 306,
+        "right": 282,
+        "bottom": 320
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 269,
+        "y": 313
+      },
+      "source": "ocr"
+    }
+  ],
+  "ui_candidates": [
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 30,
+        "top": 187,
+        "right": 196,
+        "bottom": 244
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 113,
+        "y": 215
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 728,
+        "top": 291,
+        "right": 883,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 805,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 244,
+        "top": 291,
+        "right": 399,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 321,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 30,
+        "top": 291,
+        "right": 185,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 728,
+        "top": 187,
+        "right": 883,
+        "bottom": 244
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 805,
+        "y": 215
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 728,
+        "top": 101,
+        "right": 883,
+        "bottom": 158
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 805,
+        "y": 129
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 740,
+        "top": 117,
+        "right": 817,
+        "bottom": 138
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 778,
+        "y": 127
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 740,
+        "top": 203,
+        "right": 817,
+        "bottom": 222
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 778,
+        "y": 212
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 740,
+        "top": 306,
+        "right": 779,
+        "bottom": 326
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 759,
+        "y": 316
+      },
+      "source": "contour"
+    }
+  ],
+  "errors": []
+}

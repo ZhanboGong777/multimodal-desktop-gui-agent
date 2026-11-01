@@ -1,0 +1,35 @@
+{
+  "workflow_id": "week6_local_editor_demo",
+  "instruction": "在本地编辑器演示中打开草稿、输入唯一演示标记，再完成一次本地确认；不发送消息。",
+  "subgoals": [
+    {
+      "case_id": "W6_OPEN_EDITOR",
+      "instruction": "打开本地演示编辑器，确认 Week6 Local Editor 标题可见。",
+      "expect_text": ["Week6 Local Editor"],
+      "success_rules": ["the local demonstration editor is visible"],
+      "risk": "low"
+    },
+    {
+      "case_id": "W6_WRITE_DRAFT",
+      "instruction": "在本地演示编辑器输入 WEEK6_DRAFT_READY；不要打开任何聊天或发送消息。",
+      "expect_text": ["WEEK6_DRAFT_READY"],
+      "success_rules": ["the local draft contains the demonstration marker"],
+      "risk": "low"
+    },
+    {
+      "case_id": "W6_CONFIRM_LOCAL",
+      "instruction": "在本地演示中完成确认，使 WEEK6_COMPLETE 可见。",
+      "expect_text": ["WEEK6_COMPLETE"],
+      "success_rules": ["the local demonstration confirmation is visible"],
+      "risk": "low"
+    }
+  ],
+  "final_check": {
+    "case_id": "W6_FINAL_CHECK",
+    "instruction": "只读确认最终本地演示状态，不执行新动作。",
+    "expect_text": ["WEEK6_COMPLETE"],
+    "forbid_text": ["WEEK6_ERROR"],
+    "success_rules": ["the final marker is visible and no error marker is visible"],
+    "risk": "low"
+  }
+}

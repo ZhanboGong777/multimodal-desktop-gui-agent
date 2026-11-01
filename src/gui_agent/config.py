@@ -59,6 +59,10 @@ class OcrConfig(ConfigModel):
     tesseract_scale: float = Field(default=2.0, ge=1.0, le=3.0)
     # Optional private resource folder; never modifies a system installation.
     tesseract_tessdata_dir: Path | None = None
+    # Explicit persistent C API transport; failures remain visible, never silently
+    # switch timing back to subprocess. No process-wide environment is changed.
+    tesseract_transport: Literal["subprocess", "persistent"] = "subprocess"
+    tesseract_library_path: Path | None = None
 
 
 class UiDetectionConfig(ConfigModel):
@@ -145,6 +149,7 @@ class PlanningConfig(ConfigModel):
     max_steps: int = Field(default=10, ge=1)
     require_structured_output: bool = True
     allow_real_execution: bool = False
+    visual_candidate_details: bool = False
 
 
 class ExecutionConfig(ConfigModel):

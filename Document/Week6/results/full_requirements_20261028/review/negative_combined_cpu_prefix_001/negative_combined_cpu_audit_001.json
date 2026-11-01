@@ -1,0 +1,511 @@
+{
+  "schema": "week6.independent.negative_combined_cpu_prefix.v1",
+  "reviewed_utc": "2026-10-28T10:42:49.402470+00:00",
+  "reviewer": "/root/week6_replanning_review (Codex independent agent)",
+  "scope": "Read-only original evidence and isolated extracted-AST CPU demonstrations; no pytest/model/GUI or source edits",
+  "actual_failed_run": {
+    "pytest_exit_code": 1,
+    "failed": 16,
+    "passed": 783,
+    "pytest_reported_seconds": 298.59,
+    "ruff_exit_code": 0,
+    "collection_exit_code": 0,
+    "collected_only_count": 3328,
+    "pins_count": 261,
+    "pins_before_equal_after": true,
+    "full_regression": false,
+    "failed_nodes": [
+      "tests/test_runtime_runner.py::test_t04_actual_planner_receives_nested_typing_then_send_only_without_changing_task",
+      "tests/test_runtime_runner.py::test_t04_full_prompt_uses_the_current_authorised_ids_and_actual_ocr_text[\\u53d1\\u9001]",
+      "tests/test_runtime_runner.py::test_t04_full_prompt_uses_the_current_authorised_ids_and_actual_ocr_text[SeNd]",
+      "tests/test_runtime_runner.py::test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example[editor]",
+      "tests/test_runtime_runner.py::test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example[send]",
+      "tests/test_runtime_runner.py::test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example[ambiguous_editor]",
+      "tests/test_runtime_runner.py::test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example[ambiguous_send]",
+      "tests/test_runtime_runner.py::test_t04_incomplete_roles_keep_typing_fields_without_inventing_click_example[unauthorised]",
+      "tests/test_runtime_runner.py::test_t04_send_only_stage_still_rejects_an_uncommitted_draft",
+      "tests/test_runtime_runner.py::test_t04_planning_failures_keep_actual_request_and_response_or_exception[invalid_response]",
+      "tests/test_runtime_runner.py::test_t04_planning_failures_keep_actual_request_and_response_or_exception[provider_exception]",
+      "tests/test_runtime_runner.py::test_t04_planning_failures_keep_actual_request_and_response_or_exception[interrupted]",
+      "tests/test_runtime_runner.py::test_t04_automated_planning_evidence_time_is_never_subtracted_as_human_confirmation",
+      "tests/test_runtime_runner.py::test_t04_editor_role_survives_translation_and_original_rgb_checks[False]",
+      "tests/test_runtime_runner.py::test_t04_editor_role_survives_translation_and_original_rgb_checks[True]",
+      "tests/test_runtime_runner.py::test_t04_editor_role_or_post_mapping_evidence_change_stops_all_input[source_ambiguous]"
+    ]
+  },
+  "historical_sources": [
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\grounding_consistency_001\\source_ready\\src\\gui_agent\\planning\\prompts.py",
+      "sha256": "58cdbe6220b5e1301360c24909e97fde6fd189395a4efbd0a735c76784b230b1",
+      "bytes": 7909
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\grounding_consistency_001\\source_before\\tests\\test_runtime_runner.py",
+      "sha256": "34342b57f4bad8a65867c2299b53f041c15ae2eeb467404ba36d0929f58a6c85",
+      "bytes": 152057
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\src\\gui_agent\\planning\\planner.py",
+      "sha256": "afa72e8faa640d9c8127154f283828105fb0d53d2ea21ca1f36843ca0e18bb6d",
+      "bytes": 4222
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\src\\gui_agent\\planning\\schemas.py",
+      "sha256": "0f6d2a7c668daea28d979fb73ebcd4af207f4defaf34ee137d676693ed83e357",
+      "bytes": 4600
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\src\\gui_agent\\schemas.py",
+      "sha256": "51dda2400bf39b7793609235d3d76884fcc96047e008fd3a8076551bafa82480",
+      "bytes": 5482
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\src\\gui_agent\\models\\base.py",
+      "sha256": "22b120a3149adde737bb27f2eb9a533d174fbe014dd7d92758f716b162fc851f",
+      "bytes": 6387
+    }
+  ],
+  "historical_system": {
+    "first_line": "GUI plan: ONE JSON object.",
+    "characters": 997,
+    "sha256_of_evaluated_utf8": "eb2a82e1a9ffe096806943f6eeab305cc3d62365b57ccc6a3e5e027714a229e1",
+    "old_router_prefix": "Plan GUI actions",
+    "old_router_matches": false,
+    "provenance": "Reconstructed from exact pinned historical source. Original saved planning records do not contain a raw system/wire request body; no claim of original wire capture."
+  },
+  "exact_old_router_sites": [
+    {
+      "line": 2765,
+      "expression": "messages[0][\"content\"].startswith(\"Plan GUI actions\")"
+    },
+    {
+      "line": 2974,
+      "expression": "messages[0][\"content\"].startswith(\"Plan GUI actions\")"
+    },
+    {
+      "line": 3000,
+      "expression": "messages[0][\"content\"].startswith(\"Plan GUI actions\")"
+    },
+    {
+      "line": 3079,
+      "expression": "messages[0][\"content\"].startswith(\"Plan GUI actions\")"
+    }
+  ],
+  "posthoc_extracted_ast_demonstrations": [
+    {
+      "router": "provider_failure",
+      "failure": "invalid_response",
+      "header": "executed_historical_prefix",
+      "fallback_calls": 1,
+      "observed": "inert fallback response"
+    },
+    {
+      "router": "provider_failure",
+      "failure": "invalid_response",
+      "header": "compatible_prefix_counterfactual",
+      "fallback_calls": 0,
+      "observed": "invalid prepared response"
+    },
+    {
+      "router": "provider_failure",
+      "failure": "provider_exception",
+      "header": "executed_historical_prefix",
+      "fallback_calls": 1,
+      "observed": "inert fallback response"
+    },
+    {
+      "router": "provider_failure",
+      "failure": "provider_exception",
+      "header": "compatible_prefix_counterfactual",
+      "fallback_calls": 0,
+      "observed": "RuntimeError"
+    },
+    {
+      "router": "provider_failure",
+      "failure": "interrupted",
+      "header": "executed_historical_prefix",
+      "fallback_calls": 1,
+      "observed": "inert fallback response"
+    },
+    {
+      "router": "provider_failure",
+      "failure": "interrupted",
+      "header": "compatible_prefix_counterfactual",
+      "fallback_calls": 0,
+      "observed": "KeyboardInterrupt"
+    },
+    {
+      "router": "request_capture",
+      "header": "executed_historical_prefix",
+      "captured_requests": 0
+    },
+    {
+      "router": "request_capture",
+      "header": "compatible_prefix_counterfactual",
+      "captured_requests": 1
+    },
+    {
+      "router": "manual_planning_clock_injection",
+      "header": "executed_historical_prefix",
+      "injected_seconds": 0
+    },
+    {
+      "router": "manual_planning_clock_injection",
+      "header": "compatible_prefix_counterfactual",
+      "injected_seconds": 2
+    },
+    {
+      "router": "source_ambiguous_fault_injection",
+      "header": "executed_historical_prefix",
+      "source_elements_after_mock_response": 1
+    },
+    {
+      "router": "source_ambiguous_fault_injection",
+      "header": "compatible_prefix_counterfactual",
+      "source_elements_after_mock_response": 2
+    }
+  ],
+  "selected_failed_run_records": [
+    {
+      "case_directory": "test_t04_planning_failures_kee0",
+      "status": "succeeded",
+      "planner_ms": 0.0,
+      "planning_ms": 108.99999993853271,
+      "planning_error": null,
+      "parsed_plan_present": true,
+      "step_records": 4,
+      "successful_saved_action_receipts": 4
+    },
+    {
+      "case_directory": "test_t04_planning_failures_kee1",
+      "status": "succeeded",
+      "planner_ms": 0.0,
+      "planning_ms": 109.99999998603016,
+      "planning_error": null,
+      "parsed_plan_present": true,
+      "step_records": 4,
+      "successful_saved_action_receipts": 4
+    },
+    {
+      "case_directory": "test_t04_planning_failures_kee2",
+      "status": "succeeded",
+      "planner_ms": 0.0,
+      "planning_ms": 109.99999998603016,
+      "planning_error": null,
+      "parsed_plan_present": true,
+      "step_records": 4,
+      "successful_saved_action_receipts": 4
+    },
+    {
+      "case_directory": "test_t04_automated_planning_ev0",
+      "status": "succeeded",
+      "planner_ms": 0.0,
+      "planning_ms": 6000.0,
+      "planning_error": null,
+      "parsed_plan_present": true,
+      "step_records": 4,
+      "successful_saved_action_receipts": 4
+    },
+    {
+      "case_directory": "test_t04_editor_role_or_post_m0",
+      "status": "failed",
+      "planner_ms": 0.0,
+      "planning_ms": 125.0,
+      "planning_error": null,
+      "parsed_plan_present": true,
+      "step_records": 4,
+      "successful_saved_action_receipts": 4
+    }
+  ],
+  "conclusion": {
+    "classification": "Prompt-prefix / scripted transport routing compatibility regression in CPU tests",
+    "causal_mechanism": "The historical planning system begins GUI plan. Four existing exact startswith Plan GUI actions branches are false: capture, response/exception/KI injection, manual clock injection, and source ambiguity mutation are skipped. The base ChatModel else still returns a valid plan.",
+    "cross_test_pollution_required_to_explain": false,
+    "source_accepted": false,
+    "not_claimed": [
+      "16 real GUI failures",
+      "Real provider exceptions or keyboard interrupts were ignored",
+      "A truly ambiguous saved source frame was accepted",
+      "General safety correctness from this diagnosis"
+    ],
+    "required_followup": "Keep all failures and old tests unchanged; restore compatible generic prompt prefix and rerun the full affected runtime suite plus combined target before source freeze."
+  },
+  "copied_originals": [
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\grounding_consistency_001\\root_combined_validation_001\\validation.json",
+        "sha256": "db79420dcd91d5f56f7e42f5881183e091dbcd4cfa2bba1d08d40b2b80c8cfa5",
+        "bytes": 67174
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_combined_cpu_prefix_001\\selected_originals\\validation.json",
+        "sha256": "db79420dcd91d5f56f7e42f5881183e091dbcd4cfa2bba1d08d40b2b80c8cfa5",
+        "bytes": 67174
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\grounding_consistency_001\\root_combined_validation_001\\pytest.receipt.json",
+        "sha256": "dcc5c8ea2f15dac4962eb725e6828da39582549fc32773dba66725264c838235",
+        "bytes": 54345
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_combined_cpu_prefix_001\\selected_originals\\pytest.receipt.json",
+        "sha256": "dcc5c8ea2f15dac4962eb725e6828da39582549fc32773dba66725264c838235",
+        "bytes": 54345
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\grounding_consistency_001\\root_combined_validation_001\\pytest.stdout.txt",
+        "sha256": "b1fe071907a4539d9b2d5aecf48939ff6e29b629c65eb4b2c6018d779f015be0",
+        "bytes": 26241
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_combined_cpu_prefix_001\\selected_originals\\pytest.stdout.txt",
+        "sha256": "b1fe071907a4539d9b2d5aecf48939ff6e29b629c65eb4b2c6018d779f015be0",
+        "bytes": 26241
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\grounding_consistency_001\\root_combined_validation_001\\pytest.stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_combined_cpu_prefix_001\\selected_originals\\pytest.stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\grounding_consistency_001\\root_combined_validation_001\\ruff.receipt.json",
+        "sha256": "c636a4b79b7ae32d8c04bcb9561de5cb568e9d50d1b6850c0ccec7210bb66fc8",
+        "bytes": 1041
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_combined_cpu_prefix_001\\selected_originals\\ruff.receipt.json",
+        "sha256": "c636a4b79b7ae32d8c04bcb9561de5cb568e9d50d1b6850c0ccec7210bb66fc8",
+        "bytes": 1041
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\grounding_consistency_001\\root_combined_validation_001\\ruff.stdout.txt",
+        "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+        "bytes": 19
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_combined_cpu_prefix_001\\selected_originals\\ruff.stdout.txt",
+        "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+        "bytes": 19
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\grounding_consistency_001\\root_combined_validation_001\\ruff.stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_combined_cpu_prefix_001\\selected_originals\\ruff.stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\grounding_consistency_001\\root_combined_validation_001\\collection.receipt.json",
+        "sha256": "0321dd05e3e496b9b1ff9322fdff6f1be52e4610c375c83717e0806fcf352711",
+        "bytes": 1057
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_combined_cpu_prefix_001\\selected_originals\\collection.receipt.json",
+        "sha256": "0321dd05e3e496b9b1ff9322fdff6f1be52e4610c375c83717e0806fcf352711",
+        "bytes": 1057
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\grounding_consistency_001\\root_combined_validation_001\\collection.stdout.txt",
+        "sha256": "12f331ca934af9840f0f1d6b6ee44ef382e6a2077f74f3415125ca91d025ebcc",
+        "bytes": 352711
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_combined_cpu_prefix_001\\selected_originals\\collection.stdout.txt",
+        "sha256": "12f331ca934af9840f0f1d6b6ee44ef382e6a2077f74f3415125ca91d025ebcc",
+        "bytes": 352711
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\grounding_consistency_001\\root_combined_validation_001\\collection.stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_combined_cpu_prefix_001\\selected_originals\\collection.stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\grounding_consistency_001\\root_combined_validation_001\\tested_code_pins_before.json",
+        "sha256": "56387bb75ba4e586c9b6fea7998b15221dba9ea41477ae194c3250df7ac999de",
+        "bytes": 28471
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_combined_cpu_prefix_001\\selected_originals\\tested_code_pins_before.json",
+        "sha256": "56387bb75ba4e586c9b6fea7998b15221dba9ea41477ae194c3250df7ac999de",
+        "bytes": 28471
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\grounding_consistency_001\\root_combined_validation_001\\tested_code_pins_after.json",
+        "sha256": "56387bb75ba4e586c9b6fea7998b15221dba9ea41477ae194c3250df7ac999de",
+        "bytes": 28471
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_combined_cpu_prefix_001\\selected_originals\\tested_code_pins_after.json",
+        "sha256": "56387bb75ba4e586c9b6fea7998b15221dba9ea41477ae194c3250df7ac999de",
+        "bytes": 28471
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\grounding_consistency_001\\root_combined_validation_001\\pytest_tmp\\test_t04_planning_failures_kee0\\records\\simulated-T04\\planning_0001.json",
+        "sha256": "adc01db374e8549abef90748c1be3a6183b81d768fbb304aad2e9225b158fdd9",
+        "bytes": 7022
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_combined_cpu_prefix_001\\selected_originals\\pytest_tmp\\test_t04_planning_failures_kee0\\records\\simulated-T04\\planning_0001.json",
+        "sha256": "adc01db374e8549abef90748c1be3a6183b81d768fbb304aad2e9225b158fdd9",
+        "bytes": 7022
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\grounding_consistency_001\\root_combined_validation_001\\pytest_tmp\\test_t04_planning_failures_kee0\\records\\simulated-T04\\task_summary.json",
+        "sha256": "d854a22d003d35b96b80db402c822dbabb888bbe0e2f8e55facb760e8810dbfe",
+        "bytes": 17488
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_combined_cpu_prefix_001\\selected_originals\\pytest_tmp\\test_t04_planning_failures_kee0\\records\\simulated-T04\\task_summary.json",
+        "sha256": "d854a22d003d35b96b80db402c822dbabb888bbe0e2f8e55facb760e8810dbfe",
+        "bytes": 17488
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\grounding_consistency_001\\root_combined_validation_001\\pytest_tmp\\test_t04_planning_failures_kee1\\records\\simulated-T04\\planning_0001.json",
+        "sha256": "12ca3f79016b9f68156a476ba6bf9b1f16fc926bad70284478938e634fd99864",
+        "bytes": 7023
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_combined_cpu_prefix_001\\selected_originals\\pytest_tmp\\test_t04_planning_failures_kee1\\records\\simulated-T04\\planning_0001.json",
+        "sha256": "12ca3f79016b9f68156a476ba6bf9b1f16fc926bad70284478938e634fd99864",
+        "bytes": 7023
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\grounding_consistency_001\\root_combined_validation_001\\pytest_tmp\\test_t04_planning_failures_kee1\\records\\simulated-T04\\task_summary.json",
+        "sha256": "5b41efbef388ad0642e5f148f9e33d4d7e53cce25fdd6659f727eee3dab6d61b",
+        "bytes": 17463
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_combined_cpu_prefix_001\\selected_originals\\pytest_tmp\\test_t04_planning_failures_kee1\\records\\simulated-T04\\task_summary.json",
+        "sha256": "5b41efbef388ad0642e5f148f9e33d4d7e53cce25fdd6659f727eee3dab6d61b",
+        "bytes": 17463
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\grounding_consistency_001\\root_combined_validation_001\\pytest_tmp\\test_t04_planning_failures_kee2\\records\\simulated-T04\\planning_0001.json",
+        "sha256": "23845586e79db0da52f74dcf95d9feb35bf1ffc94ef623ae121f02721de4236e",
+        "bytes": 7022
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_combined_cpu_prefix_001\\selected_originals\\pytest_tmp\\test_t04_planning_failures_kee2\\records\\simulated-T04\\planning_0001.json",
+        "sha256": "23845586e79db0da52f74dcf95d9feb35bf1ffc94ef623ae121f02721de4236e",
+        "bytes": 7022
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\grounding_consistency_001\\root_combined_validation_001\\pytest_tmp\\test_t04_planning_failures_kee2\\records\\simulated-T04\\task_summary.json",
+        "sha256": "711998fb8ff13c9dba6dc24d8b060defcf78b6cad25e6d40a09a07db62535bc9",
+        "bytes": 17485
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_combined_cpu_prefix_001\\selected_originals\\pytest_tmp\\test_t04_planning_failures_kee2\\records\\simulated-T04\\task_summary.json",
+        "sha256": "711998fb8ff13c9dba6dc24d8b060defcf78b6cad25e6d40a09a07db62535bc9",
+        "bytes": 17485
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\grounding_consistency_001\\root_combined_validation_001\\pytest_tmp\\test_t04_automated_planning_ev0\\records\\simulated-T04\\planning_0001.json",
+        "sha256": "2cf52a517a65136bd9a86eb692c7b477548b8c7b5de74d32787b72000d7814e7",
+        "bytes": 7011
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_combined_cpu_prefix_001\\selected_originals\\pytest_tmp\\test_t04_automated_planning_ev0\\records\\simulated-T04\\planning_0001.json",
+        "sha256": "2cf52a517a65136bd9a86eb692c7b477548b8c7b5de74d32787b72000d7814e7",
+        "bytes": 7011
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\grounding_consistency_001\\root_combined_validation_001\\pytest_tmp\\test_t04_automated_planning_ev0\\records\\simulated-T04\\task_summary.json",
+        "sha256": "21d89d9d1c703ebe4c83de1685c5f666e385c330be2ce1f1181babea51da4b32",
+        "bytes": 17383
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_combined_cpu_prefix_001\\selected_originals\\pytest_tmp\\test_t04_automated_planning_ev0\\records\\simulated-T04\\task_summary.json",
+        "sha256": "21d89d9d1c703ebe4c83de1685c5f666e385c330be2ce1f1181babea51da4b32",
+        "bytes": 17383
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\grounding_consistency_001\\root_combined_validation_001\\pytest_tmp\\test_t04_editor_role_or_post_m0\\records\\simulated-T04\\planning_0001.json",
+        "sha256": "c183b2906f4e9c3cf9fdc8cde993ae8d854daaf1f4503650f320140be3af71e9",
+        "bytes": 8433
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_combined_cpu_prefix_001\\selected_originals\\pytest_tmp\\test_t04_editor_role_or_post_m0\\records\\simulated-T04\\planning_0001.json",
+        "sha256": "c183b2906f4e9c3cf9fdc8cde993ae8d854daaf1f4503650f320140be3af71e9",
+        "bytes": 8433
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\grounding_consistency_001\\root_combined_validation_001\\pytest_tmp\\test_t04_editor_role_or_post_m0\\records\\simulated-T04\\task_summary.json",
+        "sha256": "84bfdc7b22f75e53a37472d4c88b3f9f8d3ebed96e991a67b8c40ac9ef8b80fb",
+        "bytes": 17331
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_combined_cpu_prefix_001\\selected_originals\\pytest_tmp\\test_t04_editor_role_or_post_m0\\records\\simulated-T04\\task_summary.json",
+        "sha256": "84bfdc7b22f75e53a37472d4c88b3f9f8d3ebed96e991a67b8c40ac9ef8b80fb",
+        "bytes": 17331
+      }
+    }
+  ],
+  "audit_script": {
+    "source": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_replanning_review\\negative_combined_cpu_prefix_001.py",
+      "sha256": "ed853601ea91b1791e4c6580f54e327a949ab1f0d7ae77d21b71753b32a60e16",
+      "bytes": 15609
+    },
+    "archive": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_combined_cpu_prefix_001\\negative_combined_cpu_prefix_001.py.txt",
+      "sha256": "ed853601ea91b1791e4c6580f54e327a949ab1f0d7ae77d21b71753b32a60e16",
+      "bytes": 15609
+    }
+  }
+}

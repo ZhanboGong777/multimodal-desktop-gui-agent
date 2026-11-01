@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 23688.0,
+  "usage": {
+    "prompt_tokens": 1497,
+    "completion_tokens": 261,
+    "total_tokens": 1758
+  },
+  "error": null,
+  "content_length": 1142,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"The caller request is fully executable with visible controls and clear final state predicates. Two distinct semantic objectives are planned: (1) prepare and review the BLUE report for project BETA, and (2) commit the report locally with the final state visible. Both goals are verifiable via the text\", \"subgoals\": [\n    {\n      \"instruction\": \"Prepare the BLUE report for project BETA by selecting the correct project and theme, then review it using visible controls.\",\n      \"expect_text\": [\"Project BETA\", \"Theme BLUE\", \"Review Complete\"],\n      \"forbid_text\": [\"LOCAL COMPLETE\", \"Commit Successful\", \"Pushed to Remote\", \"Review Failed\", \"Connection Error\", \"Syncing...\"],\n      \"goal_id\": \"prepare_review\"\n    },\n    {\n      \"instruction\": \"Commit the BLUE report locally for project BETA using visible controls, ensuring the commit message reflects the project and theme.\",\n      \"expect_text\": [\"Project BETA\", \"Theme BLUE\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [\"Review Complete\", \"Commit Failed\", \"Pushed to Remote\", \"Connection Error\", \"Syncing...\"],\n      \"goal_id\": \"commit_local\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

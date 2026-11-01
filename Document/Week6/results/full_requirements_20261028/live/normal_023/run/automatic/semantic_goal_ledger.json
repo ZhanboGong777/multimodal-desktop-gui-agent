@@ -1,0 +1,174 @@
+[
+  {
+    "round": 1,
+    "goal_id": "prepare_report",
+    "instruction": "Prepare the GREEN report for project ALPHA by selecting the correct project and theme, then save the draft locally.",
+    "expect_text": [
+      "Project ALPHA",
+      "Theme GREEN",
+      "Draft saved locally"
+    ],
+    "forbid_text": [
+      "Review unavailable",
+      "Online sync required",
+      "External communication needed",
+      "Budget exceeded",
+      "Changes not saved",
+      "Commit failed",
+      "Review pending",
+      "Local commit failed"
+    ],
+    "status": "failed",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_023\\run\\automatic\\goal_001_001_prepare_report",
+    "verification": null,
+    "task_verification": {
+      "outcome": "failed",
+      "method": "automatic",
+      "detail": "expected on screen but not found: Project ALPHA, Draft saved locally",
+      "evidence": {
+        "observation_id": "obs-0012",
+        "missing": [
+          "Project ALPHA",
+          "Draft saved locally"
+        ],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    }
+  },
+  {
+    "round": 2,
+    "goal_id": "prepare_report",
+    "instruction": "Prepare the GREEN report for project ALPHA using visible controls.",
+    "expect_text": [
+      "Project ALPHA",
+      "Theme GREEN"
+    ],
+    "forbid_text": [],
+    "status": "succeeded",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_023\\run\\automatic\\goal_002_001_prepare_report",
+    "verification": {
+      "outcome": "passed",
+      "method": "automatic",
+      "detail": "all success rules matched against the current screen",
+      "evidence": {
+        "observation_id": "obs-0005",
+        "expect_text": [
+          "Project ALPHA",
+          "Theme GREEN"
+        ],
+        "forbid_text": [],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    },
+    "task_verification": {
+      "outcome": "passed",
+      "method": "automatic",
+      "detail": "all success rules matched against the current screen",
+      "evidence": {
+        "observation_id": "obs-0004",
+        "expect_text": [
+          "Project ALPHA",
+          "Theme GREEN"
+        ],
+        "forbid_text": [],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    }
+  },
+  {
+    "round": 2,
+    "goal_id": "review_report",
+    "instruction": "Review the prepared GREEN report for project ALPHA using visible controls.",
+    "expect_text": [
+      "Project ALPHA",
+      "Theme GREEN",
+      "Review completed"
+    ],
+    "forbid_text": [],
+    "status": "failed",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_023\\run\\automatic\\goal_002_002_review_report",
+    "verification": null,
+    "task_verification": {
+      "outcome": "failed",
+      "method": "automatic",
+      "detail": "expected on screen but not found: Review completed",
+      "evidence": {
+        "observation_id": "obs-0012",
+        "missing": [
+          "Review completed"
+        ],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    }
+  },
+  {
+    "round": 3,
+    "goal_id": "review_and_commit_report",
+    "instruction": "Review the GREEN report for project ALPHA and ensure it is ready for local commit.",
+    "expect_text": [
+      "Project ALPHA",
+      "Theme GREEN",
+      "LOCAL COMPLETE"
+    ],
+    "forbid_text": [
+      "Review unavailable",
+      "Connection error",
+      "Commit failed",
+      "Not ready to commit",
+      "Review pending",
+      "Review in progress",
+      "Review timeout",
+      "Review canceled"
+    ],
+    "status": "succeeded",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_023\\run\\automatic\\goal_003_001_review_and_commit_report",
+    "verification": {
+      "outcome": "passed",
+      "method": "automatic",
+      "detail": "all success rules matched against the current screen",
+      "evidence": {
+        "observation_id": "obs-0005",
+        "expect_text": [
+          "Project ALPHA",
+          "Theme GREEN",
+          "LOCAL COMPLETE"
+        ],
+        "forbid_text": [
+          "Review unavailable",
+          "Connection error",
+          "Commit failed",
+          "Not ready to commit",
+          "Review pending",
+          "Review in progress",
+          "Review timeout",
+          "Review canceled"
+        ],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    },
+    "task_verification": {
+      "outcome": "passed",
+      "method": "automatic",
+      "detail": "all success rules matched against the current screen",
+      "evidence": {
+        "observation_id": "obs-0004",
+        "expect_text": [
+          "Project ALPHA",
+          "Theme GREEN",
+          "LOCAL COMPLETE"
+        ],
+        "forbid_text": [
+          "Review unavailable",
+          "Connection error",
+          "Commit failed",
+          "Not ready to commit",
+          "Review pending",
+          "Review in progress",
+          "Review timeout",
+          "Review canceled"
+        ],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    }
+  }
+]

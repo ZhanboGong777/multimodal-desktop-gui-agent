@@ -1,0 +1,7 @@
+"""Development fixed grouping guidance with bounded original-predicate matches."""
+from pathlib import Path
+P=Path(__file__).parent
+s=(P/'probe_failed_predicate_matches_005.py').read_text('utf8')
+s=s.replace('transient007_predicate_matches_development_probe_005','transient007_predicate_grouping_development_probe_006')
+s=s.replace("A revised objective may combine explicitly named remaining operations and use a justified outcome from unchanged caller predicates.","For a revision, prefer grouping unfinished requested operations that culminate in the same final outcome into one objective. Its instruction must explicitly name every merged operation. Split remaining work only when each earlier objective can pass without performing any later objective. Never predict final persistence in an earlier review-only objective, or invent another final success banner for a later objective. This is guidance, not permission to force ready or claim old failed work succeeded.")
+exec(compile(s,str(P/'probe_failed_predicate_matches_005.py'),'exec'))

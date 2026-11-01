@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen2.5vl:7b",
+  "latency_ms": 47985.0,
+  "usage": {
+    "prompt_tokens": 1387,
+    "completion_tokens": 193,
+    "total_tokens": 1580
+  },
+  "error": null,
+  "content_length": 797,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"The caller's request is clear and executable with the provided context and objectives.\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Prepare a GREEN report for project ALPHA in Week6 Local Lab.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"prepare_report\"\n    },\n    {\n      \"instruction\": \"Locally review the prepared GREEN report for project ALPHA.\",\n      \"expect_text\": [\"Review\", \"Project ALPHA\", \"Theme GREEN\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"review_report\"\n    },\n    {\n      \"instruction\": \"Locally commit the prepared GREEN report for project ALPHA.\",\n      \"expect_text\": [\"Commit\", \"Project ALPHA\", \"Theme GREEN\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"commit_report\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

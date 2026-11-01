@@ -1,0 +1,4295 @@
+{
+  "schema": "week6.full_perception.independent_raw_audit.v1",
+  "created_utc": "2026-10-28T00:21:23.158026+00:00",
+  "source_freeze_sha256": "3a1d7e69f7508d23e39aee728a2830e452e3194bd7d0c3da0f00e02a2ffda641",
+  "preregister_v3_sha256": "a54febc57172a09f304b844907c2111825a5ff64f21cd6b07d577130bbd063e8",
+  "review_cpu_finished_utc": "2026-10-28T00:15:50.526053+00:00",
+  "primary_started_utc": "2026-10-28T00:16:20.178773+00:00",
+  "quiet_known_review_to_primary_gap_seconds": 29.65272,
+  "batches": {
+    "perception_holdout_primary_001": {
+      "summary_sha256": "cfa65ae176a1c7d593890520e8032938798c66beb48546d668139d56c80551d2",
+      "owner_receipt_sha256": "5d50225eaa1a02f5b0f2f1569a1332fc9f83fb428d6fb06883a14693c11ccf3c",
+      "stdout_stderr_sha256": "72dd52630a750d48feb0b5df3125f2d40484c76f93890b643973e914c2a6bdca",
+      "genuine_exit": 0,
+      "records_rebuilt": 364,
+      "screen_equivalent_pairs": 91,
+      "unique_frames": 8,
+      "unique_labels": 64,
+      "accuracy_rebuilt": {
+        "native_eng_subprocess": {
+          "tp": 40,
+          "fp": 6,
+          "fn": 24,
+          "precision": 0.8695652173913043,
+          "recall": 0.625,
+          "f1": 0.7272727272727273
+        },
+        "native_bilingual_subprocess": {
+          "tp": 42,
+          "fp": 14,
+          "fn": 22,
+          "precision": 0.75,
+          "recall": 0.65625,
+          "f1": 0.7
+        },
+        "screen_bilingual_subprocess": {
+          "tp": 59,
+          "fp": 3,
+          "fn": 5,
+          "precision": 0.9516129032258065,
+          "recall": 0.921875,
+          "f1": 0.9365079365079365
+        },
+        "screen_bilingual_persistent": {
+          "tp": 59,
+          "fp": 3,
+          "fn": 5,
+          "precision": 0.9516129032258065,
+          "recall": 0.921875,
+          "f1": 0.9365079365079365
+        }
+      },
+      "timings_rebuilt": {
+        "native_eng_subprocess": {
+          "cold": {
+            "n": 3,
+            "median_ms": 185.81429996993393,
+            "p95_nearest_rank_ms": 307.7266000909731,
+            "max_ms": 307.7266000909731
+          },
+          "warmup": {
+            "n": 8,
+            "median_ms": 202.24014995619655,
+            "p95_nearest_rank_ms": 209.75959999486804,
+            "max_ms": 209.75959999486804
+          },
+          "warm": {
+            "n": 80,
+            "median_ms": 197.52995000453666,
+            "p95_nearest_rank_ms": 219.37820001039654,
+            "max_ms": 240.30319997109473
+          }
+        },
+        "native_bilingual_subprocess": {
+          "cold": {
+            "n": 3,
+            "median_ms": 308.79889999050647,
+            "p95_nearest_rank_ms": 309.9836999317631,
+            "max_ms": 309.9836999317631
+          },
+          "warmup": {
+            "n": 8,
+            "median_ms": 336.5332000539638,
+            "p95_nearest_rank_ms": 349.04930007178336,
+            "max_ms": 349.04930007178336
+          },
+          "warm": {
+            "n": 80,
+            "median_ms": 324.4608999812044,
+            "p95_nearest_rank_ms": 353.55750005692244,
+            "max_ms": 366.16820003837347
+          }
+        },
+        "screen_bilingual_subprocess": {
+          "cold": {
+            "n": 3,
+            "median_ms": 352.54260001238436,
+            "p95_nearest_rank_ms": 390.44840005226433,
+            "max_ms": 390.44840005226433
+          },
+          "warmup": {
+            "n": 8,
+            "median_ms": 379.26560000050813,
+            "p95_nearest_rank_ms": 425.1373000442982,
+            "max_ms": 425.1373000442982
+          },
+          "warm": {
+            "n": 80,
+            "median_ms": 362.4095499981195,
+            "p95_nearest_rank_ms": 392.8723999997601,
+            "max_ms": 409.1073999879882
+          }
+        },
+        "screen_bilingual_persistent": {
+          "cold": {
+            "n": 3,
+            "median_ms": 330.31009999103844,
+            "p95_nearest_rank_ms": 332.0632999530062,
+            "max_ms": 332.0632999530062
+          },
+          "warmup": {
+            "n": 8,
+            "median_ms": 121.17479997687042,
+            "p95_nearest_rank_ms": 309.0941000264138,
+            "max_ms": 309.0941000264138
+          },
+          "warm": {
+            "n": 80,
+            "median_ms": 108.29069995088503,
+            "p95_nearest_rank_ms": 125.66379993222654,
+            "max_ms": 132.9610999673605
+          }
+        }
+      },
+      "per_frame": {
+        "holdout_01": {
+          "native_eng_subprocess": {
+            "n": 10,
+            "median_ms": 195.09120000293478,
+            "p95_nearest_rank_ms": 219.37820001039654,
+            "max_ms": 219.37820001039654
+          },
+          "native_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 311.563000024762,
+            "p95_nearest_rank_ms": 336.72309992834926,
+            "max_ms": 336.72309992834926
+          },
+          "screen_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 355.45190004631877,
+            "p95_nearest_rank_ms": 402.3983998922631,
+            "max_ms": 402.3983998922631
+          },
+          "screen_bilingual_persistent": {
+            "n": 10,
+            "median_ms": 109.68285001581535,
+            "p95_nearest_rank_ms": 125.66379993222654,
+            "max_ms": 125.66379993222654
+          }
+        },
+        "holdout_02": {
+          "native_eng_subprocess": {
+            "n": 10,
+            "median_ms": 204.7939000185579,
+            "p95_nearest_rank_ms": 224.2646999657154,
+            "max_ms": 224.2646999657154
+          },
+          "native_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 334.6577999764122,
+            "p95_nearest_rank_ms": 366.16820003837347,
+            "max_ms": 366.16820003837347
+          },
+          "screen_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 351.98550001950935,
+            "p95_nearest_rank_ms": 387.1394000016153,
+            "max_ms": 387.1394000016153
+          },
+          "screen_bilingual_persistent": {
+            "n": 10,
+            "median_ms": 120.1648999704048,
+            "p95_nearest_rank_ms": 132.9610999673605,
+            "max_ms": 132.9610999673605
+          }
+        },
+        "holdout_03": {
+          "native_eng_subprocess": {
+            "n": 10,
+            "median_ms": 188.74275003327057,
+            "p95_nearest_rank_ms": 204.19509999919683,
+            "max_ms": 204.19509999919683
+          },
+          "native_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 328.06144998176023,
+            "p95_nearest_rank_ms": 348.9396000513807,
+            "max_ms": 348.9396000513807
+          },
+          "screen_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 358.26055001234636,
+            "p95_nearest_rank_ms": 377.9830998973921,
+            "max_ms": 377.9830998973921
+          },
+          "screen_bilingual_persistent": {
+            "n": 10,
+            "median_ms": 103.71835000114515,
+            "p95_nearest_rank_ms": 121.51550000999123,
+            "max_ms": 121.51550000999123
+          }
+        },
+        "holdout_04": {
+          "native_eng_subprocess": {
+            "n": 10,
+            "median_ms": 198.48764996277168,
+            "p95_nearest_rank_ms": 217.9683999856934,
+            "max_ms": 217.9683999856934
+          },
+          "native_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 306.68039998272434,
+            "p95_nearest_rank_ms": 344.0105998888612,
+            "max_ms": 344.0105998888612
+          },
+          "screen_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 359.46274996967986,
+            "p95_nearest_rank_ms": 383.0286000156775,
+            "max_ms": 383.0286000156775
+          },
+          "screen_bilingual_persistent": {
+            "n": 10,
+            "median_ms": 103.40015002293512,
+            "p95_nearest_rank_ms": 109.84169994480908,
+            "max_ms": 109.84169994480908
+          }
+        },
+        "holdout_05": {
+          "native_eng_subprocess": {
+            "n": 10,
+            "median_ms": 199.75944998441264,
+            "p95_nearest_rank_ms": 240.30319997109473,
+            "max_ms": 240.30319997109473
+          },
+          "native_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 325.16189996385947,
+            "p95_nearest_rank_ms": 350.1576000126079,
+            "max_ms": 350.1576000126079
+          },
+          "screen_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 360.42144999373704,
+            "p95_nearest_rank_ms": 409.1073999879882,
+            "max_ms": 409.1073999879882
+          },
+          "screen_bilingual_persistent": {
+            "n": 10,
+            "median_ms": 107.0554000325501,
+            "p95_nearest_rank_ms": 123.2746000168845,
+            "max_ms": 123.2746000168845
+          }
+        },
+        "holdout_06": {
+          "native_eng_subprocess": {
+            "n": 10,
+            "median_ms": 200.84154995856807,
+            "p95_nearest_rank_ms": 233.40569995343685,
+            "max_ms": 233.40569995343685
+          },
+          "native_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 340.5545499990694,
+            "p95_nearest_rank_ms": 357.00409999117255,
+            "max_ms": 357.00409999117255
+          },
+          "screen_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 373.8448999938555,
+            "p95_nearest_rank_ms": 403.4325999673456,
+            "max_ms": 403.4325999673456
+          },
+          "screen_bilingual_persistent": {
+            "n": 10,
+            "median_ms": 115.22664997028187,
+            "p95_nearest_rank_ms": 126.76230003125966,
+            "max_ms": 126.76230003125966
+          }
+        },
+        "holdout_07": {
+          "native_eng_subprocess": {
+            "n": 10,
+            "median_ms": 188.227100064978,
+            "p95_nearest_rank_ms": 223.1862999033183,
+            "max_ms": 223.1862999033183
+          },
+          "native_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 312.7110499772243,
+            "p95_nearest_rank_ms": 337.98660000320524,
+            "max_ms": 337.98660000320524
+          },
+          "screen_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 365.78995001036674,
+            "p95_nearest_rank_ms": 377.92709993664175,
+            "max_ms": 377.92709993664175
+          },
+          "screen_bilingual_persistent": {
+            "n": 10,
+            "median_ms": 105.15590000431985,
+            "p95_nearest_rank_ms": 117.39550007041544,
+            "max_ms": 117.39550007041544
+          }
+        },
+        "holdout_08": {
+          "native_eng_subprocess": {
+            "n": 10,
+            "median_ms": 198.7049499875866,
+            "p95_nearest_rank_ms": 212.69949991256,
+            "max_ms": 212.69949991256
+          },
+          "native_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 325.6975999684073,
+            "p95_nearest_rank_ms": 340.9323999658227,
+            "max_ms": 340.9323999658227
+          },
+          "screen_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 367.64954996760935,
+            "p95_nearest_rank_ms": 384.5535999862477,
+            "max_ms": 384.5535999862477
+          },
+          "screen_bilingual_persistent": {
+            "n": 10,
+            "median_ms": 107.61185002047569,
+            "p95_nearest_rank_ms": 123.60920000355691,
+            "max_ms": 123.60920000355691
+          }
+        }
+      },
+      "paired_differences": [
+        {
+          "fixture": "holdout_01",
+          "repeat": 0,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -78.70630000252277,
+          "reduction": 0.4205780320097917
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 0,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -190.81759999971837,
+          "reduction": 0.6376534378334848
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 0,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -247.32229998335242,
+          "reduction": 0.6952051751671304
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 1,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -82.46990002226084,
+          "reduction": 0.43886763824437325
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 1,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -200.21700009237975,
+          "reduction": 0.6550268058391477
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 1,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -232.63530002441257,
+          "reduction": 0.6881060315508287
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 2,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -93.71440007817,
+          "reduction": 0.4271819172266378
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 2,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -211.05929999612272,
+          "reduction": 0.6268037448010952
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 2,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -276.7345999600366,
+          "reduction": 0.6877129730986222
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 3,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -82.94140000361949,
+          "reduction": 0.41152202534009574
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 3,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -212.74180011823773,
+          "reduction": 0.6420488653668341
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 3,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -261.07439992483705,
+          "reduction": 0.6876153106237717
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 4,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -85.32750001177192,
+          "reduction": 0.4347652184230204
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 4,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -208.21369998157024,
+          "reduction": 0.6524062713291892
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 4,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -260.06169989705086,
+          "reduction": 0.7009838129316255
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 5,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -73.07420007418841,
+          "reduction": 0.41049623568139704
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 5,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -214.5871000830084,
+          "reduction": 0.6715769425368334
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 5,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -250.20930008031428,
+          "reduction": 0.7045184365512759
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 6,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -68.34889983292669,
+          "reduction": 0.36544272943527056
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 6,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -174.70309988129884,
+          "reduction": 0.5954746769329451
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 6,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -231.78839986212552,
+          "reduction": 0.6613646418648517
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 7,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -74.63289995212108,
+          "reduction": 0.37497374820893115
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 7,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -193.06159997358918,
+          "reduction": 0.6081375602856554
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 7,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -223.6206999514252,
+          "reduction": 0.6425461205147298
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 8,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -89.02239997405559,
+          "reduction": 0.45906457915567267
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 8,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -200.51629992667586,
+          "reduction": 0.6565367406646652
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 8,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -256.3421999802813,
+          "reduction": 0.7096152679623131
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 9,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -93.86539983097464,
+          "reduction": 0.4685845271549415
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 9,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -188.98049998097122,
+          "reduction": 0.6396751196047817
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 9,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -247.66919994726777,
+          "reduction": 0.699392043223297
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 0,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -81.55789994634688,
+          "reduction": 0.39876329327446725
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 0,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -230.58830003719777,
+          "reduction": 0.652194621808541
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 0,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -264.1701999818906,
+          "reduction": 0.6823645435747134
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 1,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -86.2359000602737,
+          "reduction": 0.41780594958122774
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 1,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -246.00230006035417,
+          "reduction": 0.6718286842892796
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 1,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -260.6048999587074,
+          "reduction": 0.6844140884805572
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 2,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -100.60030000749975,
+          "reduction": 0.4485783987532549
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 2,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -230.0830000312999,
+          "reduction": 0.6504160879715841
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 2,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -226.81490005925298,
+          "reduction": 0.6471563371872406
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 3,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -70.80240000505,
+          "reduction": 0.36709432390705976
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 3,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -210.76099993661046,
+          "reduction": 0.633237098186231
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 3,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -231.4215999795124,
+          "reduction": 0.6546733628127737
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 4,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -81.647599930875,
+          "reduction": 0.4247948019204002
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 4,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -221.0336000425741,
+          "reduction": 0.6665854420235675
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 4,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -236.50150001049042,
+          "reduction": 0.6814452424835699
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 5,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -84.89680010825396,
+          "reduction": 0.4140081452898632
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 5,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -204.58810008130968,
+          "reduction": 0.6299825714807836
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 5,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -257.50730000436306,
+          "reduction": 0.6818293267444244
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 6,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -74.76680004037917,
+          "reduction": 0.35992661571985973
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 6,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -232.2117000585422,
+          "reduction": 0.635895389914229
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 6,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -244.47769997641444,
+          "reduction": 0.6477280555492255
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 7,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -89.7722999798134,
+          "reduction": 0.4519000761056745
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 7,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -224.35789997689426,
+          "reduction": 0.6732605971631589
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 7,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -240.9347000066191,
+          "reduction": 0.6887437910987788
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 8,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -83.67810002528131,
+          "reduction": 0.4351752078836665
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 8,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -214.12980009336025,
+          "reduction": 0.6634793519470892
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 8,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -241.16730003152043,
+          "reduction": 0.6894922796807554
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 9,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -104.72110006958246,
+          "reduction": 0.49164489484563056
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 9,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -227.79440006706864,
+          "reduction": 0.6778086309018286
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 9,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -235.56410009041429,
+          "reduction": 0.685089044832691
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 0,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -85.92969994060695,
+          "reduction": 0.4514885827121512
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 0,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -227.37649991177022,
+          "reduction": 0.6853394241038098
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 0,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -272.5863999221474,
+          "reduction": 0.7230753721731125
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 1,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -89.69790011178702,
+          "reduction": 0.46538531420912055
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 1,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -213.53469998575747,
+          "reduction": 0.674513655238202
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 1,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -244.76349994074553,
+          "reduction": 0.7037385359653605
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 2,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -62.309599947184324,
+          "reduction": 0.3389613277060649
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 2,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -188.12349997460842,
+          "reduction": 0.6075575104685296
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 2,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -236.90690007060766,
+          "reduction": 0.6609712451491149
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 3,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -85.92340000905097,
+          "reduction": 0.42079070462214285
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 3,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -218.34849996957928,
+          "reduction": 0.6486494274428675
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 3,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -251.7622000304982,
+          "reduction": 0.6803760412666312
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 4,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -91.9168001273647,
+          "reduction": 0.4649528105927627
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 4,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -240.54930009879172,
+          "reduction": 0.6945805811810608
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 4,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -272.209299961105,
+          "reduction": 0.7201626211198315
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 5,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -81.5264000557363,
+          "reduction": 0.4354258876807018
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 5,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -216.6412000078708,
+          "reduction": 0.6720713761488459
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 5,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -271.74959995318204,
+          "reduction": 0.7199486881237283
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 6,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -80.01040003728122,
+          "reduction": 0.4406045851451931
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 6,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -247.35770002007484,
+          "reduction": 0.7088840016543032
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 6,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -256.516799912788,
+          "reduction": 0.7163298832216796
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 7,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -88.3087000111118,
+          "reduction": 0.46416748756998094
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 7,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -216.46550006698817,
+          "reduction": 0.6798355949864856
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 7,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -254.40159998834133,
+          "reduction": 0.7139199769365191
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 8,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -89.63619999121875,
+          "reduction": 0.4868947304702512
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 8,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -229.8893000697717,
+          "reduction": 0.708767482794731
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 8,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -246.65300000924617,
+          "reduction": 0.7230797871139104
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 9,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -90.64670000225306,
+          "reduction": 0.48431773897431807
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 9,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -237.5896000303328,
+          "reduction": 0.7111191458357675
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 9,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -255.96519990358502,
+          "reduction": 0.72617908074495
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 0,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -91.40320005826652,
+          "reduction": 0.4765535024274625
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 0,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -206.1843000119552,
+          "reduction": 0.6725266618108285
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 0,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -271.9391999999061,
+          "reduction": 0.7303586944017553
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 1,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -91.7335000121966,
+          "reduction": 0.4766540402804478
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 1,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -200.02530002966523,
+          "reduction": 0.6650997790176023
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 1,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -249.4048000080511,
+          "reduction": 0.7123321632170008
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 2,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -84.11620010156184,
+          "reduction": 0.45275635744081355
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 2,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -205.10850008577108,
+          "reduction": 0.6685867232858514
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 2,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -246.7849001986906,
+          "reduction": 0.7082248072180808
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 3,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -92.8925999905914,
+          "reduction": 0.46537979820166875
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 3,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -196.67450000997633,
+          "reduction": 0.6482608568446404
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 3,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -257.0532999234274,
+          "reduction": 0.7066432963350828
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 4,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -94.69209983944893,
+          "reduction": 0.47977116940493847
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 4,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -215.87519987951964,
+          "reduction": 0.6776756348071815
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 4,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -268.71329988352954,
+          "reduction": 0.723533046459522
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 5,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -113.77149994950742,
+          "reduction": 0.5219632752131729
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 5,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -239.8136998526752,
+          "reduction": 0.6971113678768949
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 5,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -248.12979996204376,
+          "reduction": 0.704260562606497
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 6,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -90.88939998764545,
+          "reduction": 0.45279181959461934
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 6,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -232.1111001074314,
+          "reduction": 0.6787811068427325
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 6,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -273.18690007086843,
+          "reduction": 0.7132284640355493
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 7,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -102.52239985857159,
+          "reduction": 0.49035315358141673
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 7,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -217.95529988594353,
+          "reduction": 0.6716410134890085
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 7,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -269.53069993760437,
+          "reduction": 0.716671142393613
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 8,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -106.84310004580766,
+          "reduction": 0.5073830546467967
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 8,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -196.3481999700889,
+          "reduction": 0.6543153718654982
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 8,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -251.42510002478957,
+          "reduction": 0.7079230473976685
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 9,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -87.32399984728545,
+          "reduction": 0.45865709702595525
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 9,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -199.4569000089541,
+          "reduction": 0.6593104336485294
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 9,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -246.39240000396967,
+          "reduction": 0.7050681194931764
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 0,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -82.74139999412,
+          "reduction": 0.42701536072819524
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 0,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -184.75929996930063,
+          "reduction": 0.6246411663353748
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 0,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -253.90110001899302,
+          "reduction": 0.6957595570885641
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 1,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -85.81480011343956,
+          "reduction": 0.45321590520257404
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 1,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -218.51759997662157,
+          "reduction": 0.6785224121304629
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 1,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -255.0560999661684,
+          "reduction": 0.7112795559000373
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 2,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -77.55809999071062,
+          "reduction": 0.420966216076871
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 2,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -221.59440000541508,
+          "reduction": 0.6750275532201019
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 2,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -254.1348000522703,
+          "reduction": 0.7043354628740338
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 3,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -92.51529991161078,
+          "reduction": 0.4639644493523989
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 3,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -243.27119998633862,
+          "reduction": 0.6947477363837864
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 3,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -275.62690002378076,
+          "reduction": 0.720568147532952
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 4,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -96.32410004269332,
+          "reduction": 0.47424784325151137
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 4,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -201.34280005004257,
+          "reduction": 0.6534390428383297
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 4,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -241.98900000192225,
+          "reduction": 0.6938273227080562
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 5,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -107.98410000279546,
+          "reduction": 0.5047615843012856
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 5,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -200.62980009242892,
+          "reduction": 0.6544198091100037
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 5,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -251.11329997889698,
+          "reduction": 0.7032802041244839
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 6,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -73.74519994482398,
+          "reduction": 0.3743034961925483
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 6,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -212.53660006914288,
+          "reduction": 0.6329050371598557
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 6,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -245.83909998182207,
+          "reduction": 0.6660254007984086
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 7,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -80.26290009729564,
+          "reduction": 0.4010794678562569
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 7,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -211.44430013373494,
+          "reduction": 0.6382287763688956
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 7,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -289.2531000543386,
+          "reduction": 0.7070346321353056
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 8,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -128.70320002548397,
+          "reduction": 0.5355867089617002
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 8,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -217.37060009036213,
+          "reduction": 0.6607599586911191
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 8,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -230.74629995971918,
+          "reduction": 0.6740142949508383
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 9,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -93.46419991925359,
+          "reduction": 0.4657175342235401
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 9,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -201.1611999478191,
+          "reduction": 0.6523041281970603
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 9,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -252.80349992681295,
+          "reduction": 0.7021775255499283
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 0,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -82.86670013330877,
+          "reduction": 0.42195355991681316
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 0,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -226.6381001099944,
+          "reduction": 0.666269892420066
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 0,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -277.60700008366257,
+          "reduction": 0.7097590691785551
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 1,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -84.26609996240586,
+          "reduction": 0.4291288437565116
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 1,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -212.31079997960478,
+          "reduction": 0.6544516787015362
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 1,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -250.51330006681383,
+          "reduction": 0.6908563875583134
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 2,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -90.50279995426536,
+          "reduction": 0.4179823851810506
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 2,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -218.27130008023232,
+          "reduction": 0.6339723752963704
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 2,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -266.8522000312805,
+          "reduction": 0.679233766565031
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 3,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -78.52449989877641,
+          "reduction": 0.3901497306122709
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 3,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -234.260999946855,
+          "reduction": 0.656185741151565
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 3,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -280.68949992302805,
+          "reduction": 0.6957531442569278
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 4,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -90.1499999454245,
+          "reduction": 0.43533521514318196
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 4,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -213.51619996130466,
+          "reduction": 0.6461416016002774
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 4,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -245.21800002548844,
+          "reduction": 0.677117590528943
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 5,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -92.68170001450926,
+          "reduction": 0.46619283693492186
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 5,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -234.82570005580783,
+          "reduction": 0.6887404148410473
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 5,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -263.3717000717297,
+          "reduction": 0.7127873007246659
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 6,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -106.6433999221772,
+          "reduction": 0.456901437897412
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 6,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -223.8904999103397,
+          "reduction": 0.6384962559763627
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 6,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -229.9675999674946,
+          "reduction": 0.6446546812260415
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 7,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -76.03399991057813,
+          "reduction": 0.40670876312006443
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 7,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -225.13579996302724,
+          "reduction": 0.6699447373911165
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 7,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -267.27879990357906,
+          "reduction": 0.706723501409487
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 8,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -90.01570008695126,
+          "reduction": 0.44914540092263366
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 8,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -225.98930017556995,
+          "reduction": 0.6718092237039601
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 8,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -258.3143000956625,
+          "reduction": 0.7005815619954461
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 9,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -78.25410005170852,
+          "reduction": 0.3817725713314324
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 9,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -214.798100059852,
+          "reduction": 0.6289479056435876
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 9,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -268.71200010646135,
+          "reduction": 0.6795376014209541
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 0,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -67.7191000431776,
+          "reduction": 0.38472367665784823
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 0,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -182.57689999882132,
+          "reduction": 0.6276753923818097
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 0,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -253.90539993532002,
+          "reduction": 0.7009964484363462
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 1,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -93.94930000416934,
+          "reduction": 0.44453092752229584
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 1,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -185.27759984135628,
+          "reduction": 0.6121376491513919
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 1,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -235.30999990180135,
+          "reduction": 0.6671571606349691
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 2,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -120.43479993008077,
+          "reduction": 0.5396155587607829
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 2,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -229.13430002517998,
+          "reduction": 0.690401035616084
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 2,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -275.17559996340424,
+          "reduction": 0.7281182005988365
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 3,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -101.59990005195141,
+          "reduction": 0.49542753107020865
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 3,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -205.80429991241544,
+          "reduction": 0.6654312148683197
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 3,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -248.72330005746335,
+          "reduction": 0.7062018418234487
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 4,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -70.18980011343956,
+          "reduction": 0.38018030357547006
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 4,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -197.51209998503327,
+          "reduction": 0.6331638268215449
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 4,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -258.07199999690056,
+          "reduction": 0.6928021828846502
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 5,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -83.58080009929836,
+          "reduction": 0.44624502161466517
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 5,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -209.76019999943674,
+          "reduction": 0.6691397848932867
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 5,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -252.08400003612041,
+          "reduction": 0.708496767340644
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 6,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -80.70429996587336,
+          "reduction": 0.42587167097795975
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 6,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -229.18709996156394,
+          "reduction": 0.6780952261402982
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 6,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -263.3002999937162,
+          "reduction": 0.7076066688794163
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 7,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -80.6791998911649,
+          "reduction": 0.4308087940280534
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 7,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -209.5969000365585,
+          "reduction": 0.6628796156808517
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 7,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -262.7789000980556,
+          "reduction": 0.711417846750608
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 8,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -88.76980002969503,
+          "reduction": 0.46929363146296854
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 8,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -217.50520006753504,
+          "reduction": 0.6842118508808042
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 8,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -276.57640003599226,
+          "reduction": 0.7336967997990624
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 9,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -83.06769991759211,
+          "reduction": 0.44663367453258795
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 9,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -201.18769991677254,
+          "reduction": 0.661570530026818
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 9,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -257.2719999589026,
+          "reduction": 0.714266478240299
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 0,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -102.67339996062219,
+          "reduction": 0.4956822949225592
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 0,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -234.40370010212064,
+          "reduction": 0.6917301777255151
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 0,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -261.6981000173837,
+          "reduction": 0.7147092994637183
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 1,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -86.44770015962422,
+          "reduction": 0.4221361493765756
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 1,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -205.77910006977618,
+          "reduction": 0.6348900417282606
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 1,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -259.95000009424984,
+          "reduction": 0.6871737612135025
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 2,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -72.84489995799959,
+          "reduction": 0.3791051347324763
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 2,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -215.0835000211373,
+          "reduction": 0.6432149820069697
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 2,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -241.03689996991307,
+          "reduction": 0.6689122211545664
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 3,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -71.61020010244101,
+          "reduction": 0.36681907670835456
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 3,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -198.043099953793,
+          "reduction": 0.6157055304129735
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 3,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -260.9443999826908,
+          "reduction": 0.6785644445716348
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 4,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -88.70729990303516,
+          "reduction": 0.4477016922361705
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 4,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -223.9957998972386,
+          "reduction": 0.6717970124546254
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 4,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -269.68449994456023,
+          "reduction": 0.711349941043687
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 5,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -107.18559997621924,
+          "reduction": 0.5039297225441661
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 5,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -221.76360001321882,
+          "reduction": 0.6776011184618476
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 5,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -262.16430007480085,
+          "reduction": 0.7130264999851952
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 6,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -87.08269998896867,
+          "reduction": 0.43700726546963464
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 6,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -228.7444999674335,
+          "reduction": 0.6709379923714037
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 6,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -255.4329999256879,
+          "reduction": 0.6948271982861726
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 7,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -85.33120003994554,
+          "reduction": 0.448466259702771
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 7,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -214.03510007075965,
+          "reduction": 0.6710041749636674
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 7,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -247.44489998556674,
+          "reduction": 0.7021962494962062
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 8,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -87.5921999104321,
+          "reduction": 0.45953333244489925
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 8,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -208.9146999642253,
+          "reduction": 0.6697407172337806
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 8,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -266.72850002069026,
+          "reduction": 0.7213801309903731
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 9,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -94.30550003889948,
+          "reduction": 0.47129844915982155
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 9,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -212.49670011457056,
+          "reduction": 0.6676231369642806
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 9,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -250.01100008375943,
+          "reduction": 0.7026675178566701
+        }
+      ],
+      "median_reductions": {
+        "native_eng_subprocess": 0.4517757942610834,
+        "native_bilingual_subprocess": 0.6662442224713112,
+        "screen_bilingual_subprocess": 0.7011924769878527
+      },
+      "native_c_api_diagnostics": [
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 308",
+        "Estimating resolution as 308",
+        "Estimating resolution as 308",
+        "Estimating resolution as 308",
+        "Estimating resolution as 308",
+        "Estimating resolution as 308",
+        "Estimating resolution as 308",
+        "Estimating resolution as 308",
+        "Estimating resolution as 308",
+        "Estimating resolution as 308",
+        "Estimating resolution as 308",
+        "Estimating resolution as 337",
+        "Estimating resolution as 337",
+        "Estimating resolution as 337",
+        "Estimating resolution as 337",
+        "Estimating resolution as 337",
+        "Estimating resolution as 337",
+        "Estimating resolution as 337",
+        "Estimating resolution as 337",
+        "Estimating resolution as 337",
+        "Estimating resolution as 337",
+        "Estimating resolution as 337",
+        "Estimating resolution as 255",
+        "Estimating resolution as 255",
+        "Estimating resolution as 255",
+        "Estimating resolution as 255",
+        "Estimating resolution as 255",
+        "Estimating resolution as 255",
+        "Estimating resolution as 255",
+        "Estimating resolution as 255",
+        "Estimating resolution as 255",
+        "Estimating resolution as 255",
+        "Estimating resolution as 255",
+        "Estimating resolution as 303",
+        "Estimating resolution as 303",
+        "Estimating resolution as 303",
+        "Estimating resolution as 303",
+        "Estimating resolution as 303",
+        "Estimating resolution as 303",
+        "Estimating resolution as 303",
+        "Estimating resolution as 303",
+        "Estimating resolution as 303",
+        "Estimating resolution as 303",
+        "Estimating resolution as 303",
+        "Estimating resolution as 309",
+        "Estimating resolution as 309",
+        "Estimating resolution as 309",
+        "Estimating resolution as 309",
+        "Estimating resolution as 309",
+        "Estimating resolution as 309",
+        "Estimating resolution as 309",
+        "Estimating resolution as 309",
+        "Estimating resolution as 309",
+        "Estimating resolution as 309",
+        "Estimating resolution as 309",
+        "Estimating resolution as 359",
+        "Estimating resolution as 359",
+        "Estimating resolution as 359",
+        "Estimating resolution as 359",
+        "Estimating resolution as 359",
+        "Estimating resolution as 359",
+        "Estimating resolution as 359",
+        "Estimating resolution as 359",
+        "Estimating resolution as 359",
+        "Estimating resolution as 359",
+        "Estimating resolution as 359",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261"
+      ],
+      "counts_rectangle": {
+        "native_eng_subprocess": {
+          "tp": 48,
+          "fp": 20,
+          "fn": 0
+        },
+        "native_bilingual_subprocess": {
+          "tp": 48,
+          "fp": 8,
+          "fn": 0
+        },
+        "screen_bilingual_subprocess": {
+          "tp": 48,
+          "fp": 3,
+          "fn": 0
+        },
+        "screen_bilingual_persistent": {
+          "tp": 48,
+          "fp": 3,
+          "fn": 0
+        }
+      },
+      "all_independent_assertions_passed": true
+    },
+    "perception_holdout_replication_001": {
+      "summary_sha256": "36c5e17519516967d5eb7f02ed6d159eb6f6afeccd7eaf4fbe1d42ff76b584d9",
+      "owner_receipt_sha256": "bb9ad5a433030c0c089c20ee3bdfc9013ba6a1642a117d9362db77a2568e4901",
+      "stdout_stderr_sha256": "6a248daa1ff1a0d645a6644177bacd0c8ee9aa2b9deb9b60947273b27fa7828f",
+      "genuine_exit": 0,
+      "records_rebuilt": 364,
+      "screen_equivalent_pairs": 91,
+      "unique_frames": 8,
+      "unique_labels": 64,
+      "accuracy_rebuilt": {
+        "native_eng_subprocess": {
+          "tp": 40,
+          "fp": 6,
+          "fn": 24,
+          "precision": 0.8695652173913043,
+          "recall": 0.625,
+          "f1": 0.7272727272727273
+        },
+        "native_bilingual_subprocess": {
+          "tp": 42,
+          "fp": 14,
+          "fn": 22,
+          "precision": 0.75,
+          "recall": 0.65625,
+          "f1": 0.7
+        },
+        "screen_bilingual_subprocess": {
+          "tp": 59,
+          "fp": 3,
+          "fn": 5,
+          "precision": 0.9516129032258065,
+          "recall": 0.921875,
+          "f1": 0.9365079365079365
+        },
+        "screen_bilingual_persistent": {
+          "tp": 59,
+          "fp": 3,
+          "fn": 5,
+          "precision": 0.9516129032258065,
+          "recall": 0.921875,
+          "f1": 0.9365079365079365
+        }
+      },
+      "timings_rebuilt": {
+        "native_eng_subprocess": {
+          "cold": {
+            "n": 3,
+            "median_ms": 194.77370008826256,
+            "p95_nearest_rank_ms": 280.9852999635041,
+            "max_ms": 280.9852999635041
+          },
+          "warmup": {
+            "n": 8,
+            "median_ms": 203.15484999446198,
+            "p95_nearest_rank_ms": 213.26999994926155,
+            "max_ms": 213.26999994926155
+          },
+          "warm": {
+            "n": 80,
+            "median_ms": 197.4573999759741,
+            "p95_nearest_rank_ms": 220.87920003104955,
+            "max_ms": 232.2592999553308
+          }
+        },
+        "native_bilingual_subprocess": {
+          "cold": {
+            "n": 3,
+            "median_ms": 318.1241999845952,
+            "p95_nearest_rank_ms": 321.6830000746995,
+            "max_ms": 321.6830000746995
+          },
+          "warmup": {
+            "n": 8,
+            "median_ms": 330.10709995869547,
+            "p95_nearest_rank_ms": 350.13099992647767,
+            "max_ms": 350.13099992647767
+          },
+          "warm": {
+            "n": 80,
+            "median_ms": 327.9696000390686,
+            "p95_nearest_rank_ms": 359.9468000466004,
+            "max_ms": 388.5814999230206
+          }
+        },
+        "screen_bilingual_subprocess": {
+          "cold": {
+            "n": 3,
+            "median_ms": 354.52210006769747,
+            "p95_nearest_rank_ms": 367.7560999058187,
+            "max_ms": 367.7560999058187
+          },
+          "warmup": {
+            "n": 8,
+            "median_ms": 370.3263499774039,
+            "p95_nearest_rank_ms": 401.020499994047,
+            "max_ms": 401.020499994047
+          },
+          "warm": {
+            "n": 80,
+            "median_ms": 368.1059000082314,
+            "p95_nearest_rank_ms": 393.7125999946147,
+            "max_ms": 402.36589999403805
+          }
+        },
+        "screen_bilingual_persistent": {
+          "cold": {
+            "n": 3,
+            "median_ms": 328.4371999325231,
+            "p95_nearest_rank_ms": 329.3820000253618,
+            "max_ms": 329.3820000253618
+          },
+          "warmup": {
+            "n": 8,
+            "median_ms": 111.18870001519099,
+            "p95_nearest_rank_ms": 335.91569995041937,
+            "max_ms": 335.91569995041937
+          },
+          "warm": {
+            "n": 80,
+            "median_ms": 109.88800000632182,
+            "p95_nearest_rank_ms": 120.94290007371455,
+            "max_ms": 130.29870006721467
+          }
+        }
+      },
+      "per_frame": {
+        "holdout_01": {
+          "native_eng_subprocess": {
+            "n": 10,
+            "median_ms": 192.5216499948874,
+            "p95_nearest_rank_ms": 197.2548000048846,
+            "max_ms": 197.2548000048846
+          },
+          "native_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 319.6252500056289,
+            "p95_nearest_rank_ms": 360.1974999764934,
+            "max_ms": 360.1974999764934
+          },
+          "screen_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 360.464499972295,
+            "p95_nearest_rank_ms": 392.97430007718503,
+            "max_ms": 392.97430007718503
+          },
+          "screen_bilingual_persistent": {
+            "n": 10,
+            "median_ms": 105.57630000403151,
+            "p95_nearest_rank_ms": 117.84220009576529,
+            "max_ms": 117.84220009576529
+          }
+        },
+        "holdout_02": {
+          "native_eng_subprocess": {
+            "n": 10,
+            "median_ms": 202.99720001639798,
+            "p95_nearest_rank_ms": 232.2592999553308,
+            "max_ms": 232.2592999553308
+          },
+          "native_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 337.059449928347,
+            "p95_nearest_rank_ms": 361.86319997068495,
+            "max_ms": 361.86319997068495
+          },
+          "screen_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 364.7960500093177,
+            "p95_nearest_rank_ms": 392.7659000037238,
+            "max_ms": 392.7659000037238
+          },
+          "screen_bilingual_persistent": {
+            "n": 10,
+            "median_ms": 114.41500001819804,
+            "p95_nearest_rank_ms": 125.75719994492829,
+            "max_ms": 125.75719994492829
+          }
+        },
+        "holdout_03": {
+          "native_eng_subprocess": {
+            "n": 10,
+            "median_ms": 201.39589998871088,
+            "p95_nearest_rank_ms": 220.87920003104955,
+            "max_ms": 220.87920003104955
+          },
+          "native_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 318.0317999795079,
+            "p95_nearest_rank_ms": 345.46350000891834,
+            "max_ms": 345.46350000891834
+          },
+          "screen_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 352.890349982772,
+            "p95_nearest_rank_ms": 373.32510005217046,
+            "max_ms": 373.32510005217046
+          },
+          "screen_bilingual_persistent": {
+            "n": 10,
+            "median_ms": 107.96974995173514,
+            "p95_nearest_rank_ms": 117.06079996656626,
+            "max_ms": 117.06079996656626
+          }
+        },
+        "holdout_04": {
+          "native_eng_subprocess": {
+            "n": 10,
+            "median_ms": 195.3964499407448,
+            "p95_nearest_rank_ms": 201.9897000864148,
+            "max_ms": 201.9897000864148
+          },
+          "native_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 306.7235500202514,
+            "p95_nearest_rank_ms": 328.4197000321001,
+            "max_ms": 328.4197000321001
+          },
+          "screen_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 353.0734999803826,
+            "p95_nearest_rank_ms": 380.9326000045985,
+            "max_ms": 380.9326000045985
+          },
+          "screen_bilingual_persistent": {
+            "n": 10,
+            "median_ms": 96.65035002399236,
+            "p95_nearest_rank_ms": 115.44990004040301,
+            "max_ms": 115.44990004040301
+          }
+        },
+        "holdout_05": {
+          "native_eng_subprocess": {
+            "n": 10,
+            "median_ms": 191.104150027968,
+            "p95_nearest_rank_ms": 206.42169995699078,
+            "max_ms": 206.42169995699078
+          },
+          "native_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 325.00595005694777,
+            "p95_nearest_rank_ms": 330.83739993162453,
+            "max_ms": 330.83739993162453
+          },
+          "screen_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 371.1690500495024,
+            "p95_nearest_rank_ms": 389.7180000785738,
+            "max_ms": 389.7180000785738
+          },
+          "screen_bilingual_persistent": {
+            "n": 10,
+            "median_ms": 110.43934995541349,
+            "p95_nearest_rank_ms": 126.6825000056997,
+            "max_ms": 126.6825000056997
+          }
+        },
+        "holdout_06": {
+          "native_eng_subprocess": {
+            "n": 10,
+            "median_ms": 209.46495002135634,
+            "p95_nearest_rank_ms": 227.55560011137277,
+            "max_ms": 227.55560011137277
+          },
+          "native_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 345.8412999752909,
+            "p95_nearest_rank_ms": 363.1151000736281,
+            "max_ms": 363.1151000736281
+          },
+          "screen_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 382.7889999956824,
+            "p95_nearest_rank_ms": 396.489099948667,
+            "max_ms": 396.489099948667
+          },
+          "screen_bilingual_persistent": {
+            "n": 10,
+            "median_ms": 114.52150001423433,
+            "p95_nearest_rank_ms": 130.29870006721467,
+            "max_ms": 130.29870006721467
+          }
+        },
+        "holdout_07": {
+          "native_eng_subprocess": {
+            "n": 10,
+            "median_ms": 195.77240000944585,
+            "p95_nearest_rank_ms": 216.4192000636831,
+            "max_ms": 216.4192000636831
+          },
+          "native_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 321.8315500416793,
+            "p95_nearest_rank_ms": 388.5814999230206,
+            "max_ms": 388.5814999230206
+          },
+          "screen_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 373.5226999851875,
+            "p95_nearest_rank_ms": 385.9445999842137,
+            "max_ms": 385.9445999842137
+          },
+          "screen_bilingual_persistent": {
+            "n": 10,
+            "median_ms": 110.40544998832047,
+            "p95_nearest_rank_ms": 120.70040008984506,
+            "max_ms": 120.70040008984506
+          }
+        },
+        "holdout_08": {
+          "native_eng_subprocess": {
+            "n": 10,
+            "median_ms": 203.66129995090887,
+            "p95_nearest_rank_ms": 220.91420006472617,
+            "max_ms": 220.91420006472617
+          },
+          "native_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 337.3530000098981,
+            "p95_nearest_rank_ms": 357.06469998694956,
+            "max_ms": 357.06469998694956
+          },
+          "screen_bilingual_subprocess": {
+            "n": 10,
+            "median_ms": 374.30229992605746,
+            "p95_nearest_rank_ms": 402.36589999403805,
+            "max_ms": 402.36589999403805
+          },
+          "screen_bilingual_persistent": {
+            "n": 10,
+            "median_ms": 109.15964999003336,
+            "p95_nearest_rank_ms": 118.76260000281036,
+            "max_ms": 118.76260000281036
+          }
+        }
+      },
+      "paired_differences": [
+        {
+          "fixture": "holdout_01",
+          "repeat": 0,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -69.46670007891953,
+          "reduction": 0.38907001333076074
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 0,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -212.72650000173599,
+          "reduction": 0.6610410084276366
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 0,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -283.89550012070686,
+          "reduction": 0.7224276500141262
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 1,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -91.620699968189,
+          "reduction": 0.4644789377288675
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 1,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -202.24819995928556,
+          "reduction": 0.6569010299128126
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 1,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -263.654200010933,
+          "reduction": 0.7139522155912561
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 2,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -84.92450008634478,
+          "reduction": 0.4459313288522503
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 2,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -234.79160002898425,
+          "reduction": 0.689934268858731
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 2,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -247.69590003415942,
+          "reduction": 0.7012621796571251
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 3,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -78.53049982804805,
+          "reduction": 0.3999053832763694
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 3,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -208.80279992707074,
+          "reduction": 0.6392346428461271
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 3,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -242.5007998244837,
+          "reduction": 0.6729721400947262
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 4,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -85.77649993821979,
+          "reduction": 0.4444341391265685
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 4,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -224.57479999866337,
+          "reduction": 0.6768380580273778
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 4,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -280.92509997077286,
+          "reduction": 0.7237535880696813
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 5,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -81.92370005417615,
+          "reduction": 0.4418463295914886
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 5,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -197.0877000130713,
+          "reduction": 0.65569961961841
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 5,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -257.09750002715737,
+          "reduction": 0.7129991181293844
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 6,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -87.48229988850653,
+          "reduction": 0.4537901473782392
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 6,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -189.57149994093925,
+          "reduction": 0.6428972571314591
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 6,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -259.330700035207,
+          "reduction": 0.7112164172449869
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 7,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -90.31900006812066,
+          "reduction": 0.4684257723999762
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 7,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -193.26830003410578,
+          "reduction": 0.6534562109581323
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 7,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -239.24340005032718,
+          "reduction": 0.7000778081245241
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 8,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -85.60600003693253,
+          "reduction": 0.44525722471669693
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 8,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -210.7893000356853,
+          "reduction": 0.6640179155345973
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 8,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -241.03469995316118,
+          "reduction": 0.6932447986042716
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 9,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -80.23940003477037,
+          "reduction": 0.43241987741150856
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 9,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -254.87790000624955,
+          "reduction": 0.7076059662348655
+        },
+        {
+          "fixture": "holdout_01",
+          "repeat": 9,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -241.37780000455678,
+          "reduction": 0.6962203928327731
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 0,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -92.7336998283863,
+          "reduction": 0.4463464626345486
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 0,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -220.19369981717318,
+          "reduction": 0.6568599224925011
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 0,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -248.03059990517795,
+          "reduction": 0.6831696037780008
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 1,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -88.01109995692968,
+          "reduction": 0.4402042887885421
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 1,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -218.14469993114471,
+          "reduction": 0.6609123627833787
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 1,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -240.27189996559173,
+          "reduction": 0.6822161811912104
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 2,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -115.63909996766597,
+          "reduction": 0.49788792091385026
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 2,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -236.84880009386688,
+          "reduction": 0.6700695111572301
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 2,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -276.145700016059,
+          "reduction": 0.7030796207446748
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 3,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -91.06510016135871,
+          "reduction": 0.4468093150192769
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 3,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -226.15030000451952,
+          "reduction": 0.667312388643286
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 3,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -265.0987000670284,
+          "reduction": 0.7016058941981018
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 4,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -95.20370012614876,
+          "reduction": 0.45550767319721375
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 4,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -217.52870013006032,
+          "reduction": 0.6565304696431937
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 4,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -252.73150007706136,
+          "reduction": 0.6895181478886583
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 5,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -88.8287000125274,
+          "reduction": 0.4499792813772957
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 5,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -247.81400000210851,
+          "reduction": 0.6953420606659453
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 5,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -234.35170005541295,
+          "reduction": 0.6833821676034086
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 6,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -92.12369995657355,
+          "reduction": 0.45584669668451017
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 6,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -224.0884000202641,
+          "reduction": 0.6708062634983292
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 6,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -237.70199995487928,
+          "reduction": 0.6836963240135152
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 7,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -91.75619995221496,
+          "reduction": 0.4379453135320692
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 7,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -231.07890004757792,
+          "reduction": 0.6624248683606485
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 7,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -265.1686000172049,
+          "reduction": 0.6924771157122209
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 8,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -75.04529994912446,
+          "reduction": 0.3811942869491065
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 8,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -198.21849989239126,
+          "reduction": 0.6193513289091546
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 8,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -247.66449991147965,
+          "reduction": 0.67029086986087
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 9,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -76.42519997898489,
+          "reduction": 0.3780012503944251
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 9,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -236.10600002575666,
+          "reduction": 0.6524730894019728
+        },
+        {
+          "fixture": "holdout_02",
+          "repeat": 9,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -237.02960007358342,
+          "reduction": 0.6533578400908981
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 0,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -87.26960001513362,
+          "reduction": 0.4346138907034741
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 0,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -196.10910001210868,
+          "reduction": 0.6333506116962464
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 0,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -238.43000002671033,
+          "reduction": 0.6774380155012323
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 1,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -93.4271999867633,
+          "reduction": 0.4765677524042998
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 1,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -215.00630001537502,
+          "reduction": 0.6769274314740827
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 1,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -240.20690005272627,
+          "reduction": 0.7006762995635071
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 2,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -96.16189997177571,
+          "reduction": 0.4930102715944471
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 2,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -218.47570000682026,
+          "reduction": 0.688406667018522
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 2,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -274.173800018616,
+          "reduction": 0.7349274544845692
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 3,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -94.0179000608623,
+          "reduction": 0.4506958331238621
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 3,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -184.4781000399962,
+          "reduction": 0.6168468330146287
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 3,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -235.30350008513778,
+          "reduction": 0.672503806260788
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 4,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -78.32410011906177,
+          "reduction": 0.4291804413183341
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 4,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -230.03090010024607,
+          "reduction": 0.6882954917989268
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 4,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -249.64950000867248,
+          "reduction": 0.7055787609327093
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 5,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -89.39640002790838,
+          "reduction": 0.44257001961133924
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 5,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -232.86610003560781,
+          "reduction": 0.6740686064652163
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 5,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -238.1722000427544,
+          "reduction": 0.6789989783374795
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 6,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -109.88320002797991,
+          "reduction": 0.4974809760834581
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 6,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -227.2141999565065,
+          "reduction": 0.6718135644154546
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 6,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -262.3291000491008,
+          "reduction": 0.7026827288399348
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 7,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -90.62349994201213,
+          "reduction": 0.436352194084503
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 7,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -212.26170007139444,
+          "reduction": 0.6445405341175512
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 7,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -254.29730012547225,
+          "reduction": 0.6847765002633481
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 8,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -108.19600010290742,
+          "reduction": 0.5076299799015581
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 8,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -213.49920006468892,
+          "reduction": 0.6704477762815557
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 8,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -265.67200012505054,
+          "reduction": 0.7168399597610087
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 9,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -99.11920002195984,
+          "reduction": 0.5128235375766126
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 9,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -215.8595999935642,
+          "reduction": 0.6962725512495489
+        },
+        {
+          "fixture": "holdout_03",
+          "repeat": 9,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -243.64120000973344,
+          "reduction": 0.721251687021773
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 0,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -82.05869991797954,
+          "reduction": 0.4154689969716271
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 0,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -191.00559991784394,
+          "reduction": 0.6232735256631632
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 0,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -234.90339994896203,
+          "reduction": 0.6704757739004956
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 1,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -101.76299989689142,
+          "reduction": 0.5204355446933386
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 1,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -202.56120001431555,
+          "reduction": 0.6835605273577523
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 1,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -253.05949989706278,
+          "reduction": 0.7296338731703512
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 2,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -103.03519992157817,
+          "reduction": 0.5133689410408413
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 2,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -216.2665999494493,
+          "reduction": 0.6888888604424357
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 2,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -250.90790004469454,
+          "reduction": 0.7198068602566817
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 3,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -102.17930004000664,
+          "reduction": 0.5058639128445287
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 3,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -207.18120003584772,
+          "reduction": 0.6748757945830934
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 3,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -246.7014999128878,
+          "reduction": 0.711956789772205
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 4,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -102.45980008039623,
+          "reduction": 0.5255685551867373
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 4,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -195.14309999067336,
+          "reduction": 0.678443103247658
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 4,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -288.44200004823506,
+          "reduction": 0.7571995677050299
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 5,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -80.32950002234429,
+          "reduction": 0.4211404048655749
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 5,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -181.35909992270172,
+          "reduction": 0.6215772978425473
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 5,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -256.0937999514863,
+          "reduction": 0.6987417160334726
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 6,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -101.66879987809807,
+          "reduction": 0.5206879487507914
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 6,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -234.82989997137338,
+          "reduction": 0.7150298838602582
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 6,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -277.0571999717504,
+          "reduction": 0.7474961349949518
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 7,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -98.62910001538694,
+          "reduction": 0.5143750441808033
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 7,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -207.8601000830531,
+          "reduction": 0.6906190352445196
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 7,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -253.43180005438626,
+          "reduction": 0.7313031781792154
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 8,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -100.50049994606525,
+          "reduction": 0.5124115136930709
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 8,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -215.18579998519272,
+          "reduction": 0.6923215762425512
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 8,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -260.1617999607697,
+          "reduction": 0.7312153081453727
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 9,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -87.06740010529757,
+          "reduction": 0.4623156620870993
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 9,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -220.94830009154975,
+          "reduction": 0.6857280569482329
+        },
+        {
+          "fixture": "holdout_04",
+          "repeat": 9,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -262.0591000886634,
+          "reduction": 0.7212888564052412
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 0,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -94.83469999395311,
+          "reduction": 0.45942214415302507
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 0,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -204.36930004507303,
+          "reduction": 0.6468277418105821
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 0,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -262.80580007005483,
+          "reduction": 0.7019520675793591
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 1,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -72.34070007689297,
+          "reduction": 0.4052273488875404
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 1,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -217.6072000293061,
+          "reduction": 0.6720725123026154
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 1,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -257.1040999609977,
+          "reduction": 0.7077255643053065
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 2,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -78.06329999584705,
+          "reduction": 0.4180781429173662
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 2,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -199.68159997370094,
+          "reduction": 0.647606828462354
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 2,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -275.10159998200834,
+          "reduction": 0.7168627495858093
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 3,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -83.10270006768405,
+          "reduction": 0.43193928753124056
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 3,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -220.16320016700774,
+          "reduction": 0.668265064779103
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 3,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -258.653600118123,
+          "reduction": 0.7029675336844601
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 4,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -82.02450012322515,
+          "reduction": 0.4321311563891791
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 4,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -221.91460011526942,
+          "reduction": 0.673072210508183
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 4,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -267.2244000714272,
+          "reduction": 0.7125721775558778
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 5,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -60.83009985741228,
+          "reduction": 0.33464870954685566
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 5,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -192.20449996646494,
+          "reduction": 0.6137828381835629
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 5,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -259.20689990743995,
+          "reduction": 0.6818546265716563
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 6,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -55.943100014701486,
+          "reduction": 0.3063267143732974
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 6,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -192.21630005631596,
+          "reduction": 0.6027501515180866
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 6,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -263.03550007287413,
+          "reduction": 0.6749380321664425
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 7,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -78.96680000703782,
+          "reduction": 0.40235686636244705
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 7,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -208.93280010204762,
+          "reduction": 0.6404529858699592
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 7,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -247.11930006742477,
+          "reduction": 0.6781295733480017
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 8,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -97.61110006365925,
+          "reduction": 0.47823166535879824
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 8,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -221.1704000364989,
+          "reduction": 0.6749838327961883
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 8,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -244.11400011740625,
+          "reduction": 0.6962525168295113
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 9,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -80.1016999175772,
+          "reduction": 0.4160539390088217
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 9,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -218.41189987026155,
+          "reduction": 0.6601789879723441
+        },
+        {
+          "fixture": "holdout_05",
+          "repeat": 9,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -254.60979994386435,
+          "reduction": 0.6936929498068393
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 0,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -99.60630000568926,
+          "reduction": 0.4721673528110957
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 0,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -248.39700001757592,
+          "reduction": 0.690478453963136
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 0,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -283.8432000717148,
+          "reduction": 0.7182405329896631
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 1,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -93.01740012597293,
+          "reduction": 0.4350661322387115
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 1,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -239.16360014118254,
+          "reduction": 0.6644415233312793
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 1,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -272.03410014044493,
+          "reduction": 0.6925206708275934
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 2,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -80.51379991229624,
+          "reduction": 0.38192137525109493
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 2,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -206.41079999040812,
+          "reduction": 0.6130233924349744
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 2,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -256.4454999519512,
+          "reduction": 0.6630881599239046
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 3,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -107.62510006316006,
+          "reduction": 0.47545526624481804
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 3,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -244.37800014857203,
+          "reduction": 0.6730042350180976
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 3,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -277.7520000236109,
+          "reduction": 0.7005287158198577
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 4,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -79.02250008191913,
+          "reduction": 0.3977107446726166
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 4,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -221.58190002664924,
+          "reduction": 0.6493189214919629
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 4,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -274.04170006047934,
+          "reduction": 0.6960450340279375
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 5,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -94.97660002671182,
+          "reduction": 0.463792107456663
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 5,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -250.13379997108132,
+          "reduction": 0.6949321260999655
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 5,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -263.3034000173211,
+          "reduction": 0.7057000692528099
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 6,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -96.57240007072687,
+          "reduction": 0.4640284764339716
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 6,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -223.08819997124374,
+          "reduction": 0.6666648736450276
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 6,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -261.0366999870166,
+          "reduction": 0.7006159991255212
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 7,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -119.56120003014803,
+          "reduction": 0.5254153269426508
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 7,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -242.43539990857244,
+          "reduction": 0.6918230125281326
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 7,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -256.99829997029155,
+          "reduction": 0.7041190137063507
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 8,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -90.61599988490343,
+          "reduction": 0.4354152047404115
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 8,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -217.21219993196428,
+          "reduction": 0.648956022113333
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 8,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -261.33579993620515,
+          "reduction": 0.6898428808500814
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 9,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -92.04599994700402,
+          "reduction": 0.45441305816225974
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 9,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -223.4469000250101,
+          "reduction": 0.6690806203726548
+        },
+        {
+          "fixture": "holdout_06",
+          "repeat": 9,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -241.27809994388372,
+          "reduction": 0.6858538402956171
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 0,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -95.71879997383803,
+          "reduction": 0.44228423331050115
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 0,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -196.86449994333088,
+          "reduction": 0.6199189517568362
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 0,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -252.35289987176657,
+          "reduction": 0.676452667481388
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 1,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -88.47719989717007,
+          "reduction": 0.435441148796717
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 1,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -273.8688999088481,
+          "reduction": 0.7047914014514395
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 1,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -241.0385999828577,
+          "reduction": 0.6775482415375405
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 2,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -85.98959993105382,
+          "reduction": 0.42893079038000514
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 2,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -211.61350002512336,
+          "reduction": 0.6489256916859969
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 2,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -271.4598999591544,
+          "reduction": 0.7033649388286763
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 3,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -74.52689995989203,
+          "reduction": 0.39124977269092553
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 3,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -218.0037999060005,
+          "reduction": 0.6527820154104745
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 3,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -258.95299995318055,
+          "reduction": 0.6907065501867887
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 4,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -95.83530004601926,
+          "reduction": 0.4856553858814431
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 4,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -226.69890010729432,
+          "reduction": 0.6907434747220503
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 4,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -275.0567001057789,
+          "reduction": 0.7304588754232297
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 5,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -91.04410000145435,
+          "reduction": 0.46878502919853604
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 5,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -229.16790004819632,
+          "reduction": 0.6895654317135431
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 5,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -274.2469999939203,
+          "reduction": 0.7266441945272311
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 6,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -78.6466000135988,
+          "reduction": 0.4103161006101932
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 6,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -190.8091000514105,
+          "reduction": 0.6280009229677106
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 6,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -238.7253000633791,
+          "reduction": 0.6786752254435646
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 7,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -91.22319996822625,
+          "reduction": 0.4583907640926399
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 7,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -206.98110002558678,
+          "reduction": 0.657572592197772
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 7,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -241.80870002601296,
+          "reduction": 0.6916863324254314
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 8,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -82.0718000177294,
+          "reduction": 0.4348674788067507
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 8,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -199.1385999135673,
+          "reduction": 0.6512157976225728
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 8,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -267.3355999868363,
+          "reduction": 0.7148161685248755
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 9,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -91.38049988541752,
+          "reduction": 0.47940354460408285
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 9,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -212.7110998844728,
+          "reduction": 0.6818898291395403
+        },
+        {
+          "fixture": "holdout_07",
+          "repeat": 9,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -251.31659989710897,
+          "reduction": 0.7169228835951514
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 0,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -79.57970001734793,
+          "reduction": 0.43646570064172374
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 0,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -243.27860004268587,
+          "reduction": 0.7030636970222461
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 0,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -269.2113999510184,
+          "reduction": 0.7237659399908122
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 1,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -105.66819994710386,
+          "reduction": 0.5000967837985191
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 1,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -222.11640002205968,
+          "reduction": 0.677713713543026
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 1,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -260.0354999303818,
+          "reduction": 0.7111346847166726
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 2,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -81.43039990682155,
+          "reduction": 0.40675947682276414
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 2,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -208.04379996843636,
+          "reduction": 0.6365964680824506
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 2,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -266.45979995373636,
+          "reduction": 0.6917038053441159
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 3,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -90.18179995473474,
+          "reduction": 0.43538827844082617
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 3,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -239.05880004167557,
+          "reduction": 0.6715010339374099
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 3,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -273.87220005039126,
+          "reduction": 0.7007630110762872
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 4,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -84.91520001552999,
+          "reduction": 0.433607170183803
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 4,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -246.1454999865964,
+          "reduction": 0.6893582591490921
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 4,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -259.2402999289334,
+          "reduction": 0.7003475528210336
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 5,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -93.80990010686219,
+          "reduction": 0.4693761862246265
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 5,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -218.13010005280375,
+          "reduction": 0.6728651588167949
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 5,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -262.21559999976307,
+          "reduction": 0.7120267524604396
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 6,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -93.93550001550466,
+          "reduction": 0.4476627872131904
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 6,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -208.33440008573234,
+          "reduction": 0.6425427539500069
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 6,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -284.0243000537157,
+          "reduction": 0.710195332099687
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 7,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -87.42720005102456,
+          "reduction": 0.4487420399360411
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 7,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -222.65160002280027,
+          "reduction": 0.6745961315184998
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 7,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -251.76390004344285,
+          "reduction": 0.7009719794500865
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 8,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -101.31069994531572,
+          "reduction": 0.48735652619269165
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 8,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -240.1219999883324,
+          "reduction": 0.6926143955636173
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 8,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -295.79859995283186,
+          "reduction": 0.7351482815944761
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 9,
+          "baseline": "native_eng_subprocess",
+          "difference_ms": -103.28799998387694,
+          "reduction": 0.4675480342758155
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 9,
+          "baseline": "native_bilingual_subprocess",
+          "difference_ms": -227.02809993643314,
+          "reduction": 0.6587125125815898
+        },
+        {
+          "fixture": "holdout_08",
+          "repeat": 9,
+          "baseline": "screen_bilingual_subprocess",
+          "difference_ms": -259.0191998751834,
+          "reduction": 0.6877004203567063
+        }
+      ],
+      "median_reductions": {
+        "native_eng_subprocess": 0.4434850250246758,
+        "native_bilingual_subprocess": 0.6649445558575195,
+        "screen_bilingual_subprocess": 0.7014772107595544
+      },
+      "native_c_api_diagnostics": [
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 308",
+        "Estimating resolution as 308",
+        "Estimating resolution as 308",
+        "Estimating resolution as 308",
+        "Estimating resolution as 308",
+        "Estimating resolution as 308",
+        "Estimating resolution as 308",
+        "Estimating resolution as 308",
+        "Estimating resolution as 308",
+        "Estimating resolution as 308",
+        "Estimating resolution as 308",
+        "Estimating resolution as 337",
+        "Estimating resolution as 337",
+        "Estimating resolution as 337",
+        "Estimating resolution as 337",
+        "Estimating resolution as 337",
+        "Estimating resolution as 337",
+        "Estimating resolution as 337",
+        "Estimating resolution as 337",
+        "Estimating resolution as 337",
+        "Estimating resolution as 337",
+        "Estimating resolution as 337",
+        "Estimating resolution as 255",
+        "Estimating resolution as 255",
+        "Estimating resolution as 255",
+        "Estimating resolution as 255",
+        "Estimating resolution as 255",
+        "Estimating resolution as 255",
+        "Estimating resolution as 255",
+        "Estimating resolution as 255",
+        "Estimating resolution as 255",
+        "Estimating resolution as 255",
+        "Estimating resolution as 255",
+        "Estimating resolution as 303",
+        "Estimating resolution as 303",
+        "Estimating resolution as 303",
+        "Estimating resolution as 303",
+        "Estimating resolution as 303",
+        "Estimating resolution as 303",
+        "Estimating resolution as 303",
+        "Estimating resolution as 303",
+        "Estimating resolution as 303",
+        "Estimating resolution as 303",
+        "Estimating resolution as 303",
+        "Estimating resolution as 309",
+        "Estimating resolution as 309",
+        "Estimating resolution as 309",
+        "Estimating resolution as 309",
+        "Estimating resolution as 309",
+        "Estimating resolution as 309",
+        "Estimating resolution as 309",
+        "Estimating resolution as 309",
+        "Estimating resolution as 309",
+        "Estimating resolution as 309",
+        "Estimating resolution as 309",
+        "Estimating resolution as 359",
+        "Estimating resolution as 359",
+        "Estimating resolution as 359",
+        "Estimating resolution as 359",
+        "Estimating resolution as 359",
+        "Estimating resolution as 359",
+        "Estimating resolution as 359",
+        "Estimating resolution as 359",
+        "Estimating resolution as 359",
+        "Estimating resolution as 359",
+        "Estimating resolution as 359",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261",
+        "Estimating resolution as 261"
+      ],
+      "counts_rectangle": {
+        "native_eng_subprocess": {
+          "tp": 48,
+          "fp": 20,
+          "fn": 0
+        },
+        "native_bilingual_subprocess": {
+          "tp": 48,
+          "fp": 8,
+          "fn": 0
+        },
+        "screen_bilingual_subprocess": {
+          "tp": 48,
+          "fp": 3,
+          "fn": 0
+        },
+        "screen_bilingual_persistent": {
+          "tp": 48,
+          "fp": 3,
+          "fn": 0
+        }
+      },
+      "all_independent_assertions_passed": true
+    }
+  },
+  "both_batches_passed": true,
+  "limits": [
+    "Eight synthetic fully annotated frames, correlated repeats; not arbitrary-app performance.",
+    "Cold fresh-engine cost and all warmup records remain separate; application CLI/YAML startup and OS capture excluded.",
+    "No real screenshot validation included yet; no model/GUI/input invoked by this audit."
+  ]
+}

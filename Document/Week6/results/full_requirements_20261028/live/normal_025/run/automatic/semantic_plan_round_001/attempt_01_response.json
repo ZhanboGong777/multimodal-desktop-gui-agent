@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 37485.0,
+  "usage": {
+    "prompt_tokens": 1494,
+    "completion_tokens": 227,
+    "total_tokens": 1721
+  },
+  "error": null,
+  "content_length": 1007,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"Caller request is fully executable with visible controls; no missing parameters or unsafe operations. Two distinct semantic objectives are planned to cover preparation and review/commit.\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Prepare the GREEN report for project ALPHA by selecting the correct project and theme, then save the draft locally.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\", \"Draft Saved\"],\n      \"forbid_text\": [\"Review\", \"Commit\", \"Push\", \"Sync\", \"Online\", \"External\", \"Network\", \"Connection Required\"],\n      \"goal_id\": \"prepare_report\"\n    },\n    {\n      \"instruction\": \"Review the GREEN report for project ALPHA and commit it locally, ensuring no external communication occurs.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [\"Review unavailable\", \"Retry\", \"Budget exhausted\", \"Online\", \"Sync\", \"Push\", \"External\", \"Connection Required\"],\n      \"goal_id\": \"review_and_commit\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

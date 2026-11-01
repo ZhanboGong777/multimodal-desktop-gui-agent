@@ -1,0 +1,25 @@
+{
+  "observed_utc": "2026-10-28T00:04:26.093614+00:00",
+  "status": "failed",
+  "actual_process_exit_code": 1,
+  "phase": "development single-frame transport smoke",
+  "fixture": "development_01.png",
+  "failure": "OcrError: Tesseract failed: Unexpected Tesseract TSV columns",
+  "warning": "Estimating resolution as 257",
+  "cause": "Initial binding parser incorrectly expected CLI TSV heading; official BaseAPI GetTSVText returns rows only and renderer adds header. No holdout was evaluated.",
+  "latency_missing": true,
+  "sources": [
+    {
+      "source": "src/gui_agent/perception/ocr.py",
+      "sha256": "49be15b1057dcae3754f0ca06ff2cb70e1465783ce5ce6dc2470c808621b9c3c"
+    },
+    {
+      "source": "src/gui_agent/perception/tesseract_api.py",
+      "sha256": "3ea3e2da911e57860a429262083d86b04771228be8b98a5a4a4df66d2fccf447"
+    },
+    {
+      "source": "src/gui_agent/config.py",
+      "sha256": "dc138edf320423b373e5c932b86fab14e2b0439fe8d251c4c439e74c6124b91d"
+    }
+  ]
+}

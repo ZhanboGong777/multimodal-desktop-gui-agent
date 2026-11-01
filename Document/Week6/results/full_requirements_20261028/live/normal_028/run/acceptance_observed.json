@@ -1,0 +1,107 @@
+{
+  "schema": "week6.semantic_live.observed_result.v1",
+  "status": "failed",
+  "runtime_pass": false,
+  "independent_pass": false,
+  "attribution_pass": false,
+  "source_unchanged": true,
+  "runtime_independent_gates_passed": false,
+  "semantic_audit_pending": true,
+  "meaning": "Observed evidence only. A separate read-only native-plan/semantic-goal audit and real owner exit receipt are required for final acceptance.",
+  "transition_attribution": [],
+  "input_receipts": [],
+  "state": {
+    "utc": "2026-10-31T13:44:10.973782+00:00",
+    "event": "started",
+    "stage": "project",
+    "project": "",
+    "colour": "",
+    "committed": false,
+    "review_attempts": 0,
+    "mode": "normal",
+    "events": 1
+  },
+  "independent_events": [
+    {
+      "utc": "2026-10-31T13:44:10.973782+00:00",
+      "event": "started",
+      "stage": "project",
+      "project": "",
+      "colour": "",
+      "committed": false,
+      "review_attempts": 0,
+      "mode": "normal",
+      "events": 1
+    }
+  ],
+  "automatic_result": {
+    "schema_version": "week6.semantic_workflow.v1",
+    "decomposition_protocol_mode": "semantic_subtasks",
+    "workflow_id": "semantic_lab",
+    "status": "failed",
+    "plans": [
+      {
+        "schema_version": "week6.semantic_subtasks.v6",
+        "input_modality": "caller_intent_only",
+        "image_attached": false,
+        "status": "failed",
+        "proposal": null,
+        "workflow": null,
+        "planning_calls": 1,
+        "model_requests": 1,
+        "elapsed_ms": 524655.9999999991,
+        "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_028\\run\\automatic\\semantic_plan_round_001",
+        "error": "ValueError: ModelError: the model returned an empty response"
+      }
+    ],
+    "goal_outcomes": [],
+    "rejected_goal_contracts": [],
+    "completed_subgoals": [],
+    "semantic_goals_total": 0,
+    "workflow_result": null,
+    "workflow_results": [],
+    "final_verification": null,
+    "final_observation_reference": "",
+    "total_actions": 0,
+    "planning_calls": 1,
+    "model_requests": 1,
+    "unconfirmed_action_attempts": 0,
+    "accounting_complete": true,
+    "elapsed_ms": 538967.9999999971,
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_028\\run\\automatic",
+    "error": "ValueError: ModelError: the model returned an empty response",
+    "notes": []
+  },
+  "status_reads": [
+    {
+      "schema": "week6.status_read.v1",
+      "trusted": true,
+      "age_seconds": 0.01,
+      "state": "finished",
+      "snapshot": {
+        "schema": "week6.run_status.semantic.v1",
+        "run_id": "0afb795c42644bef9cba9fbb204a4871",
+        "case_id": "semantic_lab",
+        "execute": true,
+        "pid": 4000,
+        "process_identity": "windows:134379278754329865",
+        "seq": 4,
+        "event": "finished",
+        "stage": "finished",
+        "task_status": "failed",
+        "updated_at_utc": "2026-10-31T13:53:35.280023+00:00",
+        "elapsed_ms": 538967.9999999971,
+        "max_actions": 20,
+        "max_planning_attempts": 24,
+        "planning_pass": 1,
+        "actions_used": 0,
+        "subgoals_total": 0,
+        "subgoals_completed": 0,
+        "subgoal_id": null,
+        "detail_code": "",
+        "write_failures": []
+      },
+      "diagnostics": []
+    }
+  ]
+}

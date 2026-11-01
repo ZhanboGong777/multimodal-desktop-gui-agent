@@ -1,0 +1,128 @@
+{
+  "run_id": "001_commit_report",
+  "case_id": "commit_report",
+  "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Commit the reviewed GREEN report for project ALPHA locally using the visible commit controls.\nComplete original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+  "status": "succeeded",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Double-click the 'Commit locally' button to finalize the local commit.",
+      "action_type": "double_click",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "double_click",
+          "x": 1282,
+          "y": 1047,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Commit locally"
+        },
+        "element_id": "obs-0002-e006",
+        "screenshot_point": {
+          "x": 1282,
+          "y": 1047
+        },
+        "control_point": {
+          "x": 1282,
+          "y": 1047
+        },
+        "note": "element obs-0002-e006"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "double_click",
+          "x": 1282,
+          "y": 1047,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Commit locally"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: report",
+        "evidence": {
+          "observation_id": "obs-0003",
+          "changed": true,
+          "element_count": 7,
+          "expectation_tokens": [
+            "report",
+            "committed",
+            "locally",
+            "requested"
+          ],
+          "expectation_hits": [
+            "report"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 13047.000000005937,
+      "after_observation_id": "obs-0003"
+    }
+  ],
+  "verification": {
+    "outcome": "passed",
+    "method": "automatic",
+    "detail": "all success rules matched against the current screen",
+    "evidence": {
+      "observation_id": "obs-0004",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [],
+      "verification_source": "frozen_model_semantic_subtask_postconditions"
+    }
+  },
+  "error": null,
+  "elapsed_ms": 52389.99999999942,
+  "execute": true,
+  "model_name": "qwen3-vl:8b-instruct",
+  "provider": "openai_compatible",
+  "notes": [
+    "planned 1 steps from obs-0001",
+    "s1: grounded obs-0001-e006 from obs-0001 to obs-0002-e006 in obs-0002 (pixel_match)"
+  ],
+  "task_id": "commit_report",
+  "commit": "482895f",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 2560x1600, control 2560x1600",
+  "started_at": "2026-11-01T11:04:53.259147Z",
+  "finished_at": "2026-11-01T11:05:45.649147Z",
+  "planning_attempts": 1,
+  "model_requests": 5,
+  "planning_ms": 35656.00000000268,
+  "confirmation_ms": 30.999999988125637,
+  "execution_ms": 16703.000000008615,
+  "planner_ms": 32422.000000005937,
+  "planning_calls": 1,
+  "system_elapsed_ms": 52359.00000001129,
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_046\\run\\automatic\\goal_001_003_commit_report\\001_commit_report",
+  "stop_reason": "",
+  "error_type": "",
+  "failed_step_id": null,
+  "recovery_records": [],
+  "unconfirmed_action_attempts": 0,
+  "action_count": 1
+}

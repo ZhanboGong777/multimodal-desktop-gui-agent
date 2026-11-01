@@ -1,0 +1,17 @@
+"""Development-only bounded original-contract match feedback, no raw screen or new input."""
+from pathlib import Path
+import hashlib,sys
+P=Path(__file__).parent;R=P.parent.parent/'week6-worktree';sys.path.insert(0,str(R/'src'))
+from gui_agent.planning import semantic_workflow as semantic
+original=semantic._logical_failure
+def matched_literals(failure):
+ logical=original(failure)
+ if logical and logical.get('category')=='semantic_postconditions_unsatisfied' and 'predicate_feedback'in logical:
+  feedback=logical['predicate_feedback'];missing=feedback['missing_expected_text']
+  feedback['present_expected_text']=None if missing is None else [x for x in logical['failed_goal']['expect_text']if x not in missing]
+  logical['required_revision']+=' present_expected_text contains only original expected literals matched in that failed verification; null is unknown. A match is context, not operation or objective completion credit. Do not restart already established selections just to reproduce a guessed missing caption. A revised objective may combine explicitly named remaining operations and use a justified outcome from unchanged caller predicates.'
+ return logical
+semantic._logical_failure=matched_literals
+s=(P/'probe_failed_plan_repair_001.py').read_text('utf8').replace('transient007_saved_failure_probe_001','transient007_predicate_matches_development_probe_005')
+s=s.replace("'source_unchanged':True,", "'source_unchanged':True,'development_only_original_predicate_match_feedback':{'scope':'Add original expected literals minus the original verifier complete missing list, or null when not checked. No extra screen text, geometry, files, goal rewrite or completion credit. Pending schema/auditor qualification if useful.','harness_sha256':"+repr(hashlib.sha256(Path(__file__).read_bytes()).hexdigest())+"},")
+exec(compile(s,str(P/'probe_failed_plan_repair_001.py'),'exec'))

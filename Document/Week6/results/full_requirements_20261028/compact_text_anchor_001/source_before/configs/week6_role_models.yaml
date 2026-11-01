@@ -1,0 +1,23 @@
+# Use --text-model gemma3:4b for the optional text/vision pair. Perception settings are unchanged from
+# week6_accuracy_persistent.yaml; no new OCR training or calibration is used.
+model:
+  provider: openai_compatible
+  model_name: qwen3-vl:8b-instruct
+  base_url: http://127.0.0.1:11434/v1
+  timeout_seconds: 900
+  temperature: 0
+  max_retries: 0
+  max_tokens: 4096
+planning:
+  visual_candidate_details: true
+perception:
+  ocr:
+    engine: tesseract
+    fallback_engine: none
+    languages: [en, zh]
+    min_confidence: 0.5
+    tesseract_profile: screen
+    tesseract_scale: 2.0
+    tesseract_tessdata_dir: D:/week6-full-ocr/tessdata
+    tesseract_transport: persistent
+    tesseract_library_path: C:/Program Files/Tesseract-OCR/libtesseract-5.dll

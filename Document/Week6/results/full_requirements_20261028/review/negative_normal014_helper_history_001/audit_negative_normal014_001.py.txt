@@ -1,0 +1,273 @@
+"""Independent normal014 failure audit from pinned historical source and raw evidence.
+
+This script performs file reads, private byte copies, and pure parser/verifier
+checks. It never constructs a live model client, captures a screen, dispatches
+input, controls a process, or runs pytest.
+"""
+from __future__ import annotations
+
+import ast
+import hashlib
+import importlib.util
+import json
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path("C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+BASE = ROOT / "Document/Week6/results/full_requirements_20261028"
+PRIVATE = Path(__file__).parent
+CONTAINER = BASE / "live/normal_014"
+RUN = CONTAINER / "run"
+AUTO = RUN / "automatic"
+ROUND = AUTO / "semantic_plan_round_001"
+CHILD = AUTO / "goal_001_001_prepare_report/001_prepare_report"
+FREEZE = BASE / "model_candidate_vl3b_001/final_source_freeze_001.json"
+FREEZE_SHA = "f45685bbf863f8decf72a1ced94329938904d8b0884cdad57111853eeeb7c0ff"
+PREVIOUS = BASE / "semantic_conversation_repair_001/final_source_freeze_001.json"
+PREREG = BASE / "live/preregistered_v6_006.json"
+PREREG_SHA = "6734253d4a1bedd4afa07ca9e249c9f39765a1865d6ee08ec9cc5937734874c4"
+OUTPUT = BASE / "review/negative_normal014_audit_001.json"
+
+
+def load(path):
+    return json.loads(path.read_text(encoding="utf8"))
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def bound(path):
+    return {"path": str(path), "sha256": sha(path), "bytes": path.stat().st_size}
+
+
+def main():
+    assert not OUTPUT.exists(), "Never replace an earlier audit"
+    assert sha(FREEZE) == FREEZE_SHA and sha(PREREG) == PREREG_SHA
+    freeze, previous, prereg = load(FREEZE), load(PREVIOUS), load(PREREG)
+    assert sha(PREVIOUS) == freeze["previous_freeze_sha256"] == "58740f05d55c1eedc92f5c048005bd9348ca2b25b6a40ccb2450f90ca2295fe9"
+    pins = freeze["code_pins"]
+    assert len(pins) == freeze["code_pin_count"] == 265 and pins == previous["code_pins"]
+    assert freeze["changed_paths"] == [] and freeze["code_byte_changes_from_previous_freeze"] == 0
+    assert prereg["freeze_sha256"] == FREEZE_SHA
+    assert (PREREG.parent / prereg["freeze"]).resolve() == FREEZE.resolve()
+    observation_path = PRIVATE / "current_code_pins_observed_001.json"
+    observation = load(observation_path)
+    assert observation["freeze_sha256"] == FREEZE_SHA and observation["observed_code_pins"] == pins
+    assert not observation["mismatches"] and observation["readme_matches_freeze"] is True
+    assert observation["readme_sha256"] == freeze["readme_sha256"]
+    # All subsequent interpretation uses historical source copies, so a later
+    # separately recorded repair cannot be mistaken for a run014 mutation.
+    replay = PRIVATE / "pinned_replay_001"
+    replay.mkdir(exist_ok=False)
+    contract, result = load(RUN / "contract.json"), load(RUN / "runtime_result.json")
+    observed = load(RUN / "acceptance_observed.json")
+    owner, start, claim = [load(CONTAINER / name) for name in ("owner_receipt.json", "owner_start.json", "owner_claim.json")]
+    source_copies = []
+    for relative, digest in contract["source_sha256"].items():
+        source = RUN / "source_snapshot" / (relative + ".txt")
+        assert sha(source) == digest == pins[relative]
+        target = replay / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        with target.open("xb") as stream:
+            stream.write(source.read_bytes())
+        assert sha(target) == digest
+        source_copies.append({"relative": relative, "source": bound(source), "private_replay": bound(target)})
+    auditor_source = ROOT / "scripts/week6_audit_semantic_acceptance.py"
+    assert sha(auditor_source) == pins["scripts/week6_audit_semantic_acceptance.py"]
+    auditor_copy = replay / "scripts/week6_audit_semantic_acceptance.py"
+    with auditor_copy.open("xb") as stream:
+        stream.write(auditor_source.read_bytes())
+    assert sha(auditor_copy) == sha(auditor_source)
+    source_copies.append({"relative": "scripts/week6_audit_semantic_acceptance.py", "source": bound(auditor_source), "private_replay": bound(auditor_copy)})
+    assert type(owner["child_exit_code"]) is int and owner["child_exit_code"] == 1
+    assert abs(owner["elapsed_seconds"] - 82.641) < .001
+    assert claim["command"] == start["command"] == owner["command"]
+    assert claim["owner"] == start["owner"] == owner["owner"]
+    assert owner["owner_harness_sha256"] == prereg["owner_harness_sha256"] == freeze["owner_harness_sha256"] == sha(CONTAINER / "owner_harness.py.txt")
+    command = owner["command"]
+    assert command[command.index("--model") + 1] == owner["requested_model"] == contract["model"] == freeze["runtime_model"] == prereg["model"] == "qwen2.5vl:3b"
+    assert Path(command[command.index("--fixture-directory") + 1]).name == prereg["normal"]["fixture"] == "fixture_normal_010"
+    assert datetime.fromisoformat(prereg["registered_utc"]) < datetime.fromisoformat(owner["started_utc"])
+    assert result == observed["automatic_result"] and result["status"] == "blocked"
+    assert result["planning_calls"] == 2 and result["model_requests"] == 3
+    assert result["total_actions"] == result["unconfirmed_action_attempts"] == 0
+    assert result["semantic_goals_total"] == 2 and result["completed_subgoals"] == []
+    assert result["final_verification"] is None and len(result["goal_outcomes"]) == 1
+    assert observed["runtime_pass"] is observed["independent_pass"] is observed["attribution_pass"] is False
+    assert observed["source_unchanged"] is True and observed["input_receipts"] == observed["transition_attribution"] == []
+    assert [item["event"] for item in observed["independent_events"]] == ["started"]
+
+    spec = importlib.util.spec_from_file_location("pinned_normal014_auditor", auditor_copy)
+    auditor = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(auditor)
+    assert auditor.ROOT == replay
+    assert Path(sys.modules["gui_agent.planning.planner"].__file__).resolve() == replay / "src/gui_agent/planning/planner.py"
+    evidence = auditor.Evidence(CONTAINER)
+    initial = evidence.frame(AUTO / "initial_observation/observation.json")
+    before = evidence.frame(AUTO / "contract_before_001_001/observation.json")
+    actor_frame = evidence.frame(CHILD / "obs-0001.json")
+    assert not auditor._rolling_frame_guard(initial, before) and not auditor._rolling_frame_guard(before, actor_frame)
+    request = auditor.WorkflowRequest.model_validate(contract["request"])
+    protocol = evidence.load(ROUND / "protocol.json")
+    native = evidence.load(ROUND / "native_proposal.json")
+    saved = evidence.load(ROUND / "attempt_01_request.json")
+    response = evidence.load(ROUND / "attempt_01_response.json")
+    auditor.audit_native_predicates(native, request)
+    parsed = auditor.SemanticPlan.model_validate(native, strict=True)
+    assert parsed.status == "ready" and len(parsed.subgoals) == 2
+    assert native == json.loads(response["content"]) == result["plans"][0]["proposal"]
+    auditor.SemanticDecomposer(max_subgoals=8)._validate(parsed, request, initial, [], False)
+    assert protocol["response_format"] == auditor._semantic_response_format(request, 8)
+    assert protocol["postcondition_source"] == "untrusted_model_prediction" and protocol["final_source"] == "unchanged_caller"
+    auditor.audit_snapshot_archive(evidence, ROUND, initial, [], None)
+    expected_context = {"original_caller_request": contract["request"], "minimum_objectives": 2, "maximum_objectives": 8,
+                        "revision": False, "completed_subgoals": [], "failure": None,
+                        "input_modality": "caller_intent_only", "image_attached": False}
+    messages = auditor.audit_semantic_repair_messages(evidence, ROUND, 1, saved, protocol, request,
+                                                     initial, [], 8, False, expected_context)
+    tasks = [auditor._goal_task(goal, request) for goal in parsed.subgoals]
+    final_task = auditor._final_task(request)
+    compilation = evidence.load(ROUND / "compiled_workflow.json")
+    assert compilation["native_proposal"] == native
+    assert compilation["mapping"] == auditor.expected_native_mapping(native, parsed, tasks)
+    assert compilation["workflow"] == result["plans"][0]["workflow"]
+    assert compilation["workflow"]["subgoals"] == [task.model_dump(mode="json") for task in tasks]
+    assert compilation["workflow"]["final_check"] == final_task.model_dump(mode="json")
+    frozen = evidence.load(AUTO / "goal_contract_001_001.json")
+    assert frozen["task"] == tasks[0].model_dump(mode="json") and frozen["goal"] == parsed.subgoals[0].model_dump(mode="json")
+    assert frozen["caller_final"] == final_task.model_dump(mode="json") and frozen["before"] == before.model_dump(mode="json")
+    assert frozen["postconditions_fixed_before_input"] is True
+    before_verdict = auditor.Verifier().check_task(tasks[0], before)
+    assert before_verdict.outcome == "failed"
+    child, goal_audit, limit = [evidence.load(CHILD / name) for name in ("task_summary.json", "semantic_goal_audit.json", "single_step_planning_limit.json")]
+    assert child["status"] == "blocked" and child["steps"] == [] and child["verification"] is None
+    assert child["action_count"] == child["unconfirmed_action_attempts"] == 0
+    assert child["planning_calls"] == 1 and child["planning_attempts"] == 2
+    assert child["stop_reason"] == "planning failed: the plan contains no steps"
+    assert goal_audit["steps"] == [] and goal_audit["confirmed_input_count"] == 0
+    assert goal_audit["eligible_for_semantic_credit"] is False and goal_audit["post_observation_id"] is None
+    assert goal_audit["semantic_postcondition_verification"]["outcome"] == "inconclusive"
+    assert limit["restored"] is True and limit["applied_max_steps"] == 1 and limit["original_max_steps"] == limit["restored_max_steps"] == 4
+    assert len(limit["calls"]) == 1
+    low_call = limit["calls"][0]
+    assert low_call["ok"] is False and low_call["parsed_plan"] is None and low_call["returned_steps"] is None
+    assert low_call["attempts"] == low_call["model_requests"] == 2 and low_call["error"] == "the plan contains no steps"
+    assert low_call["instruction"] == tasks[0].instruction
+    auditor.audit_lowlevel_image_binding(low_call, actor_frame)
+    lower_messages = [{"role": "system", "content": auditor.SYSTEM_PROMPT}, *auditor.ModelRequest(
+        instruction=low_call["instruction"], context={**low_call["context"], "max_steps": 1},
+        image_path=low_call["image_path"]).to_messages()]
+    transport = evidence.lines(AUTO / "transport_requests.jsonl")
+    assert len(transport) == 3 and sum(row["requests_made"] for row in transport) == 3
+    raw_low_replies = []
+    for index, row in enumerate(transport, 1):
+        assert row["dispatch"] == row["requests_total"] == index and row["requests_made"] == 1
+        assert row["provider"] == "openai_compatible" and row["model_name"] == "qwen2.5vl:3b"
+        assert row["count_source"] == "httpx_request_event" and row["error"] == ""
+        assert row["messages"] == (messages if index == 1 else lower_messages)
+        assert len(row["http_responses"]) == 1 and row["http_responses"][0]["status_code"] == 200
+        content = row["response"]["content"]
+        assert row["http_responses"][0]["body"]["choices"][0]["message"]["content"] == content
+        if index == 1:
+            assert content == response["content"]
+        else:
+            flat = json.loads(content)
+            assert flat == {"action_type": "double_click", "target_text": "ALPHA", "arguments": {}, "status": "success"}
+            assert "steps" not in flat
+            try:
+                auditor.parse_plan(content, instruction=tasks[0].instruction, max_steps=1, task_id=tasks[0].case_id)
+            except ValueError as exc:
+                assert str(exc) == "the plan contains no steps"
+            else:
+                raise AssertionError("A flat suggested action unexpectedly became an executable plan")
+            raw_low_replies.append({"dispatch": index, "raw_content": content, "raw_json": flat,
+                                    "sha256": hashlib.sha256(content.encode()).hexdigest(),
+                                    "parse_error": "the plan contains no steps", "http_status": 200})
+    assert raw_low_replies[0]["raw_content"] == raw_low_replies[1]["raw_content"] == low_call["response"]["content"]
+    monitor = evidence.load(AUTO / "run_status.json")
+    assert monitor["task_status"] == "blocked" and monitor["planning_pass"] == 2
+    assert monitor["actions_used"] == monitor["subgoals_completed"] == 0 and monitor["subgoals_total"] == 2
+    actual_cpython = [row for row in owner["observed_descendants"] if row["pid"] == monitor["pid"]]
+    assert len(actual_cpython) == 1
+    identity_time = int(monitor["process_identity"].split(":", 1)[1]) / 10_000_000 - 11644473600
+    assert abs(identity_time - actual_cpython[0]["create_time"]) < .001
+    handoff = load(CONTAINER / "operator_handoff_002.json")
+    assert handoff["exec_wait"] == {"closed": True, "exit_code": 1}
+    assert handoff["owner_receipt"] == owner and handoff["terminal"] is True and handoff["pending"] == []
+    assert handoff["actions"] == handoff["unconfirmed_action_attempts"] == 0
+    assert handoff["planning_calls"] == 2 and handoff["model_requests"] == 3
+    # Source inspection is limited to this old byte-for-byte replay, never the
+    # new planner repair which another owner may now be implementing.
+    planner_tree = ast.parse((replay / "src/gui_agent/planning/planner.py").read_text("utf8"))
+    planner_class = next(node for node in planner_tree.body if isinstance(node, ast.ClassDef) and node.name == "TaskPlanner")
+    old_plan_method = next(node for node in planner_class.body if isinstance(node, ast.FunctionDef) and node.name == "plan")
+    generate = [node for node in ast.walk(old_plan_method) if isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Attribute) and node.func.attr == "generate_multimodal"]
+    assert len(generate) == 1 and "response_format" not in {item.arg for item in generate[0].keywords}
+    original_files = [bound(path) for path in sorted(CONTAINER.rglob("*")) if path.is_file()]
+    script_archive = OUTPUT.with_name("negative_normal014_audit_001.py.txt")
+    with script_archive.open("xb") as stream:
+        stream.write(Path(__file__).read_bytes())
+    pin_archive = OUTPUT.with_name("negative_normal014_code_pins_observed_001.json")
+    with pin_archive.open("xb") as stream:
+        stream.write(observation_path.read_bytes())
+    audit = {
+        "schema": "week6.independent.negative_model_candidate_live.v1",
+        "reviewed_utc": datetime.now(timezone.utc).isoformat(),
+        "reviewer": "/root/week6_replanning_review (independent Codex agent, not human sign-off)",
+        "scope": "Ended normal014 original records, old-source private replay, pure parser/verifier checks. No model, GUI, live fixture-state read, owner rerun, pytest or production edits.",
+        "freeze": bound(FREEZE), "previous_code_freeze": bound(PREVIOUS), "preregistration": bound(PREREG),
+        "source_binding": {"code_pins_count": 265, "candidate_and_previous_code_pins_identical": True,
+                           "timestamped_current_pin_check_before_later_repairs": bound(pin_archive),
+                           "readme_sha256": observation["readme_sha256"], "readme_matches_candidate_freeze": True,
+                           "run_snapshots_exact": True, "private_historical_replay_copies": source_copies,
+                           "later_source_changes_not_treated_as_run014_changes": True},
+        "actual_exit": {"child_exit_code": owner["child_exit_code"], "elapsed_seconds": owner["elapsed_seconds"],
+                        "started_utc": owner["started_utc"], "finished_utc": owner["finished_utc"],
+                        "owner": owner["owner"], "launcher": owner["launcher"],
+                        "observed_descendants": owner["observed_descendants"], "actual_cpython_identity": actual_cpython[0],
+                        "owner_harness_sha256_verified": True},
+        "runtime_candidate": {"model": "qwen2.5vl:3b", "digest": prereg["model_digest"],
+                              "source_changes_from_previous_freeze": 0,
+                              "operation_scope": "CLI runtime model option changed for both inference roles; acceptance command has no training or download operation. Registered metadata identifies an already installed VL model; not a same-model comparison."},
+        "higher_level": {"status": "ready", "native": native, "planning_calls": 1, "http_requests": 1,
+                         "strict_raw_schema_distinct_goal_and_native_mapping_checks_passed": True,
+                         "first_goal_before_verification": before_verdict.model_dump(mode="json"),
+                         "caller_final_exact": final_task.model_dump(mode="json"),
+                         "meaning": "Proposal/compilation checks passed; no semantic objective was executed or completed."},
+        "lower_level": {"child_status": "blocked", "planning_calls": 1, "format_attempts": 2, "http_requests": 2,
+                        "native_replies": raw_low_replies, "two_actual_preencoding_message_arrays_equal": True,
+                        "frozen_planner_generate_has_no_response_format_keyword": True,
+                        "steps": [], "confirmed_input_count": 0, "unconfirmed_input_attempts": 0,
+                        "post_observation_id": None, "semantic_postcondition_verification": goal_audit["semantic_postcondition_verification"],
+                        "single_step_limit_restored": True,
+                        "child_model_requests_field_scope": "Saved child task_summary.model_requests=3 is the shared client's cumulative count; the call ledger independently records the actor's two HTTP requests. Do not add the cumulative value again."},
+        "actual_totals": {"status": "blocked", "owner_exit_code": 1, "planning_calls": 2,
+                          "http_requests": 3, "task_inputs": 0, "unconfirmed_inputs": 0,
+                          "proposed_semantic_goals": 2, "completed_semantic_goals": 0,
+                          "independent_events": ["started"], "final_verification": None},
+        "operator_handoff": {"source": bound(CONTAINER / "operator_handoff_002.json"),
+                             "terminal": True, "pending_requests": [], "fixture_kept_open_reported": handoff["fixture_kept_open"],
+                             "operator_recovery_original": handoff["operator_recovery"]},
+        "conclusion": {"classification": "A valid native high-level proposal was followed by two unusable flat action replies; parser blocked before dispatch",
+                       "model_status_success_is_not_an_action_receipt": True,
+                       "flat_reply_not_wrapped_or_repaired_into_steps_locally": True,
+                       "no_gui_retry_or_error_recovery_acceptance_demonstrated": True,
+                       "format_retry_was_attempted_but_did_not_produce_an_executable_plan": True,
+                       "all_001_through014_remain_unaccepted": True,
+                       "positive_acceptance_gate_not_invoked_or_satisfied": True,
+                       "wire_limit": "Actual request-event counts and returned HTTP bodies are bound to saved preencoding messages. No original outgoing HTTP request-body capture is claimed."},
+        "original_files": original_files, "strict_helper_bound_files": evidence.files,
+        "audit_script": {"private": bound(Path(__file__)), "archive": bound(script_archive)},
+    }
+    with OUTPUT.open("x", encoding="utf8") as stream:
+        json.dump(audit, stream, ensure_ascii=False, indent=2)
+        stream.write("\n")
+    print(json.dumps({"audit": str(OUTPUT), "sha256": sha(OUTPUT), "original_files": len(original_files),
+                      "historical_replay_files": len(source_copies), "lower_reply_sha256": raw_low_replies[0]["sha256"]}, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,58 @@
+{
+  "schema": "week6.semantic_live.v5.preregistration.v1",
+  "registered_utc": "2026-10-28T09:06:07Z",
+  "status_at_registration": "full_validation_003 running; no v5 model or GUI task has started",
+  "protocol": "week6.semantic_subtasks.v5",
+  "freeze": "../semantic_caller_predicates_001/final_source_freeze_001.json",
+  "freeze_sha256": "a55b089032f59fc401b1e9170314001e94edfdf10e3165a2905a839127b7054e",
+  "acceptance_contract": "../review/acceptance_contract_amendment_004.md",
+  "model": "qwen2.5vl:7b",
+  "model_digest": "c82e67b1ceeeca8a1bbc93a7c3478934b42398d90d71ffc616b00c0f2b30e292",
+  "transport": "Existing local Ollama OpenAI-compatible endpoint; no server restart",
+  "configuration": "configs/week6_accuracy_persistent.yaml",
+  "temperature": 0,
+  "max_tokens": 4096,
+  "sdk_retries": 0,
+  "model_timeout_seconds": 900,
+  "global_timeout_seconds": 7200,
+  "global_max_actions": 20,
+  "global_max_planning_attempts": 24,
+  "global_max_http_dispatches": 32,
+  "cases": [
+    {
+      "planned_name": "normal_007",
+      "mode": "normal",
+      "project": "ALPHA",
+      "colour": "GREEN",
+      "fixture": "fixture_normal_006",
+      "reuse_basis": "Original normal005 and normal006 receipts each have zero inputs; fresh Sky observation this turn is the initial ALPHA/BETA page. Verify original fixture PID/create_time again before launching."
+    },
+    {
+      "planned_name": "transient_001",
+      "mode": "transient",
+      "project": "BETA",
+      "colour": "BLUE",
+      "fixture": "A new independently launched transient fixture after the normal case",
+      "application_fault": "The first review action is rejected once by the application. This is separate from an executor transport failure."
+    }
+  ],
+  "caller_contract": {
+    "source": "Unchanged scripts/week6_semantic_acceptance.py builds the full instruction and three final text predicates from each case's parameters",
+    "final_predicates": ["Project <case project>", "Theme <case colour>", "LOCAL COMPLETE"],
+    "no_program_authored_goal_sequence": true,
+    "high_level_context": "Full caller intent and immutable predicate pools plus logical completed goals/failure category, no current OCR/window/image data",
+    "low_level_context": "Fresh screenshots and production observations for each action"
+  },
+  "passing_gates": [
+    "Real owner subprocess.wait exit0 and unchanged frozen source",
+    "Native model-generated initial plan with at least two distinct semantic objectives covering the requested operations",
+    "Each completed goal's fixed contract unsatisfied before input and verified on a fresh later frame",
+    "Known successful real input receipts with no unknown dispatch, completed ledger and unchanged shared budgets",
+    "Fresh unchanged caller-final verification",
+    "Independent project-selection, theme-selection, review-accepted and local-commit events in order; every transition has a unique actual Sky receipt",
+    "Exactly one application review rejection in transient, zero in normal",
+    "Separate read-only v5 auditor passes and Root reviews native instructions against concrete event coverage"
+  ],
+  "retention": "Every failed/nonready plan, raw model reply, original diagnostic, warning and real/unknown exit remains retained. Earlier v1-v4 attempts are not v5 successes or a pooled success-rate sample.",
+  "scope": "Two controlled offline-window cases demonstrate the mechanism. They do not establish arbitrary application or cross-resolution success rates, and elapsed times are not a causal retry-speed comparison."
+}

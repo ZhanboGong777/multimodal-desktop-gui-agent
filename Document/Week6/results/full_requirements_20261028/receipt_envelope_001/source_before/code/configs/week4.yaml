@@ -1,0 +1,174 @@
+# Week 4 runtime configuration.
+#
+# This file does not change Week 2 or Week 3 defaults; it adds the execution
+# limits and the observation settings the closed loop needs. Load it with
+# `--config configs/week4.yaml`.
+#
+# Before a real model run, check the server's context window. A full-screen
+# screenshot plus the former 60-slot element list measured 7 517 tokens on a 2560x1600 display,
+# and Ollama serves 4096 by default, which fails with HTTP 400. Raise it, e.g.
+#   OLLAMA_CONTEXT_LENGTH=16384
+# before starting the server. Request size with the 300-slot list and anonymous
+# contours needs a new measurement. The Mock provider is unaffected.
+
+runtime:
+  device: auto
+
+perception:
+  screenshot_backend: mss
+  monitor_index: 1
+  output_directory: outputs/week4
+
+  capture:
+    frame_count: 1
+    interval_seconds: 0.0
+    save_frames: false
+
+  preprocessing:
+    grayscale: false
+    resize_scale: 1.0
+    gaussian_blur: false
+    otsu_threshold: false
+
+  ocr:
+    # Both backends now return whole labels, so this is a per-machine speed
+    # choice rather than a correctness one. Mac (1470x956): Tesseract 241 ms
+    # against PaddleOCR's 5 525 ms. Windows review machine (2560x1600) is much
+    # closer - 738 ms against 982 ms - and configs/default.yaml selects PaddleOCR
+    # if you prefer it there. Measured with the engine instance reused.
+    engine: tesseract
+    fallback_engine: tesseract
+    languages:
+      - en
+    min_confidence: 0.5
+    use_doc_preprocessing: false
+
+  ui_detection:
+    enabled: true
+    min_area: 100
+    max_area_ratio: 0.5
+    min_rectangularity: 0.0
+    max_candidates: 200
+    exclusion_threshold: 0.5
+
+control:
+  # The runtime passes an explicit dry_run per action; this stays true so that
+  # any code path which forgets to decide still does nothing.
+  dry_run: true
+  pyautogui_failsafe: true
+  action_delay_seconds: 0.2
+  countdown_seconds: 3
+  move_duration_seconds: 0.3
+  drag_duration_seconds: 0.5
+
+output:
+  directory: outputs/week4
+  save_before_image: true
+  save_after_image: true
+  save_annotated_image: false
+  save_run_summary: true
+
+logging:
+  level: INFO
+  directory: outputs/week4
+
+dataset:
+  name: screenagent
+  split: train
+  sample_limit: 20
+  raw_directory: data/raw
+  processed_directory: data/processed
+
+model:
+  provider: mock
+  model_name: mock-vision-model
+  base_url: null
+  # The historical planning call carried a 2560x1600 screenshot plus the 60-slot list -
+  # measured at ~7 500 tokens on the review machine - so it is not comparable to a text call, and the
+  # warmup probe does not size it either: that probe sends one image with a short prompt,
+  # while planning sent the image AND up to 60 labelled element lines under a system prompt.
+  # The repaired list includes anonymous contours and allows 300 lines; its token size
+  # and latency have not been measured on this machine yet.
+  #
+  # Measured here, and the reason this is 600 rather than 300: a request of planning size
+  # answered in 86 s cold and 17 s warm when issued directly, and the same run through the
+  # CLI died at 320 s with "planning failed: ModelError: APITimeoutError". The gap between
+  # 17 s and 320 s is not the request, it is what else is on the machine while the CLI
+  # runs it, so the budget has to absorb that rather than assume the quiet number. The
+  # error names the transport rather than the cause and reads like a broken endpoint;
+  # scripts/week4_preflight.py checks the real latency before a run, so a model that
+  # cannot answer in budget is reported before anything is captured.
+  timeout_seconds: 600
+  temperature: 0.0
+  max_retries: 0
+  # A plan of up to 10 steps, each with 7 fields, needs room. Without this the server's
+  # small default cut a real reply off at '"steps":[{"step_id' and the run reported
+  # "no JSON object found in the response" - which blames the model for a limit.
+  # 2048 was still not enough: qwen2.5vl spends output tokens on a reasoning block before
+  # the JSON, and the same run then cut off one step later, mid-"element_id". The client
+  # reports finish_reason=length with the partial reply, so the number is easy to tune.
+  max_tokens: 8192
+
+planning:
+  max_steps: 10
+  require_structured_output: true
+  allow_real_execution: false
+
+# ── Week 4 additions ────────────────────────────────────────────────
+# Named `execution` to match 13.2. Bounded new planning passes are controlled by
+# max_planning_attempts below; there is no separate max_replans alias.
+execution:
+  # T04_20261005_192417 exposed that anonymous controls never reached the model.
+  # 300 = all 200 configured contour candidates + 100 OCR slots: the measured
+  # Windows PaddleOCR frame had 66 elements, leaving 34 slots beyond that sample.
+  # Text ranks ahead of contours, including when this total is exceeded. The cap
+  # remains bounded; prompt size/latency with this larger list is not yet measured.
+  max_elements: 300
+  max_actions: 20
+  # Raised from 240 s, which this machine outgrew: with PaddleOCR at about 10 s per frame
+  # (see the OCR note above), reading one plan and executing one step took 257 s in a dry
+  # run of T02 - the run ended `timed_out` after planning had already succeeded, with
+  # `actions: 0`. The budget has to cover the per-step observations, not just the plan,
+  # and the per-observation cost is a property of the machine. 600 s leaves room for a
+  # ~10-step plan at this speed; --task-timeout overrides it per run.
+  task_timeout_seconds: 600
+  # How long the task verifier keeps re-observing before giving up.
+  #
+  # 60 rather than 10, and the reason is arithmetic on this machine rather than a preference:
+  # one observation costs **14.7 s** with PaddleOCR (measured, 2560x1600, 66 elements; 2.3 s
+  # once warm). A 10 s window therefore could not complete even a single re-observation, so
+  # "polling" was silently one look at the frame the step had just produced - which is the
+  # state *before* a page has finished loading. That is the wrong instant to judge a search
+  # by, and T02 is exactly that case: the results page appeared on obs-0016 of a run whose
+  # verdict had already been decided from the frames either side of it.
+  #
+  # The poll interval is meaningless if it is shorter than an observation, which it also was:
+  # 0.5 s against 14.7 s. Both numbers are properties of the machine's OCR speed, so both are
+  # set here with the measurement beside them.
+  verification_timeout_seconds: 60
+  verification_poll_interval_seconds: 0.5
+  # How many times one run may ask the model for a plan. 1 is plan-once-and-execute, which
+  # this runner did until T02 showed what its ceiling costs: that task needs two actions
+  # (enter a query, submit it), the identical prompt and frame produced plans of 1, 2, 8 and
+  # 9 steps across runs, and a one-step plan ended the run after one action with the goal
+  # unmet - so the run failed for a reason no prompt wording moved.
+  #
+  # 4 here, for a machine whose planning is this slow: on this node a planning call takes
+  # ~200 s, so four passes is already ~13 minutes of a 600 s budget's worth of waiting and
+  # the wall clock stops it first if the model is slow. Every pass re-checks that budget, so
+  # the two bounds compose rather than one relying on the other.
+  max_planning_attempts: 4
+  # Longest single `wait` step the action adapter will accept. A wait longer than this is
+  # taken at this value with a note rather than refused, so the ceiling bounds one pause
+  # and never ends a run.
+  #
+  # 10 rather than the guide's suggested 5, measured on this machine: a page load after a
+  # submitted search took about 5 s here while planning alone takes ~200 s, and the model
+  # asked for 10 with good reason. The earlier value is what T02 hit - `wait 10.0` against
+  # a 5 s ceiling - and while the clamp now stops that killing the run, a ceiling below what
+  # the hardware needs would still cut the pause short and let the success check run before
+  # the page had arrived.
+  max_wait_seconds: 10
+  # A task with no verifiable success rule is reported blocked rather than
+  # treated as complete when the plan runs out.
+  require_success_rules: true

@@ -1,0 +1,40 @@
+{
+  "schema": "week6.full_perception.plan.v3",
+  "created_utc": "2026-10-28T00:14:11.855254+00:00",
+  "purpose": "Retain screen recognition while reducing full PNG-decode + OCR + contour wall time; no OS capture, model or action claims.",
+  "arms": [
+    "native_eng_subprocess",
+    "native_bilingual_subprocess",
+    "screen_bilingual_subprocess",
+    "screen_bilingual_persistent"
+  ],
+  "fixed_parameters": {
+    "screen_scale": 2.0,
+    "screen_psm": 11,
+    "screen_oem": 1,
+    "confidence": 0.5
+  },
+  "equivalence_gate": "Persistent screen ordered UIElement text, bounds, confidence and all UI candidates equal screen subprocess for every measured frame/repetition; original pixels unchanged.",
+  "accuracy_gate": "Unique-frame text F1 strictly greater than BOTH native English and native bilingual; candidate ordered text/bounds/integer confidence and all contour candidates exactly equal frozen screen subprocess on every measurement. Precision, recall and rectangle TP/FP/FN fully reported; no mandatory P/R non-inferiority gate.",
+  "speed_gate": "All warm repetitions included. Full-frame median at least 10% lower than each of the other three arms; per-frame persistent median not over5% slower than screen. p95/max/slow frames retained.",
+  "cold_rule": "Three fresh-engine first-frame measurements per arm reported separately, including creation/loading; warmup first call per arm retained separately and never described as warm speed.",
+  "warm_rule": "Each frame/arm gets one retained warmup. Each of two predetermined independent process batches then runs 10 interleaved paired repeats per frame/arm; rotate by frame+repeat and reverse odd repeats. No slow records excluded.",
+  "api_sources": [
+    "https://raw.githubusercontent.com/tesseract-ocr/tesseract/5.5.1/include/tesseract/capi.h",
+    "https://raw.githubusercontent.com/tesseract-ocr/tesseract/5.5.1/include/tesseract/baseapi.h"
+  ],
+  "no_gui_model_training": true,
+  "no_environment_install": true,
+  "supersedes": {
+    "path": "Document\\Week6\\results\\full_requirements_20261028\\perception_fixture_001\\preregistered_plan_v2.json",
+    "sha256": "842c5731ca56925feeca663124913c89dccca8a47a9d98c555353ea3fc3e7a48"
+  },
+  "formal_batches": [
+    "perception_holdout_primary_001",
+    "perception_holdout_replication_001"
+  ],
+  "amendment_reason": "Before any holdout inference: Root finalized F1 superiority to BOTH native English and bilingual arms; precision/recall tradeoffs must be reported rather than added as hard non-inferiority gates. Clarify each-frame warmup, exact screen rectangle outputs, pins and full timing scope. No result-dependent threshold changes.",
+  "cold_scope": "Three fresh engine first-frame calls per arm. Includes engine construction/lazy library/model initialization and full processing, excludes engine teardown and application CLI/YAML startup; OS page-cache state uncontrolled. Cold is reported separately without a speed pass requirement.",
+  "full_timing_scope": "PNG decode + pixel-preservation snapshot + same screen preprocessing/scaling + real CPU OCR + coordinate/text handling + contour/UI extraction. Perf-counter start/end and image SHA retained. No OS capture/model/input.",
+  "gate_source": "Root explicit instruction 2026-10-28 and review/acceptance_contract.md; review contract P/R requirement superseded by this explicit decision before evaluation."
+}

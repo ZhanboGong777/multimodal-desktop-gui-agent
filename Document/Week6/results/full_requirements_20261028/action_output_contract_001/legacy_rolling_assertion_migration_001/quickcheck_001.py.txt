@@ -1,0 +1,106 @@
+"""One migrated node and owned Ruff check with actual child waits and code pins."""
+from __future__ import annotations
+
+import ast
+import hashlib
+import json
+import os
+import subprocess
+import time
+from datetime import datetime, timezone
+from pathlib import Path
+
+import psutil
+
+ROOT = Path("C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+MIGRATION = ROOT / "Document/Week6/results/full_requirements_20261028/action_output_contract_001/legacy_rolling_assertion_migration_001"
+OUT = MIGRATION / "quickcheck_001"
+PYTHON = "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe"
+RELATIVE = "tests/test_week6_rolling_actions.py"
+NODE = RELATIVE + "::test_real_runtime_rolls_one_action_at_a_time_on_full_goal_without_selector_or_marker_claims"
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def identity(process):
+    return {"pid": process.pid, "create_time": process.create_time(), "exe": process.exe()}
+
+
+def main():
+    OUT.mkdir(exist_ok=False)
+    migration = json.loads((MIGRATION / "migration.json").read_text("utf8"))
+    pins = migration["code_pins_after_single_authorized_test_change"]
+    before = {name: sha(ROOT / name) for name in pins}
+    assert before == pins and len(before) == 267
+    old = ast.parse((MIGRATION / "source_before" / (RELATIVE + ".txt")).read_text("utf8"))
+    new = ast.parse((ROOT / RELATIVE).read_text("utf8"))
+    function_name = NODE.split("::")[1]
+    old_fn = next(node for node in old.body if isinstance(node, ast.FunctionDef) and node.name == function_name)
+    new_fn = next(node for node in new.body if isinstance(node, ast.FunctionDef) and node.name == function_name)
+    removed = old_fn.body.pop(-2)
+    assert isinstance(removed, ast.Assert) and "response_format" in ast.unparse(removed)
+    new_loop = new_fn.body.pop(-2)
+    new_len = new_fn.body.pop(-2)
+    assert isinstance(new_loop, ast.For) and isinstance(new_len, ast.Assert)
+    assert ast.dump(old) == ast.dump(new), "An unrelated test assertion changed"
+    receipts = []
+    commands = [
+        ("pytest", [PYTHON, "-m", "pytest", "-q", NODE, "--basetemp=" + str(OUT / "pytest_tmp"), "--tb=short"]),
+        ("ruff", [PYTHON, "-m", "ruff", "check", RELATIVE]),
+    ]
+    for label, command in commands:
+        started = datetime.now(timezone.utc).isoformat()
+        timer = time.monotonic()
+        descendants = {}
+        with (OUT / f"{label}.stdout.txt").open("xb") as stdout, (OUT / f"{label}.stderr.txt").open("xb") as stderr:
+            child = subprocess.Popen(command, cwd=ROOT, stdout=stdout, stderr=stderr,
+                                     creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
+            launcher = identity(psutil.Process(child.pid))
+            while child.poll() is None:
+                try:
+                    for observed in psutil.Process(child.pid).children(recursive=True):
+                        try:
+                            observed_identity = identity(observed)
+                            descendants[(observed_identity["pid"], observed_identity["create_time"])] = observed_identity
+                        except psutil.Error:
+                            pass
+                except psutil.Error:
+                    pass
+                time.sleep(.05)
+            actual_exit = child.wait()
+        receipt = {"command": command, "started_utc": started,
+                   "finished_utc": datetime.now(timezone.utc).isoformat(),
+                   "elapsed_seconds": time.monotonic() - timer,
+                   "launcher": launcher, "observed_descendants": list(descendants.values()),
+                   "actual_child_exit_code": actual_exit,
+                   "stdout_sha256": sha(OUT / f"{label}.stdout.txt"),
+                   "stderr_sha256": sha(OUT / f"{label}.stderr.txt")}
+        receipts.append(receipt)
+        with (OUT / f"{label}.receipt.json").open("x", encoding="utf8") as handle:
+            json.dump(receipt, handle, ensure_ascii=False, indent=2)
+            handle.write("\n")
+    after = {name: sha(ROOT / name) for name in pins}
+    assert after == before
+    with (OUT / "validation.json").open("x", encoding="utf8") as handle:
+        json.dump({"schema": "week6.legacy_rolling_assertion.quickcheck.v1",
+                   "scope": "Exactly one migrated test node and owned test-file Ruff, not full affected validation",
+                   "actual_receipts": receipts, "code_pins_before": before, "code_pins_after": after,
+                   "code_pins_count": len(pins), "code_pins_unchanged": True,
+                   "all_other_test_ast_unchanged": True,
+                   "original_affected001_exit1_837pass1fail_retained": True,
+                   "checks_passed": all(item["actual_child_exit_code"] == 0 for item in receipts),
+                   "no_model_gui_or_index_operations": True}, handle, ensure_ascii=False, indent=2)
+        handle.write("\n")
+    for name in ["archive_and_migrate_001.py", "quickcheck_001.py"]:
+        target = MIGRATION / (name + ".txt")
+        with target.open("xb") as handle:
+            handle.write(Path(__file__).with_name(name).read_bytes())
+    print(json.dumps({"validation": str(OUT / "validation.json"), "sha256": sha(OUT / "validation.json"),
+                      "test_sha256": after[RELATIVE], "actual_exits": [item["actual_child_exit_code"] for item in receipts]}, ensure_ascii=False))
+    assert all(item["actual_child_exit_code"] == 0 for item in receipts)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,58 @@
+{
+  "schema": "week6.semantic_live.v6.grounding_monitor_preregistration.v1",
+  "protocol": "week6.semantic_subtasks.v6",
+  "freeze": "../grounding_consistency_001/final_source_freeze_001.json",
+  "freeze_sha256": "f4a7ab5cf6b6f87b694b1777b8074054b3659b46e18489589f6b22ce235ec077",
+  "semantic_source_sha256": "5380ddb6923d7ad449a8ca41c198c8ecf841856c8cfb8725bdf72a91b678c31a",
+  "contract": "../review/acceptance_contract_amendment_005.md",
+  "contract_sha256": "64ec7ba8e40fb3f64872ee260a3a1b277e71926b7491dc5c32cc9b481eae2062",
+  "previous_development_failures": "normal001 through010 remain unaccepted. normal009 missed a bridge activation deadline before input; normal010 selected BLUE when GREEN was requested and earned no semantic-goal credit. All raw failures remain.",
+  "explicit_design_change": "Model-proposed intermediate literal postconditions are untrusted predictions. The v5 caller-final-only enum/membership and pool-specific caller count/length preflight restrictions are removed. No local plan authoring/merging or forced two-goal skeleton.",
+  "unchanged_task_and_environment": true,
+  "model": "qwen2.5vl:7b",
+  "model_digest": "c82e67b1ceeeca8a1bbc93a7c3478934b42398d90d71ffc616b00c0f2b30e292",
+  "configuration": "configs/week6_accuracy_persistent.yaml",
+  "temperature": 0,
+  "max_tokens": 4096,
+  "sdk_retries": 0,
+  "model_timeout_seconds": 900,
+  "global_timeout_seconds": 7200,
+  "global_max_actions": 20,
+  "global_max_planning_attempts": 24,
+  "global_max_http_dispatches": 32,
+  "normal": {
+    "name": "normal_011",
+    "project": "ALPHA",
+    "colour": "GREEN",
+    "fixture": "fixture_normal_007",
+    "reuse": "New independent fixture, no previous task inputs"
+  },
+  "transient": {
+    "name": "transient_001",
+    "project": "BETA",
+    "colour": "BLUE",
+    "fixture": "fixture_transient_001",
+    "application_review_rejections": 1
+  },
+  "caller": "Unchanged full natural-language instruction and three caller-final checks constructed by scripts/week6_semantic_acceptance.py. No milestone vocabulary or goal sequence supplied by the program.",
+  "required_evidence": [
+    "Initial native plan >=2 distinct meaningful objectives and exact raw-to-compiled origin",
+    "Each completed goal contract fixed before input, full predicate false on fresh before, confirmed real input, fresh verified post",
+    "No failed/unknown/cancel rescue, no completed-goal replay, shared budgets",
+    "Fresh immutable caller-final independent of model conditions",
+    "Independent project/theme/review/commit events in exact order with one unique actual Sky receipt per event",
+    "Actual owner wait0, unchanged pinned code and separate v6 machine auditor",
+    "Root agent reviews each native instruction against its actual business transitions; no human sign-off is claimed"
+  ],
+  "limits": "Before-false/after-true literal evidence alone is not semantic proof. Casefold substring is not a general negation recognizer. Future labels may be guessed incorrectly and must then fail. These are two controlled functional cases, not an arbitrary-app success-rate study.",
+  "final_full_regression": "Required after both accepted real cases. Current 3328 is collection only; full004 is not yet passed.",
+  "registered_utc": "2026-10-28T10:47:49.980033+00:00",
+  "added_generic_grounding": "Original-frame and refreshed-frame observable native text/ID conflicts are refused without dispatch or local ID replacement, with bounded replanning. Unique OCR labels may use native text-only targets. Same action/planning/HTTP/time budgets.",
+  "added_live_monitoring": "Parent counts relay persisted child events before child return; semantic completion remains outer-ledger gated. Ordinary observer faults do not retry input; cancellation propagates. Status elapsed uses a separate monitor clock.",
+  "model_metadata": {
+    "name": "qwen2.5vl:7b",
+    "digest": "c82e67b1ceeeca8a1bbc93a7c3478934b42398d90d71ffc616b00c0f2b30e292",
+    "size": 5969245426,
+    "meaning": "Read-only local tags; no generation or model load"
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "schema": "week6.semantic.v6.targeted_validation.v1",
+  "receipts": [
+    {
+      "command": [
+        "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+        "-m",
+        "ruff",
+        "check",
+        "src/gui_agent/planning/semantic_workflow.py",
+        "tests/test_week6_semantic_subtasks.py",
+        "tests/test_week6_semantic_output_constraints.py",
+        "tests/test_week6_semantic_text_context.py",
+        "tests/test_week6_semantic_caller_predicates.py",
+        "tests/test_week6_semantic_goal_grouping.py",
+        "tests/test_week6_semantic_predicted_postconditions.py"
+      ],
+      "launcher_pid": 87824,
+      "wait_exit_code": 0,
+      "started_at_utc": "2026-10-28T09:43:48.774384+00:00",
+      "elapsed_seconds": 0.2190000000409782
+    },
+    {
+      "command": [
+        "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+        "-X",
+        "utf8",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_week6_semantic_subtasks.py",
+        "tests/test_week6_semantic_output_constraints.py",
+        "tests/test_week6_semantic_text_context.py",
+        "tests/test_week6_semantic_caller_predicates.py",
+        "tests/test_week6_semantic_goal_grouping.py",
+        "tests/test_week6_semantic_predicted_postconditions.py",
+        "--basetemp",
+        "C:\\Users\\\u8054\u60f3\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\semantic_predicted_postconditions_001\\cpu_development_001\\pytest_tmp"
+      ],
+      "launcher_pid": 82244,
+      "wait_exit_code": 1,
+      "started_at_utc": "2026-10-28T09:43:48.988361+00:00",
+      "elapsed_seconds": 59.25
+    }
+  ],
+  "pin_count": 256,
+  "pins_unchanged": true,
+  "excluded_in_progress_other_agent_files": [
+    "tests/test_week6_full_requirements_review.py",
+    "scripts/week6_audit_semantic_acceptance.py"
+  ],
+  "no_model_gui_calls": true,
+  "not_full_regression": true
+}

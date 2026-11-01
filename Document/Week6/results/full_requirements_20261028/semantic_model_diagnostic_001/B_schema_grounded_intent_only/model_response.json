@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen2.5vl:7b",
+  "latency_ms": 15032.0,
+  "usage": {
+    "prompt_tokens": 1008,
+    "completion_tokens": 175,
+    "total_tokens": 1183
+  },
+  "error": null,
+  "content_length": 708,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Prepare a GREEN report for project ALPHA.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"prepare_green_report\"\n    },\n    {\n      \"instruction\": \"Review the prepared GREEN report for project ALPHA.\",\n      \"expect_text\": [\"Review\", \"Project ALPHA\", \"Theme GREEN\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"review_report\"\n    },\n    {\n      \"instruction\": \"Commit the reviewed GREEN report for project ALPHA locally.\",\n      \"expect_text\": [\"Commit\", \"Project ALPHA\", \"Theme GREEN\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"commit_report\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

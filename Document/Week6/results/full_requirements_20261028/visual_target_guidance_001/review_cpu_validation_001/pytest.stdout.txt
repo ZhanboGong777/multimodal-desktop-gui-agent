@@ -1,0 +1,12 @@
+.....................F.                                                  [100%]
+================================== FAILURES ===================================
+_ test_review_highlevel_still_receives_only_caller_intent_without_lowlevel_guidance_or_snapshot _
+tests\test_week6_visual_target_guidance_review.py:292: in test_review_highlevel_still_receives_only_caller_intent_without_lowlevel_guidance_or_snapshot
+    assert result.status == "needs_clarification" and len(bodies) == budgeted.request_count == 1
+E   AssertionError: assert ('timed_out' == 'needs_clarification'
+E     
+E     - needs_clarification
+E     + timed_out)
+=========================== short test summary info ===========================
+FAILED tests/test_week6_visual_target_guidance_review.py::test_review_highlevel_still_receives_only_caller_intent_without_lowlevel_guidance_or_snapshot
+1 failed, 22 passed in 6.45s

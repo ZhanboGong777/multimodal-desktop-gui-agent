@@ -1,0 +1,86 @@
+{
+  "schema_version": "week6.semantic_subtasks.v6",
+  "frozen_task": {
+    "case_id": "prepare_report",
+    "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Prepare the BLUE report for project BETA by selecting the correct project and theme, then save the draft locally.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+    "target_app": null,
+    "preconditions": [],
+    "success_rules": [],
+    "verification": "automatic",
+    "expect_text": [
+      "Project BETA",
+      "Theme BLUE",
+      "Draft saved locally"
+    ],
+    "forbid_text": [
+      "Review unavailable",
+      "Online sync required",
+      "External communication needed",
+      "Budget exceeded",
+      "Changes not saved",
+      "Commit failed",
+      "Review pending",
+      "Save failed"
+    ],
+    "requires_processes": [],
+    "forbids_processes": [],
+    "must_exit_processes": [],
+    "risk": "medium",
+    "message_conversation": null,
+    "gate_on_step_verification": false
+  },
+  "child_status": "failed",
+  "child_verification": null,
+  "semantic_postcondition_verification": {
+    "outcome": "inconclusive",
+    "method": "automatic",
+    "detail": "no observation available to verify against",
+    "evidence": {}
+  },
+  "post_observation_id": null,
+  "confirmed_input_count": 0,
+  "planning_accounting_complete": true,
+  "eligible_for_semantic_credit": false,
+  "planning_limit_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_003\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\single_step_planning_limit.json",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Select the 'BETA' project button to proceed with preparing the report.",
+      "action_type": "double_click",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "double_click",
+          "x": 1281,
+          "y": 1048,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "BELA"
+        },
+        "element_id": "obs-0002-e003",
+        "screenshot_point": {
+          "x": 1281,
+          "y": 1048
+        },
+        "control_point": {
+          "x": 1281,
+          "y": 1048
+        },
+        "note": "text 'BELA' -> obs-0002-e003 (re-bound from obs-0001-e003 in an earlier frame)"
+      },
+      "action_result": null,
+      "verification": null,
+      "error": "executor raised; dispatch outcome is unconfirmed",
+      "elapsed_ms": 223734.00000000038,
+      "after_observation_id": null
+    }
+  ],
+  "meaning": "The original model-proposed literal semantic postconditions were independently checked; no raw failed step was rewritten."
+}

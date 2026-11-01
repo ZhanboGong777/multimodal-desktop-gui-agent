@@ -1,4 +1,4 @@
-"""Run a checked sequence of subgoals with one shared budget (dry run by default)."""
+"""Decompose an overall request into verified semantic subtasks, or run an explicit workflow."""
 from __future__ import annotations
 
 import argparse
@@ -44,23 +44,24 @@ def parse_args(argv=None):
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--workflow", type=Path, help="use an existing explicitly checked workflow")
     mode.add_argument("--instruction", help="plan and execute this overall natural-language task under shared limits")
-    parser.add_argument("--automatic-protocol", choices=("rolling_actions", "observed_departure"),
-                        default="rolling_actions",
-                        help="automatic mode: fresh single-step action planning (default), or experimental stage-departure checks")
+    parser.add_argument("--automatic-protocol", choices=("rolling_actions", "observed_departure", "semantic_subtasks"),
+                        default="semantic_subtasks",
+                        help="automatic mode: model-generated semantic subtasks (default), or legacy rolling/departure checks")
     parser.add_argument("--workflow-id", type=_run_id, default="automatic_workflow")
     parser.add_argument("--expect-text", action="append", default=[], help="caller-owned final required text")
     parser.add_argument("--forbid-text", action="append", default=[], help="caller-owned final forbidden text")
     parser.add_argument("--model-requests", type=_positive_int, default=24,
                         help="shared HTTP request cap across all automatic planning")
     parser.add_argument("--max-subgoals", type=_positive_int, default=8,
-                        help="stage proposal limit for observed_departure; rolling_actions plans one next action")
+                        help="semantic/departure proposal limit; rolling_actions plans one next action")
     parser.add_argument("--decomposition-rounds", type=_positive_int, default=4,
-                        help="bounded fresh-screen stage-departure rounds, 1..8 (observed_departure only)")
+                        help="bounded semantic revisions or fresh-screen departure rounds, 1..8")
     parser.add_argument("--validate-only", action="store_true", help="validate the spec without model, capture or input")
     parser.add_argument("--config", default=str(REPO_ROOT / "configs/week4.yaml"))
     parser.add_argument("--execute", action="store_true")
     parser.add_argument("--provider", choices=sorted(CLIENTS))
     parser.add_argument("--model")
+    parser.add_argument("--text-model", help="Optional model for text-only requests; image planning keeps --model")
     parser.add_argument("--base-url")
     parser.add_argument("--max-actions", type=_positive_int)
     parser.add_argument("--planning-attempts", type=_positive_int)
@@ -84,11 +85,13 @@ def main(argv=None):
         else:
             if args.max_subgoals > 32:
                 raise ValueError("--max-subgoals must be at most 32")
+            if args.automatic_protocol == "semantic_subtasks" and args.max_subgoals < 2:
+                raise ValueError("semantic_subtasks requires at least two initial semantic objectives")
             if args.decomposition_rounds > 8:
                 raise ValueError("--decomposition-rounds must be at most 8")
-            if (args.automatic_protocol == "observed_departure"
+            if (args.automatic_protocol in {"observed_departure", "semantic_subtasks"}
                     and args.planning_attempts is not None and args.planning_attempts < 2):
-                raise ValueError("observed_departure needs at least two planning calls including decomposition")
+                raise ValueError("the selected protocol needs at least two planning calls including decomposition")
             request = WorkflowRequest(workflow_id=args.workflow_id, instruction=args.instruction,
                                       expect_text=args.expect_text, forbid_text=args.forbid_text)
     except (OSError, ValueError) as exc:
@@ -119,9 +122,10 @@ def main(argv=None):
             verification_timeout_seconds=config.execution.verification_timeout_seconds,
             verification_poll_interval_seconds=config.execution.verification_poll_interval_seconds,
         )
-        if request and args.automatic_protocol == "observed_departure" and options.max_planning_attempts < 2:
-            raise ValueError("observed_departure needs at least two planning calls including decomposition")
-        client = create_model_client(config.model)
+        if request and args.automatic_protocol in {"observed_departure", "semantic_subtasks"} and options.max_planning_attempts < 2:
+            raise ValueError("the selected protocol needs at least two planning calls including decomposition")
+        client = (create_model_client(config.model, text_model_name=args.text_model)
+                  if args.text_model is not None else create_model_client(config.model))
     except (OSError, ValueError) as exc:
         print(f"Configuration failed: {exc}", file=sys.stderr)
         return 2
@@ -142,6 +146,7 @@ def main(argv=None):
                                         output_directory=childdir, save_images=True),
             planner=TaskPlanner(budgeted_client or client, max_steps=config.planning.max_steps,
                                 require_structured_output=config.planning.require_structured_output,
+                                visual_candidate_details=config.planning.visual_candidate_details,
                                 allow_real_execution=args.execute),
             adapter=ActionAdapter(max_wait_seconds=config.execution.max_wait_seconds),
             executor=ActionExecutor(config.control),

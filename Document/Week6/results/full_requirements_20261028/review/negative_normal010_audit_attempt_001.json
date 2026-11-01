@@ -1,0 +1,11 @@
+{
+  "schema_version": "week6.review.private_helper_attempt.v1",
+  "actual_helper_returncode": 1,
+  "error": "AuditError: missing_evidence:-X",
+  "cause": "The private diagnostic assumed owner cmdline[1] was the script. This run legitimately recorded Python -X utf8 before run_owned.py.",
+  "scope": "Private read-only audit helper; not the experiment owner exit code.",
+  "failed_helper_snapshot": "negative_normal010_audit_attempt_001.py.txt",
+  "resolution": "Bind the explicit Root owner-harness path and require its exact occurrence in the recorded command, then check saved SHA.",
+  "raw_experiment_modified": false,
+  "model_gui_test_operations": 0
+}

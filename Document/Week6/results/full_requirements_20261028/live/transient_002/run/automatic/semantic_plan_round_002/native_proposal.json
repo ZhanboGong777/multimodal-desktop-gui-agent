@@ -1,0 +1,44 @@
+{
+  "status": "ready",
+  "reason": "The previous goal failed due to missing expected text ('Project BETA', 'Draft Saved') and no forbidden text was present. The caller request remains unchanged, and no new conditions are introduced. The current state requires completing the review and commit locally, as the draft save was not verified",
+  "subgoals": [
+    {
+      "instruction": "Review the BLUE report for project BETA using the visible controls, ensuring the review is completed locally without external sync.",
+      "expect_text": [
+        "Project BETA",
+        "Theme BLUE",
+        "Review Complete"
+      ],
+      "forbid_text": [
+        "Review Pending",
+        "Online Sync",
+        "Network Error",
+        "Review Unavailable",
+        "Budget Exceeded",
+        "Changes Not Saved",
+        "Save Failed",
+        "Commit Failed"
+      ],
+      "goal_id": "review_report"
+    },
+    {
+      "instruction": "Commit the reviewed BLUE report for project BETA locally using the visible controls, ensuring no external communication or sync occurs.",
+      "expect_text": [
+        "Project BETA",
+        "Theme BLUE",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [
+        "Review Pending",
+        "Online Sync",
+        "Network Error",
+        "Review Unavailable",
+        "Budget Exceeded",
+        "Changes Not Saved",
+        "Save Failed",
+        "Commit Failed"
+      ],
+      "goal_id": "commit_report"
+    }
+  ]
+}

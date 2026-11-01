@@ -1,0 +1,18 @@
+{
+  "schema": "week6.role_routing.design.v1",
+  "status": "implementation_pending",
+  "text_model": "gemma3:4b",
+  "visual_model": "qwen3-vl:8b-instruct",
+  "selection": "Explicit optional configured text_model_name for requests with no actual image; default visual model for image_path or prebuilt image_url. Same resolver used by actual wire request and BudgetedModelClient audit. No role inferred from model text or goal content.",
+  "unchanged": [
+    "caller",
+    "prompts",
+    "native goals and fixed literal conditions",
+    "local validation and completion credit",
+    "coordinates and actual input dispatch",
+    "global actions/planning/HTTP/deadline/SDKretry budgets"
+  ],
+  "audit": "Single budget across both model identities; expected model validated per audited call kind and original selected YAML. Both identities and digests must be frozen and report-gated. Legacy default single-model behavior remains when optional text_model_name absent.",
+  "new_config": "New configs/week6_role_models.yaml; original perception/default configurations retained byte-identical.",
+  "evidence": "normal029 native3-goal initial decomposition meaningful, but two header noops then onlyALPHA; actual owner/wrapper1. Prior Qwen8B visual controls were exercised; no old acceptance transfers to new paired candidate."
+}

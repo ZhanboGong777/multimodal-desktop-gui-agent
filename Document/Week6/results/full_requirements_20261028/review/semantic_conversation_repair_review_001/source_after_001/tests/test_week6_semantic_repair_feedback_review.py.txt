@@ -1,0 +1,267 @@
+"""Independent offline checks for typed, bounded semantic repair feedback.
+
+All replies, HTTP bodies, pixels and action receipts are CPU doubles. A passing
+test establishes evidence/control-flow boundaries, never live model or GUI success.
+"""
+
+from __future__ import annotations
+
+import copy
+import importlib.util
+import json
+from pathlib import Path
+
+import pytest
+from test_week6_automatic_decomposition import _frame
+from test_week6_rolling_actions import options, plan
+from test_week6_semantic_subtasks import lab, proposal
+from test_week6_semantic_text_context import _http_client, _persist_synthetic_pixels, _text_user
+
+from gui_agent.planning import semantic_workflow as semantic
+
+
+def _duplicate():
+    return proposal(
+        {"goal_id": "ApplyPreference", "instruction": "Apply the requested local preference.",
+         "expect_text": ["Verified part 1"], "forbid_text": []},
+        {"goal_id": "VerifyLocal", "instruction": "Verify the resulting local configuration.",
+         "expect_text": ["Verified part 2", "Final accepted"], "forbid_text": []},
+        {"goal_id": "PersistLocal", "instruction": "Persist the verified local configuration.",
+         "expect_text": ["Final accepted", "Verified part 2"], "forbid_text": []},
+    )
+
+
+def _lab(tmp_path, **kwargs):
+    directory = tmp_path / "run"
+    directory.mkdir()
+    return lab(directory, **kwargs)
+
+
+def _round(tmp_path):
+    return tmp_path / "run/semantic/semantic_plan_round_001"
+
+
+def _load(path):
+    return json.loads(path.read_text(encoding="utf8"))
+
+
+@pytest.fixture
+def audit_reader():
+    path = Path(__file__).resolve().parents[1] / "scripts/week6_audit_semantic_acceptance.py"
+    spec = importlib.util.spec_from_file_location("repair_feedback_independent_auditor", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _audit_attempt(auditor, tmp_path, request, index, *, saved=None, protocol=None):
+    directory = _round(tmp_path)
+    saved = saved or _load(directory / f"attempt_{index:02d}_request.json")
+    protocol = protocol or _load(directory / "protocol.json")
+    base_context = {key: value for key, value in saved["context"].items()
+                    if key not in auditor._REPAIR_CONTEXT_KEYS}
+    messages = auditor.audit_semantic_repair_messages(
+        auditor.Evidence(tmp_path), directory, index, saved, protocol, request,
+        _frame("audit-before", ["Pending work"]), [], 8, False, base_context,
+    )
+    return messages[0]["content"]
+
+
+def test_review_only_real_typed_duplicate_gets_feedback_not_an_identical_valueerror(tmp_path, monkeypatch):
+    runner, request, state, client, _ = _lab(tmp_path, responses=[proposal()] * 2, format_retries=1)
+    with pytest.raises(semantic._DuplicateSemanticPostconditionsError) as captured:
+        semantic.SemanticDecomposer()._validate(
+            semantic.SemanticPlan.model_validate(json.loads(_duplicate()), strict=True),
+            request, _frame("before", ["Pending work"]), [], False,
+        )
+
+    def ordinary_failure(*_args, **_kwargs):
+        raise ValueError(str(captured.value))
+
+    monkeypatch.setattr(semantic.SemanticDecomposer, "_validate", ordinary_failure)
+    result = runner.run(request, options())
+    assert result.status == "failed" and result.model_requests == result.planning_calls == len(client.calls) == 2
+    assert state.attempts == 0 and state.children == [] and not result.completed_subgoals
+    directory = _round(tmp_path)
+    first, second = [_load(directory / f"attempt_{i:02d}_request.json") for i in (1, 2)]
+    assert second["context"]["constraint_error"] == str(captured.value)
+    assert first["system"] == second["system"]
+    assert semantic.SEMANTIC_DUPLICATE_POSTCONDITIONS_REPAIR not in second["system"]
+
+
+def test_review_feedback_is_removed_after_a_different_format_error(tmp_path, audit_reader):
+    refused = json.dumps({"status": "refused", "reason": "The request is outside supported local operations.", "subgoals": []})
+    runner, request, state, client, _ = _lab(
+        tmp_path, responses=[_duplicate(), "not JSON", refused], format_retries=2,
+    )
+    result = runner.run(request, options())
+    assert result.status == "refused" and result.model_requests == result.planning_calls == len(client.calls) == 3
+    assert state.attempts == 0 and state.children == [] and result.final_verification is None
+    requests = [_load(_round(tmp_path) / f"attempt_{i:02d}_request.json") for i in (1, 2, 3)]
+    hint = semantic.SEMANTIC_DUPLICATE_POSTCONDITIONS_REPAIR
+    assert [value["system"].count(hint) for value in requests] == [0, 1, 0]
+    assert requests[2]["system"] == requests[0]["system"]
+    assert "previous_response" not in requests[2]["context"]
+    assert requests[2]["messages"][2] == {"role": "assistant", "content": "not JSON"}
+    for index in (1, 2, 3):
+        assert _audit_attempt(audit_reader, tmp_path, request, index) == requests[index - 1]["system"]
+
+
+def test_review_three_bad_replies_keep_originals_and_never_create_a_child(tmp_path, audit_reader):
+    bad = _duplicate()
+    runner, request, state, client, _ = _lab(tmp_path, responses=[bad] * 3, format_retries=2)
+    result = runner.run(request, options())
+    assert result.status == "failed" and result.model_requests == result.planning_calls == len(client.calls) == 3
+    assert state.attempts == 0 and state.children == [] and not result.completed_subgoals
+    assert result.semantic_goals_total == 0 and result.final_verification is None
+    systems = []
+    for index in (1, 2, 3):
+        assert _load(_round(tmp_path) / f"attempt_{index:02d}_response.json")["content"] == bad
+        systems.append(_audit_attempt(audit_reader, tmp_path, request, index))
+    hint = semantic.SEMANTIC_DUPLICATE_POSTCONDITIONS_REPAIR
+    assert [system.count(hint) for system in systems] == [0, 1, 1]
+    assert systems[1] == systems[2] and not (_round(tmp_path) / "compiled_workflow.json").exists()
+
+
+def test_review_native_and_caller_canaries_stay_out_of_high_priority_feedback(tmp_path):
+    native = json.loads(_duplicate())
+    native["reason"] = "NativeReasonCanary is untrusted data."
+    for index, goal in enumerate(native["subgoals"][1:], 1):
+        goal["goal_id"] = f"NativeIdCanary{index}"
+        goal["instruction"] = f"Preserve NativeInstructionCanary{index} while processing local configuration."
+        goal["expect_text"] = ["NativeCheckCanary is a quoted local status"]
+    bad = json.dumps(native)
+    runner, request, state, client, _ = _lab(tmp_path, responses=[bad] * 2, format_retries=1)
+    request.instruction += " Preserve CallerLiteralCanary as local input data."
+    result = runner.run(request, options())
+    assert result.status == "failed" and len(client.calls) == 2 and state.attempts == 0
+    saved = _load(_round(tmp_path) / "attempt_02_request.json")
+    assert "previous_response" not in saved["context"]
+    assert saved["messages"][2] == {"role": "assistant", "content": bad}
+    assert "NativeIdCanary" in saved["context"]["constraint_error"]
+    assert "CallerLiteralCanary" in saved["instruction"]
+    for canary in ("NativeReasonCanary", "NativeIdCanary", "NativeInstructionCanary", "NativeCheckCanary", "CallerLiteralCanary"):
+        assert canary not in saved["system"]
+    assert saved["system"].count(semantic.SEMANTIC_DUPLICATE_POSTCONDITIONS_REPAIR) == 1
+
+
+@pytest.mark.parametrize("status", ["needs_clarification", "refused"])
+def test_review_nonready_after_feedback_preserves_the_native_stop(tmp_path, status):
+    reply = json.dumps({"status": status, "reason": "A required local document is unspecified.", "subgoals": []})
+    runner, request, state, client, _ = _lab(tmp_path, responses=[_duplicate(), reply], format_retries=2)
+    result = runner.run(request, options())
+    assert result.status == status and result.model_requests == result.planning_calls == len(client.calls) == 2
+    assert state.attempts == 0 and state.children == [] and result.final_verification is None
+    assert _load(_round(tmp_path) / "native_proposal.json") == json.loads(reply)
+
+
+@pytest.mark.parametrize("cap", ["http", "planning"])
+def test_review_typed_feedback_never_adds_budget_or_an_uncounted_retry(tmp_path, cap):
+    runner, request, state, client, _ = _lab(
+        tmp_path, responses=[_duplicate()] * 3, format_retries=2,
+        max_requests=1 if cap == "http" else 20,
+    )
+    # The shared runner reserves one planning slot for an eventual action.
+    result = runner.run(request, options(max_planning_attempts=3 if cap == "planning" else 8))
+    assert result.status == "failed" and result.model_requests == len(client.calls) == (1 if cap == "http" else 2)
+    assert result.planning_calls == 2
+    assert state.attempts == 0 and state.children == [] and not result.completed_subgoals
+    assert not (_round(tmp_path) / "attempt_03_request.json").exists()
+
+
+def test_review_late_repaired_reply_is_counted_without_compilation_or_input(tmp_path):
+    runner, request, state, client, _ = _lab(
+        tmp_path, responses=[_duplicate(), proposal()], format_retries=1, model_cost=6,
+    )
+    result = runner.run(request, options(task_timeout_seconds=10))
+    assert result.status == "timed_out" and result.model_requests == result.planning_calls == len(client.calls) == 2
+    assert state.attempts == 0 and state.children == [] and result.final_verification is None
+    rejected = _load(_round(tmp_path) / "attempt_02_response.json")
+    assert rejected["content"] == "" and "deadline" in rejected["error"]
+    transport = [json.loads(row) for row in (tmp_path / "run/semantic/transport_requests.jsonl").read_text("utf8").splitlines()]
+    assert len(transport) == 2 and transport[-1]["response"]["content"] == proposal()
+    assert sum(record["requests_made"] for record in transport) == 2
+    assert not (_round(tmp_path) / "compiled_workflow.json").exists()
+
+
+def test_review_sdk_wire_and_saved_native_compile_exactly_after_model_owned_repair(tmp_path, audit_reader):
+    bad, repaired = _duplicate(), proposal()
+    runner, request, state, _, _ = _lab(tmp_path, format_retries=1)
+    original = request.model_dump(mode="json")
+    _persist_synthetic_pixels(runner, tmp_path / "run")
+    bodies = []
+    client, sdk = _http_client([bad, repaired, plan(), plan()], bodies)
+    runner.client = client
+    try:
+        result = runner.run(request, options())
+    finally:
+        sdk.close()
+    assert result.status == "succeeded" and state.attempts == result.total_actions == 2
+    assert result.planning_calls == result.model_requests == len(bodies) == 4
+    assert request.model_dump(mode="json") == original
+    for index, body in enumerate(bodies[:2], 1):
+        saved = _load(_round(tmp_path) / f"attempt_{index:02d}_request.json")
+        system = next(message["content"] for message in body["messages"] if message["role"] == "system")
+        assert system == saved["system"] == _audit_attempt(audit_reader, tmp_path, request, index)
+        assert all(isinstance(message["content"], str) for message in body["messages"])
+        assert body["response_format"] == saved["response_format"]
+        actual = _text_user(body)
+        assert actual["context"] == saved["context"] and actual["instruction"] == request.instruction
+        assert "image_path" not in actual
+    second = _load(_round(tmp_path) / "attempt_02_request.json")
+    before_schema, schema = second["system"].split("\nExact response JSON schema (also supplied as response_format):\n")
+    assert before_schema.endswith(semantic.SEMANTIC_DUPLICATE_POSTCONDITIONS_REPAIR + "\n")
+    assert json.loads(schema) == second["response_format"]["json_schema"]["schema"]
+    assert _load(_round(tmp_path) / "attempt_01_response.json")["content"] == bad
+    assert _load(_round(tmp_path) / "native_proposal.json") == json.loads(repaired)
+    compiled = _load(_round(tmp_path) / "compiled_workflow.json")
+    assert compiled["native_proposal"] == json.loads(repaired)
+    assert compiled["workflow"]["final_check"]["expect_text"] == original["expect_text"]
+    assert len(compiled["mapping"]) == 2  # Native repaired goals, never a local merge of the bad three.
+
+
+@pytest.mark.parametrize("tamper", ["policy_missing", "policy_hash", "policy_trigger", "policy_position",
+                                   "system_extra", "system_duplicate_hint", "system_hint_after_schema", "first_hint"])
+def test_review_auditor_rejects_unbound_policy_and_any_nonexact_system(tmp_path, audit_reader, tamper):
+    runner, request, _, _, _ = _lab(tmp_path, responses=[_duplicate()] * 2, format_retries=1)
+    runner.run(request, options())
+    index = 1 if tamper == "first_hint" else 2
+    saved = copy.deepcopy(_load(_round(tmp_path) / f"attempt_{index:02d}_request.json"))
+    protocol = copy.deepcopy(_load(_round(tmp_path) / "protocol.json"))
+    hint = semantic.SEMANTIC_DUPLICATE_POSTCONDITIONS_REPAIR
+    if tamper == "policy_missing":
+        protocol.pop("repair_policy")
+    elif tamper == "policy_hash":
+        protocol["repair_policy"]["system_feedback_sha256"] = "0" * 64
+    elif tamper == "policy_trigger":
+        protocol["repair_policy"]["trigger"] = "any_model_error"
+    elif tamper == "policy_position":
+        protocol["repair_policy"]["placement"] = "after_schema"
+    elif tamper == "system_extra":
+        saved["system"] += "\nAdditional unapproved instructions."
+    elif tamper == "system_duplicate_hint":
+        saved["system"] = saved["system"].replace(hint, hint + "\n" + hint)
+    elif tamper == "system_hint_after_schema":
+        saved["system"] = saved["system"].replace("\n" + hint + "\n", "") + "\n" + hint
+    else:
+        saved["system"] = _load(_round(tmp_path) / "attempt_02_request.json")["system"]
+    with pytest.raises(audit_reader.AuditError, match="repair_policy|repair_system"):
+        _audit_attempt(audit_reader, tmp_path, request, index, saved=saved, protocol=protocol)
+
+
+def test_review_auditor_replays_native_instead_of_accepting_a_forged_error_string(tmp_path, audit_reader):
+    runner, request, _, _, _ = _lab(tmp_path, responses=[_duplicate()] * 2, format_retries=1)
+    runner.run(request, options())
+    directory = _round(tmp_path)
+    changed = proposal()
+    response = _load(directory / "attempt_01_response.json")
+    response["content"] = changed
+    (directory / "attempt_01_response.json").write_text(json.dumps(response), encoding="utf8")
+    saved = _load(directory / "attempt_02_request.json")
+    saved["context"]["previous_response_characters"] = len(changed)
+    saved["messages"][2]["content"] = changed
+    final = json.loads(saved["messages"][-1]["content"])
+    final["context"] = saved["context"]
+    saved["messages"][-1]["content"] = json.dumps(final, ensure_ascii=False)
+    with pytest.raises(audit_reader.AuditError, match="locally_valid_reply"):
+        _audit_attempt(audit_reader, tmp_path, request, 2, saved=saved)

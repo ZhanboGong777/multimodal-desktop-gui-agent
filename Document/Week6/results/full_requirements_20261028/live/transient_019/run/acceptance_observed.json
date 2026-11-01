@@ -1,0 +1,107 @@
+{
+  "schema": "week6.semantic_live.observed_result.v1",
+  "status": "failed",
+  "runtime_pass": false,
+  "independent_pass": false,
+  "attribution_pass": false,
+  "source_unchanged": true,
+  "runtime_independent_gates_passed": false,
+  "semantic_audit_pending": true,
+  "meaning": "Observed evidence only. A separate read-only native-plan/semantic-goal audit and real owner exit receipt are required for final acceptance.",
+  "transition_attribution": [],
+  "input_receipts": [],
+  "state": {
+    "utc": "2026-11-01T09:15:42.874291+00:00",
+    "event": "started",
+    "stage": "project",
+    "project": "",
+    "colour": "",
+    "committed": false,
+    "review_attempts": 0,
+    "mode": "transient",
+    "events": 1
+  },
+  "independent_events": [
+    {
+      "utc": "2026-11-01T09:15:42.874291+00:00",
+      "event": "started",
+      "stage": "project",
+      "project": "",
+      "colour": "",
+      "committed": false,
+      "review_attempts": 0,
+      "mode": "transient",
+      "events": 1
+    }
+  ],
+  "automatic_result": {
+    "schema_version": "week6.semantic_workflow.v1",
+    "decomposition_protocol_mode": "semantic_subtasks",
+    "workflow_id": "semantic_lab",
+    "status": "failed",
+    "plans": [
+      {
+        "schema_version": "week6.semantic_subtasks.v6",
+        "input_modality": "caller_intent_only",
+        "image_attached": false,
+        "status": "failed",
+        "proposal": null,
+        "workflow": null,
+        "planning_calls": 3,
+        "model_requests": 3,
+        "elapsed_ms": 72407.00000000652,
+        "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_019\\run\\automatic\\semantic_plan_round_001",
+        "error": "1 validation error for SemanticPlan\nsubgoals.2.instruction\n  Value error, message sending is not supported by automatic workflows. This includes composing local commit-message content; verification text is not a request to compose content. [type=value_error, input_value=\"Commit the reviewed BLUE...ludes 'LOCAL COMPLETE'.\", input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/value_error"
+      }
+    ],
+    "goal_outcomes": [],
+    "rejected_goal_contracts": [],
+    "completed_subgoals": [],
+    "semantic_goals_total": 0,
+    "workflow_result": null,
+    "workflow_results": [],
+    "final_verification": null,
+    "final_observation_reference": "",
+    "total_actions": 0,
+    "planning_calls": 3,
+    "model_requests": 3,
+    "unconfirmed_action_attempts": 0,
+    "accounting_complete": true,
+    "elapsed_ms": 91062.99999999464,
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_019\\run\\automatic",
+    "error": "1 validation error for SemanticPlan\nsubgoals.2.instruction\n  Value error, message sending is not supported by automatic workflows. This includes composing local commit-message content; verification text is not a request to compose content. [type=value_error, input_value=\"Commit the reviewed BLUE...ludes 'LOCAL COMPLETE'.\", input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/value_error",
+    "notes": []
+  },
+  "status_reads": [
+    {
+      "schema": "week6.status_read.v1",
+      "trusted": true,
+      "age_seconds": 0.011,
+      "state": "finished",
+      "snapshot": {
+        "schema": "week6.run_status.semantic.v1",
+        "run_id": "c1b99ecbfedb4927ae3db83cdf5de033",
+        "case_id": "semantic_lab",
+        "execute": true,
+        "pid": 41340,
+        "process_identity": "windows:134379981584883056",
+        "seq": 4,
+        "event": "finished",
+        "stage": "finished",
+        "task_status": "failed",
+        "updated_at_utc": "2026-11-01T09:17:30.604219+00:00",
+        "elapsed_ms": 91062.99999999464,
+        "max_actions": 20,
+        "max_planning_attempts": 24,
+        "planning_pass": 3,
+        "actions_used": 0,
+        "subgoals_total": 0,
+        "subgoals_completed": 0,
+        "subgoal_id": null,
+        "detail_code": "",
+        "write_failures": []
+      },
+      "diagnostics": []
+    }
+  ]
+}

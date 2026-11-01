@@ -1,0 +1,30 @@
+{
+  "schema": "week6.caller_scope_guidance.root_scope_review.v1",
+  "reviewed_utc": "2026-10-31T12:40:27.094082+00:00",
+  "scope_review_passed": true,
+  "changed_paths": [
+    "src/gui_agent/planning/semantic_workflow.py",
+    "tests/test_week6_semantic_caller_scope_repair.py"
+  ],
+  "ast_same_except_two_fixed_guidance_strings": true,
+  "strings": {
+    "SEMANTIC_SYSTEM_PROMPT": {
+      "before_sha256": "b511c8c5580be06b8fda0945c547ee2942ef6b5d1c801d4b9db2159683d70eb7",
+      "after_sha256": "f9702557e7b4bb973eda7f15649da41b4780614aefd2c61d53b6b50edfb7cd74"
+    },
+    "SEMANTIC_GENERIC_REPAIR": {
+      "before_sha256": "4abb879657adfb3a9cc33204ef0749d3abca78552850625f2a85c243b9a02800",
+      "after_sha256": "3fa80bae25c9e9f26de691fdddfa81dfad89b9f4ca877f440a97709ab98aae4a"
+    }
+  },
+  "source_validation_execution_guards_and_budgets_unchanged": true,
+  "native_goals_not_authored_or_rewritten": true,
+  "new_tests": 7,
+  "cpu_checks_are_synthetic_not_native_efficacy": true,
+  "previous_normal_acceptance_transfers": false,
+  "repeat_failures_retained": [
+    "transient_003",
+    "transient_004",
+    "transient_005"
+  ]
+}

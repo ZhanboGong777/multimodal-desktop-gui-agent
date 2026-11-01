@@ -1,0 +1,13 @@
+.......F...........                                                      [100%]
+================================== FAILURES ===================================
+_ test_review_typed_feedback_never_adds_budget_or_an_uncounted_retry[planning] _
+tests\test_week6_semantic_repair_feedback_review.py:160: in test_review_typed_feedback_never_adds_budget_or_an_uncounted_retry
+    assert result.status == "failed" and result.model_requests == len(client.calls) == (1 if cap == "http" else 2)
+E   AssertionError: assert ('failed' == 'failed'
+E     
+E       failed and 1 == 2)
+E    +  where 1 = len([{'messages': [{'role': 'system', 'content': 'Plan the COMPLETE caller request as an ORDERED sequence of semantic stat...hema': {'$defs': {...}, 'additionalProperties': False, 'properties': {...}, 'required': [...], ...}}}}, 'timeout': 90}])
+E    +    where [{'messages': [{'role': 'system', 'content': 'Plan the COMPLETE caller request as an ORDERED sequence of semantic stat...hema': {'$defs': {...}, 'additionalProperties': False, 'properties': {...}, 'required': [...], ...}}}}, 'timeout': 90}] = <test_week6_automatic_decomposition.ScriptedClient object at 0x000001D97F7A19D0>.calls
+=========================== short test summary info ===========================
+FAILED tests/test_week6_semantic_repair_feedback_review.py::test_review_typed_feedback_never_adds_budget_or_an_uncounted_retry[planning]
+1 failed, 18 passed in 6.80s

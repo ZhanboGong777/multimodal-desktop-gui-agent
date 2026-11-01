@@ -1,0 +1,13 @@
+{
+  "schema_version": "week6.review.migration_helper_attempt.v1",
+  "scope": "Private metadata assembly only; not an experiment, pytest run, model call or GUI operation.",
+  "actual_returncode": 1,
+  "error_type": "LookupError",
+  "error": "unknown encoding: utf8-sig",
+  "failed_helper_snapshot": "bind_migration_attempt_001.py.txt",
+  "observed_at": "definitions(old test bytes), before AST comparisons or manifest publication",
+  "partial_outputs": "Two byte-exact copies had already been created; later helper verified their bytes instead of overwriting them.",
+  "resolution": "Corrected the Python codec name to utf-8-sig in the private helper; successful migration manifest is separately retained.",
+  "production_or_test_files_changed_by_helper": false,
+  "raw_run_evidence_modified": false
+}

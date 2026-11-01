@@ -1,0 +1,89 @@
+"""Read completed suite evidence against an explicitly supplied frozen source."""
+import argparse
+import hashlib
+import json
+import re
+import shutil
+from pathlib import Path
+
+
+def audit_document_bindings(repo, directory, freeze, validation):
+    """Do not infer start bytes from an end-only README copy."""
+    expected_readme = freeze['readme_sha256']
+    documents_before = json.loads((directory / 'tested_document_pins_before.json').read_text('utf-8'))
+    documents_after = json.loads((directory / 'tested_document_pins_after.json').read_text('utf-8'))
+    assert validation['readme_unchanged'] is True
+    assert (validation['readme_sha256_before'] == validation['readme_sha256_after']
+            == documents_before['README.md'] == documents_after['README.md']
+            == sha(directory / 'README.before.md') == sha(directory / 'README.after.md')
+            == sha(repo / 'README.md') == expected_readme)
+    development = None
+    if 'requirements_dev_sha256' in freeze:
+        development = freeze['requirements_dev_sha256']
+        assert validation['requirements_dev_unchanged'] is True
+        assert (validation['requirements_dev_sha256_before'] == validation['requirements_dev_sha256_after']
+                == documents_before['requirements-dev.txt'] == documents_after['requirements-dev.txt']
+                == sha(directory / 'requirements-dev.before.txt') == sha(directory / 'requirements-dev.after.txt')
+                == sha(repo / 'requirements-dev.txt') == development)
+    return {'readme_sha256_before_after_freeze_current': expected_readme,
+            'requirements_dev_sha256_before_after_freeze_current': development,
+            'separate_from_code_pin_domain': True}
+
+repo = Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+base = repo / 'Document/Week6/results/full_requirements_20261028'
+parser = argparse.ArgumentParser()
+parser.add_argument('--name', required=True)
+parser.add_argument('--freeze', required=True, type=Path)
+parser.add_argument('--freeze-sha256', required=True)
+parser.add_argument('--expected-tests', required=True, type=int)
+args = parser.parse_args()
+assert args.expected_tests > 0
+assert args.name and all(c in 'abcdefghijklmnopqrstuvwxyz0123456789_-' for c in args.name)
+directory = base / args.name
+load = lambda path: json.loads(path.read_text(encoding='utf-8'))
+sha = lambda path: hashlib.sha256(path.read_bytes()).hexdigest()
+freeze_path = args.freeze.resolve()
+assert freeze_path.is_relative_to(base.resolve())
+assert sha(freeze_path) == args.freeze_sha256
+freeze = load(freeze_path)
+validation = load(directory / 'validation.json')
+before = load(directory / 'tested_code_pins_before.json')
+after = load(directory / 'tested_code_pins_after.json')
+assert before == after == freeze['code_pins']
+assert all(sha(repo / path) == digest for path, digest in before.items())
+assert validation['checks_passed'] is True and validation['code_unchanged'] is True
+assert validation['code_pin_count'] == len(before) == freeze['code_pin_count']
+document_bindings = audit_document_bindings(repo, directory, freeze, validation)
+receipts = [load(directory / f'{name}.receipt.json') for name in ('pytest', 'ruff')]
+assert receipts == validation['results']
+assert all(receipt['actual_child_exit_code'] == 0 for receipt in receipts)
+assert receipts[0]['command'][1:4] == ['-m', 'pytest', '-q']
+assert receipts[1]['command'][1:4] == ['-m', 'ruff', 'check']
+stdout = (directory / 'pytest.stdout.txt').read_text(encoding='utf-8')
+match = re.search(r'(\d+) passed in ([\d.]+)s', stdout)
+assert match and int(match[1]) == args.expected_tests
+assert 'All checks passed!' in (directory / 'ruff.stdout.txt').read_text(encoding='utf-8')
+assert sha(repo / 'README.md') == freeze['readme_sha256']
+readme_archive = directory / 'README.tested.md'
+assert not readme_archive.exists()
+shutil.copyfile(repo / 'README.md', readme_archive)
+script_copy = directory / 'root_audit_harness.py.txt'
+assert not script_copy.exists()
+shutil.copyfile(__file__, script_copy)
+audit = {'schema': 'week6.full_regression.root_readonly_audit.v2', 'passed': True,
+         'validation_sha256': sha(directory / 'validation.json'),
+         'source_freeze': freeze_path.relative_to(repo).as_posix(),
+         'source_freeze_sha256': sha(freeze_path), 'code_pin_count': len(before),
+         'freeze_before_after_current_byte_equal': True,
+         'document_bindings': document_bindings,
+         'actual_pytest_wait_exit': receipts[0]['actual_child_exit_code'],
+         'actual_ruff_wait_exit': receipts[1]['actual_child_exit_code'],
+         'tests_passed': int(match[1]), 'pytest_reported_seconds': float(match[2]),
+         'pytest_owned_wall_seconds': receipts[0]['elapsed_seconds'],
+         'whole_owned_wall_seconds': validation['elapsed_seconds'],
+         'tested_readme_sha256': sha(readme_archive), 'root_audit_harness_sha256': sha(script_copy),
+         'meaning': 'Full CPU regression and this frozen code only; not independent model/GUI or document/package acceptance.'}
+with (directory / 'root_audit_001.json').open('x', encoding='utf-8', newline='\n') as stream:
+    json.dump(audit, stream, indent=2)
+    stream.write('\n')
+print(json.dumps(audit))

@@ -1,0 +1,359 @@
+{
+  "schema_version": "week6.semantic_workflow.v1",
+  "decomposition_protocol_mode": "semantic_subtasks",
+  "workflow_id": "semantic_lab",
+  "status": "blocked",
+  "plans": [
+    {
+      "schema_version": "week6.semantic_subtasks.v6",
+      "input_modality": "caller_intent_only",
+      "image_attached": false,
+      "status": "ready",
+      "proposal": {
+        "status": "ready",
+        "reason": "The caller's request is clear and executable with the provided context and objectives.",
+        "subgoals": [
+          {
+            "instruction": "Prepare a GREEN report for project ALPHA in Week6 Local Lab.",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN"
+            ],
+            "forbid_text": [],
+            "goal_id": "prepare_green_report"
+          },
+          {
+            "instruction": "Locally review the prepared GREEN report for project ALPHA.",
+            "expect_text": [
+              "Review",
+              "Project ALPHA",
+              "Theme GREEN"
+            ],
+            "forbid_text": [],
+            "goal_id": "review_green_report"
+          },
+          {
+            "instruction": "Locally commit the prepared GREEN report for project ALPHA.",
+            "expect_text": [
+              "Commit",
+              "Project ALPHA",
+              "Theme GREEN"
+            ],
+            "forbid_text": [],
+            "goal_id": "commit_green_report"
+          }
+        ]
+      },
+      "workflow": {
+        "workflow_id": "semantic_lab",
+        "instruction": "In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+        "subgoals": [
+          {
+            "case_id": "prepare_green_report",
+            "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Prepare a GREEN report for project ALPHA in Week6 Local Lab.\nComplete original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+            "target_app": null,
+            "preconditions": [],
+            "success_rules": [],
+            "verification": "automatic",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN"
+            ],
+            "forbid_text": [],
+            "requires_processes": [],
+            "forbids_processes": [],
+            "must_exit_processes": [],
+            "risk": "medium",
+            "message_conversation": null,
+            "gate_on_step_verification": false
+          },
+          {
+            "case_id": "review_green_report",
+            "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Locally review the prepared GREEN report for project ALPHA.\nComplete original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+            "target_app": null,
+            "preconditions": [],
+            "success_rules": [],
+            "verification": "automatic",
+            "expect_text": [
+              "Review",
+              "Project ALPHA",
+              "Theme GREEN"
+            ],
+            "forbid_text": [],
+            "requires_processes": [],
+            "forbids_processes": [],
+            "must_exit_processes": [],
+            "risk": "medium",
+            "message_conversation": null,
+            "gate_on_step_verification": false
+          },
+          {
+            "case_id": "commit_green_report",
+            "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Locally commit the prepared GREEN report for project ALPHA.\nComplete original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+            "target_app": null,
+            "preconditions": [],
+            "success_rules": [],
+            "verification": "automatic",
+            "expect_text": [
+              "Commit",
+              "Project ALPHA",
+              "Theme GREEN"
+            ],
+            "forbid_text": [],
+            "requires_processes": [],
+            "forbids_processes": [],
+            "must_exit_processes": [],
+            "risk": "medium",
+            "message_conversation": null,
+            "gate_on_step_verification": false
+          }
+        ],
+        "final_check": {
+          "case_id": "FINAL",
+          "instruction": "Independently read unchanged caller final predicates",
+          "target_app": null,
+          "preconditions": [],
+          "success_rules": [],
+          "verification": "automatic",
+          "expect_text": [
+            "Project ALPHA",
+            "Theme GREEN",
+            "LOCAL COMPLETE"
+          ],
+          "forbid_text": [],
+          "requires_processes": [],
+          "forbids_processes": [],
+          "must_exit_processes": [],
+          "risk": "low",
+          "message_conversation": null,
+          "gate_on_step_verification": true
+        }
+      },
+      "planning_calls": 1,
+      "model_requests": 1,
+      "elapsed_ms": 36625.0,
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_021\\run\\automatic\\semantic_plan_round_001",
+      "error": "The caller's request is clear and executable with the provided context and objectives."
+    }
+  ],
+  "goal_outcomes": [
+    {
+      "round": 1,
+      "goal_id": "prepare_green_report",
+      "instruction": "Prepare a GREEN report for project ALPHA in Week6 Local Lab.",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN"
+      ],
+      "forbid_text": [],
+      "status": "succeeded",
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_021\\run\\automatic\\goal_001_001_prepare_green_report",
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "obs-0009",
+          "expect_text": [
+            "Project ALPHA",
+            "Theme GREEN"
+          ],
+          "forbid_text": [],
+          "verification_source": "frozen_model_semantic_subtask_postconditions"
+        }
+      },
+      "task_verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "obs-0008",
+          "expect_text": [
+            "Project ALPHA",
+            "Theme GREEN"
+          ],
+          "forbid_text": [],
+          "verification_source": "frozen_model_semantic_subtask_postconditions"
+        }
+      }
+    }
+  ],
+  "completed_subgoals": [
+    {
+      "round": 1,
+      "goal_id": "prepare_green_report",
+      "instruction": "Prepare a GREEN report for project ALPHA in Week6 Local Lab.",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN"
+      ],
+      "forbid_text": [],
+      "status": "succeeded",
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_021\\run\\automatic\\goal_001_001_prepare_green_report",
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "obs-0009",
+          "expect_text": [
+            "Project ALPHA",
+            "Theme GREEN"
+          ],
+          "forbid_text": [],
+          "verification_source": "frozen_model_semantic_subtask_postconditions"
+        }
+      },
+      "task_verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "obs-0008",
+          "expect_text": [
+            "Project ALPHA",
+            "Theme GREEN"
+          ],
+          "forbid_text": [],
+          "verification_source": "frozen_model_semantic_subtask_postconditions"
+        }
+      }
+    }
+  ],
+  "semantic_goals_total": 3,
+  "workflow_result": {
+    "schema_version": "week6.workflow.v1",
+    "workflow_id": "semantic_lab",
+    "status": "succeeded",
+    "execute": true,
+    "subgoals": [
+      {
+        "index": 0,
+        "case_id": "prepare_green_report",
+        "status": "completed",
+        "child_status": "succeeded",
+        "actions": 2,
+        "unconfirmed_action_attempts": 0,
+        "planning_calls": 2,
+        "verification": {
+          "outcome": "passed",
+          "method": "automatic",
+          "detail": "all success rules matched against the current screen",
+          "evidence": {
+            "observation_id": "obs-0008",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN"
+            ],
+            "forbid_text": [],
+            "verification_source": "frozen_model_semantic_subtask_postconditions"
+          }
+        },
+        "elapsed_ms": 294015.99999994505,
+        "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_021\\run\\automatic\\goal_001_001_prepare_green_report\\001_prepare_green_report",
+        "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_021\\run\\automatic\\goal_001_001_prepare_green_report\\001_prepare_green_report\\task_summary.json",
+        "error": null
+      }
+    ],
+    "total_actions": 2,
+    "unconfirmed_action_attempts": 0,
+    "planning_calls": 2,
+    "accounting_complete": true,
+    "elapsed_ms": 316718.99999992456,
+    "final_verification": {
+      "outcome": "passed",
+      "method": "automatic",
+      "detail": "all success rules matched against the current screen",
+      "evidence": {
+        "observation_id": "obs-0009",
+        "expect_text": [
+          "Project ALPHA",
+          "Theme GREEN"
+        ],
+        "forbid_text": [],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    },
+    "final_observation_id": "obs-0009",
+    "final_observation_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_021\\run\\automatic\\goal_001_001_prepare_green_report\\001_prepare_green_report\\obs-0009.json",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_021\\run\\automatic\\goal_001_001_prepare_green_report",
+    "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_021\\run\\automatic\\goal_001_001_prepare_green_report\\workflow_summary.json",
+    "checkpoint_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_021\\run\\automatic\\goal_001_001_prepare_green_report\\checkpoints.jsonl",
+    "error": null,
+    "notes": []
+  },
+  "workflow_results": [
+    {
+      "schema_version": "week6.workflow.v1",
+      "workflow_id": "semantic_lab",
+      "status": "succeeded",
+      "execute": true,
+      "subgoals": [
+        {
+          "index": 0,
+          "case_id": "prepare_green_report",
+          "status": "completed",
+          "child_status": "succeeded",
+          "actions": 2,
+          "unconfirmed_action_attempts": 0,
+          "planning_calls": 2,
+          "verification": {
+            "outcome": "passed",
+            "method": "automatic",
+            "detail": "all success rules matched against the current screen",
+            "evidence": {
+              "observation_id": "obs-0008",
+              "expect_text": [
+                "Project ALPHA",
+                "Theme GREEN"
+              ],
+              "forbid_text": [],
+              "verification_source": "frozen_model_semantic_subtask_postconditions"
+            }
+          },
+          "elapsed_ms": 294015.99999994505,
+          "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_021\\run\\automatic\\goal_001_001_prepare_green_report\\001_prepare_green_report",
+          "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_021\\run\\automatic\\goal_001_001_prepare_green_report\\001_prepare_green_report\\task_summary.json",
+          "error": null
+        }
+      ],
+      "total_actions": 2,
+      "unconfirmed_action_attempts": 0,
+      "planning_calls": 2,
+      "accounting_complete": true,
+      "elapsed_ms": 316718.99999992456,
+      "final_verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "obs-0009",
+          "expect_text": [
+            "Project ALPHA",
+            "Theme GREEN"
+          ],
+          "forbid_text": [],
+          "verification_source": "frozen_model_semantic_subtask_postconditions"
+        }
+      },
+      "final_observation_id": "obs-0009",
+      "final_observation_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_021\\run\\automatic\\goal_001_001_prepare_green_report\\001_prepare_green_report\\obs-0009.json",
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_021\\run\\automatic\\goal_001_001_prepare_green_report",
+      "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_021\\run\\automatic\\goal_001_001_prepare_green_report\\workflow_summary.json",
+      "checkpoint_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_021\\run\\automatic\\goal_001_001_prepare_green_report\\checkpoints.jsonl",
+      "error": null,
+      "notes": []
+    }
+  ],
+  "final_verification": null,
+  "final_observation_reference": "",
+  "total_actions": 2,
+  "planning_calls": 3,
+  "model_requests": 3,
+  "unconfirmed_action_attempts": 0,
+  "accounting_complete": true,
+  "elapsed_ms": 418905.999999959,
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_021\\run\\automatic",
+  "error": "semantic goal checks already hold before input; no completion credit",
+  "notes": []
+}

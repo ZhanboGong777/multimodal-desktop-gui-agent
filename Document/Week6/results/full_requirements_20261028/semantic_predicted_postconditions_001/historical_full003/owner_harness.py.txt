@@ -1,0 +1,115 @@
+"""Own the frozen-source Week6 regression and preserve actual subprocess exits."""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import shutil
+import subprocess
+import time
+from datetime import UTC, datetime
+from pathlib import Path
+
+import psutil
+
+REPO = Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+PYTHON = 'D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe'
+BASE = REPO / 'Document/Week6/results/full_requirements_20261028'
+
+
+def utc():
+    return datetime.now(UTC).isoformat()
+
+
+def write(path, value):
+    with path.open('x', encoding='utf-8', newline='\n') as stream:
+        json.dump(value, stream, ensure_ascii=False, indent=2, allow_nan=False)
+        stream.write('\n')
+
+
+def identity(process):
+    return {'pid': process.pid, 'create_time': process.create_time(),
+            'exe': process.exe(), 'cmdline': process.cmdline()}
+
+
+def files():
+    paths = set()
+    for name in ('src', 'tests', 'scripts'):
+        paths.update((REPO / name).rglob('*.py'))
+    paths.update(p for p in (REPO / 'configs').rglob('*') if p.is_file())
+    paths.add(REPO / 'pyproject.toml')
+    return sorted(paths)
+
+
+def pins():
+    return {p.relative_to(REPO).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
+            for p in files()}
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--name', required=True)
+    args = parser.parse_args()
+    if any(c not in 'abcdefghijklmnopqrstuvwxyz0123456789_-' for c in args.name):
+        raise ValueError('An explicit safe new validation name is required')
+    directory = BASE / args.name
+    directory.mkdir(parents=True, exist_ok=False)
+    started, tick = utc(), time.monotonic()
+    owner = identity(psutil.Process())
+    before = pins()
+    write(directory / 'tested_code_pins_before.json', before)
+    shutil.copyfile(__file__, directory / 'owner_harness.py.txt')
+    environment = os.environ.copy()
+    environment.update(PYTHONUTF8='1', PYTHONIOENCODING='utf-8')
+    # Pytest creates only the basetemp leaf, so own its new parent explicitly.
+    scratch_parent = Path('C:/Users/联想/Documents/ChatGPT/Intern/tmp') / args.name
+    scratch_parent.mkdir(parents=True, exist_ok=False)
+    commands = [
+        ('pytest', [PYTHON, '-m', 'pytest', '-q', '--basetemp',
+                    str(scratch_parent / 'pytest')]),
+        ('ruff', [PYTHON, '-m', 'ruff', 'check', 'src', 'tests', 'scripts']),
+    ]
+    write(directory / 'owner_claim.json', {'schema': 'week6.full_regression.claim.v1',
+          'owner': owner, 'started_utc': started, 'commands': commands,
+          'code_pin_scope': 'All src/tests/scripts Python files, every configs file, pyproject.toml; rendered reports and historical evidence are not executable code pins.'})
+    results = []
+    for name, command in commands:
+        command_start, command_tick, seen = utc(), time.monotonic(), {}
+        with (directory / f'{name}.stdout.txt').open('x', encoding='utf-8') as out:
+            with (directory / f'{name}.stderr.txt').open('x', encoding='utf-8') as err:
+                child = subprocess.Popen(command, cwd=REPO, env=environment, stdout=out, stderr=err)
+                launcher = identity(psutil.Process(child.pid))
+                while child.poll() is None:
+                    try:
+                        for process in psutil.Process(child.pid).children(recursive=True):
+                            key = (process.pid, process.create_time())
+                            if key not in seen:
+                                seen[key] = identity(process)
+                    except (psutil.NoSuchProcess, psutil.AccessDenied):
+                        pass
+                    time.sleep(.25)
+                code = child.wait()
+        result = {'command': command, 'started_utc': command_start, 'finished_utc': utc(),
+                  'elapsed_seconds': time.monotonic() - command_tick,
+                  'launcher': launcher, 'observed_descendants': list(seen.values()),
+                  'actual_child_exit_code': code}
+        write(directory / f'{name}.receipt.json', result)
+        results.append(result)
+    after = pins()
+    write(directory / 'tested_code_pins_after.json', after)
+    unchanged = before == after
+    verdict = all(item['actual_child_exit_code'] == 0 for item in results) and unchanged
+    write(directory / 'validation.json', {'schema': 'week6.full_regression.actual.v1',
+          'owner': owner, 'started_utc': started, 'finished_utc': utc(),
+          'elapsed_seconds': time.monotonic() - tick, 'results': results,
+          'code_pin_count': len(before), 'code_unchanged': unchanged,
+          'checks_passed': verdict,
+          'meaning': 'Only actual pytest/Ruff exits and frozen code identity. This does not replace semantic live, perception, document or distribution acceptance.'})
+    print(json.dumps({'directory': str(directory), 'actual_checks_passed': verdict,
+                      'exits': [r['actual_child_exit_code'] for r in results], 'code_unchanged': unchanged}))
+    return 0 if verdict else 1
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

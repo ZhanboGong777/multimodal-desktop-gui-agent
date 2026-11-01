@@ -1,0 +1,249 @@
+"""Run saved-record audits only after Root confirms transient022 actually ended.
+
+Preparing this file performs no case read or execution. Both audit process exits
+are retained independently of the actual experiment owner exit. No input, model,
+OCR, fixture query or process termination capability is used.
+"""
+from __future__ import annotations
+
+import argparse
+from datetime import datetime, timedelta, timezone
+import hashlib
+import json
+import math
+import os
+from pathlib import Path
+import subprocess
+import time
+
+import psutil
+
+ROOT = Path("C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+BASE = ROOT / "Document/Week6/results/full_requirements_20261028"
+CASE = BASE / "live/transient_022"
+FREEZE = BASE / "candidate_visual_details_001/final_source_freeze_001.json"
+PREREG = BASE / "live/preregistered_v6_043.json"
+CLAIM_ORIGINAL = BASE / "receipt_envelope_001/window_claims/transient_022/window_claim_001.json"
+ACK = CLAIM_ORIGINAL.with_name("root_claim_ack_001.json")
+OUT = BASE / "review/transient022_independent_process_001"
+STRICT_OUT = BASE / "review/transient022_strict_audit_001.json"
+PROTOCOL_OUT = BASE / "review/transient022_receipt_protocol_audit_001.json"
+PYTHON = "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe"
+FREEZE_SHA = "75e7e4967ffdabc2c374ef6b8d62fc4d9dd9e33461f06fc1dd7358045c425eac"
+PREREG_SHA = "fe5d6227641707ac658ea9c221583f0360a1c0a4497cf4c26dd1adce99dcad5b"
+README_SHA = "0e235f7d924be5752245678106b0d8219198c3aaea7a023c3697ab0034c32d64"
+CHECKER_SHA = "23ee41ca6e6255c3d09bf00665ee4051f1a01a09e359996d6a823304a0d70253"
+
+
+def load(path):
+    return json.loads(path.read_text("utf-8"))
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def bound(path):
+    return {"path": str(path), "sha256": sha(path), "bytes": path.stat().st_size}
+
+
+def utc(value):
+    result = datetime.fromisoformat(value)
+    assert result.tzinfo is not None and result.utcoffset() == timedelta(0)
+    return result
+
+
+def canonical(value):
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False)
+
+
+def inventory(directory):
+    return {path.relative_to(directory).as_posix(): sha(path)
+            for path in directory.rglob("*") if path.is_file()}
+
+
+def identity(process):
+    return {"pid": process.pid, "create_time": process.create_time(), "exe": process.exe()}
+
+
+def write(path, value):
+    with path.open("x", encoding="utf-8", newline="\n") as stream:
+        json.dump(value, stream, ensure_ascii=False, indent=2)
+        stream.write("\n")
+
+
+def audit_process(name, command):
+    started, timer = datetime.now(timezone.utc).isoformat(), time.monotonic()
+    descendants, launcher = {}, None
+    with (OUT / f"{name}.stdout.txt").open("xb") as stdout, (OUT / f"{name}.stderr.txt").open("xb") as stderr:
+        child = subprocess.Popen(command, cwd=ROOT, stdout=stdout, stderr=stderr,
+            creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
+        try:
+            launcher = identity(psutil.Process(child.pid))
+        except psutil.Error:
+            pass
+        while child.poll() is None:
+            try:
+                for process in psutil.Process(child.pid).children(recursive=True):
+                    try:
+                        row = identity(process)
+                        descendants[(row["pid"], row["create_time"])] = row
+                    except psutil.Error:
+                        pass
+            except psutil.Error:
+                pass
+            time.sleep(.05)
+        actual_wait = child.wait()
+    receipt = {"schema": "week6.transient022.saved_evidence_audit.actual_exit.v1", "audit_kind": name,
+        "command": command, "popen_pid": child.pid, "started_utc": started,
+        "finished_utc": datetime.now(timezone.utc).isoformat(), "elapsed_seconds": time.monotonic() - timer,
+        "launcher": launcher, "observed_descendants": list(descendants.values()),
+        "actual_child_exit_code": actual_wait, "stdout": bound(OUT / f"{name}.stdout.txt"),
+        "stderr": bound(OUT / f"{name}.stderr.txt")}
+    write(OUT / f"{name}.receipt.json", receipt)
+    return receipt
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--owner-exit-confirmed", action="store_true", required=True)
+    parser.add_argument("--operator-handoff", type=Path, required=True)
+    parser.add_argument("--claim-ack-sha256", required=True,
+                        help="Exact external Root acknowledgement SHA supplied after its pre-owner creation")
+    args = parser.parse_args()
+    assert args.owner_exit_confirmed, "Root must explicitly confirm actual owner/session closure"
+    assert len(args.claim_ack_sha256) == 64 and all(c in "0123456789abcdef" for c in args.claim_ack_sha256), "Root must provide the actual external acknowledgement SHA at execution"
+    assert not OUT.exists() and not STRICT_OUT.exists() and not PROTOCOL_OUT.exists(), "Never overwrite audits"
+    assert sha(FREEZE) == FREEZE_SHA and sha(PREREG) == PREREG_SHA
+    freeze, prereg = load(FREEZE), load(PREREG)
+    assert prereg["freeze_sha256"] == FREEZE_SHA
+    assert prereg["transient"]["name"] == CASE.name and prereg["transient"]["fixture"] == "fixture_transient_022"
+    before = {name: sha(ROOT / name) for name in freeze["code_pins"]}
+    erratum_path = BASE / "candidate_visual_details_001/source_metadata_erratum_001.json"
+    assert sha(erratum_path) == "d3e0730f51cd8ce5fbbae5a5e366c7dfdd8b53c1787f4534a6e44fd0c35fb68f"
+    erratum = load(erratum_path)
+    assert erratum["original_freeze"]["sha256"] == FREEZE_SHA and erratum["original_preregistration"]["sha256"] == PREREG_SHA
+    assert before == freeze["code_pins"] and len(before) == erratum["actual_pin_count"] == 286
+    assert freeze["code_pin_count"] == erratum["original_scalar_fields"]["freeze.code_pin_count"] == 285
+    assert prereg["auditor_source_sha256"] == erratum["original_scalar_fields"]["prereg.auditor_source_sha256"]
+    assert before["scripts/week6_audit_semantic_acceptance.py"] == erratum["correct_auditor_sha256_from_pre_run_pin_table"]
+    assert freeze["package_python_file_count"] == len(list((ROOT / "src/gui_agent").rglob("*.py"))) == 91
+    assert sha(ROOT / "README.md") == freeze["readme_sha256"] == README_SHA
+    assert sha(ROOT / "requirements-dev.txt") == freeze["requirements_dev_sha256"] == prereg["requirements_dev_sha256"]
+    checker = Path(freeze["private_receipt_checker"]["path"])
+    assert sha(checker) == freeze["private_receipt_checker"]["sha256"] == CHECKER_SHA
+    assert sha(Path(freeze["measurement_protocol"]["path"])) == freeze["measurement_protocol"]["sha256"]
+
+    # No case, native claim or external fixture is opened before the explicit end flag.
+    owner = load(CASE / "owner_receipt.json")
+    start, owner_claim = load(CASE / "owner_start.json"), load(CASE / "owner_claim.json")
+    assert type(owner["child_exit_code"]) is int
+    assert owner["owner"] == start["owner"] == owner_claim["owner"]
+    assert owner["command"] == start["command"] == owner_claim["command"]
+    assert utc(owner["started_utc"]) <= utc(owner["finished_utc"])
+    for row in [owner["owner"], owner["launcher"], *owner["observed_descendants"]]:
+        assert type(row["pid"]) is int and row["pid"] > 0
+        assert type(row["create_time"]) in (int, float) and math.isfinite(row["create_time"]) and row["create_time"] > 0
+    handoff_path = args.operator_handoff.resolve()
+    assert handoff_path == (CASE / "operator_handoff_003.json").resolve()
+    handoff = load(handoff_path)
+    assert handoff["schema"] == "week6.live.operator_handoff.v2"
+    assert handoff["terminal"] is True and handoff["pending"] == [] and handoff["gui_stopped"] is True
+    assert handoff["exec_wait"]["closed"] is True and type(handoff["exec_wait"]["exit_code"]) is int
+    assert handoff["exec_wait"]["exit_code"] == owner["child_exit_code"]
+    assert canonical(handoff["owner_receipt"]) == canonical(owner)
+    for row in [owner["owner"], owner["launcher"], *owner["observed_descendants"]]:
+        try:
+            assert psutil.Process(row["pid"]).create_time()!=row["create_time"], "Original task process still alive"
+        except psutil.NoSuchProcess:
+            pass
+
+    assert type(handoff["exec_session"]) in (str, int) and str(handoff["exec_session"]).strip()
+    command = owner["command"]
+    fixture = Path(command[command.index("--fixture-directory") + 1]).resolve()
+    assert command[command.index("--mode") + 1] == "transient"
+    assert fixture == (BASE / "live/fixture_transient_022").resolve()
+    assert owner["owner_harness_sha256"] == prereg["owner_harness_sha256"] == sha(CASE / "owner_harness.py.txt")
+    script = ROOT / "scripts/week6_audit_semantic_acceptance.py"
+    assert sha(script) == before["scripts/week6_audit_semantic_acceptance.py"] == erratum["correct_auditor_sha256_from_pre_run_pin_table"]
+
+    # Pre-owner external Root acknowledgement anchors the original and case copy.
+    assert sha(ACK) == args.claim_ack_sha256
+    ack = load(ACK)
+    assert ack["schema"] == "week6.live.native_window_claim_ack.v1"
+    assert ack["approved_to_start_owner"] is True and ack["expected_case"] == CASE.name
+    assert ack["expected_fixture"] == fixture.name
+    assert Path(ack["claim"]["path"]).resolve() == CLAIM_ORIGINAL.resolve()
+    assert sha(CLAIM_ORIGINAL) == ack["claim"]["sha256"] == sha(CASE / "window_claim_001.json")
+    native_claim = load(CLAIM_ORIGINAL)
+    assert native_claim["schema"] == "week6.live.native_window_claim.v1"
+    assert type(native_claim["unique_returned_window_count"]) is int and native_claim["unique_returned_window_count"] == 1
+    assert utc(native_claim["claimed_at_utc"]) <= utc(ack["root_ack_utc"]) <= utc(owner["started_utc"])
+    launch_path = Path(ack["fixture_launch"]["path"]).resolve()
+    assert launch_path == (BASE / "live/fixture_transient_022.launch.json").resolve()
+    assert sha(launch_path) == ack["fixture_launch"]["sha256"]
+    launch = load(launch_path)
+    assert launch["schema"] == "week6.fixture.launch.v1"
+    assert launch["command"][launch["command"].index("--mode") + 1] == "transient"
+    checked_identity = ack["actual_fixture_identity_check"]
+    assert checked_identity["same_identity_alive"] is True
+    native_identity = native_claim["fixture_actual_process"]
+    rows = [row for row in [launch["launcher"], *launch["descendants"]]
+            if row["pid"] == native_identity["pid"]]
+    assert len(rows) == 1
+    launched = rows[0]
+    assert type(checked_identity["pid"]) is int and checked_identity["pid"] == native_identity["pid"] == launched["pid"]
+    assert checked_identity["expected_create_time"] == checked_identity["observed_create_time"] == native_identity["create_time"] == launched["create_time"]
+    assert checked_identity["exe"] == native_identity["exe"] == launched["exe"]
+    assert checked_identity["cmdline"] == launched["cmdline"]
+    assert type(checked_identity["parent_pid"]) is int and checked_identity["parent_pid"] == launch["launcher"]["pid"]
+    assert Path(launched["cmdline"][launched["cmdline"].index("--directory") + 1]).resolve() == fixture
+    claim_bindings = {str(path): sha(path) for path in (CLAIM_ORIGINAL, ACK, launch_path)}
+
+    OUT.mkdir(exist_ok=False)
+    raw_before, fixture_before = inventory(CASE), inventory(fixture)
+    strict = audit_process("strict", [PYTHON, str(script), "--container", str(CASE),
+        "--owner-harness", prereg["owner_harness"], "--fixture-directory", str(fixture), "--out", str(STRICT_OUT)])
+    protocol = audit_process("receipt_protocol", [PYTHON, str(checker), "--container", str(CASE),
+        "--operator-handoff", str(handoff_path), "--expected-window", str(CASE / "window_claim_001.json"),
+        "--owner-exit-confirmed", "--out", str(PROTOCOL_OUT)])
+    raw_after, fixture_after = inventory(CASE), inventory(fixture)
+    after = {name: sha(ROOT / name) for name in before}
+    assert raw_before == raw_after and fixture_before == fixture_after and before == after
+    assert all(sha(Path(path)) == digest for path, digest in claim_bindings.items())
+    assert sha(ROOT / "README.md") == README_SHA
+    assert sha(ROOT / "requirements-dev.txt") == freeze["requirements_dev_sha256"]
+    strict_result, protocol_result = load(STRICT_OUT), load(PROTOCOL_OUT)
+    for receipt, result in ((strict, strict_result), (protocol, protocol_result)):
+        assert type(result["passed"]) is bool
+        assert receipt["actual_child_exit_code"] == (0 if result["passed"] else 1)
+    summary = {"schema": "week6.independent.ended_audit_process.v2", "freeze": bound(FREEZE),
+        "preregistration": bound(PREREG), "owner_receipt": bound(CASE / "owner_receipt.json"),
+        "actual_experiment_owner_exit": owner["child_exit_code"], "operator_handoff": bound(handoff_path),
+        "claim_original": bound(CLAIM_ORIGINAL), "claim_case_copy": bound(CASE / "window_claim_001.json"),
+        "root_claim_ack": bound(ACK), "root_claim_ack_sha256_external": args.claim_ack_sha256,
+        "fixture_launch": bound(launch_path), "receipt_protocol_checker": bound(checker),
+        "actual_audit_receipts": [strict, protocol],
+        "strict_audit": bound(STRICT_OUT), "receipt_protocol_audit": bound(PROTOCOL_OUT),
+        "source_metadata_erratum": bound(erratum_path), "original_stale_scalar_fields": erratum["original_scalar_fields"],
+        "code_pins_count": len(before), "code_pins_before": before, "code_pins_after": after,
+        "readme_sha256": README_SHA, "requirements_dev_sha256": freeze["requirements_dev_sha256"],
+        "original_case_files": raw_before, "original_fixture_files": fixture_before,
+        "raw_evidence_unchanged": True, "code_pins_unchanged": True,
+        "machine_checks_passed": owner["child_exit_code"] == 0 and strict_result["passed"] and protocol_result["passed"],
+        "root_semantic_and_midrun_review_still_required": True,
+        "measurement_protocol_origin_scope": "The unchanged protocol document describes its original 274-file measurement candidate; this case source identity is governed by the current original 286-file SHA table and preregistered freeze identity; the two inherited scalar errors are explicitly preserved with the metadata erratum.",
+        "operations": {"model": 0, "gui": 0, "ocr": 0, "training": 0, "experiment_reruns": 0},
+        "meaning": "Ended saved records only. Original owner and both audit exits are distinct. Machine qualification does not replace Root agent semantic, actual tool chronology and mid-run monitor review."}
+    write(OUT / "process_summary.json", summary)
+    with (OUT / "run_ended_audit_001.py.txt").open("xb") as stream:
+        stream.write(Path(__file__).read_bytes())
+    print(json.dumps({"process_summary": str(OUT / "process_summary.json"),
+        "sha256": sha(OUT / "process_summary.json"), "actual_owner_exit": owner["child_exit_code"],
+        "strict_actual_exit": strict["actual_child_exit_code"],
+        "receipt_protocol_actual_exit": protocol["actual_child_exit_code"]}, ensure_ascii=True))
+    return 0 if summary["machine_checks_passed"] else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

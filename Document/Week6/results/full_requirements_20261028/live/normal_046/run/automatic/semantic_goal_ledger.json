@@ -1,0 +1,128 @@
+[
+  {
+    "round": 1,
+    "goal_id": "prepare_report",
+    "instruction": "Prepare a GREEN report for project ALPHA by selecting the project and setting the theme to GREEN.",
+    "expect_text": [
+      "Project ALPHA",
+      "Theme GREEN"
+    ],
+    "forbid_text": [],
+    "status": "succeeded",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_046\\run\\automatic\\goal_001_001_prepare_report",
+    "verification": {
+      "outcome": "passed",
+      "method": "automatic",
+      "detail": "all success rules matched against the current screen",
+      "evidence": {
+        "observation_id": "obs-0009",
+        "expect_text": [
+          "Project ALPHA",
+          "Theme GREEN"
+        ],
+        "forbid_text": [],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    },
+    "task_verification": {
+      "outcome": "passed",
+      "method": "automatic",
+      "detail": "all success rules matched against the current screen",
+      "evidence": {
+        "observation_id": "obs-0008",
+        "expect_text": [
+          "Project ALPHA",
+          "Theme GREEN"
+        ],
+        "forbid_text": [],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    }
+  },
+  {
+    "round": 1,
+    "goal_id": "review_report",
+    "instruction": "Review the prepared GREEN report for project ALPHA using the visible review controls.",
+    "expect_text": [
+      "Project ALPHA",
+      "Theme GREEN",
+      "REVIEW COMPLETE"
+    ],
+    "forbid_text": [],
+    "status": "succeeded",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_046\\run\\automatic\\goal_001_002_review_report",
+    "verification": {
+      "outcome": "passed",
+      "method": "automatic",
+      "detail": "all success rules matched against the current screen",
+      "evidence": {
+        "observation_id": "obs-0005",
+        "expect_text": [
+          "Project ALPHA",
+          "Theme GREEN",
+          "REVIEW COMPLETE"
+        ],
+        "forbid_text": [],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    },
+    "task_verification": {
+      "outcome": "passed",
+      "method": "automatic",
+      "detail": "all success rules matched against the current screen",
+      "evidence": {
+        "observation_id": "obs-0004",
+        "expect_text": [
+          "Project ALPHA",
+          "Theme GREEN",
+          "REVIEW COMPLETE"
+        ],
+        "forbid_text": [],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    }
+  },
+  {
+    "round": 1,
+    "goal_id": "commit_report",
+    "instruction": "Commit the reviewed GREEN report for project ALPHA locally using the visible commit controls.",
+    "expect_text": [
+      "Project ALPHA",
+      "Theme GREEN",
+      "LOCAL COMPLETE"
+    ],
+    "forbid_text": [],
+    "status": "succeeded",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_046\\run\\automatic\\goal_001_003_commit_report",
+    "verification": {
+      "outcome": "passed",
+      "method": "automatic",
+      "detail": "all success rules matched against the current screen",
+      "evidence": {
+        "observation_id": "obs-0005",
+        "expect_text": [
+          "Project ALPHA",
+          "Theme GREEN",
+          "LOCAL COMPLETE"
+        ],
+        "forbid_text": [],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    },
+    "task_verification": {
+      "outcome": "passed",
+      "method": "automatic",
+      "detail": "all success rules matched against the current screen",
+      "evidence": {
+        "observation_id": "obs-0004",
+        "expect_text": [
+          "Project ALPHA",
+          "Theme GREEN",
+          "LOCAL COMPLETE"
+        ],
+        "forbid_text": [],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    }
+  }
+]

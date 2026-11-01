@@ -1,0 +1,1267 @@
+{
+  "protocol": "week6.semantic_subtasks.v6",
+  "input_modality": "caller_intent_only",
+  "repair_policy_version": "week6.semantic_repair_feedback.v4",
+  "postcondition_source": "untrusted_model_prediction",
+  "final_source": "unchanged_caller",
+  "runtime_model": "qwen3-vl:8b-instruct",
+  "runtime_model_digest": "70e58e37beb15464e19aa903dedb2cba828b89c0fb186f75ff2738c7347b96eb",
+  "model_roles": [
+    "semantic",
+    "action"
+  ],
+  "generation_targeting_policy": {
+    "schema_version": "gui_agent.generation_targeting_policy.v1",
+    "instruction": "Generation guidance only; it grants neither input nor success authority. Use only candidates in the current target_bindings scope, including the final authorised subset. Use text-only targeting only when current OCR labels or adjacent OCR words can locate the target. If a target is visible in the screenshot but absent from OCR, choose its matching current ID yourself from target_bindings.anonymous_without_ocr_ids; never invent or replace an ID. If no matching allowed candidate is certain, return no steps and explain in errors.",
+    "generation_only": true
+  },
+  "schema": "week6.predicate_content_boundary.source_freeze.v1",
+  "created_at_utc": "2026-11-01T08:59:57.564399+00:00",
+  "status": "frozen_pending_normal040_transient017_full006",
+  "previous_freeze_sha256": "8d658c9f6bf15077fcdc788a1721627bab78f951865988a15e6625655d30f70c",
+  "changed_paths": [
+    "src/gui_agent/planning/semantic_workflow.py",
+    "tests/test_week6_semantic_subtasks.py"
+  ],
+  "code_pins": {
+    "configs/default.yaml": "301d655dbd7254e38fcf09d0acd991bf0a763c5d393be5ae349fa2d3e5cd1389",
+    "configs/week4.yaml": "e6d5941f2089aed81c1bce7485f216d1a0da2f35a271d67191289f54b5cd6731",
+    "configs/week6_accuracy.yaml": "989e81d5767d76fb64f60baf15f76d54fe4dfc22bfc5395c48255301e347ba9e",
+    "configs/week6_accuracy_persistent.yaml": "f7785b6c4c9c92320e7fd7292bdd65f189fc9290736be9c3ff70bdb72b56adbd",
+    "configs/week6_example_workflow.json": "8d1d9bcc7cb89f470262e89e41e7377e10a2e93cc92721ae67359236ece66006",
+    "configs/week6_role_models.yaml": "e7db3d048a60e8b94dd05979c7ae85dda52f3e89214d164062ec229449544537",
+    "pyproject.toml": "d3050d887709980ad50def520fb63dcc240c9855910571744edcead23f8a6c5b",
+    "scripts/benchmark_capture.py": "788578fe5b19b89dac82708dce4146ee1f5cb3ad4a0f76679025a2c70bb0c615",
+    "scripts/benchmark_ocr.py": "df2ead58e22cad1829e8e1199904f9d4420f6b603ca9c56f13de8863298389c3",
+    "scripts/check_coordinate_spaces.py": "e5915ee9b60d10ed7915498cf4f35a0257ace28bf4e9ebf4d380ca152d41242e",
+    "scripts/check_environment.py": "6089a17dcfe3813b2f56a3c1afd064af1dfc627c96c49b2eda0d8d81ad54c416",
+    "scripts/smoke_test_control.py": "f3b2b6b4df0814ac21bea9c6b66d56816ab42c46d21c0eddee6cc8ed8f7012df",
+    "scripts/smoke_test_image_processing.py": "24210af9e18bc87328bc6646d291207810969ba3c5db9cef27f99b2e3b41b811",
+    "scripts/smoke_test_perception.py": "09a1693912cf3a73731cae87d56ab46277f43d346eabe65fc12c9bf4da1d741c",
+    "scripts/week2_closed_loop_demo.py": "1bb1268550d529329d55b5b5ca5b3215cff2a595b356c7445a4c3b360e0b89c5",
+    "scripts/week2_control_demo.py": "43af09d03f5c5cc20bf9d99298e7d7a3fe7e3ac88a6a36515bcdb93383998ce2",
+    "scripts/week2_perception_demo.py": "8bcdf58e55d8a6e3b1815cd5f7177a58106ddeccbc5031046eb7e399c80b628f",
+    "scripts/week3_model_demo.py": "5986472fac5999897e561f69d022e6dd3d1f4c2b8fd4f3c991603c096a329420",
+    "scripts/week3_planning_demo.py": "f24656d25203e74256feff7738cf72e3cb798c01a435023d78f21777ff3a7744",
+    "scripts/week3_prepare_dataset.py": "31f603ed288dfe121c225c21cc1ac23ced16b8a1bffe5784725d6d47cd1d4f8e",
+    "scripts/week4_agent_cli.py": "c0acc13e47a9ba4afc77f6f73e96d99b80cd26287a3b7ed62dbed54e82c21834",
+    "scripts/week4_capture_probe.py": "d95b11646ed0d023773b78126def7c5b473fbf2f3fbaca55b23f5e66c3edbe3a",
+    "scripts/week4_collect_evidence.py": "cf7e63d0f44df3f4371f818bdb29dd90bf5ae14b7880edd0337d358b21e4f1d6",
+    "scripts/week4_e2e_benchmark.py": "83dd0170a8d35211d05e7a138f19f880ad9919f934f810dc2bd740b696cd1431",
+    "scripts/week4_offline_demo.py": "17d2a220800d0edbfe1591484b59c68474598993c0fe7c7f2756dc120c75ba40",
+    "scripts/week4_preflight.py": "066c47c69daabf7a8e91a7004c623b441a2344412b0271def4aae00a14c3a94b",
+    "scripts/week4_t04_verify.py": "8f627e96cb1c80f0a89ae238df83b141984599ef1d0dbd3f34931f4ceca8cd2f",
+    "scripts/week4_warmup.py": "73563fce16e9397c7e54b1b8c050da00f5a405291d759f1c9fc270980299dc67",
+    "scripts/week5_augment_pointer_ids.py": "3e7a6eacc8072f35f9e2328ef72cc949c551be325a303bd9f1df2e870d37452f",
+    "scripts/week5_build_report.py": "b3b161545e6d447fceaa2493978edf28e0838d9ca56682773c7997abba26eb52",
+    "scripts/week5_c11.py": "6bbaecd74b5fd56804f577fd02c135171b31d6dfa8aaa30c88aa0be91809773a",
+    "scripts/week5_candidate_grounding.py": "3734a56cce1b3c6f7bf1875eba894d19354d8a91ba8246ac928833259fb193d0",
+    "scripts/week5_compare_validation.py": "b7d433933bffff8b59230632a5a4ebf66ad4d66a2cadc1ce5c6f1679debf8ed1",
+    "scripts/week5_diagnose.py": "fd70362bc46915724656a39b084c196befdb61427f91800b2279650dd7fb9a4b",
+    "scripts/week5_download_assets.py": "339a8ea6a819e0ecacb3daf101376431558600ffc5b43f5e7ef882637ece5dbc",
+    "scripts/week5_evaluate.py": "51784896c28c8720e35c6fbf5755c13a8cadca818c606c55f2c1cdcaf8569e37",
+    "scripts/week5_measure_visual_input.py": "490b69af96a7a8fca0a38c8ec882b9a9e462f40240dd465fbf697b8e48840f22",
+    "scripts/week5_prepare_actor_contract.py": "6624a825338146409163cbec89b5262cb42974ae3900a0ec7aca228ff8cab5d6",
+    "scripts/week5_prepare_bilingual.py": "2a07519ba72f5fb9b857815e98dfd52b43d32a8517829b80cd1d898884d601cf",
+    "scripts/week5_prepare_data.py": "93914ac2b5fb56f02afa7da2175e12f8b77c2ffe808d86b49896c1ef9802ac94",
+    "scripts/week5_prepare_original_goals.py": "c2e9f2ae24b3be66a344b59521663a5796bf94891a4e1f4d82bce8c965c61594",
+    "scripts/week5_prepare_pointer.py": "87c4d5882a9793ec1f8939c607b5dd93f68e78064dad572f98feffcd20581a03",
+    "scripts/week5_prepare_request_actor_train.py": "dac9d37999cba5ee4991e9bec4aa35b5367b5b22f050f2b63cf886e6686788aa",
+    "scripts/week5_prepare_visual_input.py": "7288136e9686994fece430904d384484a47565c205ff8a17c0e3a9f01aad1d19",
+    "scripts/week5_targeted_probe.py": "2eec5ae5e89fd0379bf60f3323bee71226f1552a3c6d3a44d55c590fab8cf58b",
+    "scripts/week5_train_lora.py": "02de18f11522419dcfc6e80a7bc0bb52cfad7b251214e93b1bfc502c3d5f8200",
+    "scripts/week5_validation_ablation.py": "57f9fe8e10e7fc810024cd121c29524e5a8508ad6ef5e50980a9e0cffa859c80",
+    "scripts/week5_verify_submission.py": "67416804c54604c82ef169944ed3c59ef33a5246ea0c28d22a222d8050374628",
+    "scripts/week6_agent_cli.py": "10b4baf08cc309c26aa96bfb9578d3bafe27e19bc4a2e2def33783ed7d6b5a1c",
+    "scripts/week6_audit_semantic_acceptance.py": "8c9ffe3486e09ee7997fd7f0a8de0ed280c03a38d5711969f4a42dd2e5afe019",
+    "scripts/week6_benchmark_accuracy.py": "bcfd626bddd53d7e1d7a814ddfea7f3bb45461bd4d1902b64a9bbf38d09135fb",
+    "scripts/week6_benchmark_accuracy_live.py": "fa8c56661fc4e2eeb682d248094d44b4897f5f17e20b32cce79d21d5221ccc6c",
+    "scripts/week6_benchmark_perception.py": "e3266c5c2b1c64c49a2ccdb2b9c24a634eca7024fe56792b94dd09ab5d688ce4",
+    "scripts/week6_benchmark_persistent_external.py": "d363c464e6640656066bdcde4d60ce7f52fe130ea099383d84a186990d9962f2",
+    "scripts/week6_benchmark_persistent_ocr.py": "dadfe1a7c274633042d58fe2c9039336cd1b5a6d2b80ef780d3e066ed0e5ba56",
+    "scripts/week6_lab_acceptance.py": "ee754ec29718abc074bddf9b06543d8a14c87c4ec57fe01cecfcdddfdca107ee",
+    "scripts/week6_local_lab.py": "bcafc8c688ce61aa1c1e8c93b26d8721a79cf6af1171af1d2b386b00f661d761",
+    "scripts/week6_model_recovery_probe.py": "2f1b6234a03a6f06adbc383ee849262bec41a2bdcddcf51318f0377d27c15107",
+    "scripts/week6_robustness_demo.py": "7d3d1591d2fc7e910c4727a203a14f87e38d82c228d11fceb35c9b553c93a0e7",
+    "scripts/week6_semantic_acceptance.py": "24d380dd0355d5451e29d8174d0117b453f8c7d19067531d32fc24a4280ac25d",
+    "scripts/week6_status.py": "69ba6c3100bdb5cf7c0bd588dbedf8080905b6863ae0a2c4b6ae4c2f29552e83",
+    "src/gui_agent/__init__.py": "ee56b669afc4c9e288b9cf690f14d38471a30864841e3d4664fbcc5924d8c338",
+    "src/gui_agent/config.py": "dc138edf320423b373e5c932b86fab14e2b0439fe8d251c4c439e74c6124b91d",
+    "src/gui_agent/control/__init__.py": "25fb0fdc039a9578d6214de7a2480a3583118564e01a126c54f62828e04f65eb",
+    "src/gui_agent/control/actions.py": "77547cb650340f85cfe663ad08a8ffded0708b529adefbdc35f79dda91e80d07",
+    "src/gui_agent/control/executor.py": "67249eec8ba616ebf97f2b8e41296bca8a42358cdea71501000fdbd07030b733",
+    "src/gui_agent/control/safety.py": "748177d41b5b68af7fd59156749b343c16ffca4f8fb30356786da58a04e2f65d",
+    "src/gui_agent/coordinates.py": "474d897cbc5c85461003e5060951318690ed5d3d1b6a5cfd64a56aa4574ed5be",
+    "src/gui_agent/datasets/__init__.py": "14c8ad57d3d5c18dcc400bef21378868155c7bb111dbb2e92c45fdf10df1dca8",
+    "src/gui_agent/datasets/base.py": "3be5bf346a55bd62267f43af900fc8acaf27bc127c3603d205841d9bfe5ff05b",
+    "src/gui_agent/datasets/mind2web.py": "4849b6ed54e21fc33417f108a2bc5fd6aee54dff1ec4c73c1017e6e45e561e83",
+    "src/gui_agent/datasets/normalize.py": "2c878806422026f71a34d0a2195f5581f1e6b4071a9faa08f83307cf5bc0e79e",
+    "src/gui_agent/datasets/schemas.py": "934d5d5105082a80b4c56c099b9f40b2fbb43191068415fd1a20237ddf5a7753",
+    "src/gui_agent/datasets/screenagent.py": "e20f44432514b3012e5bdc6efeda37df661d0737743ebe251afdc0c6885e48be",
+    "src/gui_agent/datasets/validation.py": "4e8786ce9b8d0321f195b92d1d5ab5cde1960734ce537ce69752be12f61d6ad1",
+    "src/gui_agent/datasets/webarena.py": "f8248e58b0d1e4ecbc881afe9972d382c0d0f1d06259ab97db1604bde1c68b9c",
+    "src/gui_agent/finetuning/__init__.py": "50c3b0497f5a6551552495728e24df6589c94607f720c9a6bcfda2cf4ab18599",
+    "src/gui_agent/finetuning/action_constraints.py": "34dc20797581413695d809a6920389a726820cf547ffb68899559ddc242a4de9",
+    "src/gui_agent/finetuning/actor_contract.py": "91444f8c33e50f8584634ea1b5bd604f640c37e8196e64bb8670f121ac668d0c",
+    "src/gui_agent/finetuning/c11_training.py": "eb6c5158d0a71b33fa9535a3724264373f767b98767db3951c8bc1380c7abf59",
+    "src/gui_agent/finetuning/candidate_gallery.py": "f6910c65289e5ee2b01b926a5b7054188e794c975768d005d1e5e46644f93b01",
+    "src/gui_agent/finetuning/candidate_grounding.py": "42e9fa849b191e2edc047c99ac74781e889b2e7ba05336a517bc646de89f6e50",
+    "src/gui_agent/finetuning/data.py": "1070201cde6850da855f26daeb6dc4848a5bd4fdbe836d55d55bf9c77b8ac824",
+    "src/gui_agent/finetuning/diagnostics.py": "3dac64d0df27df9a4499b76b6391ce871692179fa487dc3ee474ab5cd4ccfc2c",
+    "src/gui_agent/finetuning/embedding_memory.py": "cf23ae0a2959d8dcb61c4425ffa9876f33111b11e5406d61d47e31c196090bc6",
+    "src/gui_agent/finetuning/evaluation.py": "183ddbdbc2cfa9939dfdddd6bf0bd9ecef301b8718ec49df6e14019b5634f868",
+    "src/gui_agent/finetuning/native_spatial_artifacts.py": "46b81f01870f32cde1e1b92a525b84dd99726507293c32c86b48f20382f71269",
+    "src/gui_agent/finetuning/native_spatial_grid_artifacts.py": "fe0e058624de7a77c4efe3315353123b44f7f7c6983476e1597999a29e6a149d",
+    "src/gui_agent/finetuning/native_spatial_grid_geometry.py": "4415c76a62a565b529391424e2823d684a3d251c0abddeb688f2be4817862cef",
+    "src/gui_agent/finetuning/native_spatial_grid_head.py": "194a016fdcae500fd6f663ac646b45bd074e1de23831e6bc1479d9986a48d073",
+    "src/gui_agent/finetuning/native_spatial_grid_inference.py": "257ed1e78147a20137210812fbb58bbd8be5751b4c50a2d861b8e0af8414c1fb",
+    "src/gui_agent/finetuning/native_spatial_head.py": "d89966267e14eb521163c0e5a856ebe341b04d5c3d91f0ff4bb07719c330e62d",
+    "src/gui_agent/finetuning/native_spatial_inference.py": "d4cc30854d933c02b7c8e0ae0cbea46b2ccec478bc1835e1a525d9f22a2a4adb",
+    "src/gui_agent/finetuning/numeric_value_loss.py": "57fcc2d98650d88d67ae6e49c2aee338c2cd3d8fdeaa69b0bc088fff2c7af621",
+    "src/gui_agent/finetuning/offset_geometry_loss.py": "a019c4c76907fa93ddc8e6b6b9618b340e7bd81c118acee7216bc4f516579866",
+    "src/gui_agent/finetuning/pointer_candidates_v2.py": "32119f7d64a7428c5075db0903203fb73ab28f3d832c779789a958570cc964ff",
+    "src/gui_agent/finetuning/pointer_candidates_v3.py": "be1a944c6b6b0b3b48337fae7f3ff662edf83804fd50c1c18c822c1fe8b0774f",
+    "src/gui_agent/finetuning/pointer_numbering.py": "83243845690285ea07aab33970b1bba8f9e1980ffec2cfdfd841a951e4a2ce24",
+    "src/gui_agent/finetuning/pointer_protocol.py": "a9a33226d9883d43a717eb2c0f942860be8f59f2514a90c9666b776d63831aad",
+    "src/gui_agent/finetuning/prompts.py": "184a38d760d51c941a954de29c9dda4e973a24e14fa298a0f97bf338e7fec9b0",
+    "src/gui_agent/finetuning/request_actor_contract.py": "2cbd39ab533eecb47c8e85f16dfbab463786ac88ab06b8070eab6452d3f70351",
+    "src/gui_agent/finetuning/resized_contract.py": "24c39763b768bdc77d6e7450352f72a0cfaeeaf51d3b60fe68246456c3270b2c",
+    "src/gui_agent/finetuning/step_contract.py": "b5298055b78abad081d45b3ca1c97e37be97d35ad673001ea662d1fff05c1236",
+    "src/gui_agent/finetuning/structured_ce.py": "43fa93ae9a9d62d909fa152f4a3161d5c985e1a9dd6f7ce8fe38bda7511063e5",
+    "src/gui_agent/finetuning/t04_prompts.py": "a79c613cf7b403008a485f0a3d4a2bf5b980387bda1a8bd543eeb591316c1ad3",
+    "src/gui_agent/finetuning/training.py": "f5b14acbd01e3e13c33a9f575fd15850c04e0b5fe7dd74cc27e2fdb177244849",
+    "src/gui_agent/finetuning/visual_pointer.py": "e31ee8c08667acc24d1a949ffefb43a07f22aae0f1206a3f69631717cdcb98f7",
+    "src/gui_agent/finetuning/visual_pointer_inference.py": "90d015a9fc179080392354b892d4a3fa84ee15d700a38c98242ee7d2ad7abe7e",
+    "src/gui_agent/finetuning/visual_pointer_input.py": "4d9d0e711526e0e78f455a8bcc2247048ef76ab17f0320f94c00cfe0ee130a3e",
+    "src/gui_agent/finetuning/visual_pointer_prompts.py": "d43f8a6ff2c14b10129d03660e6c90908a57c788f465cc8e8566b274786402e4",
+    "src/gui_agent/finetuning/visual_pointer_v2.py": "8bed0467d37d0628fa78d17ba9a309a09866ea03f6586e5c19b2fcbfa38b4f74",
+    "src/gui_agent/models/__init__.py": "e7cdc12d95d8974cb01293d6c082be2a6b1d5bf93876da0d73255f7ac56d7b34",
+    "src/gui_agent/models/base.py": "ee218666fbfc9df39e5401882a15d075a319070c087a01ffde0c939c32f8a84a",
+    "src/gui_agent/models/langchain_adapter.py": "c5eab5dcf611547ca871b387a67ccfc26ff1ba1d0674ae648b580b5991788041",
+    "src/gui_agent/models/mock.py": "a9ded660c48b14755be2db76d680cd2486410c890c98102172a9e42a2e4bea78",
+    "src/gui_agent/models/openai_compatible.py": "093644d6b35c7ffdfee8cc95055689dd920d7b26469111e567dc6e74fef6e615",
+    "src/gui_agent/perception/__init__.py": "a521ef24fbd707c3b683dd64fc2e7d9f4ff719bb21f8022cd7d09298010bc139",
+    "src/gui_agent/perception/capture.py": "2e4b65983343bfe2f264a580287f7102ede60a4b201d77a585290c7b20210717",
+    "src/gui_agent/perception/grounding.py": "b0ca16924c280f7817e03bf1cd7951d07751a60d69da442e1af440d0840afb77",
+    "src/gui_agent/perception/ocr.py": "0f0c42bc4b9537475adcf7c185672c3ee63db11cf662b870599efaca755ff28a",
+    "src/gui_agent/perception/preprocessing.py": "afaa9db640c2df42ca8c3758e765941e579e2d400e6c66231b4d98469495618f",
+    "src/gui_agent/perception/tesseract_api.py": "73a2ec0a6f03ba32b28e137afcc24399c87d73ebb02b43c1aa52711be26feee4",
+    "src/gui_agent/perception/ui_detection.py": "4cb75d461fd9ef55fbe3671c9efd7fd72a64148a2a6e37eccdf3f7ff3e908a5d",
+    "src/gui_agent/perception/visualization.py": "0c787c6509a3a631a5abd81a28aaf26b67e06b65870d5781817336949adfa072",
+    "src/gui_agent/planning/__init__.py": "51311a72d5dccb5dec7eae267976747a192543cb1104f9183e3085401b8f3daa",
+    "src/gui_agent/planning/parser.py": "94fe09f8d72fb50338e209d453f5abded95a1fdd811e2abc2396d0f6c4955b99",
+    "src/gui_agent/planning/planner.py": "cbbc8905bfa2dacfc1a1972d6378eab517d7ba113261f9b88b4af3e94c416bb4",
+    "src/gui_agent/planning/prompts.py": "c471c406a2ec33ee23a85e911c1eeb84a08bd7e27204932c75e0ad994e4e5d24",
+    "src/gui_agent/planning/schemas.py": "0f6d2a7c668daea28d979fb73ebcd4af207f4defaf34ee137d676693ed83e357",
+    "src/gui_agent/planning/semantic_workflow.py": "f238175c0d66cd8317723c4912662ddfed81c1676bdb226b2053acc884e679fe",
+    "src/gui_agent/planning/target_bindings.py": "93c4bbc75b208a79e1ec5c7a84b9e3c4201b7f92c1faf7f74e66c67291bf76e3",
+    "src/gui_agent/planning/workflow_decomposer.py": "f9926fa49a553efbfddb27c3096db946a5eb9c346d028c89802b7054267aef2a",
+    "src/gui_agent/recording.py": "5fd8cbcade4bc3a85e77f7482445274c561bb8ea5cf8e9b534c5d8fe915aa187",
+    "src/gui_agent/runtime/__init__.py": "524d1eecd51df0a13d173b25c8e451c843c82f8906391db32dfca11d42afb6c8",
+    "src/gui_agent/runtime/action_adapter.py": "7330beffa463b98d4eb67ad504ed4813b031ba010d2e0d11ee85a487cff62c41",
+    "src/gui_agent/runtime/cursor_parking.py": "6ff4f5396a869092d678db2627bdd22241a1b20e33ee6d55b929fb289be27eaf",
+    "src/gui_agent/runtime/message_regions.py": "6e9f86346a361ac529448175652e9c657ea3e26b6266a006d40e6aaa1054af48",
+    "src/gui_agent/runtime/monitoring.py": "fdfd51964074385e683c20b952c156bd252fdc32dc49b2e7b04849a00ab8be5f",
+    "src/gui_agent/runtime/observation.py": "c882b1a8e7f20a8fdcca58637139c7b1d606d61b9771968801df1572e32981c7",
+    "src/gui_agent/runtime/processes.py": "a810e7a8e9c0e309dd5c952561aed352cd1750f592702ef283d35d4d8c4a04a3",
+    "src/gui_agent/runtime/provenance.py": "19979ab84dec9c6dc8e50bd149d24d02c7efcb403daec4975d036117c72bc7e4",
+    "src/gui_agent/runtime/recorder.py": "0214800eea60b994f24d8d5fc3cace6f590d645b5039573e9c88546dac4a84aa",
+    "src/gui_agent/runtime/recovery.py": "f69c0f2e268213ae265b8324ed0f30caf3ed36c59ffaaa78884d68d3e59f946f",
+    "src/gui_agent/runtime/runner.py": "2b3b803f1e0445c75848751a7b5d5cc5774a76b27db31a74c8f8575df8fbba9a",
+    "src/gui_agent/runtime/schemas.py": "ea70de702b051661e22b8fc9849233c976d5c4941e3f41c748b8f71ce2e44414",
+    "src/gui_agent/runtime/screenshot_quality.py": "291ff4527eae6d2ece467370f15b3175cc66b5e7deb38ccbfae690e76ad922e1",
+    "src/gui_agent/runtime/target_grounding.py": "7ec229441d3e34cf89b124a47b630754c5e99e4987727a4b594c500e17d1162f",
+    "src/gui_agent/runtime/tasks.py": "a88f8bf3c2fd2c0aa11518c081db7555982f0f3b5041b152e1d943a49420e4f2",
+    "src/gui_agent/runtime/verification.py": "abc72375f2959fb765fb53dbf4bbf63401513e5cdfeaeb445d0c148b0be1cd4c",
+    "src/gui_agent/runtime/visual_grounding.py": "3e12a9dc97d45a6d3635913adbb477d07fa6dde3e8f9798c3431557ac4f22bcd",
+    "src/gui_agent/runtime/workflow.py": "13a6ae067662b2ceda1f5082bb9ed0c544f201be06b5fb21cabdf7f7098fe889",
+    "src/gui_agent/schemas.py": "51dda2400bf39b7793609235d3d76884fcc96047e008fd3a8076551bafa82480",
+    "tests/test_action_adapter.py": "74ac2896f4082cbc81a58415cea029d00fe05a0a557b04a500f969bcedee6d97",
+    "tests/test_capture.py": "056cddbd3183a7c6a46ed4c570097ce33410684ab124e4b1e5223b3f4833f5bc",
+    "tests/test_config.py": "5179416e7dd7db5644ab8e2bb836ac835b9fe1bb1b12d3c74fed18e9f8026755",
+    "tests/test_control_safety.py": "8cc666b9ebb2a0f523e7ea393eaf0dce44c6a55f287243b75370b67ea5b7ca63",
+    "tests/test_coordinate_mapping.py": "9e0d13b5ccdc5f98a90e727d113c58c801c5d637c8cdf618ada962c38c5bfde4",
+    "tests/test_dataset_adapters.py": "e7cf4a0c7ab68ebd86e7a04da6e0e946e93e3ea53f58490972c6209323677a30",
+    "tests/test_dataset_schemas.py": "1c284bbff3918733adcd079a304cd59fdf63625f216a3122c110e12eab05a23c",
+    "tests/test_dataset_validation.py": "5b8c88f6341d7a32b3ea544ca5d718025a367068c2e55eec3dcbbb50e4e4e490",
+    "tests/test_documented_counts.py": "baf2072efff09e03bbee35ba984bb969c6d5ee2f5cc552c72cb654a2d2072e24",
+    "tests/test_grounding.py": "773ed682f724f91df9720b643510541f95a2b23971b356dcc10aa2707b89e0b3",
+    "tests/test_langchain_adapter.py": "0c476b438847880537aacb05cbce9a9a31191c4e067fe0f1d90725a367051894",
+    "tests/test_langchain_integration.py": "1367b564fb12be31124953e02efe90abb2fc455f28bd758e1828c6589c1abd0e",
+    "tests/test_message_regions.py": "2c39003015d0050d196bd2d0536dc8f69a2bbfc64a034671d6e1cf409815235a",
+    "tests/test_model_config.py": "260e84a5209d5ec1c5e2fd4afa4e9cf4e1374a9c50a07d37f7fe4fa055de06cc",
+    "tests/test_model_mock.py": "63ceba025bd76a34957a57379cd4a93f4dea2b89827b3f8f095b5a1c48863ec1",
+    "tests/test_ocr.py": "d3eab7887b8a10c4342666a83c90cfa97a1a2517d12d8511e0018e543a07e11b",
+    "tests/test_plan_parser.py": "94260c93b045739a40da0509989015fca6b5c9da6893ca586bcd0808f9b83b3f",
+    "tests/test_planner.py": "e2981d650822e2e4f82f7abbe0813365794103035550eaa833563d9e8ea72211",
+    "tests/test_prepare_dataset_cli.py": "19be43efdda0343128845e6dba4dd80cc52febfc7aff453e66025cd74ab63bec",
+    "tests/test_preprocessing.py": "efac6c05597623371f856f6a187df017d787581e3a5f9dbb0b1e62a4a2e7d552",
+    "tests/test_recording.py": "25ef08bf8f5049834fdf1e22918cabea33c3259d85a0b1f9110ee9684b3edd5a",
+    "tests/test_runtime_observation.py": "1aff83b62c4a7e29494c69d3345b0d9b391798b418b70c4758b238b7f729a5fd",
+    "tests/test_runtime_processes.py": "6da691bd6900ff55e9e000551b5e181fe63d243dde511df4e476432642f056b9",
+    "tests/test_runtime_recording.py": "4cce79846fb324d22a7d3f62e85283f7d1bbf2becd1f54ca6855f7903fd7d140",
+    "tests/test_runtime_runner.py": "a1107beb8cfb2bf9f91af8194061bce23f2af6831f2062e8fa8bd516151e9940",
+    "tests/test_runtime_verification.py": "623076aab008111eff5e761d33e3fd931734d4dd857fff7d6a354926781fc10d",
+    "tests/test_schemas.py": "83bfa9b14c1ed9610b262932930d4db3fc5d75485a1df3f8326864bcda08bcd9",
+    "tests/test_smoke.py": "3c11267f860541e3ed3cdc1b6462e98e80a03372f3c8b7110db4fa5d9218c24f",
+    "tests/test_ui_detection.py": "ac62b0ef45a95d6758bd3702036d90c708aa1e6e2f353c328c059cf99ab9dc62",
+    "tests/test_visualization.py": "095fbed55f4792696ed29c42a59ec1498cf27b12781bbac36c3af2223cb4cc57",
+    "tests/test_week4_cases.py": "eecb012b151d993df20f9a65d076eb1543112552fd6286456917131e61f8241e",
+    "tests/test_week4_cli.py": "f145a75eae304e0935b74fea740e98bc38979ce1a11e24ac6ca8f370cdfe16e0",
+    "tests/test_week4_demo.py": "dddd6868ac03687544870663c66d724090a32ee120ea63fac56cf2b991bbe062",
+    "tests/test_week4_e2e_benchmark.py": "b84e1f428e54c58d34ecbd0aee140e7abc53c54f39131841dd0e83df78c83452",
+    "tests/test_week4_evidence.py": "97f894d70d0d32891dfe578315b8d1d84e76655560947f81850a2ac7ff1f24c3",
+    "tests/test_week4_integration.py": "f57cb331d3871b91b99f748e85ea1923e464db6aac1fb5f23f0ffa63810114c2",
+    "tests/test_week4_preflight.py": "96a675fae44c0630a79425618fa01c27017bd44fd75ab79228266d9791ef92b7",
+    "tests/test_week4_prompts.py": "053d5f9d4e1169f2722ef764cd7e72e0d164a19d0a7f66ed6876238b9223b1eb",
+    "tests/test_week4_warmup.py": "00d41b8c27e2c62a8fd942cc7d6e3394f377d24776e61593b7524098587099c4",
+    "tests/test_week5_action_constraints.py": "745f9d67dadc317c1894c4662651da3825a24ef1d84830f300d870523ee1b07f",
+    "tests/test_week5_actor_contract.py": "e16e82cba73a4b79534355586ffb95d538dc5e3ace6fe25fc997fe09aa031eff",
+    "tests/test_week5_atomic_artifacts.py": "8e4db26a3c5acd9b0ded96f68dc5657a59c4c29c306c0e78fb19aeae16baad64",
+    "tests/test_week5_bilingual.py": "92ef08d99d7ba5f9b9c099871baba3f97d2ff268c53af35a299854dba1111692",
+    "tests/test_week5_c11_submission.py": "2fd1eb373d30382be757fb1c500da8b93069a531b1bfb254079fcc39cdfeac52",
+    "tests/test_week5_candidate_gallery.py": "946c046eb5b50b4296b6e80a25275dad0ffbed90fd0fe7405a2aa78c91da53fb",
+    "tests/test_week5_candidate_grounding.py": "716ba31f51fcdaee8e5069472ea66e4fd20dc29d3882b4e7c9bbd7c21b2b060a",
+    "tests/test_week5_compare_validation.py": "2969a16606a1125facf80a5bb2d0b3d553b1bf0efe9fa917006c4942050f5a0d",
+    "tests/test_week5_cursor_parking.py": "9b4bc06f3e7e124daafb3897de2568808b9c0739c0ac48ecbde41945026b18fc",
+    "tests/test_week5_data.py": "46d944f1a603edae4caa1898b0492ba03083add211e09b3dd8370fca34d60a04",
+    "tests/test_week5_diagnostics.py": "725e9114919ce0ed92c8a04920fba8b164f37322ec3efbde8b70c1ac3bb993fc",
+    "tests/test_week5_download.py": "32b858b66c2be92556291349c7e12b49791fdbe0589038cceca4c456df37373f",
+    "tests/test_week5_evaluation.py": "7f808190eb253186a1392c1ef5b4b6a30536d9a31c44b66677d9e97184fe6271",
+    "tests/test_week5_gallery_protocol.py": "8a26559631fe29685efa5fc0f3a62ea97972b6abe900f909e6c3e495446a60d3",
+    "tests/test_week5_message_header.py": "dccb2208524ba234d54d8f38adb0dea9961d798efabed9a04cf843af0c546f8d",
+    "tests/test_week5_native_spatial_artifacts.py": "91fc583390d29f40e79ccd41576cf62bb20943b8febddc7ef24e3c875fe1d0ec",
+    "tests/test_week5_native_spatial_grid_artifacts.py": "efaf72d9019e84377bda25312d1de02c104aa5240bede623feefeb2e395dfe11",
+    "tests/test_week5_native_spatial_grid_geometry.py": "4e2ab011f000c3b976d8d006635deea46ab7cb99427cd8700ca9c276289fec8d",
+    "tests/test_week5_native_spatial_grid_head.py": "06ebc16b0948b29cb3bb1903722b955b8c3d0c5be46d33224a917e22cec3fb84",
+    "tests/test_week5_native_spatial_grid_inference.py": "154b564a589af702202f2da05a0a86de81f6bf1a84fa52c98c33bab4a40f6d1d",
+    "tests/test_week5_native_spatial_grid_refine_loss.py": "450df4bc884e20722b004305f3695919cd84e06bbc5d0e5b94f8bfe584314080",
+    "tests/test_week5_native_spatial_grid_training.py": "184cb72725f9207b90ed331ca7d2311d514f9b4ed186727cbba9bc04c3c5a058",
+    "tests/test_week5_native_spatial_head.py": "c9f8d434d1cab3ac6ef0ba3eef1e99b6e9dd2851b449c7eaec12f6f58fce5a26",
+    "tests/test_week5_native_spatial_inference.py": "2c32e6a27182ea0f03ccca3a27fa9fa348777e2ebed5581c8d0947498612fe8d",
+    "tests/test_week5_native_spatial_stability.py": "0e0598d88f1e7c51f87923c3e382f88bffedf18abbad40524cc9142a6b9bfe6a",
+    "tests/test_week5_native_spatial_training.py": "1f9edbd838c414a56dfe0b1bb6325a01d776614ee8f01f7ae9795b87b729c862",
+    "tests/test_week5_numeric_value_loss.py": "54d8af14249a3d50e510b96c405ecd06c2a59dddc7b331fa664daea5d0dd08f1",
+    "tests/test_week5_offset_geometry_loss.py": "da825646d7f8a39bd8c7883fc8eb5ba9bc849904dd8b7aec4d4fa3b29fc7ccce",
+    "tests/test_week5_pointer_candidates_v2.py": "49fd58eb6f1be0623ef453c94f3462bb94ae4c7a506e99251d55d70443ec2294",
+    "tests/test_week5_pointer_candidates_v3.py": "ad5c6cb27a0ae80acfb50c041db1df733bf2b38047c10aafbc68d586fd5c3557",
+    "tests/test_week5_pointer_context.py": "11d7304b34c818a19c6add7ed1225af6a59f6320b670e1f64429a10933b208ec",
+    "tests/test_week5_pointer_numbering.py": "b4cd31d2690527eee38e6e2108209239c2e1257f5c367fb84ece8a03519381d9",
+    "tests/test_week5_pointer_protocol.py": "f56d4a46ef5e8dbd437b52ee6c177a1abca851dd6e7e5c67b8c52c472421254e",
+    "tests/test_week5_prepare_pointer.py": "06fca7bbf816e314d6ac75a764392058aafeb755c502ef93d57d0886f83eb4cc",
+    "tests/test_week5_prompts.py": "1bf9e757880cc1ea84f83798edfd3261fddca7951e214dc7908897ee967e7b2a",
+    "tests/test_week5_quality_runner.py": "c11c053e74a3453ca0863bc76507f21a8ef12940981e71851225b65d2a76c88f",
+    "tests/test_week5_request_actor_contract.py": "b4f246699c9bbec5f529e282769d96e157ab2049a24faf537b97fd80cc847ee1",
+    "tests/test_week5_screenshot_quality.py": "56b15895ae6a3241e352ec1186b43b8fa93ce226eb2cc779813f6dc37b6ec9db",
+    "tests/test_week5_step_contract.py": "cafddfb338c134bd54564dda2295829fbfd3c31150bfb2174ff7ec27b1527736",
+    "tests/test_week5_targeted_probe.py": "976df8ecbd1d771b78b7697649c7d871cbdbc3bab48367ad83e14c72de63c30e",
+    "tests/test_week5_training.py": "a11b48b27260a38a95ff5894144fe31dcece03d32bfda8cc27a374a753d05dec",
+    "tests/test_week5_validation_ablation.py": "8e1916c796d34cecd4afcc16a177294b49043e66a0f41118442b0d69647491c3",
+    "tests/test_week5_visual_pointer.py": "74462782ad5f88758075e853abaeb797d48c7d7fd9166733698146d4ce509cfa",
+    "tests/test_week5_visual_pointer_inference.py": "34ce8249d8a40c07f8c88257fb91c48700797664714df4d3e7a93b21e5f00192",
+    "tests/test_week5_visual_pointer_input.py": "612d9da66ae598665e6d54580271c3089b54a8b4d001dbc02a35f9c4b04c00b9",
+    "tests/test_week5_visual_pointer_prompts.py": "c71cdb2a803013aea8372136641cb92ae2e5737aa95bae633737a37eef58e16e",
+    "tests/test_week5_visual_pointer_training.py": "5aad2bb7b1735e7d4649d0a684040848c9e3882f26721ca0c363c7808cfdad72",
+    "tests/test_week5_visual_pointer_v2.py": "2a059b8678ffefba4eb1e3561087370091c13c4a204adbdd901dd75ee348990b",
+    "tests/test_week6_action_output_contract.py": "ce8aa837cdc88115dd90d9ec9547fbfd0fe57a04b0604557f122e86d8c15994c",
+    "tests/test_week6_action_output_contract_review.py": "728c4da3e46a7d063c193fbd6928c9c547d7cfcdb46943d91ce4dfc5338b6f35",
+    "tests/test_week6_auto_cli.py": "3e4c8823834dc1036abbf642d62902d73204ba4cf52390dee78f18db1eca74da",
+    "tests/test_week6_automatic_decomposition.py": "b28ec24c5d06982f1160c3b110f706b0461113eabcd26f4c7d5b1365378000ad",
+    "tests/test_week6_cli.py": "b42915b12063c0a0e3a72a19207364420fb416ae127b27ad4a94ea3fef9f0ffd",
+    "tests/test_week6_failed_contract_feedback.py": "7e62920dc9215f45b56a320dd97957b820d11ef662cbd83a838f8702b4cd1241",
+    "tests/test_week6_full_requirements_review.py": "35621d707540c548f0add5a9b4b24b6212b766770ec09fab7d794e95a0e7a36d",
+    "tests/test_week6_grounding_consistency.py": "bfbacd519be5449f5bea6bd0c7527dc4e0681ac725dbaa7877077abda9b6536e",
+    "tests/test_week6_grounding_consistency_review.py": "e330220a730580d8364e4fdd70e638f0c6796eea50961923f0d1c2d369c94478",
+    "tests/test_week6_monitoring.py": "9bc55578b2a2a2fda5925178a872ffff42c037a78119add95958af4685429ed6",
+    "tests/test_week6_observed_departure.py": "6783960bec854eebda4b6e38f57906c38918cf9f2a27722df4c0586f92a248f1",
+    "tests/test_week6_observed_queries.py": "ee51c554ba3c2e2b4fd12af9d64b564ff8dc8a26febbad77e452ae49e5ef1b75",
+    "tests/test_week6_observed_queries_review.py": "6d954d60dd91897437921e98340a015b8d0c8089a695c7f8451d1a250aee613f",
+    "tests/test_week6_perception.py": "de3744925bf2b43f8d28acacf09ea1aa3b36df6f209ccec3c3b9cf0e1bcb64c9",
+    "tests/test_week6_perception_accuracy.py": "c626276a75aa62bac776be608beb2ad0ef284927f6d64920057476a734135750",
+    "tests/test_week6_persistent_ocr.py": "55e374249e63e0de0ee1ea59f0a3737f45a4813d94a50a8a852d2373e865044a",
+    "tests/test_week6_preexisting_contract_recovery.py": "1f68f351cce1b3de3770c335774e5a98896f1da7706d38965731ca65abb34415",
+    "tests/test_week6_progress_contract.py": "b824f18476b730c477a8a318f51b8757693eef3dda2f285d58a16a949a6f61fb",
+    "tests/test_week6_quoted_target_consistency.py": "13be86a870a2ec2ceebbe5cbcd20989b89613e3408c8f606f95ec1d15aa347bd",
+    "tests/test_week6_recovery.py": "324065c177810ca4e580a4d8c0b7df68448188c8d90537909841056d4c939cfd",
+    "tests/test_week6_recovery_feedback_roundtrip.py": "f816678c2b4cbca691e75aa2b71a9c01375964b2af552ce0dd4795e2c430e6e8",
+    "tests/test_week6_role_model_routing.py": "32bee038347f7ca0ce097732af4eaad457e16bfaa23ea4a2517d648d1d8131db",
+    "tests/test_week6_rolling_actions.py": "64c673454e065b1df6916914749cb7b6a9abf2336c99233c1750ad134a48a38a",
+    "tests/test_week6_runtime_v2.py": "9da574396066310972560c486132b73ae9c99bc08a58d9ef059b96bd8fb4ea0c",
+    "tests/test_week6_semantic_caller_predicates.py": "bc8c290bcecbd256d18ca33e47b7b5e333d4429c3c48da2bd578eda92fc5819d",
+    "tests/test_week6_semantic_caller_scope_repair.py": "772f55bb91afa2c4b150c4d99d978482a28e78a0445c00564cd2972295e4dc25",
+    "tests/test_week6_semantic_conversation_repair.py": "b71b133f1b2555e61bec6b11a13827fa5a1145afd65cd09003c53abfce3843f9",
+    "tests/test_week6_semantic_conversation_repair_review.py": "3ccdf8d0ee3771098acb0570a0069786b81c94ea9e4c98a80878b0293b23f88a",
+    "tests/test_week6_semantic_failed_plan_repair.py": "b8231dbd947076b974bb8b3a0a48f3241c958663abeefc49258ceb7d12e1514e",
+    "tests/test_week6_semantic_goal_grouping.py": "30398765aead3706e5317d6e9f20c8c11fdddcc8d5bf9b40b19040327fea60c7",
+    "tests/test_week6_semantic_live_monitoring.py": "b188bb0ea5aad26ede8ee2638f18acbc3d7e25eb825a5cd1ea0e0ee2a1e496f5",
+    "tests/test_week6_semantic_monitoring.py": "c7975740294ba8b7148d610ef46ff29465bde19a2e9d7c31a43fca47f6217331",
+    "tests/test_week6_semantic_output_constraints.py": "36e5c987532cd3caf54fc669db3c26ffdf1e5ef9e4d40bcff747e99ea2c36f58",
+    "tests/test_week6_semantic_polarity_guidance.py": "3c7b4bc54728788df2d31aab7ac34793eef83f1fcdf416eba3757db6192fab3d",
+    "tests/test_week6_semantic_predicted_postconditions.py": "c3fbbf94d656676d1a195c773a5e910ff7ee9508036032926c14e4145c30e2f5",
+    "tests/test_week6_semantic_preexisting_repair_hint.py": "c6f4b95eee93d73a1e8eabca39312d4ba3bb4cba9530ae286cd58bd6bb925837",
+    "tests/test_week6_semantic_recovery_observation_terminal.py": "844a0488d5c2051a7258952716877f63503922d3195787987c1bc096c3ee88a2",
+    "tests/test_week6_semantic_repair_feedback.py": "9f812b47609dabbcee72070633883a367cfb813f325d41ec8bf1358546975a7b",
+    "tests/test_week6_semantic_repair_feedback_review.py": "7898959fa7f0276100a2e331faf1043d6d33ccb14019abbc517559c8d3cf6d78",
+    "tests/test_week6_semantic_subtasks.py": "a75d082f467ef151163284a36eac64dcc2739ed3f925d9a10c5f76109eb47d30",
+    "tests/test_week6_semantic_text_context.py": "31ec9d4ce0ba60184f4673e3c9b2b1a4cdb66dbfaf8c6eefd9ab2e90b458f38c",
+    "tests/test_week6_target_bindings.py": "cfac29e5c7f3f88921615c71a0d80592a408708fd03ac2798c277f3ab0cfd34f",
+    "tests/test_week6_target_bindings_review.py": "918b1e15db08e97f7769f82fb17c900f5ae6008fa306c95834b8484d64818e90",
+    "tests/test_week6_visual_target_guidance.py": "1b71c9cdc450c1b5494cb693ea027eec838f2d15a805050bc1abe606a392496d",
+    "tests/test_week6_visual_target_guidance_review.py": "bcfa386b8950162833d0e2afdbce20648ff4a4de97128cfeb2f38fcd2cec109b",
+    "tests/test_week6_workflow.py": "d3e9996ce96c4a15973c1478ad2d690d29f8c69fb467cce86c85a04f4d1e817d"
+  },
+  "code_pin_count": 285,
+  "package_python_file_count": 91,
+  "readme_sha256": "4c37d667cef4cd86419031f5f0e984b4b882db800912e97372ae109934e9b042",
+  "requirements_dev_sha256": "31b4bba08667510fa824a01634563e7cd5c30eac77ca8ddfba3aa6cb21643918",
+  "git_attributes_sha256": "6bd79cb70d72652e8175e6e8cab10b97fa3db47f43819ad3edd8f974fb0b8cbb",
+  "source_before_manifest_sha256": "8c69b1b7c25703061fa148c67c1e0bc87ac6cc7c2d08d6c711ef2adb675aa0dd",
+  "preserved_original_count": 285,
+  "root_scope_review_sha256": "3cbdf73643bccdd0c22bd7d9d0b21174dd79da52641d8ec604071eafdc871b69",
+  "targeted_validation": "targeted_validation_001/validation.json",
+  "targeted_validation_sha256": "607ae136294b88c7974916fcb3c18f28abeaeb63b67fd43ed0afaa2e894bc610",
+  "targeted_tests_passed": 616,
+  "targeted_pytest_seconds": 143.7,
+  "collected_test_count": 3778,
+  "collection_test_execution": false,
+  "full004_completed": false,
+  "new_real_model_gui_acceptance_completed": false,
+  "model_gui_calls_during_changes": 0,
+  "old_failed_raw_records_retained": true,
+  "normal017_negative_audit_sha256": "1c4523e3714f294cc62a5d320208c42abc0bfa68450b468922ca7193c743539c",
+  "root_freeze_harness_sha256": "512fc6ccb879d95d0b9f2bab40646c134d907bad9ae29818346fff1ee7eb9a05",
+  "target_binding_schema_version": "gui_agent.target_binding_schema.v2",
+  "observed_query_contract_version": "gui_agent.observed_text_queries.v1",
+  "finite_query_limits": {
+    "tokens_per_label": 32,
+    "tokens_per_span": 4,
+    "elements_per_run": 4,
+    "extra_query_characters": 160,
+    "extra_queries": 128,
+    "search_steps": 4096
+  },
+  "finite_query_limits_scope": "Extras only; ASCII word-token spans and geometrically neighbouring runs. Original full labels are retained without the extra-query character cap. Not all runtime substrings or multilingual word runs are generated.",
+  "readonly_provider_metadata_file": "provider_models_001.json",
+  "readonly_provider_metadata_sha256": "34bce41d682825d3d75857f1c5ce0e01b037dbfbeb7bd8b9efe716d999980550",
+  "inherited_feature_changed_paths": [
+    "scripts/week6_audit_semantic_acceptance.py",
+    "src/gui_agent/planning/planner.py",
+    "src/gui_agent/planning/target_bindings.py",
+    "tests/test_week6_observed_queries.py",
+    "tests/test_week6_observed_queries_review.py",
+    "tests/test_week6_target_bindings.py",
+    "tests/test_week6_target_bindings_review.py"
+  ],
+  "measurement_protocol": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\receipt_envelope_001\\protocol_001.md",
+    "sha256": "5d5220a310ad4e4f0182eb582fb5cfcc0885bbcce20675f0a7f917da5dbd7515"
+  },
+  "private_protocol_review": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\receipt_envelope_001\\review_001\\review_summary_001.json",
+    "sha256": "ba63eb6d66703cbb4a28299b0ebda1d638bed1e581dca01a488209cde14a635d"
+  },
+  "private_receipt_checker": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\audit_input_receipt_protocol.py",
+    "sha256": "23ee41ca6e6255c3d09bf00665ee4051f1a01a09e359996d6a823304a0d70253"
+  },
+  "normal018_negative_audit": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_normal018_audit_001.json",
+    "sha256": "7c3019cdbd992a9be26fa589ea115fb206e9a5a1f0f7818392b8bda59c25b164"
+  },
+  "archived_protocol_review_delta": [
+    {
+      "source": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\receipt_envelope_001\\protocol_001.md",
+      "original_sha256": "b9374f8b7c2b6980c6c8b56e701644397f4d8a482a883dcfb23e2f3dab67338f",
+      "current_sha256": "5d5220a310ad4e4f0182eb582fb5cfcc0885bbcce20675f0a7f917da5dbd7515",
+      "meaning": "Prelaunch protocol review only; original draft preserved, no case used it."
+    }
+  ],
+  "code_change_during_receipt_protocol": false,
+  "preowner_claim_original": "receipt_envelope_001/window_claims/<case>/window_claim_001.json",
+  "preowner_claim_binding": "Root writes SHA-bound acknowledgement before owner starts; operator then copies original bytes into new case/window_claim_001.json for the read-only checker.",
+  "normal019_old_source_acceptance": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal019_root_acceptance_001.json",
+    "sha256": "92fd296968bf1af879c2f273f415e14b8745c7c6b4cb61d9d375231bdc2e8cd4"
+  },
+  "transient001_negative_audit": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_transient001_audit_001.json",
+    "sha256": "4a146caa79d673ff62cb02f1e3d4e1b0230aa61a9ed0cd49c2ca3eca4e34536a"
+  },
+  "semantic_prompt_constant_sha256": {
+    "SEMANTIC_SYSTEM_PROMPT": "fe1bb1483c5919297d1ca590dfdf253fe7d3053782c1a2bcadb6df7286693cff",
+    "SEMANTIC_GENERIC_REPAIR": "3fa80bae25c9e9f26de691fdddfa81dfad89b9f4ca877f440a97709ab98aae4a",
+    "SEMANTIC_REPEATED_OBJECTIVE_REPAIR": "c613d1afc03980489dbe8da84be80e181ef78f7b3705e3d010d27bd19d4e7a96",
+    "SEMANTIC_FAILED_CONTRACT_REPAIR": "b8d900b61b7fe6c74a9b810eaeebc526ed27245862ec77574370cdf038d20ea4"
+  },
+  "readonly_provider_models": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\predicate_content_boundary_001\\provider_models_001.json",
+    "sha256": "34bce41d682825d3d75857f1c5ce0e01b037dbfbeb7bd8b9efe716d999980550"
+  },
+  "normal020_negative_process_audit": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal020_independent_process_001\\process_summary.json",
+    "sha256": "31001bf898b84f1b030691d4a4aa5eebdb32deb812f3fa2caf696ab2f4f1359a"
+  },
+  "root_scope_review": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\predicate_content_boundary_001\\root_scope_review_001.json",
+    "sha256": "3cbdf73643bccdd0c22bd7d9d0b21174dd79da52641d8ec604071eafdc871b69"
+  },
+  "normal021_negative_process_audit": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal021_independent_process_001\\process_summary.json",
+    "sha256": "6162aa0b59ea1c253d989853871811f95558fff28306a920805d40d13c6d162e"
+  },
+  "pre_input_contract_recovery": "Refuse already-true proposed goal without input or completion credit; record separate bound rejection; same-budget native remaining-work revision only. Original false-before/known-input/fresh-after completion gates, no-replay and immutable final remain.",
+  "source_changes_during_runtime": false,
+  "historical_independent_scope_review": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_polarity_guidance_review_001.json",
+    "sha256": "6fe9acac27ed206ecf452f22ad9ffd054a2a60a9c80e471c599442b01cc10e0b"
+  },
+  "historical_fixed_polarity_guidance_scope": "Only generation/repair wording; original validation, schema, guards and all other production AST identical. Justified nonempty forbid remains allowed.",
+  "historical_model_only_change_scope": "Official local model switch only; all276 source/config/test pins, prompts, guards, budgets and callers unchanged. No training or inference during freeze.",
+  "code_change_during_model_change": true,
+  "normal022_negative_process_audit": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal022_independent_process_001\\process_summary.json",
+    "sha256": "0adad69e0bee18a7572606c645b0abc58c14231cdb87f8b8e3228d8982d4110c"
+  },
+  "model_acquisition": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\gemma3_model_acquisition_001\\receipt.json",
+    "sha256": "73c79bda4f2463c0acee3c30085268e3fad216974920977c8c809a7737db4d46"
+  },
+  "normal023_negative_root_review": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal023_root_acceptance_001.json",
+    "sha256": "b66a6375c2685b0b0e1352fbb851735a54bf7f61aa76a8f5317492e2dcf77147"
+  },
+  "failed_contract_feedback_revision_sha256": "dfdaa021e8ac82c299b47ade3cd287ddacc9d28ca881192218ab71fa9e85687b",
+  "failed_contract_feedback_scope": "Original native contract plus its own verifier mismatch literals only; null unknown. No raw observation/context or completion rewrite; exact independent source binding and stable wire order.",
+  "runtime_model_changed": false,
+  "recovery_schema_scope": {
+    "schema": "week6.recovery_schema.root_scope_review.v1",
+    "scope_review_passed": true,
+    "reviewed_utc": "2026-10-31T11:52:39.336666+00:00",
+    "changed_paths": [
+      "src/gui_agent/runtime/schemas.py",
+      "tests/test_week6_recovery_feedback_roundtrip.py"
+    ],
+    "schema_ast_identical_except_instruction_literal": true,
+    "default_and_all_producer_code_unchanged": true,
+    "allowed_strings": "Exactly base, base+target-conflict, base+unresolved-text, base+both in producer order; arbitrary prose still rejected.",
+    "new_tests": 10,
+    "original_failed_roundtrip_assertion_unchanged": true,
+    "full004_retained": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\full_validation_004\\validation.json",
+      "sha256": "271795680b138120b0dca790ff8dcabdb1f27cb664787b502112bfd5bbd5226e"
+    },
+    "prior_live_transfer": false
+  },
+  "full004_failed": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\full_validation_004\\validation.json",
+    "sha256": "271795680b138120b0dca790ff8dcabdb1f27cb664787b502112bfd5bbd5226e"
+  },
+  "caller_scope_guidance_scope": {
+    "schema": "week6.caller_scope_guidance.root_scope_review.v1",
+    "reviewed_utc": "2026-10-31T12:40:27.094082+00:00",
+    "scope_review_passed": true,
+    "changed_paths": [
+      "src/gui_agent/planning/semantic_workflow.py",
+      "tests/test_week6_semantic_caller_scope_repair.py"
+    ],
+    "ast_same_except_two_fixed_guidance_strings": true,
+    "strings": {
+      "SEMANTIC_SYSTEM_PROMPT": {
+        "before_sha256": "b511c8c5580be06b8fda0945c547ee2942ef6b5d1c801d4b9db2159683d70eb7",
+        "after_sha256": "f9702557e7b4bb973eda7f15649da41b4780614aefd2c61d53b6b50edfb7cd74"
+      },
+      "SEMANTIC_GENERIC_REPAIR": {
+        "before_sha256": "4abb879657adfb3a9cc33204ef0749d3abca78552850625f2a85c243b9a02800",
+        "after_sha256": "3fa80bae25c9e9f26de691fdddfa81dfad89b9f4ca877f440a97709ab98aae4a"
+      }
+    },
+    "source_validation_execution_guards_and_budgets_unchanged": true,
+    "native_goals_not_authored_or_rewritten": true,
+    "new_tests": 7,
+    "cpu_checks_are_synthetic_not_native_efficacy": true,
+    "previous_normal_acceptance_transfers": false,
+    "repeat_failures_retained": [
+      "transient_003",
+      "transient_004",
+      "transient_005"
+    ]
+  },
+  "preexisting_repair_scope": {
+    "schema": "week6.preexisting_repair_hint.root_scope_review.v1",
+    "utc": "2026-10-31T12:58:45.794161+00:00",
+    "scope_review_passed": true,
+    "source_before_manifest": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\preexisting_repair_hint_001\\source_before_manifest.json",
+      "sha256": "893c9bef4651f0d64aaf424e4ac017e387461769b0bb723e3cac5f5c4840ea83"
+    },
+    "changed_paths": [
+      "scripts/week6_audit_semantic_acceptance.py",
+      "src/gui_agent/planning/semantic_workflow.py",
+      "tests/test_week6_semantic_preexisting_repair_hint.py",
+      "tests/test_week6_semantic_repair_feedback.py"
+    ],
+    "runtime_ast_unchanged_except_fixed_typed_repair_builders_metadata_and_category_selection": true,
+    "original_before_predicate_boolean_and_error_string_unchanged": true,
+    "preexisting_exception_is_valueerror_subclass": true,
+    "original_caller_execution_and_budgets_unchanged": true,
+    "auditor_ast_unchanged_except_finite_category_policy_and_exact_message_reconstruction": true,
+    "existing_test_changed_only_exact_policy_metadata": true,
+    "native_goal_authoring_or_condition_change": false,
+    "raw_native_error_text_cannot_select_high_priority_category": true,
+    "new_synthetic_tests": 12,
+    "current_source_pins": {
+      "configs/default.yaml": "301d655dbd7254e38fcf09d0acd991bf0a763c5d393be5ae349fa2d3e5cd1389",
+      "configs/week4.yaml": "e6d5941f2089aed81c1bce7485f216d1a0da2f35a271d67191289f54b5cd6731",
+      "configs/week6_accuracy.yaml": "989e81d5767d76fb64f60baf15f76d54fe4dfc22bfc5395c48255301e347ba9e",
+      "configs/week6_accuracy_persistent.yaml": "f7785b6c4c9c92320e7fd7292bdd65f189fc9290736be9c3ff70bdb72b56adbd",
+      "configs/week6_example_workflow.json": "8d1d9bcc7cb89f470262e89e41e7377e10a2e93cc92721ae67359236ece66006",
+      "pyproject.toml": "d3050d887709980ad50def520fb63dcc240c9855910571744edcead23f8a6c5b",
+      "scripts/benchmark_capture.py": "788578fe5b19b89dac82708dce4146ee1f5cb3ad4a0f76679025a2c70bb0c615",
+      "scripts/benchmark_ocr.py": "df2ead58e22cad1829e8e1199904f9d4420f6b603ca9c56f13de8863298389c3",
+      "scripts/check_coordinate_spaces.py": "e5915ee9b60d10ed7915498cf4f35a0257ace28bf4e9ebf4d380ca152d41242e",
+      "scripts/check_environment.py": "6089a17dcfe3813b2f56a3c1afd064af1dfc627c96c49b2eda0d8d81ad54c416",
+      "scripts/smoke_test_control.py": "f3b2b6b4df0814ac21bea9c6b66d56816ab42c46d21c0eddee6cc8ed8f7012df",
+      "scripts/smoke_test_image_processing.py": "24210af9e18bc87328bc6646d291207810969ba3c5db9cef27f99b2e3b41b811",
+      "scripts/smoke_test_perception.py": "09a1693912cf3a73731cae87d56ab46277f43d346eabe65fc12c9bf4da1d741c",
+      "scripts/week2_closed_loop_demo.py": "1bb1268550d529329d55b5b5ca5b3215cff2a595b356c7445a4c3b360e0b89c5",
+      "scripts/week2_control_demo.py": "43af09d03f5c5cc20bf9d99298e7d7a3fe7e3ac88a6a36515bcdb93383998ce2",
+      "scripts/week2_perception_demo.py": "8bcdf58e55d8a6e3b1815cd5f7177a58106ddeccbc5031046eb7e399c80b628f",
+      "scripts/week3_model_demo.py": "5986472fac5999897e561f69d022e6dd3d1f4c2b8fd4f3c991603c096a329420",
+      "scripts/week3_planning_demo.py": "f24656d25203e74256feff7738cf72e3cb798c01a435023d78f21777ff3a7744",
+      "scripts/week3_prepare_dataset.py": "31f603ed288dfe121c225c21cc1ac23ced16b8a1bffe5784725d6d47cd1d4f8e",
+      "scripts/week4_agent_cli.py": "c0acc13e47a9ba4afc77f6f73e96d99b80cd26287a3b7ed62dbed54e82c21834",
+      "scripts/week4_capture_probe.py": "d95b11646ed0d023773b78126def7c5b473fbf2f3fbaca55b23f5e66c3edbe3a",
+      "scripts/week4_collect_evidence.py": "cf7e63d0f44df3f4371f818bdb29dd90bf5ae14b7880edd0337d358b21e4f1d6",
+      "scripts/week4_e2e_benchmark.py": "83dd0170a8d35211d05e7a138f19f880ad9919f934f810dc2bd740b696cd1431",
+      "scripts/week4_offline_demo.py": "17d2a220800d0edbfe1591484b59c68474598993c0fe7c7f2756dc120c75ba40",
+      "scripts/week4_preflight.py": "066c47c69daabf7a8e91a7004c623b441a2344412b0271def4aae00a14c3a94b",
+      "scripts/week4_t04_verify.py": "8f627e96cb1c80f0a89ae238df83b141984599ef1d0dbd3f34931f4ceca8cd2f",
+      "scripts/week4_warmup.py": "73563fce16e9397c7e54b1b8c050da00f5a405291d759f1c9fc270980299dc67",
+      "scripts/week5_augment_pointer_ids.py": "3e7a6eacc8072f35f9e2328ef72cc949c551be325a303bd9f1df2e870d37452f",
+      "scripts/week5_build_report.py": "b3b161545e6d447fceaa2493978edf28e0838d9ca56682773c7997abba26eb52",
+      "scripts/week5_c11.py": "6bbaecd74b5fd56804f577fd02c135171b31d6dfa8aaa30c88aa0be91809773a",
+      "scripts/week5_candidate_grounding.py": "3734a56cce1b3c6f7bf1875eba894d19354d8a91ba8246ac928833259fb193d0",
+      "scripts/week5_compare_validation.py": "b7d433933bffff8b59230632a5a4ebf66ad4d66a2cadc1ce5c6f1679debf8ed1",
+      "scripts/week5_diagnose.py": "fd70362bc46915724656a39b084c196befdb61427f91800b2279650dd7fb9a4b",
+      "scripts/week5_download_assets.py": "339a8ea6a819e0ecacb3daf101376431558600ffc5b43f5e7ef882637ece5dbc",
+      "scripts/week5_evaluate.py": "51784896c28c8720e35c6fbf5755c13a8cadca818c606c55f2c1cdcaf8569e37",
+      "scripts/week5_measure_visual_input.py": "490b69af96a7a8fca0a38c8ec882b9a9e462f40240dd465fbf697b8e48840f22",
+      "scripts/week5_prepare_actor_contract.py": "6624a825338146409163cbec89b5262cb42974ae3900a0ec7aca228ff8cab5d6",
+      "scripts/week5_prepare_bilingual.py": "2a07519ba72f5fb9b857815e98dfd52b43d32a8517829b80cd1d898884d601cf",
+      "scripts/week5_prepare_data.py": "93914ac2b5fb56f02afa7da2175e12f8b77c2ffe808d86b49896c1ef9802ac94",
+      "scripts/week5_prepare_original_goals.py": "c2e9f2ae24b3be66a344b59521663a5796bf94891a4e1f4d82bce8c965c61594",
+      "scripts/week5_prepare_pointer.py": "87c4d5882a9793ec1f8939c607b5dd93f68e78064dad572f98feffcd20581a03",
+      "scripts/week5_prepare_request_actor_train.py": "dac9d37999cba5ee4991e9bec4aa35b5367b5b22f050f2b63cf886e6686788aa",
+      "scripts/week5_prepare_visual_input.py": "7288136e9686994fece430904d384484a47565c205ff8a17c0e3a9f01aad1d19",
+      "scripts/week5_targeted_probe.py": "2eec5ae5e89fd0379bf60f3323bee71226f1552a3c6d3a44d55c590fab8cf58b",
+      "scripts/week5_train_lora.py": "02de18f11522419dcfc6e80a7bc0bb52cfad7b251214e93b1bfc502c3d5f8200",
+      "scripts/week5_validation_ablation.py": "57f9fe8e10e7fc810024cd121c29524e5a8508ad6ef5e50980a9e0cffa859c80",
+      "scripts/week5_verify_submission.py": "67416804c54604c82ef169944ed3c59ef33a5246ea0c28d22a222d8050374628",
+      "scripts/week6_agent_cli.py": "e4bcff65ce32cc3e68f93e80bcff5e3ad44ede0dcc2eb7a802cfd8a58ea9b870",
+      "scripts/week6_audit_semantic_acceptance.py": "e2631ff0faee6adb894b2e1ec23fec2946fcd93ce870db4c8b6cc3315b5a3559",
+      "scripts/week6_benchmark_accuracy.py": "bcfd626bddd53d7e1d7a814ddfea7f3bb45461bd4d1902b64a9bbf38d09135fb",
+      "scripts/week6_benchmark_accuracy_live.py": "fa8c56661fc4e2eeb682d248094d44b4897f5f17e20b32cce79d21d5221ccc6c",
+      "scripts/week6_benchmark_perception.py": "e3266c5c2b1c64c49a2ccdb2b9c24a634eca7024fe56792b94dd09ab5d688ce4",
+      "scripts/week6_benchmark_persistent_external.py": "d363c464e6640656066bdcde4d60ce7f52fe130ea099383d84a186990d9962f2",
+      "scripts/week6_benchmark_persistent_ocr.py": "dadfe1a7c274633042d58fe2c9039336cd1b5a6d2b80ef780d3e066ed0e5ba56",
+      "scripts/week6_lab_acceptance.py": "ee754ec29718abc074bddf9b06543d8a14c87c4ec57fe01cecfcdddfdca107ee",
+      "scripts/week6_local_lab.py": "bcafc8c688ce61aa1c1e8c93b26d8721a79cf6af1171af1d2b386b00f661d761",
+      "scripts/week6_model_recovery_probe.py": "2f1b6234a03a6f06adbc383ee849262bec41a2bdcddcf51318f0377d27c15107",
+      "scripts/week6_robustness_demo.py": "7d3d1591d2fc7e910c4727a203a14f87e38d82c228d11fceb35c9b553c93a0e7",
+      "scripts/week6_semantic_acceptance.py": "7b5b2c66f59d2ac0467d0a4d171f6e58c5c61ec729d7363025deb7820e09adcb",
+      "scripts/week6_status.py": "69ba6c3100bdb5cf7c0bd588dbedf8080905b6863ae0a2c4b6ae4c2f29552e83",
+      "src/gui_agent/__init__.py": "ee56b669afc4c9e288b9cf690f14d38471a30864841e3d4664fbcc5924d8c338",
+      "src/gui_agent/config.py": "dc138edf320423b373e5c932b86fab14e2b0439fe8d251c4c439e74c6124b91d",
+      "src/gui_agent/control/__init__.py": "25fb0fdc039a9578d6214de7a2480a3583118564e01a126c54f62828e04f65eb",
+      "src/gui_agent/control/actions.py": "77547cb650340f85cfe663ad08a8ffded0708b529adefbdc35f79dda91e80d07",
+      "src/gui_agent/control/executor.py": "67249eec8ba616ebf97f2b8e41296bca8a42358cdea71501000fdbd07030b733",
+      "src/gui_agent/control/safety.py": "748177d41b5b68af7fd59156749b343c16ffca4f8fb30356786da58a04e2f65d",
+      "src/gui_agent/coordinates.py": "474d897cbc5c85461003e5060951318690ed5d3d1b6a5cfd64a56aa4574ed5be",
+      "src/gui_agent/datasets/__init__.py": "14c8ad57d3d5c18dcc400bef21378868155c7bb111dbb2e92c45fdf10df1dca8",
+      "src/gui_agent/datasets/base.py": "3be5bf346a55bd62267f43af900fc8acaf27bc127c3603d205841d9bfe5ff05b",
+      "src/gui_agent/datasets/mind2web.py": "4849b6ed54e21fc33417f108a2bc5fd6aee54dff1ec4c73c1017e6e45e561e83",
+      "src/gui_agent/datasets/normalize.py": "2c878806422026f71a34d0a2195f5581f1e6b4071a9faa08f83307cf5bc0e79e",
+      "src/gui_agent/datasets/schemas.py": "934d5d5105082a80b4c56c099b9f40b2fbb43191068415fd1a20237ddf5a7753",
+      "src/gui_agent/datasets/screenagent.py": "e20f44432514b3012e5bdc6efeda37df661d0737743ebe251afdc0c6885e48be",
+      "src/gui_agent/datasets/validation.py": "4e8786ce9b8d0321f195b92d1d5ab5cde1960734ce537ce69752be12f61d6ad1",
+      "src/gui_agent/datasets/webarena.py": "f8248e58b0d1e4ecbc881afe9972d382c0d0f1d06259ab97db1604bde1c68b9c",
+      "src/gui_agent/finetuning/__init__.py": "50c3b0497f5a6551552495728e24df6589c94607f720c9a6bcfda2cf4ab18599",
+      "src/gui_agent/finetuning/action_constraints.py": "34dc20797581413695d809a6920389a726820cf547ffb68899559ddc242a4de9",
+      "src/gui_agent/finetuning/actor_contract.py": "91444f8c33e50f8584634ea1b5bd604f640c37e8196e64bb8670f121ac668d0c",
+      "src/gui_agent/finetuning/c11_training.py": "eb6c5158d0a71b33fa9535a3724264373f767b98767db3951c8bc1380c7abf59",
+      "src/gui_agent/finetuning/candidate_gallery.py": "f6910c65289e5ee2b01b926a5b7054188e794c975768d005d1e5e46644f93b01",
+      "src/gui_agent/finetuning/candidate_grounding.py": "42e9fa849b191e2edc047c99ac74781e889b2e7ba05336a517bc646de89f6e50",
+      "src/gui_agent/finetuning/data.py": "1070201cde6850da855f26daeb6dc4848a5bd4fdbe836d55d55bf9c77b8ac824",
+      "src/gui_agent/finetuning/diagnostics.py": "3dac64d0df27df9a4499b76b6391ce871692179fa487dc3ee474ab5cd4ccfc2c",
+      "src/gui_agent/finetuning/embedding_memory.py": "cf23ae0a2959d8dcb61c4425ffa9876f33111b11e5406d61d47e31c196090bc6",
+      "src/gui_agent/finetuning/evaluation.py": "183ddbdbc2cfa9939dfdddd6bf0bd9ecef301b8718ec49df6e14019b5634f868",
+      "src/gui_agent/finetuning/native_spatial_artifacts.py": "46b81f01870f32cde1e1b92a525b84dd99726507293c32c86b48f20382f71269",
+      "src/gui_agent/finetuning/native_spatial_grid_artifacts.py": "fe0e058624de7a77c4efe3315353123b44f7f7c6983476e1597999a29e6a149d",
+      "src/gui_agent/finetuning/native_spatial_grid_geometry.py": "4415c76a62a565b529391424e2823d684a3d251c0abddeb688f2be4817862cef",
+      "src/gui_agent/finetuning/native_spatial_grid_head.py": "194a016fdcae500fd6f663ac646b45bd074e1de23831e6bc1479d9986a48d073",
+      "src/gui_agent/finetuning/native_spatial_grid_inference.py": "257ed1e78147a20137210812fbb58bbd8be5751b4c50a2d861b8e0af8414c1fb",
+      "src/gui_agent/finetuning/native_spatial_head.py": "d89966267e14eb521163c0e5a856ebe341b04d5c3d91f0ff4bb07719c330e62d",
+      "src/gui_agent/finetuning/native_spatial_inference.py": "d4cc30854d933c02b7c8e0ae0cbea46b2ccec478bc1835e1a525d9f22a2a4adb",
+      "src/gui_agent/finetuning/numeric_value_loss.py": "57fcc2d98650d88d67ae6e49c2aee338c2cd3d8fdeaa69b0bc088fff2c7af621",
+      "src/gui_agent/finetuning/offset_geometry_loss.py": "a019c4c76907fa93ddc8e6b6b9618b340e7bd81c118acee7216bc4f516579866",
+      "src/gui_agent/finetuning/pointer_candidates_v2.py": "32119f7d64a7428c5075db0903203fb73ab28f3d832c779789a958570cc964ff",
+      "src/gui_agent/finetuning/pointer_candidates_v3.py": "be1a944c6b6b0b3b48337fae7f3ff662edf83804fd50c1c18c822c1fe8b0774f",
+      "src/gui_agent/finetuning/pointer_numbering.py": "83243845690285ea07aab33970b1bba8f9e1980ffec2cfdfd841a951e4a2ce24",
+      "src/gui_agent/finetuning/pointer_protocol.py": "a9a33226d9883d43a717eb2c0f942860be8f59f2514a90c9666b776d63831aad",
+      "src/gui_agent/finetuning/prompts.py": "184a38d760d51c941a954de29c9dda4e973a24e14fa298a0f97bf338e7fec9b0",
+      "src/gui_agent/finetuning/request_actor_contract.py": "2cbd39ab533eecb47c8e85f16dfbab463786ac88ab06b8070eab6452d3f70351",
+      "src/gui_agent/finetuning/resized_contract.py": "24c39763b768bdc77d6e7450352f72a0cfaeeaf51d3b60fe68246456c3270b2c",
+      "src/gui_agent/finetuning/step_contract.py": "b5298055b78abad081d45b3ca1c97e37be97d35ad673001ea662d1fff05c1236",
+      "src/gui_agent/finetuning/structured_ce.py": "43fa93ae9a9d62d909fa152f4a3161d5c985e1a9dd6f7ce8fe38bda7511063e5",
+      "src/gui_agent/finetuning/t04_prompts.py": "a79c613cf7b403008a485f0a3d4a2bf5b980387bda1a8bd543eeb591316c1ad3",
+      "src/gui_agent/finetuning/training.py": "f5b14acbd01e3e13c33a9f575fd15850c04e0b5fe7dd74cc27e2fdb177244849",
+      "src/gui_agent/finetuning/visual_pointer.py": "e31ee8c08667acc24d1a949ffefb43a07f22aae0f1206a3f69631717cdcb98f7",
+      "src/gui_agent/finetuning/visual_pointer_inference.py": "90d015a9fc179080392354b892d4a3fa84ee15d700a38c98242ee7d2ad7abe7e",
+      "src/gui_agent/finetuning/visual_pointer_input.py": "4d9d0e711526e0e78f455a8bcc2247048ef76ab17f0320f94c00cfe0ee130a3e",
+      "src/gui_agent/finetuning/visual_pointer_prompts.py": "d43f8a6ff2c14b10129d03660e6c90908a57c788f465cc8e8566b274786402e4",
+      "src/gui_agent/finetuning/visual_pointer_v2.py": "8bed0467d37d0628fa78d17ba9a309a09866ea03f6586e5c19b2fcbfa38b4f74",
+      "src/gui_agent/models/__init__.py": "ea363710fd7d7d8616ecaed1504d9d27af6667d53b79c1ba8c959cbba5b2f3ef",
+      "src/gui_agent/models/base.py": "22b120a3149adde737bb27f2eb9a533d174fbe014dd7d92758f716b162fc851f",
+      "src/gui_agent/models/langchain_adapter.py": "c5eab5dcf611547ca871b387a67ccfc26ff1ba1d0674ae648b580b5991788041",
+      "src/gui_agent/models/mock.py": "a9ded660c48b14755be2db76d680cd2486410c890c98102172a9e42a2e4bea78",
+      "src/gui_agent/models/openai_compatible.py": "74470bce82fdc7c41a32b59f4390226f22f4a42eb30a68535e6df92e678ec2df",
+      "src/gui_agent/perception/__init__.py": "a521ef24fbd707c3b683dd64fc2e7d9f4ff719bb21f8022cd7d09298010bc139",
+      "src/gui_agent/perception/capture.py": "2e4b65983343bfe2f264a580287f7102ede60a4b201d77a585290c7b20210717",
+      "src/gui_agent/perception/grounding.py": "b0ca16924c280f7817e03bf1cd7951d07751a60d69da442e1af440d0840afb77",
+      "src/gui_agent/perception/ocr.py": "0f0c42bc4b9537475adcf7c185672c3ee63db11cf662b870599efaca755ff28a",
+      "src/gui_agent/perception/preprocessing.py": "afaa9db640c2df42ca8c3758e765941e579e2d400e6c66231b4d98469495618f",
+      "src/gui_agent/perception/tesseract_api.py": "73a2ec0a6f03ba32b28e137afcc24399c87d73ebb02b43c1aa52711be26feee4",
+      "src/gui_agent/perception/ui_detection.py": "4cb75d461fd9ef55fbe3671c9efd7fd72a64148a2a6e37eccdf3f7ff3e908a5d",
+      "src/gui_agent/perception/visualization.py": "0c787c6509a3a631a5abd81a28aaf26b67e06b65870d5781817336949adfa072",
+      "src/gui_agent/planning/__init__.py": "51311a72d5dccb5dec7eae267976747a192543cb1104f9183e3085401b8f3daa",
+      "src/gui_agent/planning/parser.py": "94fe09f8d72fb50338e209d453f5abded95a1fdd811e2abc2396d0f6c4955b99",
+      "src/gui_agent/planning/planner.py": "cbbc8905bfa2dacfc1a1972d6378eab517d7ba113261f9b88b4af3e94c416bb4",
+      "src/gui_agent/planning/prompts.py": "c471c406a2ec33ee23a85e911c1eeb84a08bd7e27204932c75e0ad994e4e5d24",
+      "src/gui_agent/planning/schemas.py": "0f6d2a7c668daea28d979fb73ebcd4af207f4defaf34ee137d676693ed83e357",
+      "src/gui_agent/planning/semantic_workflow.py": "e013da4b828ccb0eb15e09d71851bad3bad0c6472db3a1a83dc9faaf872971a5",
+      "src/gui_agent/planning/target_bindings.py": "93c4bbc75b208a79e1ec5c7a84b9e3c4201b7f92c1faf7f74e66c67291bf76e3",
+      "src/gui_agent/planning/workflow_decomposer.py": "7e1c03a67069b946056cbcbbb63f23377c5cd869b1e8c46a4c292ac6ec85a6f0",
+      "src/gui_agent/recording.py": "5fd8cbcade4bc3a85e77f7482445274c561bb8ea5cf8e9b534c5d8fe915aa187",
+      "src/gui_agent/runtime/__init__.py": "524d1eecd51df0a13d173b25c8e451c843c82f8906391db32dfca11d42afb6c8",
+      "src/gui_agent/runtime/action_adapter.py": "222686942e4623d4743ac50e6da87599d4ba95d84ed9d1d855de089324a0eeda",
+      "src/gui_agent/runtime/cursor_parking.py": "6ff4f5396a869092d678db2627bdd22241a1b20e33ee6d55b929fb289be27eaf",
+      "src/gui_agent/runtime/message_regions.py": "6e9f86346a361ac529448175652e9c657ea3e26b6266a006d40e6aaa1054af48",
+      "src/gui_agent/runtime/monitoring.py": "fdfd51964074385e683c20b952c156bd252fdc32dc49b2e7b04849a00ab8be5f",
+      "src/gui_agent/runtime/observation.py": "c882b1a8e7f20a8fdcca58637139c7b1d606d61b9771968801df1572e32981c7",
+      "src/gui_agent/runtime/processes.py": "a810e7a8e9c0e309dd5c952561aed352cd1750f592702ef283d35d4d8c4a04a3",
+      "src/gui_agent/runtime/provenance.py": "19979ab84dec9c6dc8e50bd149d24d02c7efcb403daec4975d036117c72bc7e4",
+      "src/gui_agent/runtime/recorder.py": "0214800eea60b994f24d8d5fc3cace6f590d645b5039573e9c88546dac4a84aa",
+      "src/gui_agent/runtime/recovery.py": "f69c0f2e268213ae265b8324ed0f30caf3ed36c59ffaaa78884d68d3e59f946f",
+      "src/gui_agent/runtime/runner.py": "d79477fd6936eb63b08a49e10fb63b612fc40cb14ddaf38811eb9158bd0a459a",
+      "src/gui_agent/runtime/schemas.py": "0ac880717a9f9845f7697d327fdce420df9b3c32ad7f6ab72467f7a0e6a00624",
+      "src/gui_agent/runtime/screenshot_quality.py": "291ff4527eae6d2ece467370f15b3175cc66b5e7deb38ccbfae690e76ad922e1",
+      "src/gui_agent/runtime/target_grounding.py": "7ec229441d3e34cf89b124a47b630754c5e99e4987727a4b594c500e17d1162f",
+      "src/gui_agent/runtime/tasks.py": "a88f8bf3c2fd2c0aa11518c081db7555982f0f3b5041b152e1d943a49420e4f2",
+      "src/gui_agent/runtime/verification.py": "abc72375f2959fb765fb53dbf4bbf63401513e5cdfeaeb445d0c148b0be1cd4c",
+      "src/gui_agent/runtime/visual_grounding.py": "3e12a9dc97d45a6d3635913adbb477d07fa6dde3e8f9798c3431557ac4f22bcd",
+      "src/gui_agent/runtime/workflow.py": "13a6ae067662b2ceda1f5082bb9ed0c544f201be06b5fb21cabdf7f7098fe889",
+      "src/gui_agent/schemas.py": "51dda2400bf39b7793609235d3d76884fcc96047e008fd3a8076551bafa82480",
+      "tests/test_action_adapter.py": "74ac2896f4082cbc81a58415cea029d00fe05a0a557b04a500f969bcedee6d97",
+      "tests/test_capture.py": "056cddbd3183a7c6a46ed4c570097ce33410684ab124e4b1e5223b3f4833f5bc",
+      "tests/test_config.py": "5179416e7dd7db5644ab8e2bb836ac835b9fe1bb1b12d3c74fed18e9f8026755",
+      "tests/test_control_safety.py": "8cc666b9ebb2a0f523e7ea393eaf0dce44c6a55f287243b75370b67ea5b7ca63",
+      "tests/test_coordinate_mapping.py": "9e0d13b5ccdc5f98a90e727d113c58c801c5d637c8cdf618ada962c38c5bfde4",
+      "tests/test_dataset_adapters.py": "e7cf4a0c7ab68ebd86e7a04da6e0e946e93e3ea53f58490972c6209323677a30",
+      "tests/test_dataset_schemas.py": "1c284bbff3918733adcd079a304cd59fdf63625f216a3122c110e12eab05a23c",
+      "tests/test_dataset_validation.py": "5b8c88f6341d7a32b3ea544ca5d718025a367068c2e55eec3dcbbb50e4e4e490",
+      "tests/test_documented_counts.py": "baf2072efff09e03bbee35ba984bb969c6d5ee2f5cc552c72cb654a2d2072e24",
+      "tests/test_grounding.py": "773ed682f724f91df9720b643510541f95a2b23971b356dcc10aa2707b89e0b3",
+      "tests/test_langchain_adapter.py": "0c476b438847880537aacb05cbce9a9a31191c4e067fe0f1d90725a367051894",
+      "tests/test_langchain_integration.py": "1367b564fb12be31124953e02efe90abb2fc455f28bd758e1828c6589c1abd0e",
+      "tests/test_message_regions.py": "2c39003015d0050d196bd2d0536dc8f69a2bbfc64a034671d6e1cf409815235a",
+      "tests/test_model_config.py": "260e84a5209d5ec1c5e2fd4afa4e9cf4e1374a9c50a07d37f7fe4fa055de06cc",
+      "tests/test_model_mock.py": "63ceba025bd76a34957a57379cd4a93f4dea2b89827b3f8f095b5a1c48863ec1",
+      "tests/test_ocr.py": "d3eab7887b8a10c4342666a83c90cfa97a1a2517d12d8511e0018e543a07e11b",
+      "tests/test_plan_parser.py": "94260c93b045739a40da0509989015fca6b5c9da6893ca586bcd0808f9b83b3f",
+      "tests/test_planner.py": "e2981d650822e2e4f82f7abbe0813365794103035550eaa833563d9e8ea72211",
+      "tests/test_prepare_dataset_cli.py": "19be43efdda0343128845e6dba4dd80cc52febfc7aff453e66025cd74ab63bec",
+      "tests/test_preprocessing.py": "efac6c05597623371f856f6a187df017d787581e3a5f9dbb0b1e62a4a2e7d552",
+      "tests/test_recording.py": "25ef08bf8f5049834fdf1e22918cabea33c3259d85a0b1f9110ee9684b3edd5a",
+      "tests/test_runtime_observation.py": "1aff83b62c4a7e29494c69d3345b0d9b391798b418b70c4758b238b7f729a5fd",
+      "tests/test_runtime_processes.py": "6da691bd6900ff55e9e000551b5e181fe63d243dde511df4e476432642f056b9",
+      "tests/test_runtime_recording.py": "4cce79846fb324d22a7d3f62e85283f7d1bbf2becd1f54ca6855f7903fd7d140",
+      "tests/test_runtime_runner.py": "a1107beb8cfb2bf9f91af8194061bce23f2af6831f2062e8fa8bd516151e9940",
+      "tests/test_runtime_verification.py": "623076aab008111eff5e761d33e3fd931734d4dd857fff7d6a354926781fc10d",
+      "tests/test_schemas.py": "83bfa9b14c1ed9610b262932930d4db3fc5d75485a1df3f8326864bcda08bcd9",
+      "tests/test_smoke.py": "3c11267f860541e3ed3cdc1b6462e98e80a03372f3c8b7110db4fa5d9218c24f",
+      "tests/test_ui_detection.py": "ac62b0ef45a95d6758bd3702036d90c708aa1e6e2f353c328c059cf99ab9dc62",
+      "tests/test_visualization.py": "095fbed55f4792696ed29c42a59ec1498cf27b12781bbac36c3af2223cb4cc57",
+      "tests/test_week4_cases.py": "eecb012b151d993df20f9a65d076eb1543112552fd6286456917131e61f8241e",
+      "tests/test_week4_cli.py": "f145a75eae304e0935b74fea740e98bc38979ce1a11e24ac6ca8f370cdfe16e0",
+      "tests/test_week4_demo.py": "dddd6868ac03687544870663c66d724090a32ee120ea63fac56cf2b991bbe062",
+      "tests/test_week4_e2e_benchmark.py": "b84e1f428e54c58d34ecbd0aee140e7abc53c54f39131841dd0e83df78c83452",
+      "tests/test_week4_evidence.py": "97f894d70d0d32891dfe578315b8d1d84e76655560947f81850a2ac7ff1f24c3",
+      "tests/test_week4_integration.py": "f57cb331d3871b91b99f748e85ea1923e464db6aac1fb5f23f0ffa63810114c2",
+      "tests/test_week4_preflight.py": "96a675fae44c0630a79425618fa01c27017bd44fd75ab79228266d9791ef92b7",
+      "tests/test_week4_prompts.py": "053d5f9d4e1169f2722ef764cd7e72e0d164a19d0a7f66ed6876238b9223b1eb",
+      "tests/test_week4_warmup.py": "00d41b8c27e2c62a8fd942cc7d6e3394f377d24776e61593b7524098587099c4",
+      "tests/test_week5_action_constraints.py": "745f9d67dadc317c1894c4662651da3825a24ef1d84830f300d870523ee1b07f",
+      "tests/test_week5_actor_contract.py": "e16e82cba73a4b79534355586ffb95d538dc5e3ace6fe25fc997fe09aa031eff",
+      "tests/test_week5_atomic_artifacts.py": "8e4db26a3c5acd9b0ded96f68dc5657a59c4c29c306c0e78fb19aeae16baad64",
+      "tests/test_week5_bilingual.py": "92ef08d99d7ba5f9b9c099871baba3f97d2ff268c53af35a299854dba1111692",
+      "tests/test_week5_c11_submission.py": "2fd1eb373d30382be757fb1c500da8b93069a531b1bfb254079fcc39cdfeac52",
+      "tests/test_week5_candidate_gallery.py": "946c046eb5b50b4296b6e80a25275dad0ffbed90fd0fe7405a2aa78c91da53fb",
+      "tests/test_week5_candidate_grounding.py": "716ba31f51fcdaee8e5069472ea66e4fd20dc29d3882b4e7c9bbd7c21b2b060a",
+      "tests/test_week5_compare_validation.py": "2969a16606a1125facf80a5bb2d0b3d553b1bf0efe9fa917006c4942050f5a0d",
+      "tests/test_week5_cursor_parking.py": "9b4bc06f3e7e124daafb3897de2568808b9c0739c0ac48ecbde41945026b18fc",
+      "tests/test_week5_data.py": "46d944f1a603edae4caa1898b0492ba03083add211e09b3dd8370fca34d60a04",
+      "tests/test_week5_diagnostics.py": "725e9114919ce0ed92c8a04920fba8b164f37322ec3efbde8b70c1ac3bb993fc",
+      "tests/test_week5_download.py": "32b858b66c2be92556291349c7e12b49791fdbe0589038cceca4c456df37373f",
+      "tests/test_week5_evaluation.py": "7f808190eb253186a1392c1ef5b4b6a30536d9a31c44b66677d9e97184fe6271",
+      "tests/test_week5_gallery_protocol.py": "8a26559631fe29685efa5fc0f3a62ea97972b6abe900f909e6c3e495446a60d3",
+      "tests/test_week5_message_header.py": "dccb2208524ba234d54d8f38adb0dea9961d798efabed9a04cf843af0c546f8d",
+      "tests/test_week5_native_spatial_artifacts.py": "91fc583390d29f40e79ccd41576cf62bb20943b8febddc7ef24e3c875fe1d0ec",
+      "tests/test_week5_native_spatial_grid_artifacts.py": "efaf72d9019e84377bda25312d1de02c104aa5240bede623feefeb2e395dfe11",
+      "tests/test_week5_native_spatial_grid_geometry.py": "4e2ab011f000c3b976d8d006635deea46ab7cb99427cd8700ca9c276289fec8d",
+      "tests/test_week5_native_spatial_grid_head.py": "06ebc16b0948b29cb3bb1903722b955b8c3d0c5be46d33224a917e22cec3fb84",
+      "tests/test_week5_native_spatial_grid_inference.py": "154b564a589af702202f2da05a0a86de81f6bf1a84fa52c98c33bab4a40f6d1d",
+      "tests/test_week5_native_spatial_grid_refine_loss.py": "450df4bc884e20722b004305f3695919cd84e06bbc5d0e5b94f8bfe584314080",
+      "tests/test_week5_native_spatial_grid_training.py": "184cb72725f9207b90ed331ca7d2311d514f9b4ed186727cbba9bc04c3c5a058",
+      "tests/test_week5_native_spatial_head.py": "c9f8d434d1cab3ac6ef0ba3eef1e99b6e9dd2851b449c7eaec12f6f58fce5a26",
+      "tests/test_week5_native_spatial_inference.py": "2c32e6a27182ea0f03ccca3a27fa9fa348777e2ebed5581c8d0947498612fe8d",
+      "tests/test_week5_native_spatial_stability.py": "0e0598d88f1e7c51f87923c3e382f88bffedf18abbad40524cc9142a6b9bfe6a",
+      "tests/test_week5_native_spatial_training.py": "1f9edbd838c414a56dfe0b1bb6325a01d776614ee8f01f7ae9795b87b729c862",
+      "tests/test_week5_numeric_value_loss.py": "54d8af14249a3d50e510b96c405ecd06c2a59dddc7b331fa664daea5d0dd08f1",
+      "tests/test_week5_offset_geometry_loss.py": "da825646d7f8a39bd8c7883fc8eb5ba9bc849904dd8b7aec4d4fa3b29fc7ccce",
+      "tests/test_week5_pointer_candidates_v2.py": "49fd58eb6f1be0623ef453c94f3462bb94ae4c7a506e99251d55d70443ec2294",
+      "tests/test_week5_pointer_candidates_v3.py": "ad5c6cb27a0ae80acfb50c041db1df733bf2b38047c10aafbc68d586fd5c3557",
+      "tests/test_week5_pointer_context.py": "11d7304b34c818a19c6add7ed1225af6a59f6320b670e1f64429a10933b208ec",
+      "tests/test_week5_pointer_numbering.py": "b4cd31d2690527eee38e6e2108209239c2e1257f5c367fb84ece8a03519381d9",
+      "tests/test_week5_pointer_protocol.py": "f56d4a46ef5e8dbd437b52ee6c177a1abca851dd6e7e5c67b8c52c472421254e",
+      "tests/test_week5_prepare_pointer.py": "06fca7bbf816e314d6ac75a764392058aafeb755c502ef93d57d0886f83eb4cc",
+      "tests/test_week5_prompts.py": "1bf9e757880cc1ea84f83798edfd3261fddca7951e214dc7908897ee967e7b2a",
+      "tests/test_week5_quality_runner.py": "c11c053e74a3453ca0863bc76507f21a8ef12940981e71851225b65d2a76c88f",
+      "tests/test_week5_request_actor_contract.py": "b4f246699c9bbec5f529e282769d96e157ab2049a24faf537b97fd80cc847ee1",
+      "tests/test_week5_screenshot_quality.py": "56b15895ae6a3241e352ec1186b43b8fa93ce226eb2cc779813f6dc37b6ec9db",
+      "tests/test_week5_step_contract.py": "cafddfb338c134bd54564dda2295829fbfd3c31150bfb2174ff7ec27b1527736",
+      "tests/test_week5_targeted_probe.py": "976df8ecbd1d771b78b7697649c7d871cbdbc3bab48367ad83e14c72de63c30e",
+      "tests/test_week5_training.py": "a11b48b27260a38a95ff5894144fe31dcece03d32bfda8cc27a374a753d05dec",
+      "tests/test_week5_validation_ablation.py": "8e1916c796d34cecd4afcc16a177294b49043e66a0f41118442b0d69647491c3",
+      "tests/test_week5_visual_pointer.py": "74462782ad5f88758075e853abaeb797d48c7d7fd9166733698146d4ce509cfa",
+      "tests/test_week5_visual_pointer_inference.py": "34ce8249d8a40c07f8c88257fb91c48700797664714df4d3e7a93b21e5f00192",
+      "tests/test_week5_visual_pointer_input.py": "612d9da66ae598665e6d54580271c3089b54a8b4d001dbc02a35f9c4b04c00b9",
+      "tests/test_week5_visual_pointer_prompts.py": "c71cdb2a803013aea8372136641cb92ae2e5737aa95bae633737a37eef58e16e",
+      "tests/test_week5_visual_pointer_training.py": "5aad2bb7b1735e7d4649d0a684040848c9e3882f26721ca0c363c7808cfdad72",
+      "tests/test_week5_visual_pointer_v2.py": "2a059b8678ffefba4eb1e3561087370091c13c4a204adbdd901dd75ee348990b",
+      "tests/test_week6_action_output_contract.py": "ce8aa837cdc88115dd90d9ec9547fbfd0fe57a04b0604557f122e86d8c15994c",
+      "tests/test_week6_action_output_contract_review.py": "728c4da3e46a7d063c193fbd6928c9c547d7cfcdb46943d91ce4dfc5338b6f35",
+      "tests/test_week6_auto_cli.py": "3e4c8823834dc1036abbf642d62902d73204ba4cf52390dee78f18db1eca74da",
+      "tests/test_week6_automatic_decomposition.py": "b28ec24c5d06982f1160c3b110f706b0461113eabcd26f4c7d5b1365378000ad",
+      "tests/test_week6_cli.py": "b42915b12063c0a0e3a72a19207364420fb416ae127b27ad4a94ea3fef9f0ffd",
+      "tests/test_week6_failed_contract_feedback.py": "b790679398f9cb59f1e6acbb03138ab80bb4546fd1afb012069f057bacd0b108",
+      "tests/test_week6_full_requirements_review.py": "57a29ced1517e33ae9b36ca3b6f78932276102a8ecafa10c65db5f97d127d45a",
+      "tests/test_week6_grounding_consistency.py": "bfbacd519be5449f5bea6bd0c7527dc4e0681ac725dbaa7877077abda9b6536e",
+      "tests/test_week6_grounding_consistency_review.py": "e330220a730580d8364e4fdd70e638f0c6796eea50961923f0d1c2d369c94478",
+      "tests/test_week6_monitoring.py": "9bc55578b2a2a2fda5925178a872ffff42c037a78119add95958af4685429ed6",
+      "tests/test_week6_observed_departure.py": "6783960bec854eebda4b6e38f57906c38918cf9f2a27722df4c0586f92a248f1",
+      "tests/test_week6_observed_queries.py": "ee51c554ba3c2e2b4fd12af9d64b564ff8dc8a26febbad77e452ae49e5ef1b75",
+      "tests/test_week6_observed_queries_review.py": "6d954d60dd91897437921e98340a015b8d0c8089a695c7f8451d1a250aee613f",
+      "tests/test_week6_perception.py": "de3744925bf2b43f8d28acacf09ea1aa3b36df6f209ccec3c3b9cf0e1bcb64c9",
+      "tests/test_week6_perception_accuracy.py": "c626276a75aa62bac776be608beb2ad0ef284927f6d64920057476a734135750",
+      "tests/test_week6_persistent_ocr.py": "55e374249e63e0de0ee1ea59f0a3737f45a4813d94a50a8a852d2373e865044a",
+      "tests/test_week6_preexisting_contract_recovery.py": "1f68f351cce1b3de3770c335774e5a98896f1da7706d38965731ca65abb34415",
+      "tests/test_week6_progress_contract.py": "b824f18476b730c477a8a318f51b8757693eef3dda2f285d58a16a949a6f61fb",
+      "tests/test_week6_recovery.py": "324065c177810ca4e580a4d8c0b7df68448188c8d90537909841056d4c939cfd",
+      "tests/test_week6_recovery_feedback_roundtrip.py": "d8a3301322621a61764c1e9887b5d864fad45fbd831d942440e6f807ad96e85d",
+      "tests/test_week6_rolling_actions.py": "64c673454e065b1df6916914749cb7b6a9abf2336c99233c1750ad134a48a38a",
+      "tests/test_week6_runtime_v2.py": "9da574396066310972560c486132b73ae9c99bc08a58d9ef059b96bd8fb4ea0c",
+      "tests/test_week6_semantic_caller_predicates.py": "bc8c290bcecbd256d18ca33e47b7b5e333d4429c3c48da2bd578eda92fc5819d",
+      "tests/test_week6_semantic_caller_scope_repair.py": "772f55bb91afa2c4b150c4d99d978482a28e78a0445c00564cd2972295e4dc25",
+      "tests/test_week6_semantic_conversation_repair.py": "b71b133f1b2555e61bec6b11a13827fa5a1145afd65cd09003c53abfce3843f9",
+      "tests/test_week6_semantic_conversation_repair_review.py": "3ccdf8d0ee3771098acb0570a0069786b81c94ea9e4c98a80878b0293b23f88a",
+      "tests/test_week6_semantic_goal_grouping.py": "30398765aead3706e5317d6e9f20c8c11fdddcc8d5bf9b40b19040327fea60c7",
+      "tests/test_week6_semantic_live_monitoring.py": "b188bb0ea5aad26ede8ee2638f18acbc3d7e25eb825a5cd1ea0e0ee2a1e496f5",
+      "tests/test_week6_semantic_monitoring.py": "c7975740294ba8b7148d610ef46ff29465bde19a2e9d7c31a43fca47f6217331",
+      "tests/test_week6_semantic_output_constraints.py": "36e5c987532cd3caf54fc669db3c26ffdf1e5ef9e4d40bcff747e99ea2c36f58",
+      "tests/test_week6_semantic_polarity_guidance.py": "3c7b4bc54728788df2d31aab7ac34793eef83f1fcdf416eba3757db6192fab3d",
+      "tests/test_week6_semantic_predicted_postconditions.py": "c3fbbf94d656676d1a195c773a5e910ff7ee9508036032926c14e4145c30e2f5",
+      "tests/test_week6_semantic_preexisting_repair_hint.py": "c6f4b95eee93d73a1e8eabca39312d4ba3bb4cba9530ae286cd58bd6bb925837",
+      "tests/test_week6_semantic_repair_feedback.py": "d813b8f9cd9288d71b4c1760de42d6c41ab09d2c41c888ebb1c88c049f9cef83",
+      "tests/test_week6_semantic_repair_feedback_review.py": "7898959fa7f0276100a2e331faf1043d6d33ccb14019abbc517559c8d3cf6d78",
+      "tests/test_week6_semantic_subtasks.py": "a0fa608d2e893e4a3bf5072591edc5e7b24411a27807c9cef534eda7cfee66e5",
+      "tests/test_week6_semantic_text_context.py": "31ec9d4ce0ba60184f4673e3c9b2b1a4cdb66dbfaf8c6eefd9ab2e90b458f38c",
+      "tests/test_week6_target_bindings.py": "cfac29e5c7f3f88921615c71a0d80592a408708fd03ac2798c277f3ab0cfd34f",
+      "tests/test_week6_target_bindings_review.py": "918b1e15db08e97f7769f82fb17c900f5ae6008fa306c95834b8484d64818e90",
+      "tests/test_week6_visual_target_guidance.py": "1b71c9cdc450c1b5494cb693ea027eec838f2d15a805050bc1abe606a392496d",
+      "tests/test_week6_visual_target_guidance_review.py": "bcfa386b8950162833d0e2afdbce20648ff4a4de97128cfeb2f38fcd2cec109b",
+      "tests/test_week6_workflow.py": "d3e9996ce96c4a15973c1478ad2d690d29f8c69fb467cce86c85a04f4d1e817d"
+    },
+    "acceptance_transfer": false,
+    "real_model_efficacy_pending": true
+  },
+  "previous_full_regression": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\full_validation_005\\root_audit_001.json",
+    "sha256": "f0e61d7adcb087b42efbf819110cac4af4aa7da4f4af213e8bc6777aecd7daca"
+  },
+  "normal028_failure": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal028_independent_process_001\\process_summary.json",
+    "sha256": "fefbb43bda94ce2ad851284f070b047c80996039e71952c36af1f3eb50bfe8ef"
+  },
+  "thinking_control_probe": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\thinking_control_probe_001\\result.json",
+    "sha256": "e921f232063ce9d185803ac518967607b7578fcbc35f40bd0c70b32573a6e215"
+  },
+  "runtime_text_model": "qwen3-vl:8b-instruct",
+  "runtime_text_model_digest": "70e58e37beb15464e19aa903dedb2cba828b89c0fb186f75ff2738c7347b96eb",
+  "full_regression_current_completed": false,
+  "role_routing_scope": "Optional CLI/API text-model override; request image presence chooses role. Same shared budgets. Original prompts, goal/condition generation, input and credit guards unchanged. Perception source is byte-identical. Independent original HTTP model identity checks are stronger.",
+  "normal029_failure": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal029_independent_process_001\\process_summary.json",
+    "sha256": "1604fbd451d525b5345d65c77df39a1205aae9c364978176d39aceca772c07e6"
+  },
+  "root_scope_review_chain": [
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\intent_coverage_001\\root_scope_review_001.json",
+      "sha256": "c5b62756d97dec96bb09c11117a6051983f45fe737ee5d0874eb74d37062a192"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\intent_coverage_001\\root_scope_review_002.json",
+      "sha256": "44729a74a9c6196f9425971e7ddf16dc02a4098c5b91fcec9e2df12e01807aed"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\intent_coverage_001\\root_scope_review_003.json",
+      "sha256": "2394aa5d8c18755ad4cb3994aa6d64220b00de4d6b9576618e2be696717c21fe"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\checkpoint_guidance_001\\root_scope_review_001.json",
+      "sha256": "223a9b8d0bb43d89eb8155333865c7bdba58d97e57fcb50c93f490413dcf0dca"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\failed_plan_repair_001\\root_scope_review_003.json",
+      "sha256": "a492dc96eb4dccad5ffa4f1f43c843b08d952bbc2972cfb2536a5ffdc6dee729"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\quoted_target_consistency_001\\root_scope_review_001.json",
+      "sha256": "d1ee915beb956ed1541a8dd21cae74aa4240c30e4349f2068257ad4ff25cb428"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\quoted_target_ocr_uncertainty_001\\root_scope_review_001.json",
+      "sha256": "2cd511772c03dc2a70f036799be9f958d0b88bbc2963edaa6898832fed53a1ef"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\quoted_recovery_ocr_combination_001\\root_scope_review_001.json",
+      "sha256": "d4dc1e789732cd7a230522f0a0c0456c6cd5a1f3d137d4b827e0596ec6db3d17"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\quoted_long_label_ocr_001\\root_scope_review_001.json",
+      "sha256": "3e3a7f3d8e0cb32d7c9b3e484ca86a0ae9cef0d766a90141229ce5ec9dea28a4"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\predicate_content_boundary_001\\root_scope_review_001.json",
+      "sha256": "3cbdf73643bccdd0c22bd7d9d0b21174dd79da52641d8ec604071eafdc871b69"
+    }
+  ],
+  "saved_intent_diagnostic": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\intent_coverage_001\\simplified_qwen3_generation_probe_003\\result.json",
+    "sha256": "4a3fedd965964ccd1ee9dc7dbe19b8423e894e738c927189aa89351f55b249db"
+  },
+  "intent_generation_scope": "Generic explicit caller operation verbs, causal persistence order and minimal justified checkpoint guidance only. All executable AST outside the prompt and other282 pins unchanged. Native efficacy unqualified.",
+  "saved_intent_diagnostics": [
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\checkpoint_guidance_001\\normal_032_generation_probe_001\\result.json",
+      "sha256": "97548b49e18ac53951f6a2f11260249d08b494353816b79e78fdb1da1ef7892f"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\checkpoint_guidance_001\\transient_006_generation_probe_001\\result.json",
+      "sha256": "ddc481d6f5ff5e12f0872553899ae20b8505ea5deed8cb0fd9812fe547b29f91"
+    }
+  ],
+  "failed_plan_repair_scope": {
+    "schema": "week6.failed_plan_repair.root_scope_review.v3",
+    "utc": "2026-11-01T06:47:27.359056+00:00",
+    "reviewer": "Root agent",
+    "records": [
+      {
+        "path": "scripts/week6_audit_semantic_acceptance.py",
+        "before_sha256": "765733849846ee998a506195ec2f2037629a837bab245ae21656eaeae52ad273",
+        "after_sha256": "ead0a831bb7f8d0a29866ce6ab7708762dd1f71ddf8b0fcb1b3e817363cac02e",
+        "approved_function_scopes": [
+          "_audit_semantic_repair_category",
+          "_audited_semantic_system",
+          "audit",
+          "audit_logical_failure_shape",
+          "audit_semantic_repair_messages",
+          "audit_semantic_repair_system",
+          "audited_logical_failure"
+        ],
+        "all_other_ast_identical_after_exact_metadata_normalization": true,
+        "diff": {
+          "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\failed_plan_repair_001\\week6_audit_semantic_acceptance.revision003.reviewed.diff.txt",
+          "sha256": "3077715b7fc80a6891088c79a48b55006c42c3812a559717bdf6052d910e3b2c"
+        }
+      },
+      {
+        "path": "src/gui_agent/planning/semantic_workflow.py",
+        "before_sha256": "8f69c28c3240cccdfce2d5708b06df141f319028ca3b9671cfdd19e24ff68eeb",
+        "after_sha256": "cb900b9cd0e79b206cb38079a859526d8ab0ee5d55771c886fbd09bca12b6113",
+        "approved_function_scopes": [
+          "SemanticDecomposer._validate",
+          "SemanticDecomposer.decompose",
+          "SemanticWorkflowRunner.run",
+          "_logical_failure",
+          "_semantic_attempt_messages",
+          "_semantic_attempt_system",
+          "_semantic_repair_policy"
+        ],
+        "all_other_ast_identical_after_exact_metadata_normalization": true,
+        "diff": {
+          "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\failed_plan_repair_001\\semantic_workflow.revision003.reviewed.diff.txt",
+          "sha256": "7d050e1bcbe9a9ca2c79d90c7d5a8064646379ba2df39ed0cff56f6d238791e3"
+        }
+      },
+      {
+        "path": "tests/test_week6_failed_contract_feedback.py",
+        "before_sha256": "b790679398f9cb59f1e6acbb03138ab80bb4546fd1afb012069f057bacd0b108",
+        "after_sha256": "7e62920dc9215f45b56a320dd97957b820d11ef662cbd83a838f8702b4cd1241",
+        "approved_function_scopes": [],
+        "all_other_ast_identical_after_exact_metadata_normalization": true,
+        "diff": {
+          "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\failed_plan_repair_001\\test_week6_failed_contract_feedback.revision003.reviewed.diff.txt",
+          "sha256": "ed135f74e934f85be67895905a9710e2a9954142fc681a1a2b9d39fe096e65f8"
+        }
+      },
+      {
+        "path": "tests/test_week6_full_requirements_review.py",
+        "before_sha256": "57a29ced1517e33ae9b36ca3b6f78932276102a8ecafa10c65db5f97d127d45a",
+        "after_sha256": "35621d707540c548f0add5a9b4b24b6212b766770ec09fab7d794e95a0e7a36d",
+        "approved_function_scopes": [],
+        "all_other_ast_identical_after_exact_metadata_normalization": true,
+        "diff": {
+          "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\failed_plan_repair_001\\test_week6_full_requirements_review.revision003.reviewed.diff.txt",
+          "sha256": "cb38209ac89acdb81147ccdaf8ffb5749eb5a5fc3b41396cb804a1ff17e1beec"
+        }
+      },
+      {
+        "path": "tests/test_week6_semantic_repair_feedback.py",
+        "before_sha256": "d813b8f9cd9288d71b4c1760de42d6c41ab09d2c41c888ebb1c88c049f9cef83",
+        "after_sha256": "9f812b47609dabbcee72070633883a367cfb813f325d41ec8bf1358546975a7b",
+        "approved_function_scopes": [],
+        "all_other_ast_identical_after_exact_metadata_normalization": true,
+        "diff": {
+          "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\failed_plan_repair_001\\test_week6_semantic_repair_feedback.revision003.reviewed.diff.txt",
+          "sha256": "516cf64ba928e7fecf4564e459c9145e4aa72d580d697763db53229142cb3b03"
+        }
+      }
+    ],
+    "all_other_prior_pins_byte_identical": 278,
+    "added_test": "tests/test_week6_semantic_failed_plan_repair.py",
+    "additional_reviewed_scope": [
+      "Original expected-literal complement of own complete missing list, else null; no raw screen or completion credit. Independent exact shape recomputation. Fixed generic remaining-operation grouping hint; no local goal or condition rewrite.",
+      "Fixed repeated-objective generation hint and finite typed category, v4 exact protocol hash metadata. No model data enters system hint.",
+      "Original before-true rejection precedence restored; original test unchanged and must pass. Original feedback tests extend exact expected shape only;9 extra negative/complement tests added.",
+      "Existing repair-policy SDK test updates exact expected v4 metadata only, with all other AST identical."
+    ],
+    "meaning": "Exact failed/rejected signature enters existing bounded repair loop before any input. Outer failed-signature guard, action/credit/verification, cancellation and budgets retained. Auditor reconstructs failed signatures from original outcomes; recomputes typed rejection and full wire history. Hint removed on other errors. No local plan/condition authoring or acceptance transfer. Saved native diagnostics and fresh GUI cases remain required."
+  },
+  "saved_failure_diagnostic": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\failed_plan_repair_001\\transient007_saved_failure_probe_007\\result.json",
+    "sha256": "f2704db3e2e103ae298cfd18af4ca0e2550f1dcf228a6e45212b97c1d7e61b0d"
+  },
+  "normal033_previous_acceptance": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal033_root_acceptance_001.json",
+    "sha256": "bb62cdce02cc543a4abfb3b5e62ac2451c937a3c42db28a3f4999497fcac0501"
+  },
+  "transient007_previous_blocked": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\transient007_independent_process_001\\process_summary.json",
+    "sha256": "3a454294ff70d25305a13e364e5071b9106352e0c3e476479dfcc50d3cb159bc"
+  },
+  "quoted_target_scope": {
+    "schema": "week6.quoted_target.source_scope_review.v1",
+    "utc": "2026-11-01T07:32:50.647874+00:00",
+    "records": [
+      {
+        "path": "src/gui_agent/runtime/action_adapter.py",
+        "before_sha256": "222686942e4623d4743ac50e6da87599d4ba95d84ed9d1d855de089324a0eeda",
+        "after_sha256": "9eb497fdf77843cf2cdfced4363cd09fe1b0b7466c6145f98c6687f270809c9f"
+      }
+    ],
+    "original284_pins_preserved_except_scoped_action_adapter": true,
+    "all_original_function_ast_identical_after_removing_two_helper_calls": true,
+    "new_test": "tests/test_week6_quoted_target_consistency.py",
+    "new_test_sha256": "4e20f8915edfdb76889a4ebaacaeb8fa528d1892557deb2178f365a1e71b434a",
+    "saved_native_counterexample": {
+      "case": "transient_009",
+      "description": "Select the 'BETA' project button.",
+      "native_target_text": "ALPHA",
+      "actual_observation": "obs-0001",
+      "original_guard_accepted": true,
+      "current_guard_rejected": true,
+      "error": "quoted target conflict: obs-0001: description names 'BETA', but target_text 'ALPHA' and element 'obs-0001-e001' identify another readable target; refusing input without choosing a replacement",
+      "raw_step_not_rewritten": true,
+      "model_gui_calls": 0,
+      "acceptance_granted": false
+    },
+    "scope": "Narrow syntactic quoted target versus readable native target witness. Existing text/ID guards, stale-frame rules, primitive actions, semantic plan/condition parsing, completion credit, budgets and prompts unchanged. The local program rejects a contradictory answer and does not select or author a replacement. Unquoted/complex descriptions or targets without readable witnesses remain outside this check."
+  },
+  "normal034_previous_acceptance": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal034_root_acceptance_001.json",
+    "sha256": "5329221b833f674fba39330b0067c0c22e74c46a03fc1ddaf60db3d7bc9ab9b7"
+  },
+  "transient008_negative": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\transient008_independent_process_001\\process_summary.json",
+    "sha256": "d5b820d89df6d842346fcecef6f2b14015da47f91cf6e2bc6b0414eb0c6651ba"
+  },
+  "transient009_controlled_stop": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\transient009_controlled_negative_audit_001.json",
+    "sha256": "f2c1acda854c8932a420a7a7f77a6d93e4a5315eb495dd78edb81eaced6a31b4"
+  },
+  "quoted_ocr_uncertainty_scope": {
+    "schema": "week6.quoted_ocr_uncertainty.scope.v1",
+    "records": [
+      {
+        "path": "src/gui_agent/runtime/action_adapter.py",
+        "before_sha256": "9eb497fdf77843cf2cdfced4363cd09fe1b0b7466c6145f98c6687f270809c9f",
+        "after_sha256": "9fc5aae5013be1e5b698666aaaaa2c67fe8f4aa0f609ca76e27ca943514b094b"
+      },
+      {
+        "path": "tests/test_week6_quoted_target_consistency.py",
+        "before_sha256": "4e20f8915edfdb76889a4ebaacaeb8fa528d1892557deb2178f365a1e71b434a",
+        "after_sha256": "a3edda066cfd0b338819505847ee023dc83ca8704da3fff63e64e1bd251d45e7"
+      }
+    ],
+    "all_other283_pins_identical": true,
+    "all_original_action_adapter_ast_other_than_one_added_uncertainty_branch_identical": true,
+    "all_original19_tests_prefix_byte_identical": true,
+    "saved_native_counterexamples": [
+      {
+        "case": "transient_009",
+        "snapshot": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_009\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\obs-0001.json",
+        "snapshot_sha256": "b9a359d232f05b8d942a59177fed9d67d0ecb22a3f7477f21a4a69b2a505311f",
+        "saved_image_path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_009\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\monitor1_20261101_181852_990.png",
+        "saved_image_sha256": "e78dcf7eb5aa3aec01897818c243c47737613385d3cba6af4694ddcef2e1fd53",
+        "original_native_step": {
+          "step_id": "s1",
+          "description": "Select the 'BETA' project button.",
+          "action_type": "double_click",
+          "target_text": "ALPHA",
+          "arguments": {
+            "element_id": "obs-0001-e001"
+          },
+          "expected_result": "The 'BETA' project is selected.",
+          "status": "pending"
+        },
+        "preceding_guard_error": "quoted target conflict: obs-0001: description names 'BETA', but target_text 'ALPHA' and element 'obs-0001-e001' identify another readable target; refusing input without choosing a replacement",
+        "current_guard_error": "quoted target conflict: obs-0001: description names 'BETA', but target_text 'ALPHA' and element 'obs-0001-e001' identify another readable target; refusing input without choosing a replacement",
+        "same_native_target_current_resolved_point": null,
+        "step_and_ocr_not_rewritten": true
+      },
+      {
+        "case": "transient_010",
+        "snapshot": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_010\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\obs-0001.json",
+        "snapshot_sha256": "448082203f942409e235d6b93e9d042205037124f5bcb5861be305977377fa90",
+        "saved_image_path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_010\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\monitor1_20261101_184520_774.png",
+        "saved_image_sha256": "2c61e1c46cf7c72d230ad337d66e6b565d315610d6e3a3dd6d430c63909bdaa8",
+        "original_native_step": {
+          "step_id": "s1",
+          "description": "Select the 'BETA' project button.",
+          "action_type": "double_click",
+          "target_text": "BELA",
+          "arguments": {
+            "element_id": "obs-0001-e003"
+          },
+          "expected_result": "The 'BETA' project is selected, and the interface will update to allow theme selection.",
+          "status": "pending"
+        },
+        "preceding_guard_error": "quoted target conflict: obs-0001: description names 'BETA', but target_text 'BELA' and element 'obs-0001-e003' identify another readable target; refusing input without choosing a replacement",
+        "current_guard_error": null,
+        "same_native_target_current_resolved_point": {
+          "x": 1281,
+          "y": 1048
+        },
+        "step_and_ocr_not_rewritten": true
+      }
+    ],
+    "meaning": "Generic uncertainty allowance only for an absent ASCII alphabetic name of length4..160 one character edit from the already chosen readable witness. No exact named alternative may exist elsewhere; exact competing labels, dissimilar/short/numeric names still refuse. No target replacement, OCR rewrite, fuzzy target search or success credit; all original ID/text, fresh-frame, region, budget and task predicate guards unchanged. Counterfactual saved records only, no GUI/model calls or live acceptance."
+  },
+  "normal035_previous_acceptance": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal035_root_acceptance_001.json",
+    "sha256": "8ae719873c1d8a4d6e4c184be0ab3133a373a4000219879c87148a53dbdb5a66"
+  },
+  "transient010_negative": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\transient010_independent_process_001\\process_summary.json",
+    "sha256": "ba71f530b837a7a18d20d9f90d805f1343df7b2e968b0bfb30061d2ef558919a"
+  },
+  "ineffective_hint_retention": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\quoted_target_repair_hint_001\\ineffective_hint_retention_001.json",
+    "sha256": "82a9ed59b2b764b4b6c2739c5f32350041657a82184c8250f8443dce5ca79075"
+  },
+  "quoted_recovery_combination_scope": {
+    "utc": "2026-11-01T08:17:49.260235+00:00",
+    "records": [
+      {
+        "path": "src/gui_agent/runtime/runner.py",
+        "before_sha256": "d79477fd6936eb63b08a49e10fb63b612fc40cb14ddaf38811eb9158bd0a459a",
+        "after_sha256": "2b3b803f1e0445c75848751a7b5d5cc5774a76b27db31a74c8f8575df8fbba9a",
+        "restored_from": {
+          "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\quoted_target_repair_hint_001\\ineffective_hint_source\\src\\gui_agent\\runtime\\runner.py",
+          "sha256": "2b3b803f1e0445c75848751a7b5d5cc5774a76b27db31a74c8f8575df8fbba9a"
+        }
+      },
+      {
+        "path": "src/gui_agent/runtime/schemas.py",
+        "before_sha256": "0ac880717a9f9845f7697d327fdce420df9b3c32ad7f6ab72467f7a0e6a00624",
+        "after_sha256": "ea70de702b051661e22b8fc9849233c976d5c4941e3f41c748b8f71ce2e44414",
+        "restored_from": {
+          "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\quoted_target_repair_hint_001\\ineffective_hint_source\\src\\gui_agent\\runtime\\schemas.py",
+          "sha256": "ea70de702b051661e22b8fc9849233c976d5c4941e3f41c748b8f71ce2e44414"
+        }
+      },
+      {
+        "path": "scripts/week6_audit_semantic_acceptance.py",
+        "before_sha256": "ead0a831bb7f8d0a29866ce6ab7708762dd1f71ddf8b0fcb1b3e817363cac02e",
+        "after_sha256": "8c9ffe3486e09ee7997fd7f0a8de0ed280c03a38d5711969f4a42dd2e5afe019",
+        "restored_from": {
+          "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\quoted_target_repair_hint_001\\ineffective_hint_source\\scripts\\week6_audit_semantic_acceptance.py",
+          "sha256": "8c9ffe3486e09ee7997fd7f0a8de0ed280c03a38d5711969f4a42dd2e5afe019"
+        }
+      },
+      {
+        "path": "tests/test_week6_recovery_feedback_roundtrip.py",
+        "before_sha256": "d8a3301322621a61764c1e9887b5d864fad45fbd831d942440e6f807ad96e85d",
+        "after_sha256": "f816678c2b4cbca691e75aa2b71a9c01375964b2af552ce0dd4795e2c430e6e8",
+        "restored_from": {
+          "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\quoted_target_repair_hint_001\\ineffective_hint_source\\tests\\test_week6_recovery_feedback_roundtrip.py",
+          "sha256": "f816678c2b4cbca691e75aa2b71a9c01375964b2af552ce0dd4795e2c430e6e8"
+        }
+      }
+    ],
+    "preserved_original_count": 285,
+    "adapter_unchanged": true,
+    "other281_pins_identical": true,
+    "prior_probe_did_not_pass": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\quoted_target_repair_hint_001\\ineffective_hint_retention_001.json",
+      "sha256": "82a9ed59b2b764b4b6c2739c5f32350041657a82184c8250f8443dce5ca79075"
+    },
+    "current_native_negative": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\transient011_independent_process_001\\process_summary.json",
+      "sha256": "579587c1d5e857eb91db655bfe2148b98465ee5a2ba3374a4f2fe03db20ca4e7"
+    },
+    "meaning": "Use previously retained finite consistency feedback for the new strict quoted-target conflict together with the separately tested OCR-uncertainty adapter. The earlier extra hint alone did not pass its native probe because the old strict adapter refused OCR BELA; that failed experiment remains failed. Transient011 now demonstrates repeated wrong ALPHA targets without any conflict-specific feedback. No local target search/replacement, action dispatch, task predicates, budgets, base prompts or completion credit changed. Only the fixed recovery string and its exact schema/auditor whitelist gain the already-retained text. All native live cases must be new; no acceptance transfers."
+  },
+  "normal037_negative": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal037_independent_process_001\\process_summary.json",
+    "sha256": "8429520037a539b8d5e4a21fc15daa23b0d736296b681d685b7d63b8f4f57938"
+  },
+  "transient011_negative": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\transient011_independent_process_001\\process_summary.json",
+    "sha256": "579587c1d5e857eb91db655bfe2148b98465ee5a2ba3374a4f2fe03db20ca4e7"
+  },
+  "long_label_ocr_scope": {
+    "schema": "week6.long_label_ocr_uncertainty.scope.v1",
+    "records": [
+      {
+        "path": "src/gui_agent/runtime/action_adapter.py",
+        "before_sha256": "9fc5aae5013be1e5b698666aaaaa2c67fe8f4aa0f609ca76e27ca943514b094b",
+        "after_sha256": "7330beffa463b98d4eb67ad504ed4813b031ba010d2e0d11ee85a487cff62c41"
+      },
+      {
+        "path": "tests/test_week6_quoted_target_consistency.py",
+        "before_sha256": "a3edda066cfd0b338819505847ee023dc83ca8704da3fff63e64e1bd251d45e7",
+        "after_sha256": "13be86a870a2ec2ceebbe5cbcd20989b89613e3408c8f606f95ec1d15aa347bd"
+      }
+    ],
+    "all_other283_pins_identical": true,
+    "adapter_ast_outside_spelling_helper_and_renamed_call_identical": true,
+    "all_original28_tests_prefix_byte_identical": true,
+    "saved_native_counterexamples": [
+      {
+        "case": "transient_009",
+        "snapshot": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_009\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\obs-0001.json",
+        "snapshot_sha256": "b9a359d232f05b8d942a59177fed9d67d0ecb22a3f7477f21a4a69b2a505311f",
+        "saved_image_path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_009\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\monitor1_20261101_181852_990.png",
+        "saved_image_sha256": "e78dcf7eb5aa3aec01897818c243c47737613385d3cba6af4694ddcef2e1fd53",
+        "original_native_step": {
+          "step_id": "s1",
+          "description": "Select the 'BETA' project button.",
+          "action_type": "double_click",
+          "target_text": "ALPHA",
+          "arguments": {
+            "element_id": "obs-0001-e001"
+          },
+          "expected_result": "The 'BETA' project is selected.",
+          "status": "pending"
+        },
+        "preceding_guard_error": "quoted target conflict: obs-0001: description names 'BETA', but target_text 'ALPHA' and element 'obs-0001-e001' identify another readable target; refusing input without choosing a replacement",
+        "current_guard_error": "quoted target conflict: obs-0001: description names 'BETA', but target_text 'ALPHA' and element 'obs-0001-e001' identify another readable target; refusing input without choosing a replacement",
+        "same_native_target_current_resolved_point": null,
+        "step_and_ocr_not_rewritten": true
+      },
+      {
+        "case": "normal_038",
+        "snapshot": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_038\\run\\automatic\\goal_002_001_review_and_commit\\001_review_and_commit\\obs-0001.json",
+        "snapshot_sha256": "082e9c71dbe1a3d2766c4087019ec74895bf616a798cd106886154ef7502df77",
+        "saved_image_path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_038\\run\\automatic\\goal_002_001_review_and_commit\\001_review_and_commit\\monitor1_20261101_192817_340.png",
+        "saved_image_sha256": "18de696f4cd776cca9892023994ff1552c70e2ceb4e45d7b962e53ab247f482e",
+        "original_native_step": {
+          "step_id": "s1",
+          "description": "Click the 'Commit locally' button to complete the task.",
+          "action_type": "click",
+          "target_text": "Commiyocally",
+          "arguments": {
+            "element_id": "obs-0001-e008"
+          },
+          "expected_result": "The task is completed as the report is committed locally.",
+          "status": "pending"
+        },
+        "preceding_guard_error": "quoted target conflict: obs-0001: description names 'Commit locally', but target_text 'Commiyocally' and element 'obs-0001-e008' identify another readable target; refusing input without choosing a replacement",
+        "current_guard_error": null,
+        "same_native_target_current_resolved_point": {
+          "x": 1281,
+          "y": 1053
+        },
+        "step_and_ocr_not_rewritten": true
+      }
+    ],
+    "meaning": "Keep one-edit uncertainty for absent4..9-letter ASCII labels; permit at most2edits only when both normalized label lengths are at least10. Whitespace-only differences also remain uncertain. Exact competing readable literal elsewhere still refuses. Original selected native target/ID/coordinates, task predicates, budgets and dispatch unchanged; no fuzzy search or target replacement. Similar real names remain a limitation. Both new native cases required; saved replay is not acceptance."
+  },
+  "normal038_negative": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal038_independent_process_001\\process_summary.json",
+    "sha256": "3536505fe7bb8d1160bbdae0170736692ee371e16b78b9246cfe18503a2c64ee"
+  },
+  "transient012_negative": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\transient012_independent_process_001\\process_summary.json",
+    "sha256": "f5b2cd4906a4d1649b03344433775207f0682c528b6e907fc44b33b4048af4d8"
+  },
+  "predicate_content_boundary_scope": {
+    "schema": "week6.predicate_content_boundary.scope.v1",
+    "root_reviewed": true,
+    "utc": "2026-11-01T08:59:57.406288+00:00",
+    "meaning": "Only fixed initial planning guidance distinguishes caller-final visible evidence from content to compose. Local save/commit does not authorize a new message/title/description operation. No application label/parameter or target sequence injected; original caller, reply parser, message refusal, actions, predicates and all budgets unchanged. Two actual offline tests retain native unsupported-message refusal and require a genuinely revised native reply before execution. Offline success is not live efficacy.",
+    "records": [
+      {
+        "path": "src/gui_agent/planning/semantic_workflow.py",
+        "before_sha256": "cb900b9cd0e79b206cb38079a859526d8ab0ee5d55771c886fbd09bca12b6113",
+        "after_sha256": "f238175c0d66cd8317723c4912662ddfed81c1676bdb226b2053acc884e679fe"
+      },
+      {
+        "path": "tests/test_week6_semantic_subtasks.py",
+        "before_sha256": "a0fa608d2e893e4a3bf5072591edc5e7b24411a27807c9cef534eda7cfee66e5",
+        "after_sha256": "a75d082f467ef151163284a36eac64dcc2739ed3f925d9a10c5f76109eb47d30"
+      }
+    ],
+    "all_other283pins_identical": true,
+    "source_ast_except_prompt_identical": true,
+    "prior_test_ast_preserved": true,
+    "normal039_old_source_acceptance_retained_not_transferred": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal039_root_acceptance_001.json",
+      "sha256": "57b49f33c26342f83bf54a51f18e6b6fce8c36bcfdb3ed7d423b68f7c79853c1"
+    },
+    "transient014_negative": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\transient014_independent_process_001\\process_summary.json",
+      "sha256": "59aaaa2a9dff7e469340a0cd9ebacad181ef05ae4b1ccb8438a0f1bb8ef33cdd"
+    },
+    "transient015_negative": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\transient015_independent_process_001\\process_summary.json",
+      "sha256": "a528d13bbb96a01e9c4ad55b3ecd869a1220950cd2d8601007c39b3af9ca8097"
+    },
+    "transient016_negative": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\transient016_independent_process_001\\process_summary.json",
+      "sha256": "e5b4a1e7f1437125472cf2537b642c057adade1cc2f820acd6069c6ca57fd5b2"
+    }
+  }
+}

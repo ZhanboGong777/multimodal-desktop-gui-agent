@@ -1,0 +1,274 @@
+{
+  "schema_version": "week6.semantic_subtasks.v6",
+  "frozen_task": {
+    "case_id": "prepare_report",
+    "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Prepare a GREEN report for project ALPHA in Week6 Local Lab.\nComplete original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+    "target_app": null,
+    "preconditions": [],
+    "success_rules": [],
+    "verification": "automatic",
+    "expect_text": [
+      "Project ALPHA",
+      "Theme GREEN"
+    ],
+    "forbid_text": [],
+    "requires_processes": [],
+    "forbids_processes": [],
+    "must_exit_processes": [],
+    "risk": "medium",
+    "message_conversation": null,
+    "gate_on_step_verification": false
+  },
+  "child_status": "succeeded",
+  "child_verification": {
+    "outcome": "passed",
+    "method": "automatic",
+    "detail": "all success rules matched against the current screen",
+    "evidence": {
+      "observation_id": "obs-0012",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN"
+      ],
+      "forbid_text": [],
+      "verification_source": "frozen_model_semantic_subtask_postconditions"
+    }
+  },
+  "semantic_postcondition_verification": {
+    "outcome": "passed",
+    "method": "automatic",
+    "detail": "all success rules matched against the current screen",
+    "evidence": {
+      "observation_id": "obs-0012",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN"
+      ],
+      "forbid_text": []
+    }
+  },
+  "post_observation_id": "obs-0012",
+  "confirmed_input_count": 3,
+  "planning_accounting_complete": true,
+  "eligible_for_semantic_credit": true,
+  "planning_limit_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_018\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\single_step_planning_limit.json",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Click on the button labeled 'ALPHA'",
+      "action_type": "click",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "click",
+          "x": 1282,
+          "y": 741,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Choose a project"
+        },
+        "element_id": "obs-0002-e002",
+        "screenshot_point": {
+          "x": 1282,
+          "y": 741
+        },
+        "control_point": {
+          "x": 1282,
+          "y": 741
+        },
+        "note": "text 'Choose a project' -> obs-0002-e002 (re-bound from obs-0001-e002 in an earlier frame)"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "click",
+          "x": 1282,
+          "y": 741,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Choose a project"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: alpha",
+        "evidence": {
+          "observation_id": "obs-0003",
+          "changed": true,
+          "element_count": 23,
+          "expectation_tokens": [
+            "alpha",
+            "button"
+          ],
+          "expectation_hits": [
+            "alpha"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 49234.00000005495,
+      "after_observation_id": "obs-0003"
+    },
+    {
+      "index": 2,
+      "step_id": "s1",
+      "description": "Click on the 'ALPHA' button to select the project.",
+      "action_type": "click",
+      "observation_id": "obs-0006",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "click",
+          "x": 1280,
+          "y": 867,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "ALPHA"
+        },
+        "element_id": "obs-0006-e000",
+        "screenshot_point": {
+          "x": 1280,
+          "y": 867
+        },
+        "control_point": {
+          "x": 1280,
+          "y": 867
+        },
+        "note": "text 'ALPHA' -> obs-0006-e000 (re-bound from obs-0005-e000 in an earlier frame)"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "click",
+          "x": 1280,
+          "y": 867,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "ALPHA"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: alpha",
+        "evidence": {
+          "observation_id": "obs-0007",
+          "changed": true,
+          "element_count": 9,
+          "expectation_tokens": [
+            "alpha",
+            "button"
+          ],
+          "expectation_hits": [
+            "alpha"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 40890.00000001397,
+      "after_observation_id": "obs-0007"
+    },
+    {
+      "index": 3,
+      "step_id": "s1",
+      "description": "Click on the GREEN button to select the report theme.",
+      "action_type": "click",
+      "observation_id": "obs-0010",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "click",
+          "x": 1282,
+          "y": 1080,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "GREEN"
+        },
+        "element_id": "obs-0010-e008",
+        "screenshot_point": {
+          "x": 1282,
+          "y": 1080
+        },
+        "control_point": {
+          "x": 1282,
+          "y": 1080
+        },
+        "note": "element obs-0010-e008"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "click",
+          "x": 1282,
+          "y": 1080,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "GREEN"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: report, theme, green",
+        "evidence": {
+          "observation_id": "obs-0011",
+          "changed": true,
+          "element_count": 9,
+          "expectation_tokens": [
+            "report",
+            "theme",
+            "green"
+          ],
+          "expectation_hits": [
+            "report",
+            "theme",
+            "green"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 39531.00000007544,
+      "after_observation_id": "obs-0011"
+    }
+  ],
+  "meaning": "The original model-proposed literal semantic postconditions were independently checked; no raw failed step was rewritten."
+}

@@ -1,0 +1,46 @@
+"""Recovery observation failure must still persist a truthful terminal monitor."""
+import json
+
+import pytest
+from test_week6_rolling_actions import options
+from test_week6_semantic_subtasks import lab
+
+from gui_agent.runtime.monitoring import read_run_status
+
+
+@pytest.mark.parametrize("failure", [TimeoutError, OSError])
+def test_recovery_capture_failure_keeps_terminal_status_and_actual_call_accounting(tmp_path, failure):
+    runner, request, state, client, _ = lab(tmp_path, fail_at=1)
+    original_factory = runner.runner_factory
+
+    def factory(task, index, directory, budgeted):
+        child = original_factory(task, index, directory, budgeted)
+        observe = child.observer.observe
+
+        def capture(**kwargs):
+            # A known failed input starts recovery. Its next planning pass is
+            # announced before its capture; no second model call takes place.
+            if child.monitor._status["planning_pass"] == 2:
+                raise failure("recovery screenshot unavailable")
+            return observe(**kwargs)
+
+        child.observer.observe = capture
+        return child
+
+    runner.runner_factory = factory
+    result = runner.run(request, options())
+    assert result.status == "failed"
+    assert "persistence failed" not in result.error
+    assert result.total_actions == state.attempts == 1
+    assert result.unconfirmed_action_attempts == 0
+    assert result.planning_calls == result.model_requests == len(client.calls) == 2
+    assert result.completed_subgoals == [] and result.final_verification is None
+    status = read_run_status(tmp_path / "semantic")
+    assert status["trusted"] and status["state"] == "finished"
+    assert status["snapshot"]["task_status"] == "failed"
+    assert status["snapshot"]["planning_pass"] == 3
+    assert status["snapshot"]["subgoals_completed"] == 0
+    history = [json.loads(line) for line in
+               (tmp_path / "semantic/status_events.jsonl").read_text("utf8").splitlines()]
+    assert [event["planning_pass"] for event in history] == sorted(
+        event["planning_pass"] for event in history)

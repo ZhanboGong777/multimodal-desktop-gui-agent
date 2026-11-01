@@ -1,0 +1,32 @@
+{
+  "reviewer": "Root",
+  "approved": true,
+  "case": "normal_048",
+  "operator_chronology_reviewed": true,
+  "stages": [
+    {
+      "stage_key": "1:1:prepare_report",
+      "semantic_alignment_passed": true,
+      "rationale": "Native preparation instruction requests GREEN ALPHA report using visible controls, and predicates verify Project ALPHA and Theme GREEN. Original initial saved screenshot shows neither selection; native inputs001/002 and independently attributed project_selected/theme_selected demonstrate selection and theme. No review operation is named or credited in this goal."
+    },
+    {
+      "stage_key": "1:2:review_and_commit",
+      "semantic_alignment_passed": true,
+      "rationale": "Native instruction explicitly requests BOTH review and local commit. Original saved before screenshot shows Draft ready and available Review report button without completed review. Native003 actually produces review_accepted and immediate Review complete pixels; native004 produces local_commit and immediate LOCAL COMPLETE. Separate saved caller-final screenshot confirms ALPHA GREEN LOCAL COMPLETE. Thus both named business operations occurred before success, not merely an available control."
+    }
+  ],
+  "actually_viewed_saved_original_pixels": [
+    "C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/live/normal_048/run/automatic/contract_before_001_001/monitor1_20261101_225302_795.png",
+    "C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/live/normal_048/run/automatic/contract_before_001_002/monitor1_20261101_225629_168.png",
+    "C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/live/normal_048/run/automatic/caller_final_round_001/monitor1_20261101_225851_309.png"
+  ],
+  "rejected_contract_count_reviewed": 0,
+  "rejected_contract_rationale": "All native semantic stages reviewed; original rejection records retained without altering status.",
+  "caveats": [
+    "One controlled local normal case, not arbitrary-app reliability or a population success rate. Previous failures preserved.",
+    "4 confirmed native inputs, 5 planning calls and 5 HTTP requests; no target replacement. Actual owner, wrapper, strict audit and protocol audit all exit0.",
+    "Root is the agent operator/reviewer, not human independent sign-off. Real active CLI observation and original timing receipts reviewed.",
+    "Operator deviation retained: input002 auxiliary precheck failed its pending-age<30s assertion at ~38s, after its real owner/launcher identity, child existence and task-deadline checks had passed. Root mistakenly proceeded without enforcing this failed auxiliary check. Original screenshot/state had no intervening input; original request/control/coordinates unchanged. Input002 actually selected GREEN and immediate pixels/events confirm it. Later003/004 verified the same actual identities. Receipt protocol and strict audit passed without changed timestamps or tolerance. This is not described as a passed auxiliary check; additional operator latency is included in385.157s. This local scheduling deviation does not establish model error or justify fabricated evidence.",
+    "Current-source transient027 separately accepted; full regression, final report and distribution remain pending."
+  ]
+}

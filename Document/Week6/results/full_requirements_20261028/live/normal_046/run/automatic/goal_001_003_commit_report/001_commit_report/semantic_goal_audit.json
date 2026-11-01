@@ -1,0 +1,134 @@
+{
+  "schema_version": "week6.semantic_subtasks.v6",
+  "frozen_task": {
+    "case_id": "commit_report",
+    "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Commit the reviewed GREEN report for project ALPHA locally using the visible commit controls.\nComplete original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+    "target_app": null,
+    "preconditions": [],
+    "success_rules": [],
+    "verification": "automatic",
+    "expect_text": [
+      "Project ALPHA",
+      "Theme GREEN",
+      "LOCAL COMPLETE"
+    ],
+    "forbid_text": [],
+    "requires_processes": [],
+    "forbids_processes": [],
+    "must_exit_processes": [],
+    "risk": "medium",
+    "message_conversation": null,
+    "gate_on_step_verification": false
+  },
+  "child_status": "succeeded",
+  "child_verification": {
+    "outcome": "passed",
+    "method": "automatic",
+    "detail": "all success rules matched against the current screen",
+    "evidence": {
+      "observation_id": "obs-0004",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [],
+      "verification_source": "frozen_model_semantic_subtask_postconditions"
+    }
+  },
+  "semantic_postcondition_verification": {
+    "outcome": "passed",
+    "method": "automatic",
+    "detail": "all success rules matched against the current screen",
+    "evidence": {
+      "observation_id": "obs-0004",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": []
+    }
+  },
+  "post_observation_id": "obs-0004",
+  "confirmed_input_count": 1,
+  "planning_accounting_complete": true,
+  "eligible_for_semantic_credit": true,
+  "planning_limit_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_046\\run\\automatic\\goal_001_003_commit_report\\001_commit_report\\single_step_planning_limit.json",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Double-click the 'Commit locally' button to finalize the local commit.",
+      "action_type": "double_click",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "double_click",
+          "x": 1282,
+          "y": 1047,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Commit locally"
+        },
+        "element_id": "obs-0002-e006",
+        "screenshot_point": {
+          "x": 1282,
+          "y": 1047
+        },
+        "control_point": {
+          "x": 1282,
+          "y": 1047
+        },
+        "note": "element obs-0002-e006"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "double_click",
+          "x": 1282,
+          "y": 1047,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Commit locally"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: report",
+        "evidence": {
+          "observation_id": "obs-0003",
+          "changed": true,
+          "element_count": 7,
+          "expectation_tokens": [
+            "report",
+            "committed",
+            "locally",
+            "requested"
+          ],
+          "expectation_hits": [
+            "report"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 13047.000000005937,
+      "after_observation_id": "obs-0003"
+    }
+  ],
+  "meaning": "The original model-proposed literal semantic postconditions were independently checked; no raw failed step was rewritten."
+}

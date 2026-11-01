@@ -1,0 +1,51 @@
+I001 [*] Import block is un-sorted or un-formatted
+  --> tests\test_week6_visual_target_guidance.py:2:1
+   |
+ 1 |   """Fixed generation advice never replaces native targets or authorizes input."""
+ 2 | / from __future__ import annotations
+ 3 | |
+ 4 | | import json
+ 5 | | from copy import deepcopy
+ 6 | | from datetime import UTC, datetime, timedelta
+ 7 | |
+ 8 | | import pytest
+ 9 | | from PIL import Image, ImageDraw
+10 | | from test_runtime_runner import FakeExecutor, FakeObserver, _approved_message_context
+11 | | from test_week6_action_output_contract import sdk, user
+12 | | from test_week6_automatic_decomposition import Clock
+13 | | from test_week6_semantic_subtasks import lab, proposal
+14 | | from test_week6_semantic_text_context import _http_client, _persist_synthetic_pixels, _text_user
+15 | | from test_week6_target_bindings import element
+16 | |
+17 | | from gui_agent.planning.planner import PlanResult, TaskPlanner
+18 | | from gui_agent.planning.prompts import SYSTEM_PROMPT
+19 | | from gui_agent.planning.schemas import TaskPlan
+20 | | from gui_agent.planning.target_bindings import (
+21 | |     GENERATION_TARGETING_POLICY_TEXT,
+22 | |     GENERATION_TARGETING_POLICY_VERSION,
+23 | |     generation_targeting_policy,
+24 | | )
+25 | | from gui_agent.planning.workflow_decomposer import BudgetedModelClient
+26 | | from gui_agent.recording import RunSession
+27 | | from gui_agent.runtime.recorder import TaskRecorder
+28 | | from gui_agent.runtime.runner import TaskRunner, Timings
+29 | | from gui_agent.runtime.schemas import ExecutionOptions, ObservationSnapshot, StepRecord, TaskSpec, VerificationResult
+30 | | from gui_agent.runtime.verification import Verifier
+31 | | from gui_agent.schemas import BoundingBox, ScreenInfo
+   | |_____________________________________________________^
+help: Organize imports
+   |
+28 | from gui_agent.runtime.runner import TaskRunner, Timings
+   - from gui_agent.runtime.schemas import ExecutionOptions, ObservationSnapshot, StepRecord, TaskSpec, VerificationResult
+29 + from gui_agent.runtime.schemas import (
+30 +     ExecutionOptions,
+31 +     ObservationSnapshot,
+32 +     StepRecord,
+33 +     TaskSpec,
+34 +     VerificationResult,
+35 + )
+36 | from gui_agent.runtime.verification import Verifier
+   |
+
+Found 1 error.
+[*] 1 fixable with the `--fix` option.

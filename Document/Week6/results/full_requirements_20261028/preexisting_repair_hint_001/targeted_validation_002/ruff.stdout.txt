@@ -1,0 +1,30 @@
+I001 [*] Import block is un-sorted or un-formatted
+  --> tests\test_week6_semantic_preexisting_repair_hint.py:2:1
+   |
+ 1 |   """Synthetic SDK and independent-reader boundaries, never native efficacy evidence."""
+ 2 | / from __future__ import annotations
+ 3 | |
+ 4 | | import copy
+ 5 | | import json
+ 6 | |
+ 7 | | import pytest
+ 8 | | import test_week6_semantic_repair_feedback_review as repair_review
+ 9 | | from test_week6_automatic_decomposition import _frame
+10 | | from test_week6_rolling_actions import options, plan
+11 | | from test_week6_semantic_repair_feedback import run_sdk, system
+12 | | from test_week6_semantic_subtasks import lab as base_lab, proposal
+13 | | from test_week6_semantic_text_context import _persist_synthetic_pixels
+14 | |
+15 | | from gui_agent.planning import semantic_workflow as semantic
+   | |____________________________________________________________^
+help: Organize imports
+   |
+11 | from test_week6_semantic_repair_feedback import run_sdk, system
+   - from test_week6_semantic_subtasks import lab as base_lab, proposal
+12 + from test_week6_semantic_subtasks import lab as base_lab
+13 + from test_week6_semantic_subtasks import proposal
+14 | from test_week6_semantic_text_context import _persist_synthetic_pixels
+   |
+
+Found 1 error.
+[*] 1 fixable with the `--fix` option.

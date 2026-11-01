@@ -1,0 +1,86 @@
+{
+  "schema": "week6.report.semantic_operation_review.v1",
+  "reviewer": "Root",
+  "reviewer_kind": "Codex Root agent review, not human sign-off",
+  "approved": true,
+  "reviewed_utc": "2026-10-29T01:31:58.961014+00:00",
+  "source_freeze": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\failed_contract_feedback_001\\final_source_freeze_001.json",
+    "sha256": "a2e222b18889df5736c4abf2a45f71bae79a24013f5afe9896539c4560568c35"
+  },
+  "independent_audit": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal024_strict_audit_001.json",
+    "sha256": "bafed821b908b8e0c701063410f491e01c801116bc79e9a9fd4442283588774a"
+  },
+  "runtime": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_024\\run\\runtime_result.json",
+    "sha256": "3b9ee0fe8a0666c96da07b1b60be5f9760c4e4ee26e657305ae0be3f8eb8e8ca"
+  },
+  "container": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_024",
+  "stages": [
+    {
+      "stage_key": "1:1:prepare_report",
+      "native_instruction": "Prepare the GREEN report for project ALPHA by selecting the correct project and theme, then save the draft locally.",
+      "independent_transitions": [
+        "project_selected",
+        "theme_selected"
+      ],
+      "semantic_alignment_passed": true,
+      "rationale": "This is an accurately retained FAILED preparation attempt, not a completed prepare goal. Original inputs001/002 selected ALPHA then GREEN and their independent events match the selection portion of the native instruction. Original saved pixels show Project ALPHA, Theme GREEN and Draft ready; they do not establish the model's invented Draft Saved condition or an explicit save operation. Input003 double-clicked the project title with no business transition. The original contract failed and remains failed, with no completion credit. The subsequent plan handles remaining review/commit without replaying selections. Acceptance concerns the complete bounded recovery trajectory; it does not declare this failed native objective fulfilled.",
+      "original_status": "failed"
+    },
+    {
+      "stage_key": "2:1:review_and_commit",
+      "native_instruction": "Review the GREEN report for project ALPHA and commit it locally using visible controls.",
+      "independent_transitions": [
+        "review_accepted",
+        "local_commit"
+      ],
+      "semantic_alignment_passed": true,
+      "rationale": "The revised native instruction explicitly requires review and local commit. Original contract-before pixels are the prepared draft, and LOCAL COMPLETE is absent. Independent review_accepted belongs uniquely to original input004 Review report. Input005 clicked Review complete status text and made no business change; it is not credited as commit despite its model description. Original input006 Commit locally uniquely caused local_commit. Saved review, post-noop and independent caller-final pixels show the ordered draft -> Review complete -> LOCAL COMPLETE progression for ALPHA/GREEN. The unchanged whole predicate and caller final both pass on separate fresh observations. Only this revised objective is in completed_subgoals; the earlier failed objective is not rescued.",
+      "original_status": "succeeded"
+    }
+  ],
+  "actually_viewed_saved_original_pixels": [
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_024\\run\\automatic\\initial_observation\\monitor1_20261029_120301_520.png",
+      "sha256": "63ec2b0324730173ce2ab7cbb787b68112c18c7ca6c8e4ef39d9768bafffb8dc"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_024\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\monitor1_20261029_121115_883.png",
+      "sha256": "07fefe0f0d4888cfbee2410c421761c77329cbefa0d6a58974119ba51ac4490d"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_024\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\monitor1_20261029_121453_048.png",
+      "sha256": "5df174603f86db4e5e2c148ec8cf74824d5e40ea406ddb61992944aebcd0cf20"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_024\\run\\automatic\\goal_002_001_review_and_commit\\001_review_and_commit\\monitor1_20261029_121944_743.png",
+      "sha256": "8e259c9b1160faed3489cd3660e425392789f58b275fd5c73905c0c0f42a1690"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_024\\run\\automatic\\goal_002_001_review_and_commit\\001_review_and_commit\\monitor1_20261029_122329_015.png",
+      "sha256": "36be55b82cfc9783fa75e8f01cbdc777013e6b0f55ca8f34fcfbec1cc4502f23"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_024\\run\\automatic\\caller_final_round_002\\monitor1_20261029_122723_511.png",
+      "sha256": "b669b04f56ec04bb6e20f1c9ed4dfcc777eaed79d65697953a30736cf16e85cb"
+    }
+  ],
+  "rejected_pre_input_contracts_reviewed": [],
+  "rejected_contract_rationale": "No pre-input rejected contract ledger in this case. The executed first contract failed after three known inputs and is separately retained in semantic_goal_ledger.json; it is not a rejected-before-input record.",
+  "caveats": [
+    "Six confirmed input calls include two noops (003 project title, 005 review status). Three double-click calls include their original repeated physical clicks/ignored events; counts are not a count of individual physical button presses.",
+    "Round1 has three raw step checks passed but the frozen goal failed. These diagnostic step outcomes are preserved and cannot establish a saved draft or complete that goal.",
+    "Round2 native reason wrongly describes null forbidden-text feedback as no forbidden text present. Original null and untrusted reason remain unchanged; no validator pass is inferred from that sentence.",
+    "A cursor/halo overlaps the Project ALPHA label after input003 while OCR reports it missing. Root can read the saved label; a causal OCR diagnosis was not isolated. The failed record is not modified or given credit.",
+    "Review and local_commit events occurred respectively 2.473ms and 3.248ms after click dispatch return, but within their originally sampled immediate fresh-operation intervals. No timestamp or interval extension was added.",
+    "The lower-right Lenovo store notification was present in original pixels and untouched. No unrelated GUI operation, target substitution, mouse parking, manual plan repair or late replay was used.",
+    "The final commit had current readable target support. This run is not proof of missing-OCR visual grounding, arbitrary-application reliability or completion of all Week6 deliverables.",
+    "This is Root Codex agent review of original saved evidence and contemporaneous operator tool reports, not independent human sign-off or hardware timestamp certification."
+  ],
+  "manual_findings": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_normal024_independent_audit_20261029\\root_manual_findings_001.json",
+    "sha256": "7f708b1326cd17af0b758f033cc412441218af92be10a1139fa5af171ce2cddd"
+  }
+}

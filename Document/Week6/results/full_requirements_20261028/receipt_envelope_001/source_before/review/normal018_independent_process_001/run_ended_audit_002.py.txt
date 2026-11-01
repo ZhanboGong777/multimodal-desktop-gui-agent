@@ -1,0 +1,152 @@
+"""Launch only after Root confirms normal018's real owner/session has ended.
+
+This runs the read-only saved-evidence auditor, never a model or experiment.
+No selected case/fixture file is opened before the explicit confirmation flag.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import subprocess
+import time
+from datetime import datetime, timezone
+from pathlib import Path
+
+import psutil
+
+ROOT = Path("C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+BASE = ROOT / "Document/Week6/results/full_requirements_20261028"
+CONTAINER = BASE / "live/normal_018"
+FREEZE = BASE / "observed_query_constraints_001/final_source_freeze_001.json"
+PREREG = BASE / "live/preregistered_v6_010.json"
+OUT = BASE / "review/normal018_independent_process_001"
+AUDIT = BASE / "review/normal018_strict_audit_001.json"
+PYTHON = "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe"
+FREEZE_SHA = "93c839778aa31111ff9931e70a3d1a20214d2cea8d13194955f6ef1eeef9a6d4"
+PREREG_SHA = "047d4a23fac0841201f8f6f2db03966e6c0498b5b0dbcf6d4a4098fbdb9f3386"
+
+
+def load(path):
+    return json.loads(path.read_text("utf8"))
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def bound(path):
+    return {"path": str(path), "sha256": sha(path), "bytes": path.stat().st_size}
+
+
+def identity(process):
+    return {"pid": process.pid, "create_time": process.create_time(), "exe": process.exe()}
+
+
+def inventory():
+    return {path.relative_to(CONTAINER).as_posix(): sha(path)
+            for path in CONTAINER.rglob("*") if path.is_file()}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--owner-exit-confirmed", action="store_true", required=True,
+                        help="Root has explicitly confirmed the actual experiment exec session closed")
+    parser.add_argument("--operator-handoff", type=Path, required=True,
+                        help="Explicit selected terminal operator handoff, inside this case")
+    args = parser.parse_args()
+    assert args.owner_exit_confirmed, "Wait for Root's explicit ended/session-closed signal"
+    assert not OUT.exists() and not AUDIT.exists(), "Never overwrite an earlier process or audit"
+    assert sha(FREEZE) == FREEZE_SHA and sha(PREREG) == PREREG_SHA
+    freeze, prereg = load(FREEZE), load(PREREG)
+    assert prereg["freeze_sha256"] == FREEZE_SHA and prereg["normal"]["name"] == CONTAINER.name
+    before = {name: sha(ROOT / name) for name in freeze["code_pins"]}
+    assert before == freeze["code_pins"]
+    assert len(before) == freeze["code_pin_count"] == 274
+    assert sha(ROOT / "README.md") == freeze["readme_sha256"] == "72be47c3626c4877e24880e2254585bd2748fbf8ae82e9f175e72f9a201eb0bd"
+    assert sha(ROOT / "requirements-dev.txt") == freeze["requirements_dev_sha256"] == prereg["requirements_dev_sha256"]
+
+    # Only now, after explicit ended authorization, may case records be read.
+    owner = load(CONTAINER / "owner_receipt.json")
+    start = load(CONTAINER / "owner_start.json")
+    claim = load(CONTAINER / "owner_claim.json")
+    assert type(owner["child_exit_code"]) is int
+    assert owner["owner"] == start["owner"] == claim["owner"]
+    assert owner["command"] == start["command"] == claim["command"]
+    for row in [owner["owner"], owner["launcher"], *owner["observed_descendants"]]:
+        assert type(row["pid"]) is int and row["pid"] > 0
+        assert type(row["create_time"]) in (int, float) and row["create_time"] > 0
+    handoff_path = args.operator_handoff.resolve()
+    assert handoff_path.is_relative_to(CONTAINER.resolve())
+    handoff = load(handoff_path)
+    assert handoff["terminal"] is True and handoff["pending"] == []
+    assert handoff["schema"] == "week6.live.operator_handoff.v1" and handoff["gui_stopped"] is True
+    assert handoff["exec_actual_wait"]["session_closed"] is True
+    assert type(handoff["exec_actual_wait"]["exit_code"]) is int
+    assert handoff["exec_actual_wait"]["exit_code"] == owner["child_exit_code"]
+    assert handoff["owner_receipt"] == owner
+    assert datetime.fromisoformat(owner["finished_utc"]) >= datetime.fromisoformat(owner["started_utc"])
+    command = owner["command"]
+    fixture = Path(command[command.index("--fixture-directory") + 1]).resolve()
+    assert fixture.name == prereg["normal"]["fixture"] == "fixture_normal_014"
+    assert owner["owner_harness_sha256"] == prereg["owner_harness_sha256"] == sha(CONTAINER / "owner_harness.py.txt")
+    script = ROOT / "scripts/week6_audit_semantic_acceptance.py"
+    assert sha(script) == freeze["code_pins"]["scripts/week6_audit_semantic_acceptance.py"] == prereg["auditor_source_sha256"]
+    OUT.mkdir(exist_ok=False)
+    raw_before = inventory()
+    audit_command = [PYTHON, str(script), "--container", str(CONTAINER),
+                     "--owner-harness", prereg["owner_harness"],
+                     "--fixture-directory", str(fixture), "--out", str(AUDIT)]
+    started, timer = datetime.now(timezone.utc).isoformat(), time.monotonic()
+    descendants = {}
+    with (OUT / "stdout.txt").open("xb") as stdout, (OUT / "stderr.txt").open("xb") as stderr:
+        child = subprocess.Popen(audit_command, cwd=ROOT, stdout=stdout, stderr=stderr,
+            creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
+        launcher = identity(psutil.Process(child.pid))
+        while child.poll() is None:
+            try:
+                for process in psutil.Process(child.pid).children(recursive=True):
+                    try:
+                        row = identity(process)
+                        descendants[(row["pid"], row["create_time"])] = row
+                    except psutil.Error:
+                        pass
+            except psutil.Error:
+                pass
+            time.sleep(.05)
+        actual_wait = child.wait()
+    receipt = {"schema": "week6.normal018.saved_evidence_audit.actual_exit.v1",
+        "command": audit_command, "started_utc": started, "finished_utc": datetime.now(timezone.utc).isoformat(),
+        "elapsed_seconds": time.monotonic() - timer, "launcher": launcher,
+        "observed_descendants": list(descendants.values()), "actual_child_exit_code": actual_wait,
+        "stdout": bound(OUT / "stdout.txt"), "stderr": bound(OUT / "stderr.txt")}
+    (OUT / "receipt.json").write_text(json.dumps(receipt, ensure_ascii=False, indent=2) + "\n", encoding="utf8")
+    raw_after = inventory()
+    after = {name: sha(ROOT / name) for name in freeze["code_pins"]}
+    assert raw_before == raw_after and before == after
+    assert sha(ROOT / "README.md") == freeze["readme_sha256"]
+    assert sha(ROOT / "requirements-dev.txt") == freeze["requirements_dev_sha256"]
+    result = load(AUDIT)
+    assert type(result["passed"]) is bool and actual_wait == (0 if result["passed"] else 1)
+    summary = {"schema": "week6.independent.ended_audit_process.v1",
+        "freeze": bound(FREEZE), "preregistration": bound(PREREG),
+        "owner_receipt": bound(CONTAINER / "owner_receipt.json"), "operator_handoff": bound(handoff_path),
+        "actual_audit_receipt": receipt, "audit": bound(AUDIT),
+        "code_pins_count": len(before), "code_pins_before": before, "code_pins_after": after,
+        "code_pins_unchanged": True, "readme_sha256": freeze["readme_sha256"],
+        "requirements_dev_sha256": freeze["requirements_dev_sha256"],
+        "original_case_files": raw_before, "raw_evidence_unchanged": True,
+        "operations": {"model": 0, "gui": 0, "training": 0, "experiment_reruns": 0},
+        "meaning": "Only ended saved evidence was audited. The actual audit exit is preserved, never predicted. Positive machine checks still require Root agent stage/event/receipt and mid-run telemetry review; negative evidence never resumes or rescues this run."}
+    (OUT / "process_summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf8")
+    with (OUT / "run_ended_audit_002.py.txt").open("xb") as stream:
+        stream.write(Path(__file__).read_bytes())
+    print(json.dumps({"audit": str(AUDIT), "sha256": sha(AUDIT), "passed": result["passed"],
+        "actual_audit_exit": actual_wait, "process_summary": str(OUT / "process_summary.json"),
+        "process_summary_sha256": sha(OUT / "process_summary.json")}, ensure_ascii=True))
+    return actual_wait
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

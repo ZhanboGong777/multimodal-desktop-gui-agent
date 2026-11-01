@@ -1,0 +1,100 @@
+{
+  "schema": "week6.root.native_operation_notes.v1",
+  "case": "transient_006",
+  "reviewer": "Root",
+  "utc": "2026-11-01T05:11:01.782394+00:00",
+  "sole_operator": true,
+  "window_id": 2493898,
+  "inputs_actually_observed": [
+    {
+      "id": "input_001",
+      "action": "double_click",
+      "xy": [
+        1281,
+        1048
+      ],
+      "original_target_description": "BELA",
+      "start": "2026-11-01T05:06:05.158Z",
+      "dispatch_returned": "2026-11-01T05:06:05.426Z",
+      "fresh_finish": "2026-11-01T05:06:05.522Z",
+      "before": "Choose a project",
+      "after": "Project BETA; Choose report theme",
+      "business_change": "project_selected"
+    },
+    {
+      "id": "input_002",
+      "action": "double_click",
+      "xy": [
+        1282,
+        915
+      ],
+      "start": "2026-11-01T05:06:54.377Z",
+      "dispatch_returned": "2026-11-01T05:06:54.690Z",
+      "fresh_finish": "2026-11-01T05:06:54.773Z",
+      "before": "Choose report theme",
+      "after": "Project BETA; Theme BLUE; Draft ready; Review report",
+      "business_change": "theme_selected"
+    },
+    {
+      "id": "input_003",
+      "action": "click",
+      "xy": [
+        1282,
+        1049
+      ],
+      "start": "2026-11-01T05:07:49.576Z",
+      "dispatch_returned": "2026-11-01T05:07:49.707Z",
+      "fresh_finish": "2026-11-01T05:07:49.862Z",
+      "before": "Draft ready; Review report",
+      "after": "Review unavailable. Please retry.; Draft ready; Review report",
+      "business_change": "review_rejected",
+      "distinction": "Input actually dispatched and refreshed successfully; application review failed as preregistered."
+    },
+    {
+      "id": "input_004",
+      "action": "click",
+      "xy": [
+        1282,
+        1094
+      ],
+      "start": "2026-11-01T05:08:42.610Z",
+      "dispatch_returned": "2026-11-01T05:08:42.745Z",
+      "fresh_finish": "2026-11-01T05:08:42.907Z",
+      "before": "Review unavailable. Please retry.; Draft ready",
+      "after": "Review complete; Commit locally",
+      "business_change": "review_accepted"
+    },
+    {
+      "id": "input_005",
+      "action": "double_click",
+      "xy": [
+        1281,
+        1049
+      ],
+      "start": "2026-11-01T05:09:33.648Z",
+      "dispatch_returned": "2026-11-01T05:09:33.929Z",
+      "fresh_finish": "2026-11-01T05:09:34.013Z",
+      "before": "Review complete; Commit locally",
+      "after": "Project BETA; Theme BLUE; LOCAL COMPLETE",
+      "business_change": "local_commit"
+    }
+  ],
+  "unknown_inputs": 0,
+  "operator_added_inputs": 0,
+  "local_goal_or_condition_changes": false,
+  "actual_owner_and_wrapper_exit": [
+    0,
+    0
+  ],
+  "raw_runtime_status": "succeeded",
+  "root_semantic_concern": {
+    "goal_id": "GOAL_2",
+    "instruction": "Review the generated report and confirm its accuracy.",
+    "expect_text": [
+      "LOCAL COMPLETE"
+    ],
+    "finding": "Native instruction does not explicitly request the local commit performed inside this goal. Physical completion and machine checks cannot replace semantic alignment. Root qualification withheld, consistent with earlier normal027."
+  },
+  "lower_right_uninstall_notification": "Outside Lab controls; untouched.",
+  "qualification": "Pending original strict and receipt audits; regardless of their outcome, no Root semantic approval from physical final alone."
+}

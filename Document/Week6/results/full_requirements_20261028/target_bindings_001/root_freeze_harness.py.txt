@@ -1,0 +1,201 @@
+"""Freeze checked target-binding source and preregister fresh controlled cases."""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import re
+import shutil
+from datetime import UTC, datetime
+from pathlib import Path
+from urllib.request import urlopen
+
+REPO = Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+BASE = REPO / 'Document/Week6/results/full_requirements_20261028'
+CHANGE = BASE / 'target_bindings_001'
+sha = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
+load = lambda p: json.loads(p.read_text(encoding='utf-8'))
+
+
+def write(path, data):
+    with path.open('x', encoding='utf-8', newline='\n') as stream:
+        json.dump(data, stream, ensure_ascii=False, indent=2, allow_nan=False)
+        stream.write('\n')
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--validation-name', required=True)
+    args = parser.parse_args()
+    assert args.validation_name and all(c in 'abcdefghijklmnopqrstuvwxyz0123456789_-' for c in args.validation_name)
+    destination = CHANGE / 'final_source_freeze_001.json'
+    prereg = BASE / 'live/preregistered_v6_008.json'
+    assert not destination.exists() and not prereg.exists()
+    old_path = BASE / 'action_output_contract_001/final_source_freeze_001.json'
+    assert sha(old_path) == '132f0f708246981e558f54c0ffef6cb576940091154a202cd1bc0f1a212a3dc4'
+    old = load(old_path)
+    directory = CHANGE / args.validation_name
+    check = load(directory / 'validation.json')
+    assert check['checks_passed'] is True and check['code_unchanged'] is True
+    assert check['scope'] == 'affected_target_bindings_action_runtime_semantic'
+    assert [item['actual_child_exit_code'] for item in check['receipts']] == [0, 0, 0]
+    pins = load(directory / 'tested_code_pins_before.json')
+    assert pins == load(directory / 'tested_code_pins_after.json')
+    paths = {REPO / 'pyproject.toml'}
+    for name in ('src', 'tests', 'scripts'):
+        paths.update((REPO / name).rglob('*.py'))
+    paths.update(p for p in (REPO / 'configs').rglob('*') if p.is_file())
+    assert set(pins) == {p.relative_to(REPO).as_posix() for p in paths}
+    assert all(sha(REPO / name) == digest for name, digest in pins.items())
+    changed = {name for name in set(old['code_pins']) | set(pins)
+               if old['code_pins'].get(name) != pins.get(name)}
+    assert changed == {
+        'src/gui_agent/planning/planner.py', 'src/gui_agent/planning/target_bindings.py',
+        'src/gui_agent/runtime/runner.py', 'scripts/week6_audit_semantic_acceptance.py',
+        'tests/test_week6_target_bindings.py', 'tests/test_week6_target_bindings_review.py',
+        'tests/test_runtime_runner.py',
+    }, changed
+    assert len(pins) == 270
+    migration_path = CHANGE / 'legacy_context_assertion_migration_001/migration.json'
+    assert sha(migration_path) == 'd842b05a6d8a2d4cd717069a47b4b48a43fa5dde54edaf1a8611d3624c02fa07'
+    migration = load(migration_path)
+    assert migration['old_sha256'] == old['code_pins']['tests/test_runtime_runner.py']
+    assert migration['new_sha256'] == pins['tests/test_runtime_runner.py']
+    assert migration['code_pins_after'] == pins
+    assert migration['all_other_existing_assertions_unchanged'] is True
+    assert migration['production_auditor_other_tests_unchanged'] is True
+    quick_path = CHANGE / 'legacy_context_assertion_migration_001/quickcheck_001/validation.json'
+    assert sha(quick_path) == '3f4d9a6cb215b298a42f7d3fdc659be02862d4c97822210191f7e7ee7c8d06ef'
+    quick = load(quick_path)
+    assert quick['checks_passed'] is True and quick['test_count_unchanged'] is True
+    assert quick['ast_only_one_context_key_and_five_new_binding_assertions'] is True
+    dependency_sha = sha(REPO / 'requirements-dev.txt')
+    assert dependency_sha == check['requirements_dev_sha256_before'] == check['requirements_dev_sha256_after']
+    dependency_receipt = load(CHANGE / 'schema_test_dependency_001/receipt.json')
+    assert dependency_receipt['checks_passed'] is True
+    assert dependency_receipt['requirements_dev_sha256'] == dependency_sha
+    assert sha(REPO / 'README.md') == old['readme_sha256'], 'Merge independent README edits explicitly'
+    assert sha(REPO / '.gitattributes') == old['git_attributes_sha256']
+    assert load(BASE / 'review/negative_normal015_audit_001.json')['schema']
+    assert load(BASE / 'live/normal_015/owner_receipt.json')['child_exit_code'] == 1
+    assert load(BASE / 'live/normal_015/run/acceptance_observed.json')['runtime_independent_gates_passed'] is False
+    assert (BASE / 'live/fixture_normal_011.close.json').is_file()
+    for name in ('normal_016', 'fixture_normal_012', 'transient_001', 'fixture_transient_001'):
+        assert not (BASE / 'live' / name).exists(), name
+    previous = load(BASE / 'live/preregistered_v6_007.json')
+    with urlopen('http://127.0.0.1:11434/api/tags', timeout=15) as response:
+        tags = json.load(response)
+    model = [m for m in tags['models'] if m['name'] == previous['model']]
+    assert len(model) == 1 and model[0]['digest'] == previous['model_digest']
+    count, collected = check['targeted_tests_passed'], check['collected_test_count']
+    before_readme = CHANGE / 'README.before_target_bindings.md'
+    shutil.copyfile(REPO / 'README.md', before_readme)
+    text = before_readme.read_text(encoding='utf-8')
+    start = text.index('The earlier [379-case affected semantic CPU check]')
+    end = text.index('### Week 5 submission', start)
+    replacement = (
+        'The [838-case action-output check](Document/Week6/results/full_requirements_20261028/action_output_contract_001/root_affected_validation_002/validation.json)\n'
+        'passed on the preceding source freeze. Its retained first check had one\n'
+        'legacy interface assertion failure; that assertion was separately migrated\n'
+        'without changing its runtime action or verification checks. Normal014\n'
+        'stopped before input on malformed flat action replies. After the format\n'
+        'change, normal015 produced valid TaskPlan objects but paired the requested\n'
+        'label with a different visible element ID three times; the existing guard\n'
+        'refused all inputs. Neither case completed any semantic objective.\n\n'
+        'The new candidate supplies current-observation text/ID bindings to the\n'
+        'action planner and guides its endpoint schema with positive alternatives.\n'
+        'It derives candidates from the snapshot, and message tasks keep their\n'
+        'previously authorised candidate scope. The model still chooses the target;\n'
+        'the program does not replace IDs or rewrite native actions. Text-only,\n'
+        'ID-only, anonymous visual and nonpoint paths retain their declared limits.\n'
+        'A consistent pair cannot establish a control role or completed operation;\n'
+        'source/fresh-frame consistency and independent goal/final checks remain.\n'
+        'The caller, single-step limit, model and global budgets are unchanged.\n'
+        'These are generation constraints, not evidence of task success.\n\n'
+        'The endpoint request remains `strict:false` with extensible action arguments.\n'
+        'The audit reconstructs each bounded format-correction attempt and verifies\n'
+        'the final native object against its declared generation schema. This\n'
+        'additional audit qualification does not assert that every schema violation\n'
+        'is independently rejected by the legacy runtime. Research auditing uses\n'
+        '`requirements-dev.txt`, including the JSON Schema validator; ordinary\n'
+        'execution does not import that test/audit dependency.\n\n'
+        f'The [{count}-case affected CPU check](Document/Week6/results/full_requirements_20261028/target_bindings_001/{args.validation_name}/validation.json)\n'
+        f'passed with Ruff clean, {len(pins)} unchanged code pins and a separately\n'
+        'bound development-dependency file. Old 7B failures and the separate existing\n'
+        '3B configuration remain distinct; no model was downloaded or trained.\n'
+        'The retained first check had 1,025 passing cases and one legacy exact-key\n'
+        'context assertion failure after the new target_bindings field was added.\n'
+        'That assertion was separately migrated, preserving its original\n'
+        'complete-observation checks and adding independent candidate-scope checks.\n'
+        f'The {collected}-case full-suite collection is not a full execution.\n'
+        'Normal016, transient001 and full004 remain pending on this freeze.\n\n'
+        f'Validation target (pending): `{collected} tests, ruff clean`. This is the\n'
+        'collected suite size, not a full regression or real-window acceptance claim.\n\n'
+    )
+    text = text[:start] + replacement + text[end:]
+    links = []
+    for target in re.findall(r'\[[^\]]*\]\(([^)]+)\)', text):
+        if target.startswith(('http://', 'https://', '#')):
+            continue
+        assert (REPO / target.split('#', 1)[0]).exists(), target
+        links.append(target)
+    (REPO / 'README.md').write_text(text, encoding='utf-8', newline='\n')
+    qa = CHANGE / 'README.update_qa_001.json'
+    write(qa, {'schema': 'week6.pending_readme.qa.v1', 'previous_sha256': sha(before_readme),
+               'current_sha256': sha(REPO / 'README.md'), 'local_links_checked': links,
+               'targeted_tests_passed': count, 'collection_only': collected,
+               'full_regression_passed': False, 'new_real_acceptance_passed': False})
+    shutil.copyfile(__file__, CHANGE / 'root_freeze_harness.py.txt')
+    freeze = {
+        'schema': 'week6.semantic.target_bindings.source_freeze.v1',
+        'created_at_utc': datetime.now(UTC).isoformat(),
+        'status': 'frozen_pending_normal016_transient001_full004',
+        'protocol': old['protocol'], 'input_modality': old['input_modality'],
+        'repair_policy_version': old['repair_policy_version'],
+        'postcondition_source': 'untrusted_model_prediction', 'final_source': 'unchanged_caller',
+        'previous_freeze_sha256': sha(old_path), 'changed_paths': sorted(changed),
+        'code_pin_count': len(pins), 'code_pins': pins,
+        'package_python_file_count': len(list((REPO / 'src/gui_agent').rglob('*.py'))),
+        'readme_sha256': sha(REPO / 'README.md'),
+        'requirements_dev_sha256': dependency_sha,
+        'git_attributes_sha256': sha(REPO / '.gitattributes'),
+        'readme_update_qa_sha256': sha(qa),
+        'targeted_validation': f'{args.validation_name}/validation.json',
+        'targeted_validation_sha256': sha(directory / 'validation.json'),
+        'targeted_tests_passed': count, 'targeted_pytest_seconds': check['targeted_pytest_seconds'],
+        'collected_test_count': collected, 'collection_test_execution': False,
+        'runtime_model': previous['model'], 'runtime_model_digest': previous['model_digest'],
+        'model_roles': ['semantic', 'action'],
+        'model_gui_calls_during_changes': 0, 'old_failed_raw_records_retained': True,
+        'new_real_model_gui_acceptance_completed': False, 'full004_completed': False,
+        'source_before_manifest_sha256': sha(CHANGE / 'source_before_manifest.json'),
+        'legacy_context_assertion_migration_sha256': sha(migration_path),
+        'legacy_context_assertion_quickcheck_sha256': sha(quick_path),
+        'root_freeze_harness_sha256': sha(CHANGE / 'root_freeze_harness.py.txt'),
+        'target_binding_scope': 'Current snapshot and final authorised candidate subset only; native generation guidance, all original runtime guards preserved',
+    }
+    write(destination, freeze)
+    previous.update({
+        'schema': 'week6.semantic_live.v6.target_bindings_preregistration.v1',
+        'registered_utc': datetime.now(UTC).isoformat(),
+        'freeze': '../target_bindings_001/final_source_freeze_001.json',
+        'freeze_sha256': sha(destination),
+        'previous_development_failures': 'normal001 through015 remain unaccepted. Normal015 had valid native action structure but repeated wrong text/ID pairs; its original-frame guard refused all input. Different source/model configurations and all negative records remain separate.',
+        'normal': {'name': 'normal_016', 'project': 'ALPHA', 'colour': 'GREEN',
+                   'fixture': 'fixture_normal_012', 'reuse': 'New independent fixture'},
+        'added_target_bindings': freeze['target_binding_scope'],
+        'repair_experiment': 'High-level v2 conversation and bounded action-format feedback remain. This candidate adds snapshot-derived generation target bindings and explicit per-attempt audit qualification; it does not locally repair a model plan or replace IDs.',
+        'runtime_model_change': 'Same existing qwen2.5vl3b as014 and015, both roles, same digest; no download/train',
+        'final_full_regression': f'Required after both accepted real cases; {collected} is collection only, full004 not started.',
+        'requirements_dev_sha256': dependency_sha,
+        'auditor_source_sha256': pins['scripts/week6_audit_semantic_acceptance.py'],
+    })
+    write(prereg, previous)
+    print(json.dumps({'freeze_sha256': sha(destination), 'prereg_sha256': sha(prereg),
+                      'code_pin_count': len(pins), 'package_python_file_count': freeze['package_python_file_count'],
+                      'targeted_tests_passed': count, 'collected_test_count': collected,
+                      'readme_sha256': sha(REPO / 'README.md'), 'requirements_dev_sha256': dependency_sha}))
+
+
+if __name__ == '__main__':
+    main()

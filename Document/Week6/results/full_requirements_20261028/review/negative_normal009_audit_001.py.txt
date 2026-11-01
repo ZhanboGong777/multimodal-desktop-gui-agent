@@ -1,0 +1,205 @@
+"""Read-only diagnosis of ended normal009. Never reads original fixture state."""
+from __future__ import annotations
+
+import ast
+import hashlib
+import importlib.util
+import json
+import sys
+from datetime import UTC, datetime
+from pathlib import Path
+
+ROOT=Path(r"C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+BATCH=ROOT/"Document/Week6/results/full_requirements_20261028/live/normal_009"
+RUN=BATCH/"run"
+ROUND=RUN/"automatic/semantic_plan_round_001"
+OUT=ROOT/"Document/Week6/results/full_requirements_20261028/review/negative_normal009_audit_001.json"
+assert not OUT.exists()
+sys.path.insert(0,str(ROOT/"src"))
+spec=importlib.util.spec_from_file_location("normal009_saved_evidence_reader",ROOT/"scripts/week6_audit_semantic_acceptance.py")
+reader=importlib.util.module_from_spec(spec)
+spec.loader.exec_module(reader)
+from gui_agent.planning import semantic_workflow as semantic
+from gui_agent.runtime.schemas import ObservationSnapshot
+
+evidence=reader.Evidence(BATCH)
+def load(path):
+    return evidence.load(path,run_only=path.is_relative_to(RUN))
+def stamp(value):
+    return reader.timestamp(value)
+def sha(path):
+    return reader.sha(path)
+
+claim,start,owner=(load(BATCH/name) for name in ("owner_claim.json","owner_start.json","owner_receipt.json"))
+assert owner["schema"]=="week6.semantic.live.actual_exit.v1"
+assert type(owner["child_exit_code"]) is int and owner["child_exit_code"]==1
+assert claim["owner"]==start["owner"]==owner["owner"]
+assert start["launcher"]==owner["launcher"]
+assert claim["command"]==start["command"]==owner["command"]
+assert claim["started_utc"]==start["started_utc"]==owner["started_utc"]
+assert abs((stamp(owner["finished_utc"])-stamp(owner["started_utc"])).total_seconds()-owner["elapsed_seconds"])<0.01
+owner_harness=Path(owner["owner"]["cmdline"][1])
+harness_sha=sha(evidence.external(owner_harness,"current_owner_harness"))
+assert start["owner_harness_sha256"]==owner["owner_harness_sha256"]==harness_sha
+assert sha(evidence.bind(BATCH/"owner_harness.py.txt"))==harness_sha
+evidence.bind(BATCH/"stdout.txt")
+
+contract=load(RUN/"contract.json")
+runtime=load(RUN/"runtime_result.json")
+assert runtime==load(RUN/"automatic/automatic_workflow_summary.json")
+acceptance=load(RUN/"acceptance_observed.json")
+assert acceptance["automatic_result"]==runtime
+assert runtime["status"]=="failed" and runtime["accounting_complete"] is True
+assert runtime["error"]=="RuntimeError: dedicated-window activation receipt missing"
+assert runtime["planning_calls"]==runtime["model_requests"]==1
+assert runtime["total_actions"]==runtime["unconfirmed_action_attempts"]==0
+assert not runtime["completed_subgoals"] and not runtime["goal_outcomes"] and not runtime["workflow_results"]
+assert runtime["workflow_result"] is None and runtime["final_verification"] is None
+assert acceptance["source_unchanged"] is True
+assert not acceptance["runtime_pass"] and not acceptance["runtime_independent_gates_passed"]
+assert not acceptance["input_receipts"] and not acceptance["transition_attribution"]
+assert [row["event"] for row in acceptance["independent_events"]]==["started"]
+assert not list((RUN/"sky_bridge").glob("*_request.json"))
+assert not list((RUN/"automatic").glob("goal_*"))
+assert not list(RUN.rglob("dispatch_intents.jsonl"))
+source_result=reader.source_audit(evidence,contract,owner["command"])
+
+freeze_path=ROOT/"Document/Week6/results/full_requirements_20261028/semantic_predicted_postconditions_001/final_source_freeze_001.json"
+freeze=json.loads(evidence.external(freeze_path,"explicit_frozen_v6_source").read_bytes(),object_pairs_hook=reader.unique)
+assert sha(freeze_path)=="235166e04a5d697a500831ccff49bc50ad0aba45c4733cb54ef6073eebd336b5"
+for name,digest in contract["source_sha256"].items():
+    assert freeze["code_pins"][name]==digest
+assert freeze["protocol"]==semantic.SEMANTIC_PROTOCOL_VERSION=="week6.semantic_subtasks.v6"
+assert sha(ROOT/"scripts/week6_audit_semantic_acceptance.py")==freeze["code_pins"]["scripts/week6_audit_semantic_acceptance.py"]
+
+request=semantic.WorkflowRequest.model_validate(contract["request"])
+native=load(ROUND/"native_proposal.json")
+reader.audit_native_predicates(native,request)
+semantic._validate_native_predicates(native,request)
+parsed=semantic.SemanticPlan.model_validate(native,strict=True)
+assert parsed.model_dump(mode="json")==native
+assert native["status"]=="ready" and len(native["subgoals"])==runtime["semantic_goals_total"]==3
+initial=load(RUN/"automatic/initial_observation/observation.json")
+frame=ObservationSnapshot.model_validate(initial)
+semantic.SemanticDecomposer()._validate(parsed,request,frame,[],False)
+tasks=[semantic._goal_task(goal,request) for goal in parsed.subgoals]
+compiled=load(ROUND/"compiled_workflow.json")
+expected_workflow=semantic.WorkflowSpec(workflow_id=request.workflow_id,instruction=request.instruction,
+    subgoals=tasks,final_check=semantic._final_task(request))
+assert compiled["schema_version"]==semantic.SEMANTIC_PROTOCOL_VERSION
+assert compiled["native_proposal"]==native
+assert compiled["workflow"]==expected_workflow.model_dump(mode="json")
+assert compiled["mapping"]==reader.expected_native_mapping(native,parsed,tasks)
+plan=load(ROUND/"result.json")
+assert runtime["plans"]==[plan] and plan["status"]=="ready" and plan["proposal"]==native
+assert plan["workflow"]==compiled["workflow"]
+assert plan["planning_calls"]==plan["model_requests"]==1
+
+protocol=load(ROUND/"protocol.json")
+expected_format=semantic._semantic_response_format(request,8)
+system=(semantic.SEMANTIC_SYSTEM_PROMPT+"\nExact response JSON schema (also supplied as response_format):\n"
+        +json.dumps(expected_format["json_schema"]["schema"],ensure_ascii=False,sort_keys=True))
+assert protocol["schema_version"]==semantic.SEMANTIC_PROTOCOL_VERSION
+assert protocol["postcondition_source"]=="untrusted_model_prediction" and "predicate_pools" not in protocol
+assert protocol["caller_request"]==contract["request"] and protocol["response_format"]==expected_format
+assert protocol["final_source"]=="unchanged_caller"
+archived=reader.audit_snapshot_archive(evidence,ROUND,frame,[],None)
+saved=load(ROUND/"attempt_01_request.json")
+response=load(ROUND/"attempt_01_response.json")
+assert saved["system"]==system and saved["response_format"]==expected_format
+assert saved["instruction"]==request.instruction
+assert saved["context"]=={"original_caller_request":contract["request"],"minimum_objectives":2,
+    "maximum_objectives":8,"revision":False,"completed_subgoals":[],"failure":None,
+    "input_modality":"caller_intent_only","image_attached":False}
+reader.audit_highlevel_intent_binding(saved,protocol,plan,frame,archived)
+assert json.loads(response["content"],object_pairs_hook=reader.unique)==native
+http=reader.transport_audit(evidence,RUN/"automatic",[{"system":system,"instruction":request.instruction,
+    "context":saved["context"],"image_path":None,"response":response,"requests":1,"kind":"semantic_decomposition"}],1,contract)
+
+events=evidence.lines(RUN/"automatic/status_events.jsonl")
+monitor=load(RUN/"automatic/run_status.json")
+assert events[-1]==monitor and [row["seq"] for row in events]==list(range(1,len(events)+1))
+assert monitor["event"]=="finished" and monitor["task_status"]=="failed"
+assert monitor["planning_pass"]==1 and monitor["actions_used"]==monitor["subgoals_completed"]==0
+assert monitor["subgoals_total"]==3
+identities=[owner["launcher"],*owner["observed_descendants"]]
+actual=[row for row in identities if row["pid"]==monitor["pid"]]
+assert len(actual)==1
+created=int(monitor["process_identity"].split(":")[1])/10_000_000-11644473600
+assert abs(created-actual[0]["create_time"])<0.001
+assert stamp(monitor["updated_at_utc"])<stamp(owner["finished_utc"])
+
+activation=[]
+for request_path in sorted((RUN/"sky_activation").glob("*_request.json")):
+    payload=load(request_path)
+    receipt_path=request_path.with_name(request_path.name.replace("_request.json","_receipt.json"))
+    receipt=load(receipt_path)
+    assert receipt["id"]==payload["id"]==request_path.name.removesuffix("_request.json")
+    assert payload["required_window_title"]==receipt["window"]["title"]=="Week6 Local Lab"
+    assert receipt["success"] is True
+    activation.append({"request_reference":str(request_path.relative_to(BATCH)),
+        "receipt_reference":str(receipt_path.relative_to(BATCH)),
+        "id":payload["id"],"monotonic_token_ns":int(payload["id"].split("_")[1]),"receipt":receipt})
+assert len(activation)==2
+first,late=activation
+assert stamp(first["receipt"]["utc"])<stamp(frame.captured_at.isoformat())
+assert stamp(late["receipt"]["utc"])>stamp(owner["finished_utc"])>stamp(monitor["updated_at_utc"])
+assert first["receipt"]["window"]==late["receipt"]["window"]
+lab_source=RUN/"source_snapshot/scripts/week6_lab_acceptance.py.txt"
+tree=ast.parse(evidence.bind(lab_source).read_bytes())
+bound=next(node for node in tree.body if isinstance(node,ast.ClassDef) and node.name=="BoundObserver")
+observe=next(node for node in bound.body if isinstance(node,ast.FunctionDef) and node.name=="observe")
+assert any(isinstance(node,ast.BinOp) and isinstance(node.op,ast.Add)
+    and isinstance(node.right,ast.Constant) and node.right.value==90 for node in ast.walk(observe))
+assert any(isinstance(node,ast.Constant) and node.value=="dedicated-window activation receipt missing" for node in ast.walk(observe))
+late_after_terminal=(stamp(late["receipt"]["utc"])-stamp(monitor["updated_at_utc"])).total_seconds()
+late_after_owner=(stamp(late["receipt"]["utc"])-stamp(owner["finished_utc"])).total_seconds()
+plan_done=next(row for row in events if row["detail_code"]=="semantic_plan_revision_1")
+post_plan_to_terminal=(stamp(monitor["updated_at_utc"])-stamp(plan_done["updated_at_utc"])).total_seconds()
+bound_before=dict(evidence.files)
+for name,digest in bound_before.items():
+    if name.startswith("current_source/"):
+        path=ROOT/name.removeprefix("current_source/")
+    elif name=="explicit_frozen_v6_source":
+        path=freeze_path
+    elif name=="current_owner_harness":
+        path=owner_harness
+    else:
+        path=BATCH/name
+    assert path.is_file() and sha(path)==digest,("evidence_changed",name)
+
+result={"schema_version":"week6.semantic_live.negative_normal009_review.v1",
+    "created_utc":datetime.now(UTC).isoformat(),"reviewer":"/root/week6_replanning_review",
+    "classification":"harness_orchestration_activation_receipt_timeout_before_semantic_goal_execution",
+    "audit_checks_passed":True,"run_accepted":False,"child_exit_code":owner["child_exit_code"],
+    "owner_elapsed_seconds":owner["elapsed_seconds"],"runtime_elapsed_ms":runtime["elapsed_ms"],
+    "runtime_error":runtime["error"],"actual_http_requests":http,"planning_calls":1,
+    "known_task_inputs":0,"unknown_task_inputs":0,"accepted_native_goal_count":3,
+    "completed_semantic_goals":0,"semantic_goal_after_checks_performed":False,
+    "raw_native_content_sha256":hashlib.sha256(response["content"].encode("utf8")).hexdigest(),
+    "raw_native_goals":native["subgoals"],"native_ready_interpretation":"Locally schema/structure accepted only. In particular the predicted Review Complete text was not tested after any input.",
+    "source":{**source_result,"frozen_v6_source_sha256":sha(freeze_path),
+        "source_unchanged_recorded_by_harness":acceptance["source_unchanged"],
+        "separate_historical_after_hash_map_available":False},
+    "actual_child_identity":actual[0],"activation_records":activation,
+    "timing":{"configured_activation_wait_seconds":90,"plan_accepted_event_utc":plan_done["updated_at_utc"],
+        "terminal_failed_event_utc":monitor["updated_at_utc"],"owner_wait_finished_utc":owner["finished_utc"],
+        "late_receipt_utc":late["receipt"]["utc"],"late_after_terminal_seconds":late_after_terminal,
+        "late_after_owner_wait_finished_seconds":late_after_owner,
+        "plan_accepted_to_terminal_seconds":post_plan_to_terminal,
+        "activation_monotonic_token_delta_seconds":(late["monotonic_token_ns"]-first["monotonic_token_ns"])/1e9,
+        "request_wall_timestamp_present":False,
+        "note":"Activation request IDs encode monotonic tokens, not UTC. No exact UTC request-creation time is invented. Wall-clock deltas compare saved UTC fields only."},
+    "late_receipt_effect":"Original late success receipt retained. It was after terminal failure and real owner wait, cannot retroactively complete capture, start goals or rescue the task.",
+    "cause_scope":"Saved evidence establishes a missing activation receipt at the 90-second harness boundary and a later receipt. Root's context-restoration lapse is reported orchestration context, not independently inferred from missing model/runtime records.",
+    "not_classified_as":["model refusal","invalid semantic JSON","semantic goal after-condition failure","quality zero","accepted GUI proof"],
+    "original_fixture_state_reads":0,"operations":{"model_calls":0,"gui_operations":0,"test_runs":0},
+    "raw_evidence_modified":False,"evidence_sha256":evidence.files,"audit_script_sha256":sha(Path(__file__))}
+OUT.write_text(json.dumps(result,ensure_ascii=False,indent=2)+"\n",encoding="utf8")
+script_copy=OUT.with_suffix(".py.txt")
+assert not script_copy.exists()
+script_copy.write_bytes(Path(__file__).read_bytes())
+print(json.dumps({"out":str(OUT),"sha256":sha(OUT),"bound_evidence_files":len(evidence.files),
+    "late_after_terminal_seconds":late_after_terminal,"late_after_owner_wait_seconds":late_after_owner,
+    "run_accepted":False},ensure_ascii=False))
+

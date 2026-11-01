@@ -1,0 +1,82 @@
+{
+  "schema_version": "week6.semantic_subtasks.v6",
+  "frozen_task": {
+    "case_id": "review_and_commit",
+    "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Review the GREEN report for project ALPHA and commit it locally using visible controls. If review is temporarily unavailable, retry within budget.\nComplete original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+    "target_app": null,
+    "preconditions": [],
+    "success_rules": [],
+    "verification": "automatic",
+    "expect_text": [
+      "Project ALPHA",
+      "Theme GREEN",
+      "LOCAL COMPLETE"
+    ],
+    "forbid_text": [
+      "Review unavailable",
+      "Connection error",
+      "Commit failed"
+    ],
+    "requires_processes": [],
+    "forbids_processes": [],
+    "must_exit_processes": [],
+    "risk": "medium",
+    "message_conversation": null,
+    "gate_on_step_verification": false
+  },
+  "child_status": "failed",
+  "child_verification": null,
+  "semantic_postcondition_verification": {
+    "outcome": "inconclusive",
+    "method": "automatic",
+    "detail": "no observation available to verify against",
+    "evidence": {}
+  },
+  "post_observation_id": null,
+  "confirmed_input_count": 0,
+  "planning_accounting_complete": true,
+  "eligible_for_semantic_credit": false,
+  "planning_limit_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_038\\run\\automatic\\goal_002_001_review_and_commit\\001_review_and_commit\\single_step_planning_limit.json",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Click the 'Commit locally' button to complete the task.",
+      "action_type": "click",
+      "observation_id": "obs-0002",
+      "resolved": null,
+      "action_result": null,
+      "verification": null,
+      "error": "quoted target conflict: obs-0001: description names 'Commit locally', but target_text 'Commiyocally' and element 'obs-0001-e008' identify another readable target; refusing input without choosing a replacement",
+      "elapsed_ms": 2063.000000009197,
+      "after_observation_id": null
+    },
+    {
+      "index": 2,
+      "step_id": "s1",
+      "description": "Click the 'Commit locally' button to complete the task.",
+      "action_type": "click",
+      "observation_id": "obs-0004",
+      "resolved": null,
+      "action_result": null,
+      "verification": null,
+      "error": "quoted target conflict: obs-0003: description names 'Commit locally', but target_text 'Commiyocally' and element 'obs-0003-e008' identify another readable target; refusing input without choosing a replacement",
+      "elapsed_ms": 1218.9999999973224,
+      "after_observation_id": null
+    },
+    {
+      "index": 3,
+      "step_id": "s1",
+      "description": "Click the 'Commit locally' button to finalize the local commit.",
+      "action_type": "click",
+      "observation_id": "obs-0006",
+      "resolved": null,
+      "action_result": null,
+      "verification": null,
+      "error": "quoted target conflict: obs-0005: description names 'Commit locally', but target_text 'Commiyocally' and element 'obs-0005-e008' identify another readable target; refusing input without choosing a replacement",
+      "elapsed_ms": 1297.0000000059372,
+      "after_observation_id": null
+    }
+  ],
+  "meaning": "The original model-proposed literal semantic postconditions were independently checked; no raw failed step was rewritten."
+}

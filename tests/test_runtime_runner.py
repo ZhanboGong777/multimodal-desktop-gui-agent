@@ -2298,13 +2298,29 @@ def test_message_context_never_guesses_ambiguous_role_ids_or_drops_unlabelled_se
 
 
 def test_non_message_planning_context_remains_the_complete_observation(tmp_path):
+    from gui_agent.planning.target_bindings import (
+        GENERATION_TARGETING_POLICY_TEXT,
+        GENERATION_TARGETING_POLICY_VERSION,
+    )
     from gui_agent.runtime.observation import describe_elements
     runner, _, options, _, _, source = _approved_message_context(tmp_path)
     task = TaskSpec(case_id="T02", instruction="search", target_app="browser", success_rules=["results"])
     context = runner._context(source, task, options)
-    assert set(context) == {"platform", "observation_id", "screen", "target_app", "allowed_keys", "limits", "visible_text", "success_rules"}
+    assert set(context) == {"platform", "observation_id", "screen", "target_app", "allowed_keys", "limits", "visible_text", "success_rules", "target_bindings", "targeting_policy"}
     assert context["visible_text"] == describe_elements(source)
     assert "Sidebar" in context["visible_text"] and "Other app" in context["visible_text"]
+    bindings = context["target_bindings"]
+    assert bindings["schema_version"] == "gui_agent.target_bindings.v1"
+    assert bindings["observation_id"] == context["observation_id"] == source.observation_id
+    assert bindings["scope"] == "all_snapshot_candidates"
+    assert bindings["min_confidence"] == runner.adapter.min_confidence
+    assert [(item["element_id"], item["text"]) for item in bindings["candidates"]] == [
+        (element.element_id, element.text) for element in source.elements
+    ]
+    assert context["targeting_policy"] == {
+        "schema_version": GENERATION_TARGETING_POLICY_VERSION,
+        "instruction": GENERATION_TARGETING_POLICY_TEXT, "generation_only": True,
+    }
 
 
 def test_exact_message_literal_is_given_to_planning_but_withheld_from_visual_assessment(tmp_path):

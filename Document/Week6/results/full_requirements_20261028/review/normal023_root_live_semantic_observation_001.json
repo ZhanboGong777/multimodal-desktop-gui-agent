@@ -1,0 +1,66 @@
+{
+  "schema": "week6.root.live_semantic_observation.v1",
+  "observed_utc": "2026-10-29T00:27:56.696717+00:00",
+  "reviewer": "Root agent",
+  "task_still_running": true,
+  "final_task_exit": null,
+  "source_freeze": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\qwen3vl_candidate_001\\final_source_freeze_001.json",
+    "sha256": "eae135d2cf4a9e34538009b0d5b8796cf42c8581087d89c0be08b383514cad68"
+  },
+  "native_round2": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_023\\run\\automatic\\semantic_plan_round_002\\native_proposal.json",
+    "sha256": "e9e2cebf601a8e044c571234aae23d326b86517657d05091cfcc80026f7e895c"
+  },
+  "fixed_goal_contract": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_023\\run\\automatic\\goal_contract_002_001.json",
+    "sha256": "ef12ead66bdcb7d098b7cf3d813a7754674e9ee0a611ce93e789fd8ed37901aa"
+  },
+  "before_observation": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_023\\run\\automatic\\contract_before_002_001\\observation.json",
+    "sha256": "8234b996ab6bbf8edd7977f7df89103f0a9a64b7ba13e71ed17c799858827ee8"
+  },
+  "before_pixels_actually_viewed": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_023\\run\\automatic\\contract_before_002_001\\monitor1_20261029_111917_965.png",
+    "sha256": "5df174603f86db4e5e2c148ec8cf74824d5e40ea406ddb61992944aebcd0cf20"
+  },
+  "native_goal": {
+    "instruction": "Prepare the GREEN report for project ALPHA using visible controls.",
+    "expect_text": [
+      "Project ALPHA",
+      "Theme GREEN"
+    ],
+    "forbid_text": [],
+    "goal_id": "prepare_report"
+  },
+  "actual_ocr_labels": [
+    "Offline report preparation",
+    "Theme GREEN",
+    "Draft ready",
+    "Review report",
+    "立即体验",
+    "联想应用商店已升级到最新版本",
+    "Project",
+    "全新功能上线 !",
+    "Week6 Local Lab",
+    "3. 修复已知问题 ， 使用更流畅",
+    "x",
+    "增深色模式 ， 夜间浏览不伤眼 ;",
+    "点击 「 立即更新抢先体验",
+    "2. 优化下载路径异常提示 ， 处理更及时 ;"
+  ],
+  "root_actual_pixel_reading": [
+    "Project ALPHA",
+    "Theme GREEN",
+    "Draft ready",
+    "Review report"
+  ],
+  "finding": "The round2 prepare predicate Project ALPHA AND Theme GREEN was already visibly true in the original fresh before pixels. Project ALPHA was absent from OCR. False in literal OCR is not independent semantic evidence of a new preparation outcome. Cursor near the label is visible; its causal effect on OCR was not isolated. No cursor parking or original image mutation performed.",
+  "accepted_for_final_delivery": false,
+  "next": "Let the same bounded original task end; retain real owner/wrapper exits and run ended audits. Do not reclassify current semantics even if later machine checks pass. No source changes while it is active.",
+  "static_code_findings_to_review_after_end": [
+    "Failed executed-goal logical feedback currently preserves category only, dropping the original predicted goal and exact native literals reported missing by its verifier. Consider bounded feedback of that original contract and native-only mismatch literals; no raw UI, coordinates or images to high-level model.",
+    "audit_highlevel_intent_binding currently only allows failure category despite main audit reconstructing the newer rich rejected-before-input feedback. Cover this mismatch with a meaningful positive/tamper check before any future source freeze."
+  ],
+  "proposed_source_fix_implemented": false
+}

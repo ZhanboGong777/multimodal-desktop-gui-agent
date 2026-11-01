@@ -1,0 +1,29 @@
+{
+  "schema": "week6.semantic_auditor.version_snapshot.v1",
+  "version": "initial_v001",
+  "reviewer": "/root/week6_replanning_review",
+  "files": {
+    "week6_audit_semantic_acceptance.py.txt": "8850053110a28013a300a62d913aa3180052965be2ce61a747304b9900bfed9f",
+    "test_week6_full_requirements_review.py.txt": "fc9d3df0170b49cd861b22b1ee49a3f1e3a26ed671e20c4a4ea702f0e036c36b"
+  },
+  "validation": {
+    "semantic_counterexamples": "../cpu_validation_002/audit.json",
+    "semantic_testcases": 23,
+    "auditor_negative_counterexamples": "../cpu_validation_004/audit.json",
+    "auditor_testcases": 8,
+    "auditor_raw_audit_sha256": "74fbfdf9962ec93f3de492c81463a841747fecbe1404a0debf889950d6a75526",
+    "ruff": "two selected files passed; no production changes by reviewer",
+    "live_positive_audit": "pending actual ended semantic run; none invented"
+  },
+  "retained_history": {
+    "cpu_validation_001": "18 pass, 5 review-fixture assumption failures; original target bytes retained",
+    "cpu_validation_002": "23 pass, real exit0, 12 selected pins unchanged",
+    "cpu_validation_003": "review wrapper setup error while hashing PINS; pytest not started; original wrapper and explanation retained",
+    "cpu_validation_004": "8 added auditor negative guards pass, 23 earlier semantic tests deselected, real exit0, 13 selected pins unchanged"
+  },
+  "scope_limits": [
+    "No GUI, model, OCR performance or real-task success is established by scripted CPU tests",
+    "Native objective wording and per-goal real fixture transition partition remain visible to the release reviewer",
+    "Saved transport messages and retained provider replies are bound; no raw wire-level JSON request body was captured by the original transport logger"
+  ]
+}

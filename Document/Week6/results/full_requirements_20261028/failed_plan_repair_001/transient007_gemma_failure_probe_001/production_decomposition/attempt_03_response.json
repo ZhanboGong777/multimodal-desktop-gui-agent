@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "gemma3:4b",
+  "latency_ms": 4328.0,
+  "usage": {
+    "prompt_tokens": 2719,
+    "completion_tokens": 249,
+    "total_tokens": 2968
+  },
+  "error": null,
+  "content_length": 1118,
+  "content": "{\"status\": \"needs_clarification\", \"reason\": \"The previous plan failed validation due to an unspecified error. To proceed, I require clarification on the exact state of the report after generation. Specifically, I need confirmation that the report was successfully generated with 'Theme BLUE' and 'Project BETA' before proceeding with review and,\", \"subgoals\": [{\"instruction\": \"Verify the report's theme is 'Theme BLUE' and includes 'Project BETA'. If not, initiate report generation again using the visible controls.\", \"expect_text\": [\"Theme BLUE\", \"Project BETA\"], \"forbid_text\": [\"Report Generated\"], \"goal_id\": \"verify_report_details\"}, {\"instruction\": \"Locate the review option and attempt to review the generated report using the visible controls. If the review is temporarily unavailable, retry within budget constraints.\", \"expect_text\": [], \"forbid_text\": [\"Review unavailable\"], \"goal_id\": \"review_report_retry\"}, {\"instruction\": \"Locate the commit option and commit the reviewed report locally using the visible controls.\", \"expect_text\": [\"LOCAL COMPLETE\"], \"forbid_text\": [], \"goal_id\": \"commit_report\"}]}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

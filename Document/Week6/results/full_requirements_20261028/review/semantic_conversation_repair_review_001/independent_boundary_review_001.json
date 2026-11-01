@@ -1,0 +1,110 @@
+{
+  "schema": "week6.independent.conversation_repair.boundary_review.v1",
+  "reviewed_utc": "2026-10-28T11:40:57.847517+00:00",
+  "reviewer": "/root/week6_replanning_review (independent Codex agent)",
+  "code_stopped_for_root_validation": true,
+  "static_checks": {
+    "three_owned_files_ruff_tool_actual_exit_code": 0,
+    "pytest_or_shared_target_started_by_reviewer": false,
+    "first_ruff_fixture_import_style_issue_preserved": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_conversation_repair_review_001\\static_fixture_import_correction_001.json",
+      "sha256": "058100e5e2b8b946738126fd0dbc9f7aa19ce2043cb265321e14092598a27b8b",
+      "bytes": 680
+    }
+  },
+  "producer_scope_readonly": {
+    "source": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\src\\gui_agent\\planning\\semantic_workflow.py",
+      "sha256": "ae50b05e029e0ee5330430ec67d5a5bb0d49fe62487d47ecb34b914fcb0d8337",
+      "bytes": 58692
+    },
+    "native_protocol_original_system_and_typed_hint_same_AST": true,
+    "schema_rawchecks_preflight_and_goal_final_compilers_same_AST": true,
+    "initial_scope_guard_goal_result_and_all_execution_classes_same_AST": true,
+    "semantic_validate_and_constructor_same_AST": true,
+    "changed_behavior": "Versioned v2 role serialization of bounded repair attempts through the existing BudgetedModelClient retry/deadline/request counter"
+  },
+  "old_review_cases_preserved": {
+    "function_names_and_parametrization_decorators_identical": true,
+    "expected_old_case_count": 19,
+    "changed_helpers_or_cases_only_for_wire_representation": [
+      "_audit_attempt",
+      "test_review_feedback_is_removed_after_a_different_format_error",
+      "test_review_native_and_caller_canaries_stay_out_of_high_priority_feedback",
+      "test_review_auditor_replays_native_instead_of_accepting_a_forged_error_string"
+    ]
+  },
+  "new_case_scope": [
+    "First actual SDK MockTransport packet exactly equals original two-message ModelRequest",
+    "Role/control markers remain literal untrusted assistant content, never extra roles",
+    "Exact 1999/2000/2001 threshold; oversized raw archive full and assistant omitted without truncation",
+    "Only immediately previous raw reply is included and base user remains identical",
+    "Forged/missing/reordered/accumulated assistant/history or extra user turns are refused by exact auditor",
+    "Original caller, fixed final repair instruction and correction metadata cannot be rewritten",
+    "Transport audit binds full validated message array, not a two-message approximation",
+    "SDK HTTP cap remains counted and no history-induced extra call/input is authorized",
+    "Unknown and cancellation after model-owned repair remain terminal without goal/final rescue"
+  ],
+  "strict_auditor": "Typed category is recomputed from archived preceding native reply and exact saved rejection. V2 ten-key policy, system, immutable base user, optional exact assistant and final user JSON are independently rebuilt and compared by equality. No startswith acceptance.",
+  "limits": [
+    "Only source review and Ruff here; Root owns actual smoke/affected-semantic validation",
+    "Synthetic replies/MockTransport do not establish live model compliance",
+    "No source-level change reclassifies normal001 through normal012 as completed",
+    "No model, UI, process-control, staging, commit or full regression by this reviewer"
+  ],
+  "source_before": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_conversation_repair_review_001\\source_before_manifest_001.json",
+    "sha256": "12b58fbbf61cc78214296fce4ef06eb98f52b9bd1d882a1a4eb543eb5f0b5c49",
+    "bytes": 1728
+  },
+  "copies": [
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_audit_semantic_acceptance.py",
+        "sha256": "6f2c50c1ce5083a1b9425cc6656c1c0dea6ebc00be01dc7c6f1778e2badecd09",
+        "bytes": 57486
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_conversation_repair_review_001\\source_after_001\\scripts\\week6_audit_semantic_acceptance.py.txt",
+        "sha256": "6f2c50c1ce5083a1b9425cc6656c1c0dea6ebc00be01dc7c6f1778e2badecd09",
+        "bytes": 57486
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\tests\\test_week6_semantic_repair_feedback_review.py",
+        "sha256": "7898959fa7f0276100a2e331faf1043d6d33ccb14019abbc517559c8d3cf6d78",
+        "bytes": 14858
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_conversation_repair_review_001\\source_after_001\\tests\\test_week6_semantic_repair_feedback_review.py.txt",
+        "sha256": "7898959fa7f0276100a2e331faf1043d6d33ccb14019abbc517559c8d3cf6d78",
+        "bytes": 14858
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\tests\\test_week6_semantic_conversation_repair_review.py",
+        "sha256": "3ccdf8d0ee3771098acb0570a0069786b81c94ea9e4c98a80878b0293b23f88a",
+        "bytes": 12065
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_conversation_repair_review_001\\source_after_001\\tests\\test_week6_semantic_conversation_repair_review.py.txt",
+        "sha256": "3ccdf8d0ee3771098acb0570a0069786b81c94ea9e4c98a80878b0293b23f88a",
+        "bytes": 12065
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_replanning_review\\bind_conversation_repair_review_001.py",
+        "sha256": "3a909d03b38d483be7a447d2d607b21450cb97a574e8fe689a5e2278f441ec41",
+        "bytes": 8284
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_conversation_repair_review_001\\source_after_001\\bind_conversation_repair_review_001.py.txt",
+        "sha256": "3a909d03b38d483be7a447d2d607b21450cb97a574e8fe689a5e2278f441ec41",
+        "bytes": 8284
+      }
+    }
+  ]
+}

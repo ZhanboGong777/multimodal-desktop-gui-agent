@@ -1,0 +1,350 @@
+{
+  "schema": "week6.normal012.metadata_and_repair_readonly_assessment.v1",
+  "created_at_utc": "2026-10-28T11:29:30.016090+00:00",
+  "scope": {
+    "source_edits": false,
+    "tests_run": 0,
+    "generation_chat_load_pull_calls": 0,
+    "gui_executor_calls": 0,
+    "metadata_http_calls": 2,
+    "metadata_endpoints": [
+      "POST /api/show",
+      "GET /api/tags"
+    ]
+  },
+  "source_binding": {
+    "freeze_path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\semantic_repair_feedback_001\\final_source_freeze_001.json",
+    "freeze_sha256": "6a27f32b523374e2b6a2745d5796c376b7ddc7b2ad40219e28a62411e37860af",
+    "pin_count": 263,
+    "all_current_pins_equal_freeze": true,
+    "semantic_source_sha256": "8019728a21f8c64ac7b19f52f33d0324380458a04033979bcea1ea1c7d630694"
+  },
+  "normal012": {
+    "directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_012",
+    "raw_file_count": 128,
+    "owner_receipt_sha256": "184c682fbbefdbbf7450b48e0d341368cc41ab9b05c2c3da69389e8ae91950ff",
+    "owner_wait_child_exit_code": 1,
+    "owner_elapsed_seconds": 76.82800000009593,
+    "attempts": [
+      {
+        "attempt": 1,
+        "request_sha256": "01dc29761209bedf0b1ec3a7b98bb4c839a2eb8eeb9e27888b055d5a6919bf0d",
+        "response_sha256": "6aff4b2b03e568aabb3619ddbc9e4e4e73b37fa851e903f4996199b41dd53201",
+        "content_sha256": "8b9dcb7b7c6f86ad0eb7342ddee2c8e8f78a72986430038b39ffde1c0795204e",
+        "content_characters": 832,
+        "message_roles": [
+          "system",
+          "user"
+        ],
+        "saved_system_matches_transport_arguments": true,
+        "fixed_hint_occurrences": 0,
+        "schema_text_equals_transport_schema": true,
+        "response_format_matches_protocol": true,
+        "caller_instruction_unchanged": true,
+        "caller_context_unchanged": true,
+        "saved_context_equals_user_packet": true,
+        "image_path": null,
+        "previous_response_is_nested_user_data": false,
+        "native_goal_count": 3,
+        "native_checks": [
+          {
+            "goal_id": "prepare_green_report",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN"
+            ],
+            "forbid_text": []
+          },
+          {
+            "goal_id": "review_green_report",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": []
+          },
+          {
+            "goal_id": "commit_green_report",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": []
+          }
+        ],
+        "validator_error": "duplicate semantic postconditions for goals 'review_green_report' and 'commit_green_report': one complete expect_text/forbid_text set can verify only one goal. In the model response, combine their unfinished required operations into one semantic goal; preserve every requested operation, do not merge into completed objectives, and do not use an overall-final outcome for an earlier goal with requested operations still remaining.",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 1316,
+          "prompt_tokens_details": {
+            "cached_tokens": 1310
+          },
+          "completion_tokens": 198,
+          "total_tokens": 1514
+        },
+        "http_status": 200,
+        "actual_http_requests": 1,
+        "actual_model": "qwen2.5vl:7b"
+      },
+      {
+        "attempt": 2,
+        "request_sha256": "ff4a6cfe0efe412799c9ca0d37832bc0e335f221d6778cd9eab1865246a11a4d",
+        "response_sha256": "dd45a6f1f39c1d1661ff39fdf209022da1f4c8f4cefc6050ed944d9034062be1",
+        "content_sha256": "8b9dcb7b7c6f86ad0eb7342ddee2c8e8f78a72986430038b39ffde1c0795204e",
+        "content_characters": 832,
+        "message_roles": [
+          "system",
+          "user"
+        ],
+        "saved_system_matches_transport_arguments": true,
+        "fixed_hint_occurrences": 1,
+        "schema_text_equals_transport_schema": true,
+        "response_format_matches_protocol": true,
+        "caller_instruction_unchanged": true,
+        "caller_context_unchanged": true,
+        "saved_context_equals_user_packet": true,
+        "image_path": null,
+        "previous_response_is_nested_user_data": true,
+        "native_goal_count": 3,
+        "native_checks": [
+          {
+            "goal_id": "prepare_green_report",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN"
+            ],
+            "forbid_text": []
+          },
+          {
+            "goal_id": "review_green_report",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": []
+          },
+          {
+            "goal_id": "commit_green_report",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": []
+          }
+        ],
+        "validator_error": "duplicate semantic postconditions for goals 'review_green_report' and 'commit_green_report': one complete expect_text/forbid_text set can verify only one goal. In the model response, combine their unfinished required operations into one semantic goal; preserve every requested operation, do not merge into completed objectives, and do not use an overall-final outcome for an earlier goal with requested operations still remaining.",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 1822,
+          "prompt_tokens_details": {
+            "cached_tokens": 782
+          },
+          "completion_tokens": 198,
+          "total_tokens": 2020
+        },
+        "http_status": 200,
+        "actual_http_requests": 1,
+        "actual_model": "qwen2.5vl:7b"
+      },
+      {
+        "attempt": 3,
+        "request_sha256": "943f7afd2576e0bd0a0138fa2554dd0aa94630143bbbb8887ac92c094d9a6261",
+        "response_sha256": "173150dc77c03238c0eae41d04d05970ceb0e9d371801a6890941bb462744ef4",
+        "content_sha256": "8b9dcb7b7c6f86ad0eb7342ddee2c8e8f78a72986430038b39ffde1c0795204e",
+        "content_characters": 832,
+        "message_roles": [
+          "system",
+          "user"
+        ],
+        "saved_system_matches_transport_arguments": true,
+        "fixed_hint_occurrences": 1,
+        "schema_text_equals_transport_schema": true,
+        "response_format_matches_protocol": true,
+        "caller_instruction_unchanged": true,
+        "caller_context_unchanged": true,
+        "saved_context_equals_user_packet": true,
+        "image_path": null,
+        "previous_response_is_nested_user_data": true,
+        "native_goal_count": 3,
+        "native_checks": [
+          {
+            "goal_id": "prepare_green_report",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN"
+            ],
+            "forbid_text": []
+          },
+          {
+            "goal_id": "review_green_report",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": []
+          },
+          {
+            "goal_id": "commit_green_report",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": []
+          }
+        ],
+        "validator_error": "duplicate semantic postconditions for goals 'review_green_report' and 'commit_green_report': one complete expect_text/forbid_text set can verify only one goal. In the model response, combine their unfinished required operations into one semantic goal; preserve every requested operation, do not merge into completed objectives, and do not use an overall-final outcome for an earlier goal with requested operations still remaining.",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 1822,
+          "prompt_tokens_details": {
+            "cached_tokens": 1554
+          },
+          "completion_tokens": 198,
+          "total_tokens": 2020
+        },
+        "http_status": 200,
+        "actual_http_requests": 1,
+        "actual_model": "qwen2.5vl:7b"
+      }
+    ],
+    "all_three_content_byte_identical": true,
+    "actual_http_total": 3,
+    "independent_negative_audit_path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_normal012_audit_001.json",
+    "independent_negative_audit_sha256": "feb5511c579267eb100137d115ec25fb630e7e3b3f7f110668326abe5e57c67a"
+  },
+  "metadata": {
+    "summary_sha256": "10927df8b65ef298bf585afe6086382c8bef01ced99d243502faf2c5a502a5a5",
+    "requests": [
+      {
+        "endpoint": "/api/show",
+        "method": "POST",
+        "status_code": 200,
+        "started_at_utc": "2026-10-28T11:24:57.441312+00:00",
+        "elapsed_seconds": 0.09399999992456287,
+        "raw_response_bytes": 26426,
+        "raw_response_sha256": "aab17ff4fed08c64ac9c96f7b109fcfc22812242ab13a04e14c0642297938ce2"
+      },
+      {
+        "endpoint": "/api/tags",
+        "method": "GET",
+        "status_code": 200,
+        "started_at_utc": "2026-10-28T11:24:57.540282+00:00",
+        "elapsed_seconds": 0.07800000009592623,
+        "raw_response_bytes": 1278,
+        "raw_response_sha256": "c471834d2e4f35f5369ce5b164328fa04bf4f739fbc2d4b410794a094fe2100b"
+      }
+    ],
+    "template_sha256": "a242d8dfdc8f8c2b0586ee85fba70adb408fb633aba2836fe1b05f2c46631474",
+    "template_characters": 487,
+    "template_findings": [
+      "Template explicitly emits .System within a system ChatML turn when nonempty.",
+      "Template loops .Messages and emits user and assistant roles/content in order.",
+      "This metadata is not an independent capture of the server-rendered prompt for normal012."
+    ],
+    "default_system": "You are a helpful assistant.",
+    "parameters": "temperature                    0.0001\nnum_ctx                        32768",
+    "configured_context": 32768,
+    "actual_request_temperature_from_harness": 0,
+    "installed_models": [
+      {
+        "name": "qwen2.5vl:7b",
+        "model": "qwen2.5vl:7b",
+        "digest": "c82e67b1ceeeca8a1bbc93a7c3478934b42398d90d71ffc616b00c0f2b30e292",
+        "size": 5969245426,
+        "modified_at": "2026-10-06T11:49:40.3644314+11:00",
+        "details": {
+          "parent_model": "qwen2.5vl:7b",
+          "format": "gguf",
+          "family": "qwen25vl",
+          "families": [
+            "qwen25vl"
+          ],
+          "parameter_size": "8.3B",
+          "quantization_level": "Q4_K_M",
+          "context_length": 128000,
+          "embedding_length": 3584
+        }
+      },
+      {
+        "name": "llava:7b",
+        "model": "llava:7b",
+        "digest": "8dd30f6b0cb19f555f2c7a7ebda861449ea2cc76bf1f44e262931f45fc81d081",
+        "size": 4733363377,
+        "modified_at": "2026-09-27T02:10:33.4399384+10:00",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "llama",
+          "families": [
+            "llama",
+            "clip"
+          ],
+          "parameter_size": "7B",
+          "quantization_level": "Q4_0",
+          "context_length": 32768,
+          "embedding_length": 4096
+        }
+      },
+      {
+        "name": "qwen2.5vl:3b",
+        "model": "qwen2.5vl:3b",
+        "digest": "fb90415cde1ef08aa669ae74b082d49b158729b6db1ab183c941417d507e71a1",
+        "size": 3200627168,
+        "modified_at": "2026-09-27T01:33:50.1051439+10:00",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen25vl",
+          "families": [
+            "qwen25vl"
+          ],
+          "parameter_size": "3.8B",
+          "quantization_level": "Q4_K_M",
+          "context_length": 128000,
+          "embedding_length": 2048
+        }
+      }
+    ],
+    "dedicated_text_only_model_installed": false,
+    "three_b_model_is": "qwen2.5vl:3b (vision-language family), not a verified dedicated text model"
+  },
+  "conclusions": [
+    "The exact duplicate-postcondition guard correctly rejected goals 2 and 3. No native checks were locally merged or rewritten.",
+    "Retry fixed feedback was present once in the actual saved call arguments on attempts 2 and 3; the same exact schema and complete caller were retained.",
+    "No client-code or saved-message evidence shows the system role being removed. The Ollama template supports system/user/assistant turns, but metadata alone cannot prove attention or instruction following.",
+    "All replies stopped normally after 198 completion tokens; this run has no finish_reason=length evidence. Prompt totals at most 2020 tokens versus configured num_ctx32768 do not independently prove zero server truncation.",
+    "Usage cached_tokens refers to reported prompt caching; it is not evidence of a response cache returning prior generated content.",
+    "Current repair sends system+user JSON only. Rejected JSON remains nested user context, rather than an assistant turn followed by a new user correction.",
+    "The result supports a repair-ineffectiveness/capability limitation in this run, not proof of a serialization defect or guaranteed model incapability."
+  ],
+  "next_experiment_proposal": {
+    "priority": "Bounded explicit role-conversation repair is a smaller, auditable change than adding a second model route.",
+    "messages": [
+      "Original system and exact response schema.",
+      "Original immutable user request/context packet.",
+      "Previous rejected native response as an assistant-role message, unchanged.",
+      "Final user-role fixed typed correction instruction plus delimited validation data; no model text interpolated into system."
+    ],
+    "bounds": "Retain original max3 planning/actual HTTP attempts, same BudgetedModelClient counter, absolute deadline, immutable caller/final, strict native validator, no local merge and no forced ready. Archive every exact messages array and per-attempt role policy for independent reconstruction.",
+    "meaningful_tests": [
+      "Actual OpenAI SDK MockTransport body contains ordered system,user,assistant,user for retry, unchanged caller and response_format.",
+      "Malicious prior goal/error strings never enter system; original raw reply remains byte exact.",
+      "Three invalid responses still fail with 0 input; valid nonready remains nonready.",
+      "HTTP cap and late deadline remain shared with action planning; no implicit retry.",
+      "Auditor rejects reordered/altered role histories and unsupported repair-policy versions."
+    ],
+    "limitation": "Not tested against a real model in this diagnostic. Earlier unrelated saved-frame multi-turn probes also failed, so conversation roles are a falsifiable next experiment, not a promised fix.",
+    "routing_alternative": "If conversation repair remains ineffective, explicitly select/authorize a dedicated high-level text model and separate action vision model. Existing installed alternatives are all VL. A router needs per-role actual model/digest records but ONE shared transport/planning/action/time budget; it must not reclassify historical attempts as same-model successes."
+  },
+  "limitations": [
+    "No actual wire request body or server-rendered prompt was captured by the existing logger; saved exact method arguments are source-bound evidence.",
+    "No new generation request or GUI execution was performed.",
+    "No evidence here establishes live success or completes Week6 deliverables."
+  ]
+}

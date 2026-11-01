@@ -1,0 +1,170 @@
+"""Optional persistent Tesseract C API transport, with isolated per-frame state.
+
+Bindings follow upstream include/tesseract/capi.h (5.5.1). Returned TsvText uses
+TessDeleteText, while API lifetime uses End + Delete. This module never downloads
+libraries/resources, changes process environment, or falls back silently.
+"""
+from __future__ import annotations
+
+import ctypes
+import ctypes.util
+import os
+from pathlib import Path
+import shutil
+import sys
+import threading
+import weakref
+from typing import Any
+
+import numpy as np
+from PIL import Image
+
+
+def _dispose(lib: Any, api: int) -> None:
+    try:
+        lib.TessBaseAPIEnd(api)
+    finally:
+        lib.TessBaseAPIDelete(api)
+
+
+def _library_path(explicit: str | Path | None) -> str:
+    if explicit is not None:
+        path = Path(explicit).expanduser().resolve()
+        if not path.is_file():
+            raise RuntimeError(f"Tesseract C API library does not exist: {path}")
+        return str(path)
+    if sys.platform == "win32":
+        executable = shutil.which("tesseract")
+        if executable:
+            candidates = sorted(Path(executable).parent.glob("libtesseract-*.dll"))
+            if len(candidates) == 1:
+                return str(candidates[0])
+        raise RuntimeError("Set tesseract_library_path to an installed Tesseract C API DLL")
+    library = ctypes.util.find_library("tesseract")
+    if not library:
+        raise RuntimeError("Installed Tesseract C API library was not found")
+    return library
+
+
+class PersistentTesseract:
+    """One serialized API instance. Image/results/adaptation are cleared per call."""
+
+    def __init__(self, library: str | Path | None = None) -> None:
+        self.library_path = _library_path(library)
+        self._directory = None
+        if sys.platform == "win32":
+            self._directory = os.add_dll_directory(str(Path(self.library_path).parent))
+        try:
+            self._lib = ctypes.CDLL(self.library_path)
+            pointer, integer, string = ctypes.c_void_p, ctypes.c_int, ctypes.c_char_p
+            definitions = {
+                "TessBaseAPICreate": ([], pointer),
+                "TessBaseAPIInit2": ([pointer, string, string, integer], integer),
+                "TessBaseAPISetPageSegMode": ([pointer, integer], None),
+                "TessBaseAPIClearAdaptiveClassifier": ([pointer], None),
+                "TessBaseAPISetImage": ([pointer, pointer, integer, integer, integer, integer], None),
+                "TessBaseAPIRecognize": ([pointer, pointer], integer),
+                "TessBaseAPIGetTsvText": ([pointer, integer], pointer),
+                "TessDeleteText": ([pointer], None),
+                "TessBaseAPIClear": ([pointer], None),
+                "TessBaseAPIEnd": ([pointer], None),
+                "TessBaseAPIDelete": ([pointer], None),
+            }
+            for name, (args, result) in definitions.items():
+                function = getattr(self._lib, name)
+                function.argtypes, function.restype = args, result
+        except Exception:
+            if self._directory is not None:
+                self._directory.close()
+            raise
+        self._api: int | None = None
+        self._key: tuple[str, str | None, int] | None = None
+        self._finalizer: weakref.finalize | None = None
+        self._lock = threading.RLock()
+        self._closed = False
+
+    def _release_api(self) -> None:
+        if self._finalizer is not None:
+            self._finalizer()
+        self._finalizer = None
+        self._api, self._key = None, None
+
+    def close(self) -> None:
+        with self._lock:
+            if not self._closed:
+                self._closed = True
+                try:
+                    self._release_api()
+                finally:
+                    if self._directory is not None:
+                        self._directory.close()
+
+    def image_to_data(
+        self, image: Image.Image, *, language: str, tessdata_dir: str | Path | None,
+        psm: int, oem: int,
+    ) -> dict[str, list[str]]:
+        with self._lock:
+            if self._closed:
+                raise RuntimeError("Persistent Tesseract transport is closed")
+            folder = str(tessdata_dir) if tessdata_dir is not None else None
+            key = (language, folder, oem)
+            if key != self._key:
+                self._release_api()
+                api = self._lib.TessBaseAPICreate()
+                if not api:
+                    raise RuntimeError("TessBaseAPICreate returned NULL")
+                self._api = api
+                self._finalizer = weakref.finalize(self, _dispose, self._lib, api)
+                status = self._lib.TessBaseAPIInit2(
+                    api, folder.encode("utf-8") if folder is not None else None,
+                    language.encode("utf-8"), oem,
+                )
+                if status:
+                    self._release_api()
+                    raise RuntimeError(f"TessBaseAPIInit2 failed ({status}) for {language}")
+                self._key = key
+            api = self._api
+            array = np.ascontiguousarray(np.asarray(image), dtype=np.uint8)
+            if array.ndim not in (2, 3) or (array.ndim == 3 and array.shape[2] not in (3, 4)):
+                raise ValueError("Tesseract expects an 8-bit grayscale/RGB/RGBA image")
+            height, width = array.shape[:2]
+            if not width or not height or max(width, height, array.strides[0]) > 2**31 - 1:
+                raise ValueError("Tesseract image dimensions/stride exceed C API limits")
+            channels = 1 if array.ndim == 2 else array.shape[2]
+            text_pointer = None
+            try:
+                self._lib.TessBaseAPIClearAdaptiveClassifier(api)
+                self._lib.TessBaseAPISetPageSegMode(api, psm)
+                # array remains alive through Recognize/GetTsvText/Clear.
+                self._lib.TessBaseAPISetImage(
+                    api, array.ctypes.data, width, height, channels, array.strides[0],
+                )
+                status = self._lib.TessBaseAPIRecognize(api, None)
+                if status:
+                    raise RuntimeError(f"TessBaseAPIRecognize failed ({status})")
+                text_pointer = self._lib.TessBaseAPIGetTsvText(api, 0)
+                if not text_pointer:
+                    raise RuntimeError("TessBaseAPIGetTsvText returned NULL")
+                text = ctypes.string_at(text_pointer).decode("utf-8")
+                lines = text.splitlines()
+                if not lines:
+                    raise RuntimeError("Tesseract C API returned empty TSV without a header")
+                header = lines[0].split("\t")
+                expected = ["level", "page_num", "block_num", "par_num", "line_num", "word_num",
+                            "left", "top", "width", "height", "conf", "text"]
+                if header != expected:
+                    raise RuntimeError("Unexpected Tesseract TSV columns")
+                data: dict[str, list[str]] = {name: [] for name in header}
+                for line in lines[1:]:
+                    values = line.split("\t", len(header) - 1)
+                    if len(values) != len(header):
+                        raise RuntimeError("Malformed Tesseract TSV row")
+                    for name, value in zip(header, values):
+                        data[name].append(value)
+                return data
+            finally:
+                try:
+                    if text_pointer:
+                        self._lib.TessDeleteText(text_pointer)
+                finally:
+                    self._lib.TessBaseAPIClear(api)

@@ -1,0 +1,831 @@
+{
+  "schema_version": "week6.semantic.goal_grouping.independent_review.v1",
+  "reviewer": "/root/week6_replanning_review",
+  "source_before": "Document\\Week6\\results\\full_requirements_20261028\\semantic_goal_grouping_prompt_001\\source_before\\src\\gui_agent\\planning\\semantic_workflow.py",
+  "source_before_sha256": "de2586762d7d518e5e4ec6b58a635c0c26b92e165679522195191a4a966cd835",
+  "source_after": "src\\gui_agent\\planning\\semantic_workflow.py",
+  "source_after_sha256": "1b35465afb1134618f9d88b0cf90c996731ee3e34e321ac9e262374c387c1b56",
+  "only_system_prompt_and_validate_body_differ_in_production_AST": true,
+  "membership_guard_terms_before": [
+    "completed_checks",
+    "completed_id",
+    "completed_instruction",
+    "current_checks",
+    "current_id",
+    "current_instruction"
+  ],
+  "membership_guard_terms_after": [
+    "completed_checks",
+    "completed_id",
+    "completed_instruction",
+    "current_checks",
+    "current_id",
+    "current_instruction"
+  ],
+  "boolean_assignments_compared": 64,
+  "boolean_rejection_differences": 0,
+  "guard_blocks_only_raise_diagnostics_and_optional_prior_goal_lookup": true,
+  "remaining_validate_AST_identical_after_removing_only_diagnostic_branches_and_lookup_bookkeeping": true,
+  "protocol_schema_input_compilation_budget_credit_runtime_and_archive_code_unchanged": true,
+  "no_programmatic_merge_or_forced_goal_count": true,
+  "new_prompt_has_no_fixture_specific_literals": true,
+  "prompt_diff": [
+    "--- ",
+    "+++ ",
+    "@@ -24,6 +24,16 @@",
+    " Each list has <=8 checks of <=200 characters. Choose distinct observable caller",
+    " outcomes for distinct goals. Related requested operations may share a semantic",
+    " goal when that caller-provided outcome verifies their combined completion.",
+    "+The same COMPLETE expect_text/forbid_text set may belong to only ONE goal. If",
+    "+several unfinished requested operations need that same outcome, combine ALL",
+    "+those operations into one concise semantic goal in your response, rather than",
+    "+returning separate goals with identical checks. Do not drop any requested",
+    "+operation to remove a duplicate, and never combine new work into an already",
+    "+completed goal. A predicate that becomes true only after the overall request is",
+    "+finished cannot verify an earlier goal while requested operations remain. Put",
+    "+the overall final-state conjunction on the last goal, whose instruction covers",
+    "+all operations still needed to produce that state. Other goals need their own",
+    "+distinguishable caller-provided outcomes; never invent an intermediate label.",
+    " Do not invent a goal sequence just to reach the minimum of two. If the request",
+    " cannot support two meaningful, distinguishable objectives with these predicates,",
+    " return needs_clarification. Multiple supplied strings alone do not prove that"
+  ],
+  "truth_table": [
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": false,
+        "completed_instruction": false,
+        "current_checks": false,
+        "current_id": false,
+        "current_instruction": false
+      },
+      "before_rejects": false,
+      "after_rejects": false
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": false,
+        "completed_instruction": false,
+        "current_checks": false,
+        "current_id": false,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": false,
+        "completed_instruction": false,
+        "current_checks": false,
+        "current_id": true,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": false,
+        "completed_instruction": false,
+        "current_checks": false,
+        "current_id": true,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": false,
+        "completed_instruction": false,
+        "current_checks": true,
+        "current_id": false,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": false,
+        "completed_instruction": false,
+        "current_checks": true,
+        "current_id": false,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": false,
+        "completed_instruction": false,
+        "current_checks": true,
+        "current_id": true,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": false,
+        "completed_instruction": false,
+        "current_checks": true,
+        "current_id": true,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": false,
+        "completed_instruction": true,
+        "current_checks": false,
+        "current_id": false,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": false,
+        "completed_instruction": true,
+        "current_checks": false,
+        "current_id": false,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": false,
+        "completed_instruction": true,
+        "current_checks": false,
+        "current_id": true,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": false,
+        "completed_instruction": true,
+        "current_checks": false,
+        "current_id": true,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": false,
+        "completed_instruction": true,
+        "current_checks": true,
+        "current_id": false,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": false,
+        "completed_instruction": true,
+        "current_checks": true,
+        "current_id": false,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": false,
+        "completed_instruction": true,
+        "current_checks": true,
+        "current_id": true,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": false,
+        "completed_instruction": true,
+        "current_checks": true,
+        "current_id": true,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": true,
+        "completed_instruction": false,
+        "current_checks": false,
+        "current_id": false,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": true,
+        "completed_instruction": false,
+        "current_checks": false,
+        "current_id": false,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": true,
+        "completed_instruction": false,
+        "current_checks": false,
+        "current_id": true,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": true,
+        "completed_instruction": false,
+        "current_checks": false,
+        "current_id": true,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": true,
+        "completed_instruction": false,
+        "current_checks": true,
+        "current_id": false,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": true,
+        "completed_instruction": false,
+        "current_checks": true,
+        "current_id": false,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": true,
+        "completed_instruction": false,
+        "current_checks": true,
+        "current_id": true,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": true,
+        "completed_instruction": false,
+        "current_checks": true,
+        "current_id": true,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": true,
+        "completed_instruction": true,
+        "current_checks": false,
+        "current_id": false,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": true,
+        "completed_instruction": true,
+        "current_checks": false,
+        "current_id": false,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": true,
+        "completed_instruction": true,
+        "current_checks": false,
+        "current_id": true,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": true,
+        "completed_instruction": true,
+        "current_checks": false,
+        "current_id": true,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": true,
+        "completed_instruction": true,
+        "current_checks": true,
+        "current_id": false,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": true,
+        "completed_instruction": true,
+        "current_checks": true,
+        "current_id": false,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": true,
+        "completed_instruction": true,
+        "current_checks": true,
+        "current_id": true,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": false,
+        "completed_id": true,
+        "completed_instruction": true,
+        "current_checks": true,
+        "current_id": true,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": false,
+        "completed_instruction": false,
+        "current_checks": false,
+        "current_id": false,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": false,
+        "completed_instruction": false,
+        "current_checks": false,
+        "current_id": false,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": false,
+        "completed_instruction": false,
+        "current_checks": false,
+        "current_id": true,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": false,
+        "completed_instruction": false,
+        "current_checks": false,
+        "current_id": true,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": false,
+        "completed_instruction": false,
+        "current_checks": true,
+        "current_id": false,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": false,
+        "completed_instruction": false,
+        "current_checks": true,
+        "current_id": false,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": false,
+        "completed_instruction": false,
+        "current_checks": true,
+        "current_id": true,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": false,
+        "completed_instruction": false,
+        "current_checks": true,
+        "current_id": true,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": false,
+        "completed_instruction": true,
+        "current_checks": false,
+        "current_id": false,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": false,
+        "completed_instruction": true,
+        "current_checks": false,
+        "current_id": false,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": false,
+        "completed_instruction": true,
+        "current_checks": false,
+        "current_id": true,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": false,
+        "completed_instruction": true,
+        "current_checks": false,
+        "current_id": true,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": false,
+        "completed_instruction": true,
+        "current_checks": true,
+        "current_id": false,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": false,
+        "completed_instruction": true,
+        "current_checks": true,
+        "current_id": false,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": false,
+        "completed_instruction": true,
+        "current_checks": true,
+        "current_id": true,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": false,
+        "completed_instruction": true,
+        "current_checks": true,
+        "current_id": true,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": true,
+        "completed_instruction": false,
+        "current_checks": false,
+        "current_id": false,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": true,
+        "completed_instruction": false,
+        "current_checks": false,
+        "current_id": false,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": true,
+        "completed_instruction": false,
+        "current_checks": false,
+        "current_id": true,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": true,
+        "completed_instruction": false,
+        "current_checks": false,
+        "current_id": true,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": true,
+        "completed_instruction": false,
+        "current_checks": true,
+        "current_id": false,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": true,
+        "completed_instruction": false,
+        "current_checks": true,
+        "current_id": false,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": true,
+        "completed_instruction": false,
+        "current_checks": true,
+        "current_id": true,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": true,
+        "completed_instruction": false,
+        "current_checks": true,
+        "current_id": true,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": true,
+        "completed_instruction": true,
+        "current_checks": false,
+        "current_id": false,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": true,
+        "completed_instruction": true,
+        "current_checks": false,
+        "current_id": false,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": true,
+        "completed_instruction": true,
+        "current_checks": false,
+        "current_id": true,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": true,
+        "completed_instruction": true,
+        "current_checks": false,
+        "current_id": true,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": true,
+        "completed_instruction": true,
+        "current_checks": true,
+        "current_id": false,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": true,
+        "completed_instruction": true,
+        "current_checks": true,
+        "current_id": false,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": true,
+        "completed_instruction": true,
+        "current_checks": true,
+        "current_id": true,
+        "current_instruction": false
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    },
+    {
+      "conditions": {
+        "completed_checks": true,
+        "completed_id": true,
+        "completed_instruction": true,
+        "current_checks": true,
+        "current_id": true,
+        "current_instruction": true
+      },
+      "before_rejects": true,
+      "after_rejects": true
+    }
+  ],
+  "conclusion": "No acceptance guard relaxation found. The same six OR rejection terms are split into exact completed/id-instruction/check diagnostics; the model, not local code, is asked to group related unfinished operations. No model or GUI effectiveness result is implied.",
+  "limitations": "This is source/Boolean analysis, not a new full regression or live run. Previous full003 and normal007 remain bound to their original producer hashes.",
+  "operations": {
+    "model_calls": 0,
+    "GUI_operations": 0,
+    "pytest_runs": 0
+  },
+  "review_script_sha256": "26a8fe6d05cabffee8b0a5c7c5d474c5ffeee87d10d0757daf4f91890ad62aca"
+}

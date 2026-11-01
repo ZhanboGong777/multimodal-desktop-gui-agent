@@ -1,0 +1,59 @@
+{
+  "schema_version": "week6.workflow.v1",
+  "workflow_id": "semantic_lab",
+  "status": "succeeded",
+  "execute": true,
+  "subgoals": [
+    {
+      "index": 0,
+      "case_id": "ALPHA_REVIEW_001",
+      "status": "completed",
+      "child_status": "succeeded",
+      "actions": 1,
+      "unconfirmed_action_attempts": 0,
+      "planning_calls": 1,
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "obs-0004",
+          "expect_text": [
+            "Review Complete"
+          ],
+          "forbid_text": [],
+          "verification_source": "frozen_model_semantic_subtask_postconditions"
+        }
+      },
+      "elapsed_ms": 48844.000000011874,
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_030\\run\\automatic\\goal_001_002_ALPHA_REVIEW_001\\001_ALPHA_REVIEW_001",
+      "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_030\\run\\automatic\\goal_001_002_ALPHA_REVIEW_001\\001_ALPHA_REVIEW_001\\task_summary.json",
+      "error": null
+    }
+  ],
+  "total_actions": 1,
+  "unconfirmed_action_attempts": 0,
+  "planning_calls": 1,
+  "accounting_complete": true,
+  "elapsed_ms": 51625.0,
+  "final_verification": {
+    "outcome": "passed",
+    "method": "automatic",
+    "detail": "all success rules matched against the current screen",
+    "evidence": {
+      "observation_id": "obs-0005",
+      "expect_text": [
+        "Review Complete"
+      ],
+      "forbid_text": [],
+      "verification_source": "frozen_model_semantic_subtask_postconditions"
+    }
+  },
+  "final_observation_id": "obs-0005",
+  "final_observation_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_030\\run\\automatic\\goal_001_002_ALPHA_REVIEW_001\\001_ALPHA_REVIEW_001\\obs-0005.json",
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_030\\run\\automatic\\goal_001_002_ALPHA_REVIEW_001",
+  "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_030\\run\\automatic\\goal_001_002_ALPHA_REVIEW_001\\workflow_summary.json",
+  "checkpoint_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_030\\run\\automatic\\goal_001_002_ALPHA_REVIEW_001\\checkpoints.jsonl",
+  "error": null,
+  "notes": []
+}

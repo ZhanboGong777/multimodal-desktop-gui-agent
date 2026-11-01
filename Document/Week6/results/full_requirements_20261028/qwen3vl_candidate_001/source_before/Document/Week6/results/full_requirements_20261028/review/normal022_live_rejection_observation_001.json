@@ -1,0 +1,67 @@
+{
+  "schema": "week6.actual_rejection_midrun_observation.v1",
+  "observed_utc": "2026-10-28T23:56:17.057457+00:00",
+  "source": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_022\\run\\automatic\\semantic_rejected_contracts.json",
+  "source_observed_sha256": "9c2345b2c4bf70302f2b49fd466ad5836dca90094aefe2f7277e025d2b486beb",
+  "observed_rejected_contracts": [
+    {
+      "schema_version": "week6.semantic.rejected_pre_input_contract.v1",
+      "round": 1,
+      "goal_index": 2,
+      "goal": {
+        "instruction": "Locally review the prepared GREEN report for project ALPHA.",
+        "expect_text": [
+          "Review",
+          "Project ALPHA",
+          "Theme GREEN"
+        ],
+        "forbid_text": [],
+        "goal_id": "review_report"
+      },
+      "status": "rejected_before_input",
+      "reason": "semantic goal checks already hold before input; no completion credit",
+      "before_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_022\\run\\automatic\\contract_before_001_002\\observation.json",
+      "before_verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "obs-0001",
+          "expect_text": [
+            "Review",
+            "Project ALPHA",
+            "Theme GREEN"
+          ],
+          "forbid_text": []
+        }
+      },
+      "confirmed_inputs": 0,
+      "eligible_for_semantic_credit": false
+    }
+  ],
+  "original_parent_status_at_read": {
+    "schema": "week6.run_status.semantic.v1",
+    "run_id": "a24e7bb3d21b48faa1f4d99855aa1718",
+    "case_id": "semantic_lab",
+    "execute": true,
+    "pid": 80012,
+    "process_identity": "windows:134377048308211843",
+    "seq": 33,
+    "event": "finished",
+    "stage": "finished",
+    "task_status": "blocked",
+    "updated_at_utc": "2026-10-28T23:55:55.554950+00:00",
+    "elapsed_ms": 519983.99999993853,
+    "max_actions": 20,
+    "max_planning_attempts": 24,
+    "planning_pass": 4,
+    "actions_used": 2,
+    "subgoals_total": 3,
+    "subgoals_completed": 1,
+    "subgoal_id": null,
+    "detail_code": "",
+    "write_failures": []
+  },
+  "task_finished": false,
+  "meaning": "Original running rejection snapshot, no execution/completion credit or final success inferred."
+}

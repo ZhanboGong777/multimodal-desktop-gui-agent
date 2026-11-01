@@ -1,0 +1,62 @@
+{
+  "accepted": false,
+  "source_freeze": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\failed_plan_repair_001\\final_source_freeze_001.json",
+    "sha256": "bb681abc47882e4957bcee53711eba93ad10c221c15feebf988a19cea6e6c5d7"
+  },
+  "terminal": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_009\\operator_handoff_003.json",
+    "sha256": "345da8227f8574a6643761e22b0ab8375a7820dad4d2ce34252275a66e9403ac"
+  },
+  "controlled_stop": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\transient009_controlled_stop_001.json",
+    "sha256": "d16508a2c85dc928d00edc850f4cfafed3310f1a5a8d934384af80d4d0fb70f3"
+  },
+  "actual_owner_child_exit": 15,
+  "actual_wrapper_exit": 1,
+  "audits": [
+    {
+      "audit_kind": "strict",
+      "command": [
+        "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_audit_semantic_acceptance.py",
+        "--container",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_009",
+        "--owner-harness",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_full_requirements_20261028\\run_owned_role_models_001.py",
+        "--fixture-directory",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\fixture_transient_009",
+        "--out",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\transient009_strict_audit_001.json"
+      ],
+      "started_utc": "2026-11-01T07:27:12.732622+00:00",
+      "finished_utc": "2026-11-01T07:27:13.660868+00:00",
+      "actual_child_exit_code": 1,
+      "stdout": "{\"passed\": false, \"out\": \"C:\\\\Users\\\\联想\\\\Documents\\\\ChatGPT\\\\Intern\\\\week6-worktree\\\\Document\\\\Week6\\\\results\\\\full_requirements_20261028\\\\review\\\\transient009_strict_audit_001.json\", \"sha256\": \"61a7be25f02d05167310d3f9811e67aa17c374c5f5ac490de148e8d18c8ad528\", \"error\": \"owner_did_not_observe_real_exit_zero\"}\n",
+      "stderr": ""
+    },
+    {
+      "audit_kind": "receipt_protocol",
+      "command": [
+        "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\audit_input_receipt_protocol.py",
+        "--container",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_009",
+        "--operator-handoff",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_009\\operator_handoff_003.json",
+        "--expected-window",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_009\\window_claim_001.json",
+        "--owner-exit-confirmed",
+        "--out",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\transient009_receipt_protocol_audit_001.json"
+      ],
+      "started_utc": "2026-11-01T07:27:13.661869+00:00",
+      "finished_utc": "2026-11-01T07:27:13.836441+00:00",
+      "actual_child_exit_code": 1,
+      "stdout": "{\"audit\": \"C:\\\\Users\\\\\\u8054\\u60f3\\\\Documents\\\\ChatGPT\\\\Intern\\\\week6-worktree\\\\Document\\\\Week6\\\\results\\\\full_requirements_20261028\\\\review\\\\transient009_receipt_protocol_audit_001.json\", \"passed\": false, \"sha256\": \"87ace4bdd3566761d2963087b3892e056655c25aad70cbff4a3352de8ce15044\"}\n",
+      "stderr": ""
+    }
+  ],
+  "raw_case_and_fixture_unchanged": true,
+  "meaning": "Incomplete controlled-stop case retained as negative evidence; no qualification or acceptance transfer."
+}

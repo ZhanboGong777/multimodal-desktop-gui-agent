@@ -1,0 +1,49 @@
+{
+  "schema": "week6.normal014.action_output_readonly.v1",
+  "owner_exit": 1,
+  "actual_model": "qwen2.5vl:3b",
+  "highlevel_native_goals": 2,
+  "lowlevel_http_count": 2,
+  "lowlevel_messages_equal": true,
+  "lowlevel_raw_contents": [
+    "{\"action_type\":\"double_click\",\"target_text\":\"ALPHA\",\"arguments\":{},\"status\":\"success\"}",
+    "{\"action_type\":\"double_click\",\"target_text\":\"ALPHA\",\"arguments\":{},\"status\":\"success\"}"
+  ],
+  "lowlevel_raw_sha256": [
+    "a1c725c336815a3170b327a2072c1594df19057f5de72d2f9651fb06f0486bd3",
+    "a1c725c336815a3170b327a2072c1594df19057f5de72d2f9651fb06f0486bd3"
+  ],
+  "lowlevel_context_keys": [
+    [
+      "platform",
+      "observation_id",
+      "screen",
+      "target_app",
+      "allowed_keys",
+      "limits",
+      "visible_text",
+      "success_rules",
+      "max_steps"
+    ],
+    [
+      "platform",
+      "observation_id",
+      "screen",
+      "target_app",
+      "allowed_keys",
+      "limits",
+      "visible_text",
+      "success_rules",
+      "max_steps"
+    ]
+  ],
+  "system_has_full_task_plan_example": true,
+  "code_findings": {
+    "planner.py:54,60": "require_structured_output is assigned but not used in the prior planning call",
+    "planner.py:84-90": "generate_multimodal has no response_format",
+    "planner.py:100-102": "PlanParseError only updates last_error then repeats identical request",
+    "parser.py:61-63": "missing/nonlist/empty steps is rejected before execution"
+  },
+  "input_count": 0,
+  "parser_change_or_native_local_wrapping": false
+}

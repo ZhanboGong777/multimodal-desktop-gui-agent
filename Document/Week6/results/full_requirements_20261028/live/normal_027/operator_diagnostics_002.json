@@ -1,0 +1,83 @@
+{
+  "schema": "week6.live.operator_diagnostics.v2",
+  "utc": "2026-10-31T13:18:13.354145+00:00",
+  "accepted": false,
+  "owner_receipt": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_027\\owner_receipt.json",
+    "sha256": "ec1e168e081036768e03a94891655ce44f001bbdcc1079ffdc2aa564a4f020b6"
+  },
+  "wrapper_proof": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_027\\exec_wrapper_wait_001.json",
+    "sha256": "ac73f82ba22546d7a57a88dca2bd51d59854ca46e24033dddb220de32b98d817"
+  },
+  "original_process_identities_gone": [
+    {
+      "pid": 25576,
+      "expected_create_time": 1793451761.5251029,
+      "observed_create_time": null,
+      "same_identity_alive": false
+    },
+    {
+      "pid": 4764,
+      "expected_create_time": 1793451761.7249572,
+      "observed_create_time": null,
+      "same_identity_alive": false
+    },
+    {
+      "pid": 13688,
+      "expected_create_time": 1793451761.7470329,
+      "observed_create_time": null,
+      "same_identity_alive": false
+    },
+    {
+      "pid": 2792,
+      "expected_create_time": 1793452005.976094,
+      "observed_create_time": null,
+      "same_identity_alive": false
+    },
+    {
+      "pid": 9428,
+      "expected_create_time": 1793452005.9985487,
+      "observed_create_time": null,
+      "same_identity_alive": false
+    },
+    {
+      "pid": 15444,
+      "expected_create_time": 1793452093.6930902,
+      "observed_create_time": null,
+      "same_identity_alive": false
+    },
+    {
+      "pid": 35136,
+      "expected_create_time": 1793452280.3859072,
+      "observed_create_time": null,
+      "same_identity_alive": false
+    },
+    {
+      "pid": 3340,
+      "expected_create_time": 1793452280.406726,
+      "observed_create_time": null,
+      "same_identity_alive": false
+    }
+  ],
+  "source_freeze": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\preexisting_repair_hint_001\\final_source_freeze_001.json",
+    "sha256": "71ea38ff9e9f4227e2d42524295adf893148ae0ad0aea05806ba08ac17536005"
+  },
+  "code_and_readme_dev_unchanged": true,
+  "pending_unserved_requests": [
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_027\\run\\sky_activation\\capture_19358906000000_request.json",
+      "sha256": "618c0bfc221539ca1ee19f9de32e91f1c1a709b3f1314ca8f58443d6693c1a7f"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_027\\run\\sky_activation\\capture_19449046000000_request.json",
+      "sha256": "242d01e0c0cda05a5c5ce075dbe3771d7125512ef141abacc491756a15f30380"
+    }
+  ],
+  "known_inputs": 5,
+  "unknown_inputs": 0,
+  "planning_and_http_requests": 8,
+  "diagnosis": "Native review-only subgoal wrongly required LOCAL COMPLETE alongside Review Complete. Local commit input004 occurred inside that subgoal and input005 clicked final marker without business change. Only prepare goal verified. Two subsequent native capture requests were not serviced before their original deadlines during operator/context interruption. Owner actually exited1. Native plan defect and operator capture timeout are distinct; no late receipts or semantic acceptance. Semantic monitor persistence ValueError separately retained for diagnosis.",
+  "raw_evidence_not_repaired": true
+}

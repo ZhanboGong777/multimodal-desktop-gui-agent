@@ -1,0 +1,28 @@
+{
+  "schema": "week6.semantic.development_history.v1",
+  "source_pins_at_development_runs": "Not captured; these are development results, not release validation. Final captured targeted run is saved separately.",
+  "runs": [
+    {
+      "tool_session_id": 11582,
+      "exit_code": 0,
+      "stdout_completion": "29 passed in 11.56s",
+      "scope": "new semantic file only, first draft"
+    },
+    {
+      "tool_session_id": 42996,
+      "exit_code": 0,
+      "stdout_completion": "41 passed in 11.13s",
+      "scope": "new semantic + old auto CLI, intermediate source"
+    },
+    {
+      "tool_session_id": 30391,
+      "exit_code": 1,
+      "stdout_completion": "1 failed, 37 passed in 14.71s",
+      "failed_test": "test_shared_budget_client_cannot_be_bypassed_by_custom_factory",
+      "observed_actual": "failed status, zero inputs, one HTTP; runtime error string was workflow interrupted by ValueError",
+      "assertion_error": "Expected BudgetedModelClient in parent error, which the existing WorkflowRunner intentionally replaces with generic exception type.",
+      "followup": "Exact preinput error now separately saved to semantic_child_setup_error.json and test checks that evidence; no guards loosened."
+    }
+  ],
+  "no_model_or_gui_calls": true
+}

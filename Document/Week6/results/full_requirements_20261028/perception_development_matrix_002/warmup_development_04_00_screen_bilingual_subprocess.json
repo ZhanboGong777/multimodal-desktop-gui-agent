@@ -1,0 +1,308 @@
+{
+  "fixture": "development_04",
+  "arm": "screen_bilingual_subprocess",
+  "phase": "warmup",
+  "repeat": 0,
+  "image_sha256": "a2769bb1db05de3a51cf8c181b849461c5f1030de371ed93936d83ce0d7c4645",
+  "started_perf_counter": 674557.8351707,
+  "status": "completed",
+  "ended_perf_counter": 674558.2182224,
+  "engine_creation_ms": 0.001400010660290718,
+  "decode_ms": 1.5430999919772148,
+  "ocr_ms": 376.5680000651628,
+  "ui_ms": 4.939200007356703,
+  "full_ms": 383.051700075157,
+  "metrics": {
+    "tp": 7,
+    "fp": 1,
+    "fn": 1,
+    "precision": 0.875,
+    "recall": 0.875,
+    "labels": [
+      {
+        "text": "Color Studio",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9034369885433715
+      },
+      {
+        "text": "Brush Width",
+        "language": "en",
+        "matched": true,
+        "iou": 0.8851674641148325
+      },
+      {
+        "text": "Pick Color",
+        "language": "en",
+        "matched": true,
+        "iou": 0.984375
+      },
+      {
+        "text": "Fill",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9444444444444444
+      },
+      {
+        "text": "Erase",
+        "language": "en",
+        "matched": true,
+        "iou": 0.972972972972973
+      },
+      {
+        "text": "颜色面板",
+        "language": "zh",
+        "matched": true,
+        "iou": 0.9230769230769231
+      },
+      {
+        "text": "选取颜色",
+        "language": "zh",
+        "matched": true,
+        "iou": 0.6190476190476191
+      },
+      {
+        "text": "擦除",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      }
+    ]
+  },
+  "control_metrics": {
+    "tp": 6,
+    "fp": 1,
+    "fn": 0,
+    "iou_threshold": 0.8
+  },
+  "predictions": [
+    {
+      "text": "Color Studio",
+      "bounding_box": {
+        "left": 43,
+        "top": 38,
+        "right": 135,
+        "bottom": 50
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 89,
+        "y": 44
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Brush Width",
+      "bounding_box": {
+        "left": 43,
+        "top": 115,
+        "right": 117,
+        "bottom": 125
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 80,
+        "y": 120
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "颜色面板",
+      "bounding_box": {
+        "left": 548,
+        "top": 116,
+        "right": 604,
+        "bottom": 128
+      },
+      "confidence": 0.93,
+      "center": {
+        "x": 576,
+        "y": 122
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Pick Color",
+      "bounding_box": {
+        "left": 43,
+        "top": 201,
+        "right": 106,
+        "bottom": 211
+      },
+      "confidence": 0.9,
+      "center": {
+        "x": 74,
+        "y": 206
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "选取颜色",
+      "bounding_box": {
+        "left": 548,
+        "top": 200,
+        "right": 604,
+        "bottom": 221
+      },
+      "confidence": 0.9,
+      "center": {
+        "x": 576,
+        "y": 210
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Fill",
+      "bounding_box": {
+        "left": 43,
+        "top": 305,
+        "right": 60,
+        "bottom": 315
+      },
+      "confidence": 0.95,
+      "center": {
+        "x": 51,
+        "y": 310
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Erase",
+      "bounding_box": {
+        "left": 257,
+        "top": 305,
+        "right": 293,
+        "bottom": 315
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 275,
+        "y": 310
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "除",
+      "bounding_box": {
+        "left": 567,
+        "top": 304,
+        "right": 579,
+        "bottom": 325
+      },
+      "confidence": 0.89,
+      "center": {
+        "x": 573,
+        "y": 314
+      },
+      "source": "ocr"
+    }
+  ],
+  "ui_candidates": [
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 536,
+        "top": 291,
+        "right": 691,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 613,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 244,
+        "top": 291,
+        "right": 399,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 321,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 30,
+        "top": 291,
+        "right": 185,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 536,
+        "top": 187,
+        "right": 691,
+        "bottom": 244
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 613,
+        "y": 215
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 30,
+        "top": 187,
+        "right": 185,
+        "bottom": 244
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 215
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 536,
+        "top": 101,
+        "right": 691,
+        "bottom": 158
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 613,
+        "y": 129
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 548,
+        "top": 305,
+        "right": 577,
+        "bottom": 320
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 562,
+        "y": 312
+      },
+      "source": "contour"
+    }
+  ],
+  "errors": []
+}

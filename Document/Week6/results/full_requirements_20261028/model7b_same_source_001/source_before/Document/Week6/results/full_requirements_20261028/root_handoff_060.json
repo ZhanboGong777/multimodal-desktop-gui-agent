@@ -1,0 +1,274 @@
+{
+  "schema": "week6.full_requirements.handoff.v4",
+  "previous": {
+    "path": "root_handoff_059.json",
+    "sha256": "d0bc49582ae28725462192c12c59a0c237472e8c6646a443126bfda5e04ac13a"
+  },
+  "updated_utc": "2026-10-28T15:38:45.191226+00:00",
+  "status": "in_progress",
+  "branch": "codex/week6-full-requirements",
+  "phase": "new275_fixed_polarity_guidance_normal020_running",
+  "freeze": {
+    "path": "semantic_polarity_guidance_001\\final_source_freeze_001.json",
+    "sha256": "a99bf7b8bc95326440bb6974aba636f7dca498450b5e27e88ffc198255b6c6f2"
+  },
+  "preregistration": {
+    "path": "live\\preregistered_v6_012.json",
+    "sha256": "9693e65614280966eda9de388f00b23986fefbe837a97d32219932b42b1b8be1"
+  },
+  "code_pin_count": 275,
+  "package_python_count": 91,
+  "readme_sha256": "d87303ea0d3eb099b8e04193bfbae13037688faaa07e4f5452d252670a20f3e3",
+  "requirements_dev_sha256": "31b4bba08667510fa824a01634563e7cd5c30eac77ca8ddfba3aa6cb21643918",
+  "all_source_writers_stopped": true,
+  "active_cpu_task": null,
+  "validation": {
+    "path": "semantic_polarity_guidance_001\\root_affected_validation_001\\validation.json",
+    "sha256": "400b5f1961498a999c6a6cef4a50bc09393289b78342269cd40910b3a132d474",
+    "actual_exec_session": 89295,
+    "actual_exec_exit": 0,
+    "session_closed": true,
+    "passed": 1127,
+    "pytest_seconds": 273.65,
+    "collected_only": 3624,
+    "full004_run": false
+  },
+  "root_scope_review": {
+    "path": "observed_query_constraints_001/root_scope_review_001.json",
+    "sha256": "bf5d70c346c86588cafee5c0f449732d131d911718518f8e9ebfc30b05a5a7d6"
+  },
+  "active_model_or_gui_task": {
+    "case": "normal_020",
+    "exec_session": 14310,
+    "owner": {
+      "pid": 77280,
+      "create_time": 1793201865.3320408,
+      "exe": "D:\\anaconda\\python.exe",
+      "cmdline": [
+        "D:\\anaconda\\python.exe",
+        "-X",
+        "utf8",
+        "C:/Users/联想/Documents/ChatGPT/Intern/tmp/week6_full_requirements_20261028/run_owned_model.py",
+        "--name",
+        "normal_020",
+        "--fixture-directory",
+        "C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/live/fixture_normal_016",
+        "--project",
+        "ALPHA",
+        "--colour",
+        "GREEN",
+        "--mode",
+        "normal",
+        "--model",
+        "qwen2.5vl:3b",
+        "--config",
+        "C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/configs/week6_accuracy_persistent.yaml",
+        "--task-timeout",
+        "7200",
+        "--model-timeout",
+        "900"
+      ]
+    },
+    "launcher": {
+      "pid": 77572,
+      "create_time": 1793201865.4932494,
+      "exe": "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe",
+      "cmdline": [
+        "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_semantic_acceptance.py",
+        "--directory",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_020\\run",
+        "--fixture-directory",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\fixture_normal_016",
+        "--project",
+        "ALPHA",
+        "--colour",
+        "GREEN",
+        "--mode",
+        "normal",
+        "--config",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\configs\\week6_accuracy_persistent.yaml",
+        "--task-timeout",
+        "7200.0",
+        "--model-timeout",
+        "900.0",
+        "--model",
+        "qwen2.5vl:3b"
+      ]
+    },
+    "actual_acceptance": {
+      "pid": 56472,
+      "create_time": 1793201865.5172389,
+      "exe": "D:/anaconda/python.exe"
+    },
+    "started_utc": "2026-10-28T15:37:45.487676+00:00",
+    "window_claim_sha256": "16b9e493ed26eb6a68b55be327133ce9232a744b284a49ba079cf290884bd633",
+    "preowner_root_ack": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\receipt_envelope_001\\window_claims\\normal_020\\root_claim_ack_001.json",
+      "sha256": "e745bf2b4dd4dc64aa5e70c3e6f805d085267aaeff85020d266900af083582ad"
+    },
+    "state": "Running, outcome and actual exit unknown"
+  },
+  "last_case": {
+    "name": "transient_001",
+    "accepted": false,
+    "actual_owner_child_exit_code": 1,
+    "actual_exec_session": 85807,
+    "actual_exec_wait_exit": 1,
+    "session_closed": true,
+    "owner_elapsed_seconds": 53.34299999999348,
+    "goals_completed": 0,
+    "actions": 0,
+    "planning": 3,
+    "http": 3,
+    "unknown": 0,
+    "reason": "Three identical semantic replies require and forbid same Project BETA/Theme BLUE strings; actual concrete error and complete role feedback were delivered; no input, never reached planned application rejection.",
+    "negative_audit": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_transient001_audit_001.json",
+      "sha256": "4a146caa79d673ff62cb02f1e3d4e1b0230aa61a9ed0cd49c2ca3eca4e34536a"
+    },
+    "terminal_handoff": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_001\\operator_handoff_003.json",
+      "sha256": "3ca8db7bcc158adc153f8bd4805d05f6c0fc6bddca25ca6f20e1a2c492badeba"
+    }
+  },
+  "source_change": "Explicit schema.v2 finite snapshot-only generation query set and source/cap/search metadata. All packetv1/runtime/parser/SYSTEM/semantic/budgets unchanged. No gallery; native chooses target and no local rewriting.",
+  "private_tooling_diagnostics": "Two scope normalizer import omissions and one valid-directory Markdown-link check failure are preserved as real private-tool exit1 diagnostics; corrected without project source/test changes. Not model/runtime exits.",
+  "next": "Sole operator serves original requests in existing normal020, same275 source, model, budget and operationv2. Actual closed exec plus finalterminal003 required before audits. Then freshtransient002 only ifnormal020 accepted. No duplicate model, source/README mutation or heavyCPU. Full004/report/package still pending.",
+  "remaining": [
+    "normal and transient real acceptance",
+    "full004 full pytest/Ruff on final freeze",
+    "final report natural prose and all-page rendering QA",
+    "wheel/source ZIP/index/branch commit and delivery audit"
+  ],
+  "overall_complete": false,
+  "ended_audit_helper": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_normal020_independent_audit_20261029\\run_ended_audit_001.py",
+    "sha256": "ae348a277609bf8e9374f8d01fd97466e0fedfa63b1234cc974bf1e6933916c7"
+  },
+  "ended_process_identity_checks": [
+    {
+      "pid": 85424,
+      "expected_create_time": 1793197593.9419434,
+      "same_identity_alive": false,
+      "pid_absent": true
+    },
+    {
+      "pid": 78992,
+      "expected_create_time": 1793197594.1665003,
+      "same_identity_alive": false,
+      "pid_absent": true
+    },
+    {
+      "pid": 70284,
+      "expected_create_time": 1793197594.195413,
+      "same_identity_alive": false,
+      "pid_absent": true
+    }
+  ],
+  "fixture": {
+    "name": "fixture_normal_016",
+    "actual_pid": 78604,
+    "create_time": 1793201782.0888815,
+    "parent_pid": 64692,
+    "state": "Active after Root exactidentity preowner acknowledgement"
+  },
+  "proposed_next_measurement_protocol": {
+    "path": "receipt_envelope_001\\protocol_001.md",
+    "sha256": "5d5220a310ad4e4f0182eb582fb5cfcc0885bbcce20675f0a7f917da5dbd7515",
+    "status": "Registered before launch; 15 pure boundary tests and expected synthetic CLI accept0/reject1 passed; no live acceptance claimed."
+  },
+  "source_before_next_measurement": {
+    "path": "receipt_envelope_001/source_before_manifest.json",
+    "sha256": "072369a927ab66d8af23ba7d5e3fbd0b8225d19afb2c8e7835469d16f395c66d",
+    "records": 579,
+    "code_pins": 274,
+    "ended_case_files": 282,
+    "review_files": 15
+  },
+  "private_protocol_review": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\receipt_envelope_001\\review_001\\review_summary_001.json",
+    "sha256": "ba63eb6d66703cbb4a28299b0ebda1d638bed1e581dca01a488209cde14a635d"
+  },
+  "previous_ended_case": {
+    "name": "normal_018",
+    "actual_owner_child_exit_code": 1,
+    "actual_exec_session": 12027,
+    "actual_exec_wait_exit": 1,
+    "session_closed": true,
+    "owner_elapsed_seconds": 629.359000000055,
+    "owner_receipt_sha256": "331037ae85f43fd7cb0c2e9ba92258c40675a412534c856f93bc33b55d9390b7",
+    "runtime_status": "succeeded",
+    "runtime_sha256": "7579a7d4ebf9d9d9c1c9377679db0a10d5026e5631efd57201eb2d47393be490",
+    "goals_total": 2,
+    "completed_goals": 2,
+    "actions": 6,
+    "planning": 7,
+    "http": 7,
+    "unknown": 0,
+    "caller_final_outcome": "passed",
+    "independent_state_pass": true,
+    "attribution_pass": false,
+    "overall_acceptance": false,
+    "terminal_handoff": {
+      "path": "live/normal_018/operator_handoff_004.json",
+      "sha256": "8b0343fb645c42abcb15fd7965a52b3e7c93f3e1fd99bc5fb95ed0ff38a49696"
+    },
+    "business_event_after_click_return_milliseconds": {
+      "project_selected": 2.781,
+      "theme_selected": 4.019,
+      "local_commit": 2.424
+    },
+    "post_refresh_exact_utc": "Not sampled in018; remains missing, no extension or reclassification.",
+    "native_target_caveat": "Two initial/no-effect caption actions retained. Last commit had OCR support; no proof of missing-OCR visual targeting.",
+    "negative_audit": {
+      "path": "review/negative_normal018_audit_001.json",
+      "sha256": "7c3019cdbd992a9be26fa589ea115fb206e9a5a1f0f7818392b8bda59c25b164"
+    }
+  },
+  "private_report_history_base": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_full_report_20261028\\draft_027\\report.md",
+    "sha256": "b403e01b42a188285e9f50b1a0e87ea6b943a57a3192d32a1191af2705bb181d"
+  },
+  "private_report_note": "Private history base027 b403 now bound by final_evidence_gate constant-only revision. All gate logic unchanged; expected pending-final CLI actual2 preserved, no DOCX/PDF.",
+  "private_gate_checker": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_full_report_20261028\\final_evidence_gate.py",
+    "sha256": "00c49456ceeef7b7a9eaf9f85bfbfdd4525dd3131125a866a6ac1d7f74c63d70"
+  },
+  "private_gate_revision": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_full_report_20261028\\gate_history_base_revision_003\\review_001.json",
+    "sha256": "28cf2feaefce06cd33f27b25bb4ab00015b7dff3004fc760e52cfc34f829db4e"
+  },
+  "last_accepted_normal": {
+    "name": "normal_019",
+    "accepted": true,
+    "actual_owner_child_exit_code": 0,
+    "actual_exec_session": 56625,
+    "actual_exec_wait_exit": 0,
+    "session_closed": true,
+    "owner_elapsed_seconds": 667.782,
+    "goals_total": 2,
+    "completed_goals": 2,
+    "actions": 5,
+    "planning": 6,
+    "http": 6,
+    "unknown": 0,
+    "caller_final_outcome": "passed",
+    "independent_state_pass": true,
+    "attribution_pass": true,
+    "strict_audit": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal019_strict_audit_001.json",
+      "sha256": "61254d6585961ee19b7a9532acdca94ca337bda053f1e37cfa49806ab7d7b9ed"
+    },
+    "receipt_protocol_audit": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal019_receipt_protocol_audit_001.json",
+      "sha256": "79db2aa30a072bc3fe506e39b27f123e1e9d3e99c1cb2ca04d0e35ce0ddfb8de"
+    },
+    "root_acceptance": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal019_root_acceptance_001.json",
+      "sha256": "92fd296968bf1af879c2f273f415e14b8745c7c6b4cb61d9d375231bdc2e8cd4"
+    },
+    "caveats": "Input004 caption noop and final raw step verification failed preserved. Actual business commit belongs to005. Last commit has OCR support, not missing-OCR visual proof."
+  },
+  "current_unfrozen_candidate": null
+}

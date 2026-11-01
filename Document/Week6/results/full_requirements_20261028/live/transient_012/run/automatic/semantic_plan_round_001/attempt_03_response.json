@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 17625.0,
+  "usage": {
+    "prompt_tokens": 2043,
+    "completion_tokens": 197,
+    "total_tokens": 2240
+  },
+  "error": null,
+  "content_length": 900,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"Corrected the instruction to avoid unsupported message sending by focusing only on visible controls and local operations. Postcondition polarity is preserved: expect_text is visible after goal, forbid_text is absent. No literal is duplicated, and no caller-required final text is forbidden.\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Prepare a BLUE report for project BETA by selecting the correct project and theme, then review the report using visible controls.\",\n      \"expect_text\": [\"Project BETA\", \"Theme BLUE\", \"Review Complete\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"prepare_review\"\n    },\n    {\n      \"instruction\": \"Commit the BLUE report for project BETA locally after review, ensuring the commit message includes 'LOCAL COMPLETE'.\",\n      \"expect_text\": [\"LOCAL COMPLETE\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"commit_report\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

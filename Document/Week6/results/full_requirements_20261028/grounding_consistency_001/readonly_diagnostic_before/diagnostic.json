@@ -1,0 +1,354 @@
+{
+  "schema": "week6.normal010.target_binding_readonly_diagnostic.v1",
+  "created_at_utc": "2026-10-28T10:05:54.011490+00:00",
+  "scope": "Already saved second low-level plan/input of active normal010; no overall-run exit or final status inference.",
+  "classification": "Native model target-text/element-ID inconsistency, preserved by anonymous-target pixel refresh and ID-first adapter; no evidence of scaling or detector label-coordinate swap in these frames.",
+  "native_step": {
+    "step_id": "s1",
+    "description": "Select the 'GREEN' report theme.",
+    "action_type": "click",
+    "target_text": "GREEN",
+    "arguments": {
+      "element_id": "obs-0005-e006"
+    },
+    "expected_result": "The 'GREEN' theme is selected.",
+    "status": "pending"
+  },
+  "raw_response": {
+    "provider": "openai_compatible",
+    "model_name": "qwen2.5vl:7b",
+    "latency_ms": 17266.0,
+    "usage": {
+      "prompt_tokens": 5403,
+      "completion_tokens": 108,
+      "total_tokens": 5511
+    },
+    "error": null,
+    "content_length": 472,
+    "content": "{\"task_id\":\"t1\",\"instruction\":\"Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\",\"summary\":\"Choose 'GREEN' report theme for Project ALPHA.\",\"steps\":[{\"step_id\":\"s1\",\"description\":\"Select the 'GREEN' report theme.\",\"action_type\":\"click\",\"target_text\":\"GREEN\",\"arguments\":{\"element_id\":\"obs-0005-e006\"},\"expected_result\":\"The 'GREEN' theme is selected.\",\"status\":\"pending\"}],\"errors\":[]}",
+    "raw_response": {
+      "finish_reason": "stop"
+    }
+  },
+  "model_visible_text": "obs-0005-e000  'BLUE'  conf=0.96  center=(1282,898)  box=(1234,868,1330,929)\nobs-0005-e001  'GREEN'  conf=0.96  center=(1280,1079)  box=(1215,1065,1345,1093)\nobs-0005-e002  'Offline report preparation'  conf=0.95  center=(1280,597)  box=(1101,582,1460,613)\nobs-0005-e003  'Project ALPHA'  conf=0.95  center=(1282,691)  box=(1155,673,1409,710)\nobs-0005-e004  'Choose report theme'  conf=0.95  center=(1280,789)  box=(1101,771,1460,808)\nobs-0005-e005  'Week6 Local Lab'  conf=0.92  center=(1281,496)  box=(1089,477,1474,515)\nobs-0005-e006  <unlabelled box>  conf=0.50  center=(1282,917)  box=(1049,858,1516,976)\nobs-0005-e007  <unlabelled box>  conf=0.50  center=(1282,1080)  box=(1048,1022,1516,1139)",
+  "model_source_image_path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_010\\run\\automatic\\goal_001_001_prepare_green_report\\001_prepare_green_report\\monitor1_20261028_210157_464.png",
+  "selected_source_element": {
+    "element_id": "obs-0005-e006",
+    "text": "",
+    "bounding_box": {
+      "left": 1049,
+      "top": 858,
+      "right": 1516,
+      "bottom": 976
+    },
+    "center": {
+      "x": 1282,
+      "y": 917
+    },
+    "confidence": 0.5,
+    "source": "contour"
+  },
+  "selected_fresh_element": {
+    "element_id": "obs-0006-e006",
+    "text": "",
+    "bounding_box": {
+      "left": 1049,
+      "top": 858,
+      "right": 1516,
+      "bottom": 976
+    },
+    "center": {
+      "x": 1282,
+      "y": 917
+    },
+    "confidence": 0.5,
+    "source": "contour"
+  },
+  "correct_target_text_candidate": {
+    "element_id": "obs-0005-e001",
+    "text": "GREEN",
+    "bounding_box": {
+      "left": 1215,
+      "top": 1065,
+      "right": 1345,
+      "bottom": 1093
+    },
+    "center": {
+      "x": 1280,
+      "y": 1079
+    },
+    "confidence": 0.96,
+    "source": "ocr"
+  },
+  "competing_label_inside_selected_contour": {
+    "element_id": "obs-0005-e000",
+    "text": "BLUE",
+    "bounding_box": {
+      "left": 1234,
+      "top": 868,
+      "right": 1330,
+      "bottom": 929
+    },
+    "center": {
+      "x": 1282,
+      "y": 898
+    },
+    "confidence": 0.96,
+    "source": "ocr"
+  },
+  "geometry_facts": {
+    "selected_source_and_fresh_geometry_equal": true,
+    "selected_contour_contains_blue_center": true,
+    "selected_contour_contains_green_center": false,
+    "request_equals_selected_fresh_center": true,
+    "scale_x": 1.0,
+    "scale_y": 1.0
+  },
+  "saved_pixel_visual_review": {
+    "file": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_010\\run\\automatic\\goal_001_001_prepare_green_report\\001_prepare_green_report\\monitor1_20261028_210228_255.png",
+    "reviewer": "/root/week6_auto_decomposition",
+    "method": "view_image original on existing saved PNG only",
+    "observed": "The upper BLUE button is hovered; the lower button reads GREEN. This observation does not establish why the model selected the wrong ID."
+  },
+  "actual_input_request": {
+    "id": "input_002",
+    "action": {
+      "action_type": "click",
+      "x": 1282,
+      "y": 917,
+      "start": null,
+      "end": null,
+      "text": null,
+      "key": null,
+      "keys": null,
+      "scroll_amount": null,
+      "duration": null,
+      "target_description": "GREEN"
+    },
+    "screen": {
+      "screenshot_width": 2560,
+      "screenshot_height": 1600,
+      "control_width": 2560,
+      "control_height": 1600,
+      "monitor_index": 1,
+      "monitor_left": 0,
+      "monitor_top": 0,
+      "scale_x": 1.0,
+      "scale_y": 1.0
+    },
+    "required_window_title": "Week6 Local Lab",
+    "created_utc": "2026-10-28T10:02:30.096329+00:00",
+    "deadline_monotonic": 716803.265
+  },
+  "actual_input_receipt": {
+    "id": "input_002",
+    "action": {
+      "action_type": "click",
+      "x": 1282,
+      "y": 917,
+      "start": null,
+      "end": null,
+      "text": null,
+      "key": null,
+      "keys": null,
+      "scroll_amount": null,
+      "duration": null,
+      "target_description": "GREEN"
+    },
+    "success": true,
+    "started_utc": "2026-10-28T10:02:47.131Z",
+    "finished_utc": "2026-10-28T10:02:47.589Z",
+    "window": {
+      "app": "process:D:\\anaconda\\python.exe",
+      "id": 98572846,
+      "title": "Week6 Local Lab"
+    },
+    "before_screenshot_id": "screenshot-0",
+    "transport": "Sky click"
+  },
+  "raw_step_record": {
+    "index": 2,
+    "step_id": "s1",
+    "description": "Select the 'GREEN' report theme.",
+    "action_type": "click",
+    "observation_id": "obs-0006",
+    "resolved": {
+      "step_id": "s1",
+      "action": {
+        "action_type": "click",
+        "x": 1282,
+        "y": 917,
+        "start": null,
+        "end": null,
+        "text": null,
+        "key": null,
+        "keys": null,
+        "scroll_amount": null,
+        "duration": null,
+        "target_description": "GREEN"
+      },
+      "element_id": "obs-0006-e006",
+      "screenshot_point": {
+        "x": 1282,
+        "y": 917
+      },
+      "control_point": {
+        "x": 1282,
+        "y": 917
+      },
+      "note": "element obs-0006-e006"
+    },
+    "action_result": {
+      "success": true,
+      "dry_run": false,
+      "error": null,
+      "action": {
+        "action_type": "click",
+        "x": 1282,
+        "y": 917,
+        "start": null,
+        "end": null,
+        "text": null,
+        "key": null,
+        "keys": null,
+        "scroll_amount": null,
+        "duration": null,
+        "target_description": "GREEN"
+      }
+    },
+    "verification": {
+      "outcome": "passed",
+      "method": "automatic",
+      "detail": "expected result observed: theme",
+      "evidence": {
+        "observation_id": "obs-0007",
+        "changed": true,
+        "element_count": 7,
+        "expectation_tokens": [
+          "green",
+          "theme"
+        ],
+        "expectation_hits": [
+          "theme"
+        ]
+      }
+    },
+    "error": null,
+    "elapsed_ms": 59155.99999995902,
+    "after_observation_id": "obs-0007"
+  },
+  "post_observation_text": [
+    "Project ALPHA",
+    "Theme BLUE",
+    "Review report",
+    "Offline report preparation",
+    "Week6 Local Lab",
+    "Draft yady"
+  ],
+  "observed_child_summary": {
+    "status": "failed",
+    "verification": {
+      "outcome": "failed",
+      "method": "automatic",
+      "detail": "expected on screen but not found: Theme GREEN",
+      "evidence": {
+        "observation_id": "obs-0008",
+        "missing": [
+          "Theme GREEN"
+        ],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    },
+    "action_count": 2,
+    "planning_calls": 2,
+    "notes": [
+      "planned 1 steps from obs-0001",
+      "task verification: expected on screen but not found: Theme GREEN",
+      "re-planned from obs-0005: attempt 2 of at most 3",
+      "s1: grounded obs-0005-e006 from obs-0005 to obs-0006-e006 in obs-0006 (pixel_match)",
+      "task verification: expected on screen but not found: Theme GREEN"
+    ]
+  },
+  "advisory_step_verifier_limit": "Raw step expected-result tokens ['green','theme'] received any hit ['theme'] and were marked passed; mandatory frozen semantic goal still failed because Theme GREEN was absent. No semantic or caller-final credit follows from this step verdict.",
+  "source_evidence": [
+    {
+      "file": "src/gui_agent/runtime/action_adapter.py",
+      "sha256": "18d52a74b311dd89606a61f2dc8b8d689eac4a3a97be0e1b2ca7f260ce9b9657",
+      "equals_actual_run_source_snapshot": true,
+      "excerpts": [
+        {
+          "first_line": 449,
+          "last_line": 510,
+          "text": "449:     def resolve(self, step: PlanStep, observation: ObservationSnapshot) -> ResolvedAction:\n450:         \"\"\"Return the action for ``step``, or raise if it cannot be resolved safely.\"\"\"\n451:         kind = step.action_type\n452:         if kind == \"finish\":\n453:             raise ActionResolutionError(\n454:                 \"finish is a planning verb and must be handled by the runner, never executed\"\n455:             )\n456:         if kind in _POINT_ACTIONS:\n457:             return self._resolve_point(step, observation)\n458:         if kind == \"drag\":\n459:             return self._resolve_drag(step, observation)\n460:         if kind == \"type_text\":\n461:             return self._resolve_type(step)\n462:         if kind == \"key_press\":\n463:             return self._resolve_key(step)\n464:         if kind == \"hotkey\":\n465:             return self._resolve_hotkey(step)\n466:         if kind == \"wait\":\n467:             return self._resolve_wait(step)\n468:         raise ActionResolutionError(f\"unsupported action type {kind!r}\")\n469: \n470:     # ── target location ────────────────────────────────────────────────\n471:     def _locate(\n472:         self, step: PlanStep, observation: ObservationSnapshot\n473:     ) -> tuple[Point, ElementRef | None, str]:\n474:         \"\"\"Find the point this step refers to.\n475: \n476:         Preference order: an element id from *this* frame, then a unique text match\n477:         in this frame. An id from another frame is an error even when the text\n478:         would match - silently rebinding it is how a plan ends up clicking\n479:         yesterday's coordinates.\n480:         \"\"\"\n481:         arguments: dict[str, Any] = dict(step.arguments or {})\n482:         element_id = arguments.get(\"element_id\") or arguments.get(\"target_element\")\n483:         query = (step.target_text or arguments.get(\"target\") or \"\").strip()\n484:         rebound_from: str | None = None\n485: \n486:         if isinstance(element_id, str) and element_id:\n487:             found = observation.element(element_id)\n488:             if found is not None:\n489:                 return found.center, found, f\"element {element_id}\"\n490:             # The id belongs to an earlier frame. A plan is written from one\n491:             # observation and executed after another, so this is the normal case,\n492:             # not an error - as long as the step also said what it is aiming at in\n493:             # words. A bare stale id has nothing to re-locate and is refused.\n494:             if not query:\n495:                 raise ActionResolutionError(\n496:                     f\"element id {element_id!r} is not from observation \"\n497:                     f\"{observation.observation_id} and the step names no text target \"\n498:                     \"to re-locate\"\n499:                 )\n500:             rebound_from = element_id\n501: \n502:         if not query:\n503:             raise ActionResolutionError(\n504:                 f\"{step.action_type} needs target_text or arguments.element_id to locate a target\"\n505:             )\n506: \n507:         result = find_text(observation.elements, query, min_confidence=self.min_confidence)\n508:         # find_text orders by confidence but also marks a selected_index; taking\n509:         # the first candidate without checking the count is how an ambiguous query\n510:         # silently becomes a click on the wrong control."
+        },
+        {
+          "first_line": 575,
+          "last_line": 615,
+          "text": "575:         if not is_inside_screen(control, observation.screen_info):\n576:             raise ActionResolutionError(\n577:                 f\"screenshot point ({point.x},{point.y}) maps to control \"\n578:                 f\"({control.x},{control.y}), outside the captured monitor\"\n579:             )\n580:         return control\n581: \n582:     # ── per-action resolution ──────────────────────────────────────────\n583:     def _resolve_point(self, step: PlanStep, observation: ObservationSnapshot) -> ResolvedAction:\n584:         point, element, note = self._locate(step, observation)\n585:         control = self._to_control(point, observation)\n586:         kwargs: dict[str, Any] = {\"x\": control.x, \"y\": control.y}\n587:         if step.action_type == \"scroll\":\n588:             amount = (step.arguments or {}).get(\n589:                 \"scroll_amount\", (step.arguments or {}).get(\"amount\")\n590:             )\n591:             if amount is None:\n592:                 raise ActionResolutionError(\"scroll requires arguments.scroll_amount\")\n593:             # A wrong-typed amount has to leave as the module's own error: the\n594:             # runner catches ActionResolutionError and records it, so a bare\n595:             # ValueError from int() would escape the run as a traceback instead.\n596:             try:\n597:                 kwargs[\"scroll_amount\"] = int(amount)\n598:             except (TypeError, ValueError) as exc:\n599:                 raise ActionResolutionError(\n600:                     f\"scroll_amount must be a number, got {amount!r}\"\n601:                 ) from exc\n602:         action = DesktopAction(\n603:             action_type=step.action_type,  # type: ignore[arg-type]\n604:             target_description=step.target_text,\n605:             **kwargs,\n606:         )\n607:         return ResolvedAction(\n608:             step_id=step.step_id,\n609:             action=action,\n610:             element_id=element.element_id if element else None,\n611:             screenshot_point=point,\n612:             control_point=control,\n613:             note=note,\n614:         )\n615: "
+        }
+      ]
+    },
+    {
+      "file": "src/gui_agent/runtime/runner.py",
+      "sha256": "e3fe1cfd49f338afa29c5cae2b13c12fa972a694327b9def13a97c0d803ffe56",
+      "equals_actual_run_source_snapshot": true,
+      "excerpts": [
+        {
+          "first_line": 1464,
+          "last_line": 1529,
+          "text": "1464:     def _ground_step(\n1465:         self, step: PlanStep, source: ObservationSnapshot, current: ObservationSnapshot,\n1466:         notes: list[str], *, deadline: float | None = None,\n1467:     ) -> tuple[PlanStep, ObservationSnapshot, bool]:\n1468:         \"\"\"Refresh only one anonymous target, preserving every approved action field.\"\"\"\n1469:         old_id = step.arguments.get(\"element_id\") or step.arguments.get(\"target_element\")\n1470:         old = source.element(old_id) if isinstance(old_id, str) else None\n1471:         anonymous = old is not None and old.source == \"contour\" and not old.text.strip()\n1472:         if not anonymous:\n1473:             return step, current, anonymous\n1474:         # Invalid frame identity is terminal for grounding, not a reason to ask\n1475:         # the model to guess across a different window or degraded capture.\n1476:         validate_frames(source, current)\n1477:         editor_target = False\n1478:         allowed_candidate_ids = None\n1479:         if self._message_composer is not None:\n1480:             source_composer, _ = self._message_controls(source)\n1481:             if old.bounding_box == source_composer:\n1482:                 # T04_20261007_132911_213511_fb82db6e mapped the approved\n1483:                 # editor to eligible OCR Send. Fresh RGB checks proved that\n1484:                 # Send stayed unchanged, not that it was the old editor.\n1485:                 # Bind the role to the actual approved source candidate and\n1486:                 # independent composer evidence, not step_id/description.\n1487:                 source_editor = self._message_editor_candidate(source)\n1488:                 if source_editor.element_id != old_id:\n1489:                     raise GroundingError(\"approved source target is not the authorised message editor\")\n1490:                 editor_target = True\n1491:                 current_editor = self._message_editor_candidate(current)\n1492:                 allowed_candidate_ids = frozenset({current_editor.element_id})\n1493:         method = \"pixel_match\"\n1494:         try:\n1495:             chosen = match_candidate(source, current, old_id)\n1496:         except GroundingError:\n1497:             if self.target_grounder is None:\n1498:                 raise GroundingError(\"no model client can refresh the changed anonymous target\") from None\n1499:             self._check_deadline(deadline)\n1500:             if editor_target:\n1501:                 mapped = self.target_grounder.ground(\n1502:                     step, source, current, self.recorder.directory,\n1503:                     allowed_candidate_ids=allowed_candidate_ids,\n1504:                 )\n1505:             else:\n1506:                 mapped = self.target_grounder.ground(step, source, current, self.recorder.directory)\n1507:             self._check_deadline(deadline)\n1508:             chosen_id = mapped.arguments.get(\"element_id\") or mapped.arguments.get(\"target_element\")\n1509:             if editor_target and chosen_id not in allowed_candidate_ids:\n1510:                 raise GroundingError(\"message editor mapping changed the approved target role\")\n1511:             mapping_frame = current\n1512:             current = self._observing()\n1513:             if editor_target:\n1514:                 # A model may take minutes. Preserve the role/uniqueness in the\n1515:                 # fresh frame as well as the original RGB identity check.\n1516:                 current_editor = self._message_editor_candidate(current)\n1517:             chosen = match_candidate(mapping_frame, current, chosen_id)\n1518:             method = \"vision_model_then_pixel_match\"\n1519:         if editor_target and chosen.element_id != current_editor.element_id:\n1520:             raise GroundingError(\"message editor grounding changed the approved target role\")\n1521:         arguments = dict(step.arguments)\n1522:         for key in (\"element_id\", \"target_element\"):\n1523:             if key in arguments:\n1524:                 arguments[key] = chosen.element_id\n1525:         notes.append(\n1526:             f\"{step.step_id}: grounded {old_id} from {source.observation_id} \"\n1527:             f\"to {chosen.element_id} in {current.observation_id} ({method})\"\n1528:         )\n1529:         return step.model_copy(update={\"arguments\": arguments}, deep=True), current, True"
+        }
+      ]
+    },
+    {
+      "file": "src/gui_agent/runtime/visual_grounding.py",
+      "sha256": "3e12a9dc97d45a6d3635913adbb477d07fa6dde3e8f9798c3431557ac4f22bcd",
+      "equals_actual_run_source_snapshot": true,
+      "excerpts": [
+        {
+          "first_line": 197,
+          "last_line": 241,
+          "text": "197: def match_candidate(\n198:     source: ObservationSnapshot, current: ObservationSnapshot, element_id: str\n199: ) -> ElementRef:\n200:     \"\"\"Return a unique compatible current candidate, or refuse without coordinates.\n201: \n202:     The small offset search accommodates a contour boundary shifting by up to two\n203:     pixels. It searches only actual current candidates, and both target pixels and\n204:     surrounding context must agree; no old location is accepted as a fallback.\n205:     \"\"\"\n206:     validate_frames(source, current)\n207:     element = source.element(element_id)\n208:     if element is None:\n209:         raise GroundingError(f\"candidate {element_id!r} is absent from its source frame\")\n210:     if not _candidate_is_valid(element, source):\n211:         raise GroundingError(\"source candidate is outside foreground or has invalid geometry\")\n212:     old_image = _load_image(source)\n213:     new_image = _load_image(current)\n214:     box = element.bounding_box\n215:     assert source.window_bounds is not None\n216:     crop = BoundingBox(\n217:         left=max(0, source.window_bounds.left, box.left - _PADDING),\n218:         top=max(0, source.window_bounds.top, box.top - _PADDING),\n219:         right=min(old_image.shape[1], source.window_bounds.right, box.right + _PADDING),\n220:         bottom=min(old_image.shape[0], source.window_bounds.bottom, box.bottom + _PADDING),\n221:     )\n222:     template = old_image[crop.top:crop.bottom, crop.left:crop.right]\n223:     target = old_image[box.top:box.bottom, box.left:box.right]\n224:     gray = cv2.cvtColor(target, cv2.COLOR_RGB2GRAY)\n225:     if float(gray.std()) < _MIN_TEXTURE_STD or np.count_nonzero(\n226:         cv2.Canny(gray, 40, 120)\n227:     ) < _MIN_EDGE_PIXELS:\n228:         # Constant patches can yield perfect normalized correlation everywhere.\n229:         # A border and context alone must not manufacture identity for blank data.\n230:         raise GroundingError(\"source candidate has insufficient visual texture\")\n231:     source_matches = _score_candidates(element, crop, template, old_image, source)\n232:     if len(source_matches) > 1 and source_matches[0][0] - source_matches[1][0] < _MIN_MARGIN:\n233:         # If one of two identical old controls disappears, the surviving clone\n234:         # must not inherit the selected one's identity merely because it is alone.\n235:         raise GroundingError(\"source candidate is visually ambiguous\")\n236:     matches = _score_candidates(element, crop, template, new_image, current)\n237:     if not matches or matches[0][0] < _MIN_CORRELATION or not matches[0][1]:\n238:         raise GroundingError(\"source candidate disappeared or its appearance changed\")\n239:     if len(matches) > 1 and matches[0][0] - matches[1][0] < _MIN_MARGIN:\n240:         raise GroundingError(\"multiple current candidates are visually ambiguous\")\n241:     return matches[0][2]"
+        }
+      ]
+    },
+    {
+      "file": "src/gui_agent/runtime/verification.py",
+      "sha256": "abc72375f2959fb765fb53dbf4bbf63401513e5cdfeaeb445d0c148b0be1cd4c",
+      "equals_actual_run_source_snapshot": true,
+      "excerpts": [
+        {
+          "first_line": 780,
+          "last_line": 821,
+          "text": "780:         }\n781: \n782:         expectation = (expected_result or \"\").strip()\n783:         if expectation:\n784:             # The expectation is free text written by the model, so it is matched\n785:             # loosely: if any distinctive word from it appears, the screen moved\n786:             # in the expected direction. A miss is reported, not hidden.\n787:             #\n788:             # Words that describe the action rather than name something on screen are removed\n789:             # first - see :data:`_ACTION_WORDS` for the expectation that made this necessary,\n790:             # and note what happens if they are left in: a token that cannot appear makes the\n791:             # check fail, and a failed step verification stops the pass.\n792:             tokens = [\n793:                 t\n794:                 for t in _words(expectation)\n795:                 if len(t) >= 4 and t not in _ACTION_WORDS\n796:             ]\n797:             haystack = _haystack(after)\n798:             hits = [t for t in tokens if t in haystack]\n799:             evidence[\"expectation_tokens\"] = tokens\n800:             evidence[\"expectation_hits\"] = hits\n801:             if tokens and not hits:\n802:                 return VerificationResult(\n803:                     outcome=\"failed\",\n804:                     detail=f\"expected result not observed: {expectation!r}\",\n805:                     evidence=evidence,\n806:                 )\n807:             if tokens:\n808:                 return VerificationResult(\n809:                     outcome=\"passed\",\n810:                     detail=f\"expected result observed: {', '.join(hits[:3])}\",\n811:                     evidence=evidence,\n812:                 )\n813: \n814:         if changed:\n815:             # 11.1.5: a changed screenshot is not success. It is worth recording -\n816:             # the action did have some effect - but it does not say the step did\n817:             # what it was for, and no expectation was given to check it against.\n818:             return VerificationResult(\n819:                 outcome=\"inconclusive\",\n820:                 detail=(\n821:                     \"the screen changed after the action, which is not evidence that the \""
+        }
+      ]
+    }
+  ],
+  "cause_boundary": {
+    "model_selected_wrong_id": true,
+    "adapter_implemented_id_priority_without_cross_validating_target_text": true,
+    "coordinate_transform_bug_supported": false,
+    "detector_swapped_blue_green_supported": false,
+    "hover_causal_claim": false,
+    "no_new_model_gui_executor_calls": true,
+    "no_frozen_source_test_fixture_config_edits": true
+  },
+  "recommended_design_not_implemented": {
+    "preferred": "Reject conflicting nonempty target_text and explicit element_id before input; preserve native plan and return a bounded replan error, rather than silently selecting the text target.",
+    "source_and_fresh_checks": "Validate the original selected candidate against supplied visible text in the planning frame, then validate again after pixel refresh in the fresh dispatch frame. Pixel identity proves the same control, not that the original control matches the intended text.",
+    "labeled_candidate": "A labeled candidate must be consistent with the supplied text under an explicitly defined existing text-match rule; an explicit ID may legitimately disambiguate repeated equal labels.",
+    "anonymous_candidate": "When supplied text matches detected visible text, require matching OCR evidence spatially contained by the chosen contour and reject if the contour contains a different competing label while the requested text is elsewhere. Blank target_text/true anonymous controls need their existing visual grounding path; do not invent labels.",
+    "ambiguity": "If text-to-candidate consistency cannot be established, fail closed/replan. Do not automatically change the model's ID to another control merely because that control has a unique label.",
+    "compatibility_tests_needed": [
+      "Wrong anonymous ID plus unique target text outside its contour causes zero dispatch and retains raw mismatch.",
+      "Matching text inside its actual contour remains allowed.",
+      "Same-label multiple controls can be disambiguated only by consistent explicit ID.",
+      "Labeled candidate with contradictory supplied text is rejected.",
+      "Stale ID refresh cannot bypass source/fresh consistency.",
+      "ID-only anonymous visual controls retain their explicitly supported path.",
+      "All shared budgets, raw receipts and no unknown replay remain unchanged."
+    ],
+    "not_claimed": "Containment/text consistency is a guard against observable cross-field conflicts, not proof of widget role, caller semantics or arbitrary GUI safety. Any new policy requires separate authorization, targeted tests and a new freeze."
+  }
+}

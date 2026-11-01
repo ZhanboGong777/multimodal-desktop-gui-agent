@@ -1,0 +1,59 @@
+{
+  "schema_version": "week6.semantic_subtasks.v6",
+  "frozen_task": {
+    "case_id": "commit_report",
+    "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Commit the prepared GREEN report for project ALPHA locally using the visible commit controls.\nComplete original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+    "target_app": null,
+    "preconditions": [],
+    "success_rules": [],
+    "verification": "automatic",
+    "expect_text": [
+      "LOCAL COMPLETE"
+    ],
+    "forbid_text": [
+      "Review Pending",
+      "Review Failed",
+      "Review Error",
+      "Review Timeout",
+      "Review Cancelled",
+      "Review Not Started",
+      "Review In Progress",
+      "Review Unavailable"
+    ],
+    "requires_processes": [],
+    "forbids_processes": [],
+    "must_exit_processes": [],
+    "risk": "medium",
+    "message_conversation": null,
+    "gate_on_step_verification": false
+  },
+  "child_status": "failed",
+  "child_verification": null,
+  "semantic_postcondition_verification": {
+    "outcome": "inconclusive",
+    "method": "automatic",
+    "detail": "no observation available to verify against",
+    "evidence": {}
+  },
+  "post_observation_id": null,
+  "confirmed_input_count": 0,
+  "planning_accounting_complete": true,
+  "eligible_for_semantic_credit": false,
+  "planning_limit_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_027\\run\\automatic\\goal_002_001_commit_report\\001_commit_report\\single_step_planning_limit.json",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Confirm local completion by interacting with the 'LOCAL COMPLETE' text.",
+      "action_type": "double_click",
+      "observation_id": "obs-0001",
+      "resolved": null,
+      "action_result": null,
+      "verification": null,
+      "error": "observation failed: dedicated-window activation receipt missing",
+      "elapsed_ms": 90015.99999999962,
+      "after_observation_id": null
+    }
+  ],
+  "meaning": "The original model-proposed literal semantic postconditions were independently checked; no raw failed step was rewritten."
+}

@@ -1,0 +1,20 @@
+{
+  "status": "ready",
+  "reason": "The first goal was rejected because its postcondition already held, but the caller's intent remains unchanged. The workflow must now proceed with the remaining operations to achieve the final state: 'LOCAL COMPLETE' with no forbidden text. The new plan avoids repeating the failed goal and focuses on",
+  "subgoals": [
+    {
+      "instruction": "Review the report using visible controls, ensuring no errors or unavailable states, and proceed to commit if review is complete.",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [
+        "ERROR",
+        "UNAVAILABLE",
+        "RETRY"
+      ],
+      "goal_id": "review_and_commit"
+    }
+  ]
+}

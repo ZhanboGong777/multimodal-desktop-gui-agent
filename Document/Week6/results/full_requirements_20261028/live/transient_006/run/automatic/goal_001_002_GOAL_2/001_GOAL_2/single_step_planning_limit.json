@@ -1,0 +1,1858 @@
+{
+  "schema_version": "week6.single_step_planning.v1",
+  "protocol_version": "week6.semantic_subtasks.v6",
+  "raw_step_verification_policy": "Raw model step predictions are advisory; the predeclared semantic subtask postconditions are mandatory.",
+  "original_max_steps": 4,
+  "applied_max_steps": 1,
+  "restored": true,
+  "calls": [
+    {
+      "max_steps": 1,
+      "returned_steps": 1,
+      "ok": true,
+      "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Review the generated report and confirm its accuracy.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+      "context": {
+        "platform": "win32",
+        "observation_id": "obs-0001",
+        "screen": "2560x1600",
+        "target_app": null,
+        "allowed_keys": {
+          "keys": [
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "a",
+            "b",
+            "backspace",
+            "c",
+            "d",
+            "delete",
+            "down",
+            "e",
+            "end",
+            "enter",
+            "esc",
+            "escape",
+            "f",
+            "f1",
+            "f10",
+            "f11",
+            "f12",
+            "f2",
+            "f3",
+            "f4",
+            "f5",
+            "f6",
+            "f7",
+            "f8",
+            "f9",
+            "g",
+            "h",
+            "home",
+            "i",
+            "j",
+            "k",
+            "l",
+            "left",
+            "m",
+            "n",
+            "o",
+            "p",
+            "pagedown",
+            "pageup",
+            "q",
+            "r",
+            "return",
+            "right",
+            "s",
+            "space",
+            "t",
+            "tab",
+            "u",
+            "up",
+            "v",
+            "w",
+            "x",
+            "y",
+            "z"
+          ],
+          "modifiers": [
+            "alt",
+            "cmd",
+            "command",
+            "control",
+            "ctrl",
+            "shift",
+            "super",
+            "win"
+          ],
+          "hotkey_separator": "+"
+        },
+        "limits": "at most 18 actions and 7051.08 s for the whole task",
+        "visible_text": "obs-0001-e000  'Theme BLUE'  conf=0.96  center=(1281,818)  box=(1167,804,1396,833)\nobs-0001-e001  'Review report'  conf=0.96  center=(1282,1049)  box=(1168,1032,1397,1067)\nobs-0001-e002  'Offline report preparation'  conf=0.95  center=(1280,630)  box=(1101,615,1460,646)\nobs-0001-e003  'Project BETA'  conf=0.95  center=(1282,724)  box=(1168,706,1397,743)\nobs-0001-e004  'Week6 Local Lab'  conf=0.91  center=(1281,529)  box=(1089,510,1474,548)\nobs-0001-e005  '217.02KB'  conf=0.91  center=(2298,1394)  box=(2265,1386,2332,1402)\nobs-0001-e006  '点击清理后可释放'  conf=0.86  center=(2156,1397)  box=(2072,1382,2240,1413)\nobs-0001-e007  '立即清理'  conf=0.85  center=(2271,1458)  box=(2235,1449,2307,1467)\nobs-0001-e008  'Draft yady'  conf=0.67  center=(1281,921)  box=(1188,901,1375,941)\nobs-0001-e009  '发现 2 款应用有卸载残留'  conf=0.55  center=(2207,1356)  box=(2072,1338,2342,1375)\nobs-0001-e010  <unlabelled box>  conf=0.50  center=(1984,800)  box=(1409,0,2560,1600)\nobs-0001-e011  <unlabelled box>  conf=0.50  center=(2270,1409)  box=(1997,1307,2543,1512)\nobs-0001-e012  <unlabelled box>  conf=0.50  center=(1282,1047)  box=(1048,988,1516,1106)\nobs-0001-e013  <unlabelled box>  conf=0.50  center=(2271,1460)  box=(2050,1437,2493,1483)\nobs-0001-e014  <unlabelled box>  conf=0.50  center=(2039,1352)  box=(2026,1339,2053,1366)\nobs-0001-e015  <unlabelled box>  conf=0.50  center=(2504,1345)  box=(2496,1337,2513,1354)\nobs-0001-e016  <unlabelled box>  conf=0.50  center=(2243,1396)  box=(2237,1389,2249,1403)\nobs-0001-e017  <unlabelled box>  conf=0.50  center=(2040,1350)  box=(2032,1346,2048,1355)\nobs-0001-e018  <unlabelled box>  conf=0.50  center=(2258,1394)  box=(2254,1386,2262,1403)",
+        "targeting_policy": {
+          "schema_version": "gui_agent.generation_targeting_policy.v1",
+          "instruction": "Generation guidance only; it grants neither input nor success authority. Use only candidates in the current target_bindings scope, including the final authorised subset. Use text-only targeting only when current OCR labels or adjacent OCR words can locate the target. If a target is visible in the screenshot but absent from OCR, choose its matching current ID yourself from target_bindings.anonymous_without_ocr_ids; never invent or replace an ID. If no matching allowed candidate is certain, return no steps and explain in errors.",
+          "generation_only": true
+        },
+        "success_rules": [],
+        "target_bindings": {
+          "schema_version": "gui_agent.target_bindings.v1",
+          "observation_id": "obs-0001",
+          "scope": "all_snapshot_candidates",
+          "min_confidence": 0.35,
+          "candidates": [
+            {
+              "element_id": "obs-0001-e000",
+              "text": "Theme BLUE",
+              "source": "ocr",
+              "confidence": 0.96,
+              "bounding_box": {
+                "left": 1167,
+                "top": 804,
+                "right": 1396,
+                "bottom": 833
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Theme BLUE"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e001",
+              "text": "Review report",
+              "source": "ocr",
+              "confidence": 0.96,
+              "bounding_box": {
+                "left": 1168,
+                "top": 1032,
+                "right": 1397,
+                "bottom": 1067
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Review report"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e002",
+              "text": "Offline report preparation",
+              "source": "ocr",
+              "confidence": 0.95,
+              "bounding_box": {
+                "left": 1101,
+                "top": 615,
+                "right": 1460,
+                "bottom": 646
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Offline report preparation"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e003",
+              "text": "Project BETA",
+              "source": "ocr",
+              "confidence": 0.95,
+              "bounding_box": {
+                "left": 1168,
+                "top": 706,
+                "right": 1397,
+                "bottom": 743
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Project BETA"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e004",
+              "text": "Week6 Local Lab",
+              "source": "ocr",
+              "confidence": 0.91,
+              "bounding_box": {
+                "left": 1089,
+                "top": 510,
+                "right": 1474,
+                "bottom": 548
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Week6 Local Lab"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e005",
+              "text": "217.02KB",
+              "source": "ocr",
+              "confidence": 0.91,
+              "bounding_box": {
+                "left": 2265,
+                "top": 1386,
+                "right": 2332,
+                "bottom": 1402
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "217.02KB"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e006",
+              "text": "点击清理后可释放",
+              "source": "ocr",
+              "confidence": 0.86,
+              "bounding_box": {
+                "left": 2072,
+                "top": 1382,
+                "right": 2240,
+                "bottom": 1413
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "点击清理后可释放"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e007",
+              "text": "立即清理",
+              "source": "ocr",
+              "confidence": 0.85,
+              "bounding_box": {
+                "left": 2235,
+                "top": 1449,
+                "right": 2307,
+                "bottom": 1467
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "立即清理"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e008",
+              "text": "Draft yady",
+              "source": "ocr",
+              "confidence": 0.67,
+              "bounding_box": {
+                "left": 1188,
+                "top": 901,
+                "right": 1375,
+                "bottom": 941
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Draft yady"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e009",
+              "text": "发现 2 款应用有卸载残留",
+              "source": "ocr",
+              "confidence": 0.55,
+              "bounding_box": {
+                "left": 2072,
+                "top": 1338,
+                "right": 2342,
+                "bottom": 1375
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "发现 2 款应用有卸载残留"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e010",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 1409,
+                "top": 0,
+                "right": 2560,
+                "bottom": 1600
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_mixed_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": [
+                "obs-0001-e002",
+                "obs-0001-e004",
+                "obs-0001-e005",
+                "obs-0001-e006",
+                "obs-0001-e007",
+                "obs-0001-e009"
+              ]
+            },
+            {
+              "element_id": "obs-0001-e011",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 1997,
+                "top": 1307,
+                "right": 2543,
+                "bottom": 1512
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_mixed_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": [
+                "obs-0001-e005",
+                "obs-0001-e006",
+                "obs-0001-e007",
+                "obs-0001-e009"
+              ]
+            },
+            {
+              "element_id": "obs-0001-e012",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 1048,
+                "top": 988,
+                "right": 1516,
+                "bottom": 1106
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_with_single_ocr",
+              "compatible_texts": [
+                "Review report"
+              ],
+              "overlapping_ocr_ids": [
+                "obs-0001-e001"
+              ]
+            },
+            {
+              "element_id": "obs-0001-e013",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 2050,
+                "top": 1437,
+                "right": 2493,
+                "bottom": 1483
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_with_single_ocr",
+              "compatible_texts": [
+                "立即清理"
+              ],
+              "overlapping_ocr_ids": [
+                "obs-0001-e007"
+              ]
+            },
+            {
+              "element_id": "obs-0001-e014",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 2026,
+                "top": 1339,
+                "right": 2053,
+                "bottom": 1366
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_without_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e015",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 2496,
+                "top": 1337,
+                "right": 2513,
+                "bottom": 1354
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_without_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e016",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 2237,
+                "top": 1389,
+                "right": 2249,
+                "bottom": 1403
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_with_single_ocr",
+              "compatible_texts": [
+                "点击清理后可释放"
+              ],
+              "overlapping_ocr_ids": [
+                "obs-0001-e006"
+              ]
+            },
+            {
+              "element_id": "obs-0001-e017",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 2032,
+                "top": 1346,
+                "right": 2048,
+                "bottom": 1355
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_without_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e018",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 2254,
+                "top": 1386,
+                "right": 2262,
+                "bottom": 1403
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_without_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": []
+            }
+          ],
+          "labels": [
+            {
+              "text": "Theme BLUE",
+              "element_ids": [
+                "obs-0001-e000"
+              ]
+            },
+            {
+              "text": "Review report",
+              "element_ids": [
+                "obs-0001-e001",
+                "obs-0001-e012"
+              ]
+            },
+            {
+              "text": "Offline report preparation",
+              "element_ids": [
+                "obs-0001-e002"
+              ]
+            },
+            {
+              "text": "Project BETA",
+              "element_ids": [
+                "obs-0001-e003"
+              ]
+            },
+            {
+              "text": "Week6 Local Lab",
+              "element_ids": [
+                "obs-0001-e004"
+              ]
+            },
+            {
+              "text": "217.02KB",
+              "element_ids": [
+                "obs-0001-e005"
+              ]
+            },
+            {
+              "text": "点击清理后可释放",
+              "element_ids": [
+                "obs-0001-e006",
+                "obs-0001-e016"
+              ]
+            },
+            {
+              "text": "立即清理",
+              "element_ids": [
+                "obs-0001-e007",
+                "obs-0001-e013"
+              ]
+            },
+            {
+              "text": "Draft yady",
+              "element_ids": [
+                "obs-0001-e008"
+              ]
+            },
+            {
+              "text": "发现 2 款应用有卸载残留",
+              "element_ids": [
+                "obs-0001-e009"
+              ]
+            }
+          ],
+          "anonymous_without_ocr_ids": [
+            "obs-0001-e014",
+            "obs-0001-e015",
+            "obs-0001-e017",
+            "obs-0001-e018"
+          ]
+        }
+      },
+      "image_path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_006\\run\\automatic\\goal_001_002_GOAL_2\\001_GOAL_2\\monitor1_20261101_160713_787.png",
+      "task_id": "GOAL_2",
+      "attempts": 1,
+      "model_requests": 1,
+      "parsed_plan": {
+        "task_id": "t1",
+        "instruction": "Review the generated report and confirm its accuracy.",
+        "summary": "",
+        "steps": [
+          {
+            "step_id": "s1",
+            "description": "Click the 'Review report' button to proceed with reviewing the report.",
+            "action_type": "click",
+            "target_text": "Review report",
+            "arguments": {
+              "element_id": "obs-0001-e001"
+            },
+            "expected_result": "The report will be displayed for review.",
+            "status": "pending"
+          }
+        ],
+        "assumptions": [],
+        "requires_confirmation": true,
+        "errors": []
+      },
+      "response": {
+        "provider": "openai_compatible",
+        "model_name": "qwen3-vl:8b-instruct",
+        "latency_ms": 29328.0,
+        "usage": {
+          "prompt_tokens": 8741,
+          "completion_tokens": 110,
+          "total_tokens": 8851
+        },
+        "error": null,
+        "content_length": 408,
+        "content": "{\"task_id\": \"t1\", \"instruction\": \"Review the generated report and confirm its accuracy.\", \"steps\": [{\"step_id\": \"s1\", \"description\": \"Click the 'Review report' button to proceed with reviewing the report.\", \"action_type\": \"click\", \"target_text\": \"Review report\", \"arguments\": {\"element_id\": \"obs-0001-e001\"}, \"expected_result\": \"The report will be displayed for review.\", \"status\": \"pending\"}], \"errors\": []}",
+        "raw_response": {
+          "finish_reason": "stop"
+        }
+      },
+      "error": null
+    },
+    {
+      "max_steps": 1,
+      "returned_steps": 1,
+      "ok": true,
+      "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Review the generated report and confirm its accuracy.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+      "context": {
+        "platform": "win32",
+        "observation_id": "obs-0005",
+        "screen": "2560x1600",
+        "target_app": null,
+        "allowed_keys": {
+          "keys": [
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "a",
+            "b",
+            "backspace",
+            "c",
+            "d",
+            "delete",
+            "down",
+            "e",
+            "end",
+            "enter",
+            "esc",
+            "escape",
+            "f",
+            "f1",
+            "f10",
+            "f11",
+            "f12",
+            "f2",
+            "f3",
+            "f4",
+            "f5",
+            "f6",
+            "f7",
+            "f8",
+            "f9",
+            "g",
+            "h",
+            "home",
+            "i",
+            "j",
+            "k",
+            "l",
+            "left",
+            "m",
+            "n",
+            "o",
+            "p",
+            "pagedown",
+            "pageup",
+            "q",
+            "r",
+            "return",
+            "right",
+            "s",
+            "space",
+            "t",
+            "tab",
+            "u",
+            "up",
+            "v",
+            "w",
+            "x",
+            "y",
+            "z"
+          ],
+          "modifiers": [
+            "alt",
+            "cmd",
+            "command",
+            "control",
+            "ctrl",
+            "shift",
+            "super",
+            "win"
+          ],
+          "hotkey_separator": "+"
+        },
+        "limits": "at most 18 actions and 7051.08 s for the whole task",
+        "visible_text": "obs-0005-e000  'Draft ready'  conf=0.96  center=(1281,964)  box=(1188,946,1375,983)\nobs-0005-e001  'Review report'  conf=0.96  center=(1282,1094)  box=(1168,1077,1397,1112)\nobs-0005-e002  'Offline report preparation'  conf=0.95  center=(1280,586)  box=(1101,571,1460,602)\nobs-0005-e003  'Project BETA'  conf=0.95  center=(1283,681)  box=(1169,663,1397,700)\nobs-0005-e004  'Theme BLUE'  conf=0.95  center=(1281,775)  box=(1167,760,1396,790)\nobs-0005-e005  'Review unavailable. Please retry'  conf=0.95  center=(1278,870)  box=(1047,855,1509,886)\nobs-0005-e006  'Week6 Local Lab'  conf=0.91  center=(1281,485)  box=(1089,466,1474,505)\nobs-0005-e007  '217.02KB'  conf=0.91  center=(2298,1394)  box=(2265,1386,2332,1402)\nobs-0005-e008  '点击清理后可释放'  conf=0.86  center=(2156,1397)  box=(2072,1382,2240,1413)\nobs-0005-e009  '立即清理'  conf=0.85  center=(2271,1458)  box=(2235,1449,2307,1467)\nobs-0005-e010  'x'  conf=0.78  center=(2504,1345)  box=(2497,1338,2511,1352)\nobs-0005-e011  '发现 2 款应用有卸载残留'  conf=0.55  center=(2207,1356)  box=(2072,1338,2342,1375)\nobs-0005-e012  <unlabelled box>  conf=0.50  center=(1984,800)  box=(1409,0,2560,1600)\nobs-0005-e013  <unlabelled box>  conf=0.50  center=(2270,1409)  box=(1997,1307,2543,1512)\nobs-0005-e014  <unlabelled box>  conf=0.50  center=(1282,1092)  box=(1048,1034,1516,1151)\nobs-0005-e015  <unlabelled box>  conf=0.50  center=(2271,1460)  box=(2050,1437,2493,1483)\nobs-0005-e016  <unlabelled box>  conf=0.50  center=(1295,1063)  box=(1280,1047,1311,1079)\nobs-0005-e017  <unlabelled box>  conf=0.50  center=(2039,1352)  box=(2026,1339,2053,1366)\nobs-0005-e018  <unlabelled box>  conf=0.50  center=(2243,1396)  box=(2237,1389,2249,1403)\nobs-0005-e019  <unlabelled box>  conf=0.50  center=(2040,1350)  box=(2032,1346,2048,1355)\nobs-0005-e020  <unlabelled box>  conf=0.50  center=(2258,1394)  box=(2254,1386,2262,1403)\nobs-0005-e021  <unlabelled box>  conf=0.50  center=(1286,1054)  box=(1281,1048,1292,1060)",
+        "targeting_policy": {
+          "schema_version": "gui_agent.generation_targeting_policy.v1",
+          "instruction": "Generation guidance only; it grants neither input nor success authority. Use only candidates in the current target_bindings scope, including the final authorised subset. Use text-only targeting only when current OCR labels or adjacent OCR words can locate the target. If a target is visible in the screenshot but absent from OCR, choose its matching current ID yourself from target_bindings.anonymous_without_ocr_ids; never invent or replace an ID. If no matching allowed candidate is certain, return no steps and explain in errors.",
+          "generation_only": true
+        },
+        "success_rules": [],
+        "target_bindings": {
+          "schema_version": "gui_agent.target_bindings.v1",
+          "observation_id": "obs-0005",
+          "scope": "all_snapshot_candidates",
+          "min_confidence": 0.35,
+          "candidates": [
+            {
+              "element_id": "obs-0005-e000",
+              "text": "Draft ready",
+              "source": "ocr",
+              "confidence": 0.96,
+              "bounding_box": {
+                "left": 1188,
+                "top": 946,
+                "right": 1375,
+                "bottom": 983
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Draft ready"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0005-e001",
+              "text": "Review report",
+              "source": "ocr",
+              "confidence": 0.96,
+              "bounding_box": {
+                "left": 1168,
+                "top": 1077,
+                "right": 1397,
+                "bottom": 1112
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Review report"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0005-e002",
+              "text": "Offline report preparation",
+              "source": "ocr",
+              "confidence": 0.95,
+              "bounding_box": {
+                "left": 1101,
+                "top": 571,
+                "right": 1460,
+                "bottom": 602
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Offline report preparation"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0005-e003",
+              "text": "Project BETA",
+              "source": "ocr",
+              "confidence": 0.95,
+              "bounding_box": {
+                "left": 1169,
+                "top": 663,
+                "right": 1397,
+                "bottom": 700
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Project BETA"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0005-e004",
+              "text": "Theme BLUE",
+              "source": "ocr",
+              "confidence": 0.95,
+              "bounding_box": {
+                "left": 1167,
+                "top": 760,
+                "right": 1396,
+                "bottom": 790
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Theme BLUE"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0005-e005",
+              "text": "Review unavailable. Please retry",
+              "source": "ocr",
+              "confidence": 0.95,
+              "bounding_box": {
+                "left": 1047,
+                "top": 855,
+                "right": 1509,
+                "bottom": 886
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Review unavailable. Please retry"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0005-e006",
+              "text": "Week6 Local Lab",
+              "source": "ocr",
+              "confidence": 0.91,
+              "bounding_box": {
+                "left": 1089,
+                "top": 466,
+                "right": 1474,
+                "bottom": 505
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Week6 Local Lab"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0005-e007",
+              "text": "217.02KB",
+              "source": "ocr",
+              "confidence": 0.91,
+              "bounding_box": {
+                "left": 2265,
+                "top": 1386,
+                "right": 2332,
+                "bottom": 1402
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "217.02KB"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0005-e008",
+              "text": "点击清理后可释放",
+              "source": "ocr",
+              "confidence": 0.86,
+              "bounding_box": {
+                "left": 2072,
+                "top": 1382,
+                "right": 2240,
+                "bottom": 1413
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "点击清理后可释放"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0005-e009",
+              "text": "立即清理",
+              "source": "ocr",
+              "confidence": 0.85,
+              "bounding_box": {
+                "left": 2235,
+                "top": 1449,
+                "right": 2307,
+                "bottom": 1467
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "立即清理"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0005-e010",
+              "text": "x",
+              "source": "ocr",
+              "confidence": 0.78,
+              "bounding_box": {
+                "left": 2497,
+                "top": 1338,
+                "right": 2511,
+                "bottom": 1352
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "x"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0005-e011",
+              "text": "发现 2 款应用有卸载残留",
+              "source": "ocr",
+              "confidence": 0.55,
+              "bounding_box": {
+                "left": 2072,
+                "top": 1338,
+                "right": 2342,
+                "bottom": 1375
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "发现 2 款应用有卸载残留"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0005-e012",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 1409,
+                "top": 0,
+                "right": 2560,
+                "bottom": 1600
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_mixed_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": [
+                "obs-0005-e002",
+                "obs-0005-e005",
+                "obs-0005-e006",
+                "obs-0005-e007",
+                "obs-0005-e008",
+                "obs-0005-e009",
+                "obs-0005-e010",
+                "obs-0005-e011"
+              ]
+            },
+            {
+              "element_id": "obs-0005-e013",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 1997,
+                "top": 1307,
+                "right": 2543,
+                "bottom": 1512
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_mixed_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": [
+                "obs-0005-e007",
+                "obs-0005-e008",
+                "obs-0005-e009",
+                "obs-0005-e010",
+                "obs-0005-e011"
+              ]
+            },
+            {
+              "element_id": "obs-0005-e014",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 1048,
+                "top": 1034,
+                "right": 1516,
+                "bottom": 1151
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_with_single_ocr",
+              "compatible_texts": [
+                "Review report"
+              ],
+              "overlapping_ocr_ids": [
+                "obs-0005-e001"
+              ]
+            },
+            {
+              "element_id": "obs-0005-e015",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 2050,
+                "top": 1437,
+                "right": 2493,
+                "bottom": 1483
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_with_single_ocr",
+              "compatible_texts": [
+                "立即清理"
+              ],
+              "overlapping_ocr_ids": [
+                "obs-0005-e009"
+              ]
+            },
+            {
+              "element_id": "obs-0005-e016",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 1280,
+                "top": 1047,
+                "right": 1311,
+                "bottom": 1079
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_with_single_ocr",
+              "compatible_texts": [
+                "Review report"
+              ],
+              "overlapping_ocr_ids": [
+                "obs-0005-e001"
+              ]
+            },
+            {
+              "element_id": "obs-0005-e017",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 2026,
+                "top": 1339,
+                "right": 2053,
+                "bottom": 1366
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_without_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0005-e018",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 2237,
+                "top": 1389,
+                "right": 2249,
+                "bottom": 1403
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_with_single_ocr",
+              "compatible_texts": [
+                "点击清理后可释放"
+              ],
+              "overlapping_ocr_ids": [
+                "obs-0005-e008"
+              ]
+            },
+            {
+              "element_id": "obs-0005-e019",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 2032,
+                "top": 1346,
+                "right": 2048,
+                "bottom": 1355
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_without_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0005-e020",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 2254,
+                "top": 1386,
+                "right": 2262,
+                "bottom": 1403
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_without_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0005-e021",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 1281,
+                "top": 1048,
+                "right": 1292,
+                "bottom": 1060
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_without_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": []
+            }
+          ],
+          "labels": [
+            {
+              "text": "Draft ready",
+              "element_ids": [
+                "obs-0005-e000"
+              ]
+            },
+            {
+              "text": "Review report",
+              "element_ids": [
+                "obs-0005-e001",
+                "obs-0005-e014",
+                "obs-0005-e016"
+              ]
+            },
+            {
+              "text": "Offline report preparation",
+              "element_ids": [
+                "obs-0005-e002"
+              ]
+            },
+            {
+              "text": "Project BETA",
+              "element_ids": [
+                "obs-0005-e003"
+              ]
+            },
+            {
+              "text": "Theme BLUE",
+              "element_ids": [
+                "obs-0005-e004"
+              ]
+            },
+            {
+              "text": "Review unavailable. Please retry",
+              "element_ids": [
+                "obs-0005-e005"
+              ]
+            },
+            {
+              "text": "Week6 Local Lab",
+              "element_ids": [
+                "obs-0005-e006"
+              ]
+            },
+            {
+              "text": "217.02KB",
+              "element_ids": [
+                "obs-0005-e007"
+              ]
+            },
+            {
+              "text": "点击清理后可释放",
+              "element_ids": [
+                "obs-0005-e008",
+                "obs-0005-e018"
+              ]
+            },
+            {
+              "text": "立即清理",
+              "element_ids": [
+                "obs-0005-e009",
+                "obs-0005-e015"
+              ]
+            },
+            {
+              "text": "x",
+              "element_ids": [
+                "obs-0005-e010"
+              ]
+            },
+            {
+              "text": "发现 2 款应用有卸载残留",
+              "element_ids": [
+                "obs-0005-e011"
+              ]
+            }
+          ],
+          "anonymous_without_ocr_ids": [
+            "obs-0005-e017",
+            "obs-0005-e019",
+            "obs-0005-e020",
+            "obs-0005-e021"
+          ]
+        },
+        "recovery": {
+          "previous_pass": 1,
+          "reason": "task_verification",
+          "failed_step_index": null,
+          "actions_used": 1,
+          "actions_remaining": 17,
+          "remaining_ms": 6996327.999999994,
+          "recent_steps": [
+            {
+              "index": 1,
+              "action_type": "click",
+              "attempted": true,
+              "succeeded": true,
+              "verification": "passed"
+            }
+          ],
+          "omitted_steps": 0,
+          "instruction": "Plan from the current observation; previous attempts do not prove success. Do not replay completed inputs to recreate an earlier state. Existing task checks and remaining budgets still apply."
+        }
+      },
+      "image_path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_006\\run\\automatic\\goal_001_002_GOAL_2\\001_GOAL_2\\monitor1_20261101_160805_796.png",
+      "task_id": "GOAL_2",
+      "attempts": 1,
+      "model_requests": 1,
+      "parsed_plan": {
+        "task_id": "t1",
+        "instruction": "Review the generated report and confirm its accuracy.",
+        "summary": "",
+        "steps": [
+          {
+            "step_id": "s1",
+            "description": "Click the 'Review report' button to proceed with the review.",
+            "action_type": "click",
+            "target_text": "Review report",
+            "arguments": {
+              "element_id": "obs-0005-e001"
+            },
+            "expected_result": "The report review interface should load.",
+            "status": "pending"
+          }
+        ],
+        "assumptions": [],
+        "requires_confirmation": true,
+        "errors": []
+      },
+      "response": {
+        "provider": "openai_compatible",
+        "model_name": "qwen3-vl:8b-instruct",
+        "latency_ms": 28313.0,
+        "usage": {
+          "prompt_tokens": 9505,
+          "completion_tokens": 87,
+          "total_tokens": 9592
+        },
+        "error": null,
+        "content_length": 377,
+        "content": "{\"task_id\":\"t1\",\"instruction\":\"Review the generated report and confirm its accuracy.\",\"steps\":[{\"step_id\":\"s1\",\"description\":\"Click the 'Review report' button to proceed with the review.\",\"action_type\":\"click\",\"target_text\":\"Review report\",\"arguments\":{\"element_id\":\"obs-0005-e001\"},\"expected_result\":\"The report review interface should load.\",\"status\":\"pending\"}],\"errors\":[]}",
+        "raw_response": {
+          "finish_reason": "stop"
+        }
+      },
+      "error": null
+    },
+    {
+      "max_steps": 1,
+      "returned_steps": 1,
+      "ok": true,
+      "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Review the generated report and confirm its accuracy.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+      "context": {
+        "platform": "win32",
+        "observation_id": "obs-0009",
+        "screen": "2560x1600",
+        "target_app": null,
+        "allowed_keys": {
+          "keys": [
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "a",
+            "b",
+            "backspace",
+            "c",
+            "d",
+            "delete",
+            "down",
+            "e",
+            "end",
+            "enter",
+            "esc",
+            "escape",
+            "f",
+            "f1",
+            "f10",
+            "f11",
+            "f12",
+            "f2",
+            "f3",
+            "f4",
+            "f5",
+            "f6",
+            "f7",
+            "f8",
+            "f9",
+            "g",
+            "h",
+            "home",
+            "i",
+            "j",
+            "k",
+            "l",
+            "left",
+            "m",
+            "n",
+            "o",
+            "p",
+            "pagedown",
+            "pageup",
+            "q",
+            "r",
+            "return",
+            "right",
+            "s",
+            "space",
+            "t",
+            "tab",
+            "u",
+            "up",
+            "v",
+            "w",
+            "x",
+            "y",
+            "z"
+          ],
+          "modifiers": [
+            "alt",
+            "cmd",
+            "command",
+            "control",
+            "ctrl",
+            "shift",
+            "super",
+            "win"
+          ],
+          "hotkey_separator": "+"
+        },
+        "limits": "at most 18 actions and 7051.08 s for the whole task",
+        "visible_text": "obs-0009-e000  'Review complete'  conf=0.96  center=(1281,919)  box=(1136,901,1427,938)\nobs-0009-e001  'Offline report preparation'  conf=0.95  center=(1280,630)  box=(1101,615,1460,646)\nobs-0009-e002  'Project BETA'  conf=0.95  center=(1282,724)  box=(1168,706,1397,743)\nobs-0009-e003  'Theme BLUE'  conf=0.95  center=(1281,818)  box=(1167,804,1396,833)\nobs-0009-e004  'Commit locally'  conf=0.95  center=(1281,1049)  box=(1157,1032,1405,1067)\nobs-0009-e005  'Week6 Local Lab'  conf=0.91  center=(1281,529)  box=(1089,510,1474,548)\nobs-0009-e006  '217.02KB'  conf=0.91  center=(2298,1394)  box=(2265,1386,2332,1402)\nobs-0009-e007  '义'  conf=0.87  center=(2504,1345)  box=(2497,1338,2511,1352)\nobs-0009-e008  '点击清理后可释放'  conf=0.86  center=(2156,1397)  box=(2072,1382,2240,1413)\nobs-0009-e009  '立即清理'  conf=0.85  center=(2271,1458)  box=(2235,1449,2307,1467)\nobs-0009-e010  '了'  conf=0.64  center=(1290,1107)  box=(1264,1095,1317,1120)\nobs-0009-e011  '发现 2 款应用有卸载残留'  conf=0.55  center=(2207,1356)  box=(2072,1338,2342,1375)\nobs-0009-e012  <unlabelled box>  conf=0.50  center=(1984,800)  box=(1409,0,2560,1600)\nobs-0009-e013  <unlabelled box>  conf=0.50  center=(2270,1409)  box=(1997,1307,2543,1512)\nobs-0009-e014  <unlabelled box>  conf=0.50  center=(1282,1056)  box=(1048,988,1516,1124)\nobs-0009-e015  <unlabelled box>  conf=0.50  center=(2271,1460)  box=(2050,1437,2493,1483)\nobs-0009-e016  <unlabelled box>  conf=0.50  center=(2039,1352)  box=(2026,1339,2053,1366)\nobs-0009-e017  <unlabelled box>  conf=0.50  center=(2243,1396)  box=(2237,1389,2249,1403)\nobs-0009-e018  <unlabelled box>  conf=0.50  center=(2040,1350)  box=(2032,1346,2048,1355)\nobs-0009-e019  <unlabelled box>  conf=0.50  center=(2258,1394)  box=(2254,1386,2262,1403)",
+        "targeting_policy": {
+          "schema_version": "gui_agent.generation_targeting_policy.v1",
+          "instruction": "Generation guidance only; it grants neither input nor success authority. Use only candidates in the current target_bindings scope, including the final authorised subset. Use text-only targeting only when current OCR labels or adjacent OCR words can locate the target. If a target is visible in the screenshot but absent from OCR, choose its matching current ID yourself from target_bindings.anonymous_without_ocr_ids; never invent or replace an ID. If no matching allowed candidate is certain, return no steps and explain in errors.",
+          "generation_only": true
+        },
+        "success_rules": [],
+        "target_bindings": {
+          "schema_version": "gui_agent.target_bindings.v1",
+          "observation_id": "obs-0009",
+          "scope": "all_snapshot_candidates",
+          "min_confidence": 0.35,
+          "candidates": [
+            {
+              "element_id": "obs-0009-e000",
+              "text": "Review complete",
+              "source": "ocr",
+              "confidence": 0.96,
+              "bounding_box": {
+                "left": 1136,
+                "top": 901,
+                "right": 1427,
+                "bottom": 938
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Review complete"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0009-e001",
+              "text": "Offline report preparation",
+              "source": "ocr",
+              "confidence": 0.95,
+              "bounding_box": {
+                "left": 1101,
+                "top": 615,
+                "right": 1460,
+                "bottom": 646
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Offline report preparation"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0009-e002",
+              "text": "Project BETA",
+              "source": "ocr",
+              "confidence": 0.95,
+              "bounding_box": {
+                "left": 1168,
+                "top": 706,
+                "right": 1397,
+                "bottom": 743
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Project BETA"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0009-e003",
+              "text": "Theme BLUE",
+              "source": "ocr",
+              "confidence": 0.95,
+              "bounding_box": {
+                "left": 1167,
+                "top": 804,
+                "right": 1396,
+                "bottom": 833
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Theme BLUE"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0009-e004",
+              "text": "Commit locally",
+              "source": "ocr",
+              "confidence": 0.95,
+              "bounding_box": {
+                "left": 1157,
+                "top": 1032,
+                "right": 1405,
+                "bottom": 1067
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Commit locally"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0009-e005",
+              "text": "Week6 Local Lab",
+              "source": "ocr",
+              "confidence": 0.91,
+              "bounding_box": {
+                "left": 1089,
+                "top": 510,
+                "right": 1474,
+                "bottom": 548
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Week6 Local Lab"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0009-e006",
+              "text": "217.02KB",
+              "source": "ocr",
+              "confidence": 0.91,
+              "bounding_box": {
+                "left": 2265,
+                "top": 1386,
+                "right": 2332,
+                "bottom": 1402
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "217.02KB"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0009-e007",
+              "text": "义",
+              "source": "ocr",
+              "confidence": 0.87,
+              "bounding_box": {
+                "left": 2497,
+                "top": 1338,
+                "right": 2511,
+                "bottom": 1352
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "义"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0009-e008",
+              "text": "点击清理后可释放",
+              "source": "ocr",
+              "confidence": 0.86,
+              "bounding_box": {
+                "left": 2072,
+                "top": 1382,
+                "right": 2240,
+                "bottom": 1413
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "点击清理后可释放"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0009-e009",
+              "text": "立即清理",
+              "source": "ocr",
+              "confidence": 0.85,
+              "bounding_box": {
+                "left": 2235,
+                "top": 1449,
+                "right": 2307,
+                "bottom": 1467
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "立即清理"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0009-e010",
+              "text": "了",
+              "source": "ocr",
+              "confidence": 0.64,
+              "bounding_box": {
+                "left": 1264,
+                "top": 1095,
+                "right": 1317,
+                "bottom": 1120
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "了"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0009-e011",
+              "text": "发现 2 款应用有卸载残留",
+              "source": "ocr",
+              "confidence": 0.55,
+              "bounding_box": {
+                "left": 2072,
+                "top": 1338,
+                "right": 2342,
+                "bottom": 1375
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "发现 2 款应用有卸载残留"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0009-e012",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 1409,
+                "top": 0,
+                "right": 2560,
+                "bottom": 1600
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_mixed_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": [
+                "obs-0009-e000",
+                "obs-0009-e001",
+                "obs-0009-e005",
+                "obs-0009-e006",
+                "obs-0009-e007",
+                "obs-0009-e008",
+                "obs-0009-e009",
+                "obs-0009-e011"
+              ]
+            },
+            {
+              "element_id": "obs-0009-e013",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 1997,
+                "top": 1307,
+                "right": 2543,
+                "bottom": 1512
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_mixed_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": [
+                "obs-0009-e006",
+                "obs-0009-e007",
+                "obs-0009-e008",
+                "obs-0009-e009",
+                "obs-0009-e011"
+              ]
+            },
+            {
+              "element_id": "obs-0009-e014",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 1048,
+                "top": 988,
+                "right": 1516,
+                "bottom": 1124
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_mixed_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": [
+                "obs-0009-e004",
+                "obs-0009-e010"
+              ]
+            },
+            {
+              "element_id": "obs-0009-e015",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 2050,
+                "top": 1437,
+                "right": 2493,
+                "bottom": 1483
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_with_single_ocr",
+              "compatible_texts": [
+                "立即清理"
+              ],
+              "overlapping_ocr_ids": [
+                "obs-0009-e009"
+              ]
+            },
+            {
+              "element_id": "obs-0009-e016",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 2026,
+                "top": 1339,
+                "right": 2053,
+                "bottom": 1366
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_without_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0009-e017",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 2237,
+                "top": 1389,
+                "right": 2249,
+                "bottom": 1403
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_with_single_ocr",
+              "compatible_texts": [
+                "点击清理后可释放"
+              ],
+              "overlapping_ocr_ids": [
+                "obs-0009-e008"
+              ]
+            },
+            {
+              "element_id": "obs-0009-e018",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 2032,
+                "top": 1346,
+                "right": 2048,
+                "bottom": 1355
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_without_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0009-e019",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 2254,
+                "top": 1386,
+                "right": 2262,
+                "bottom": 1403
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_without_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": []
+            }
+          ],
+          "labels": [
+            {
+              "text": "Review complete",
+              "element_ids": [
+                "obs-0009-e000"
+              ]
+            },
+            {
+              "text": "Offline report preparation",
+              "element_ids": [
+                "obs-0009-e001"
+              ]
+            },
+            {
+              "text": "Project BETA",
+              "element_ids": [
+                "obs-0009-e002"
+              ]
+            },
+            {
+              "text": "Theme BLUE",
+              "element_ids": [
+                "obs-0009-e003"
+              ]
+            },
+            {
+              "text": "Commit locally",
+              "element_ids": [
+                "obs-0009-e004"
+              ]
+            },
+            {
+              "text": "Week6 Local Lab",
+              "element_ids": [
+                "obs-0009-e005"
+              ]
+            },
+            {
+              "text": "217.02KB",
+              "element_ids": [
+                "obs-0009-e006"
+              ]
+            },
+            {
+              "text": "义",
+              "element_ids": [
+                "obs-0009-e007"
+              ]
+            },
+            {
+              "text": "点击清理后可释放",
+              "element_ids": [
+                "obs-0009-e008",
+                "obs-0009-e017"
+              ]
+            },
+            {
+              "text": "立即清理",
+              "element_ids": [
+                "obs-0009-e009",
+                "obs-0009-e015"
+              ]
+            },
+            {
+              "text": "了",
+              "element_ids": [
+                "obs-0009-e010"
+              ]
+            },
+            {
+              "text": "发现 2 款应用有卸载残留",
+              "element_ids": [
+                "obs-0009-e011"
+              ]
+            }
+          ],
+          "anonymous_without_ocr_ids": [
+            "obs-0009-e016",
+            "obs-0009-e018",
+            "obs-0009-e019"
+          ]
+        },
+        "recovery": {
+          "previous_pass": 2,
+          "reason": "task_verification",
+          "failed_step_index": null,
+          "actions_used": 2,
+          "actions_remaining": 16,
+          "remaining_ms": 6947750.0,
+          "recent_steps": [
+            {
+              "index": 2,
+              "action_type": "click",
+              "attempted": true,
+              "succeeded": true,
+              "verification": "passed"
+            }
+          ],
+          "omitted_steps": 0,
+          "instruction": "Plan from the current observation; previous attempts do not prove success. Do not replay completed inputs to recreate an earlier state. Existing task checks and remaining budgets still apply."
+        }
+      },
+      "image_path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_006\\run\\automatic\\goal_001_002_GOAL_2\\001_GOAL_2\\monitor1_20261101_160854_441.png",
+      "task_id": "GOAL_2",
+      "attempts": 1,
+      "model_requests": 1,
+      "parsed_plan": {
+        "task_id": "t1",
+        "instruction": "Review the generated report and confirm its accuracy.",
+        "summary": "",
+        "steps": [
+          {
+            "step_id": "s1",
+            "description": "Confirm the report review is complete by interacting with the 'Commit locally' button.",
+            "action_type": "double_click",
+            "target_text": "Commit locally",
+            "arguments": {
+              "element_id": "obs-0009-e004"
+            },
+            "expected_result": "The report is committed locally as confirmed by the interface.",
+            "status": "pending"
+          }
+        ],
+        "assumptions": [],
+        "requires_confirmation": true,
+        "errors": []
+      },
+      "response": {
+        "provider": "openai_compatible",
+        "model_name": "qwen3-vl:8b-instruct",
+        "latency_ms": 28485.0,
+        "usage": {
+          "prompt_tokens": 9108,
+          "completion_tokens": 95,
+          "total_tokens": 9203
+        },
+        "error": null,
+        "content_length": 433,
+        "content": "{\"task_id\":\"t1\",\"instruction\":\"Review the generated report and confirm its accuracy.\",\"steps\":[{\"step_id\":\"s1\",\"description\":\"Confirm the report review is complete by interacting with the 'Commit locally' button.\",\"action_type\":\"double_click\",\"target_text\":\"Commit locally\",\"arguments\":{\"element_id\":\"obs-0009-e004\"},\"expected_result\":\"The report is committed locally as confirmed by the interface.\",\"status\":\"pending\"}],\"errors\":[]}",
+        "raw_response": {
+          "finish_reason": "stop"
+        }
+      },
+      "error": null
+    }
+  ],
+  "meaning": "At most one step per planning call; recovery calls retain the shared overall budgets.",
+  "restored_max_steps": 4
+}

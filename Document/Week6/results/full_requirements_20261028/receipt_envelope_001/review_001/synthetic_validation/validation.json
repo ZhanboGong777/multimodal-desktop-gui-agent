@@ -1,0 +1,92 @@
+{
+  "schema": "week6.sky_input_operation.synthetic_validation.v1",
+  "synthetic_records_only": true,
+  "live_cases_read_or_executed": [],
+  "private_source_before": {
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\audit_input_receipt_protocol.py": "23ee41ca6e6255c3d09bf00665ee4051f1a01a09e359996d6a823304a0d70253",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\run_checks_001.py": "c4108f4fb4ab04a037e2ba8b4775f2eca529fae4e70f612e91c9b224e738aca8",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\test_input_receipt_protocol.py": "7e5e810f1c0e8b9ca5f28f13d755bf6e275c3c01cebc7ee868ef68a0f01ae258"
+  },
+  "private_source_after": {
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\audit_input_receipt_protocol.py": "23ee41ca6e6255c3d09bf00665ee4051f1a01a09e359996d6a823304a0d70253",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\run_checks_001.py": "c4108f4fb4ab04a037e2ba8b4775f2eca529fae4e70f612e91c9b224e738aca8",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\test_input_receipt_protocol.py": "7e5e810f1c0e8b9ca5f28f13d755bf6e275c3c01cebc7ee868ef68a0f01ae258"
+  },
+  "private_source_unchanged": true,
+  "process_receipts": [
+    {
+      "synthetic_records_only": true,
+      "command": [
+        "C:\\Users\\联想\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "-X",
+        "utf8",
+        "-B",
+        "-m",
+        "unittest",
+        "-v",
+        "test_input_receipt_protocol"
+      ],
+      "pid": 68844,
+      "started_utc": "2026-10-28T14:54:10.854388+00:00",
+      "finished_utc": "2026-10-28T14:54:11.020585+00:00",
+      "elapsed_seconds": 0.1665156000526622,
+      "actual_exit": 0,
+      "expected_exit": 0,
+      "exit_as_expected": true
+    },
+    {
+      "synthetic_records_only": true,
+      "command": [
+        "C:\\Users\\联想\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "-X",
+        "utf8",
+        "-B",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\audit_input_receipt_protocol.py",
+        "--container",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\validation_001\\synthetic_case",
+        "--operator-handoff",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\validation_001\\synthetic_case\\operator_handoff_003.json",
+        "--expected-window",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\validation_001\\synthetic_case\\window_claim_001.json",
+        "--owner-exit-confirmed",
+        "--out",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\validation_001\\cli_synthetic_qualified.audit.json"
+      ],
+      "pid": 83356,
+      "started_utc": "2026-10-28T14:54:11.033314+00:00",
+      "finished_utc": "2026-10-28T14:54:11.279420+00:00",
+      "elapsed_seconds": 0.24602720001712441,
+      "actual_exit": 0,
+      "expected_exit": 0,
+      "exit_as_expected": true
+    },
+    {
+      "synthetic_records_only": true,
+      "command": [
+        "C:\\Users\\联想\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "-X",
+        "utf8",
+        "-B",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\audit_input_receipt_protocol.py",
+        "--container",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\validation_001\\synthetic_case",
+        "--operator-handoff",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\validation_001\\synthetic_case\\operator_handoff_003.json",
+        "--expected-window",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\validation_001\\synthetic_case\\synthetic_late_claim.json",
+        "--owner-exit-confirmed",
+        "--out",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\validation_001\\cli_synthetic_late_claim.audit.json"
+      ],
+      "pid": 77920,
+      "started_utc": "2026-10-28T14:54:11.282425+00:00",
+      "finished_utc": "2026-10-28T14:54:11.420615+00:00",
+      "elapsed_seconds": 0.13865660002920777,
+      "actual_exit": 1,
+      "expected_exit": 1,
+      "exit_as_expected": true
+    }
+  ],
+  "commands_as_expected": true,
+  "meaning": "Pure boundaries and CLI serialization checks only; no observed windows, OS inputs or live acceptance."
+}

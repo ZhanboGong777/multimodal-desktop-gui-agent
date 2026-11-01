@@ -1,0 +1,232 @@
+{
+  "schema_version": "week6.semantic_subtasks.v6",
+  "native_proposal": {
+    "status": "ready",
+    "reason": "All requested operations are executable using visible controls in Week6 Local Lab. The plan will prepare the GREEN report for project ALPHA, review it, and commit it locally, with verifiable outcomes.",
+    "subgoals": [
+      {
+        "instruction": "Prepare the GREEN report for project ALPHA by selecting the correct project and theme.",
+        "expect_text": [
+          "Project ALPHA",
+          "Theme GREEN"
+        ],
+        "forbid_text": [
+          "Project BETA",
+          "Theme RED",
+          "Theme BLUE",
+          "Theme YELLOW",
+          "Theme PURPLE",
+          "Theme ORANGE",
+          "Theme PINK",
+          "Theme WHITE"
+        ],
+        "goal_id": "prepare_report"
+      },
+      {
+        "instruction": "Review the prepared GREEN report for project ALPHA using the available review controls.",
+        "expect_text": [
+          "Review Complete",
+          "LOCAL COMPLETE"
+        ],
+        "forbid_text": [
+          "Review Pending",
+          "Review Failed",
+          "Review Error",
+          "Review Timeout",
+          "Review Cancelled",
+          "Review Not Started",
+          "Review In Progress",
+          "Review Unavailable"
+        ],
+        "goal_id": "review_report"
+      },
+      {
+        "instruction": "Commit the reviewed GREEN report for project ALPHA locally using the visible commit controls.",
+        "expect_text": [
+          "LOCAL COMPLETE"
+        ],
+        "forbid_text": [
+          "Commit Failed",
+          "Commit Error",
+          "Commit Timeout",
+          "Commit Cancelled",
+          "Commit Not Started",
+          "Commit In Progress",
+          "Commit Unavailable",
+          "Commit Pending"
+        ],
+        "goal_id": "commit_report"
+      }
+    ]
+  },
+  "workflow": {
+    "workflow_id": "semantic_lab",
+    "instruction": "In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+    "subgoals": [
+      {
+        "case_id": "prepare_report",
+        "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Prepare the GREEN report for project ALPHA by selecting the correct project and theme.\nComplete original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+        "target_app": null,
+        "preconditions": [],
+        "success_rules": [],
+        "verification": "automatic",
+        "expect_text": [
+          "Project ALPHA",
+          "Theme GREEN"
+        ],
+        "forbid_text": [
+          "Project BETA",
+          "Theme RED",
+          "Theme BLUE",
+          "Theme YELLOW",
+          "Theme PURPLE",
+          "Theme ORANGE",
+          "Theme PINK",
+          "Theme WHITE"
+        ],
+        "requires_processes": [],
+        "forbids_processes": [],
+        "must_exit_processes": [],
+        "risk": "medium",
+        "message_conversation": null,
+        "gate_on_step_verification": false
+      },
+      {
+        "case_id": "review_report",
+        "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Review the prepared GREEN report for project ALPHA using the available review controls.\nComplete original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+        "target_app": null,
+        "preconditions": [],
+        "success_rules": [],
+        "verification": "automatic",
+        "expect_text": [
+          "Review Complete",
+          "LOCAL COMPLETE"
+        ],
+        "forbid_text": [
+          "Review Pending",
+          "Review Failed",
+          "Review Error",
+          "Review Timeout",
+          "Review Cancelled",
+          "Review Not Started",
+          "Review In Progress",
+          "Review Unavailable"
+        ],
+        "requires_processes": [],
+        "forbids_processes": [],
+        "must_exit_processes": [],
+        "risk": "medium",
+        "message_conversation": null,
+        "gate_on_step_verification": false
+      },
+      {
+        "case_id": "commit_report",
+        "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Commit the reviewed GREEN report for project ALPHA locally using the visible commit controls.\nComplete original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+        "target_app": null,
+        "preconditions": [],
+        "success_rules": [],
+        "verification": "automatic",
+        "expect_text": [
+          "LOCAL COMPLETE"
+        ],
+        "forbid_text": [
+          "Commit Failed",
+          "Commit Error",
+          "Commit Timeout",
+          "Commit Cancelled",
+          "Commit Not Started",
+          "Commit In Progress",
+          "Commit Unavailable",
+          "Commit Pending"
+        ],
+        "requires_processes": [],
+        "forbids_processes": [],
+        "must_exit_processes": [],
+        "risk": "medium",
+        "message_conversation": null,
+        "gate_on_step_verification": false
+      }
+    ],
+    "final_check": {
+      "case_id": "FINAL",
+      "instruction": "Independently read unchanged caller final predicates",
+      "target_app": null,
+      "preconditions": [],
+      "success_rules": [],
+      "verification": "automatic",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [],
+      "requires_processes": [],
+      "forbids_processes": [],
+      "must_exit_processes": [],
+      "risk": "low",
+      "message_conversation": null,
+      "gate_on_step_verification": true
+    }
+  },
+  "mapping": [
+    {
+      "goal_id": "prepare_report",
+      "native_instruction": "Prepare the GREEN report for project ALPHA by selecting the correct project and theme.",
+      "validated_instruction": "Prepare the GREEN report for project ALPHA by selecting the correct project and theme.",
+      "compiled_instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Prepare the GREEN report for project ALPHA by selecting the correct project and theme.\nComplete original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN"
+      ],
+      "forbid_text": [
+        "Project BETA",
+        "Theme RED",
+        "Theme BLUE",
+        "Theme YELLOW",
+        "Theme PURPLE",
+        "Theme ORANGE",
+        "Theme PINK",
+        "Theme WHITE"
+      ]
+    },
+    {
+      "goal_id": "review_report",
+      "native_instruction": "Review the prepared GREEN report for project ALPHA using the available review controls.",
+      "validated_instruction": "Review the prepared GREEN report for project ALPHA using the available review controls.",
+      "compiled_instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Review the prepared GREEN report for project ALPHA using the available review controls.\nComplete original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+      "expect_text": [
+        "Review Complete",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [
+        "Review Pending",
+        "Review Failed",
+        "Review Error",
+        "Review Timeout",
+        "Review Cancelled",
+        "Review Not Started",
+        "Review In Progress",
+        "Review Unavailable"
+      ]
+    },
+    {
+      "goal_id": "commit_report",
+      "native_instruction": "Commit the reviewed GREEN report for project ALPHA locally using the visible commit controls.",
+      "validated_instruction": "Commit the reviewed GREEN report for project ALPHA locally using the visible commit controls.",
+      "compiled_instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Commit the reviewed GREEN report for project ALPHA locally using the visible commit controls.\nComplete original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+      "expect_text": [
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [
+        "Commit Failed",
+        "Commit Error",
+        "Commit Timeout",
+        "Commit Cancelled",
+        "Commit Not Started",
+        "Commit In Progress",
+        "Commit Unavailable",
+        "Commit Pending"
+      ]
+    }
+  ]
+}

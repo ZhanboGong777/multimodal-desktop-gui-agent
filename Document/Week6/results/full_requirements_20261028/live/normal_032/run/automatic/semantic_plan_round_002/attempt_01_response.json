@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 11422.0,
+  "usage": {
+    "prompt_tokens": 1418,
+    "completion_tokens": 131,
+    "total_tokens": 1549
+  },
+  "error": null,
+  "content_length": 573,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"The previous goal failed due to missing 'Saved Locally' text, but the caller's intent remains unchanged. The current plan focuses on completing the review and commit steps to satisfy the final state.\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Review the GREEN report for project ALPHA and ensure the review is completed locally.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [\"Review unavailable\", \"Connection error\", \"Commit failed\"],\n      \"goal_id\": \"review_and_commit\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

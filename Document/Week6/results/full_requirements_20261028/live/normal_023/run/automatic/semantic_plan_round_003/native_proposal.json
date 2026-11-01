@@ -1,0 +1,25 @@
+{
+  "status": "ready",
+  "reason": "The request requires reviewing and committing the GREEN report for project ALPHA locally. The previous goal 'prepare_report' is completed, so the next logical step is to review the report and ensure it is committed locally. The final state must include 'LOCAL COMPLETE' as a visible text indicator.",
+  "subgoals": [
+    {
+      "instruction": "Review the GREEN report for project ALPHA and ensure it is ready for local commit.",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [
+        "Review unavailable",
+        "Connection error",
+        "Commit failed",
+        "Not ready to commit",
+        "Review pending",
+        "Review in progress",
+        "Review timeout",
+        "Review canceled"
+      ],
+      "goal_id": "review_and_commit_report"
+    }
+  ]
+}

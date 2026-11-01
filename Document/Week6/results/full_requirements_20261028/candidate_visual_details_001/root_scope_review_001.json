@@ -1,0 +1,36 @@
+{
+  "schema": "week6.candidate_visual_details.scope.v1",
+  "utc": "2026-11-01T10:18:07.584625+00:00",
+  "root_reviewed": true,
+  "meaning": "Optional visual_candidate_details is false by default and explicitly enabled by the Week6 role-model configuration. Current non-message action context selects anonymous_without_ocr contours by geometry only:96x24minimum,8regions/1Mtotalpixels,reading order; no goal/target word or native reply selects a crop. Original screenshot remains first, original pixels/current IDs/bounds/SHA are logged; no OCR, painting, coordinate-space change or extra model dispatch. Empty region set retains prior format. Nonempty detail requests use a compact canonical-current-ID generation schema; secondary target aliases cannot select another target. This profile does not claim label/ID semantic agreement: original runtime consistency/freshness/scope and task-verification guards are unchanged. Independent auditor rebuilds crop selection and hashes from the actual scoped snapshot/pixels. SDK tests inspect actual encoded image bytes in one HTTP request and wrong-readable-ID refusal before any input. Caller semantic protocol,repairv5,whole-final guard,budgets,model and OCR profile unchanged. Saved development positive is not live acceptance or a heldout accuracy measurement. No old perception timing is attributed to the added vision attachments; actual task wall time includes their overhead.",
+  "changed_paths": [
+    "configs/week6_role_models.yaml",
+    "scripts/week6_agent_cli.py",
+    "scripts/week6_audit_semantic_acceptance.py",
+    "scripts/week6_semantic_acceptance.py",
+    "src/gui_agent/config.py",
+    "src/gui_agent/models/openai_compatible.py",
+    "src/gui_agent/planning/planner.py",
+    "src/gui_agent/planning/target_bindings.py",
+    "src/gui_agent/runtime/runner.py",
+    "tests/test_week6_candidate_visual_details.py"
+  ],
+  "all_other276oldpins_identical": true,
+  "source_before_manifest": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\candidate_visual_details_001\\source_before_manifest.json",
+    "sha256": "20e3da3dd079bdc26032ec5c8a8f79413ef1c9efb3dc82f6121c5ba7b95c52db"
+  },
+  "targeted_validation": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\candidate_visual_details_001\\targeted_validation_002\\validation.json",
+    "sha256": "1fbe0c1717da5de84655d9ff8ac4ec1382a986548ae3c98de00781aa5dc7fdbc"
+  },
+  "saved_production_probe": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\candidate_visual_details_001\\saved_production_probe_001\\result.json",
+    "sha256": "2e67b04748ad2ea3f82f0a12534f68a1f5b603822c5388123acd6936d72bb147"
+  },
+  "no_op_prompt_correction": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\visual_prompt_probe_correction_001.json",
+    "sha256": "5cb41d515cabd346248183c122cb4c3ece4e403bd6127058a642ae97386c3093"
+  },
+  "limitations": "Only large current anonymous contours receive details, subject to count/pixel limits. Detection/OCR may omit controls, native model may still select incorrectly; unchanged guard and actual event/pixel review remain necessary."
+}

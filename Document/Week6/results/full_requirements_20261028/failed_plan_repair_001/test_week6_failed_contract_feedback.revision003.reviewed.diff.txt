@@ -1,0 +1,82 @@
+--- tests/test_week6_failed_contract_feedback.py
++++ tests/test_week6_failed_contract_feedback.py
+@@ -61,7 +61,8 @@
+     feedback = saved["context"]["failure"]
+     assert feedback["failed_goal"] == native["subgoals"][0]
+     assert feedback["predicate_feedback"] == {
+-        "missing_expected_text": ["Guessed confirmation"], "present_forbidden_text": None}
++        "missing_expected_text": ["Guessed confirmation"], "present_forbidden_text": None,
++        "present_expected_text": ["Verified part 1"]}
+     assert saved["image_path"] is None and saved["image_attached"] is False
+ 
+ 
+@@ -73,7 +74,8 @@
+     assert record == native_before
+     assert list(logical["failed_goal"]) == ["goal_id", "instruction", "expect_text", "forbid_text"]
+     assert logical["predicate_feedback"] == {
+-        "missing_expected_text": ["Guessed confirmation"], "present_forbidden_text": None}
++        "missing_expected_text": ["Guessed confirmation"], "present_forbidden_text": None,
++        "present_expected_text": ["Selected preference"]}
+     serialized = json.dumps(logical)
+     assert all(value not in serialized for value in
+                ["ObservationCanary", "RawScreenCanary", "GeometryCanary", "PrivatePathCanary", "DiagnosticsCanary"])
+@@ -87,7 +89,7 @@
+     evidence["unexpected"] = ["Conflict"]
+     logical = _logical_failure(record)
+     assert logical["predicate_feedback"] == {
+-        "missing_expected_text": None, "present_forbidden_text": ["Conflict"]}
++        "missing_expected_text": None, "present_forbidden_text": ["Conflict"], "present_expected_text": None}
+     assert logical == audit_reader.audited_logical_failure(record)
+ 
+ 
+@@ -98,7 +100,7 @@
+     record = failed_record()
+     record["task_verification"] = verification
+     logical = _logical_failure(record)
+-    assert logical["predicate_feedback"] == {"missing_expected_text": None, "present_forbidden_text": None}
++    assert logical["predicate_feedback"] == {"missing_expected_text": None, "present_forbidden_text": None, "present_expected_text": None}
+     assert logical == audit_reader.audited_logical_failure(record)
+     assert "Canary" not in json.dumps(logical)
+ 
+@@ -177,3 +179,41 @@
+     assert "Additional justified outcomes remain allowed" in SEMANTIC_SYSTEM_PROMPT
+     assert all(label not in SEMANTIC_SYSTEM_PROMPT for label in
+                ["ALPHA", "BETA", "GREEN", "BLUE", "Week6 Local Lab", "Draft ready", "Review complete"])
++
++
++@pytest.mark.parametrize("missing,expected", [
++    ([], ["First matched", "Second matched", "Third matched"]),
++    (["First matched", "Third matched"], ["Second matched"]),
++    (["First matched", "Second matched", "Third matched"], []),
++])
++def test_match_feedback_is_exact_original_order_complement(audit_reader, missing, expected):
++    record = failed_record()
++    record["expect_text"] = ["First matched", "Second matched", "Third matched"]
++    record["task_verification"]["evidence"]["missing"] = missing
++    original = copy.deepcopy(record)
++    logical = _logical_failure(record)
++    assert logical["predicate_feedback"]["present_expected_text"] == expected
++    assert logical == audit_reader.audited_logical_failure(record)
++    assert record == original
++    audit_reader.audit_logical_failure_shape(logical)
++    assert record["status"] == "failed"
++
++
++@pytest.mark.parametrize("forged", [["Guessed confirmation"], ["ForeignCanary"], [], None,
++                                    ["Selected preference", "Selected preference"]])
++def test_match_feedback_cannot_be_forged_or_silently_repaired(audit_reader, forged):
++    logical = _logical_failure(failed_record())
++    logical["predicate_feedback"]["present_expected_text"] = forged
++    with pytest.raises(audit_reader.AuditError):
++        audit_reader.audit_logical_failure_shape(logical)
++
++
++def test_match_feedback_does_not_trust_supplied_positive_or_screen_fields(audit_reader):
++    record = failed_record()
++    record["task_verification"]["evidence"]["present_expected_text"] = ["RawScreenCanary"]
++    logical = _logical_failure(record)
++    assert logical["predicate_feedback"]["present_expected_text"] == ["Selected preference"]
++    assert logical == audit_reader.audited_logical_failure(record)
++    assert "RawScreenCanary" not in json.dumps(logical)
++    record["task_verification"]["evidence"].pop("missing")
++    assert _logical_failure(record)["predicate_feedback"]["present_expected_text"] is None

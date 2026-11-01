@@ -1,0 +1,58 @@
+........................................................................ [  5%]
+........................................................................ [ 11%]
+........................................................................ [ 17%]
+........................................................................ [ 23%]
+........................................................................ [ 28%]
+........................................................................ [ 34%]
+........................................................................ [ 40%]
+........................................................................ [ 46%]
+........................................................................ [ 52%]
+...................F.................................................... [ 57%]
+........................................................................ [ 63%]
+........................................................................ [ 69%]
+........................................................................ [ 75%]
+........................................................................ [ 81%]
+........................................................................ [ 86%]
+........................................................................ [ 92%]
+........................................................................ [ 98%]
+..................                                                       [100%]
+================================== FAILURES ===================================
+______ test_review_monitor_revision_keeps_confirmed_goal_count_monotonic ______
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/failed_contract_feedback_001/root_affected_validation_001/pytest_tmp/test_review_monitor_revision_k0')
+
+    def test_review_monitor_revision_keeps_confirmed_goal_count_monotonic(tmp_path):
+        original = json.loads(proposal())
+        original["subgoals"][1]["expect_text"] = ["Unobserved former objective"]
+        revised = proposal({"goal_id": "Remaining", "instruction": "Persist the remaining approved configuration",
+                            "expect_text": ["Verified part 3"], "forbid_text": []})
+        runner, request, state, _, _ = lab(tmp_path,
+            responses=[json.dumps(original), plan(), plan(), revised, plan()], rounds=2, goal_calls=1,
+            extra_text_at_stage={3: ["Unobserved former objective"]})
+        request.expect_text.extend(["Verified part 3", "Unobserved former objective"])
+        result = runner.run(request, options())
+        assert result.status == "succeeded" and state.attempts == 3
+        events = [json.loads(line) for line in (tmp_path / "semantic/status_events.jsonl").read_text("utf8").splitlines()]
+        completed = [event["subgoals_completed"] for event in events]
+        assert completed == sorted(completed) and completed[-1] == len(result.completed_subgoals) == 2
+        assert all(event["subgoals_total"] >= event["subgoals_completed"] for event in events)
+        assert events[-1]["actions_used"] == result.total_actions
+        assert events[-1]["planning_pass"] == result.planning_calls
+        saved = json.loads((tmp_path / "semantic/semantic_plan_round_002/attempt_01_request.json").read_text("utf8"))
+        assert "current_observation" not in saved["context"] and saved["image_path"] is None
+>       assert saved["context"]["failure"] == {"category": "semantic_postconditions_unsatisfied"}
+E       AssertionError: assert {'category': ...ing budgets.'} == {'category': ..._unsatisfied'}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Left contains 3 more items:
+E         {'failed_goal': {'expect_text': ['Unobserved former objective'],
+E                          'forbid_text': [],
+E                          'goal_id': 'PersistConfig',
+E                          'instruction': 'Persist the requested configuration'},...
+E         
+E         ...Full output truncated (16 lines hidden), use '-vv' to show
+
+tests\test_week6_full_requirements_review.py:320: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_week6_full_requirements_review.py::test_review_monitor_revision_keeps_confirmed_goal_count_monotonic
+1 failed, 1241 passed in 209.50s (0:03:29)

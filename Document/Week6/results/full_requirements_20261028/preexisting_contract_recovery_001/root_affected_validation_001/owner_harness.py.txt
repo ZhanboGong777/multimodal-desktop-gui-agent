@@ -1,0 +1,145 @@
+"""Own offline fixed-polarity guidance checks; no model or desktop input."""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import re
+import shutil
+import subprocess
+import time
+from datetime import UTC, datetime
+from pathlib import Path
+
+import psutil
+
+REPO = Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+BASE = REPO / 'Document/Week6/results/full_requirements_20261028/preexisting_contract_recovery_001'
+PYTHON = 'D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe'
+
+
+def utc():
+    return datetime.now(UTC).isoformat()
+
+
+def write(path, value):
+    with path.open('x', encoding='utf-8', newline='\n') as stream:
+        json.dump(value, stream, ensure_ascii=False, indent=2, allow_nan=False)
+        stream.write('\n')
+
+
+def pins():
+    domain = {REPO / 'pyproject.toml'}
+    for folder in ('src', 'tests', 'scripts'):
+        domain.update((REPO / folder).rglob('*.py'))
+    domain.update(p for p in (REPO / 'configs').rglob('*') if p.is_file())
+    return {p.relative_to(REPO).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
+            for p in sorted(domain)}
+
+
+def identity(process):
+    return {'pid': process.pid, 'create_time': process.create_time(),
+            'exe': process.exe(), 'cmdline': process.cmdline()}
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--name', required=True)
+    parser.add_argument('--changed-only', action='store_true')
+    args = parser.parse_args()
+    assert args.name and all(c in 'abcdefghijklmnopqrstuvwxyz0123456789_-' for c in args.name)
+    directory = BASE / args.name
+    directory.mkdir(exist_ok=False)
+    shutil.copyfile(__file__, directory / 'owner_harness.py.txt')
+    tests = {
+        'tests/test_planner.py', 'tests/test_week4_prompts.py',
+        'tests/test_week6_preexisting_contract_recovery.py',
+        'tests/test_model_config.py', 'tests/test_model_mock.py',
+        'tests/test_week6_action_output_contract.py',
+        'tests/test_week6_action_output_contract_review.py',
+        'tests/test_week6_target_bindings.py',
+        'tests/test_week6_target_bindings_review.py',
+        'tests/test_week6_visual_target_guidance.py',
+        'tests/test_week6_visual_target_guidance_review.py',
+        'tests/test_week6_observed_queries.py',
+        'tests/test_week6_observed_queries_review.py',
+        'tests/test_action_adapter.py',
+    }
+    if not args.changed_only:
+        for path in (REPO / 'tests').glob('test_*.py'):
+            text = path.read_text(encoding='utf-8')
+            if ('TaskPlanner' in text or 'generate_multimodal' in text
+                    or path.name.startswith('test_week6_semantic_')):
+                tests.add(path.relative_to(REPO).as_posix())
+    tests = sorted(tests)
+    assert all((REPO / name).is_file() for name in tests), tests
+    before = pins()
+    dev_before = hashlib.sha256((REPO / 'requirements-dev.txt').read_bytes()).hexdigest()
+    write(directory / 'tested_code_pins_before.json', before)
+    started, tick = utc(), time.monotonic()
+    commands = [
+        ('ruff', [PYTHON, '-m', 'ruff', 'check', 'src', 'tests', 'scripts']),
+        ('pytest', [PYTHON, '-X', 'utf8', '-m', 'pytest', '-q', *tests,
+                    '--basetemp', str(directory / 'pytest_tmp')]),
+        ('collection', [PYTHON, '-X', 'utf8', '-m', 'pytest', '--collect-only', '-q']),
+    ]
+    write(directory / 'owner_claim.json', {
+        'schema': 'week6.preexisting_contract_recovery.offline.claim.v1',
+        'owner': identity(psutil.Process()), 'started_utc': started,
+        'commands': commands, 'model_gui_calls': 0, 'full_regression': False,
+    })
+    env = os.environ.copy()
+    env.update(PYTHONUTF8='1', PYTHONIOENCODING='utf-8')
+    receipts = []
+    for name, command in commands:
+        call_started, call_tick, seen = utc(), time.monotonic(), {}
+        with (directory / f'{name}.stdout.txt').open('x', encoding='utf-8') as out:
+            with (directory / f'{name}.stderr.txt').open('x', encoding='utf-8') as err:
+                child = subprocess.Popen(command, cwd=REPO, env=env, stdout=out, stderr=err)
+                launcher = identity(psutil.Process(child.pid))
+                while child.poll() is None:
+                    try:
+                        for process in psutil.Process(child.pid).children(recursive=True):
+                            key = (process.pid, process.create_time())
+                            if key not in seen:
+                                seen[key] = identity(process)
+                    except (psutil.NoSuchProcess, psutil.AccessDenied):
+                        pass
+                    time.sleep(.25)
+                code = child.wait()
+        receipt = {'name': name, 'command': command, 'launcher': launcher,
+                   'observed_descendants': list(seen.values()),
+                   'started_utc': call_started, 'finished_utc': utc(),
+                   'elapsed_seconds': time.monotonic() - call_tick,
+                   'actual_child_exit_code': code}
+        write(directory / f'{name}.receipt.json', receipt)
+        receipts.append(receipt)
+    after = pins()
+    dev_after = hashlib.sha256((REPO / 'requirements-dev.txt').read_bytes()).hexdigest()
+    write(directory / 'tested_code_pins_after.json', after)
+    output = (directory / 'pytest.stdout.txt').read_text(encoding='utf-8')
+    collection = (directory / 'collection.stdout.txt').read_text(encoding='utf-8')
+    passed = re.search(r'(\d+) passed in ([\d.]+)s', output)
+    failed = re.search(r'(\d+) failed[, ]', output)
+    collected = re.search(r'(\d+) tests? collected in ([\d.]+)s', collection)
+    okay = bool(before == after and dev_before == dev_after and passed and collected
+                and all(item['actual_child_exit_code'] == 0 for item in receipts))
+    value = {'schema': 'week6.preexisting_contract_recovery.offline.actual.v1',
+             'scope': 'changed_and_core_planner' if args.changed_only else 'affected_preexisting_contract_recovery_action_runtime_semantic',
+             'started_utc': started, 'finished_utc': utc(),
+             'elapsed_seconds': time.monotonic() - tick, 'receipts': receipts,
+             'code_pin_count': len(before), 'code_unchanged': before == after,
+             'requirements_dev_sha256_before': dev_before, 'requirements_dev_sha256_after': dev_after,
+             'targeted_tests_passed': int(passed[1]) if passed else None,
+             'targeted_failed_count': int(failed[1]) if failed else 0,
+             'targeted_pytest_seconds': float(passed[2]) if passed else None,
+             'collected_test_count': int(collected[1]) if collected else None,
+             'checks_passed': okay, 'model_gui_calls': 0, 'full_regression': False}
+    write(directory / 'validation.json', value)
+    print(json.dumps({k: v for k, v in value.items() if k != 'receipts'}))
+    return 0 if okay else 1
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

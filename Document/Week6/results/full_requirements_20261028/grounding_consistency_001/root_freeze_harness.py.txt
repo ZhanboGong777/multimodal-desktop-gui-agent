@@ -1,0 +1,121 @@
+"""Bind completed combined checks and the pending README to exact current bytes."""
+import argparse
+import hashlib
+import json
+import re
+import shutil
+from datetime import UTC, datetime
+from pathlib import Path
+
+repo = Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+base = repo / 'Document/Week6/results/full_requirements_20261028'
+change = base / 'grounding_consistency_001'
+parser = argparse.ArgumentParser()
+parser.add_argument('--validation-name', required=True)
+args = parser.parse_args()
+assert args.validation_name and all(c in 'abcdefghijklmnopqrstuvwxyz0123456789_-' for c in args.validation_name)
+validation_dir = change / args.validation_name
+sha = lambda path: hashlib.sha256(path.read_bytes()).hexdigest()
+load = lambda path: json.loads(path.read_text(encoding='utf-8'))
+
+
+def write(path, value):
+    with path.open('x', encoding='utf-8', newline='\n') as stream:
+        json.dump(value, stream, ensure_ascii=False, indent=2, allow_nan=False)
+        stream.write('\n')
+
+
+assert not (change / 'final_source_freeze_001.json').exists()
+validation = load(validation_dir / 'validation.json')
+assert validation['checks_passed'] is True and validation['code_unchanged'] is True
+assert [r['actual_child_exit_code'] for r in validation['receipts']] == [0, 0, 0]
+pins = load(validation_dir / 'tested_code_pins_before.json')
+assert pins == load(validation_dir / 'tested_code_pins_after.json')
+actual = {repo / 'pyproject.toml'}
+for directory in ('src', 'tests', 'scripts'):
+    actual.update((repo / directory).rglob('*.py'))
+actual.update(p for p in (repo / 'configs').rglob('*') if p.is_file())
+assert set(pins) == {p.relative_to(repo).as_posix() for p in actual}
+assert all(sha(repo / name) == digest for name, digest in pins.items())
+target_count = validation['targeted_tests_passed']
+collection_count = validation['collected_test_count']
+old_freeze = load(base / 'semantic_predicted_postconditions_001/final_source_freeze_001.json')
+readme_path = repo / 'README.md'
+assert sha(readme_path) == old_freeze['readme_sha256'], 'Review independent README changes before merging'
+shutil.copyfile(readme_path, change / 'README.before_combined_update.md')
+text = readme_path.read_text(encoding='utf-8')
+marker = 'Explicit unresolved forms such as'
+assert text.count(marker) == 1
+addition = (
+    'The action layer now checks observable contradictions between a supplied text\n'
+    'target and explicit element ID in the original and refreshed frames. It rejects\n'
+    'a conflict before input and replans within the same budget; it does not replace\n'
+    'the native ID. Unique visible OCR labels can use text-only targeting. Consistent\n'
+    'IDs can disambiguate repeated labels; an unlabelled visual target with no local\n'
+    'OCR evidence retains its existing grounding path. This is an evidence-consistency\n'
+    'check, not a general proof of a control\'s role.\n\n'
+    'Parent semantic status now receives child action and planning counts before the\n'
+    'child returns. Verified-goal counts still come only from the outer completion\n'
+    'ledger. Status elapsed time uses the monitor\'s own monotonic clock, separately\n'
+    'from execution-clock fixtures; observer overhead remains part of real wall time.\n'
+    'Updates are event-driven, so a long model wait can still be reported as stale.\n'
+    'Ordinary observer faults do not retry input; interrupts and process exit propagate.\n\n'
+)
+text = text.replace(marker, addition + marker)
+start = text.index('The v6 [313-case targeted CPU check]')
+end = text.index('### Week 5 submission', start)
+replacement = (
+    'The earlier v6 [313-case targeted check](Document/Week6/results/full_requirements_20261028/semantic_predicted_postconditions_001/cpu_validation_001/validation.json)\n'
+    'and 3262-case collection bind the pre-grounding-fix source. Normal009 stopped\n'
+    'before input on a bridge timeout; normal010 selected the wrong theme and earned\n'
+    'zero semantic-goal credit. Their raw records and negative audits are retained.\n\n'
+    f'The current [{target_count}-case combined CPU check](Document/Week6/results/full_requirements_20261028/grounding_consistency_001/{args.validation_name}/validation.json)\n'
+    f'passed with Ruff clean; all {len(pins)} code pins matched before and after. The\n'
+    f'same record contains a {collection_count}-case full-suite collection, which only\n'
+    'counts tests. New normal011/transient001 real runs and full004 remain pending.\n\n'
+    f'Validation target (pending): `{collection_count} tests, ruff clean`. This is the\n'
+    'collected suite size, not a claim that the full regression or real-window\n'
+    'acceptance has passed.\n\n'
+)
+text = text[:start] + replacement + text[end:]
+readme_path.write_text(text, encoding='utf-8', newline='\n')
+links = []
+for target in re.findall(r'\[[^\]]*\]\(([^)]+)\)', text):
+    if target.startswith(('https://', 'http://', '#')):
+        continue
+    target = target.split('#', 1)[0]
+    assert (repo / target).exists(), target
+    links.append(target)
+qa_path = change / 'README.update_qa_001.json'
+write(qa_path, {'schema': 'week6.pending_readme.qa.v1',
+      'previous_sha256': old_freeze['readme_sha256'], 'current_sha256': sha(readme_path),
+      'local_links_checked': links, 'local_link_count': len(links),
+      'targeted_tests_passed': target_count, 'collection_only': collection_count,
+      'full_regression_passed': False, 'new_real_acceptance_passed': False})
+shutil.copyfile(__file__, change / 'root_freeze_harness.py.txt')
+freeze = {'schema': 'week6.semantic.grounding_monitor.source_freeze.v1',
+          'created_at_utc': datetime.now(UTC).isoformat(),
+          'status': 'frozen_pending_normal011_transient001_full004',
+          'protocol': 'week6.semantic_subtasks.v6', 'input_modality': 'caller_intent_only',
+          'postcondition_source': 'untrusted_model_prediction', 'final_source': 'unchanged_caller',
+          'changes': ['Reject observable native text/ID conflicts before dispatch; no local ID replacement',
+                      'Generic unique-OCR text-only guidance; unchanged 1000-character prompt cap',
+                      'Passively relay child counters to parent status without goal credit or budget changes',
+                      'Monitor elapsed uses its own monotonic clock; ordinary observer faults isolated, cancellation preserved'],
+          'code_pin_count': len(pins), 'code_pins': pins,
+          'readme_sha256': sha(readme_path), 'readme_update_qa_sha256': sha(qa_path),
+          'git_attributes_sha256': sha(repo / '.gitattributes'),
+          'targeted_validation': f'{args.validation_name}/validation.json',
+          'targeted_validation_sha256': sha(validation_dir / 'validation.json'),
+          'targeted_tests_passed': target_count,
+          'targeted_pytest_seconds': validation['targeted_pytest_seconds'],
+          'collected_test_count': collection_count, 'collection_test_execution': False,
+          'source_before_manifest_sha256': sha(change / 'source_before_manifest.json'),
+          'new_real_model_gui_acceptance_completed': False, 'full004_completed': False,
+          'model_gui_calls_during_changes': 0, 'old_failed_raw_records_retained': True,
+          'root_freeze_harness_sha256': sha(change / 'root_freeze_harness.py.txt')}
+write(change / 'final_source_freeze_001.json', freeze)
+print(json.dumps({'freeze_sha256': sha(change / 'final_source_freeze_001.json'),
+                  'code_pin_count': len(pins), 'targeted_tests_passed': target_count,
+                  'collected_test_count': collection_count, 'readme_sha256': sha(readme_path),
+                  'local_links_checked': len(links)}))

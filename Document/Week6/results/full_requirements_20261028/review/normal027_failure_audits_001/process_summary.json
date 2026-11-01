@@ -1,0 +1,45 @@
+{
+  "schema": "week6.failure.saved_audits.v1",
+  "actual_owner_exit": 1,
+  "actual_wrapper_exit": 1,
+  "actual_audit_exits": {
+    "strict": 1,
+    "receipt_protocol": 1
+  },
+  "commands": {
+    "strict": [
+      "scripts/week6_audit_semantic_acceptance.py",
+      "--container",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_027",
+      "--owner-harness",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_full_requirements_20261028\\run_owned_model.py",
+      "--fixture-directory",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\fixture_normal_023",
+      "--out",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal027_failure_audits_001\\strict.json"
+    ],
+    "receipt_protocol": [
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\audit_input_receipt_protocol.py",
+      "--container",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_027",
+      "--operator-handoff",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_027\\operator_handoff_003.json",
+      "--expected-window",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_027\\window_claim_001.json",
+      "--owner-exit-confirmed",
+      "--out",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal027_failure_audits_001\\receipt_protocol.json"
+    ]
+  },
+  "terminal": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_027\\operator_handoff_003.json",
+    "sha256": "99b04742b5629abc03409b78bde673f53ef3c4b6bb5999cab0236a1523eea6e3"
+  },
+  "accepted": false,
+  "original_case_unchanged": true,
+  "source_freeze": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\preexisting_repair_hint_001\\final_source_freeze_001.json",
+    "sha256": "71ea38ff9e9f4227e2d42524295adf893148ae0ad0aea05806ba08ac17536005"
+  },
+  "reason": "Original positive reader correctly requires pending empty; not used or weakened. Original auditors run independently with actual negative outcomes retained."
+}

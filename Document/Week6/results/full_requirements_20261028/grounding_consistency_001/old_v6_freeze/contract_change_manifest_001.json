@@ -1,0 +1,134 @@
+{
+  "schema": "week6.semantic.v5_to_v6.contract_change_manifest.v1",
+  "created_at_utc": "2026-10-28T09:45:06.463767+00:00",
+  "old_protocol": "week6.semantic_subtasks.v5",
+  "new_protocol": "week6.semantic_subtasks.v6",
+  "old_source_sha256": "1b35465afb1134618f9d88b0cf90c996731ee3e34e321ac9e262374c387c1b56",
+  "new_source_sha256": "42fa0f02080122b156bebfdf384a45456350ba96ca2f44f1dfc76b1d77fbecdd",
+  "all_v5_guards_unchanged_claim": false,
+  "changes": [
+    {
+      "id": "caller_pool_membership",
+      "v5_assertion": "Every model expected literal was an exact member of caller.expect_text, every forbidden literal of caller.forbid_text.",
+      "v6_change": "Withdrawn. Bounded native intermediate literals are untrusted predictions and need not belong to caller final pools.",
+      "reason": "A caller final state may not describe distinct intermediate operations. The high-level model must be able to propose an observable intermediate contract.",
+      "replacement_verification": [
+        "Raw strict strings/lists/required fields and <=200/<=8 limits.",
+        "The complete native predicate is fixed before related inputs and must be false on a fresh before frame.",
+        "Known successful input plus trusted new scoped post observation must verify the actual literal contract; absence remains failed.",
+        "Original caller final remains independently verified and cannot be rewritten by native fields."
+      ],
+      "tests": [
+        "test_predictions_are_not_pool_restricted_but_raw_integrity_final_conflicts_and_actual_evidence_still_apply",
+        "test_predicted_intermediate_conditions_execute_with_single_independent_caller_final"
+      ]
+    },
+    {
+      "id": "empty_pool_maxitems_zero",
+      "v5_assertion": "An empty caller side forced the corresponding model checklist maxItems=0.",
+      "v6_change": "Withdrawn. Both model lists retain <=8 predicted literals regardless of caller pool emptiness.",
+      "reason": "Independent caller final polarity does not enumerate every valid intermediate visible/absent condition.",
+      "replacement_verification": [
+        "SDK request body contains the same bounded free-string schema as prompt text.",
+        "Strict empty total contract is rejected; real caller final polarity/content is preserved."
+      ],
+      "tests": [
+        "test_sdk_schema_bounds_predictions_even_when_caller_has_an_empty_side",
+        "test_empty_predicted_contract_cannot_be_credited_or_replaced_with_caller_final"
+      ]
+    },
+    {
+      "id": "two_caller_predicate_preflight",
+      "v5_assertion": "Fewer than two distinct signed caller predicates, including case aliases, returned clarification before observation/HTTP.",
+      "v6_change": "Withdrawn. A single caller final may coexist with at least two meaningful native predicted intermediate objectives.",
+      "reason": "Caller-final count was only a necessary representation limit of the old enum protocol, not a user requirement or a general decomposition proof.",
+      "replacement_verification": [
+        "At least two native meaningful initial objectives, distinct identities/check conjunctions, primitive/caller-copy rejection.",
+        "Every actual goal before predicate remains false and actual post evidence is mandatory."
+      ],
+      "tests": [
+        "test_only_final_contradiction_still_preflights_not_old_pool_representation_limits",
+        "test_predicted_intermediate_conditions_execute_with_single_independent_caller_final"
+      ]
+    },
+    {
+      "id": "caller_final_200_preflight",
+      "v5_assertion": "A caller final literal longer than 200 returned clarification before observation/HTTP.",
+      "v6_change": "Withdrawn. Full caller final literals stay intact; only model goal literals retain the 200-character bound.",
+      "reason": "The goal output schema no longer has to enumerate the caller final value.",
+      "replacement_verification": [
+        "No truncation of caller context, saved request, compiled independent final or runtime final verification.",
+        "Native model prediction bounds remain strict."
+      ],
+      "tests": [
+        "test_long_single_caller_final_is_preserved_while_short_model_contracts_execute",
+        "test_only_final_contradiction_still_preflights_not_old_pool_representation_limits"
+      ]
+    },
+    {
+      "id": "whitespace_or_case_membership",
+      "v5_assertion": "Whitespace/case substitutions failed exact caller membership before Pydantic.",
+      "v6_change": "Outer whitespace remains rejected explicitly; arbitrary letter case is preserved byte-for-byte as a prediction rather than restricted by pool membership.",
+      "reason": "Raw-to-compiled identity is required independently of where a predicted status came from. Existing verifier remains case-insensitive substring matching.",
+      "replacement_verification": [
+        "Native raw dict/list/type/count/length/nonblank and raw==raw.strip checks occur before Pydantic.",
+        "No silent instruction/check stripping; exact native/validated/compiled check strings are audited."
+      ],
+      "tests": [
+        "test_raw_goal_instruction_is_not_silently_stripped_before_compilation",
+        "test_predictions_are_not_pool_restricted_but_raw_integrity_final_conflicts_and_actual_evidence_still_apply"
+      ]
+    },
+    {
+      "id": "caller_final_required_text_conflict",
+      "v5_assertion": "A model forbidden condition containing required caller-final text is rejected.",
+      "v6_change": "Retained. The free literal protocol does not remove this independent conservative conflict check.",
+      "reason": "A semantic objective must not require absence of the caller-required final text.",
+      "replacement_verification": [
+        "Same _validate substring conflict guard and explicit generic prompt sentence."
+      ],
+      "tests": [
+        "test_predictions_are_not_pool_restricted_but_raw_integrity_final_conflicts_and_actual_evidence_still_apply"
+      ]
+    },
+    {
+      "id": "placeholder_and_contradiction_preflight",
+      "v5_assertion": "Declared complete unresolved markers and contradictory caller final positive/negative literals stop before observation/HTTP.",
+      "v6_change": "Retained; scope no longer claims caller-pool representability.",
+      "reason": "These independent conservative checks do not depend on intermediate prediction membership.",
+      "replacement_verification": [
+        "Exact reserved forms remain 0observe/0HTTP/0input; bare unknown/TBD not overclaimed as ambiguity detection."
+      ],
+      "tests": [
+        "test_reserved_unresolved_forms_stop_before_observation_http_or_input",
+        "test_only_final_contradiction_still_preflights_not_old_pool_representation_limits"
+      ]
+    },
+    {
+      "id": "caption_and_literal_matching",
+      "v5_assertion": "Each whole goal predicate must be unsatisfied before input; no claim of arbitrary control-role/negation detection.",
+      "v6_change": "Retained. Current visible caption alone cannot receive credit; a genuinely new control may witness a stage. No generic caption ban or new matcher was added.",
+      "reason": "OCR elements have no authoritative universal role labels. Predictions and input receipts do not themselves prove semantic completion.",
+      "replacement_verification": [
+        "Before-false + known input + trusted fresh post + independent events remain necessary.",
+        "Existing casefold substring matcher can match Saved inside Not saved; this limitation is explicitly tested/documented, not silently changed."
+      ],
+      "tests": [
+        "test_preexisting_predicted_control_text_cannot_be_used_as_initial_goal_credit",
+        "test_newly_appearing_control_may_witness_a_stage_without_banning_all_captions"
+      ]
+    }
+  ],
+  "native_literal_source": "untrusted_model_prediction",
+  "caller_final_source": "unchanged_caller",
+  "not_changed": [
+    "Shared actual HTTP/actions/planning/absolute deadline budgets",
+    "Replay/duplicate/loop guards and initial >=2 native meaningful objectives",
+    "Goal ledger/frozen before contracts/known input receipts/error-free scoped fresh post observations",
+    "Unknown/cancel/timeout/incomplete accounting stop; failed records never relabelled completed",
+    "Fresh independent caller final and separate actual operation event audit",
+    "Legacy protocols, global matcher, executor, action adapter, observation and monitor implementations"
+  ],
+  "model_and_gui_validation": "pending; no new real model/GUI calls in implementation work",
+  "test_results": "See actual validation receipts; this manifest defines the contract change, not a test-pass claim."
+}

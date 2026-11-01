@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 25562.0,
+  "usage": {
+    "prompt_tokens": 1344,
+    "completion_tokens": 265,
+    "total_tokens": 1609
+  },
+  "error": null,
+  "content_length": 1180,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"Plan outlines two distinct semantic objectives: first, prepare and review the BLUE report for project BETA; second, commit the report locally. Each step is explicitly named and preserves caller operations without combining or omitting.\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Prepare a BLUE report for project BETA by selecting the project, choosing the BLUE theme, and generating the report using visible controls.\",\n      \"expect_text\": [\"Project BETA\", \"Theme BLUE\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"prepare_report\"\n    },\n    {\n      \"instruction\": \"Review the prepared BLUE report for project BETA using the visible review controls, ensuring no errors or omissions.\",\n      \"expect_text\": [\"Project BETA\", \"Theme BLUE\", \"REVIEW COMPLETE\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"review_report\"\n    },\n    {\n      \"instruction\": \"Commit the reviewed BLUE report for project BETA locally using the visible commit controls, ensuring the commit message includes 'LOCAL COMPLETE'.\",\n      \"expect_text\": [\"Project BETA\", \"Theme BLUE\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"commit_report\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

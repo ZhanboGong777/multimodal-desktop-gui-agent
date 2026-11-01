@@ -1,0 +1,116 @@
+{
+  "name": "install",
+  "command": [
+    "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+    "-X",
+    "utf8",
+    "-c",
+    "import json,os,runpy,sys\nfrom pathlib import Path\nimport psutil\np=psutil.Process()\nPath(sys.argv[1]).write_text(json.dumps({\"pid\":p.pid,\"create_time\":p.create_time(),\"exe\":p.exe(),\"cmdline\":p.cmdline(),\"parents\":[{\"pid\":x.pid,\"create_time\":x.create_time(),\"exe\":x.exe()} for x in p.parents()[:4]]},ensure_ascii=False,indent=2)+\"\\n\",encoding=\"utf8\")\nsys.argv=[\"pip\",*sys.argv[2:]]\nrunpy.run_module(\"pip\",run_name=\"__main__\")\n",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_distribution_20261028_001\\install.actual_child_identity.json",
+    "install",
+    "--no-index",
+    "--no-deps",
+    "--no-compile",
+    "--target",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_distribution_20261028_001\\isolated_install",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_distribution_20261028_001\\wheel\\multimodal_desktop_gui_agent-2.1.0-py3-none-any.whl"
+  ],
+  "effective_pip_arguments": [
+    "install",
+    "--no-index",
+    "--no-deps",
+    "--no-compile",
+    "--target",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_distribution_20261028_001\\isolated_install",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_distribution_20261028_001\\wheel\\multimodal_desktop_gui_agent-2.1.0-py3-none-any.whl"
+  ],
+  "cwd": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_distribution_20261028_001",
+  "started_at_utc": "2026-10-28T09:03:12.047576+00:00",
+  "elapsed_seconds": 2.297000000020489,
+  "launcher": {
+    "pid": 78780,
+    "create_time": 1793178192.0527496,
+    "exe": "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe",
+    "cmdline": [
+      "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+      "-X",
+      "utf8",
+      "-c",
+      "import json,os,runpy,sys\nfrom pathlib import Path\nimport psutil\np=psutil.Process()\nPath(sys.argv[1]).write_text(json.dumps({\"pid\":p.pid,\"create_time\":p.create_time(),\"exe\":p.exe(),\"cmdline\":p.cmdline(),\"parents\":[{\"pid\":x.pid,\"create_time\":x.create_time(),\"exe\":x.exe()} for x in p.parents()[:4]]},ensure_ascii=False,indent=2)+\"\\n\",encoding=\"utf8\")\nsys.argv=[\"pip\",*sys.argv[2:]]\nrunpy.run_module(\"pip\",run_name=\"__main__\")\n",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_distribution_20261028_001\\install.actual_child_identity.json",
+      "install",
+      "--no-index",
+      "--no-deps",
+      "--no-compile",
+      "--target",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_distribution_20261028_001\\isolated_install",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_distribution_20261028_001\\wheel\\multimodal_desktop_gui_agent-2.1.0-py3-none-any.whl"
+    ],
+    "parents": [
+      {
+        "pid": 77564,
+        "create_time": 1793178171.3411329,
+        "exe": "D:\\anaconda\\python.exe"
+      },
+      {
+        "pid": 60136,
+        "create_time": 1793178171.30012,
+        "exe": "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe"
+      },
+      {
+        "pid": 72476,
+        "create_time": 1793178170.7869782,
+        "exe": "C:\\Users\\联想\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe"
+      },
+      {
+        "pid": 24804,
+        "create_time": 1792477406.470415,
+        "exe": "C:\\Users\\联想\\AppData\\Local\\OpenAI\\Codex\\bin\\896a0166b774037a\\codex.exe"
+      }
+    ]
+  },
+  "waited_launcher_pid": 78780,
+  "child_wait_exit_code": 0,
+  "actual_child_identity": {
+    "pid": 68208,
+    "create_time": 1793178192.090824,
+    "exe": "D:\\anaconda\\python.exe",
+    "cmdline": [
+      "D:\\anaconda\\python.exe",
+      "-X",
+      "utf8",
+      "-c",
+      "import json,os,runpy,sys\nfrom pathlib import Path\nimport psutil\np=psutil.Process()\nPath(sys.argv[1]).write_text(json.dumps({\"pid\":p.pid,\"create_time\":p.create_time(),\"exe\":p.exe(),\"cmdline\":p.cmdline(),\"parents\":[{\"pid\":x.pid,\"create_time\":x.create_time(),\"exe\":x.exe()} for x in p.parents()[:4]]},ensure_ascii=False,indent=2)+\"\\n\",encoding=\"utf8\")\nsys.argv=[\"pip\",*sys.argv[2:]]\nrunpy.run_module(\"pip\",run_name=\"__main__\")\n",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_distribution_20261028_001\\install.actual_child_identity.json",
+      "install",
+      "--no-index",
+      "--no-deps",
+      "--no-compile",
+      "--target",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_distribution_20261028_001\\isolated_install",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_distribution_20261028_001\\wheel\\multimodal_desktop_gui_agent-2.1.0-py3-none-any.whl"
+    ],
+    "parents": [
+      {
+        "pid": 78780,
+        "create_time": 1793178192.0527496,
+        "exe": "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe"
+      },
+      {
+        "pid": 77564,
+        "create_time": 1793178171.3411329,
+        "exe": "D:\\anaconda\\python.exe"
+      },
+      {
+        "pid": 60136,
+        "create_time": 1793178171.30012,
+        "exe": "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe"
+      },
+      {
+        "pid": 72476,
+        "create_time": 1793178170.7869782,
+        "exe": "C:\\Users\\联想\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe"
+      }
+    ]
+  }
+}

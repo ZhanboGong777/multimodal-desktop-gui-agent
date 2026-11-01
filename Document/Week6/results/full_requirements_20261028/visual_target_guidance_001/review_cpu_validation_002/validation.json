@@ -1,0 +1,52 @@
+{
+  "schema": "week6.visual_guidance.independent_offline_validation.v1",
+  "scope": "owned new synthetic review tests and Ruff only; not shared/full regression, model or GUI evidence",
+  "commands": [
+    {
+      "command": [
+        "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe",
+        "-m",
+        "ruff",
+        "check",
+        "scripts/week6_audit_semantic_acceptance.py",
+        "tests/test_week6_visual_target_guidance_review.py"
+      ],
+      "cwd": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree",
+      "pid": 43248,
+      "actual_wait": 0,
+      "started_utc": "2026-10-28T13:39:43.575316+00:00",
+      "finished_utc": "2026-10-28T13:39:43.761427+00:00",
+      "elapsed_seconds": 0.18700000003445894,
+      "stdout_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_week6_visual_target_guidance_review.py",
+        "--tb=short",
+        "--basetemp",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\visual_target_guidance_001\\review_cpu_validation_002\\pytest_tmp"
+      ],
+      "cwd": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree",
+      "pid": 87804,
+      "actual_wait": 0,
+      "started_utc": "2026-10-28T13:39:43.764426+00:00",
+      "finished_utc": "2026-10-28T13:39:50.653185+00:00",
+      "elapsed_seconds": 6.890999999945052,
+      "stdout_sha256": "e2bac889e43f68d2c4b8fc5dae5efb3dfc747bf620554f5417cc2d32ba1a12b7",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "pin_count": 271,
+  "source_unchanged": true,
+  "owned_sha256": {
+    "scripts/week6_audit_semantic_acceptance.py": "01e6f2574d5d2096fa012b891a4a1d718457b00908f4a8961181386ede928650",
+    "tests/test_week6_visual_target_guidance_review.py": "bcfa386b8950162833d0e2afdbce20648ff4a4de97128cfeb2f38fcd2cec109b"
+  },
+  "before_after_changes": [],
+  "passed": true
+}

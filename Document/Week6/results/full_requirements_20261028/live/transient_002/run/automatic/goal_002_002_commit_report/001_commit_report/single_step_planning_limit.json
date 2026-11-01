@@ -1,0 +1,698 @@
+{
+  "schema_version": "week6.single_step_planning.v1",
+  "protocol_version": "week6.semantic_subtasks.v6",
+  "raw_step_verification_policy": "Raw model step predictions are advisory; the predeclared semantic subtask postconditions are mandatory.",
+  "original_max_steps": 4,
+  "applied_max_steps": 1,
+  "restored": true,
+  "calls": [
+    {
+      "max_steps": 1,
+      "returned_steps": 1,
+      "ok": true,
+      "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Commit the reviewed BLUE report for project BETA locally using the visible controls, ensuring no external communication or sync occurs.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+      "context": {
+        "platform": "win32",
+        "observation_id": "obs-0001",
+        "screen": "2560x1600",
+        "target_app": null,
+        "allowed_keys": {
+          "keys": [
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "a",
+            "b",
+            "backspace",
+            "c",
+            "d",
+            "delete",
+            "down",
+            "e",
+            "end",
+            "enter",
+            "esc",
+            "escape",
+            "f",
+            "f1",
+            "f10",
+            "f11",
+            "f12",
+            "f2",
+            "f3",
+            "f4",
+            "f5",
+            "f6",
+            "f7",
+            "f8",
+            "f9",
+            "g",
+            "h",
+            "home",
+            "i",
+            "j",
+            "k",
+            "l",
+            "left",
+            "m",
+            "n",
+            "o",
+            "p",
+            "pagedown",
+            "pageup",
+            "q",
+            "r",
+            "return",
+            "right",
+            "s",
+            "space",
+            "t",
+            "tab",
+            "u",
+            "up",
+            "v",
+            "w",
+            "x",
+            "y",
+            "z"
+          ],
+          "modifiers": [
+            "alt",
+            "cmd",
+            "command",
+            "control",
+            "ctrl",
+            "shift",
+            "super",
+            "win"
+          ],
+          "hotkey_separator": "+"
+        },
+        "limits": "at most 15 actions and 5765.02 s for the whole task",
+        "visible_text": "obs-0001-e000  'Review complete'  conf=0.96  center=(1281,919)  box=(1136,901,1427,938)\nobs-0001-e001  'Offline report preparation'  conf=0.95  center=(1280,630)  box=(1101,615,1460,646)\nobs-0001-e002  'Project BETA'  conf=0.95  center=(1282,724)  box=(1168,706,1397,743)\nobs-0001-e003  'Theme BLUE'  conf=0.95  center=(1281,818)  box=(1167,804,1396,833)\nobs-0001-e004  '立即体验'  conf=0.95  center=(2271,1459)  box=(2235,1450,2307,1468)\nobs-0001-e005  'Commit locally'  conf=0.94  center=(1281,1049)  box=(1157,1032,1406,1067)\nobs-0001-e006  '联想应用商店已升级到最新版本'  conf=0.94  center=(2243,1266)  box=(2072,1249,2415,1284)\nobs-0001-e007  '全新功能上线 !'  conf=0.92  center=(2129,1310)  box=(2072,1296,2186,1324)\nobs-0001-e008  'Week6 Local Lab'  conf=0.91  center=(1281,529)  box=(1089,510,1474,548)\nobs-0001-e009  'x'  conf=0.86  center=(2504,1253)  box=(2497,1246,2511,1260)\nobs-0001-e010  '增深色模式 ， 夜间浏览不伤眼 ;'  conf=0.80  center=(2230,1340)  box=(2111,1326,2350,1354)\nobs-0001-e011  '点击 「 立即更新抢先体验'  conf=0.75  center=(2308,1310)  box=(2202,1296,2414,1324)\nobs-0001-e012  '3. 修复已知问题 ， 使用更流畅 。'  conf=0.74  center=(2191,1400)  box=(2073,1387,2309,1414)\nobs-0001-e013  '2. 优化下载路径异常提示 ， 处理更及时 ;'  conf=0.62  center=(2227,1370)  box=(2073,1357,2381,1384)\nobs-0001-e014  <unlabelled box>  conf=0.50  center=(1984,800)  box=(1409,0,2560,1600)\nobs-0001-e015  <unlabelled box>  conf=0.50  center=(2270,1363)  box=(1997,1215,2543,1512)\nobs-0001-e016  <unlabelled box>  conf=0.50  center=(1282,1056)  box=(1048,988,1516,1124)\nobs-0001-e017  <unlabelled box>  conf=0.50  center=(2271,1461)  box=(2050,1440,2493,1483)\nobs-0001-e018  <unlabelled box>  conf=0.50  center=(2039,1262)  box=(2026,1249,2053,1276)\nobs-0001-e019  <unlabelled box>  conf=0.50  center=(1295,1107)  box=(1284,1096,1306,1119)\nobs-0001-e020  <unlabelled box>  conf=0.50  center=(1290,1112)  box=(1283,1102,1297,1123)\nobs-0001-e021  <unlabelled box>  conf=0.50  center=(2077,1337)  box=(2073,1330,2081,1345)\nobs-0001-e022  <unlabelled box>  conf=0.50  center=(2039,1261)  box=(2032,1257,2047,1265)\nobs-0001-e023  <unlabelled box>  conf=0.50  center=(1305,1105)  box=(1301,1099,1310,1111)",
+        "targeting_policy": {
+          "schema_version": "gui_agent.generation_targeting_policy.v1",
+          "instruction": "Generation guidance only; it grants neither input nor success authority. Use only candidates in the current target_bindings scope, including the final authorised subset. Use text-only targeting only when current OCR labels or adjacent OCR words can locate the target. If a target is visible in the screenshot but absent from OCR, choose its matching current ID yourself from target_bindings.anonymous_without_ocr_ids; never invent or replace an ID. If no matching allowed candidate is certain, return no steps and explain in errors.",
+          "generation_only": true
+        },
+        "success_rules": [],
+        "target_bindings": {
+          "schema_version": "gui_agent.target_bindings.v1",
+          "observation_id": "obs-0001",
+          "scope": "all_snapshot_candidates",
+          "min_confidence": 0.35,
+          "candidates": [
+            {
+              "element_id": "obs-0001-e000",
+              "text": "Review complete",
+              "source": "ocr",
+              "confidence": 0.96,
+              "bounding_box": {
+                "left": 1136,
+                "top": 901,
+                "right": 1427,
+                "bottom": 938
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Review complete"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e001",
+              "text": "Offline report preparation",
+              "source": "ocr",
+              "confidence": 0.95,
+              "bounding_box": {
+                "left": 1101,
+                "top": 615,
+                "right": 1460,
+                "bottom": 646
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Offline report preparation"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e002",
+              "text": "Project BETA",
+              "source": "ocr",
+              "confidence": 0.95,
+              "bounding_box": {
+                "left": 1168,
+                "top": 706,
+                "right": 1397,
+                "bottom": 743
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Project BETA"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e003",
+              "text": "Theme BLUE",
+              "source": "ocr",
+              "confidence": 0.95,
+              "bounding_box": {
+                "left": 1167,
+                "top": 804,
+                "right": 1396,
+                "bottom": 833
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Theme BLUE"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e004",
+              "text": "立即体验",
+              "source": "ocr",
+              "confidence": 0.95,
+              "bounding_box": {
+                "left": 2235,
+                "top": 1450,
+                "right": 2307,
+                "bottom": 1468
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "立即体验"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e005",
+              "text": "Commit locally",
+              "source": "ocr",
+              "confidence": 0.94,
+              "bounding_box": {
+                "left": 1157,
+                "top": 1032,
+                "right": 1406,
+                "bottom": 1067
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Commit locally"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e006",
+              "text": "联想应用商店已升级到最新版本",
+              "source": "ocr",
+              "confidence": 0.94,
+              "bounding_box": {
+                "left": 2072,
+                "top": 1249,
+                "right": 2415,
+                "bottom": 1284
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "联想应用商店已升级到最新版本"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e007",
+              "text": "全新功能上线 !",
+              "source": "ocr",
+              "confidence": 0.92,
+              "bounding_box": {
+                "left": 2072,
+                "top": 1296,
+                "right": 2186,
+                "bottom": 1324
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "全新功能上线 !"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e008",
+              "text": "Week6 Local Lab",
+              "source": "ocr",
+              "confidence": 0.91,
+              "bounding_box": {
+                "left": 1089,
+                "top": 510,
+                "right": 1474,
+                "bottom": 548
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Week6 Local Lab"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e009",
+              "text": "x",
+              "source": "ocr",
+              "confidence": 0.86,
+              "bounding_box": {
+                "left": 2497,
+                "top": 1246,
+                "right": 2511,
+                "bottom": 1260
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "x"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e010",
+              "text": "增深色模式 ， 夜间浏览不伤眼 ;",
+              "source": "ocr",
+              "confidence": 0.8,
+              "bounding_box": {
+                "left": 2111,
+                "top": 1326,
+                "right": 2350,
+                "bottom": 1354
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "增深色模式 ， 夜间浏览不伤眼 ;"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e011",
+              "text": "点击 「 立即更新抢先体验",
+              "source": "ocr",
+              "confidence": 0.75,
+              "bounding_box": {
+                "left": 2202,
+                "top": 1296,
+                "right": 2414,
+                "bottom": 1324
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "点击 「 立即更新抢先体验"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e012",
+              "text": "3. 修复已知问题 ， 使用更流畅 。",
+              "source": "ocr",
+              "confidence": 0.74,
+              "bounding_box": {
+                "left": 2073,
+                "top": 1387,
+                "right": 2309,
+                "bottom": 1414
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "3. 修复已知问题 ， 使用更流畅 。"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e013",
+              "text": "2. 优化下载路径异常提示 ， 处理更及时 ;",
+              "source": "ocr",
+              "confidence": 0.62,
+              "bounding_box": {
+                "left": 2073,
+                "top": 1357,
+                "right": 2381,
+                "bottom": 1384
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "2. 优化下载路径异常提示 ， 处理更及时 ;"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e014",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 1409,
+                "top": 0,
+                "right": 2560,
+                "bottom": 1600
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_mixed_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": [
+                "obs-0001-e000",
+                "obs-0001-e001",
+                "obs-0001-e004",
+                "obs-0001-e006",
+                "obs-0001-e007",
+                "obs-0001-e008",
+                "obs-0001-e009",
+                "obs-0001-e010",
+                "obs-0001-e011",
+                "obs-0001-e012",
+                "obs-0001-e013"
+              ]
+            },
+            {
+              "element_id": "obs-0001-e015",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 1997,
+                "top": 1215,
+                "right": 2543,
+                "bottom": 1512
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_mixed_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": [
+                "obs-0001-e004",
+                "obs-0001-e006",
+                "obs-0001-e007",
+                "obs-0001-e009",
+                "obs-0001-e010",
+                "obs-0001-e011",
+                "obs-0001-e012",
+                "obs-0001-e013"
+              ]
+            },
+            {
+              "element_id": "obs-0001-e016",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 1048,
+                "top": 988,
+                "right": 1516,
+                "bottom": 1124
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_with_single_ocr",
+              "compatible_texts": [
+                "Commit locally"
+              ],
+              "overlapping_ocr_ids": [
+                "obs-0001-e005"
+              ]
+            },
+            {
+              "element_id": "obs-0001-e017",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 2050,
+                "top": 1440,
+                "right": 2493,
+                "bottom": 1483
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_with_single_ocr",
+              "compatible_texts": [
+                "立即体验"
+              ],
+              "overlapping_ocr_ids": [
+                "obs-0001-e004"
+              ]
+            },
+            {
+              "element_id": "obs-0001-e018",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 2026,
+                "top": 1249,
+                "right": 2053,
+                "bottom": 1276
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_without_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e019",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 1284,
+                "top": 1096,
+                "right": 1306,
+                "bottom": 1119
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_without_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e020",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 1283,
+                "top": 1102,
+                "right": 1297,
+                "bottom": 1123
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_without_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e021",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 2073,
+                "top": 1330,
+                "right": 2081,
+                "bottom": 1345
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_without_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e022",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 2032,
+                "top": 1257,
+                "right": 2047,
+                "bottom": 1265
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_without_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e023",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 1301,
+                "top": 1099,
+                "right": 1310,
+                "bottom": 1111
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_without_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": []
+            }
+          ],
+          "labels": [
+            {
+              "text": "Review complete",
+              "element_ids": [
+                "obs-0001-e000"
+              ]
+            },
+            {
+              "text": "Offline report preparation",
+              "element_ids": [
+                "obs-0001-e001"
+              ]
+            },
+            {
+              "text": "Project BETA",
+              "element_ids": [
+                "obs-0001-e002"
+              ]
+            },
+            {
+              "text": "Theme BLUE",
+              "element_ids": [
+                "obs-0001-e003"
+              ]
+            },
+            {
+              "text": "立即体验",
+              "element_ids": [
+                "obs-0001-e004",
+                "obs-0001-e017"
+              ]
+            },
+            {
+              "text": "Commit locally",
+              "element_ids": [
+                "obs-0001-e005",
+                "obs-0001-e016"
+              ]
+            },
+            {
+              "text": "联想应用商店已升级到最新版本",
+              "element_ids": [
+                "obs-0001-e006"
+              ]
+            },
+            {
+              "text": "全新功能上线 !",
+              "element_ids": [
+                "obs-0001-e007"
+              ]
+            },
+            {
+              "text": "Week6 Local Lab",
+              "element_ids": [
+                "obs-0001-e008"
+              ]
+            },
+            {
+              "text": "x",
+              "element_ids": [
+                "obs-0001-e009"
+              ]
+            },
+            {
+              "text": "增深色模式 ， 夜间浏览不伤眼 ;",
+              "element_ids": [
+                "obs-0001-e010"
+              ]
+            },
+            {
+              "text": "点击 「 立即更新抢先体验",
+              "element_ids": [
+                "obs-0001-e011"
+              ]
+            },
+            {
+              "text": "3. 修复已知问题 ， 使用更流畅 。",
+              "element_ids": [
+                "obs-0001-e012"
+              ]
+            },
+            {
+              "text": "2. 优化下载路径异常提示 ， 处理更及时 ;",
+              "element_ids": [
+                "obs-0001-e013"
+              ]
+            }
+          ],
+          "anonymous_without_ocr_ids": [
+            "obs-0001-e018",
+            "obs-0001-e019",
+            "obs-0001-e020",
+            "obs-0001-e021",
+            "obs-0001-e022",
+            "obs-0001-e023"
+          ]
+        }
+      },
+      "image_path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_002_002_commit_report\\001_commit_report\\monitor1_20261029_125857_383.png",
+      "task_id": "commit_report",
+      "attempts": 1,
+      "model_requests": 1,
+      "parsed_plan": {
+        "task_id": "t1",
+        "instruction": "Commit the reviewed BLUE report for project BETA locally using the visible controls, ensuring no external communication or sync occurs.",
+        "summary": "",
+        "steps": [
+          {
+            "step_id": "s1",
+            "description": "Click the 'Commit locally' button to finalize the local commit.",
+            "action_type": "click",
+            "target_text": "Commit locally",
+            "arguments": {
+              "element_id": "obs-0001-e005"
+            },
+            "expected_result": "The report is committed locally as requested.",
+            "status": "pending"
+          }
+        ],
+        "assumptions": [],
+        "requires_confirmation": true,
+        "errors": []
+      },
+      "response": {
+        "provider": "openai_compatible",
+        "model_name": "qwen3-vl:8b-instruct",
+        "latency_ms": 129032.0,
+        "usage": {
+          "prompt_tokens": 9915,
+          "completion_tokens": 102,
+          "total_tokens": 10017
+        },
+        "error": null,
+        "content_length": 468,
+        "content": "{\"task_id\":\"t1\",\"instruction\":\"Commit the reviewed BLUE report for project BETA locally using the visible controls, ensuring no external communication or sync occurs.\",\"steps\":[{\"step_id\":\"s1\",\"description\":\"Click the 'Commit locally' button to finalize the local commit.\",\"action_type\":\"click\",\"target_text\":\"Commit locally\",\"arguments\":{\"element_id\":\"obs-0001-e005\"},\"expected_result\":\"The report is committed locally as requested.\",\"status\":\"pending\"}],\"errors\":[]}",
+        "raw_response": {
+          "finish_reason": "stop"
+        }
+      },
+      "error": null
+    }
+  ],
+  "meaning": "At most one step per planning call; recovery calls retain the shared overall budgets.",
+  "restored_max_steps": 4
+}

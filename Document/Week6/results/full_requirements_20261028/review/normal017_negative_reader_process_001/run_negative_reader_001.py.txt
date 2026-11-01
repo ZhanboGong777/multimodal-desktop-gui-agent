@@ -1,0 +1,40 @@
+"""Actual process receipt for the ended-case pure evidence reader."""
+import hashlib
+import json
+import subprocess
+import time
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path("C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+BASE = ROOT / "Document/Week6/results/full_requirements_20261028"
+FREEZE = BASE / "visual_target_guidance_001/final_source_freeze_001.json"
+OUT = BASE / "review/normal017_negative_reader_process_001"
+OUT.mkdir(exist_ok=False)
+SCRIPT = Path(__file__).with_name("negative_evidence_audit_001.py")
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+freeze = json.loads(FREEZE.read_bytes())
+before = {name: sha(ROOT / name) for name in freeze["code_pins"]}
+assert before == freeze["code_pins"]
+command = ["D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe", str(SCRIPT)]
+started, timer = datetime.now(timezone.utc).isoformat(), time.monotonic()
+with (OUT / "stdout.txt").open("xb") as stdout, (OUT / "stderr.txt").open("xb") as stderr:
+    process = subprocess.Popen(command, cwd=ROOT, stdout=stdout, stderr=stderr)
+    actual = process.wait()
+after = {name: sha(ROOT / name) for name in freeze["code_pins"]}
+receipt = {"schema": "week6.normal017.negative_reader.actual_exit.v1", "command": command,
+    "started_utc": started, "finished_utc": datetime.now(timezone.utc).isoformat(),
+    "actual_wait": actual, "pid": process.pid, "elapsed_seconds": time.monotonic() - timer,
+    "script_sha256": sha(SCRIPT), "stdout_sha256": sha(OUT / "stdout.txt"),
+    "stderr_sha256": sha(OUT / "stderr.txt"), "source_unchanged": before == after,
+    "code_pin_count": len(before), "code_pins_before": before, "code_pins_after": after,
+    "meaning": "A zero reader exit only means the negative evidence checks ran; the experiment and strict gate retain their separate actual nonzero exits."}
+(OUT / "receipt.json").write_text(json.dumps(receipt, ensure_ascii=False, indent=2) + "\n", encoding="utf8")
+(OUT / "run_negative_reader_001.py.txt").write_bytes(Path(__file__).read_bytes())
+(OUT / "reader_source_before.py.txt").write_bytes(SCRIPT.read_bytes())
+assert before == after
+print(json.dumps({"actual_wait": actual, "receipt": str(OUT / "receipt.json"), "sha256": sha(OUT / "receipt.json")}, ensure_ascii=True))
+raise SystemExit(actual)

@@ -1,0 +1,20 @@
+{
+  "schema": "week6.semantic_conversation_repair.producer_ready.v1",
+  "created_utc": "2026-10-28T11:35:24.291273+00:00",
+  "status": "producer_owned_source_stopped_pending_reviewer_and_root_unified_validation",
+  "source_archive_manifest_sha256": "58b86b77b4d4a24ed8758e9e110dd66877de1b660865d518e712ee9a2ba066c1",
+  "static_validation_sha256": "cfa28f6fb8992141bf6d94c861bc4d7e6cb33b87976610667e8878739d3f9dfc",
+  "source_pins": {
+    "src/gui_agent/planning/semantic_workflow.py": "ae50b05e029e0ee5330430ec67d5a5bb0d49fe62487d47ecb34b914fcb0d8337",
+    "tests/test_week6_semantic_repair_feedback.py": "b51411546a15ae0c792c58ca1d567ac78eeca42b3611cd821f115b3e93b8066c",
+    "tests/test_week6_semantic_goal_grouping.py": "30398765aead3706e5317d6e9f20c8c11fdddcc8d5bf9b40b19040327fea60c7",
+    "tests/test_week6_semantic_conversation_repair.py": "b71b133f1b2555e61bec6b11a13827fa5a1145afd65cd09003c53abfce3843f9"
+  },
+  "protocol": "week6.semantic_subtasks.v6",
+  "repair_policy": "week6.semantic_repair_feedback.v2",
+  "transport_change": "bounded actual role conversation; original first user packet unchanged; only immediately previous <=2000 character native assistant reply; fixed final user correction with no raw reply in context; oversized original archived and assistant omitted without truncation",
+  "no_guard_credit_or_budget_change": true,
+  "no_pytest_collect_model_gui_run_by_producer": true,
+  "historical_normal001_through012_reclassified": false,
+  "root_next_step": "Wait for reviewer-owned source stop, then unified semantic target, full Ruff and collect; live evaluation only after new source freeze."
+}

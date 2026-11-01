@@ -1,0 +1,57 @@
+{
+  "schema": "week6.observed_query_constraints.source_delta.v1",
+  "prior_freeze_sha256": "6bf0bbe60e067fa2558f69938c7b5b5fd0e5e9c5c4477ff2eaa3ee97ac3d6fd0",
+  "source_before_manifest_sha256": "2a859d3a9a8e6bf60ba7d573d43516646c86ad4f17fc2195fe4511e66ce6e434",
+  "producer_changed_paths": [
+    "src/gui_agent/planning/target_bindings.py",
+    "src/gui_agent/planning/planner.py",
+    "tests/test_week6_target_bindings.py",
+    "tests/test_week6_observed_queries.py"
+  ],
+  "current_owned_sha256": {
+    "src/gui_agent/planning/target_bindings.py": "93c4bbc75b208a79e1ec5c7a84b9e3c4201b7f92c1faf7f74e66c67291bf76e3",
+    "src/gui_agent/planning/planner.py": "cbbc8905bfa2dacfc1a1972d6378eab517d7ba113261f9b88b4af3e94c416bb4",
+    "tests/test_week6_target_bindings.py": "cfac29e5c7f3f88921615c71a0d80592a408708fd03ac2798c277f3ab0cfd34f",
+    "tests/test_week6_observed_queries.py": "ee51c554ba3c2e2b4fd12af9d64b564ff8dc8a26febbad77e452ae49e5ef1b75"
+  },
+  "existing_helper_functions_AST_exact": [
+    "generation_targeting_policy",
+    "_number",
+    "_overlap",
+    "_candidate_records",
+    "_raw_element",
+    "derive_target_bindings",
+    "validate_target_bindings"
+  ],
+  "existing_apply_branch_factory_and_id_visual_full_label_loops_AST_exact": true,
+  "helper_AST_equal_after_new_query_function_constants_imports_version_and_apply_change_removed": true,
+  "planner_AST_equal_after_only_metadata_query_contract_and_import_removed": true,
+  "immutable_bytes": {
+    "src/gui_agent/runtime/runner.py": "d79477fd6936eb63b08a49e10fb63b612fc40cb14ddaf38811eb9158bd0a459a",
+    "src/gui_agent/runtime/action_adapter.py": "222686942e4623d4743ac50e6da87599d4ba95d84ed9d1d855de089324a0eeda",
+    "src/gui_agent/perception/grounding.py": "b0ca16924c280f7817e03bf1cd7951d07751a60d69da442e1af440d0840afb77",
+    "src/gui_agent/planning/parser.py": "94fe09f8d72fb50338e209d453f5abded95a1fdd811e2abc2396d0f6c4955b99",
+    "src/gui_agent/planning/prompts.py": "c471c406a2ec33ee23a85e911c1eeb84a08bd7e27204932c75e0ad994e4e5d24",
+    "src/gui_agent/planning/semantic_workflow.py": "ae50b05e029e0ee5330430ec67d5a5bb0d49fe62487d47ecb34b914fcb0d8337"
+  },
+  "generated_query_contract_policy": {
+    "full_labels": "raw first label order; no 160-character extra cap",
+    "extra_phase_order": [
+      "label_token_span",
+      "reading_order_run",
+      "spatial_run"
+    ],
+    "dedup": "first exact case-sensitive occurrence; existing raw labels excluded from extras",
+    "search_step": "one candidate consideration or spatial neighbour comparison, including revisited IDs",
+    "token_scan": "first 33 token matches per OCR label; first 32 generate; truncation count includes all labels",
+    "runs": "at most four actual OCR elements; every adjacent pair has original runtime geometry",
+    "qualification": "existing find_text or adjacent-run matcher on up to four actual source OCR witnesses",
+    "count_overflow": "stop at first 129th new qualified query; omitted lower bound one only then",
+    "search_overflow": "stop before 4097th step; omitted new-query lower bound remains zero",
+    "limitations": "finite generation subset; no arbitrary substring or all runtime word runs; no business guarantee"
+  },
+  "tested_evidence": "producer_validation_001/audit.json",
+  "real_model_calls": 0,
+  "gui_calls": 0,
+  "full_regression": false
+}

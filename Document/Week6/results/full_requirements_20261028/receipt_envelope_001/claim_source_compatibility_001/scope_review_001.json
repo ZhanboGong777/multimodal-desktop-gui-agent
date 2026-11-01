@@ -1,0 +1,35 @@
+{
+  "schema": "week6.receipt.claim_source_compatibility.v1",
+  "created_utc": "2026-10-31T12:15:41.426433+00:00",
+  "original_checker": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\audit_input_receipt_protocol.py",
+    "sha256": "23ee41ca6e6255c3d09bf00665ee4051f1a01a09e359996d6a823304a0d70253"
+  },
+  "compatibility_checker": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261031\\audit_input_receipt_protocol.py",
+    "sha256": "24135294fb7fbe399b3c852c0a6350131123cd7b0ea0b818237262917f60b5e4"
+  },
+  "reviewer": "Root",
+  "scope_review_passed": true,
+  "only_changed_ast": "One origin label equality becomes a two-value exact string membership. Native Sky origin, unique window, pre-owner time, process identity, actual exits, exact actions, timing strings, interval uniqueness and no evidence overwrite rules are unchanged.",
+  "allowed_sources": [
+    "Sky returned unique window and fresh observation before owner start",
+    "Sky list_windows returned unique window and fresh observation before owner start"
+  ],
+  "original_case_claim_unchanged": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_025\\window_claim_001.json",
+    "sha256": "aa48bae4460518184df1ffe7c3d8ae8bcad9d3712806f730c6a16f1c2d111cb4"
+  },
+  "original_rejected_audit": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal025_receipt_protocol_audit_001.json",
+    "sha256": "a75a9a326a66325ba1f8ee0e4e5cce34b61ab78ec9fbfdfa8d836317017e1846"
+  },
+  "root_actual_preowner_ack": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\receipt_envelope_001\\window_claims\\normal_025\\root_claim_ack_001.json",
+    "sha256": "89c69fd30139987763d4d2d212dbd2ea5f7c62c2bc9f6e70ccad9e2321195292"
+  },
+  "raw_claim_or_receipt_modified": false,
+  "timing_tolerance_added": false,
+  "runtime_code_modified": false,
+  "not_yet_validated": true
+}

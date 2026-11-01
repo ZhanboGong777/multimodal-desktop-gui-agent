@@ -1,0 +1,131 @@
+{
+  "schema_version": "week6.semantic_subtasks.v6",
+  "response_format": {
+    "type": "json_schema",
+    "json_schema": {
+      "name": "semantic_subtask_sequence",
+      "strict": true,
+      "schema": {
+        "$defs": {
+          "SemanticGoal": {
+            "additionalProperties": false,
+            "properties": {
+              "instruction": {
+                "maxLength": 600,
+                "minLength": 1,
+                "title": "Instruction",
+                "type": "string"
+              },
+              "expect_text": {
+                "items": {
+                  "maxLength": 200,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "maxItems": 8,
+                "title": "Expect Text",
+                "type": "array"
+              },
+              "forbid_text": {
+                "items": {
+                  "maxLength": 200,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "maxItems": 8,
+                "title": "Forbid Text",
+                "type": "array"
+              },
+              "goal_id": {
+                "title": "Goal Id",
+                "type": "string"
+              }
+            },
+            "required": [
+              "goal_id",
+              "instruction",
+              "expect_text",
+              "forbid_text"
+            ],
+            "title": "SemanticGoal",
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "enum": [
+              "ready",
+              "needs_clarification",
+              "refused"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 300,
+            "title": "Reason",
+            "type": "string"
+          },
+          "subgoals": {
+            "items": {
+              "$ref": "#/$defs/SemanticGoal"
+            },
+            "maxItems": 8,
+            "title": "Subgoals",
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "reason",
+          "subgoals"
+        ],
+        "title": "SemanticPlan",
+        "type": "object"
+      }
+    }
+  },
+  "caller_request": {
+    "workflow_id": "semantic_lab",
+    "instruction": "In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+    "expect_text": [
+      "Project BETA",
+      "Theme BLUE",
+      "LOCAL COMPLETE"
+    ],
+    "forbid_text": []
+  },
+  "revision": false,
+  "input_modality": "caller_intent_only",
+  "image_attached": false,
+  "snapshot_image_path_provenance": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_026\\run\\automatic\\initial_observation\\monitor1_20261101_223505_499.png",
+  "snapshot_sent_to_model": false,
+  "postcondition_source": "untrusted_model_prediction",
+  "final_source": "unchanged_caller",
+  "repair_policy": {
+    "schema_version": "week6.semantic_repair_feedback.v5",
+    "trigger": "local_validation_error_with_typed_duplicate_preexisting_repeated_or_unsupported_message_category",
+    "system_feedback_sha256": "dd36c2961f7ee304b1732016bedbffa7ff813926f7e3b2d63a23b9165d7ab82c",
+    "generic_feedback_sha256": "3fa80bae25c9e9f26de691fdddfa81dfad89b9f4ca877f440a97709ab98aae4a",
+    "preexisting_feedback_sha256": "2c9ffc1e6ee5bc739430c88094eb5234eea6a5373df0a77db523b18874a4fe4c",
+    "repeated_feedback_sha256": "c613d1afc03980489dbe8da84be80e181ef78f7b3705e3d010d27bd19d4e7a96",
+    "unsupported_message_feedback_sha256": "c07d0f06cd68361bacffb2e8dff0e3ce6bb7b27ac160fc52a4f43170651f148e",
+    "unsupported_message_previous_reply": "archived_in_full_assistant_omitted",
+    "placement": "fixed_system_hint_before_exact_response_schema_and_final_user_repair",
+    "messages": "system_base_user_optional_previous_assistant_final_user",
+    "history": "immediately_previous_reply_only_rebuilt_from_base",
+    "previous_response_max_characters": 2000,
+    "oversized_previous_response": "archived_in_full_assistant_omitted_no_truncation",
+    "raw_response_in_correction_context": false
+  },
+  "output_constraints": {
+    "schema_version": "week6.semantic_output_constraints.v1",
+    "reason_max_characters": 300,
+    "instruction_max_characters": 600,
+    "check_max_characters": 200,
+    "checks_per_list_max": 8,
+    "inline_correction_max_characters": 2000,
+    "oversized_previous_response": "archived_in_full_not_repeated_in_correction_context"
+  }
+}

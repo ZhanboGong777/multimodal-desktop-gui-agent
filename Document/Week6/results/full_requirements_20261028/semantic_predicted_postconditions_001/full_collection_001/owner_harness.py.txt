@@ -1,0 +1,23 @@
+from pathlib import Path
+import hashlib,json,os,re,subprocess,time
+from datetime import datetime,timezone
+root=Path(r"C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+base=root/"Document/Week6/results/full_requirements_20261028/semantic_predicted_postconditions_001"
+out=base/"full_collection_001";out.mkdir(exist_ok=False)
+(out/"owner_harness.py.txt").write_bytes(Path(__file__).read_bytes())
+keys=set(json.loads((root/"Document/Week6/results/full_requirements_20261028/semantic_goal_grouping_prompt_001/final_source_freeze_001.json").read_text("utf8"))["code_pins"]);keys.add("tests/test_week6_semantic_predicted_postconditions.py")
+def pins():return {k:hashlib.sha256((root/k).read_bytes()).hexdigest() for k in sorted(keys)}
+before=pins();(out/"pins_before.json").write_text(json.dumps(before,indent=2)+"\n",encoding="utf8")
+cmd=[r"D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe","-X","utf8","-m","pytest","--collect-only","-q","--basetemp",str(out/"pytest_tmp")]
+clock=time.monotonic();started=datetime.now(timezone.utc).isoformat()
+with (out/"stdout.txt").open("wb") as stdout,(out/"stderr.txt").open("wb") as stderr:
+ child=subprocess.Popen(cmd,cwd=root,stdout=stdout,stderr=stderr,env={**os.environ,"PYTHONUTF8":"1"});code=child.wait()
+after=pins();(out/"pins_after.json").write_text(json.dumps(after,indent=2)+"\n",encoding="utf8")
+stdout=(out/"stdout.txt").read_text("utf8");counts={}
+for line in stdout.splitlines():
+ match=re.match(r"(tests/[\w/]+\.py)::",line)
+ if match:counts[match.group(1)]=counts.get(match.group(1),0)+1
+result={"schema":"week6.semantic.v6.collection_only.v1","command":cmd,"launcher_pid":child.pid,"wait_exit_code":code,"started_at_utc":started,"elapsed_seconds":time.monotonic()-clock,"pins_count":len(before),"pins_unchanged":before==after,"test_count":sum(counts.values()),"per_file_counts":counts,"tests_executed":False,"not_a_pass_claim":True}
+(out/"collection.json").write_text(json.dumps(result,indent=2)+"\n",encoding="utf8")
+print(json.dumps({k:v for k,v in result.items() if k!="per_file_counts"},ensure_ascii=False),flush=True)
+raise SystemExit(0 if code==0 and before==after and counts else 1)

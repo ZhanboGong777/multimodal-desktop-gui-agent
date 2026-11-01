@@ -1,0 +1,25 @@
+{
+  "status": "ready",
+  "reason": "The previous goal failed because 'Draft Saved' was not visible, indicating the report was not saved locally. The current request requires completing the review and commit steps. The next logical state is to ensure the report is reviewed and committed locally, with 'LOCAL COMPLETE' as the final verid",
+  "subgoals": [
+    {
+      "instruction": "Review the GREEN report for project ALPHA and commit it locally, ensuring the review is completed before committing.",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [
+        "Review",
+        "Commit",
+        "Push",
+        "Sync",
+        "Online",
+        "External",
+        "Network",
+        "Connection Required"
+      ],
+      "goal_id": "review_and_commit_report"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+E                                                                        [100%]
+=================================== ERRORS ====================================
+_________ ERROR at setup of test_an_unknown_top_level_key_is_rejected _________
+
+self = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/tmp/week6_full001_setup_diagnostic_001/pytest')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [WinError 3] 系统找不到指定的路径。: 'C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_full001_setup_diagnostic_001\\pytest'
+
+D:\anaconda\Lib\pathlib.py:1311: FileNotFoundError
+=========================== short test summary info ===========================
+ERROR tests/test_config.py::test_an_unknown_top_level_key_is_rejected - FileN...
+1 error in 0.44s

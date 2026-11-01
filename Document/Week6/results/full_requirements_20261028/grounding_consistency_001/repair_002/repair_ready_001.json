@@ -1,0 +1,43 @@
+{
+  "schema": "week6.grounding_consistency.repair002.ready.v1",
+  "created_at_utc": "2026-10-28T10:42:26.242855+00:00",
+  "status": "owned_files_stopped_pending_root_combined002",
+  "root_cause": "The changed low-level system prefix bypassed the unchanged T04 offline test transport routers keyed by startswith(Plan GUI actions), so injected provider exceptions, cancellation and editor-role plans were not exercised. No old safety assertion was relaxed.",
+  "before_archive_sha256": "990fabdeab09d8b40a6f64cc797b75da35fee53b4ef6dc8fa5b1292884c0fbab",
+  "source_files_changed_from_failed_combined": {
+    "src/gui_agent/planning/prompts.py": {
+      "before": "58cdbe6220b5e1301360c24909e97fde6fd189395a4efbd0a735c76784b230b1",
+      "after": "c471c406a2ec33ee23a85e911c1eeb84a08bd7e27204932c75e0ad994e4e5d24"
+    },
+    "tests/test_week6_grounding_consistency.py": {
+      "before": "2d86102592a0e1389f5af5c7b5f7eb42e586c01f776076ca9829615b0f185266",
+      "after": "bfbacd519be5449f5bea6bd0c7527dc4e0681ac725dbaa7877077abda9b6536e"
+    }
+  },
+  "adapter_runner_unchanged_from_failed_combined": true,
+  "owned_file_sha256": {
+    "src/gui_agent/runtime/action_adapter.py": "222686942e4623d4743ac50e6da87599d4ba95d84ed9d1d855de089324a0eeda",
+    "src/gui_agent/runtime/runner.py": "91282ffc0cdc182dd6e727fb485ddc5d7244360200939c0521da56bcd8815511",
+    "src/gui_agent/planning/prompts.py": "c471c406a2ec33ee23a85e911c1eeb84a08bd7e27204932c75e0ad994e4e5d24",
+    "tests/test_week6_grounding_consistency.py": "bfbacd519be5449f5bea6bd0c7527dc4e0681ac725dbaa7877077abda9b6536e"
+  },
+  "restored_prefix": "Plan GUI actions: ONE JSON object.",
+  "prompt_characters": 996,
+  "old_prompt_cap_preserved": 1000,
+  "validation_sha256": "042f5f1646a9f2787b063143d34eff960b4b4f981605d51f06189ad7822faed2",
+  "tests_passed": 225,
+  "test_scope": "all 176 test_runtime_runner + 15 week4_prompts + 8 planner + 26 grounding_consistency",
+  "pytest_seconds": 127.52,
+  "pytest_and_ruff_wait_exits": [
+    0,
+    0
+  ],
+  "pins_count": 14,
+  "pins_unchanged": true,
+  "unchanged_old_t04_tests_restored_without_waivers": 16,
+  "previous_combined_failed": 16,
+  "previous_combined_passed": 783,
+  "not_an_actual_application_or_model_success_claim": true,
+  "new_models_gui_calls": 0,
+  "wheel002_preparation_paused_no_build_install_smoke": true
+}

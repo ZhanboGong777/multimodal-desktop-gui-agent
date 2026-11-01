@@ -1,0 +1,10 @@
+{
+  "schema": "week6.independent.repair_review.assertion_correction.v1",
+  "old_test": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_repair_feedback_review_001\\new_test_before_assertion_correction_002.py.txt",
+  "old_test_sha256": "b169ca22366a46a6ac3484ba7989a5f8864d4548bc4d6fa740fba2d20f1dd280",
+  "second_target_actual_exit": 1,
+  "second_target_passed": 18,
+  "second_target_failed": 1,
+  "production_or_auditor_changed": false,
+  "correction": "Existing semantic runner reserves one action-planning slot: max_calls=options.max_planning_attempts-spent-1. Use total cap3 to exercise two decomposition attempts and rejection of a third; one action slot stays reserved but no child/input is created. The earlier cap2-two-request assumption was incorrect."
+}

@@ -1,0 +1,200 @@
+{
+  "schema": "week6.live.operator_diagnostics.v2",
+  "operator": "Root sole native operator; no independent human sign-off",
+  "utc": "2026-11-01T05:11:02.033648+00:00",
+  "source_freeze": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\role_model_routing_001\\final_source_freeze_001.json",
+    "sha256": "b28f6b1f0661703da05ecd773be933b6a86758e3030c8a21d793d6c81a96c928"
+  },
+  "owner_receipt": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_006\\owner_receipt.json",
+    "sha256": "cd418b76a059098713db9c00fec27b49da0502129b3c432f0e4864771d98cfb6"
+  },
+  "wrapper_proof": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_006\\exec_wrapper_wait_001.json",
+    "sha256": "e03271dd67259cc3c51f8f23f6ce6a7598e9ca4d4d04ff908252bf790552bf84"
+  },
+  "operator_notes": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\transient006_operator_notes_001.json",
+    "sha256": "251afcce3a0436ba52e1d4f5dace09c09985436fbfbc1363431529b7f4531aaf"
+  },
+  "notes": {
+    "schema": "week6.root.native_operation_notes.v1",
+    "case": "transient_006",
+    "reviewer": "Root",
+    "utc": "2026-11-01T05:11:01.782394+00:00",
+    "sole_operator": true,
+    "window_id": 2493898,
+    "inputs_actually_observed": [
+      {
+        "id": "input_001",
+        "action": "double_click",
+        "xy": [
+          1281,
+          1048
+        ],
+        "original_target_description": "BELA",
+        "start": "2026-11-01T05:06:05.158Z",
+        "dispatch_returned": "2026-11-01T05:06:05.426Z",
+        "fresh_finish": "2026-11-01T05:06:05.522Z",
+        "before": "Choose a project",
+        "after": "Project BETA; Choose report theme",
+        "business_change": "project_selected"
+      },
+      {
+        "id": "input_002",
+        "action": "double_click",
+        "xy": [
+          1282,
+          915
+        ],
+        "start": "2026-11-01T05:06:54.377Z",
+        "dispatch_returned": "2026-11-01T05:06:54.690Z",
+        "fresh_finish": "2026-11-01T05:06:54.773Z",
+        "before": "Choose report theme",
+        "after": "Project BETA; Theme BLUE; Draft ready; Review report",
+        "business_change": "theme_selected"
+      },
+      {
+        "id": "input_003",
+        "action": "click",
+        "xy": [
+          1282,
+          1049
+        ],
+        "start": "2026-11-01T05:07:49.576Z",
+        "dispatch_returned": "2026-11-01T05:07:49.707Z",
+        "fresh_finish": "2026-11-01T05:07:49.862Z",
+        "before": "Draft ready; Review report",
+        "after": "Review unavailable. Please retry.; Draft ready; Review report",
+        "business_change": "review_rejected",
+        "distinction": "Input actually dispatched and refreshed successfully; application review failed as preregistered."
+      },
+      {
+        "id": "input_004",
+        "action": "click",
+        "xy": [
+          1282,
+          1094
+        ],
+        "start": "2026-11-01T05:08:42.610Z",
+        "dispatch_returned": "2026-11-01T05:08:42.745Z",
+        "fresh_finish": "2026-11-01T05:08:42.907Z",
+        "before": "Review unavailable. Please retry.; Draft ready",
+        "after": "Review complete; Commit locally",
+        "business_change": "review_accepted"
+      },
+      {
+        "id": "input_005",
+        "action": "double_click",
+        "xy": [
+          1281,
+          1049
+        ],
+        "start": "2026-11-01T05:09:33.648Z",
+        "dispatch_returned": "2026-11-01T05:09:33.929Z",
+        "fresh_finish": "2026-11-01T05:09:34.013Z",
+        "before": "Review complete; Commit locally",
+        "after": "Project BETA; Theme BLUE; LOCAL COMPLETE",
+        "business_change": "local_commit"
+      }
+    ],
+    "unknown_inputs": 0,
+    "operator_added_inputs": 0,
+    "local_goal_or_condition_changes": false,
+    "actual_owner_and_wrapper_exit": [
+      0,
+      0
+    ],
+    "raw_runtime_status": "succeeded",
+    "root_semantic_concern": {
+      "goal_id": "GOAL_2",
+      "instruction": "Review the generated report and confirm its accuracy.",
+      "expect_text": [
+        "LOCAL COMPLETE"
+      ],
+      "finding": "Native instruction does not explicitly request the local commit performed inside this goal. Physical completion and machine checks cannot replace semantic alignment. Root qualification withheld, consistent with earlier normal027."
+    },
+    "lower_right_uninstall_notification": "Outside Lab controls; untouched.",
+    "qualification": "Pending original strict and receipt audits; regardless of their outcome, no Root semantic approval from physical final alone."
+  },
+  "original_process_identities_gone": [
+    {
+      "pid": 21344,
+      "expected_create_time": 1793509481.680058,
+      "observed_create_time": null,
+      "same_identity_alive": false
+    },
+    {
+      "pid": 5792,
+      "expected_create_time": 1793509481.8263419,
+      "observed_create_time": null,
+      "same_identity_alive": false
+    },
+    {
+      "pid": 18036,
+      "expected_create_time": 1793509481.8531103,
+      "observed_create_time": null,
+      "same_identity_alive": false
+    },
+    {
+      "pid": 16376,
+      "expected_create_time": 1793509626.2500775,
+      "observed_create_time": null,
+      "same_identity_alive": false
+    },
+    {
+      "pid": 10636,
+      "expected_create_time": 1793509626.2687898,
+      "observed_create_time": null,
+      "same_identity_alive": false
+    },
+    {
+      "pid": 11188,
+      "expected_create_time": 1793509682.9503367,
+      "observed_create_time": null,
+      "same_identity_alive": false
+    },
+    {
+      "pid": 40848,
+      "expected_create_time": 1793509731.6500273,
+      "observed_create_time": null,
+      "same_identity_alive": false
+    },
+    {
+      "pid": 19744,
+      "expected_create_time": 1793509731.6734045,
+      "observed_create_time": null,
+      "same_identity_alive": false
+    }
+  ],
+  "capture_count": 26,
+  "input_count": 5,
+  "input_receipt_refs": [
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_006\\run\\sky_bridge\\input_001_receipt.json",
+      "sha256": "11546b52c67d0b8b1f6a91700f3fa57986076ed630e417c85ed02e263f87ed33"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_006\\run\\sky_bridge\\input_002_receipt.json",
+      "sha256": "153feef634b21e038b29458eca92e900d86dc7ac9a860ddddd21c949ee6277ab"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_006\\run\\sky_bridge\\input_003_receipt.json",
+      "sha256": "33ac32c7049574ea88c2b26ab9044dfdaefb046593134800a251ab77e1ae0648"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_006\\run\\sky_bridge\\input_004_receipt.json",
+      "sha256": "2d205a013375a8a5abab0e26e06c1855153a2e5074b9df4899d5342a96cfeb61"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_006\\run\\sky_bridge\\input_005_receipt.json",
+      "sha256": "a27c752ad02ca54fbb534d9ed64262987f6f67fc298933466c08343b1d84b8ff"
+    }
+  ],
+  "all_inputs_known_success": true,
+  "pending": [],
+  "code_and_readme_dev_unchanged": true,
+  "raw_evidence_not_repaired": true,
+  "separate_semantic_review_required": true
+}

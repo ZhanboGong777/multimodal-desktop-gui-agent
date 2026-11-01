@@ -1,0 +1,28 @@
+{
+  "schema": "week6.semantic_auditor.version_snapshot.v1",
+  "version": "v003_text_context_compatible",
+  "reviewer": "/root/week6_replanning_review",
+  "files": {
+    "week6_audit_semantic_acceptance.py.txt": "bbd1353869e9bb091332051e9e0d84da0a6ef4607fe20637e0686d2ba46b912c",
+    "test_week6_full_requirements_review.py.txt": "d95a68cf087357bf344fd89fd07f0b0133373a428c585701238d430e81a22802"
+  },
+  "production_source_tested": "78a0b37e3bafc2ffabaf666c0b1b97590e25eba6e8623c47e95470eef48acd71",
+  "validation": {
+    "audit": "../cpu_validation_006/audit.json",
+    "audit_sha256": "4bfd94d5263f161a8deacb2bba22d40262608755217c6d1b35b4b2574c25ba0d",
+    "actual_exit_code": 0,
+    "testcases": 27,
+    "deselected_earlier_semantic_testcases": 23,
+    "selected_13_pins_before_equal_after": true,
+    "ruff_selected_two_files_exit_code": 0,
+    "real_positive_audit": null
+  },
+  "retained_history": {
+    "v001": "Original checker and 31-test source bytes retained",
+    "v002_intermediate": "Raw/validated mapping plus bounded repair binding, before text-only fields",
+    "cpu_validation_005": "25 pass, 2 review fixture failures caused by generic _frame having image_path=None; exact old auditor/test bytes and stdout retained",
+    "cpu_validation_006": "Fixed synthetic frame provenance and hardened helper's standalone missing-path rejection; 27 pass, no production edits"
+  },
+  "scope": "No model, GUI, OCR or experiment reruns. High-level recorded no-image arguments/full original snapshot and low-level image provenance are bound to actual counted pre-encoding messages and pinned client code. Actual wire-body properties were separately tested by the implementation owner's offline SDK MockTransport tests; the real-run logger does not store raw request bodies.",
+  "future_use": "Current prompt-only source revisions require their own current-vs-before pins and final regression. These CPU results do not declare real task completion."
+}

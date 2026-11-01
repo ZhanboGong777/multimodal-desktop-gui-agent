@@ -1,0 +1,26 @@
+{
+  "schema": "week6.observed_queries.independent_migration_scope.v1",
+  "created_at_utc": "2026-10-28T14:20:10.772400+00:00",
+  "old_auditor_sha256": "01e6f2574d5d2096fa012b891a4a1d718457b00908f4a8961181386ede928650",
+  "new_auditor_sha256": "eb2e3c4ed8da2a6b7b347381e820c028a23af5c4bb45fb47ebd2160b02baa68d",
+  "old_require_guards": 169,
+  "new_require_guards": 170,
+  "all_old_require_asts_preserved_in_original_order": true,
+  "legacy_test_before_sha256": "cc7c17956138c5b693db88d81f3624ddd412dfbd1fffbde8b5c6355507f293a9",
+  "legacy_test_after_sha256": "918b1e15db08e97f7769f82fb17c900f5ae6008fa306c95834b8484d64818e90",
+  "only_changed_old_test_function": "test_review_standard_json_schema_preserves_legacy_nonpoint_text_only_id_only_and_unknown_visual_paths",
+  "all_old_cases_and_parameter_decorators_unchanged": true,
+  "all_other_old_module_ast_identical": true,
+  "old_assert_predicate_still_evaluated_unchanged": true,
+  "intentional_migration": "One formerly accepted arbitrary unseen text-only query is now rejected by schema.v2. All nine other supported path cases retain acceptance; runtime matching is unchanged and deliberately wider.",
+  "new_review_sha256": "6d954d60dd91897437921e98340a015b8d0c8089a695c7f8451d1a250aee613f",
+  "validation": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\observed_query_constraints_001\\review_cpu_validation_001\\validation.json",
+  "validation_sha256": "0d9b76bd4815d6ce66015e3f46458d9823ffff8746fbf2bf3fa3bbcc217866b2",
+  "independence": "Query events/counters are rebuilt in the audit script, without calling the producer observed_query_contract. Frozen pure text matchers qualify <=4 saved source witnesses; original pixels and final authorised subset remain upstream bound.",
+  "limitations": [
+    "Finite generation subset, not all arbitrary runtime substrings or word-run forms",
+    "Standard JSON Schema qualification plus offline SDK transport tests do not prove every provider enforces strict:false",
+    "An unknown native text query is retained if a mock provider ignores schema; unchanged runtime no-match guard dispatches nothing, and audit rejects its schema qualification",
+    "No live model, OCR, GUI, full/shared regression or final acceptance was performed by this review"
+  ]
+}

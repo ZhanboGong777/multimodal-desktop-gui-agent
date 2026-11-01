@@ -1,0 +1,18 @@
+{
+  "response": {
+    "provider": "openai_compatible",
+    "model_name": "qwen3-vl:8b-instruct",
+    "latency_ms": 0.0,
+    "usage": {
+      "prompt_tokens": 9985,
+      "completion_tokens": 118,
+      "total_tokens": 10103
+    },
+    "error": null,
+    "content_length": 525
+  },
+  "content": "{\"task_id\":\"t1\",\"instruction\":\"Prepare a BLUE report for project BETA by selecting the project, choosing the BLUE theme, and generating the report using visible controls.\",\"summary\":\"Select BETA project to start report generation.\",\"steps\":[{\"step_id\":\"s1\",\"description\":\"Select the 'BETA' project button.\",\"action_type\":\"double_click\",\"target_text\":\"BETA\",\"arguments\":{\"element_id\":\"obs-0001-e003\"},\"expected_result\":\"Project BETA is selected, enabling theme and report generation options.\",\"status\":\"pending\"}],\"errors\":[]}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

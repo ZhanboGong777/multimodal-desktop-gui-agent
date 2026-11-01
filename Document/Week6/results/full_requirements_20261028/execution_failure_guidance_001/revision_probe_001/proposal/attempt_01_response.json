@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 16125.0,
+  "usage": {
+    "prompt_tokens": 1991,
+    "completion_tokens": 133,
+    "total_tokens": 2124
+  },
+  "error": null,
+  "content_length": 594,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"Revision plan focuses on the remaining operation: review and commit the BLUE report for project BETA. Since 'LOCAL COMPLETE' is the final verifiable predicate, the goal must explicitly perform the review and commit actions to satisfy the caller's final state. No earlier objective can claim finality.\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Review the prepared BLUE report for project BETA and commit it locally using visible controls.\",\n      \"expect_text\": [\"LOCAL COMPLETE\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"review_and_commit\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

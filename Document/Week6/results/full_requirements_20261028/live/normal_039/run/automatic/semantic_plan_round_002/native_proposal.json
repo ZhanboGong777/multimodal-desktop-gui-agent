@@ -1,0 +1,20 @@
+{
+  "status": "ready",
+  "reason": "Revision plan focuses on completing the review and commit steps since report generation is already confirmed. The final state requires both review and local commit, so these are grouped into one objective to avoid redundant checks and ensure full persistence.",
+  "subgoals": [
+    {
+      "instruction": "Review the GREEN report for project ALPHA and commit it locally using visible controls. If review is temporarily unavailable, retry within budget.",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [
+        "Review unavailable",
+        "Connection error",
+        "Commit failed"
+      ],
+      "goal_id": "review_and_commit"
+    }
+  ]
+}

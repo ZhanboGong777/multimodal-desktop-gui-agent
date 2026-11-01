@@ -1,0 +1,78 @@
+{
+  "schema": "week6.report.semantic_operation_review.v1",
+  "reviewer": "Root",
+  "reviewer_kind": "Codex Root agent review, not human sign-off",
+  "approved": true,
+  "reviewed_utc": "2026-11-01T11:52:02.362581+00:00",
+  "source_freeze": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\auditor_prompt_sync_001\\final_source_freeze_001.json",
+    "sha256": "0be4751f70acd61e378c63e42f38d88d24e39a02b7dab978e1ebcf69d491f6ae"
+  },
+  "independent_audit": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\transient027_strict_audit_002.json",
+    "sha256": "485333be8b99f02e8dbf4536f71fa0c3ab1c0f0038f7624188742db854d8d69c"
+  },
+  "runtime": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_027\\run\\runtime_result.json",
+    "sha256": "1efeeb1a09e468a5b08068c4872fd8891a306722ed05b0d5dc78ac60bedd3699"
+  },
+  "container": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_027",
+  "stages": [
+    {
+      "stage_key": "1:1:prepare_report",
+      "native_instruction": "Prepare a BLUE report for project BETA in Week6 Local Lab using visible controls.",
+      "independent_transitions": [
+        "project_selected",
+        "theme_selected"
+      ],
+      "semantic_alignment_passed": true,
+      "rationale": "Native preparation instruction requests BLUE BETA report and predicates verify Project BETA and Theme BLUE. Saved original before image has no selection. Native001/002, immediate fresh pixels and independent project_selected/theme_selected establish precisely those operations. No review operation named or credited here.",
+      "original_status": "succeeded"
+    },
+    {
+      "stage_key": "1:2:review_and_commit",
+      "native_instruction": "Review the prepared BLUE report for project BETA and commit it locally.",
+      "independent_transitions": [
+        "review_rejected",
+        "review_accepted",
+        "local_commit"
+      ],
+      "semantic_alignment_passed": true,
+      "rationale": "Native instruction explicitly requests BOTH review and local commit. Saved before screenshot shows Draft ready and Review report, without completed review. Native003 caused real review_rejected and visible retry notice. Model subsequently selected the moved Review report control via native004, causing review_accepted and immediate Review complete. Native005 caused local_commit and immediate LOCAL COMPLETE. Separate saved caller-final image confirms BLUE BETA LOCAL COMPLETE. Both named operations occurred before goal success. The first step raw prediction passed despite the application rejection; this imperfection is retained and the semantic condition required continuing until final completion.",
+      "original_status": "succeeded"
+    }
+  ],
+  "actually_viewed_saved_original_pixels": [
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_027\\run\\automatic\\contract_before_001_001\\monitor1_20261101_224526_567.png",
+      "sha256": "e2873ab492c6d30cad5f3cfe44f13cb4616bfb9886396e289a87b8c165bbfd46"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_027\\run\\automatic\\contract_before_001_002\\monitor1_20261101_224735_135.png",
+      "sha256": "0b96eb6c90d462cb06472d71e87595d105ab1330ee1ef23985a839b198a2f2ab"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_027\\run\\automatic\\caller_final_round_001\\monitor1_20261101_225056_927.png",
+      "sha256": "81716482b4867d398035086a53ff037a518a3fe1c6913356f28f18e8479821d5"
+    }
+  ],
+  "rejected_pre_input_contracts_reviewed": [],
+  "rejected_contract_rationale": "No rejected high-level contracts. Both original semantic goals succeeded; one application review rejection occurred and was retried inside the second goal, not a failed semantic goal or new semantic round.",
+  "caveats": [
+    "One controlled local recovery case; no general success rate or deterministic reliability claim. Historical failures remain unchanged.",
+    "5 confirmed native inputs,6 planning calls and6 HTTP requests; original owner/wrapper/strict/protocol all0. No target replacement.",
+    "The real application rejection is distinct from executor failures0 and failed semantic goals0. Raw step predictions passed on the rejected review; final semantic verification required actual recovery.",
+    "Recovery occurred through action-layer fresh-screen replanning within the existing second goal. This case does not by itself exercise the newly added high-level failed-contract guidance; its text-only probe is separate development evidence.",
+    "Root agent operator/reviewer is not independent human sign-off. Normal048, full current-source regression and final artifacts remain pending."
+  ],
+  "manual_findings": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\transient027_manual_findings_001.json",
+    "sha256": "c888c3ccfad0bc62e39b863920af03a363f6b87143331b29de30a4b130a34c61"
+  },
+  "original_physical_review": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\transient027_root_semantic_review_001.json",
+    "sha256": "bfb3871bb6d0ca545184c733acf2585541abfc41b183a6164cc1dabe6fa5185e"
+  },
+  "audit_maintenance_review_utc": "2026-11-01T12:13:10.244337+00:00",
+  "audit_maintenance_scope": "Same previously viewed original pixels and native events. No new physical experiment or image viewing claimed; all original runtime/config pins remain equal and new independent saved-record replay actually passed."
+}

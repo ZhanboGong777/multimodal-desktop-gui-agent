@@ -1,0 +1,76 @@
+{
+  "schema": "week6.report.semantic_operation_review.v1",
+  "reviewer": "Root",
+  "reviewer_kind": "Codex Root agent review, not human sign-off",
+  "approved": true,
+  "reviewed_utc": "2026-10-31T12:18:58.387147+00:00",
+  "source_freeze": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\recovery_feedback_schema_001\\final_source_freeze_001.json",
+    "sha256": "ee7e2c8c6cc2b6a14349baaf15468367cc3fd41c9c537ee1644823b0c8a612e5"
+  },
+  "independent_audit": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal025_strict_audit_001.json",
+    "sha256": "6aa7afd51d84712b26f42b243abaf9b0a5133c2964f35704295709d4ca9828b1"
+  },
+  "runtime": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_025\\run\\runtime_result.json",
+    "sha256": "4f74ee9b90fb2b372ca026d57cf01306a8ac2114813effe4d1ca36964d1574c5"
+  },
+  "container": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_025",
+  "stages": [
+    {
+      "stage_key": "1:1:prepare_report",
+      "native_instruction": "Prepare the GREEN report for project ALPHA by selecting the correct project and theme, then save the draft locally.",
+      "independent_transitions": [
+        "project_selected",
+        "theme_selected",
+        "review_accepted"
+      ],
+      "semantic_alignment_passed": true,
+      "rationale": "Reviewed as an original FAILED attempt, not as successfully saved preparation. Inputs001/002 selected ALPHA and GREEN. Input003 performed review early despite the preparation/save instruction; this deviation is retained, not presented as correct sequencing of the original plan. The stage's fixed Draft Saved prediction never appeared; its forbidden Review literal also conflicted with the visible review state. No completion credit was assigned. The independently recorded early review remains real partial caller progress, without establishing the requested save or a passed prepare_report.",
+      "original_status": "failed"
+    },
+    {
+      "stage_key": "2:1:review_and_commit_report",
+      "native_instruction": "Review the GREEN report for project ALPHA and commit it locally, ensuring the review is completed before committing.",
+      "independent_transitions": [
+        "local_commit"
+      ],
+      "semantic_alignment_passed": true,
+      "rationale": "The original revision explicitly requests local commit after ensuring review is complete. Its fresh pre-state visibly shows ALPHA/GREEN, Review complete and Commit locally; the original known input003 and independent review_accepted event establish that prerequisite before this stage. LOCAL COMPLETE is visibly absent, so the whole revised condition is genuinely new, not merely an OCR-missing pre-existing preparation state. Input004 performs the expressly requested remaining commit and produces the unique local_commit event and fresh caller final. Review is not re-executed or reattributed to this stage; only local_commit is listed here. This is bounded continuation from real partial progress of a failed attempt, not evidence that the initial plan or every sub-operation was performed within the revised stage.",
+      "original_status": "succeeded"
+    }
+  ],
+  "actually_viewed_saved_original_pixels": [
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_025\\run\\automatic\\initial_observation\\monitor1_20261031_225436_072.png",
+      "sha256": "c16a5480894870b44d0549b8a8c6e96c7cfe879b7b17a2e69955674b927437cd"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_025\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\monitor1_20261031_230514_444.png",
+      "sha256": "06b47cd891e84bb32341d07fba4ba4e826197362a07507f4689f60c6eb90b581"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_025\\run\\automatic\\contract_before_002_001\\monitor1_20261031_230832_237.png",
+      "sha256": "18de696f4cd776cca9892023994ff1552c70e2ceb4e45d7b962e53ab247f482e"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_025\\run\\automatic\\caller_final_round_002\\monitor1_20261031_231217_038.png",
+      "sha256": "c049405d298e4082ebec345661f47c809fb34241394d7c79318ab81ba6cffc1c"
+    }
+  ],
+  "rejected_pre_input_contracts_reviewed": [],
+  "rejected_contract_rationale": "No pre-input contract rejection occurred. The first executed goal failed its predicted postcondition; later success does not change that failure. An actual review event in the failed attempt is retained as partial business progress, not a completed semantic goal.",
+  "caveats": [
+    "The initial plan was imperfect: a save state was hallucinated and review occurred during preparation. This case verifies retained failure and bounded completion of the remaining caller work, not flawless initial planning.",
+    "The revised goal has one new business transition, local_commit. Review had already completed before its pre-state and is not counted again or reassigned. The final ledger has one revised goal succeeded, one historical attempt failed.",
+    "Original receipt-protocol audit001 exited1 solely because the native origin description explicitly named list_windows. The immutable pre-owner claim and Root ACK already bound a unique real native window and fixture PID/create_time. A separately tested exact two-label compatibility reader passed all original remaining checks; original failure, claim and timing strings remain unchanged. This is a post-run metadata compatibility revision, not a changed timing tolerance.",
+    "Four confirmed executor calls include two double_click calls; repeated physical presses are not four additional executor calls. Unknown inputs0, executor failures0. No target, ID, coordinate or cursor correction was made.",
+    "Input004 retains the original OCR text Commiyocally. Its native coordinates land inside the independently viewed Commit locally button. Pointer/OCR effects were not isolated causally.",
+    "Only the dedicated local fixture, this caller combination and current278 source are qualified. Root is the sole native operator and reviewing Codex agent; this is not independent human sign-off or overall delivery approval."
+  ],
+  "manual_findings": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_normal025_independent_audit_20261031\\root_manual_findings_001.json",
+    "sha256": "529203384a0654438fc4352f0710a2bd4497787cea34dc947016c5a8421b086d"
+  }
+}

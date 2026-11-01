@@ -1,0 +1,23 @@
+{
+  "schema": "week6.monitor_terminal.scope_review.v1",
+  "previous_freeze_sha256": "71ea38ff9e9f4227e2d42524295adf893148ae0ad0aea05806ba08ac17536005",
+  "changed_paths": [
+    "src/gui_agent/planning/semantic_workflow.py",
+    "tests/test_week6_semantic_recovery_observation_terminal.py"
+  ],
+  "source_ast_identical_except_terminal_planning_keyword": true,
+  "model_goal_action_or_condition_changes": false,
+  "confirmed_accounting_unchanged": true,
+  "original_baseline_exec": {
+    "session": 82523,
+    "chunk_id": "e3c5c6",
+    "exit_code": 1,
+    "failed": 2,
+    "seconds": 4.4,
+    "failure": "Both actual recovery observation faults reproduce semantic monitor persistence ValueError before this edit."
+  },
+  "source_sha256": "a86d52bfa873268db8932a20ea85e1c3106a68e9fa6c6cbcb8a2ad99ce19e365",
+  "new_test_sha256": "4652ae6092db0dbfd80662f24446dd1389f2bfa7990a5fd8849f50e365f0201d",
+  "download_actual_exit": 0,
+  "scope": "Preserve the already announced recovery pass in terminal telemetry without increasing actual model/planning counts or granting completion."
+}

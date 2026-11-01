@@ -1,0 +1,40 @@
+.F.F..............FFF..                                                  [100%]
+================================== FAILURES ===================================
+_ test_review_completed_objective_cannot_be_reintroduced_under_partial_renaming[id] _
+tests\test_week6_full_requirements_review.py:43: in test_review_completed_objective_cannot_be_reintroduced_under_partial_renaming
+    parsed = semantic.SemanticPlan.model_validate(json.loads(proposal(changed)))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   pydantic_core._pydantic_core.ValidationError: 1 validation error for SemanticPlan
+E   subgoals.0
+E     Value error, describe the semantic state change, not a primitive action instruction [type=value_error, input_value={'goal_id': 'setpreferenc...on'], 'forbid_text': []}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/value_error
+_ test_review_completed_objective_cannot_be_reintroduced_under_partial_renaming[checks] _
+tests\test_week6_full_requirements_review.py:43: in test_review_completed_objective_cannot_be_reintroduced_under_partial_renaming
+    parsed = semantic.SemanticPlan.model_validate(json.loads(proposal(changed)))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   pydantic_core._pydantic_core.ValidationError: 1 validation error for SemanticPlan
+E   subgoals.0
+E     Value error, describe the semantic state change, not a primitive action instruction [type=value_error, input_value={'goal_id': 'NewIdentity'... 1'], 'forbid_text': []}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/value_error
+____ test_review_child_reused_capture_provenance_stops_before_credit[time] ____
+tests\test_week6_full_requirements_review.py:262: in test_review_child_reused_capture_provenance_stops_before_credit
+    assert result.total_actions == state.attempts == 1
+E   AssertionError: assert 0 == 1
+E    +  where 0 = namespace(stage=0, attempts=0, captures=4, children=[<gui_agent.runtime.runner.TaskRunner object at 0x0000023BCB413E00...ses=[], must_exit_processes=[], risk='medium', message_conversation=None, gate_on_step_verification=False)], root=None).attempts
+____ test_review_child_reused_capture_provenance_stops_before_credit[path] ____
+tests\test_week6_full_requirements_review.py:262: in test_review_child_reused_capture_provenance_stops_before_credit
+    assert result.total_actions == state.attempts == 1
+E   AssertionError: assert 0 == 1
+E    +  where 0 = namespace(stage=0, attempts=0, captures=4, children=[<gui_agent.runtime.runner.TaskRunner object at 0x0000023BCB3F39B0...ses=[], must_exit_processes=[], risk='medium', message_conversation=None, gate_on_step_verification=False)], root=None).attempts
+_____ test_review_child_reused_capture_provenance_stops_before_credit[id] _____
+tests\test_week6_full_requirements_review.py:262: in test_review_child_reused_capture_provenance_stops_before_credit
+    assert result.total_actions == state.attempts == 1
+E   AssertionError: assert 0 == 1
+E    +  where 0 = namespace(stage=0, attempts=0, captures=4, children=[<gui_agent.runtime.runner.TaskRunner object at 0x0000023BCB3F1EE0...ses=[], must_exit_processes=[], risk='medium', message_conversation=None, gate_on_step_verification=False)], root=None).attempts
+=========================== short test summary info ===========================
+FAILED tests/test_week6_full_requirements_review.py::test_review_completed_objective_cannot_be_reintroduced_under_partial_renaming[id]
+FAILED tests/test_week6_full_requirements_review.py::test_review_completed_objective_cannot_be_reintroduced_under_partial_renaming[checks]
+FAILED tests/test_week6_full_requirements_review.py::test_review_child_reused_capture_provenance_stops_before_credit[time]
+FAILED tests/test_week6_full_requirements_review.py::test_review_child_reused_capture_provenance_stops_before_credit[path]
+FAILED tests/test_week6_full_requirements_review.py::test_review_child_reused_capture_provenance_stops_before_credit[id]
+5 failed, 18 passed in 11.31s

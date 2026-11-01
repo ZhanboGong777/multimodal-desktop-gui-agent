@@ -1,0 +1,127 @@
+{
+  "run_id": "001_ALPHA_REVIEW_001",
+  "case_id": "ALPHA_REVIEW_001",
+  "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Review the GREEN report.\nComplete original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+  "status": "succeeded",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Click the 'Review report' button to start reviewing the GREEN report.",
+      "action_type": "click",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "click",
+          "x": 1282,
+          "y": 1049,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Review report"
+        },
+        "element_id": "obs-0002-e002",
+        "screenshot_point": {
+          "x": 1282,
+          "y": 1049
+        },
+        "control_point": {
+          "x": 1282,
+          "y": 1049
+        },
+        "note": "text 'Review report' -> obs-0002-e002 (re-bound from obs-0001-e002 in an earlier frame)"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "click",
+          "x": 1282,
+          "y": 1049,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Review report"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: report, review",
+        "evidence": {
+          "observation_id": "obs-0003",
+          "changed": true,
+          "element_count": 19,
+          "expectation_tokens": [
+            "report",
+            "review",
+            "interface",
+            "should",
+            "load"
+          ],
+          "expectation_hits": [
+            "report",
+            "review"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 9639.999999999418,
+      "after_observation_id": "obs-0003"
+    }
+  ],
+  "verification": {
+    "outcome": "passed",
+    "method": "automatic",
+    "detail": "all success rules matched against the current screen",
+    "evidence": {
+      "observation_id": "obs-0004",
+      "expect_text": [
+        "Review Complete"
+      ],
+      "forbid_text": [],
+      "verification_source": "frozen_model_semantic_subtask_postconditions"
+    }
+  },
+  "error": null,
+  "elapsed_ms": 48844.000000011874,
+  "execute": true,
+  "model_name": "qwen3-vl:8b-instruct",
+  "provider": "openai_compatible",
+  "notes": [
+    "planned 1 steps from obs-0001"
+  ],
+  "task_id": "ALPHA_REVIEW_001",
+  "commit": "482895f",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 2560x1600, control 2560x1600",
+  "started_at": "2026-11-01T05:01:00.195858Z",
+  "finished_at": "2026-11-01T05:01:49.039858Z",
+  "planning_attempts": 1,
+  "model_requests": 4,
+  "planning_ms": 36422.00000000594,
+  "confirmation_ms": 16.00000000325963,
+  "execution_ms": 12406.000000002678,
+  "planner_ms": 34093.99999999732,
+  "planning_calls": 1,
+  "system_elapsed_ms": 48828.000000008615,
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_030\\run\\automatic\\goal_001_002_ALPHA_REVIEW_001\\001_ALPHA_REVIEW_001",
+  "stop_reason": "",
+  "error_type": "",
+  "failed_step_id": null,
+  "recovery_records": [],
+  "unconfirmed_action_attempts": 0,
+  "action_count": 1
+}

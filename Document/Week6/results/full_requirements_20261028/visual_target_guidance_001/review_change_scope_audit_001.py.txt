@@ -1,0 +1,59 @@
+"""AST and byte evidence only; never executes project or model code."""
+import ast
+import hashlib
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path("C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+BASE = ROOT / "Document/Week6/results/full_requirements_20261028/visual_target_guidance_001"
+OLD = BASE / "review_source_before/scripts/week6_audit_semantic_acceptance.py.txt"
+NEW = ROOT / "scripts/week6_audit_semantic_acceptance.py"
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+def guards(path):
+    tree = ast.parse(path.read_text("utf8"))
+    return [ast.dump(node, include_attributes=False) for node in sorted(ast.walk(tree), key=lambda n: getattr(n, "lineno", -1))
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "require"]
+
+old, new = guards(OLD), guards(NEW)
+cursor = 0
+for guard in old:
+    while cursor < len(new) and new[cursor] != guard:
+        cursor += 1
+    assert cursor < len(new), "an old guard changed or disappeared"
+    cursor += 1
+proof = {"schema": "week6.visual_guidance.independent_review_scope.v1",
+    "created_at_utc": datetime.now(timezone.utc).isoformat(),
+    "auditor_before_sha256": sha(OLD), "auditor_after_sha256": sha(NEW),
+    "old_require_guard_count": len(old), "new_require_guard_count": len(new),
+    "every_old_guard_ast_preserved_in_source_order": True,
+    "new_owned_test_sha256": sha(ROOT / "tests/test_week6_visual_target_guidance_review.py"),
+    "actual_validation_reference": str(BASE / "review_cpu_validation_002/validation.json"),
+    "actual_validation_sha256": sha(BASE / "review_cpu_validation_002/validation.json"),
+    "previous_failure_reference": str(BASE / "review_cpu_validation_001/validation.json"),
+    "previous_failure_sha256": sha(BASE / "review_cpu_validation_001/validation.json"),
+    "first_failure_explanation": "The new high-level synthetic test omitted the fixed clock while declaring deadline=100, so the original safe timeout path ran. Only its clock fixture and owned import formatting were corrected; all first-run bytes, stdout, stderr and actual exits remain.",
+    "independent_verified_boundaries": [
+        "Exact fixed policy required on every selected live action call, without legacy fallback",
+        "No-match guidance exact fixed literal, linked to previous native one-step/journal and fresh-frame pure adapter failure",
+        "Actual SDK MockTransport serialization and schema, per-attempt raw content retained",
+        "Native anonymous ID refreshed by unchanged real pixel matcher on synthetic images, independent caller check required",
+        "Conflicting or unlisted primary ID refused without fake executor dispatch",
+        "Message final authorised subset, shared caps and cancellation preserved",
+        "High semantic caller-intent-only input contains no visual targeting policy"],
+    "limitations": [
+        "Synthetic offline frames/replies/executor do not establish real model or GUI success",
+        "Advice does not guarantee a model will choose a correct anonymous candidate",
+        "No change to original parser, target binding packet/schema, execution authority or immutable caller final",
+        "Unused secondary alias schema qualification is distinct from unchanged runtime primary-target dispatch behavior",
+        "No full/shared regression or live run executed by this review"],
+}
+target = BASE / "review_change_scope_audit_001.json"
+with target.open("x", encoding="utf8", newline="\n") as stream:
+    json.dump(proof, stream, ensure_ascii=False, indent=2)
+    stream.write("\n")
+(BASE / "review_change_scope_audit_001.py.txt").write_bytes(Path(__file__).read_bytes())
+print(json.dumps({"path": str(target), "sha256": sha(target), "old_guards": len(old), "new_guards": len(new)}))

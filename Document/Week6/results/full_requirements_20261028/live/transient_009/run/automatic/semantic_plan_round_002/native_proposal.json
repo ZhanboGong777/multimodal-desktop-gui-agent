@@ -1,0 +1,34 @@
+{
+  "status": "ready",
+  "reason": "Revision plan focuses on completing the review and commit steps since report preparation was partially successful. The review step is critical to ensure final persistence before commit. The instruction explicitly names all required operations to achieve the final state.",
+  "subgoals": [
+    {
+      "instruction": "Review the BLUE report for project BETA by selecting the review option and confirming the report's content using visible controls.",
+      "expect_text": [
+        "Project BETA",
+        "Theme BLUE",
+        "REVIEW COMPLETE"
+      ],
+      "forbid_text": [
+        "ERROR",
+        "UNAVAILABLE",
+        "RETRY"
+      ],
+      "goal_id": "review_report"
+    },
+    {
+      "instruction": "Commit the BLUE report for project BETA locally by selecting the commit option and confirming the commit using visible controls.",
+      "expect_text": [
+        "Project BETA",
+        "Theme BLUE",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [
+        "ERROR",
+        "UNAVAILABLE",
+        "RETRY"
+      ],
+      "goal_id": "commit_report"
+    }
+  ]
+}

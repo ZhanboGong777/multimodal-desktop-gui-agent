@@ -1,0 +1,73 @@
+{
+  "schema_version": "week6.semantic_subtasks.v6",
+  "input_modality": "caller_intent_only",
+  "image_attached": false,
+  "status": "ready",
+  "proposal": {
+    "status": "ready",
+    "reason": "Revision plan focuses on completing the review and commit steps. The previous goal failed due to missing 'Review Complete' text, so this revision merges review and commit into one objective to ensure final persistence is captured correctly without replaying failed steps.",
+    "subgoals": [
+      {
+        "instruction": "Review the prepared BLUE report for project BETA and commit it locally using the visible controls. This combines review and commit to ensure final state is captured with 'LOCAL COMPLETE'.",
+        "expect_text": [
+          "Project BETA",
+          "Theme BLUE",
+          "LOCAL COMPLETE"
+        ],
+        "forbid_text": [],
+        "goal_id": "review_and_commit_report"
+      }
+    ]
+  },
+  "workflow": {
+    "workflow_id": "semantic_lab",
+    "instruction": "In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+    "subgoals": [
+      {
+        "case_id": "review_and_commit_report",
+        "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Review the prepared BLUE report for project BETA and commit it locally using the visible controls. This combines review and commit to ensure final state is captured with 'LOCAL COMPLETE'.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+        "target_app": null,
+        "preconditions": [],
+        "success_rules": [],
+        "verification": "automatic",
+        "expect_text": [
+          "Project BETA",
+          "Theme BLUE",
+          "LOCAL COMPLETE"
+        ],
+        "forbid_text": [],
+        "requires_processes": [],
+        "forbids_processes": [],
+        "must_exit_processes": [],
+        "risk": "medium",
+        "message_conversation": null,
+        "gate_on_step_verification": false
+      }
+    ],
+    "final_check": {
+      "case_id": "FINAL",
+      "instruction": "Independently read unchanged caller final predicates",
+      "target_app": null,
+      "preconditions": [],
+      "success_rules": [],
+      "verification": "automatic",
+      "expect_text": [
+        "Project BETA",
+        "Theme BLUE",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [],
+      "requires_processes": [],
+      "forbids_processes": [],
+      "must_exit_processes": [],
+      "risk": "low",
+      "message_conversation": null,
+      "gate_on_step_verification": true
+    }
+  },
+  "planning_calls": 1,
+  "model_requests": 1,
+  "elapsed_ms": 14344.000000011874,
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_023\\run\\automatic\\semantic_plan_round_002",
+  "error": "Revision plan focuses on completing the review and commit steps. The previous goal failed due to missing 'Review Complete' text, so this revision merges review and commit into one objective to ensure final persistence is captured correctly without replaying failed steps."
+}

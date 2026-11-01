@@ -1,0 +1,196 @@
+"""Read-only qualification of ended Sky input-operation v2 records.
+
+This checks recorded timing and identity claims. It neither executes inputs nor
+proves timestamp collection from JSON alone. The original owner, strict task
+auditor, source checks and Root semantic/tool-record review remain independent.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import math
+from datetime import datetime, timedelta
+from pathlib import Path
+
+VERSION = "week6.sky_input_operation.v2"
+TRANSITIONS = {"project_selected", "theme_selected", "review_rejected", "review_accepted", "local_commit"}
+
+
+class ProtocolError(ValueError):
+    pass
+
+
+def require(condition, code):
+    if not condition:
+        raise ProtocolError(code)
+
+
+def canonical(value):
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False)
+
+
+def unique(pairs):
+    value = {}
+    for key, item in pairs:
+        require(key not in value, "duplicate_json_key")
+        value[key] = item
+    return value
+
+
+def load(path):
+    return json.loads(path.read_bytes(), object_pairs_hook=unique,
+        parse_constant=lambda _value: (_ for _ in ()).throw(ProtocolError("nonfinite_json")))
+
+
+def utc(value):
+    require(type(value) is str and bool(value), "missing_utc_timestamp")
+    try:
+        parsed = datetime.fromisoformat(value)
+    except ValueError as exc:
+        raise ProtocolError("invalid_utc_timestamp") from exc
+    require(parsed.tzinfo is not None and parsed.utcoffset() == timedelta(0), "timestamp_not_explicit_utc")
+    return parsed
+
+
+def window(value):
+    require(type(value) is dict and {"app", "id", "title"} <= value.keys(), "missing_window_identity")
+    require(type(value["id"]) is int and value["id"] > 0, "invalid_window_id")
+    require(all(type(value[key]) is str and value[key].strip() for key in ("app", "title")), "empty_window_identity")
+    return {key: value[key] for key in ("app", "id", "title")}
+
+
+def audit_records(pairs, expected_window, events=(), *, owner_interval=None, transition_names=TRANSITIONS):
+    """Pure receipt/transition validation; no files, model or operating-system I/O.
+
+    Event comparisons are unchanged closed intervals. Touching operations are
+    refused because their shared boundary could belong to two receipts. Reused
+    provider-local screenshot identifiers are allowed; only nonemptiness binds.
+    """
+    expected = window(expected_window)
+    require(type(pairs) is list and bool(pairs), "no_recorded_input_operations")
+    rows, identifiers = [], set()
+    previous_finish = None
+    for asked, answered in pairs:
+        require(type(asked) is dict and type(answered) is dict, "invalid_request_receipt_object")
+        identifier = asked.get("id")
+        require(type(identifier) is str and identifier and identifier not in identifiers, "duplicate_or_empty_input_id")
+        identifiers.add(identifier)
+        require(answered.get("id") == identifier, "request_receipt_id_mismatch")
+        require(type(asked.get("action")) is dict and bool(asked["action"])
+                and canonical(asked["action"]) == canonical(answered.get("action")), "raw_native_action_changed")
+        require(asked.get("required_window_title") == expected["title"], "request_target_window_changed")
+        require(answered.get("timing_protocol") == VERSION, "timing_protocol_missing_or_changed")
+        require(answered.get("success") is True and answered.get("transport") == "Sky click", "unsuccessful_or_wrong_input_transport")
+        require(window(answered.get("window")) == expected, "input_window_differs_from_claim")
+        refresh = answered.get("post_refresh")
+        require(type(refresh) is dict, "missing_fresh_post_refresh")
+        require(refresh.get("method") == "sky.get_window_state" and refresh.get("success") is True,
+                "post_refresh_method_or_success_missing")
+        require(refresh.get("error") in (None, ""), "post_refresh_reported_error")
+        require(window(refresh.get("window")) == expected, "post_refresh_changed_window")
+        require(type(refresh.get("screenshot_id")) is str and bool(refresh["screenshot_id"].strip()), "post_refresh_missing_screenshot")
+        require(answered.get("finished_utc") == refresh.get("finished_utc"), "operation_finish_not_original_refresh_finish_string")
+        start = utc(answered.get("started_utc"))
+        dispatch_return = utc(answered.get("dispatch_returned_utc"))
+        refresh_start = utc(refresh.get("started_utc"))
+        refresh_finish = utc(refresh.get("finished_utc"))
+        finish = utc(answered.get("finished_utc"))
+        require(start <= dispatch_return <= refresh_start <= refresh_finish == finish, "operation_timestamp_order_invalid")
+        require(previous_finish is None or previous_finish < start, "operation_intervals_overlap_or_touch")
+        previous_finish = finish
+        if "created_utc" in asked:
+            require(utc(asked["created_utc"]) <= start, "operation_started_before_original_request")
+        if owner_interval is not None:
+            require(utc(owner_interval[0]) <= start <= finish <= utc(owner_interval[1]), "operation_outside_actual_owner_lifetime")
+        rows.append({"id": identifier, "started_utc": answered["started_utc"], "dispatch_returned_utc": answered["dispatch_returned_utc"],
+            "post_refresh_started_utc": refresh["started_utc"], "finished_utc": answered["finished_utc"],
+            "window": expected, "screenshot_id": refresh["screenshot_id"], "action": asked["action"]})
+    assignments, used = [], set()
+    for event in events:
+        require(type(event) is dict and type(event.get("event")) is str, "malformed_independent_event")
+        if event["event"] not in transition_names:
+            continue
+        when = utc(event.get("utc"))
+        matches = [row["id"] for row in rows if utc(row["started_utc"]) <= when <= utc(row["finished_utc"])]
+        require(len(matches) == 1, "business_event_missing_or_ambiguous_interval")
+        require(matches[0] not in used, "one_input_claimed_multiple_business_transitions")
+        used.add(matches[0])
+        assignments.append({"event": event["event"], "event_utc": event["utc"], "input_id": matches[0]})
+    return {"timing_protocol": VERSION, "operation_count": len(rows), "operations": rows,
+        "business_transition_assignments": assignments, "business_transition_count": len(assignments),
+        "scope": "Recorded receipt protocol and interval uniqueness only; not independent proof of task completion or of the timestamp sampling process."}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--container", type=Path, required=True)
+    parser.add_argument("--operator-handoff", type=Path, required=True)
+    parser.add_argument("--expected-window", type=Path, required=True)
+    parser.add_argument("--owner-exit-confirmed", action="store_true", required=True)
+    parser.add_argument("--out", type=Path, required=True)
+    args = parser.parse_args()
+    require(args.owner_exit_confirmed, "explicit_ended_authorization_required")
+    case, output = args.container.resolve(), args.out.resolve()
+    require(not output.exists() and not output.is_relative_to(case), "audit_output_would_replace_original_evidence")
+    files = {}
+
+    def read(path, *, scope=case, lines=False):
+        path = path.resolve()
+        require(path.is_relative_to(scope.resolve()) and path.is_file(), "selected_evidence_path_escaped_or_missing")
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        require(str(path) not in files or files[str(path)] == digest, "evidence_changed_during_read")
+        files[str(path)] = digest
+        return [json.loads(line, object_pairs_hook=unique,
+                parse_constant=lambda _value: (_ for _ in ()).throw(ProtocolError("nonfinite_json")))
+                for line in path.read_bytes().splitlines() if line.strip()] if lines else load(path)
+
+    result = {"schema": "week6.sky_input_operation.protocol_audit.v1", "passed": False,
+        "meaning": "Only ended record qualification; ordinary strict acceptance, actual owner outcome, source and semantic checks remain required."}
+    try:
+        owner = read(case / "owner_receipt.json")
+        require(type(owner.get("child_exit_code")) is int, "actual_owner_exit_missing")
+        handoff = read(args.operator_handoff)
+        require(handoff.get("schema") == "week6.live.operator_handoff.v2" and handoff.get("terminal") is True
+                and handoff.get("gui_stopped") is True and handoff.get("pending") == [], "operator_not_terminal_v2")
+        require(handoff.get("exec_wait") == {"closed": True, "exit_code": owner["child_exit_code"]}
+                and handoff["exec_wait"].get("closed") is True
+                and type(handoff["exec_wait"]["exit_code"]) is int
+                and canonical(handoff.get("owner_receipt")) == canonical(owner), "operator_actual_exit_or_receipt_binding_changed")
+        claim = read(args.expected_window)
+        require(claim.get("schema") == "week6.live.native_window_claim.v1"
+                and type(claim.get("unique_returned_window_count")) is int and claim["unique_returned_window_count"] == 1,
+                "expected_window_not_unique_native_preowner_claim")
+        require(claim.get("source") == "Sky returned unique window and fresh observation before owner start", "expected_window_claim_source_changed")
+        require(utc(claim.get("claimed_at_utc")) <= utc(owner["started_utc"]), "window_claim_not_before_actual_owner")
+        identity = claim.get("fixture_actual_process")
+        require(type(identity) is dict and type(identity.get("pid")) is int and identity["pid"] > 0
+                and type(identity.get("create_time")) in (int, float) and math.isfinite(identity["create_time"]) and identity["create_time"] > 0
+                and type(identity.get("exe")) is str and bool(identity["exe"]), "fixture_creation_identity_missing")
+        expected = window(claim.get("window"))
+        bridge = case / "run/sky_bridge"
+        paths = sorted(bridge.glob("*_request.json"))
+        require(len(paths) == len(list(bridge.glob("*_receipt.json"))), "request_receipt_inventory_differs")
+        pairs = [(read(path), read(path.with_name(path.name.replace("_request.json", "_receipt.json")))) for path in paths]
+        command = owner["command"]
+        fixture = Path(command[command.index("--fixture-directory") + 1]).resolve()
+        events = read(fixture / "independent_events.jsonl", scope=fixture, lines=True)
+        checked = audit_records(pairs, expected, events, owner_interval=(owner["started_utc"], owner["finished_utc"]))
+        require(all(hashlib.sha256(Path(path).read_bytes()).hexdigest() == digest for path, digest in files.items()), "bound_evidence_changed_during_audit")
+        result.update(passed=True, actual_original_owner_exit=owner["child_exit_code"], window_claim=claim, protocol=checked)
+    except (ProtocolError, KeyError, TypeError, ValueError, OSError) as exc:
+        result["error"] = str(exc)
+        result["error_type"] = type(exc).__name__
+    result["evidence_sha256"] = files
+    result["auditor_sha256"] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with output.open("x", encoding="utf8", newline="\n") as stream:
+        json.dump(result, stream, ensure_ascii=False, indent=2)
+        stream.write("\n")
+    print(json.dumps({"audit": str(output), "passed": result["passed"],
+        "sha256": hashlib.sha256(output.read_bytes()).hexdigest()}, ensure_ascii=True))
+    return 0 if result["passed"] else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

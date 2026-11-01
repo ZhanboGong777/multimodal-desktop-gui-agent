@@ -1,0 +1,250 @@
+{
+  "type": "json_schema",
+  "json_schema": {
+    "name": "gui_task_plan",
+    "strict": false,
+    "schema": {
+      "$defs": {
+        "PlanStep": {
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "description": "One step of a plan.",
+              "properties": {
+                "step_id": {
+                  "title": "Step Id",
+                  "type": "string"
+                },
+                "description": {
+                  "title": "Description",
+                  "type": "string"
+                },
+                "action_type": {
+                  "title": "Action Type",
+                  "type": "string",
+                  "enum": [
+                    "move",
+                    "click",
+                    "double_click",
+                    "right_click",
+                    "scroll"
+                  ]
+                },
+                "target_text": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Target Text"
+                },
+                "arguments": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "element_id": {
+                      "enum": [
+                        "obs-0001-e000",
+                        "obs-0001-e001",
+                        "obs-0001-e002",
+                        "obs-0001-e003",
+                        "obs-0001-e004",
+                        "obs-0001-e005",
+                        "obs-0001-e006",
+                        "obs-0001-e007",
+                        "obs-0001-e008",
+                        "obs-0001-e009",
+                        "obs-0001-e010",
+                        "obs-0001-e011",
+                        "obs-0001-e012",
+                        "obs-0001-e013",
+                        "obs-0001-e014",
+                        "obs-0001-e015",
+                        "obs-0001-e016",
+                        "obs-0001-e017",
+                        "obs-0001-e018",
+                        "obs-0001-e019",
+                        "obs-0001-e020",
+                        "obs-0001-e021",
+                        "obs-0001-e022",
+                        "obs-0001-e023",
+                        "obs-0001-e024",
+                        "obs-0001-e025"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "element_id"
+                  ]
+                },
+                "expected_result": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Expected Result"
+                },
+                "status": {
+                  "default": "pending",
+                  "enum": [
+                    "pending",
+                    "planned",
+                    "skipped",
+                    "done",
+                    "failed",
+                    "pending_runtime_resolution"
+                  ],
+                  "title": "Status",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "step_id",
+                "description",
+                "action_type",
+                "arguments"
+              ],
+              "title": "PlanStep",
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "description": "One step of a plan.",
+              "properties": {
+                "step_id": {
+                  "title": "Step Id",
+                  "type": "string"
+                },
+                "description": {
+                  "title": "Description",
+                  "type": "string"
+                },
+                "action_type": {
+                  "title": "Action Type",
+                  "type": "string",
+                  "enum": [
+                    "drag",
+                    "type_text",
+                    "key_press",
+                    "hotkey",
+                    "wait",
+                    "finish"
+                  ]
+                },
+                "target_text": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Target Text"
+                },
+                "arguments": {
+                  "additionalProperties": true,
+                  "title": "Arguments",
+                  "type": "object"
+                },
+                "expected_result": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Expected Result"
+                },
+                "status": {
+                  "default": "pending",
+                  "enum": [
+                    "pending",
+                    "planned",
+                    "skipped",
+                    "done",
+                    "failed",
+                    "pending_runtime_resolution"
+                  ],
+                  "title": "Status",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "step_id",
+                "description",
+                "action_type"
+              ],
+              "title": "PlanStep",
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "description": "A validated plan: the only thing the planner is allowed to emit.",
+      "properties": {
+        "task_id": {
+          "title": "Task Id",
+          "type": "string"
+        },
+        "instruction": {
+          "title": "Instruction",
+          "type": "string"
+        },
+        "summary": {
+          "default": "",
+          "title": "Summary",
+          "type": "string"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/PlanStep"
+          },
+          "title": "Steps",
+          "type": "array",
+          "maxItems": 1
+        },
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "requires_confirmation": {
+          "default": true,
+          "title": "Requires Confirmation",
+          "type": "boolean"
+        },
+        "errors": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Errors",
+          "type": "array"
+        }
+      },
+      "required": [
+        "task_id",
+        "instruction",
+        "steps"
+      ],
+      "title": "TaskPlan",
+      "type": "object"
+    }
+  }
+}

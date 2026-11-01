@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 22031.0,
+  "usage": {
+    "prompt_tokens": 1493,
+    "completion_tokens": 262,
+    "total_tokens": 1755
+  },
+  "error": null,
+  "content_length": 1139,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"The previous goal failed due to missing 'Report Generated' text, but the caller's intent remains unchanged. The current plan will execute the remaining operations to achieve the final state with 'LOCAL COMPLETE' and no forbidden text.\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Select project ALPHA and choose the GREEN theme to generate the report using visible controls.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\"],\n      \"forbid_text\": [\"ERROR\", \"UNAVAILABLE\", \"RETRY\"],\n      \"goal_id\": \"generate_report\"\n    },\n    {\n      \"instruction\": \"Review the generated report using visible controls, ensuring no errors or unavailable states.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\", \"Review Complete\"],\n      \"forbid_text\": [\"ERROR\", \"UNAVAILABLE\", \"RETRY\"],\n      \"goal_id\": \"review_report\"\n    },\n    {\n      \"instruction\": \"Commit the report locally using visible controls to finalize the workflow.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [\"ERROR\", \"UNAVAILABLE\", \"RETRY\"],\n      \"goal_id\": \"commit_report\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

@@ -1,0 +1,293 @@
+{
+  "fixture": "holdout_06",
+  "arm": "native_bilingual_subprocess",
+  "phase": "warm",
+  "repeat": 2,
+  "image_sha256": "e0637359b4723d467212f0e65abbce5a6ea3feeca782c2f6b23afb5ef4538a1b",
+  "started_perf_counter": 674708.613333,
+  "status": "completed",
+  "ended_perf_counter": 674708.9576245,
+  "engine_creation_ms": 0.001600012183189392,
+  "decode_ms": 1.7367999535053968,
+  "ocr_ms": 336.42589999362826,
+  "ui_ms": 6.127200089395046,
+  "full_ms": 344.2915000487119,
+  "metrics": {
+    "tp": 5,
+    "fp": 3,
+    "fn": 3,
+    "precision": 0.625,
+    "recall": 0.625,
+    "labels": [
+      {
+        "text": "Font Inspector",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9921875
+      },
+      {
+        "text": "Style Sample",
+        "language": "en",
+        "matched": true,
+        "iou": 0.928125
+      },
+      {
+        "text": "Manage Fonts",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9202981651376146
+      },
+      {
+        "text": "Regular",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9833333333333333
+      },
+      {
+        "text": "Italic",
+        "language": "en",
+        "matched": true,
+        "iou": 0.8703296703296703
+      },
+      {
+        "text": "字体检查",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "管理字体",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "粗体",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      }
+    ]
+  },
+  "control_metrics": {
+    "tp": 6,
+    "fp": 0,
+    "fn": 0,
+    "iou_threshold": 0.8
+  },
+  "predictions": [
+    {
+      "text": "Font Inspector",
+      "bounding_box": {
+        "left": 43,
+        "top": 38,
+        "right": 170,
+        "bottom": 57
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 106,
+        "y": 47
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Style Sample",
+      "bounding_box": {
+        "left": 43,
+        "top": 116,
+        "right": 142,
+        "bottom": 131
+      },
+      "confidence": 0.94,
+      "center": {
+        "x": 92,
+        "y": 123
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Manage Fonts",
+      "bounding_box": {
+        "left": 43,
+        "top": 202,
+        "right": 150,
+        "bottom": 217
+      },
+      "confidence": 0.92,
+      "center": {
+        "x": 96,
+        "y": 209
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "字体 检查",
+      "bounding_box": {
+        "left": 724,
+        "top": 111,
+        "right": 800,
+        "bottom": 142
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 762,
+        "y": 126
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "管理 字体",
+      "bounding_box": {
+        "left": 728,
+        "top": 198,
+        "right": 799,
+        "bottom": 228
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 763,
+        "y": 213
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Regular",
+      "bounding_box": {
+        "left": 43,
+        "top": 306,
+        "right": 102,
+        "bottom": 321
+      },
+      "confidence": 0.87,
+      "center": {
+        "x": 72,
+        "y": 313
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Italic",
+      "bounding_box": {
+        "left": 257,
+        "top": 306,
+        "right": 290,
+        "bottom": 318
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 273,
+        "y": 312
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "粗 体",
+      "bounding_box": {
+        "left": 728,
+        "top": 302,
+        "right": 766,
+        "bottom": 332
+      },
+      "confidence": 0.84,
+      "center": {
+        "x": 747,
+        "y": 317
+      },
+      "source": "ocr"
+    }
+  ],
+  "ui_candidates": [
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 716,
+        "top": 291,
+        "right": 871,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 793,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 244,
+        "top": 291,
+        "right": 399,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 321,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 30,
+        "top": 291,
+        "right": 185,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 716,
+        "top": 187,
+        "right": 871,
+        "bottom": 244
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 793,
+        "y": 215
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 30,
+        "top": 187,
+        "right": 185,
+        "bottom": 244
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 215
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 716,
+        "top": 101,
+        "right": 871,
+        "bottom": 158
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 793,
+        "y": 129
+      },
+      "source": "contour"
+    }
+  ],
+  "errors": []
+}

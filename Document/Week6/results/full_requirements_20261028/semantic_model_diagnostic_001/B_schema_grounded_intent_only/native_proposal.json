@@ -1,0 +1,36 @@
+{
+  "status": "ready",
+  "reason": "",
+  "subgoals": [
+    {
+      "instruction": "Prepare a GREEN report for project ALPHA.",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN"
+      ],
+      "forbid_text": [],
+      "goal_id": "prepare_green_report"
+    },
+    {
+      "instruction": "Review the prepared GREEN report for project ALPHA.",
+      "expect_text": [
+        "Review",
+        "Project ALPHA",
+        "Theme GREEN"
+      ],
+      "forbid_text": [],
+      "goal_id": "review_report"
+    },
+    {
+      "instruction": "Commit the reviewed GREEN report for project ALPHA locally.",
+      "expect_text": [
+        "Commit",
+        "Project ALPHA",
+        "Theme GREEN",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [],
+      "goal_id": "commit_report"
+    }
+  ]
+}

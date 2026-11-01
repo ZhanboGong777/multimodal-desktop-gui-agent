@@ -1,0 +1,141 @@
+........................................................................ [ 10%]
+........................................................................ [ 21%]
+........................................................................ [ 32%]
+....................................................................FFFF [ 43%]
+........................................................................ [ 54%]
+........................................................................ [ 65%]
+........................................................................ [ 76%]
+........................................................................ [ 87%]
+........................................................................ [ 98%]
+........                                                                 [100%]
+================================== FAILURES ===================================
+_ test_independent_reader_binds_each_role_to_actual_dispatch_and_response[text_dispatch] _
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/role_model_routing_001/targeted_validation_001/pytest_tmp/test_independent_reader_binds_0')
+auditor = <module 'role_model_independent_auditor' from 'C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_audit_semantic_acceptance.py'>
+tamper = 'text_dispatch'
+
+    @pytest.mark.parametrize("tamper", ["text_dispatch", "visual_dispatch", "text_body", "visual_body"])
+    def test_independent_reader_binds_each_role_to_actual_dispatch_and_response(tmp_path, auditor, tamper):
+>       records = run_semantic_pair(tmp_path / "original")
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_week6_role_model_routing.py:146: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_week6_role_model_routing.py:125: in run_semantic_pair
+    _persist_synthetic_pixels(runner, tmp_path)
+tests\test_week6_semantic_text_context.py:47: in _persist_synthetic_pixels
+    pixels.mkdir()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/role_model_routing_001/targeted_validation_001/pytest_tmp/test_independent_reader_binds_0/original/synthetic_pixels')
+mode = 511, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [WinError 3] 系统找不到指定的路径。: 'C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\role_model_routing_001\\targeted_validation_001\\pytest_tmp\\test_independent_reader_binds_0\\original\\synthetic_pixels'
+
+D:\anaconda\Lib\pathlib.py:1311: FileNotFoundError
+_ test_independent_reader_binds_each_role_to_actual_dispatch_and_response[visual_dispatch] _
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/role_model_routing_001/targeted_validation_001/pytest_tmp/test_independent_reader_binds_1')
+auditor = <module 'role_model_independent_auditor' from 'C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_audit_semantic_acceptance.py'>
+tamper = 'visual_dispatch'
+
+    @pytest.mark.parametrize("tamper", ["text_dispatch", "visual_dispatch", "text_body", "visual_body"])
+    def test_independent_reader_binds_each_role_to_actual_dispatch_and_response(tmp_path, auditor, tamper):
+>       records = run_semantic_pair(tmp_path / "original")
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_week6_role_model_routing.py:146: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_week6_role_model_routing.py:125: in run_semantic_pair
+    _persist_synthetic_pixels(runner, tmp_path)
+tests\test_week6_semantic_text_context.py:47: in _persist_synthetic_pixels
+    pixels.mkdir()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/role_model_routing_001/targeted_validation_001/pytest_tmp/test_independent_reader_binds_1/original/synthetic_pixels')
+mode = 511, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [WinError 3] 系统找不到指定的路径。: 'C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\role_model_routing_001\\targeted_validation_001\\pytest_tmp\\test_independent_reader_binds_1\\original\\synthetic_pixels'
+
+D:\anaconda\Lib\pathlib.py:1311: FileNotFoundError
+_ test_independent_reader_binds_each_role_to_actual_dispatch_and_response[text_body] _
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/role_model_routing_001/targeted_validation_001/pytest_tmp/test_independent_reader_binds_2')
+auditor = <module 'role_model_independent_auditor' from 'C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_audit_semantic_acceptance.py'>
+tamper = 'text_body'
+
+    @pytest.mark.parametrize("tamper", ["text_dispatch", "visual_dispatch", "text_body", "visual_body"])
+    def test_independent_reader_binds_each_role_to_actual_dispatch_and_response(tmp_path, auditor, tamper):
+>       records = run_semantic_pair(tmp_path / "original")
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_week6_role_model_routing.py:146: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_week6_role_model_routing.py:125: in run_semantic_pair
+    _persist_synthetic_pixels(runner, tmp_path)
+tests\test_week6_semantic_text_context.py:47: in _persist_synthetic_pixels
+    pixels.mkdir()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/role_model_routing_001/targeted_validation_001/pytest_tmp/test_independent_reader_binds_2/original/synthetic_pixels')
+mode = 511, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [WinError 3] 系统找不到指定的路径。: 'C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\role_model_routing_001\\targeted_validation_001\\pytest_tmp\\test_independent_reader_binds_2\\original\\synthetic_pixels'
+
+D:\anaconda\Lib\pathlib.py:1311: FileNotFoundError
+_ test_independent_reader_binds_each_role_to_actual_dispatch_and_response[visual_body] _
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/role_model_routing_001/targeted_validation_001/pytest_tmp/test_independent_reader_binds_3')
+auditor = <module 'role_model_independent_auditor' from 'C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_audit_semantic_acceptance.py'>
+tamper = 'visual_body'
+
+    @pytest.mark.parametrize("tamper", ["text_dispatch", "visual_dispatch", "text_body", "visual_body"])
+    def test_independent_reader_binds_each_role_to_actual_dispatch_and_response(tmp_path, auditor, tamper):
+>       records = run_semantic_pair(tmp_path / "original")
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_week6_role_model_routing.py:146: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_week6_role_model_routing.py:125: in run_semantic_pair
+    _persist_synthetic_pixels(runner, tmp_path)
+tests\test_week6_semantic_text_context.py:47: in _persist_synthetic_pixels
+    pixels.mkdir()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/role_model_routing_001/targeted_validation_001/pytest_tmp/test_independent_reader_binds_3/original/synthetic_pixels')
+mode = 511, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [WinError 3] 系统找不到指定的路径。: 'C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\role_model_routing_001\\targeted_validation_001\\pytest_tmp\\test_independent_reader_binds_3\\original\\synthetic_pixels'
+
+D:\anaconda\Lib\pathlib.py:1311: FileNotFoundError
+=========================== short test summary info ===========================
+FAILED tests/test_week6_role_model_routing.py::test_independent_reader_binds_each_role_to_actual_dispatch_and_response[text_dispatch]
+FAILED tests/test_week6_role_model_routing.py::test_independent_reader_binds_each_role_to_actual_dispatch_and_response[visual_dispatch]
+FAILED tests/test_week6_role_model_routing.py::test_independent_reader_binds_each_role_to_actual_dispatch_and_response[text_body]
+FAILED tests/test_week6_role_model_routing.py::test_independent_reader_binds_each_role_to_actual_dispatch_and_response[visual_body]
+4 failed, 652 passed in 113.08s (0:01:53)

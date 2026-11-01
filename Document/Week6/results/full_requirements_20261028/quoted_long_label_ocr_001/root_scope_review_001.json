@@ -1,0 +1,68 @@
+{
+  "schema": "week6.long_label_ocr_uncertainty.scope.v1",
+  "records": [
+    {
+      "path": "src/gui_agent/runtime/action_adapter.py",
+      "before_sha256": "9fc5aae5013be1e5b698666aaaaa2c67fe8f4aa0f609ca76e27ca943514b094b",
+      "after_sha256": "7330beffa463b98d4eb67ad504ed4813b031ba010d2e0d11ee85a487cff62c41"
+    },
+    {
+      "path": "tests/test_week6_quoted_target_consistency.py",
+      "before_sha256": "a3edda066cfd0b338819505847ee023dc83ca8704da3fff63e64e1bd251d45e7",
+      "after_sha256": "13be86a870a2ec2ceebbe5cbcd20989b89613e3408c8f606f95ec1d15aa347bd"
+    }
+  ],
+  "all_other283_pins_identical": true,
+  "adapter_ast_outside_spelling_helper_and_renamed_call_identical": true,
+  "all_original28_tests_prefix_byte_identical": true,
+  "saved_native_counterexamples": [
+    {
+      "case": "transient_009",
+      "snapshot": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_009\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\obs-0001.json",
+      "snapshot_sha256": "b9a359d232f05b8d942a59177fed9d67d0ecb22a3f7477f21a4a69b2a505311f",
+      "saved_image_path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_009\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\monitor1_20261101_181852_990.png",
+      "saved_image_sha256": "e78dcf7eb5aa3aec01897818c243c47737613385d3cba6af4694ddcef2e1fd53",
+      "original_native_step": {
+        "step_id": "s1",
+        "description": "Select the 'BETA' project button.",
+        "action_type": "double_click",
+        "target_text": "ALPHA",
+        "arguments": {
+          "element_id": "obs-0001-e001"
+        },
+        "expected_result": "The 'BETA' project is selected.",
+        "status": "pending"
+      },
+      "preceding_guard_error": "quoted target conflict: obs-0001: description names 'BETA', but target_text 'ALPHA' and element 'obs-0001-e001' identify another readable target; refusing input without choosing a replacement",
+      "current_guard_error": "quoted target conflict: obs-0001: description names 'BETA', but target_text 'ALPHA' and element 'obs-0001-e001' identify another readable target; refusing input without choosing a replacement",
+      "same_native_target_current_resolved_point": null,
+      "step_and_ocr_not_rewritten": true
+    },
+    {
+      "case": "normal_038",
+      "snapshot": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_038\\run\\automatic\\goal_002_001_review_and_commit\\001_review_and_commit\\obs-0001.json",
+      "snapshot_sha256": "082e9c71dbe1a3d2766c4087019ec74895bf616a798cd106886154ef7502df77",
+      "saved_image_path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_038\\run\\automatic\\goal_002_001_review_and_commit\\001_review_and_commit\\monitor1_20261101_192817_340.png",
+      "saved_image_sha256": "18de696f4cd776cca9892023994ff1552c70e2ceb4e45d7b962e53ab247f482e",
+      "original_native_step": {
+        "step_id": "s1",
+        "description": "Click the 'Commit locally' button to complete the task.",
+        "action_type": "click",
+        "target_text": "Commiyocally",
+        "arguments": {
+          "element_id": "obs-0001-e008"
+        },
+        "expected_result": "The task is completed as the report is committed locally.",
+        "status": "pending"
+      },
+      "preceding_guard_error": "quoted target conflict: obs-0001: description names 'Commit locally', but target_text 'Commiyocally' and element 'obs-0001-e008' identify another readable target; refusing input without choosing a replacement",
+      "current_guard_error": null,
+      "same_native_target_current_resolved_point": {
+        "x": 1281,
+        "y": 1053
+      },
+      "step_and_ocr_not_rewritten": true
+    }
+  ],
+  "meaning": "Keep one-edit uncertainty for absent4..9-letter ASCII labels; permit at most2edits only when both normalized label lengths are at least10. Whitespace-only differences also remain uncertain. Exact competing readable literal elsewhere still refuses. Original selected native target/ID/coordinates, task predicates, budgets and dispatch unchanged; no fuzzy search or target replacement. Similar real names remain a limitation. Both new native cases required; saved replay is not acceptance."
+}

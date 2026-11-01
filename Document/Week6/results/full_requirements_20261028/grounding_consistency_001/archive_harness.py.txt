@@ -1,0 +1,55 @@
+from pathlib import Path
+from datetime import datetime, timezone
+import hashlib
+import json
+
+root = Path(r"C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+base = root / "Document/Week6/results/full_requirements_20261028"
+out = base / "grounding_consistency_001"
+out.mkdir(exist_ok=False)
+(out / "archive_harness.py.txt").write_bytes(Path(__file__).read_bytes())
+freeze_path = base / "semantic_predicted_postconditions_001/final_source_freeze_001.json"
+freeze = json.loads(freeze_path.read_text("utf-8"))
+manifest = []
+
+def sha(raw):
+    return hashlib.sha256(raw).hexdigest()
+
+def copy_file(source, destination):
+    raw = source.read_bytes()
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with destination.open("xb") as handle:
+        handle.write(raw)
+    assert destination.read_bytes() == raw
+    manifest.append({"source": str(source), "destination": str(destination.relative_to(out)), "bytes": len(raw), "sha256": sha(raw)})
+
+for key, expected in freeze["code_pins"].items():
+    assert sha((root / key).read_bytes()) == expected
+    copy_file(root / key, out / "source_before" / key)
+copy_file(root / "README.md", out / "source_before/README.md")
+assert sha((root / "README.md").read_bytes()) == freeze["readme_sha256"]
+copy_file(freeze_path, out / "old_v6_freeze/final_source_freeze_001.json")
+for name in ["README.update_qa_001.json", "contract_change_manifest_001.json", "source_before_manifest.json"]:
+    copy_file(freeze_path.parent / name, out / "old_v6_freeze" / name)
+for sub in ["cpu_validation_001", "full_collection_001"]:
+    for source in sorted((freeze_path.parent / sub).iterdir()):
+        if source.is_file():
+            copy_file(source, out / "old_v6_freeze" / sub / source.name)
+for run_name in ["normal_009", "normal_010"]:
+    source_base = base / "live" / run_name
+    assert (source_base / "owner_receipt.json").is_file()
+    for source in sorted(source_base.rglob("*")):
+        if source.is_file():
+            copy_file(source, out / "ended_live_before" / run_name / source.relative_to(source_base))
+private = Path(r"C:/Users/联想/Documents/ChatGPT/Intern/tmp/week6_normal010_grounding_readonly_20261028_001")
+for source in sorted(private.rglob("*")):
+    if source.is_file():
+        copy_file(source, out / "readonly_diagnostic_before" / source.relative_to(private))
+pins_after = {key: sha((root / key).read_bytes()) for key in freeze["code_pins"]}
+assert pins_after == freeze["code_pins"]
+payload = {"schema": "week6.grounding_consistency.before_archive.v1", "created_at_utc": datetime.now(timezone.utc).isoformat(), "old_freeze_sha256": sha(freeze_path.read_bytes()), "code_pin_count": len(freeze["code_pins"]), "code_pins_before_after_equal": True, "readme_sha256": sha((root / "README.md").read_bytes()), "ended_runs_copied": ["normal_009", "normal_010"], "readonly_diagnostic_sha256": sha((private / "diagnostic.json").read_bytes()), "copies": manifest, "file_count": len(manifest), "bytes": sum(item["bytes"] for item in manifest), "original_files_modified": False, "model_gui_calls": 0}
+path = out / "source_before_manifest.json"
+with path.open("x", encoding="utf-8", newline="\n") as handle:
+    json.dump(payload, handle, ensure_ascii=False, indent=2)
+    handle.write("\n")
+print(json.dumps({"path": str(path), "sha256": sha(path.read_bytes()), "files": len(manifest), "bytes": payload["bytes"]}, ensure_ascii=False))

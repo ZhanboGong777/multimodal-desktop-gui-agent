@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 19844.0,
+  "usage": {
+    "prompt_tokens": 1578,
+    "completion_tokens": 202,
+    "total_tokens": 1780
+  },
+  "error": null,
+  "content_length": 955,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"The previous goal failed due to missing 'Report Generated' text, but the caller's final predicates remain unchanged. The next objective must complete the workflow by reviewing and committing the report locally, using only visible controls and preserving all original operations.\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Review the BLUE report for project BETA using visible controls and ensure the review is completed locally.\",\n      \"expect_text\": [\"Review Complete\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [\"Review unavailable\", \"Connection error\", \"External sync required\"],\n      \"goal_id\": \"review_report\"\n    },\n    {\n      \"instruction\": \"Commit the BLUE report for project BETA locally using visible controls.\",\n      \"expect_text\": [\"Commit Successful\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [\"Commit failed\", \"Connection error\", \"External sync required\"],\n      \"goal_id\": \"commit_report\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

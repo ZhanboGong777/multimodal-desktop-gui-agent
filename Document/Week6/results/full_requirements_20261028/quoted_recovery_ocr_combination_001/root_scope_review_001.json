@@ -1,0 +1,53 @@
+{
+  "utc": "2026-11-01T08:17:49.260235+00:00",
+  "records": [
+    {
+      "path": "src/gui_agent/runtime/runner.py",
+      "before_sha256": "d79477fd6936eb63b08a49e10fb63b612fc40cb14ddaf38811eb9158bd0a459a",
+      "after_sha256": "2b3b803f1e0445c75848751a7b5d5cc5774a76b27db31a74c8f8575df8fbba9a",
+      "restored_from": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\quoted_target_repair_hint_001\\ineffective_hint_source\\src\\gui_agent\\runtime\\runner.py",
+        "sha256": "2b3b803f1e0445c75848751a7b5d5cc5774a76b27db31a74c8f8575df8fbba9a"
+      }
+    },
+    {
+      "path": "src/gui_agent/runtime/schemas.py",
+      "before_sha256": "0ac880717a9f9845f7697d327fdce420df9b3c32ad7f6ab72467f7a0e6a00624",
+      "after_sha256": "ea70de702b051661e22b8fc9849233c976d5c4941e3f41c748b8f71ce2e44414",
+      "restored_from": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\quoted_target_repair_hint_001\\ineffective_hint_source\\src\\gui_agent\\runtime\\schemas.py",
+        "sha256": "ea70de702b051661e22b8fc9849233c976d5c4941e3f41c748b8f71ce2e44414"
+      }
+    },
+    {
+      "path": "scripts/week6_audit_semantic_acceptance.py",
+      "before_sha256": "ead0a831bb7f8d0a29866ce6ab7708762dd1f71ddf8b0fcb1b3e817363cac02e",
+      "after_sha256": "8c9ffe3486e09ee7997fd7f0a8de0ed280c03a38d5711969f4a42dd2e5afe019",
+      "restored_from": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\quoted_target_repair_hint_001\\ineffective_hint_source\\scripts\\week6_audit_semantic_acceptance.py",
+        "sha256": "8c9ffe3486e09ee7997fd7f0a8de0ed280c03a38d5711969f4a42dd2e5afe019"
+      }
+    },
+    {
+      "path": "tests/test_week6_recovery_feedback_roundtrip.py",
+      "before_sha256": "d8a3301322621a61764c1e9887b5d864fad45fbd831d942440e6f807ad96e85d",
+      "after_sha256": "f816678c2b4cbca691e75aa2b71a9c01375964b2af552ce0dd4795e2c430e6e8",
+      "restored_from": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\quoted_target_repair_hint_001\\ineffective_hint_source\\tests\\test_week6_recovery_feedback_roundtrip.py",
+        "sha256": "f816678c2b4cbca691e75aa2b71a9c01375964b2af552ce0dd4795e2c430e6e8"
+      }
+    }
+  ],
+  "preserved_original_count": 285,
+  "adapter_unchanged": true,
+  "other281_pins_identical": true,
+  "prior_probe_did_not_pass": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\quoted_target_repair_hint_001\\ineffective_hint_retention_001.json",
+    "sha256": "82a9ed59b2b764b4b6c2739c5f32350041657a82184c8250f8443dce5ca79075"
+  },
+  "current_native_negative": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\transient011_independent_process_001\\process_summary.json",
+    "sha256": "579587c1d5e857eb91db655bfe2148b98465ee5a2ba3374a4f2fe03db20ca4e7"
+  },
+  "meaning": "Use previously retained finite consistency feedback for the new strict quoted-target conflict together with the separately tested OCR-uncertainty adapter. The earlier extra hint alone did not pass its native probe because the old strict adapter refused OCR BELA; that failed experiment remains failed. Transient011 now demonstrates repeated wrong ALPHA targets without any conflict-specific feedback. No local target search/replacement, action dispatch, task predicates, budgets, base prompts or completion credit changed. Only the fixed recovery string and its exact schema/auditor whitelist gain the already-retained text. All native live cases must be new; no acceptance transfers."
+}

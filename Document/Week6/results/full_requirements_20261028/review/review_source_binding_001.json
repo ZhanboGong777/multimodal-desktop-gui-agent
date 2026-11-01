@@ -1,0 +1,25 @@
+{
+  "schema": "week6.full_requirements.independent_source_review.v1",
+  "reviewer": "/root/week6_replanning_review",
+  "observed_at_utc": "2026-10-28T00:13:55.6989743Z",
+  "scope": "Read-only C API source review and preregistered acceptance clarification; not actual OCR, GUI, model or performance evidence.",
+  "source_sha256": {
+    "src/gui_agent/perception/tesseract_api.py": "73a2ec0a6f03ba32b28e137afcc24399c87d73ebb02b43c1aa52711be26feee4",
+    "src/gui_agent/perception/ocr.py": "0f0c42bc4b9537475adcf7c185672c3ee63db11cf662b870599efaca755ff28a"
+  },
+  "artifact_sha256": {
+    "acceptance_contract.md": "3bf64cc2154f22ea107a566ec75673a333328a69e3d44cb25810746b2062f7a2",
+    "acceptance_contract_amendment_002.md": "c38f6bc942000b23bedf995bcb838e4a20c20247ca1dfcd79ca5a39c6792df0b",
+    "persistent_tesseract_source_review_001.md": "e36b9845dab956f3ca5f2ed249d664dce6e7018dc97a7e554d8f3af0742340dd"
+  },
+  "blocking_source_findings": [],
+  "remaining_gates": [
+    "Owner final source freeze and dependency/DLL/traineddata/metrics hashes",
+    "Two new holdout paired measurements under the amended contract",
+    "Complete ordered candidate output equality against identical screen CLI algorithm",
+    "Actual semantic workflow acceptance and independent final release closure"
+  ],
+  "original_contract_preserved": true,
+  "formal_holdout_observed_or_run_by_reviewer": false,
+  "production_modified_by_reviewer": false
+}

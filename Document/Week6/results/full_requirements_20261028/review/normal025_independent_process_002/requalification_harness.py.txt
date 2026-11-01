@@ -1,0 +1,30 @@
+"""Narrow compatibility reread; never modify the claim, input, timestamp or old result."""
+import copy,hashlib,importlib.util,json
+from pathlib import Path
+R=Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree');B=R/'Document/Week6/results/full_requirements_20261028';C=B/'live/normal_025';D=Path(__file__).resolve().parent
+load=lambda p:json.loads(p.read_bytes());sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();ref=lambda p:{'path':str(p),'sha256':sha(p)}
+oldfile=B/'review/normal025_independent_process_001/process_summary.json';old=load(oldfile)
+assert [x['actual_child_exit_code']for x in old['actual_audit_receipts']]==[0,1]
+rejected=B/'review/normal025_receipt_protocol_audit_001.json';assert load(rejected)['error']=='expected_window_claim_source_changed'and load(rejected)['passed'] is False
+scope=B/'receipt_envelope_001/claim_source_compatibility_001/scope_review_001.json';sv=load(scope)
+assert sv['scope_review_passed'] and not sv['raw_claim_or_receipt_modified'] and not sv['timing_tolerance_added'] and not sv['runtime_code_modified']
+validation=B/'receipt_envelope_001/claim_source_compatibility_001/validation_001/receipt.json';vv=load(validation);assert vv['checks_passed'] and vv['actual_child_wait_exit']==0
+checker=Path(sv['compatibility_checker']['path']);assert sha(checker)==sv['compatibility_checker']['sha256']=='24135294fb7fbe399b3c852c0a6350131123cd7b0ea0b818237262917f60b5e4'
+assert sha(Path(sv['original_checker']['path']))==sv['original_checker']['sha256']=='23ee41ca6e6255c3d09bf00665ee4051f1a01a09e359996d6a823304a0d70253'
+spec=importlib.util.spec_from_file_location('normal025_saved_reader',D/'run_ended_audit_001.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+f=load(m.FREEZE);assert sha(m.FREEZE)==m.FREEZE_SHA and sha(m.PREREG)==m.PREREG_SHA
+assert all(sha(R/n)==v for n,v in f['code_pins'].items())and sha(R/'README.md')==f['readme_sha256']
+fixture=B/'live/fixture_normal_021';assert m.inventory(C)==old['original_case_files']and m.inventory(fixture)==old['original_fixture_files']
+assert sha(C/'window_claim_001.json')==sv['original_case_claim_unchanged']['sha256']
+assert sha(Path(sv['root_actual_preowner_ack']['path']))==sv['root_actual_preowner_ack']['sha256']==old['root_claim_ack_sha256_external']
+out=B/'review/normal025_independent_process_002';out.mkdir(exist_ok=False);m.OUT=out
+protocolout=B/'review/normal025_receipt_protocol_audit_002.json';assert not protocolout.exists()
+receipt=m.audit_process('receipt_protocol',[m.PYTHON,str(checker),'--container',str(C),'--operator-handoff',str(C/'operator_handoff_003.json'),'--expected-window',str(C/'window_claim_001.json'),'--owner-exit-confirmed','--out',str(protocolout)])
+passed=load(protocolout)['passed'];assert receipt['actual_child_exit_code']==(0 if passed else 1)
+assert m.inventory(C)==old['original_case_files']and m.inventory(fixture)==old['original_fixture_files']
+assert all(sha(R/n)==v for n,v in f['code_pins'].items())
+v=copy.deepcopy(old);v.update(actual_audit_receipts=[old['actual_audit_receipts'][0],receipt],receipt_protocol_checker=ref(checker),receipt_protocol_audit=ref(protocolout),machine_checks_passed=old['actual_experiment_owner_exit']==0 and load(Path(old['strict_audit']['path']))['passed'] and passed,previous_failed_summary=ref(oldfile),original_rejected_protocol=ref(rejected),claim_source_compatibility_amendment=ref(scope),claim_source_compatibility_validation=ref(validation),original_strict_receipt_reused_without_rerun=True,meaning='Source278 and original owner/raw evidence remain bound. Original strict actual0 reused; original protocol actual1 retained; new full protocol actual result separately records the only two-source-label compatibility change. No timestamp/identity/action/exit criterion change or raw repair.')
+m.write(out/'process_summary.json',v)
+with (out/'requalification_harness.py.txt').open('xb')as s:s.write(Path(__file__).read_bytes())
+print(json.dumps({'summary':ref(out/'process_summary.json'),'new_protocol_exit':receipt['actual_child_exit_code'],'new_protocol_passed':passed,'raw_unchanged':True},ensure_ascii=True))
+raise SystemExit(0 if v['machine_checks_passed']else 1)

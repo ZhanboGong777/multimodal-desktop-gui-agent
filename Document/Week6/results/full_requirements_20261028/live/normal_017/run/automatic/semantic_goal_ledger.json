@@ -1,0 +1,55 @@
+[
+  {
+    "round": 1,
+    "goal_id": "prepare_report",
+    "instruction": "Prepare a GREEN report for project ALPHA in Week6 Local Lab.",
+    "expect_text": [
+      "Project ALPHA",
+      "Theme GREEN"
+    ],
+    "forbid_text": [],
+    "status": "succeeded",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_017\\run\\automatic\\goal_001_001_prepare_report",
+    "verification": {
+      "outcome": "passed",
+      "method": "automatic",
+      "detail": "all success rules matched against the current screen",
+      "evidence": {
+        "observation_id": "obs-0009",
+        "expect_text": [
+          "Project ALPHA",
+          "Theme GREEN"
+        ],
+        "forbid_text": [],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    },
+    "task_verification": {
+      "outcome": "passed",
+      "method": "automatic",
+      "detail": "all success rules matched against the current screen",
+      "evidence": {
+        "observation_id": "obs-0008",
+        "expect_text": [
+          "Project ALPHA",
+          "Theme GREEN"
+        ],
+        "forbid_text": [],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    }
+  },
+  {
+    "round": 1,
+    "goal_id": "review_commit",
+    "instruction": "Review the prepared report and commit it locally.",
+    "expect_text": [
+      "LOCAL COMPLETE"
+    ],
+    "forbid_text": [],
+    "status": "failed",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_017\\run\\automatic\\goal_001_002_review_commit",
+    "verification": null,
+    "task_verification": null
+  }
+]

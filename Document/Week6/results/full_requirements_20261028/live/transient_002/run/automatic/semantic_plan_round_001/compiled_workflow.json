@@ -1,0 +1,178 @@
+{
+  "schema_version": "week6.semantic_subtasks.v6",
+  "native_proposal": {
+    "status": "ready",
+    "reason": "Caller request is fully executable with visible controls; no missing parameters or unsafe operations. Two distinct semantic objectives are planned to cover preparation, review, and local commit with verifiable text outcomes.",
+    "subgoals": [
+      {
+        "instruction": "Prepare the BLUE report for project BETA by selecting the correct project and theme, then save the draft locally.",
+        "expect_text": [
+          "Project BETA",
+          "Theme BLUE",
+          "Draft Saved"
+        ],
+        "forbid_text": [
+          "Review Pending",
+          "Online Sync",
+          "Commit Failed",
+          "Network Error",
+          "Review Unavailable",
+          "Budget Exceeded",
+          "Changes Not Saved",
+          "Save Failed"
+        ],
+        "goal_id": "prepare_report"
+      },
+      {
+        "instruction": "Review the prepared BLUE report for project BETA and commit it locally using visible controls.",
+        "expect_text": [
+          "Project BETA",
+          "Theme BLUE",
+          "LOCAL COMPLETE",
+          "Commit Successful"
+        ],
+        "forbid_text": [
+          "Review Pending",
+          "Online Sync",
+          "Commit Failed",
+          "Network Error",
+          "Review Unavailable",
+          "Budget Exceeded",
+          "Changes Not Saved",
+          "Save Failed"
+        ],
+        "goal_id": "review_and_commit"
+      }
+    ]
+  },
+  "workflow": {
+    "workflow_id": "semantic_lab",
+    "instruction": "In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+    "subgoals": [
+      {
+        "case_id": "prepare_report",
+        "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Prepare the BLUE report for project BETA by selecting the correct project and theme, then save the draft locally.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+        "target_app": null,
+        "preconditions": [],
+        "success_rules": [],
+        "verification": "automatic",
+        "expect_text": [
+          "Project BETA",
+          "Theme BLUE",
+          "Draft Saved"
+        ],
+        "forbid_text": [
+          "Review Pending",
+          "Online Sync",
+          "Commit Failed",
+          "Network Error",
+          "Review Unavailable",
+          "Budget Exceeded",
+          "Changes Not Saved",
+          "Save Failed"
+        ],
+        "requires_processes": [],
+        "forbids_processes": [],
+        "must_exit_processes": [],
+        "risk": "medium",
+        "message_conversation": null,
+        "gate_on_step_verification": false
+      },
+      {
+        "case_id": "review_and_commit",
+        "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Review the prepared BLUE report for project BETA and commit it locally using visible controls.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+        "target_app": null,
+        "preconditions": [],
+        "success_rules": [],
+        "verification": "automatic",
+        "expect_text": [
+          "Project BETA",
+          "Theme BLUE",
+          "LOCAL COMPLETE",
+          "Commit Successful"
+        ],
+        "forbid_text": [
+          "Review Pending",
+          "Online Sync",
+          "Commit Failed",
+          "Network Error",
+          "Review Unavailable",
+          "Budget Exceeded",
+          "Changes Not Saved",
+          "Save Failed"
+        ],
+        "requires_processes": [],
+        "forbids_processes": [],
+        "must_exit_processes": [],
+        "risk": "medium",
+        "message_conversation": null,
+        "gate_on_step_verification": false
+      }
+    ],
+    "final_check": {
+      "case_id": "FINAL",
+      "instruction": "Independently read unchanged caller final predicates",
+      "target_app": null,
+      "preconditions": [],
+      "success_rules": [],
+      "verification": "automatic",
+      "expect_text": [
+        "Project BETA",
+        "Theme BLUE",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [],
+      "requires_processes": [],
+      "forbids_processes": [],
+      "must_exit_processes": [],
+      "risk": "low",
+      "message_conversation": null,
+      "gate_on_step_verification": true
+    }
+  },
+  "mapping": [
+    {
+      "goal_id": "prepare_report",
+      "native_instruction": "Prepare the BLUE report for project BETA by selecting the correct project and theme, then save the draft locally.",
+      "validated_instruction": "Prepare the BLUE report for project BETA by selecting the correct project and theme, then save the draft locally.",
+      "compiled_instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Prepare the BLUE report for project BETA by selecting the correct project and theme, then save the draft locally.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+      "expect_text": [
+        "Project BETA",
+        "Theme BLUE",
+        "Draft Saved"
+      ],
+      "forbid_text": [
+        "Review Pending",
+        "Online Sync",
+        "Commit Failed",
+        "Network Error",
+        "Review Unavailable",
+        "Budget Exceeded",
+        "Changes Not Saved",
+        "Save Failed"
+      ]
+    },
+    {
+      "goal_id": "review_and_commit",
+      "native_instruction": "Review the prepared BLUE report for project BETA and commit it locally using visible controls.",
+      "validated_instruction": "Review the prepared BLUE report for project BETA and commit it locally using visible controls.",
+      "compiled_instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Review the prepared BLUE report for project BETA and commit it locally using visible controls.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+      "expect_text": [
+        "Project BETA",
+        "Theme BLUE",
+        "LOCAL COMPLETE",
+        "Commit Successful"
+      ],
+      "forbid_text": [
+        "Review Pending",
+        "Online Sync",
+        "Commit Failed",
+        "Network Error",
+        "Review Unavailable",
+        "Budget Exceeded",
+        "Changes Not Saved",
+        "Save Failed"
+      ]
+    }
+  ]
+}

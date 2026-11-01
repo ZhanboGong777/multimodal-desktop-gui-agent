@@ -121,6 +121,10 @@ _TOKEN = re.compile(r"[0-9a-z_]+")
 #: the run search exists for targets that span more than one element.
 _MIN_RUN_TOKENS = 2
 
+# Kept distinct from free-form OCR text so recovery can explain this refusal
+# without copying untrusted labels or the rejected action into its prompt.
+TARGET_CONSISTENCY_ERROR_PREFIX = "target consistency conflict:"
+
 #: Longest single ``wait`` step accepted by default. The run's own limit comes from
 #: ``execution.max_wait_seconds``; this is what a directly constructed adapter uses.
 DEFAULT_MAX_WAIT_SECONDS = 5.0
@@ -427,6 +431,180 @@ def _as_ref(element: Any, observation: ObservationSnapshot) -> ElementRef:
     raise ActionResolutionError("matched element is not part of this observation")
 
 
+def _possible_bounded_ocr_variant(literal: str, observed: str) -> bool:
+    """An absent label with bounded OCR spelling differences is uncertain.
+
+    This does not match/select a control or modify either label. Numeric names
+    and short labels receive no such uncertainty allowance. At least ten letters
+    on both sides permit two edits; shorter labels permit at most one.
+    """
+    expected = "".join(literal.casefold().split())
+    if not expected.isascii() or not expected.isalpha() or not 4 <= len(expected) <= 160:
+        return False
+    candidates = ["".join(observed.casefold().split()), *re.findall(r"[a-zA-Z]{4,160}", observed)]
+    for candidate in candidates:
+        candidate = candidate.casefold()
+        if not candidate.isascii() or not candidate.isalpha():
+            continue
+        budget = 2 if min(len(candidate), len(expected)) >= 10 else 1
+        if abs(len(candidate) - len(expected)) > budget:
+            continue
+        previous = list(range(len(candidate) + 1))
+        for index, wanted in enumerate(expected, 1):
+            current = [index]
+            for position, seen in enumerate(candidate, 1):
+                current.append(min(current[-1] + 1, previous[position] + 1,
+                                   previous[position - 1] + (wanted != seen)))
+            previous = current
+        if previous[-1] <= budget:
+            return True
+    return False
+
+
+def _validate_quoted_target_consistency(
+    step: PlanStep,
+    observation: ObservationSnapshot,
+    *,
+    min_confidence: float,
+) -> None:
+    """Refuse a literal named immediately after an action that names another target.
+
+    This narrow syntax check is not natural-language intent interpretation. It
+    never chooses a replacement or treats an unmatched name as screen evidence.
+    Other descriptions and targets without readable witnesses keep their
+    existing grounding path.
+    """
+    named = re.match(
+        r'''^\s*(?:click|double[ _-]?click|right[ _-]?click|select|tap|press|hover)'''
+        r'''(?:\s+(?:on|the|a|an)){0,3}\s+'''
+        r'''(?:'([^'\r\n]{1,160})'|"([^"\r\n]{1,160})"|“([^”\r\n]{1,160})”|‘([^’\r\n]{1,160})’)''',
+        step.description,
+        re.IGNORECASE,
+    )
+    if named is None:
+        return
+    literal = next(value for value in named.groups() if value is not None).strip()
+    if not literal:
+        return
+    arguments = step.arguments or {}
+    query = (step.target_text or arguments.get("target") or "").strip()
+    if " ".join(query.casefold().split()) == " ".join(literal.casefold().split()):
+        return  # The existing text/ID check still validates this claim.
+    readable = [item for item in observation.elements
+                if item.text.strip() and item.confidence >= min_confidence]
+    identifier = arguments.get("element_id") or arguments.get("target_element")
+    selected = observation.element(identifier) if isinstance(identifier, str) else None
+    witnesses: set[str] = set()
+    if selected is not None:
+        if selected.text.strip() and selected.confidence >= min_confidence:
+            witnesses.add(selected.element_id)
+        elif selected.source == "contour" and not selected.text.strip():
+            box = selected.bounding_box
+            witnesses.update(item.element_id for item in readable if item.source == "ocr"
+                             and max(box.left, item.bounding_box.left) < min(box.right, item.bounding_box.right)
+                             and max(box.top, item.bounding_box.top) < min(box.bottom, item.bounding_box.bottom))
+    elif query:
+        groups = {frozenset({match.element.element_id}) for match in
+                  find_text(readable, query, min_confidence=min_confidence).candidates}
+        groups.update(frozenset(item.element_id for item in run)
+                      for run in _match_adjacent_runs(readable, query, min_confidence))
+        if len(groups) == 1:
+            witnesses.update(next(iter(groups)))
+    if not witnesses:
+        return
+    matching = {match.element.element_id for match in
+                find_text(readable, literal, min_confidence=min_confidence).candidates}
+    matching.update(item.element_id for run in _match_adjacent_runs(readable, literal, min_confidence)
+                    for item in run)
+    if not matching and any(
+        item.element_id in witnesses and _possible_bounded_ocr_variant(literal, item.text)
+        for item in readable
+    ):
+        # No exact literal elsewhere supports a competing target. Defer this
+        # uncertain OCR spelling to the original ID/text and fresh-frame guards;
+        # never use it to select a new target or pass a success predicate.
+        return
+    if not witnesses.intersection(matching):
+        raise ActionResolutionError(
+            f"quoted target conflict: {observation.observation_id}: description names {literal!r}, "
+            f"but target_text {query!r} and element {identifier!r} identify another readable target; "
+            "refusing input without choosing a replacement"
+        )
+
+
+def validate_target_consistency(
+    step: PlanStep,
+    observation: ObservationSnapshot,
+    *,
+    min_confidence: float = 0.35,
+) -> None:
+    """Refuse observable text/ID conflicts without choosing a replacement target.
+
+    An ID disambiguates equal labels; it does not override contradictory text.
+    For an anonymous contour, overlapping readable OCR can establish a conflict
+    or an ambiguous container. A box with no such evidence retains the existing
+    visual-grounding path. This checks consistency, not the control's role.
+    """
+    if step.action_type not in _POINT_ACTIONS:
+        return
+    _validate_quoted_target_consistency(step, observation, min_confidence=min_confidence)
+    arguments = step.arguments or {}
+    element_id = arguments.get("element_id") or arguments.get("target_element")
+    query = (step.target_text or arguments.get("target") or "").strip()
+    if not isinstance(element_id, str) or not element_id or not query:
+        return
+    selected = observation.element(element_id)
+    if selected is None:
+        # The runner checks the original frame before refreshing a stale ID.
+        # Direct adapter callers retain the existing stale-ID/text fallback.
+        return
+
+    readable = [
+        item for item in observation.elements
+        if item.text.strip() and item.confidence >= min_confidence
+    ]
+    groups = [
+        frozenset({match.element.element_id})
+        for match in find_text(readable, query, min_confidence=min_confidence).candidates
+    ]
+    groups.extend(
+        frozenset(item.element_id for item in run)
+        for run in _match_adjacent_runs(readable, query, min_confidence)
+    )
+    if selected.text.strip() and selected.confidence >= min_confidence:
+        if not any(element_id in group for group in groups):
+            raise ActionResolutionError(
+                f"{TARGET_CONSISTENCY_ERROR_PREFIX} {observation.observation_id}: "
+                f"element {element_id!r} has text {selected.text!r}, inconsistent with "
+                f"target_text {query!r}; refusing to replace the supplied element ID"
+            )
+        return
+    if selected.text.strip() or selected.source != "contour":
+        return
+
+    box = selected.bounding_box
+    overlapping = [
+        item for item in readable
+        if item.source == "ocr"
+        and max(box.left, item.bounding_box.left) < min(box.right, item.bounding_box.right)
+        and max(box.top, item.bounding_box.top) < min(box.bottom, item.bounding_box.bottom)
+    ]
+    if not overlapping:
+        return
+    observed_ids = frozenset(item.element_id for item in overlapping)
+    # One complete matching label (possibly a word-level run) must explain the
+    # box's readable labels. Merely containing one requested label among other
+    # controls does not identify where the contour centre would click.
+    if not any(group == observed_ids for group in groups):
+        labels = ", ".join(f"{item.element_id}:{item.text!r}" for item in overlapping[:5])
+        raise ActionResolutionError(
+            f"{TARGET_CONSISTENCY_ERROR_PREFIX} {observation.observation_id}: "
+            f"anonymous element {element_id!r} overlaps OCR labels ({labels}) "
+            f"inconsistent or ambiguous for target_text {query!r}; "
+            "refusing to replace the supplied element ID"
+        )
+
+
 class ActionAdapter:
     """Resolves plan steps against the current observation."""
 
@@ -473,11 +651,10 @@ class ActionAdapter:
     ) -> tuple[Point, ElementRef | None, str]:
         """Find the point this step refers to.
 
-        Preference order: an element id from *this* frame, then a unique text match
-        in this frame. An id from another frame is an error even when the text
-        would match - silently rebinding it is how a plan ends up clicking
-        yesterday's coordinates.
+        A consistent current-frame ID takes priority. A stale ID can use the
+        existing unique-text fallback, but a present conflicting ID is refused.
         """
+        _validate_quoted_target_consistency(step, observation, min_confidence=self.min_confidence)
         arguments: dict[str, Any] = dict(step.arguments or {})
         element_id = arguments.get("element_id") or arguments.get("target_element")
         query = (step.target_text or arguments.get("target") or "").strip()
@@ -486,6 +663,7 @@ class ActionAdapter:
         if isinstance(element_id, str) and element_id:
             found = observation.element(element_id)
             if found is not None:
+                validate_target_consistency(step, observation, min_confidence=self.min_confidence)
                 return found.center, found, f"element {element_id}"
             # The id belongs to an earlier frame. A plan is written from one
             # observation and executed after another, so this is the normal case,

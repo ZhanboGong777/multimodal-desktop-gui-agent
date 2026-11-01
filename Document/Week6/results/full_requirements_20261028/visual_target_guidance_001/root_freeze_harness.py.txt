@@ -1,0 +1,429 @@
+"""Prepared helper for Root's later, explicitly reviewed visual-guidance freeze.
+
+Nothing executes on import. This file must not be run until both writers have
+stopped and the real uniform validation and both SHA-bound proofs have ended.
+No model generation, installation, process control, capture or input is used.
+"""
+from __future__ import annotations
+
+import argparse
+import ast
+import importlib.util
+import json
+import math
+import re
+from copy import deepcopy
+from datetime import UTC, datetime
+from hashlib import sha256
+from pathlib import Path
+from urllib.request import Request, urlopen
+
+REPO = Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+BASE = REPO/'Document/Week6/results/full_requirements_20261028'
+CHANGE = BASE/'visual_target_guidance_001'
+PRIOR_SHA = '47db55adf8dc555160fb734b92d5fe4ba53d21803fde8a250dc53ae9a13a7e38'
+PRIOR_PREREG_SHA = 'ca3d51d81339093e39ac575da59c913feebf34c0cc3f056374993bb101adc199'
+README_SHA = '99cbae4bc749473ed588cc390cf89336f933e5a2184d88315f8287a3a9bcc0bf'
+DEV_SHA = '31b4bba08667510fa824a01634563e7cd5c30eac77ca8ddfba3aa6cb21643918'
+BEFORE_SHA = 'e197fcb723896e7edf7bf1f756f481803adcc7007ee4e7a7d2a14858ee16d710'
+NEGATIVE016_SHA = '82e0e79451a66a464b1786254f8cd2e21d60c8edeaeee702951c82781b8b97a3'
+OWNER016_SHA = '885f5f518350de0403a19e629582ac2ab280f11996d702841b0c8b41c6a7875b'
+RUNTIME016_SHA = '1cc9fcbd9da113083a86c9d5bc21d26633026d46e26b5c093423ba7442aeae4d'
+CLOSE012_SHA = '82f290a3b0887cadb4f4561f84068278e9d112cade33b6f31cbf4c81e21a637d'
+POLICY_VERSION = 'gui_agent.generation_targeting_policy.v1'
+CHANGED_PATHS = {
+    'src/gui_agent/planning/target_bindings.py', 'src/gui_agent/runtime/runner.py',
+    'tests/test_runtime_runner.py', 'tests/test_week6_visual_target_guidance.py',
+    'tests/test_week6_visual_target_guidance_review.py', 'scripts/week6_audit_semantic_acceptance.py',
+}
+RUNNER_METHODS = {'_context', '_prepare_recovery'}
+TEST_FUNCTION = 'test_non_message_planning_context_remains_the_complete_observation'
+
+
+class FreezeError(ValueError):
+    pass
+
+
+def require(condition, detail):
+    if not condition:
+        raise FreezeError(detail)
+
+
+def sha(path):
+    return sha256(path.read_bytes()).hexdigest()
+
+
+def unique(pairs):
+    value = {}
+    for key, item in pairs:
+        require(key not in value, 'duplicate JSON key')
+        value[key] = item
+    return value
+
+
+def load(path):
+    return json.loads(path.read_bytes(), object_pairs_hook=unique,
+                      parse_constant=lambda _v: (_ for _ in ()).throw(FreezeError('nonfinite JSON')))
+
+
+def bound(path, expected):
+    require(type(expected) is str and re.fullmatch('[0-9a-f]{64}', expected), 'TODO: supply the actual 64-character proof SHA')
+    require(path.is_file(), f'TODO: original evidence not supplied: {path}')
+    require(sha(path) == expected, f'changed evidence: {path}')
+    return load(path)
+
+
+def write(path, value):
+    with path.open('x', encoding='utf-8', newline='\n') as stream:
+        stream.write(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False)+'\n')
+
+
+def inventory():
+    paths = {REPO/'pyproject.toml'}
+    for folder in ('src', 'tests', 'scripts'):
+        paths.update((REPO/folder).rglob('*.py'))
+    paths.update(path for path in (REPO/'configs').rglob('*') if path.is_file())
+    return {path.relative_to(REPO).as_posix(): sha(path) for path in sorted(paths)}
+
+
+def ast_value(node):
+    return ast.dump(node, include_attributes=False)
+
+
+def check_legacy_test(old, current, proof, pins, prior):
+    require(proof.get('schema') == 'week6.visual_guidance.legacy_test_migration.v1', 'TODO: unsupported migration proof schema')
+    require(proof.get('path') == 'tests/test_runtime_runner.py'
+            and proof.get('old_sha256') == prior['code_pins']['tests/test_runtime_runner.py']
+            and proof.get('new_sha256') == pins['tests/test_runtime_runner.py']
+            and proof.get('changed_function') == TEST_FUNCTION
+            and proof.get('original_context_set_added_keys') == ['targeting_policy']
+            and proof.get('original_assertions_preserved') is True
+            and proof.get('original_function_AST_equal_after_only_added_import_key_policy_assertion_removed') is True
+            and proof.get('every_other_test_module_AST_equal') is True
+            and proof.get('old_test_count_preserved') is True, 'new migration proof is not bound to this test change')
+    before, after = ast.parse(old.read_text('utf-8')), ast.parse(current.read_text('utf-8'))
+    original = next(n for n in before.body if isinstance(n, ast.FunctionDef) and n.name == TEST_FUNCTION)
+    changed = next(n for n in after.body if isinstance(n, ast.FunctionDef) and n.name == TEST_FUNCTION)
+    expected_assert = ast.parse("assert context['targeting_policy'] == {'schema_version': GENERATION_TARGETING_POLICY_VERSION, 'instruction': GENERATION_TARGETING_POLICY_TEXT, 'generation_only': True}").body[0]
+    counts = {'import': 0, 'key': 0, 'policy_assert': 0}
+    kept = []
+    for statement in changed.body:
+        if (isinstance(statement, ast.ImportFrom) and statement.module == 'gui_agent.planning.target_bindings'
+                and statement.level == 0
+                and [(x.name, x.asname) for x in statement.names] == [
+                    ('GENERATION_TARGETING_POLICY_TEXT', None), ('GENERATION_TARGETING_POLICY_VERSION', None)]):
+            counts['import'] += 1
+            continue
+        if ast_value(statement) == ast_value(expected_assert):
+            counts['policy_assert'] += 1
+            continue
+        for node in ast.walk(statement):
+            if isinstance(node, ast.Set):
+                matches = [x for x in node.elts if isinstance(x, ast.Constant) and x.value == 'targeting_policy']
+                if matches:
+                    require(len(matches) == 1, 'duplicate migrated context key')
+                    node.elts.remove(matches[0]); counts['key'] += 1
+        kept.append(statement)
+    changed.body = kept
+    require(counts == {'import': 1, 'key': 1, 'policy_assert': 1}
+            and ast_value(changed) == ast_value(original)
+            and ast_value(after) == ast_value(before), 'legacy test changed beyond the one context-key migration and its policy assertion')
+    return counts
+
+
+def check_source_scope(prior, pins, proof):
+    changed = {name for name in set(prior['code_pins']) | set(pins)
+               if prior['code_pins'].get(name) != pins.get(name)}
+    require(changed == CHANGED_PATHS, f'unexpected changed paths: {sorted(changed)}')
+    require(proof.get('prior_freeze_sha256') == PRIOR_SHA
+            and proof.get('source_before_manifest_sha256') == BEFORE_SHA
+            and set(proof.get('changed_paths', [])) == CHANGED_PATHS
+            and set(proof.get('runner_changed_methods', [])) == RUNNER_METHODS,
+            'TODO: final source_delta_proof does not bind the authorised six paths and methods')
+    old_helper = ast.parse((CHANGE/'source_before/code/src/gui_agent/planning/target_bindings.py').read_text('utf-8'))
+    helper_path = REPO/'src/gui_agent/planning/target_bindings.py'
+    new_helper = ast.parse(helper_path.read_text('utf-8'))
+    allowed = {'GENERATION_TARGETING_POLICY_TEXT', 'GENERATION_TARGETING_POLICY_VERSION'}
+    declarations, stripped = set(), []
+    for node in new_helper.body:
+        if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name) and node.targets[0].id in allowed:
+            declarations.add(node.targets[0].id)
+        elif isinstance(node, ast.FunctionDef) and node.name == 'generation_targeting_policy':
+            declarations.add(node.name)
+            statements = node.body[1:] if node.body and isinstance(node.body[0], ast.Expr) and isinstance(node.body[0].value, ast.Constant) else node.body
+            expected = ast.parse("return {'schema_version': GENERATION_TARGETING_POLICY_VERSION, 'instruction': GENERATION_TARGETING_POLICY_TEXT, 'generation_only': True}").body
+            require(len(statements) == 1 and ast_value(statements[0]) == ast_value(expected[0]), 'policy API is not the declared fresh pure dictionary')
+        else:
+            stripped.append(node)
+    require(declarations == allowed | {'generation_targeting_policy'}, 'new targeting-policy declarations missing')
+    reduced = deepcopy(new_helper); reduced.body = stripped
+    require(ast_value(reduced) == ast_value(old_helper), 'old binding packet/schema/helper AST changed')
+    old_runner = ast.parse((CHANGE/'source_before/code/src/gui_agent/runtime/runner.py').read_text('utf-8'))
+    new_runner = ast.parse((REPO/'src/gui_agent/runtime/runner.py').read_text('utf-8'))
+    old_class = next(n for n in old_runner.body if isinstance(n, ast.ClassDef) and n.name == 'TaskRunner')
+    new_class = next(n for n in new_runner.body if isinstance(n, ast.ClassDef) and n.name == 'TaskRunner')
+    old_methods = {n.name: n for n in old_class.body if isinstance(n, ast.FunctionDef)}
+    observed = set()
+    for index, method in enumerate(new_class.body):
+        if isinstance(method, ast.FunctionDef) and method.name in RUNNER_METHODS:
+            require(method.name in old_methods, 'new runner method was not authorised')
+            if ast_value(method) != ast_value(old_methods[method.name]): observed.add(method.name)
+            new_class.body[index] = old_methods[method.name]
+    require(observed == RUNNER_METHODS and ast_value(new_runner) == ast_value(old_runner), 'runner changed beyond context and recovery context')
+    # This is the actual pure helper API, not a guessed copy of its text.
+    spec = importlib.util.spec_from_file_location('week6_frozen_visual_targeting_helper', helper_path)
+    module = importlib.util.module_from_spec(spec)
+    require(spec.loader is not None, 'cannot load the pure targeting helper')
+    spec.loader.exec_module(module)
+    policy, fresh_policy = module.generation_targeting_policy(), module.generation_targeting_policy()
+    require(type(policy) is dict and set(policy) == {'schema_version', 'instruction', 'generation_only'}
+            and policy == fresh_policy and policy is not fresh_policy
+            and policy['schema_version'] == POLICY_VERSION and policy['generation_only'] is True
+            and type(policy['instruction']) is str and policy['instruction'].strip()
+            and policy == proof.get('generation_targeting_policy'), 'actual fixed targeting-policy API and proof disagree')
+    return sorted(changed), policy
+
+
+def check_before_archive(prior):
+    path = CHANGE/'source_before_manifest.json'
+    manifest = bound(path, BEFORE_SHA)
+    require(manifest['prior_freeze_sha256'] == PRIOR_SHA and manifest['prior_readme_sha256'] == README_SHA
+            and manifest['code_pin_count'] == 270 and manifest['normal016_files'] == 235
+            and manifest['negative_audit_files'] == 3 and manifest['all_copies_exact'] is True
+            and len(manifest['files']) == 512, 'unexpected original preservation manifest')
+    seen, code = set(), {}
+    for record in manifest['files']:
+        destination = (CHANGE/record['destination']).resolve()
+        require(destination.is_relative_to((CHANGE/'source_before').resolve()) and destination not in seen,
+                'preservation path escapes or repeats')
+        seen.add(destination)
+        require(destination.is_file() and destination.stat().st_size == record['bytes']
+                and sha(destination) == record['sha256'], 'preserved original bytes changed')
+        prefix = 'source_before/code/'
+        if record['destination'].startswith(prefix): code[record['destination'][len(prefix):]] = record['sha256']
+        if record['destination'].startswith(('source_before/normal016/', 'source_before/review/')):
+            require(sha(Path(record['source'])) == record['sha256'], 'ended normal016 or negative audit original changed')
+    require(code == prior['code_pins'], 'archived code does not match the previous freeze')
+    return manifest
+
+
+def check_ended016():
+    negative = bound(BASE/'review/negative_normal016_audit_001.json', NEGATIVE016_SHA)
+    owner = bound(BASE/'live/normal_016/owner_receipt.json', OWNER016_SHA)
+    runtime = bound(BASE/'live/normal_016/run/runtime_result.json', RUNTIME016_SHA)
+    close = bound(BASE/'live/fixture_normal_012.close.json', CLOSE012_SHA)
+    require(type(owner['child_exit_code']) is int and owner['child_exit_code'] == 1
+            and math.isclose(owner['elapsed_seconds'], 438.469, abs_tol=.001)
+            and runtime['status'] == 'failed' and runtime['total_actions'] == 3
+            and runtime['planning_calls'] == runtime['model_requests'] == 6
+            and runtime['unconfirmed_action_attempts'] == 0 and runtime['accounting_complete'] is True
+            and len(runtime['completed_subgoals']) == 1 and runtime['semantic_goals_total'] == 2
+            and runtime['final_verification'] is None, 'normal016 is not the preserved ended failure')
+    require(negative['totals']['overall_acceptance'] is False
+            and negative['totals']['completed_goals'] == 1
+            and negative['independent_state']['committed'] is False
+            and negative['all_normal001_through016_remain_unaccepted'] is True,
+            'normal016 negative classification changed')
+    require(close['schema'] == 'week6.fixture.controlled_close.v1'
+            and close['actual_process_wait_exit_code'] == 15
+            and close['reason'] == 'normal016_ended_negative_audit_preserved'
+            and str(BASE/'live/fixture_normal_012') in close['checked_actual_process']['cmdline']
+            and datetime.fromisoformat(close['utc']) >= datetime.fromisoformat(owner['finished_utc']),
+            'fixture012 close evidence missing or confused with task exit')
+    return negative, owner, runtime
+
+
+def check_uniform(name, prior):
+    directory = CHANGE/name
+    check = load(directory/'validation.json')
+    require(check.get('schema') == 'week6.visual_target_guidance.offline.actual.v1'
+            and check.get('scope') == 'affected_visual_target_guidance_action_runtime_semantic'
+            and check.get('checks_passed') is True and check.get('code_unchanged') is True
+            and check.get('full_regression') is False and check.get('model_gui_calls') == 0,
+            'uniform validation has not actually ended successfully')
+    receipts = [load(directory/(name+'.receipt.json')) for name in ('ruff', 'pytest', 'collection')]
+    require(check.get('receipts') == receipts
+            and all(type(r.get('actual_child_exit_code')) is int and r['actual_child_exit_code'] == 0 for r in receipts),
+            'uniform real receipts not all zero or not bound')
+    require([r['name'] for r in receipts] == ['ruff', 'pytest', 'collection'], 'receipt order/scope changed')
+    require('--collect-only' not in receipts[1]['command'] and '--collect-only' in receipts[2]['command'], 'pytest/collection roles changed')
+    pins = load(directory/'tested_code_pins_before.json')
+    require(pins == load(directory/'tested_code_pins_after.json') == inventory()
+            and len(pins) == check['code_pin_count'] == 272
+            and len(list((REPO/'src/gui_agent').rglob('*.py'))) == 91, 'code domain, package count or before/after/current differs')
+    require(sha(REPO/'requirements-dev.txt') == check['requirements_dev_sha256_before']
+            == check['requirements_dev_sha256_after'] == DEV_SHA == prior['requirements_dev_sha256'], 'development dependencies changed')
+    text = (directory/'pytest.stdout.txt').read_text('utf-8')
+    summaries = re.findall(r'(?m)^(\d+) passed in ([0-9.]+)s', text)
+    collected = re.findall(r'(?m)^(\d+) tests? collected in [0-9.]+s', (directory/'collection.stdout.txt').read_text('utf-8'))
+    require(len(summaries) == len(collected) == 1 and not re.search(r'\d+ (?:failed|error|skipped|deselected|xfailed|xpassed)', text)
+            and check['targeted_failed_count'] == 0
+            and int(summaries[0][0]) == check['targeted_tests_passed']
+            and float(summaries[0][1]) == check['targeted_pytest_seconds']
+            and int(collected[0]) == check['collected_test_count']
+            and 0 < check['targeted_tests_passed'] <= check['collected_test_count'], 'actual test summaries not matched; never substitute expected counts')
+    require((directory/'ruff.stdout.txt').read_text('utf-8').strip() == 'All checks passed!', 'Ruff stdout not clean')
+    return directory, check, pins
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--validation-name', required=True)
+    parser.add_argument('--migration-proof', type=Path, required=True, help='Actual new migration proof path')
+    parser.add_argument('--migration-proof-sha256', required=True, help='Required actual new proof SHA; TODO is rejected')
+    parser.add_argument('--source-delta-proof', type=Path, required=True, help='Actual final six-path proof path')
+    parser.add_argument('--source-delta-proof-sha256', required=True, help='Required actual final six-path proof SHA')
+    args = parser.parse_args()
+    require(re.fullmatch('root_affected_validation_[0-9]{3}', args.validation_name), 'select an ended uniform validation, not the producer narrow target')
+    destination = CHANGE/'final_source_freeze_001.json'
+    prereg = BASE/'live/preregistered_v6_009.json'
+    outputs = [destination, prereg, BASE/'live/prereg_v6_009.json', CHANGE/'README.before_visual_target_guidance.md',
+               CHANGE/'README.update_qa_001.json', CHANGE/'root_freeze_harness.py.txt', CHANGE/'provider_readonly_tags_001.json']
+    require(not any(path.exists() for path in outputs), 'new freeze output already exists; no overwrite/recovery guessing')
+    for name in ('normal_017', 'fixture_normal_013', 'transient_001', 'fixture_transient_001'):
+        require(not (BASE/'live'/name).exists(), f'fresh run/fixture directory already exists: {name}')
+        require(not (BASE/'live'/f'{name}.launch.json').exists(), f'fresh fixture claim already exists: {name}')
+    prior_path = BASE/'target_bindings_001/final_source_freeze_001.json'
+    prior = bound(prior_path, PRIOR_SHA)
+    previous = bound(BASE/'live/preregistered_v6_008.json', PRIOR_PREREG_SHA)
+    require(previous['model'] == 'qwen2.5vl:3b'
+            and previous['model_digest'] == 'fb90415cde1ef08aa669ae74b082d49b158729b6db1ab183c941417d507e71a1'
+            and previous['model'] == prior['runtime_model'] and previous['model_digest'] == prior['runtime_model_digest'], 'model/candidate identity changed')
+    expected_options = {'configuration':'configs/week6_accuracy_persistent.yaml', 'temperature':0,
+        'max_tokens':4096, 'sdk_retries':0, 'model_timeout_seconds':900, 'global_timeout_seconds':7200,
+        'global_max_actions':20, 'global_max_planning_attempts':24, 'global_max_http_dispatches':32}
+    require(all(previous.get(key) == value for key, value in expected_options.items()), 'caller/model budgets or options changed')
+    require(sha(Path(previous['owner_harness'])) == previous['owner_harness_sha256'], 'live owner harness changed')
+    require(sha(REPO/'README.md') == prior['readme_sha256'] == README_SHA
+            and sha(REPO/'.gitattributes') == prior['git_attributes_sha256'], 'merge independent README/attributes changes explicitly')
+    manifest = check_before_archive(prior)
+    negative, ended_owner, ended_runtime = check_ended016()
+    migration_path, delta_path = args.migration_proof.resolve(), args.source_delta_proof.resolve()
+    require(migration_path.is_relative_to(CHANGE.resolve()) and delta_path.is_relative_to(CHANGE.resolve()),
+            'new proofs must belong to the selected new source family')
+    migration = bound(migration_path, args.migration_proof_sha256)
+    delta = bound(delta_path, args.source_delta_proof_sha256)
+    directory, check, pins = check_uniform(args.validation_name, prior)
+    changes, policy = check_source_scope(prior, pins, delta)
+    migration_counts = check_legacy_test(CHANGE/'source_before/code/tests/test_runtime_runner.py',
+                                        REPO/'tests/test_runtime_runner.py', migration, pins, prior)
+    # Read-only identity check only; never generate/load/pull a model.
+    request = Request('http://127.0.0.1:11434/api/tags', method='GET')
+    with urlopen(request, timeout=15) as response:
+        tags = json.load(response)
+    model = [item for item in tags['models'] if item['name'] == previous['model']]
+    require(len(model) == 1 and model[0]['digest'].removeprefix('sha256:') == previous['model_digest'], 'installed model digest changed')
+    readme_bytes = (REPO/'README.md').read_bytes()
+    text = readme_bytes.decode('utf-8')
+    start_marker = 'The new candidate supplies current-observation text/ID bindings to the\n'
+    end_marker = '### Week 5 submission'
+    require(text.count(start_marker) == text.count(end_marker) == 1, 'pending README replacement is not unique')
+    start, end = text.index(start_marker), text.index(end_marker)
+    require(start < end, 'README replacement scope invalid')
+    count, collected = check['targeted_tests_passed'], check['collected_test_count']
+    replacement = (
+        'The preceding snapshot-binding candidate guided native text/ID pairs;\n'
+        'it did not grant execution or semantic-goal credit. Its [1026-case check](Document/Week6/results/full_requirements_20261028/target_bindings_001/root_affected_validation_002/validation.json)\n'
+        'passed with 270 unchanged code pins and bound development dependencies.\n'
+        'The retained first check had 1,025 passing cases and one exact-key\n'
+        'context assertion failure. That assertion was migrated separately,\n'
+        'preserving its original complete-observation checks. The earlier\n'
+        '838-case result above remains historical. No counts are pooled.\n\n'
+        'Normal016 ended with task exit 1 after 438.469 seconds: three inputs,\n'
+        'six planning calls and six HTTP requests, with zero unknown inputs.\n'
+        'The prepare objective completed (one of two goals), and a review input\n'
+        'was independently recorded. No commit input occurred. The saved pixels\n'
+        'show the commit button, while the fresh OCR candidates omitted its\n'
+        'literal label, leaving this text-only target unresolved. The reason\n'
+        'for that omission, including any cursor contribution, has not been\n'
+        'isolated. Partial goal credit is not overall acceptance. See the\n'
+        '[retained negative audit](Document/Week6/results/full_requirements_20261028/review/negative_normal016_audit_001.json).\n\n'
+        f'The new candidate adds the fixed `{policy["schema_version"]}` guidance\n'
+        'to the low-level planning and recovery context. The policy comes from\n'
+        'the helper API; it is not a locally authored action or goal sequence.\n'
+        'Existing binding packets, positive generation-schema alternatives and\n'
+        'the action SYSTEM prompt remain unchanged. The model still chooses its\n'
+        'native target; the program does not replace IDs, insert coordinates or\n'
+        'rewrite a returned action. Candidate consistency is not a control-role\n'
+        'or task-completion guarantee. The caller, model, single-step limit,\n'
+        'grounding guards and shared budgets remain unchanged.\n\n'
+        'The endpoint remains `strict:false`; exact attempts and generation\n'
+        'schema qualification remain separate from execution/goal/final checks.\n'
+        'Research auditing uses the bound `requirements-dev.txt`, including\n'
+        'jsonschema; ordinary execution does not import that audit dependency.\n'
+        f'The [{count}-case affected check](Document/Week6/results/full_requirements_20261028/visual_target_guidance_001/{args.validation_name}/validation.json)\n'
+        f'passed with Ruff clean, {len(pins)} before/after/current code pins and\n'
+        'unchanged development dependencies. The scope proofs retain all prior\n'
+        'assertions outside the declared additive context migration. This is\n'
+        'offline evidence only, not proof that the new guidance fixes the case.\n'
+        f'The {collected}-case collection is not a full execution. New normal017\n'
+        'and transient001 cases, final full004, report and package QA remain pending.\n'
+        'Normal016 and fixture012 must not be reused. Model candidates and all\n'
+        'failed/partial runs retain their separate original records.\n\n'
+        f'Validation target (pending): `{collected} tests, ruff clean`. This is\n'
+        'the collected suite size, not a full regression or desktop acceptance.\n\n')
+    new_text = text[:start]+replacement+text[end:]
+    links = []
+    for target in re.findall(r'\[[^\]]*\]\(([^)]+)\)', new_text):
+        if target.startswith(('http://', 'https://', '#')): continue
+        require((REPO/target.split('#',1)[0]).exists(), f'local README link missing: {target}')
+        links.append(target)
+    # Recheck every tested input immediately before the first mutation.
+    require(inventory() == pins and sha(REPO/'requirements-dev.txt') == DEV_SHA
+            and sha(REPO/'README.md') == README_SHA, 'source changed during freeze preflight')
+    backup = CHANGE/'README.before_visual_target_guidance.md'
+    with backup.open('xb') as stream: stream.write(readme_bytes)
+    with (CHANGE/'root_freeze_harness.py.txt').open('xb') as stream: stream.write(Path(__file__).read_bytes())
+    write(CHANGE/'provider_readonly_tags_001.json', {'schema':'week6.model.readonly_tags.v1',
+        'observed_utc':datetime.now(UTC).isoformat(),'method':'GET','url':request.full_url,'tags':tags,
+        'selected':model[0],'generation_load_pull_calls':0})
+    (REPO/'README.md').write_bytes(new_text.encode('utf-8'))
+    qa_path = CHANGE/'README.update_qa_001.json'
+    write(qa_path, {'schema':'week6.pending_visual_guidance_readme.qa.v1','previous_sha256':sha(backup),
+        'current_sha256':sha(REPO/'README.md'),'local_links_checked':links,
+        'targeted_tests_passed':count,'collection_only':collected,'full_regression_passed':False,
+        'new_real_acceptance_passed':False,'normal016_overall_acceptance':False,
+        'old_016_task_exit':1,'old_fixture012_teardown_exit':15,'replacement_only':True})
+    freeze = {
+        'schema':'week6.semantic.visual_target_guidance.source_freeze.v1','created_at_utc':datetime.now(UTC).isoformat(),
+        'status':'frozen_pending_normal017_transient001_full004','protocol':prior['protocol'],
+        'input_modality':prior['input_modality'],'repair_policy_version':prior['repair_policy_version'],
+        'postcondition_source':'untrusted_model_prediction','final_source':'unchanged_caller',
+        'previous_freeze_sha256':PRIOR_SHA,'changed_paths':changes,'code_pin_count':len(pins),'code_pins':pins,
+        'package_python_file_count':91,'readme_sha256':sha(REPO/'README.md'),'requirements_dev_sha256':DEV_SHA,
+        'git_attributes_sha256':sha(REPO/'.gitattributes'),'readme_update_qa_sha256':sha(qa_path),
+        'targeted_validation':f'{args.validation_name}/validation.json','targeted_validation_sha256':sha(directory/'validation.json'),
+        'targeted_tests_passed':count,'targeted_pytest_seconds':check['targeted_pytest_seconds'],
+        'collected_test_count':collected,'collection_test_execution':False,
+        'runtime_model':previous['model'],'runtime_model_digest':previous['model_digest'],
+        'model_roles':['semantic','action'],'model_gui_calls_during_changes':0,
+        'old_failed_raw_records_retained':True,'new_real_model_gui_acceptance_completed':False,'full004_completed':False,
+        'source_before_manifest_sha256':BEFORE_SHA,'preserved_original_count':len(manifest['files']),
+        'migration_proof_sha256':sha(migration_path),'source_delta_proof_sha256':sha(delta_path),
+        'migration_AST_recomputed':migration_counts,'generation_targeting_policy':policy,
+        'normal016_negative_audit_sha256':NEGATIVE016_SHA,'normal016_owner_receipt_sha256':OWNER016_SHA,
+        'fixture012_close_sha256':CLOSE012_SHA,'root_freeze_harness_sha256':sha(CHANGE/'root_freeze_harness.py.txt'),
+        'meaning':'Frozen offline-tested guidance candidate only; fresh normal/transient and full regression still required.',
+    }
+    write(destination,freeze)
+    previous.update({'schema':'week6.semantic_live.v6.visual_target_guidance_preregistration.v1',
+        'registered_utc':datetime.now(UTC).isoformat(),'freeze':'../visual_target_guidance_001/final_source_freeze_001.json',
+        'freeze_sha256':sha(destination),'previous_development_failures':'normal001 through016 remain unaccepted. Normal016 completed one prepare goal and a review input, but no commit input and no overall acceptance. Neither OCR-only nor cursor causation is established.',
+        'normal':{'name':'normal_017','project':'ALPHA','colour':'GREEN','fixture':'fixture_normal_013','reuse':'New independent fixture only'},
+        'generation_targeting_policy':policy,'migration_proof_sha256':sha(migration_path),
+        'source_delta_proof_sha256':sha(delta_path),'requirements_dev_sha256':DEV_SHA,
+        'auditor_source_sha256':pins['scripts/week6_audit_semantic_acceptance.py'],
+        'repair_experiment':'Same high-level v2 conversation and bounded action-format feedback; fixed low-level targeting guidance added to normal and recovery context. No local action repair or coordinate insertion.',
+        'final_full_regression':f'Required after both accepted fresh cases; {collected} is collection only, full004 not started.',
+        'source_before_manifest_sha256':BEFORE_SHA,'normal016_negative_audit_sha256':NEGATIVE016_SHA})
+    require(previous['transient'] == {'name':'transient_001','project':'BETA','colour':'BLUE',
+            'fixture':'fixture_transient_001','application_review_rejections':1}, 'transient case changed')
+    write(prereg,previous)
+    print(json.dumps({'freeze':str(destination),'freeze_sha256':sha(destination),'prereg':str(prereg),
+        'prereg_sha256':sha(prereg),'code_pin_count':len(pins),'package_python_file_count':91,
+        'targeted_tests_passed':count,'collected_test_count':collected,'readme_sha256':sha(REPO/'README.md'),
+        'requirements_dev_sha256':DEV_SHA,'new_real_acceptance_completed':False,'overall_completed':False}))
+
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 41656.0,
+  "usage": {
+    "prompt_tokens": 1500,
+    "completion_tokens": 293,
+    "total_tokens": 1793
+  },
+  "error": null,
+  "content_length": 1352,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"The previous goal failed due to missing 'Report Generated' text, indicating the report was not fully created. The current plan will ensure the report is prepared, reviewed, and committed locally without external sync. The workflow remains unchanged except for the revised conditions to reflect actual\", \"subgoals\": [\n    {\n      \"instruction\": \"Prepare a BLUE report for project BETA by selecting the project, choosing the BLUE theme, and generating the report using visible controls.\",\n      \"expect_text\": [\"Project BETA\", \"Theme BLUE\", \"Report Generated\"],\n      \"forbid_text\": [\"Review unavailable\", \"Connection error\", \"External sync required\"],\n      \"goal_id\": \"prepare_report\"\n    },\n    {\n      \"instruction\": \"Review the generated BLUE report for project BETA using visible controls.\",\n      \"expect_text\": [\"Project BETA\", \"Theme BLUE\", \"Review Complete\"],\n      \"forbid_text\": [\"Review unavailable\", \"Connection error\", \"External sync required\"],\n      \"goal_id\": \"review_report\"\n    },\n    {\n      \"instruction\": \"Commit the reviewed BLUE report for project BETA locally using visible controls.\",\n      \"expect_text\": [\"Project BETA\", \"Theme BLUE\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [\"Connection error\", \"External sync required\", \"Review unavailable\"],\n      \"goal_id\": \"commit_report\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

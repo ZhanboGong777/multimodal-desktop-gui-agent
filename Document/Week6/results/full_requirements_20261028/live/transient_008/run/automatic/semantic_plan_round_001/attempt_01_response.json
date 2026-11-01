@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 28047.0,
+  "usage": {
+    "prompt_tokens": 1289,
+    "completion_tokens": 288,
+    "total_tokens": 1577
+  },
+  "error": null,
+  "content_length": 1319,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"Plan outlines two distinct semantic objectives: first, prepare and review the BLUE report for project BETA; second, commit the report locally. Each step is explicitly named and preserves caller operations.\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Prepare a BLUE report for project BETA by selecting the project, choosing the BLUE theme, and generating the report using visible controls.\",\n      \"expect_text\": [\"Project BETA\", \"Theme BLUE\", \"Report Generated\"],\n      \"forbid_text\": [\"Error\", \"Unavailable\", \"Connection Failed\"],\n      \"goal_id\": \"prepare_report\"\n    },\n    {\n      \"instruction\": \"Review the prepared BLUE report for project BETA by accessing the review interface and confirming review completion using visible controls.\",\n      \"expect_text\": [\"Project BETA\", \"Theme BLUE\", \"Review Complete\"],\n      \"forbid_text\": [\"Error\", \"Unavailable\", \"Connection Failed\"],\n      \"goal_id\": \"review_report\"\n    },\n    {\n      \"instruction\": \"Commit the reviewed BLUE report for project BETA locally by selecting the commit option and confirming the local commit using visible controls.\",\n      \"expect_text\": [\"Project BETA\", \"Theme BLUE\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [\"Error\", \"Unavailable\", \"Connection Failed\"],\n      \"goal_id\": \"commit_report\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

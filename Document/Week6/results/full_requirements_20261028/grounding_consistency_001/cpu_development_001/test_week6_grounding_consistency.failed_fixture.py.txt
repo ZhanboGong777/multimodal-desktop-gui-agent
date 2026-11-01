@@ -1,0 +1,208 @@
+"""Text/ID conflicts stop before input; no local target replacement is permitted."""
+
+from __future__ import annotations
+
+import json
+from datetime import UTC, datetime
+
+import pytest
+from test_runtime_runner import FakeExecutor, FakeObserver
+from test_week6_automatic_decomposition import ScriptedClient
+
+from gui_agent.planning.planner import TaskPlanner
+from gui_agent.planning.schemas import PlanStep
+from gui_agent.recording import RunSession
+from gui_agent.runtime import runner as runner_module
+from gui_agent.runtime.action_adapter import (
+    TARGET_CONSISTENCY_ERROR_PREFIX,
+    ActionAdapter,
+    ActionResolutionError,
+    validate_target_consistency,
+)
+from gui_agent.runtime.recorder import TaskRecorder
+from gui_agent.runtime.runner import TaskRunner
+from gui_agent.runtime.schemas import ElementRef, ExecutionOptions, ObservationSnapshot, TaskSpec
+from gui_agent.runtime.verification import Verifier
+from gui_agent.schemas import BoundingBox, ScreenInfo
+
+
+def element(oid, index, text, box, *, source="ocr", confidence=0.95):
+    bounds = BoundingBox(left=box[0], top=box[1], right=box[2], bottom=box[3])
+    return ElementRef(element_id=f"{oid}-e{index:03d}", text=text, bounding_box=bounds,
+                      center=bounds.center, source=source, confidence=confidence)
+
+
+def frame(oid="obs-0001", *, swapped=False, finished=False):
+    labels = ["Dismiss", "Accept"] if swapped else ["Accept", "Dismiss"]
+    items = [
+        element(oid, 0, labels[0], (30, 20, 90, 40)),
+        element(oid, 1, labels[1], (30, 120, 90, 140)),
+        element(oid, 2, "", (10, 10, 150, 60), source="contour"),
+        element(oid, 3, "", (10, 110, 150, 160), source="contour"),
+    ]
+    if finished:
+        items.append(element(oid, 4, "Requested state verified", (210, 20, 440, 40)))
+    return ObservationSnapshot(observation_id=oid, captured_at=datetime.now(UTC),
+        screen_info=ScreenInfo(screenshot_width=600, screenshot_height=500,
+                               control_width=600, control_height=500),
+        elements=items, foreground_stable=True, window_id="local-window",
+        window_bounds=BoundingBox(left=0, top=0, right=600, bottom=500))
+
+
+def step(oid="obs-0001", index=2, *, target="Accept", kind="click", alias="element_id"):
+    return PlanStep(step_id="choose", description="Choose the requested control", action_type=kind,
+                    target_text=target, arguments={alias: f"{oid}-e{index:03d}"})
+
+
+@pytest.mark.parametrize("kind", ["move", "click", "double_click", "right_click", "scroll"])
+@pytest.mark.parametrize("alias", ["element_id", "target_element"])
+def test_wrong_anonymous_id_is_refused_without_silently_using_the_visible_text(kind, alias):
+    value = frame()
+    proposed = step(index=3, kind=kind, alias=alias)
+    if kind == "scroll":
+        proposed.arguments["scroll_amount"] = -2
+    original = proposed.model_dump()
+    with pytest.raises(ActionResolutionError, match=TARGET_CONSISTENCY_ERROR_PREFIX):
+        ActionAdapter().resolve(proposed, value)
+    assert proposed.model_dump() == original
+    assert value.elements[0].text == "Accept"  # A unique matching target exists, but is not substituted.
+
+
+def test_an_explicit_labeled_id_cannot_override_different_supplied_text_even_if_not_elsewhere():
+    with pytest.raises(ActionResolutionError, match="has text 'Dismiss'"):
+        ActionAdapter().resolve(step(index=1, target="Unavailable label"), frame())
+
+
+@pytest.mark.parametrize("source", ["ocr", "contour"])
+def test_a_nonempty_candidate_label_is_evidence_regardless_of_its_source_name(source):
+    value = frame()
+    value.elements[1].source = source
+    with pytest.raises(ActionResolutionError, match=TARGET_CONSISTENCY_ERROR_PREFIX):
+        validate_target_consistency(step(index=1), value)
+
+
+@pytest.mark.parametrize("index", [0, 2])
+def test_matching_explicit_id_keeps_its_own_coordinate_with_duplicate_labels_elsewhere(index):
+    value = frame()
+    value.elements[1].text = "Accept"
+    resolved = ActionAdapter().resolve(step(index=index), value)
+    assert resolved.element_id == value.elements[index].element_id
+    assert resolved.screenshot_point == value.elements[index].center
+
+
+@pytest.mark.parametrize("second_label", ["Dismiss", "Accept"])
+def test_a_container_enclosing_multiple_controls_is_not_justified_by_one_matching_label(second_label):
+    value = frame()
+    value.elements[1].text = second_label
+    value.elements[2] = element(value.observation_id, 2, "", (0, 0, 200, 180), source="contour")
+    with pytest.raises(ActionResolutionError, match="inconsistent or ambiguous"):
+        validate_target_consistency(step(), value)
+
+
+def test_existing_word_level_label_run_can_establish_consistency_inside_one_contour():
+    value = frame()
+    value.elements = [
+        element(value.observation_id, 0, "Save", (30, 20, 65, 40)),
+        element(value.observation_id, 1, "changes", (70, 20, 130, 40)),
+        element(value.observation_id, 2, "", (10, 10, 150, 60), source="contour"),
+    ]
+    result = ActionAdapter().resolve(step(target="Save changes"), value)
+    assert result.element_id == value.elements[2].element_id
+
+
+@pytest.mark.parametrize("target", [None, "unlabelled visual control"])
+def test_id_only_or_no_local_ocr_visual_path_is_not_replaced_with_a_text_search(target):
+    value = frame()
+    value.elements = [item for item in value.elements if item.source == "contour"]
+    result = ActionAdapter().resolve(step(target=target), value)
+    assert result.element_id.endswith("-e002")
+
+
+def test_low_confidence_or_merely_adjacent_text_does_not_create_a_conflict():
+    value = frame()
+    value.elements[0].text = "Noise"
+    value.elements[0].confidence = 0.1
+    value.elements.append(element(value.observation_id, 4, "Unrelated", (151, 20, 230, 40)))
+    result = ActionAdapter().resolve(step(target="visual control"), value)
+    assert result.element_id.endswith("-e002")
+
+
+def native(oid, index):
+    return json.dumps({"task_id": "requested", "instruction": "Apply the requested choice",
+        "steps": [{"step_id": "choose", "description": "Choose the requested control",
+                   "action_type": "click", "target_text": "Accept",
+                   "arguments": {"element_id": f"{oid}-e{index:03d}"}}]})
+
+
+def runtime(tmp_path, frames, responses):
+    observer = FakeObserver(frames)
+    observer.foreground_matches = lambda _value: True
+    executor = FakeExecutor()
+    client = ScriptedClient(responses)
+    session = RunSession.create(tmp_path, session_id="target-consistency")
+    recorder = TaskRecorder(session)
+    runner = TaskRunner(observer=observer, planner=TaskPlanner(client, max_format_retries=0),
+        adapter=ActionAdapter(), executor=executor, recorder=recorder, verifier=Verifier(),
+        sleep=lambda _seconds: None)
+    task = TaskSpec(case_id="Consistency", instruction="Apply the requested choice",
+                    expect_text=["Requested state verified"], gate_on_step_verification=False)
+    return runner, task, executor, client, recorder
+
+
+def test_source_conflict_cannot_be_hidden_by_stale_id_text_fallback_or_pixel_mapping(tmp_path, monkeypatch):
+    runner, task, executor, client, recorder = runtime(tmp_path,
+        [frame("obs-0001"), frame("obs-0002")], [native("obs-0001", 3)])
+    calls = []
+    monkeypatch.setattr(runner_module, "match_candidate", lambda *_args: calls.append(True))
+    result = runner.run(task, ExecutionOptions(execute=True, confirm=False))
+    assert result.status == "failed" and result.action_count == 0 and executor.actions == []
+    assert calls == [] and len(client.calls) == result.planning_calls == 1
+    assert "obs-0001" in result.steps[0].error
+    assert result.steps[0].error.startswith(TARGET_CONSISTENCY_ERROR_PREFIX)
+    assert result.steps[0].action_result is None
+    assert TARGET_CONSISTENCY_ERROR_PREFIX in (recorder.directory / "steps.jsonl").read_text("utf8")
+
+
+def test_fresh_conflict_is_refused_even_when_pixel_refresh_returns_that_current_id(tmp_path, monkeypatch):
+    source, current = frame("obs-0001"), frame("obs-0002", swapped=True)
+    runner, task, executor, client, _ = runtime(tmp_path, [source, current], [native("obs-0001", 2)])
+    # This isolates the dispatch consistency guard from the separately tested pixel matcher.
+    monkeypatch.setattr(runner_module, "match_candidate", lambda _old, fresh, _id: fresh.elements[2])
+    result = runner.run(task, ExecutionOptions(execute=True, confirm=False))
+    assert result.status == "failed" and executor.actions == [] and result.action_count == 0
+    assert len(client.calls) == 1 and "obs-0002" in result.steps[0].error
+    assert "Dismiss" in result.steps[0].error
+
+
+def test_rejected_plan_uses_existing_budgeted_recovery_and_only_the_corrected_plan_dispatches(tmp_path):
+    frames = [frame(f"obs-{index:04d}", finished=index >= 5) for index in range(1, 7)]
+    bad, corrected = native("obs-0001", 3), native("obs-0003", 0)
+    runner, task, executor, client, recorder = runtime(tmp_path, frames, [bad, corrected])
+    result = runner.run(task, ExecutionOptions(execute=True, confirm=False, max_actions=1,
+                                              max_planning_attempts=2))
+    assert result.status == "succeeded" and result.action_count == len(executor.actions) == 1
+    assert result.planning_calls == len(client.calls) == 2
+    assert result.steps[0].error.startswith(TARGET_CONSISTENCY_ERROR_PREFIX)
+    assert result.steps[0].action_result is None and result.steps[1].action_result["success"] is True
+    action = executor.actions[0][0]
+    assert (action.x, action.y) == (60, 30)
+    messages = client.calls[1]["messages"]
+    payload = json.loads(messages[-1].content)
+    recovery = payload["context"]["recovery"]
+    assert recovery["reason"] == "target_resolution" and recovery["actions_used"] == 0
+    assert "target_text conflicted" in recovery["instruction"]
+    assert "Dismiss" not in recovery["instruction"]  # No free-form OCR/error injection.
+    assert (recorder.directory / "recovery.jsonl").is_file()
+    assert json.loads(bad)["steps"][0]["arguments"]["element_id"] == "obs-0001-e003"
+
+
+def test_repeated_conflicts_exhaust_planning_budget_without_any_input(tmp_path):
+    frames = [frame(f"obs-{index:04d}") for index in range(1, 5)]
+    runner, task, executor, client, _ = runtime(tmp_path, frames,
+        [native("obs-0001", 3), native("obs-0003", 3)])
+    result = runner.run(task, ExecutionOptions(execute=True, confirm=False, max_actions=1,
+                                              max_planning_attempts=2))
+    assert result.status == "failed" and executor.actions == []
+    assert result.planning_calls == len(client.calls) == 2 and result.action_count == 0
+    assert all(record.action_result is None for record in result.steps)
+    assert all(record.error.startswith(TARGET_CONSISTENCY_ERROR_PREFIX) for record in result.steps)

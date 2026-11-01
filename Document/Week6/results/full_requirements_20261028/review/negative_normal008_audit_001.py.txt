@@ -1,0 +1,222 @@
+"""Read-only diagnosis of ended normal008; no model/GUI/fixture-state reads."""
+from __future__ import annotations
+
+import ast
+from datetime import datetime
+import hashlib
+import json
+from pathlib import Path
+from types import SimpleNamespace
+
+ROOT = Path(r"C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+BATCH = ROOT / "Document/Week6/results/full_requirements_20261028/live/normal_008"
+RUN = BATCH / "run"
+ROUND = RUN / "automatic/semantic_plan_round_001"
+OUT = ROOT / "Document/Week6/results/full_requirements_20261028/review/negative_normal008_audit_001.json"
+FILES = {}
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def unique(pairs):
+    result = {}
+    for key, value in pairs:
+        assert key not in result, ("duplicate_json_key", key)
+        result[key] = value
+    return result
+
+
+def bind(path, external=False):
+    path = path.resolve()
+    assert path.is_file() and (external or path.is_relative_to(BATCH.resolve())), path
+    digest = sha(path)
+    key = str(path) if external else path.relative_to(BATCH).as_posix()
+    assert key not in FILES or FILES[key] == digest, ("changed_evidence", path)
+    FILES[key] = digest
+    return path
+
+
+def load(path, external=False):
+    return json.loads(bind(path, external).read_bytes(), object_pairs_hook=unique)
+
+
+def stamp(value):
+    result = datetime.fromisoformat(value)
+    assert result.tzinfo
+    return result
+
+
+claim, start, receipt = (load(BATCH / name) for name in
+                         ("owner_claim.json", "owner_start.json", "owner_receipt.json"))
+assert receipt["schema"] == "week6.semantic.live.actual_exit.v1"
+assert type(receipt["child_exit_code"]) is int and receipt["child_exit_code"] == 1
+assert claim["owner"] == start["owner"] == receipt["owner"]
+assert start["launcher"] == receipt["launcher"]
+assert claim["command"] == start["command"] == receipt["command"]
+assert claim["started_utc"] == start["started_utc"] == receipt["started_utc"]
+assert abs((stamp(receipt["finished_utc"]) - stamp(receipt["started_utc"])).total_seconds()
+           - receipt["elapsed_seconds"]) < 0.01
+owner_harness = Path(receipt["owner"]["cmdline"][1])
+assert sha(bind(owner_harness, external=True)) == receipt["owner_harness_sha256"] == start["owner_harness_sha256"]
+bind(BATCH / "stdout.txt")
+
+contract = load(RUN / "contract.json")
+runtime = load(RUN / "runtime_result.json")
+assert runtime == load(RUN / "automatic/automatic_workflow_summary.json")
+acceptance = load(RUN / "acceptance_observed.json")
+assert acceptance["automatic_result"] == runtime
+assert runtime["status"] == "failed" and runtime["accounting_complete"] is True
+assert runtime["planning_calls"] == runtime["model_requests"] == 3
+assert runtime["total_actions"] == runtime["unconfirmed_action_attempts"] == 0
+assert not runtime["completed_subgoals"] and not runtime["goal_outcomes"] and not runtime["workflow_results"]
+assert runtime["workflow_result"] is None and runtime["final_verification"] is None
+assert not acceptance["runtime_pass"] and not acceptance["runtime_independent_gates_passed"]
+assert acceptance["source_unchanged"] is True and not acceptance["input_receipts"]
+assert not list((RUN / "sky_bridge").glob("*_request.json"))
+assert not list((RUN / "automatic").glob("goal_*"))
+assert not list(RUN.rglob("dispatch_intents.jsonl"))
+
+snapshot_count = 0
+for rel, digest in contract["source_sha256"].items():
+    snapshot = RUN / "source_snapshot" / (rel + ".txt")
+    assert sha(bind(snapshot)) == digest, rel
+    snapshot_count += 1
+source_path = RUN / "source_snapshot/src/gui_agent/planning/semantic_workflow.py.txt"
+source = bind(source_path).read_bytes()
+tree = ast.parse(source)
+klass = next(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == "SemanticDecomposer")
+validate = next(node for node in klass.body if isinstance(node, ast.FunctionDef) and node.name == "_validate")
+functions = [next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == name)
+             for name in ("_signature", "_validate_native_predicates")]
+prompt = next(ast.literal_eval(node.value) for node in tree.body if isinstance(node, ast.Assign)
+              and any(isinstance(target, ast.Name) and target.id == "SEMANTIC_SYSTEM_PROMPT" for target in node.targets))
+minimal = ast.Module(body=[ast.ImportFrom(module="__future__", names=[ast.alias(name="annotations")], level=0),
+                           *functions, validate], type_ignores=[])
+namespace = {"__name__": "normal008_pure_validation_only"}
+exec(compile(ast.fix_missing_locations(minimal), str(source_path), "exec"), namespace)
+
+
+def no_frame_check():
+    raise AssertionError("duplicate rejection must occur before frame verification")
+
+
+namespace["Verifier"] = no_frame_check
+namespace["_goal_task"] = no_frame_check
+request = SimpleNamespace(**contract["request"])
+protocol = load(ROUND / "protocol.json")
+assert protocol["schema_version"] == "week6.semantic_subtasks.v5"
+assert protocol["input_modality"] == "caller_intent_only" and protocol["snapshot_sent_to_model"] is False
+assert protocol["predicate_pools"] == {"expect_text": request.expect_text, "forbid_text": request.forbid_text}
+initial = load(RUN / "automatic/initial_observation/observation.json")
+archived = load(ROUND / "snapshot_archive.json")
+assert initial == archived
+original_pixels = Path(initial["image_path"])
+original_digest = sha(bind(original_pixels))
+context_sources = load(ROUND / "context_source_archive.json")
+assert context_sources["snapshot_pixels_sha256"] == original_digest
+assert sha(bind(ROUND / context_sources["snapshot_pixels_archive"])) == original_digest
+assert context_sources["completed_subgoals"] == [] and context_sources["failure"] is None
+assert context_sources["sent_to_high_level_model"] is False
+
+transport = [json.loads(row, object_pairs_hook=unique) for row in
+             bind(RUN / "automatic/transport_requests.jsonl").read_bytes().splitlines() if row]
+assert len(transport) == 3
+attempts, previous, cumulative = [], None, 0
+for index in range(1, 4):
+    sent = load(ROUND / f"attempt_{index:02d}_request.json")
+    response = load(ROUND / f"attempt_{index:02d}_response.json")
+    error = load(ROUND / f"attempt_{index:02d}_error.json")["error"]
+    assert sent["instruction"] == request.instruction and sent["image_path"] is None
+    assert sent["response_format"] == protocol["response_format"]
+    marker = "\nExact response JSON schema (also supplied as response_format):\n"
+    before_schema, schema_text = sent["system"].split(marker)
+    assert before_schema == prompt and json.loads(schema_text) == sent["response_format"]["json_schema"]["schema"]
+    context = sent["context"]
+    assert context["original_caller_request"] == contract["request"]
+    assert context["completed_subgoals"] == [] and context["failure"] is None
+    assert context["input_modality"] == "caller_intent_only" and context["image_attached"] is False
+    assert "current_observation" not in context
+    if index > 1:
+        assert context["constraint_error"] == previous["error"]
+        assert context["previous_response"] == previous["content"]
+        assert context["previous_response_characters"] == len(previous["content"])
+        assert Path(context["previous_response_record"]).resolve() == (ROUND / f"attempt_{index - 1:02d}_response.json").resolve()
+    native = json.loads(response["content"], object_pairs_hook=unique)
+    assert native["status"] == "ready" and len(native["subgoals"]) == 3
+    namespace["_validate_native_predicates"](native, request)
+    proposal = SimpleNamespace(status=native["status"], subgoals=[SimpleNamespace(**goal) for goal in native["subgoals"]])
+    try:
+        namespace["_validate"](SimpleNamespace(max_subgoals=8), proposal, request, None, [], False)
+    except ValueError as exc:
+        reproduced = str(exc)
+    else:
+        raise AssertionError("the archived duplicate guard did not reject")
+    assert reproduced == error and error.startswith("duplicate semantic postconditions for goals")
+    signatures = [(tuple(sorted(s.casefold() for s in goal["expect_text"])),
+                   tuple(sorted(s.casefold() for s in goal["forbid_text"]))) for goal in native["subgoals"]]
+    assert signatures[0] == signatures[1] and signatures[2] != signatures[1]
+    actual = transport[index - 1]
+    assert actual["dispatch"] == index and actual["count_source"] == "httpx_request_event"
+    assert type(actual["requests_made"]) is int and actual["requests_made"] == 1
+    cumulative += actual["requests_made"]
+    assert actual["requests_total"] == cumulative and not actual["error"]
+    messages = actual["messages"]
+    assert len(messages) == 2 and messages[0] == {"role": "system", "content": sent["system"]}
+    assert messages[1]["role"] == "user"
+    assert json.loads(messages[1]["content"]) == {"instruction": sent["instruction"], "context": context}
+    http = actual["http_responses"]
+    assert len(http) == 1 and http[0]["status_code"] == 200
+    assert http[0]["body"]["choices"][0]["message"]["content"] == response["content"] == actual["response"]["content"]
+    attempts.append({"attempt": index, "native_status": "ready", "native_goal_ids": [g["goal_id"] for g in native["subgoals"]],
+        "raw_content_sha256": hashlib.sha256(response["content"].encode("utf-8")).hexdigest(),
+        "raw_goal_instructions": [g["instruction"] for g in native["subgoals"]],
+        "raw_checks": [{"expect_text": g["expect_text"], "forbid_text": g["forbid_text"]} for g in native["subgoals"]],
+        "duplicate_check_goal_ids": [native["subgoals"][0]["goal_id"], native["subgoals"][1]["goal_id"]],
+        "recorded_error": error, "same_error_reproduced_from_archived_guard": True,
+        "actual_http_requests": actual["requests_made"], "http_status": http[0]["status_code"],
+        "model_response_latency_ms": response["latency_ms"]})
+    previous = {"content": response["content"], "error": error}
+assert cumulative == runtime["model_requests"] == 3
+assert len({a["raw_content_sha256"] for a in attempts}) == 1
+plan = load(ROUND / "result.json")
+assert runtime["plans"] == [plan] and plan["status"] == "failed"
+assert plan["workflow"] is None and plan["proposal"] is None and plan["error"] == runtime["error"]
+assert not (ROUND / "compiled_workflow.json").exists() and not (ROUND / "native_proposal.json").exists()
+status = load(RUN / "automatic/run_status.json")
+events = [json.loads(row, object_pairs_hook=unique) for row in
+          bind(RUN / "automatic/status_events.jsonl").read_bytes().splitlines() if row]
+assert events[-1] == status and status["event"] == "finished" and status["task_status"] == "failed"
+assert status["actions_used"] == status["subgoals_completed"] == 0 and status["planning_pass"] == 3
+actual_process = next(p for p in receipt["observed_descendants"] if p["pid"] == status["pid"])
+windows_time = int(status["process_identity"].split(":", 1)[1]) / 10_000_000 - 11644473600
+assert abs(windows_time - actual_process["create_time"]) < 0.01
+
+result = {"schema_version": "week6.semantic.negative_run_audit.v1", "run": "normal_008",
+    "reviewer": "/root/week6_replanning_review", "diagnostic_consistent": True, "real_run_success": False,
+    "classification": "pre_execution_semantic_proposal_rejected_for_duplicate_fixed_postcondition_sets_after_three_attempts",
+    "actual_owner_wait_child_exit_code": receipt["child_exit_code"], "owner_elapsed_seconds": receipt["elapsed_seconds"],
+    "runtime_elapsed_ms": runtime["elapsed_ms"], "decomposition_elapsed_ms": plan["elapsed_ms"],
+    "real_model_requests": cumulative, "planning_calls": runtime["planning_calls"],
+    "confirmed_task_inputs": 0, "unconfirmed_task_inputs": 0, "execution_children_created": 0,
+    "raw_source_snapshot_sha256": hashlib.sha256(source).hexdigest(), "before_source_snapshots_bound": snapshot_count,
+    "recorded_harness_source_unchanged": acceptance["source_unchanged"],
+    "after_source_evidence_scope": "The ended harness records source_unchanged=true and its actual owner code hash is bound. No separate after-hash map was present; current producer may have advanced to a new prompt revision, so this audit does not substitute current bytes for historical after bytes.",
+    "archived_validator_ast_sha256": hashlib.sha256(ast.dump(validate, include_attributes=False).encode()).hexdigest(),
+    "validation_reproduction_scope": "Only three pure predicate/duplicate-check function ASTs extracted from the pinned archived source were executed. No module imports, image verification, model or GUI operation was performed.",
+    "attempts": attempts, "monitor_actual_CPython": actual_process,
+    "transport_scope": "Actual dispatch event counts, saved pre-encoding messages, 200 responses and original provider contents are bound. The logger did not retain raw wire request bodies.",
+    "not_inferred": ["GUI execution failure", "validator fault", "missing user parameters", "model-quality zero", "completed semantic stages", "success rate", "new-prompt source equivalence to full003"],
+    "evidence_sha256": FILES, "auditor_sha256": sha(Path(__file__)),
+    "audit_operations": {"model_calls": 0, "GUI_operations": 0, "fixture_original_reads": 0, "experiment_reruns": 0},
+    "raw_evidence_modified": False}
+with OUT.open("x", encoding="utf-8", newline="\n") as f:
+    json.dump(result, f, ensure_ascii=False, indent=2)
+    f.write("\n")
+script_copy = OUT.with_name("negative_normal008_audit_001.py.txt")
+with script_copy.open("xb") as f:
+    f.write(Path(__file__).read_bytes())
+print(json.dumps({"out": str(OUT), "diagnostic_consistent": True, "real_run_success": False,
+                  "actual_child_exit": receipt["child_exit_code"], "requests": cumulative,
+                  "task_inputs": 0, "files_bound": len(FILES), "sha256": sha(OUT)}))

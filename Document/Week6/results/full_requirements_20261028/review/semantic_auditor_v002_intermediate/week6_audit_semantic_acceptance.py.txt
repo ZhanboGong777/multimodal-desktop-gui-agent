@@ -1,0 +1,635 @@
+"""Read-only audit of an ended, explicitly selected semantic live run.
+
+No model, OCR, capture, executor or process-control operation is performed. Saved
+literal predicates are recomputed with the pinned ordinary Verifier. A runtime
+or acceptance success boolean by itself is never sufficient evidence.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import math
+import sys
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+
+from gui_agent.models.base import ModelRequest
+from gui_agent.planning.parser import parse_plan
+from gui_agent.planning.prompts import SYSTEM_PROMPT
+from gui_agent.planning.semantic_workflow import (
+    SEMANTIC_PROTOCOL_VERSION,
+    SEMANTIC_REASON_MAX_CHARACTERS,
+    SEMANTIC_INSTRUCTION_MAX_CHARACTERS,
+    SEMANTIC_CHECK_MAX_CHARACTERS,
+    SEMANTIC_CHECKS_PER_LIST,
+    SEMANTIC_STEP_POLICY,
+    SEMANTIC_SYSTEM_PROMPT,
+    SemanticDecomposer,
+    SemanticPlan,
+    SemanticWorkflowResult,
+    _final_task,
+    _goal_task,
+    _initial_guard,
+    _INLINE_CORRECTION_MAX_CHARACTERS,
+)
+from gui_agent.planning.workflow_decomposer import WorkflowRequest, _rolling_frame_guard
+from gui_agent.runtime.monitoring import read_run_status
+from gui_agent.runtime.recorder import _mask_step
+from gui_agent.runtime.schemas import ObservationSnapshot
+from gui_agent.runtime.verification import Verifier
+from gui_agent.schemas import ActionResult
+
+
+class AuditError(ValueError):
+    pass
+
+
+def require(condition: Any, code: str) -> None:
+    if not condition:
+        raise AuditError(code)
+
+
+def sha(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def unique(pairs):
+    value = {}
+    for key, item in pairs:
+        require(key not in value, "duplicate_json_key")
+        value[key] = item
+    return value
+
+
+def timestamp(value: str) -> datetime:
+    result = datetime.fromisoformat(value)
+    require(result.tzinfo is not None, "timestamp_without_timezone")
+    return result
+
+
+class Evidence:
+    def __init__(self, container: Path):
+        self.container = container.resolve()
+        self.run = (self.container / "run").resolve()
+        self.files: dict[str, str] = {}
+
+    def bind(self, path: Path, *, scope: Path | None = None, label: str | None = None) -> Path:
+        path = path.resolve()
+        require(path.is_file(), f"missing_evidence:{path.name}")
+        require(path.is_relative_to((scope or self.container).resolve()), "evidence_path_escaped_selected_scope")
+        key = label or path.relative_to(self.container).as_posix()
+        digest = sha(path)
+        require(key not in self.files or self.files[key] == digest, "evidence_changed_while_auditing")
+        self.files[key] = digest
+        return path
+
+    def external(self, path: Path, label: str) -> Path:
+        return self.bind(path, scope=path.parent, label=label)
+
+    def load(self, path: Path, *, run_only: bool = True):
+        target = self.bind(path, scope=self.run if run_only else self.container)
+        return json.loads(target.read_bytes(), object_pairs_hook=unique,
+                          parse_constant=lambda _v: (_ for _ in ()).throw(AuditError("nonfinite_json")))
+
+    def lines(self, path: Path):
+        target = self.bind(path, scope=self.run)
+        rows = target.read_bytes().splitlines()
+        return [json.loads(row, object_pairs_hook=unique) for row in rows if row.strip()]
+
+    def frame(self, path: Path) -> ObservationSnapshot:
+        value = self.load(path)
+        payload = {key: value[key] for key in ObservationSnapshot.model_fields if key in value}
+        payload["notices"] = value.get("notices", value.get("ocr_notices", []))
+        frame = ObservationSnapshot.model_validate(payload)
+        self.bind(Path(frame.image_path), scope=self.run)
+        require(not _initial_guard(frame), "unreadable_or_unscoped_saved_frame")
+        return frame
+
+
+def same_check(actual: dict | None, expected) -> bool:
+    if actual is None:
+        return False
+    return actual == expected.model_dump(mode="json")
+
+
+def command_value(command: list[str], flag: str) -> str:
+    require(command.count(flag) == 1, f"owner_command_missing_or_duplicate:{flag}")
+    index = command.index(flag)
+    require(index + 1 < len(command), "owner_command_truncated")
+    return command[index + 1]
+
+
+def audit_repair_context(evidence: Evidence, directory: Path, index: int, context: dict) -> None:
+    keys = {"constraint_error", "previous_response_record", "previous_response_characters", "previous_response"}
+    if index == 1:
+        require(not keys.intersection(context), "first_attempt_contains_unattributed_repair_context")
+        return
+    previous_path = directory / f"attempt_{index - 1:02d}_response.json"
+    previous = evidence.load(previous_path)
+    error = evidence.load(directory / f"attempt_{index - 1:02d}_error.json")
+    content = previous["content"]
+    require(Path(context.get("previous_response_record", "")).resolve() == previous_path.resolve()
+            and type(context.get("previous_response_characters")) is int
+            and context["previous_response_characters"] == len(content)
+            and context.get("constraint_error") == error["error"], "repair_reference_count_or_error_not_bound_to_original_reply")
+    if len(content) <= _INLINE_CORRECTION_MAX_CHARACTERS:
+        require(context.get("previous_response") == content, "small_original_reply_not_preserved_in_repair_context")
+    else:
+        require("previous_response" not in context, "oversized_original_reply_was_echoed_into_repair_context")
+
+
+def expected_native_mapping(native: dict, parsed: SemanticPlan, tasks: list) -> list[dict]:
+    return [{"goal_id": goal.goal_id, "native_instruction": native["subgoals"][index]["instruction"],
+             "validated_instruction": goal.instruction, "compiled_instruction": task.instruction,
+             "expect_text": goal.expect_text, "forbid_text": goal.forbid_text}
+            for index, (goal, task) in enumerate(zip(parsed.subgoals, tasks, strict=True))]
+
+
+def owner_audit(evidence: Evidence, owner_harness: Path, fixture: Path) -> dict:
+    claim = evidence.load(evidence.container / "owner_claim.json", run_only=False)
+    start = evidence.load(evidence.container / "owner_start.json", run_only=False)
+    receipt = evidence.load(evidence.container / "owner_receipt.json", run_only=False)
+    evidence.bind(evidence.container / "stdout.txt")
+    require(claim.get("schema") == "week6.semantic.live.claim.v1"
+            and receipt.get("schema") == "week6.semantic.live.actual_exit.v1", "wrong_owner_schema")
+    require(type(receipt.get("child_exit_code")) is int and receipt["child_exit_code"] == 0,
+            "owner_did_not_observe_real_exit_zero")
+    require(claim["owner"] == start["owner"] == receipt["owner"]
+            and start["launcher"] == receipt["launcher"]
+            and claim["command"] == start["command"] == receipt["command"], "owner_identity_or_command_changed")
+    command = receipt["command"]
+    require(Path(command[1]).resolve() == ROOT / "scripts/week6_semantic_acceptance.py"
+            and Path(command_value(command, "--directory")).resolve() == evidence.run
+            and Path(claim["batch"]).resolve() == evidence.run
+            and Path(command_value(command, "--fixture-directory")).resolve() == fixture.resolve(),
+            "owner_command_not_bound_to_explicit_selected_run")
+    digest = sha(evidence.external(owner_harness.resolve(), "explicit_owner_harness"))
+    require(start["owner_harness_sha256"] == receipt["owner_harness_sha256"] == digest,
+            "owner_harness_sha_mismatch")
+    require(timestamp(claim["started_utc"]) == timestamp(start["started_utc"]) == timestamp(receipt["started_utc"])
+            and timestamp(receipt["finished_utc"]) >= timestamp(receipt["started_utc"])
+            and type(receipt["elapsed_seconds"]) in (float, int) and receipt["elapsed_seconds"] >= 0,
+            "owner_exit_timestamps_invalid")
+    for identity in [receipt["owner"], receipt["launcher"], *receipt["observed_descendants"]]:
+        require(type(identity.get("pid")) is int and identity["pid"] > 0
+                and type(identity.get("create_time")) in (float, int)
+                and math.isfinite(identity["create_time"]) and identity["create_time"] > 0,
+                "owner_process_creation_identity_missing")
+    return receipt
+
+
+def source_audit(evidence: Evidence, contract: dict, command: list[str]) -> dict:
+    pins = contract["source_sha256"]
+    config = Path(command_value(command, "--config")).resolve()
+    require(config.is_relative_to(ROOT), "selected_config_escaped_repository")
+    expected = {p.relative_to(ROOT).as_posix() for p in (ROOT / "src").rglob("*.py")}
+    expected |= {config.relative_to(ROOT).as_posix(), "scripts/week6_semantic_acceptance.py",
+                 "scripts/week6_lab_acceptance.py", "scripts/week6_local_lab.py",
+                 "scripts/week6_agent_cli.py", "pyproject.toml"}
+    require(set(pins) == expected, "source_pin_inventory_differs_from_executed_harness_contract")
+    for name, digest in pins.items():
+        path = (ROOT / name).resolve()
+        require(path.is_relative_to(ROOT), "source_pin_path_escaped_repository")
+        evidence.external(path, "current_source/" + name)
+        snapshot = evidence.run / "source_snapshot" / name
+        snapshot = snapshot.with_suffix(snapshot.suffix + ".txt")
+        require(sha(evidence.bind(snapshot, scope=evidence.run)) == digest == sha(path),
+                f"source_snapshot_current_or_before_pin_changed:{name}")
+    return {"pin_count": len(pins), "all_saved_before_and_current_equal": True}
+
+
+def audit(container: Path, owner_harness: Path, fixture: Path, evidence: Evidence) -> dict:
+    owner = owner_audit(evidence, owner_harness, fixture)
+    contract = evidence.load(evidence.run / "contract.json")
+    require(contract.get("schema") == "week6.semantic_live.contract.v1"
+            and contract.get("automatic_protocol") == "semantic_subtasks", "not_semantic_live_contract")
+    sources = source_audit(evidence, contract, owner["command"])
+    request = WorkflowRequest.model_validate(contract["request"])
+    project = command_value(owner["command"], "--project")
+    colour = command_value(owner["command"], "--colour")
+    mode = command_value(owner["command"], "--mode")
+    expected_request = WorkflowRequest(workflow_id="semantic_lab",
+        instruction=f"In Week6 Local Lab, prepare a {colour} report for project {project}, "
+                    "review it and commit it locally. Use the visible controls. This is an offline test "
+                    "with no external communication. If review is temporarily unavailable, retry within budget.",
+        expect_text=[f"Project {project}", f"Theme {colour}", "LOCAL COMPLETE"])
+    require(request == expected_request and contract["fixture_mode"] == mode
+            and contract["independent_expected"] == {"project": project, "colour": colour,
+                "stage": "completed", "committed": True,
+                "event_order": ["project_selected", "theme_selected", "review_accepted", "local_commit"],
+                "review_rejections": int(mode == "transient")}, "owner_parameters_or_original_caller_final_changed")
+    root = evidence.run / "automatic"
+    raw = evidence.load(evidence.run / "runtime_result.json")
+    typed = SemanticWorkflowResult.model_validate(raw)
+    require(typed.workflow_id == request.workflow_id, "runtime_caller_identity_changed")
+    require(raw == evidence.load(root / "automatic_workflow_summary.json"), "runtime_root_summary_mismatch")
+    acceptance = evidence.load(evidence.run / "acceptance_observed.json")
+    require(acceptance["automatic_result"] == raw, "acceptance_embedded_another_runtime")
+    require(typed.status == "succeeded" and typed.accounting_complete and typed.unconfirmed_action_attempts == 0,
+            "runtime_not_completed_with_complete_known_accounting")
+    require(Path(typed.evidence_directory).resolve() == root.resolve(), "runtime_directory_changed")
+    setup = evidence.load(root / "semantic_request.json")
+    require(setup["schema_version"] == SEMANTIC_PROTOCOL_VERSION
+            and setup["caller_request"] == request.model_dump(mode="json")
+            and setup["options"] == contract["options"]
+            and setup["max_model_requests"] == contract["max_model_requests"], "caller_or_shared_limits_changed")
+    options = contract["options"]
+    require(0 < typed.total_actions <= options["max_actions"]
+            and 0 < typed.planning_calls <= options["max_planning_attempts"]
+            and 0 < typed.model_requests <= contract["max_model_requests"]
+            and typed.elapsed_ms < options["task_timeout_seconds"] * 1000, "global_budget_exceeded")
+    verifier, final_task = Verifier(), _final_task(request)
+    latest = evidence.frame(root / "initial_observation/observation.json")
+    require(verifier.check_task(final_task, latest).outcome == "failed", "caller_final_preexisting_or_inconclusive")
+    completed, outcomes, plan_calls, actions, stage_reviews, model_calls, all_steps = [], [], 0, 0, [], [], []
+    workflow_cursor = 0
+    for round_index, plan_record in enumerate(raw["plans"], 1):
+        directory = root / f"semantic_plan_round_{round_index:03d}"
+        require(Path(plan_record["evidence_directory"]).resolve() == directory.resolve()
+                and evidence.load(directory / "result.json") == plan_record
+                and plan_record["status"] == "ready", "accepted_plan_record_missing_or_changed")
+        native = evidence.load(directory / "native_proposal.json")
+        parsed = SemanticPlan.model_validate(native, strict=True)
+        require(parsed.model_dump(mode="json") == plan_record["proposal"], "native_semantic_proposal_not_original")
+        protocol = evidence.load(directory / "protocol.json")
+        maximum = protocol["response_format"]["json_schema"]["schema"]["properties"]["subgoals"]["maxItems"]
+        require(type(maximum) is int and 2 <= maximum <= 32, "semantic_schema_objective_bound_changed")
+        schema = SemanticPlan.model_json_schema()
+        schema["properties"]["subgoals"]["maxItems"] = maximum
+        schema["$defs"]["SemanticGoal"]["required"] = ["goal_id", "instruction", "expect_text", "forbid_text"]
+        expected_format = {"type": "json_schema", "json_schema": {
+            "name": "semantic_subtask_sequence", "strict": True, "schema": schema}}
+        require(protocol["schema_version"] == SEMANTIC_PROTOCOL_VERSION
+                and protocol["caller_request"] == request.model_dump(mode="json")
+                and protocol["revision"] == (round_index > 1)
+                and protocol["response_format"] == expected_format, "semantic_protocol_or_caller_changed")
+        require(protocol.get("output_constraints") == {
+            "schema_version": "week6.semantic_output_constraints.v1",
+            "reason_max_characters": SEMANTIC_REASON_MAX_CHARACTERS,
+            "instruction_max_characters": SEMANTIC_INSTRUCTION_MAX_CHARACTERS,
+            "check_max_characters": SEMANTIC_CHECK_MAX_CHARACTERS,
+            "checks_per_list_max": SEMANTIC_CHECKS_PER_LIST,
+            "inline_correction_max_characters": _INLINE_CORRECTION_MAX_CHARACTERS,
+            "oversized_previous_response": "archived_in_full_not_repeated_in_correction_context"},
+            "semantic_output_constraints_changed_or_unversioned")
+        attempts = sorted(directory.glob("attempt_*_request.json"))
+        require(len(attempts) == plan_record["planning_calls"] >= 1, "decomposition_attempts_incomplete")
+        for index, path in enumerate(attempts, 1):
+            saved = evidence.load(path)
+            response = evidence.load(directory / f"attempt_{index:02d}_response.json")
+            context = saved["context"]
+            audit_repair_context(evidence, directory, index, context)
+            require(saved["instruction"] == request.instruction and saved["system"] == SEMANTIC_SYSTEM_PROMPT
+                    and saved["response_format"] == protocol["response_format"]
+                    and context["original_caller_request"] == request.model_dump(mode="json")
+                    and context["completed_subgoals"] == completed
+                    and context["revision"] == (round_index > 1)
+                    and context["minimum_objectives"] == (1 if round_index > 1 else 2)
+                    and context["maximum_objectives"] == maximum
+                    and response["provider"] == "openai_compatible" and response["model_name"] == contract["model"],
+                    "decomposition_prompt_or_completed_context_changed")
+            frame = ObservationSnapshot.model_validate(context["current_observation"])
+            evidence.bind(Path(frame.image_path), scope=evidence.run)
+            require(frame.model_dump(mode="json") == latest.model_dump(mode="json"), "proposal_not_bound_to_latest_actual_frame")
+            require(Path(saved["image_path"]).resolve() == Path(frame.image_path).resolve(), "native_proposal_uses_another_image")
+            model_calls.append({"system": SEMANTIC_SYSTEM_PROMPT, "instruction": request.instruction,
+                                "context": context, "image_path": saved["image_path"], "response": response,
+                                "requests": 1, "kind": "semantic_decomposition"})
+        require(json.loads(response["content"], object_pairs_hook=unique) == native,
+                "native_proposal_differs_from_last_accepted_raw_reply")
+        SemanticDecomposer(max_subgoals=maximum)._validate(parsed, request, latest, completed, round_index > 1)
+        compilation = evidence.load(directory / "compiled_workflow.json")
+        expected_tasks = [_goal_task(goal, request) for goal in parsed.subgoals]
+        require(compilation["native_proposal"] == native and compilation["schema_version"] == SEMANTIC_PROTOCOL_VERSION
+                and compilation["workflow"] == plan_record["workflow"]
+                and compilation["workflow"]["workflow_id"] == request.workflow_id
+                and compilation["workflow"]["instruction"] == request.instruction
+                and compilation["workflow"]["subgoals"] == [task.model_dump(mode="json") for task in expected_tasks]
+                and compilation["workflow"]["final_check"] == final_task.model_dump(mode="json"), "native_to_compiled_mapping_changed")
+        expected_mapping = expected_native_mapping(native, parsed, expected_tasks)
+        require(compilation["mapping"] == expected_mapping, "native_goal_mapping_not_exact")
+        plan_calls += plan_record["planning_calls"]
+        for goal_index, (goal, task) in enumerate(zip(parsed.subgoals, expected_tasks, strict=True), 1):
+            # A failed goal stops the remainder of this round; later goals remain unexecuted.
+            require(workflow_cursor < len(raw["goal_outcomes"])
+                    and raw["goal_outcomes"][workflow_cursor]["round"] == round_index,
+                    "native_semantic_sequence_contains_an_unexecuted_required_goal")
+            recorded = raw["goal_outcomes"][workflow_cursor]
+            require(recorded["goal_id"] == goal.goal_id, "semantic_goal_execution_order_changed")
+            before = evidence.frame(root / f"contract_before_{round_index:03d}_{goal_index:03d}/observation.json")
+            require(not _rolling_frame_guard(latest, before) and verifier.check_task(task, before).outcome == "failed",
+                    "goal_preconditions_preexisting_or_frame_not_fresh")
+            frozen = evidence.load(root / f"goal_contract_{round_index:03d}_{goal_index:03d}.json")
+            require(frozen["schema_version"] == SEMANTIC_PROTOCOL_VERSION
+                    and frozen["round"] == round_index and frozen["goal"] == goal.model_dump(mode="json")
+                    and frozen["task"] == task.model_dump(mode="json")
+                    and frozen["before"] == before.model_dump(mode="json")
+                    and frozen["caller_final"] == final_task.model_dump(mode="json")
+                    and frozen["postconditions_fixed_before_input"] is True, "pre_input_semantic_contract_changed")
+            goal_dir = root / f"goal_{round_index:03d}_{goal_index:03d}_{goal.goal_id}"
+            workflow = raw["workflow_results"][workflow_cursor]
+            require(Path(recorded["evidence_directory"]).resolve() == goal_dir.resolve()
+                    and evidence.load(goal_dir / "workflow_summary.json") == workflow
+                    and recorded["status"] == workflow["status"]
+                    and recorded["verification"] == workflow["final_verification"]
+                    and recorded["task_verification"] == workflow["subgoals"][0]["verification"]
+                    and workflow["accounting_complete"] and workflow["unconfirmed_action_attempts"] == 0,
+                    "goal_workflow_record_or_accounting_changed")
+            child_dir = goal_dir / f"001_{goal.goal_id}"
+            child = evidence.load(child_dir / "task_summary.json")
+            require(child["case_id"] == goal.goal_id and child["instruction"] == task.instruction
+                    and child["execute"] is True and child["provider"] == "openai_compatible"
+                    and child["model_name"] == contract["model"] and child["unconfirmed_action_attempts"] == 0,
+                    "semantic_child_identity_or_unknown_dispatch")
+            audit_row = evidence.load(child_dir / "semantic_goal_audit.json")
+            require(Path(workflow["subgoals"][0]["summary_reference"]).resolve() == (child_dir / "task_summary.json").resolve()
+                    and workflow["subgoals"][0]["verification"] == child["verification"]
+                    and audit_row["child_verification"] == child["verification"]
+                    and audit_row["child_status"] == child["status"]
+                    and audit_row["post_observation_id"] == child["verification"]["evidence"]["observation_id"],
+                    "semantic_child_verdict_or_post_frame_binding_changed")
+            steps = evidence.lines(child_dir / "steps.jsonl")
+            require([_mask_step(step) for step in audit_row["steps"]] == child["steps"] == steps,
+                    "original_semantic_steps_journal_mismatch")
+            limit = evidence.load(child_dir / "single_step_planning_limit.json")
+            require(Path(audit_row["planning_limit_reference"]).resolve() == (child_dir / "single_step_planning_limit.json").resolve()
+                    and limit["protocol_version"] == SEMANTIC_PROTOCOL_VERSION
+                    and limit["raw_step_verification_policy"] == SEMANTIC_STEP_POLICY
+                    and limit["applied_max_steps"] == 1 and limit["restored"] is True
+                    and limit["restored_max_steps"] == limit["original_max_steps"], "single_step_limit_or_restoration_missing")
+            frames = {}
+
+            def child_frame(identifier, frames=frames, child_dir=child_dir, before=before):
+                require(isinstance(identifier, str) and identifier and Path(identifier).name == identifier,
+                        "unsafe_or_empty_observation_id")
+                if identifier not in frames:
+                    value = evidence.frame(child_dir / f"{identifier}.json")
+                    require(value.observation_id == identifier and not _rolling_frame_guard(before, value),
+                            "child_frame_not_fresh_or_original_scope")
+                    require(Path(value.image_path).resolve().is_relative_to(child_dir.resolve()),
+                            "child_borrowed_image_from_another_goal")
+                    frames[identifier] = value
+                return frames[identifier]
+
+            calls = limit["calls"]
+            require(len(calls) == child["planning_calls"] == workflow["planning_calls"], "child_planning_call_inventory_incomplete")
+            native_steps = []
+            for call in calls:
+                require(call["max_steps"] == 1 and call["returned_steps"] in (None, 0, 1)
+                        and call["instruction"] == task.instruction and call["task_id"] == goal.goal_id,
+                        "action_planner_goal_or_one_step_bound_changed")
+                frame = child_frame(call["context"]["observation_id"])
+                require(Path(call["image_path"]).resolve() == Path(frame.image_path).resolve(), "action_plan_uses_another_image")
+                if call["ok"]:
+                    require(call["response"]["provider"] == "openai_compatible"
+                            and call["response"]["model_name"] == contract["model"]
+                            and not call["response"].get("error"), "native_action_response_provider_changed")
+                    rebuilt = parse_plan(call["response"]["content"], instruction=task.instruction, max_steps=1, task_id=goal.goal_id)
+                    require(rebuilt.model_dump(mode="json") == call["parsed_plan"], "native_action_plan_changed")
+                    native_steps.extend(rebuilt.model_dump(mode="json")["steps"])
+                model_calls.append({"system": SYSTEM_PROMPT, "instruction": task.instruction,
+                    "context": {**call["context"], "max_steps": 1}, "image_path": call["image_path"],
+                    "response": call["response"], "requests": call["model_requests"], "kind": "primitive_action_plan"})
+            inputs, executor_failures, used_plans = 0, 0, 0
+            for step in steps:
+                if step["action_result"] is None:
+                    continue
+                receipt = ActionResult.model_validate(step["action_result"])
+                require(receipt.action is not None and not receipt.dry_run
+                        and receipt.action.action_type == step["action_type"]
+                        and step["resolved"]["action"] == step["action_result"]["action"], "invalid_real_action_receipt")
+                matching = [i for i in range(used_plans, len(native_steps))
+                            if native_steps[i]["step_id"] == step["step_id"]
+                            and native_steps[i]["action_type"] == step["action_type"]
+                            and native_steps[i]["description"] == step["description"]]
+                require(matching, "step_not_attributable_to_ordered_native_action_plan")
+                native_step = native_steps[matching[0]]
+                used_plans = matching[0] + 1
+                raw_check = verifier.check_step(expected_result=native_step.get("expected_result"),
+                    action_type=step["action_type"], before=child_frame(step["observation_id"]),
+                    after=child_frame(step["after_observation_id"]) if step["after_observation_id"] else None,
+                    action_result=receipt)
+                require(same_check(step["verification"], raw_check), "raw_model_step_verdict_rewritten")
+                inputs += int(receipt.success and step["action_type"] in semantic_input_types())
+                executor_failures += int(not receipt.success)
+                all_steps.append({"goal_id": goal.goal_id, "stage_key": f"{round_index}:{goal_index}:{goal.goal_id}",
+                    "step": step, "action": receipt.action.model_dump(mode="json"),
+                    "before_captured_at": child_frame(step["observation_id"]).captured_at.isoformat(),
+                    "after_captured_at": child_frame(step["after_observation_id"]).captured_at.isoformat()
+                    if step["after_observation_id"] else None})
+            post = child_frame(audit_row["post_observation_id"])
+            checked = verifier.check_task(task, post)
+            require(audit_row["schema_version"] == SEMANTIC_PROTOCOL_VERSION
+                    and audit_row["frozen_task"] == task.model_dump(mode="json")
+                    and same_check(audit_row["semantic_postcondition_verification"], checked)
+                    and audit_row["confirmed_input_count"] == inputs
+                    and audit_row["planning_accounting_complete"] is True,
+                    "semantic_postcondition_audit_or_input_count_changed")
+            if workflow["final_observation_reference"]:
+                require(Path(workflow["final_observation_reference"]).resolve()
+                        == (child_dir / f"{workflow['final_observation_id']}.json").resolve(),
+                        "goal_final_reference_borrowed_from_another_directory")
+                latest = child_frame(workflow["final_observation_id"])
+            else:
+                latest = post
+            if recorded["status"] == "succeeded":
+                require(checked.passed and inputs > 0 and audit_row["eligible_for_semantic_credit"] is True
+                        and child["status"] == "succeeded" and workflow["status"] == "succeeded"
+                        and not _rolling_frame_guard(post, latest)
+                        and verifier.check_task(task, latest).passed, "unqualified_completed_semantic_goal")
+                completed.append(recorded)
+            else:
+                require(checked.outcome == "failed" and not audit_row["eligible_for_semantic_credit"],
+                        "failed_goal_rescued_or_nonliteral_failure_replanned")
+            outcomes.append(recorded)
+            actions += len([step for step in steps if step["action_result"] is not None])
+            plan_calls += len(calls)
+            require(workflow["total_actions"] == child.get("action_count", len(steps))
+                    == len([step for step in steps if step["action_result"] is not None]), "known_action_counts_disagree")
+            stage_reviews.append({"round": round_index, "goal_id": goal.goal_id,
+                "stage_key": f"{round_index}:{goal_index}:{goal.goal_id}", "instruction": goal.instruction,
+                "expect_text": goal.expect_text, "forbid_text": goal.forbid_text, "status": recorded["status"],
+                "confirmed_inputs": inputs, "executor_failures": executor_failures,
+                "semantic_postcondition": checked.outcome,
+                "raw_step_outcomes": [step["verification"]["outcome"] for step in steps if step["verification"]]})
+            workflow_cursor += 1
+            if recorded["status"] != "succeeded":
+                revision = root / f"revision_observation_{round_index:03d}/observation.json"
+                revised_before = evidence.frame(revision)
+                require(not _rolling_frame_guard(latest, revised_before)
+                        and not verifier.check_task(final_task, revised_before).passed, "caller_final_rescued_failed_semantic_goal")
+                latest = revised_before
+                break
+        else:
+            final_candidate = root / f"caller_final_round_{round_index:03d}/observation.json"
+            final_frame = evidence.frame(final_candidate)
+            require(not _rolling_frame_guard(latest, final_frame), "independent_caller_final_not_fresh")
+            latest = final_frame
+    require(workflow_cursor == len(raw["workflow_results"]) == len(raw["goal_outcomes"])
+            and raw["workflow_result"] == raw["workflow_results"][-1]
+            and completed == raw["completed_subgoals"] and outcomes == evidence.load(root / "semantic_goal_ledger.json")
+            and actions == typed.total_actions and plan_calls == typed.planning_calls, "root_goal_ledger_or_shared_counts_disagree")
+    final_path = Path(typed.final_observation_reference).resolve()
+    require(final_path == (root / f"caller_final_round_{len(raw['plans']):03d}/observation.json").resolve(), "caller_final_reference_changed")
+    final_check = verifier.check_task(final_task, evidence.frame(final_path))
+    require(final_check.passed and same_check(raw["final_verification"], final_check), "immutable_caller_final_not_independently_passed")
+    http = transport_audit(evidence, root, model_calls, typed.model_requests, contract)
+    monitor = monitor_audit(evidence, root, owner, typed, completed)
+    transitions = fixture_audit(evidence, fixture, acceptance, contract, owner, all_steps, stage_reviews)
+    return {"passed": True, "source": sources, "actual_owner_child_exit_code": owner["child_exit_code"],
+            "actual_model_requests": http, "planning_calls": plan_calls, "known_actions": actions,
+            "unconfirmed_action_attempts": 0, "native_semantic_stages": stage_reviews,
+            "monitor": monitor, "transition_attribution": transitions,
+            "scope": "Ended controlled local-window run. Native ordered semantic goals, immutable pre-input literal postconditions, actual receipts, independent fixture events and a fresh caller final are separately bound. No general-app success rate is inferred."}
+
+
+def semantic_input_types():
+    return {"click", "double_click", "right_click", "drag", "scroll", "type_text", "key_press", "hotkey"}
+
+
+def transport_audit(evidence, root, calls, expected_total, contract):
+    dispatches = evidence.lines(root / "transport_requests.jsonl")
+    cumulative = 0
+    for index, dispatch in enumerate(dispatches, 1):
+        require(dispatch["dispatch"] == index and dispatch["count_source"] == "httpx_request_event"
+                and type(dispatch["requests_made"]) is int and dispatch["requests_made"] >= 0,
+                "actual_http_dispatch_inventory_invalid")
+        cumulative += dispatch["requests_made"]
+        require(dispatch["requests_total"] == cumulative, "actual_http_total_nonmonotonic")
+    require(cumulative == expected_total, "actual_http_total_differs_from_root")
+    cursor = 0
+    for call in calls:
+        messages = [{"role": "system", "content": call["system"]}, *ModelRequest(
+            instruction=call["instruction"], context=call["context"], image_path=call["image_path"]).to_messages()]
+        made, replies = 0, []
+        while made < call["requests"]:
+            require(cursor < len(dispatches), "native_call_has_no_remaining_http_record")
+            dispatch = dispatches[cursor]
+            require(dispatch["messages"] == messages and dispatch["provider"] == "openai_compatible"
+                    and dispatch["model_name"] == contract["model"], "actual_http_prompt_or_call_binding_changed")
+            made += dispatch["requests_made"]
+            for response in dispatch["http_responses"]:
+                body = response.get("body")
+                for choice in body.get("choices", []) if isinstance(body, dict) else []:
+                    content = choice.get("message", {}).get("content")
+                    if isinstance(content, str):
+                        replies.append(content)
+            cursor += 1
+        require(made == call["requests"], "native_call_http_segment_count_changed")
+        if call["response"] and call["response"].get("content"):
+            require(replies and call["response"]["content"] == replies[-1], "native_response_borrowed_from_another_call")
+    require(cursor == len(dispatches), "unassigned_actual_http_dispatches")
+    return cumulative
+
+
+def monitor_audit(evidence, root, owner, result, completed):
+    evidence.bind(root / "run_status.json", scope=evidence.run)
+    events = evidence.lines(root / "status_events.jsonl")
+    read = read_run_status(root)
+    require(read.get("snapshot") is not None and not read.get("diagnostics"), "root_monitor_journal_snapshot_disagree")
+    final = read["snapshot"]
+    require(final["event"] == "finished" and final["task_status"] == "succeeded"
+            and final["actions_used"] == result.total_actions
+            and final["planning_pass"] == result.planning_calls
+            and final["subgoals_completed"] == len(completed)
+            and final["subgoals_total"] >= len(completed), "root_monitor_not_bound_to_completed_ledger")
+    identities = [owner["launcher"], *owner["observed_descendants"]]
+    matched = [row for row in identities if row["pid"] == final["pid"]]
+    require(len(matched) == 1 and final["process_identity"].startswith("windows:"), "actual_trainer_pid_identity_missing")
+    saved_time = int(final["process_identity"].split(":", 1)[1]) / 10_000_000 - 11644473600
+    require(abs(saved_time - matched[0]["create_time"]) < .001, "actual_cpython_pid_was_reused_or_misattributed")
+    require(all(row["subgoals_total"] >= row["subgoals_completed"] for row in events), "monitor_completed_exceeds_declared_total")
+    return {"actual_cpython": matched[0], "events": len(events), "terminal_status": final["task_status"],
+            "completed_semantic_goals": final["subgoals_completed"], "granularity": "event-driven; detailed inputs remain in child journals"}
+
+
+def fixture_audit(evidence, fixture, acceptance, contract, owner, steps, stages):
+    originals = {}
+    for filename in ("independent_state.json", "independent_events.jsonl"):
+        path = evidence.external(fixture / filename, "explicit_fixture/" + filename)
+        originals[filename] = path.read_bytes()
+        archived = evidence.container / "fixture_evidence" / filename
+        if archived.exists():
+            require(evidence.bind(archived).read_bytes() == originals[filename], "archived_fixture_differs_from_original")
+    state = json.loads(originals["independent_state.json"], object_pairs_hook=unique)
+    events = [json.loads(row, object_pairs_hook=unique) for row in originals["independent_events.jsonl"].splitlines() if row]
+    require(state == acceptance["state"] and events == acceptance["independent_events"], "fixture_originals_differ_from_embedded_observation")
+    expected = contract["independent_expected"]
+    order = ["project_selected", "theme_selected", "review_accepted", "local_commit"]
+    require(state["project"] == expected["project"] and state["colour"] == expected["colour"]
+            and state["stage"] == "completed" and state["committed"] is True
+            and [event["event"] for event in events if event["event"] in order] == order
+            and sum(event["event"] == "review_rejected" for event in events) == expected["review_rejections"],
+            "independent_fixture_parameters_sequence_or_recovery_failed")
+    requests = sorted((evidence.run / "sky_bridge").glob("*_request.json"))
+    receipts, owners = [], []
+    require(len(requests) == len(steps), "sky_requests_not_bijective_with_known_runtime_inputs")
+    for request_path, step in zip(requests, steps, strict=True):
+        request = evidence.load(request_path)
+        receipt = evidence.load(request_path.with_name(request_path.name.replace("_request.json", "_receipt.json")))
+        require(receipt["id"] == request["id"] and receipt["action"] == request["action"] == step["action"]
+                and receipt["transport"] == "Sky click" and type(receipt["success"]) is bool
+                and receipt["success"] == step["step"]["action_result"]["success"]
+                and request["required_window_title"] == "Week6 Local Lab"
+                and timestamp(receipt["finished_utc"]) >= timestamp(receipt["started_utc"]), "sky_input_receipt_or_runtime_binding_changed")
+        require(timestamp(step["before_captured_at"]) <= timestamp(receipt["started_utc"]),
+                "input_receipt_precedes_its_actual_planning_observation")
+        if receipt["success"]:
+            require(step["after_captured_at"] is not None
+                    and timestamp(receipt["finished_utc"]) <= timestamp(step["after_captured_at"]),
+                    "successful_input_lacks_a_strictly_later_actual_post_frame")
+        receipts.append(receipt)
+        owners.append({"goal_id": step["goal_id"], "stage_key": step["stage_key"]})
+    require(receipts == acceptance["input_receipts"], "acceptance_embedded_different_sky_receipts")
+    transitions = []
+    for event in events:
+        if event["event"] not in {*order, "review_rejected"}:
+            continue
+        when = timestamp(event["utc"])
+        matching = [index for index, row in enumerate(receipts) if row["success"]
+                    and timestamp(row["started_utc"]) <= when <= timestamp(row["finished_utc"])]
+        require(len(matching) == 1 and timestamp(owner["started_utc"]) <= when <= timestamp(owner["finished_utc"]),
+                "semantic_transition_not_uniquely_attributed_to_real_owned_input")
+        index = matching[0]
+        transitions.append({"event": event["event"], "utc": event["utc"],
+                            "input_receipt": receipts[index]["id"], **owners[index]})
+    require(len({row["input_receipt"] for row in transitions}) == len(transitions), "one_input_crossed_multiple_semantic_transitions")
+    completed_keys = {stage["stage_key"] for stage in stages if stage["status"] == "succeeded"}
+    require(completed_keys <= {row["stage_key"] for row in transitions}, "completed_goal_has_no_independent_semantic_transition")
+    for stage in stages:
+        stage["independent_transitions"] = [row["event"] for row in transitions if row["stage_key"] == stage["stage_key"]]
+    return transitions
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--container", type=Path, required=True)
+    parser.add_argument("--owner-harness", type=Path, required=True)
+    parser.add_argument("--fixture-directory", type=Path, required=True)
+    parser.add_argument("--out", type=Path, required=True)
+    args = parser.parse_args()
+    require(not args.out.exists(), "audit_output_exists_no_overwrite")
+    evidence = Evidence(args.container)
+    try:
+        result = audit(args.container, args.owner_harness, args.fixture_directory.resolve(), evidence)
+    except (AuditError, OSError, ValueError, KeyError, TypeError, IndexError) as exc:
+        result = {"passed": False, "error_type": type(exc).__name__, "error": str(exc)}
+    result.update(schema="week6.semantic_live.independent_audit.v1", container=str(args.container.resolve()),
+                  auditor_sha256=sha(Path(__file__)), evidence_sha256=evidence.files,
+                  operations={"model_calls": 0, "gui_operations": 0, "experiment_reruns": 0},
+                  raw_evidence_modified=False)
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    with args.out.open("x", encoding="utf8", newline="\n") as stream:
+        stream.write(json.dumps(result, ensure_ascii=False, indent=2) + "\n")
+    print(json.dumps({"passed": result["passed"], "out": str(args.out), "sha256": sha(args.out),
+                      "error": result.get("error", "")}, ensure_ascii=False))
+    return 0 if result["passed"] else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

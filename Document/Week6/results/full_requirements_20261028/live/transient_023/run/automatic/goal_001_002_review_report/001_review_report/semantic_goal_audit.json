@@ -1,0 +1,130 @@
+{
+  "schema_version": "week6.semantic_subtasks.v6",
+  "frozen_task": {
+    "case_id": "review_report",
+    "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Review the prepared BLUE report using the visible review controls.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+    "target_app": null,
+    "preconditions": [],
+    "success_rules": [],
+    "verification": "automatic",
+    "expect_text": [
+      "Project BETA",
+      "Theme BLUE",
+      "Review Complete"
+    ],
+    "forbid_text": [],
+    "requires_processes": [],
+    "forbids_processes": [],
+    "must_exit_processes": [],
+    "risk": "medium",
+    "message_conversation": null,
+    "gate_on_step_verification": false
+  },
+  "child_status": "failed",
+  "child_verification": {
+    "outcome": "failed",
+    "method": "automatic",
+    "detail": "expected on screen but not found: Review Complete",
+    "evidence": {
+      "observation_id": "obs-0004",
+      "missing": [
+        "Review Complete"
+      ],
+      "verification_source": "frozen_model_semantic_subtask_postconditions"
+    }
+  },
+  "semantic_postcondition_verification": {
+    "outcome": "failed",
+    "method": "automatic",
+    "detail": "expected on screen but not found: Review Complete",
+    "evidence": {
+      "observation_id": "obs-0004",
+      "missing": [
+        "Review Complete"
+      ]
+    }
+  },
+  "post_observation_id": "obs-0004",
+  "confirmed_input_count": 1,
+  "planning_accounting_complete": true,
+  "eligible_for_semantic_credit": false,
+  "planning_limit_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_023\\run\\automatic\\goal_001_002_review_report\\001_review_report\\single_step_planning_limit.json",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Click the 'Review report' button to start reviewing the report.",
+      "action_type": "click",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "click",
+          "x": 1282,
+          "y": 1049,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Review report"
+        },
+        "element_id": "obs-0002-e001",
+        "screenshot_point": {
+          "x": 1282,
+          "y": 1049
+        },
+        "control_point": {
+          "x": 1282,
+          "y": 1049
+        },
+        "note": "text 'Review report' -> obs-0002-e001 (re-bound from obs-0001-e001 in an earlier frame)"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "click",
+          "x": 1282,
+          "y": 1049,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Review report"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: report, review",
+        "evidence": {
+          "observation_id": "obs-0003",
+          "changed": true,
+          "element_count": 11,
+          "expectation_tokens": [
+            "report",
+            "review",
+            "interface",
+            "should",
+            "load"
+          ],
+          "expectation_hits": [
+            "report",
+            "review"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 19797.000000005937,
+      "after_observation_id": "obs-0003"
+    }
+  ],
+  "meaning": "The original model-proposed literal semantic postconditions were independently checked; no raw failed step was rewritten."
+}

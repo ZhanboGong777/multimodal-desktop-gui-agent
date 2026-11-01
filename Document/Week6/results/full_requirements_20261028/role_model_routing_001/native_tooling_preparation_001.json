@@ -1,0 +1,65 @@
+{
+  "schema": "week6.native_tooling.identity_rebind.v1",
+  "freeze": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\role_model_routing_001\\final_source_freeze_001.json",
+    "sha256": "b28f6b1f0661703da05ecd773be933b6a86758e3030c8a21d793d6c81a96c928"
+  },
+  "preregistration": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\preregistered_v6_024.json",
+    "sha256": "c0ff7d8141bf50fd41f4040a7e6b96068f005dcb96bffb2897f0813610dbf7ce"
+  },
+  "replacements": {
+    "gemma3_candidate_001/final_source_freeze_001.json": "role_model_routing_001/final_source_freeze_001.json",
+    "765aa0864d0eb14b2d5b5a720d0275327ba563d111eef153fb55a0e09a99a7b9": "b28f6b1f0661703da05ecd773be933b6a86758e3030c8a21d793d6c81a96c928",
+    "preregistered_v6_023.json": "preregistered_v6_024.json",
+    "96a58a213939a137b79eb9ae12f432d72149237dfa1233e9efb0936113105c49": "c0ff7d8141bf50fd41f4040a7e6b96068f005dcb96bffb2897f0813610dbf7ce",
+    "d37352eb1562739b15aafd0b623f214fd2d33e31b9a836fb715576435d294903": "75571131da8053d9ddf0e28a8dae9688f86000758c7fd942879ef5150284cff0",
+    "normal_029": "normal_030",
+    "normal029": "normal030",
+    "fixture_normal_025": "fixture_normal_026",
+    "281": "283"
+  },
+  "files": [
+    {
+      "before": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_full_requirements_20261028\\prepare_native_preflight_gemma_001.py",
+        "sha256": "bb84a31ab6c2ab72e624d8de5b38c912d5d67c77560d384fcdf0d4b12af2e4cb"
+      },
+      "after": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_full_requirements_20261028\\prepare_native_preflight_roles_001.py",
+        "sha256": "96dd1a744b3a94dd7a7cce08afdcf733372f9987347dbf12daaccaead69e85a2"
+      }
+    },
+    {
+      "before": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_full_requirements_20261028\\finalize_native_case_gemma_001.py",
+        "sha256": "52fbe8da41c982fff2f3e7f02fc869499afc3b9d6b0ebf56d1446bdddc349649"
+      },
+      "after": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_full_requirements_20261028\\finalize_native_case_roles_001.py",
+        "sha256": "716009c1ae70e7592cdd8bace43dd4c1f538e06d05b86cfff8ad793af9984fb7"
+      }
+    },
+    {
+      "before": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_normal029_independent_audit_20261101\\run_ended_audit_001.py",
+        "sha256": "20ab7d4ae7edefa2adb65ba54e1640e54b1cc7df1e090eba5169d77f87c5c21b"
+      },
+      "after": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_normal030_independent_audit_20261101\\run_ended_audit_001.py",
+        "sha256": "bc56ee2e18ab1855c3b7ba5dde0f563b38ba7e228a7f583593cf97a3362e4e8c"
+      }
+    },
+    {
+      "before": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_transient006_independent_audit_20261101_gemma\\run_ended_audit_001.py",
+        "sha256": "ff96948e5dbcaeb5be49e49aeedda3e018c020eb8a30354284eae0fbe4ab6dad"
+      },
+      "after": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_transient006_independent_audit_20261101_roles\\run_ended_audit_001.py",
+        "sha256": "05faf96cda0321fc885ac6a2ddca22e425b626a7f21dd71eda0eb5c9340071cb"
+      }
+    }
+  ],
+  "scope": "Only identities and paths rebound. No original source, input, semantic, process, receipt or pending-request guard removed. Existing native audit reads the newly pinned explicit paired-model owner command."
+}

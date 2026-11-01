@@ -1,0 +1,110 @@
+{
+  "schema": "week6.operation_outcome_guidance.text_probe.v1",
+  "started_utc": "2026-11-01T11:19:43.079057+00:00",
+  "finished_utc": "2026-11-01T11:20:03.051962+00:00",
+  "elapsed_seconds": 19.968999999997322,
+  "actual_http_requests": 1,
+  "model_input_has_no_image": true,
+  "gui_inputs": 0,
+  "acceptance_granted": false,
+  "code_readme_unchanged": true,
+  "system_prompt_sha256": "efa700f2f5d0198850c8fc2a349d5c67430668b3a72e162eb212ecfe757d78ee",
+  "source_sha256": "b410675c0ae6e007a08aa62ee2e4e1485afe575a469a93e4d6d2d822d1932b7c",
+  "result": {
+    "schema_version": "week6.semantic_subtasks.v6",
+    "input_modality": "caller_intent_only",
+    "image_attached": false,
+    "status": "ready",
+    "proposal": {
+      "status": "ready",
+      "reason": "Plan outlines two distinct semantic objectives: first, prepare the BLUE report for project BETA; second, review and commit it locally. Each goal uses explicit operations and verifiable postconditions to distinguish outcomes without conflating steps or inventing controls.",
+      "subgoals": [
+        {
+          "instruction": "Prepare a BLUE report for project BETA in Week6 Local Lab using visible controls.",
+          "expect_text": [
+            "Project BETA",
+            "Theme BLUE"
+          ],
+          "forbid_text": [],
+          "goal_id": "prepare_report"
+        },
+        {
+          "instruction": "Review the prepared BLUE report for project BETA and commit it locally.",
+          "expect_text": [
+            "LOCAL COMPLETE"
+          ],
+          "forbid_text": [],
+          "goal_id": "review_and_commit"
+        }
+      ]
+    },
+    "workflow": {
+      "workflow_id": "semantic_lab",
+      "instruction": "In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+      "subgoals": [
+        {
+          "case_id": "prepare_report",
+          "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Prepare a BLUE report for project BETA in Week6 Local Lab using visible controls.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+          "target_app": null,
+          "preconditions": [],
+          "success_rules": [],
+          "verification": "automatic",
+          "expect_text": [
+            "Project BETA",
+            "Theme BLUE"
+          ],
+          "forbid_text": [],
+          "requires_processes": [],
+          "forbids_processes": [],
+          "must_exit_processes": [],
+          "risk": "medium",
+          "message_conversation": null,
+          "gate_on_step_verification": false
+        },
+        {
+          "case_id": "review_and_commit",
+          "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Review the prepared BLUE report for project BETA and commit it locally.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+          "target_app": null,
+          "preconditions": [],
+          "success_rules": [],
+          "verification": "automatic",
+          "expect_text": [
+            "LOCAL COMPLETE"
+          ],
+          "forbid_text": [],
+          "requires_processes": [],
+          "forbids_processes": [],
+          "must_exit_processes": [],
+          "risk": "medium",
+          "message_conversation": null,
+          "gate_on_step_verification": false
+        }
+      ],
+      "final_check": {
+        "case_id": "FINAL",
+        "instruction": "Independently read unchanged caller final predicates",
+        "target_app": null,
+        "preconditions": [],
+        "success_rules": [],
+        "verification": "automatic",
+        "expect_text": [
+          "Project BETA",
+          "Theme BLUE",
+          "LOCAL COMPLETE"
+        ],
+        "forbid_text": [],
+        "requires_processes": [],
+        "forbids_processes": [],
+        "must_exit_processes": [],
+        "risk": "low",
+        "message_conversation": null,
+        "gate_on_step_verification": true
+      }
+    },
+    "planning_calls": 1,
+    "model_requests": 1,
+    "elapsed_ms": 19812.000000005355,
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\operation_outcome_guidance_001\\text_proposal_probe_001\\proposal",
+    "error": "Plan outlines two distinct semantic objectives: first, prepare the BLUE report for project BETA; second, review and commit it locally. Each goal uses explicit operations and verifiable postconditions to distinguish outcomes without conflating steps or inventing controls."
+  }
+}

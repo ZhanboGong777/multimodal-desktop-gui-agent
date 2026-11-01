@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 33047.0,
+  "usage": {
+    "prompt_tokens": 1731,
+    "completion_tokens": 280,
+    "total_tokens": 2011
+  },
+  "error": null,
+  "content_length": 1244,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"The previous goal failed due to missing expected text ('Project BETA', 'Draft Saved') and no forbidden text was present. The caller request remains unchanged, and no new conditions are introduced. The current state requires completing the review and commit locally, as the draft save was not verified\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Review the BLUE report for project BETA using the visible controls, ensuring the review is completed locally without external sync.\",\n      \"expect_text\": [\"Project BETA\", \"Theme BLUE\", \"Review Complete\"],\n      \"forbid_text\": [\"Review Pending\", \"Online Sync\", \"Network Error\", \"Review Unavailable\", \"Budget Exceeded\", \"Changes Not Saved\", \"Save Failed\", \"Commit Failed\"],\n      \"goal_id\": \"review_report\"\n    },\n    {\n      \"instruction\": \"Commit the reviewed BLUE report for project BETA locally using the visible controls, ensuring no external communication or sync occurs.\",\n      \"expect_text\": [\"Project BETA\", \"Theme BLUE\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [\"Review Pending\", \"Online Sync\", \"Network Error\", \"Review Unavailable\", \"Budget Exceeded\", \"Changes Not Saved\", \"Save Failed\", \"Commit Failed\"],\n      \"goal_id\": \"commit_report\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

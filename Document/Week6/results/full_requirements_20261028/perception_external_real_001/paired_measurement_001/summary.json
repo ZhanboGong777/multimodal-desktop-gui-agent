@@ -1,0 +1,368 @@
+{
+  "schema": "week6.full_perception.real_saved_frame_result.v1",
+  "created_utc": "2026-10-28T00:41:58.597281+00:00",
+  "source_sha256": "542111a058598f482a3f8d9d5459140953d3b2f08fb1a995180c9c5bf1015a49",
+  "gt_sha256": "8025d1d3f594ffa742e9f2b313a50e82c24e4ff91d8a5cedc7e0206eb1cbd404",
+  "records": 56,
+  "timings": {
+    "cold": {
+      "native_eng_subprocess": {
+        "n": 3,
+        "median_ms": 514.1214000759646,
+        "p95_nearest_rank_ms": 794.9978000251576,
+        "max_ms": 794.9978000251576
+      },
+      "native_bilingual_subprocess": {
+        "n": 3,
+        "median_ms": 591.6016000555828,
+        "p95_nearest_rank_ms": 667.3365000169724,
+        "max_ms": 667.3365000169724
+      },
+      "screen_bilingual_subprocess": {
+        "n": 3,
+        "median_ms": 1057.073300005868,
+        "p95_nearest_rank_ms": 1095.841099973768,
+        "max_ms": 1095.841099973768
+      },
+      "screen_bilingual_persistent": {
+        "n": 3,
+        "median_ms": 835.5312999337912,
+        "p95_nearest_rank_ms": 906.0520000057295,
+        "max_ms": 906.0520000057295
+      }
+    },
+    "warmup": {
+      "native_eng_subprocess": {
+        "n": 1,
+        "median_ms": 444.99770004767925,
+        "p95_nearest_rank_ms": 444.99770004767925,
+        "max_ms": 444.99770004767925
+      },
+      "native_bilingual_subprocess": {
+        "n": 1,
+        "median_ms": 620.0040000258014,
+        "p95_nearest_rank_ms": 620.0040000258014,
+        "max_ms": 620.0040000258014
+      },
+      "screen_bilingual_subprocess": {
+        "n": 1,
+        "median_ms": 956.4314000308514,
+        "p95_nearest_rank_ms": 956.4314000308514,
+        "max_ms": 956.4314000308514
+      },
+      "screen_bilingual_persistent": {
+        "n": 1,
+        "median_ms": 780.7450999971479,
+        "p95_nearest_rank_ms": 780.7450999971479,
+        "max_ms": 780.7450999971479
+      }
+    },
+    "warm": {
+      "native_eng_subprocess": {
+        "n": 10,
+        "median_ms": 479.3366000521928,
+        "p95_nearest_rank_ms": 529.2931000003591,
+        "max_ms": 529.2931000003591
+      },
+      "native_bilingual_subprocess": {
+        "n": 10,
+        "median_ms": 597.6969000184909,
+        "p95_nearest_rank_ms": 763.8117000460625,
+        "max_ms": 763.8117000460625
+      },
+      "screen_bilingual_subprocess": {
+        "n": 10,
+        "median_ms": 930.3731999825686,
+        "p95_nearest_rank_ms": 991.4282000390813,
+        "max_ms": 991.4282000390813
+      },
+      "screen_bilingual_persistent": {
+        "n": 10,
+        "median_ms": 589.5114499726333,
+        "p95_nearest_rank_ms": 630.9302999870852,
+        "max_ms": 630.9302999870852
+      }
+    }
+  },
+  "roi_metrics_unique_frame": {
+    "native_eng_subprocess": {
+      "text": {
+        "tp": 5,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "labels": [
+          {
+            "text": "Week6 Local Lab",
+            "language": "en",
+            "matched": true,
+            "iou": 0.9948051948051948
+          },
+          {
+            "text": "Offline report preparation",
+            "language": "en",
+            "matched": true,
+            "iou": 0.9639740018570102
+          },
+          {
+            "text": "Choose a project",
+            "language": "en",
+            "matched": true,
+            "iou": 0.812539184952978
+          },
+          {
+            "text": "ALPHA",
+            "language": "en",
+            "matched": true,
+            "iou": 0.984
+          },
+          {
+            "text": "BETA",
+            "language": "en",
+            "matched": true,
+            "iou": 0.918693009118541
+          }
+        ]
+      },
+      "controls": {
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "iou_threshold": 0.8
+      }
+    },
+    "native_bilingual_subprocess": {
+      "text": {
+        "tp": 5,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "labels": [
+          {
+            "text": "Week6 Local Lab",
+            "language": "en",
+            "matched": true,
+            "iou": 0.9948051948051948
+          },
+          {
+            "text": "Offline report preparation",
+            "language": "en",
+            "matched": true,
+            "iou": 0.9639740018570102
+          },
+          {
+            "text": "Choose a project",
+            "language": "en",
+            "matched": true,
+            "iou": 0.812539184952978
+          },
+          {
+            "text": "ALPHA",
+            "language": "en",
+            "matched": true,
+            "iou": 0.984
+          },
+          {
+            "text": "BETA",
+            "language": "en",
+            "matched": true,
+            "iou": 0.918693009118541
+          }
+        ]
+      },
+      "controls": {
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "iou_threshold": 0.8
+      }
+    },
+    "screen_bilingual_subprocess": {
+      "text": {
+        "tp": 5,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "labels": [
+          {
+            "text": "Week6 Local Lab",
+            "language": "en",
+            "matched": true,
+            "iou": 0.9437895437895438
+          },
+          {
+            "text": "Offline report preparation",
+            "language": "en",
+            "matched": true,
+            "iou": 0.9328780663132357
+          },
+          {
+            "text": "Choose a project",
+            "language": "en",
+            "matched": true,
+            "iou": 0.9662628145386766
+          },
+          {
+            "text": "ALPHA",
+            "language": "en",
+            "matched": true,
+            "iou": 0.9488571428571428
+          },
+          {
+            "text": "BETA",
+            "language": "en",
+            "matched": true,
+            "iou": 0.9090225563909774
+          }
+        ]
+      },
+      "controls": {
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "iou_threshold": 0.8
+      }
+    },
+    "screen_bilingual_persistent": {
+      "text": {
+        "tp": 5,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "labels": [
+          {
+            "text": "Week6 Local Lab",
+            "language": "en",
+            "matched": true,
+            "iou": 0.9437895437895438
+          },
+          {
+            "text": "Offline report preparation",
+            "language": "en",
+            "matched": true,
+            "iou": 0.9328780663132357
+          },
+          {
+            "text": "Choose a project",
+            "language": "en",
+            "matched": true,
+            "iou": 0.9662628145386766
+          },
+          {
+            "text": "ALPHA",
+            "language": "en",
+            "matched": true,
+            "iou": 0.9488571428571428
+          },
+          {
+            "text": "BETA",
+            "language": "en",
+            "matched": true,
+            "iou": 0.9090225563909774
+          }
+        ]
+      },
+      "controls": {
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "iou_threshold": 0.8
+      }
+    }
+  },
+  "equivalence": [
+    {
+      "phase": "cold",
+      "repeat": 0,
+      "equal": true
+    },
+    {
+      "phase": "cold",
+      "repeat": 1,
+      "equal": true
+    },
+    {
+      "phase": "cold",
+      "repeat": 2,
+      "equal": true
+    },
+    {
+      "phase": "warmup",
+      "repeat": 0,
+      "equal": true
+    },
+    {
+      "phase": "warm",
+      "repeat": 0,
+      "equal": true
+    },
+    {
+      "phase": "warm",
+      "repeat": 1,
+      "equal": true
+    },
+    {
+      "phase": "warm",
+      "repeat": 2,
+      "equal": true
+    },
+    {
+      "phase": "warm",
+      "repeat": 3,
+      "equal": true
+    },
+    {
+      "phase": "warm",
+      "repeat": 4,
+      "equal": true
+    },
+    {
+      "phase": "warm",
+      "repeat": 5,
+      "equal": true
+    },
+    {
+      "phase": "warm",
+      "repeat": 6,
+      "equal": true
+    },
+    {
+      "phase": "warm",
+      "repeat": 7,
+      "equal": true
+    },
+    {
+      "phase": "warm",
+      "repeat": 8,
+      "equal": true
+    },
+    {
+      "phase": "warm",
+      "repeat": 9,
+      "equal": true
+    }
+  ],
+  "all_errors": [],
+  "source_unchanged": true,
+  "runtime_unchanged": true,
+  "inputs_unchanged": true,
+  "screen_full_predictions_exact": true,
+  "full_frame_precision": null,
+  "full_frame_recall": null,
+  "roi": [
+    1000,
+    480,
+    1600,
+    1130
+  ],
+  "limits": "One easy English real frame; ROI5 labels/2 controls only. Whole uncropped PNG used for full processing timing; unannotated notification retained. No improvement expected from labels, no code/parameter changes, no execution-success claim.",
+  "no_gpu_frameworks_imported": true,
+  "omp_environment": {
+    "OMP_THREAD_LIMIT": null,
+    "OMP_NUM_THREADS": null
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "schema": "week6.semantic_live.v6.model_only_preregistration.v1",
+  "protocol": "week6.semantic_subtasks.v6",
+  "freeze": "../qwen3vl_candidate_001/final_source_freeze_001.json",
+  "freeze_sha256": "eae135d2cf4a9e34538009b0d5b8796cf42c8581087d89c0be08b383514cad68",
+  "semantic_source_sha256": "7fd066917d332410469e1080d15da23fddfde7f16a482d97c3e91b46016afc1d",
+  "contract": "../review/acceptance_contract_amendment_005.md",
+  "contract_sha256": "64ec7ba8e40fb3f64872ee260a3a1b277e71926b7491dc5c32cc9b481eae2062",
+  "previous_development_failures": "normal001-018,020-022 and transient001 remain unaccepted. normal019 accepted only on prior274/3B. No historical success transfers to current276/Qwen3-VL.",
+  "explicit_design_change": "Model-proposed intermediate literal postconditions are untrusted predictions. The v5 caller-final-only enum/membership and pool-specific caller count/length preflight restrictions are removed. No local plan authoring/merging or forced two-goal skeleton.",
+  "unchanged_task_and_environment": true,
+  "model": "qwen3-vl:8b-instruct",
+  "model_digest": "70e58e37beb15464e19aa903dedb2cba828b89c0fb186f75ff2738c7347b96eb",
+  "configuration": "configs/week6_accuracy_persistent.yaml",
+  "temperature": 0,
+  "max_tokens": 4096,
+  "sdk_retries": 0,
+  "model_timeout_seconds": 900,
+  "global_timeout_seconds": 7200,
+  "global_max_actions": 20,
+  "global_max_planning_attempts": 24,
+  "global_max_http_dispatches": 32,
+  "normal": {
+    "name": "normal_023",
+    "project": "ALPHA",
+    "colour": "GREEN",
+    "fixture": "fixture_normal_019",
+    "reuse": "New independent fixture only"
+  },
+  "transient": {
+    "name": "transient_002",
+    "project": "BETA",
+    "colour": "BLUE",
+    "fixture": "fixture_transient_002",
+    "application_review_rejections": 1
+  },
+  "caller": "Unchanged full natural-language instruction and three caller-final checks constructed by scripts/week6_semantic_acceptance.py. No milestone vocabulary or goal sequence supplied by the program.",
+  "required_evidence": [
+    "Initial native plan >=2 distinct meaningful objectives and exact raw-to-compiled origin",
+    "Each completed goal contract fixed before input, full predicate false on fresh before, confirmed real input, fresh verified post",
+    "No failed/unknown/cancel rescue, no completed-goal replay, shared budgets",
+    "Fresh immutable caller-final independent of model conditions",
+    "Independent project/theme/review/commit events in exact order with one unique actual Sky receipt per event",
+    "Actual owner wait0, unchanged pinned code and separate v6 machine auditor",
+    "Root agent reviews each native instruction against its actual business transitions; no human sign-off is claimed"
+  ],
+  "limits": "Before-false/after-true literal evidence alone is not semantic proof. Casefold substring is not a general negation recognizer. Future labels may be guessed incorrectly and must then fail. These are two controlled functional cases, not an arbitrary-app success-rate study.",
+  "final_full_regression": "Required after accepted fresh normal and transient on this276-file source;3639 collection only, full004 not started.",
+  "registered_utc": "2026-10-29T00:08:07.294648+00:00",
+  "added_generic_grounding": "Original-frame and refreshed-frame observable native text/ID conflicts are refused without dispatch or local ID replacement, with bounded replanning. Unique OCR labels may use native text-only targets. Same action/planning/HTTP/time budgets.",
+  "added_live_monitoring": "Parent counts relay persisted child events before child return; semantic completion remains outer-ledger gated. Ordinary observer faults do not retry input; cancellation propagates. Status elapsed uses a separate monitor clock.",
+  "model_metadata": {
+    "name": "qwen3-vl:8b-instruct",
+    "model": "qwen3-vl:8b-instruct",
+    "modified_at": "2026-10-29T11:07:37.097684+11:00",
+    "size": 6190971795,
+    "digest": "70e58e37beb15464e19aa903dedb2cba828b89c0fb186f75ff2738c7347b96eb",
+    "details": {
+      "parent_model": "dhiltgen/qwen3-vl:8b-instruct-q4_K_M-llamacpp",
+      "format": "gguf",
+      "family": "qwen3vl",
+      "families": [
+        "qwen3vl",
+        "clip"
+      ],
+      "parameter_size": "8.2B",
+      "quantization_level": "Q4_K_M",
+      "context_length": 262144,
+      "embedding_length": 4096
+    },
+    "capabilities": [
+      "completion",
+      "vision",
+      "tools"
+    ],
+    "meaning": "Official downloaded model; metadata only, no inference before registration"
+  },
+  "repair_experiment": "Refuse already-true proposed goal without input or completion credit; record separate bound rejection; same-budget native remaining-work revision only. Original false-before/known-input/fresh-after completion gates, no-replay and immutable final remain.",
+  "runtime_model_change": "Official local model switch only; all276 source/config/test pins, prompts, guards, budgets and callers unchanged. No training or inference during freeze.",
+  "owner_harness": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_full_requirements_20261028\\run_owned_model.py",
+  "owner_harness_sha256": "bbe7cc2f8d220a39f03710a71ea9f7fc83311aaa4f9dcaaa395e2cd7f8cb5a5d",
+  "added_action_output_contract": "Endpoint non-strict JSON schema and bounded native format-error feedback; local parser and all execution guards unchanged",
+  "added_target_bindings": "Current snapshot and final authorised candidate subset only; native generation guidance, all original runtime guards preserved",
+  "requirements_dev_sha256": "31b4bba08667510fa824a01634563e7cd5c30eac77ca8ddfba3aa6cb21643918",
+  "auditor_source_sha256": "877a4b91c6c1614f5b34c05879cc43dd850a3913ee3de3085f48d99e64807a1e",
+  "generation_targeting_policy": {
+    "schema_version": "gui_agent.generation_targeting_policy.v1",
+    "instruction": "Generation guidance only; it grants neither input nor success authority. Use only candidates in the current target_bindings scope, including the final authorised subset. Use text-only targeting only when current OCR labels or adjacent OCR words can locate the target. If a target is visible in the screenshot but absent from OCR, choose its matching current ID yourself from target_bindings.anonymous_without_ocr_ids; never invent or replace an ID. If no matching allowed candidate is certain, return no steps and explain in errors.",
+    "generation_only": true
+  },
+  "source_before_manifest_sha256": "c83cf0c1eb657bfdaf7f9b1be4836f006f1868a9a80508692582aea2d44a7d40",
+  "normal016_negative_audit_sha256": "82e0e79451a66a464b1786254f8cd2e21d60c8edeaeee702951c82781b8b97a3",
+  "root_scope_review_sha256": "a6a2371714e732b73a6cabd6ed8e4ce834dcb3234582628bc41aac7306b850c9",
+  "normal017_negative_audit_sha256": "1c4523e3714f294cc62a5d320208c42abc0bfa68450b468922ca7193c743539c",
+  "target_binding_schema_version": "gui_agent.target_binding_schema.v2",
+  "observed_query_contract_version": "gui_agent.observed_text_queries.v1",
+  "finite_query_limits": {
+    "tokens_per_label": 32,
+    "tokens_per_span": 4,
+    "elements_per_run": 4,
+    "extra_query_characters": 160,
+    "extra_queries": 128,
+    "search_steps": 4096
+  },
+  "finite_query_limits_scope": "Extras only; ASCII word-token spans and geometrically neighbouring runs. Original full labels are retained without the extra-query character cap. Not all runtime substrings or multilingual word runs are generated.",
+  "normal018_negative_audit_sha256": "7c3019cdbd992a9be26fa589ea115fb206e9a5a1f0f7818392b8bda59c25b164",
+  "measurement_protocol": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\receipt_envelope_001\\protocol_001.md",
+    "sha256": "5d5220a310ad4e4f0182eb582fb5cfcc0885bbcce20675f0a7f917da5dbd7515"
+  },
+  "private_protocol_review": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\receipt_envelope_001\\review_001\\review_summary_001.json",
+    "sha256": "ba63eb6d66703cbb4a28299b0ebda1d638bed1e581dca01a488209cde14a635d"
+  },
+  "private_receipt_checker": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\audit_input_receipt_protocol.py",
+    "sha256": "23ee41ca6e6255c3d09bf00665ee4051f1a01a09e359996d6a823304a0d70253"
+  },
+  "receipt_timing_protocol": "week6.sky_input_operation.v2",
+  "preowner_claim_original": "receipt_envelope_001/window_claims/<case>/window_claim_001.json",
+  "preowner_claim_binding": "Root writes SHA-bound acknowledgement before owner starts; operator then copies original bytes into new case/window_claim_001.json for the read-only checker.",
+  "final_operator_handoff": {
+    "schema": "week6.live.operator_handoff.v2",
+    "terminal": true,
+    "pending": [],
+    "gui_stopped": true,
+    "exec_wait": "EXACT dictionary closed:true and real int exit_code ONLY; exec_session at TOP; owner_receipt exact original dict; all other wrapper evidence TOP separately; finalterminal last case write"
+  },
+  "normal019_old_source_acceptance": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal019_root_acceptance_001.json",
+    "sha256": "92fd296968bf1af879c2f273f415e14b8745c7c6b4cb61d9d375231bdc2e8cd4"
+  },
+  "transient001_negative_audit": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_transient001_audit_001.json",
+    "sha256": "4a146caa79d673ff62cb02f1e3d4e1b0230aa61a9ed0cd49c2ca3eca4e34536a"
+  },
+  "semantic_prompt_constant_sha256": {
+    "SEMANTIC_GENERIC_REPAIR": "4abb879657adfb3a9cc33204ef0749d3abca78552850625f2a85c243b9a02800",
+    "SEMANTIC_SYSTEM_PROMPT": "839de73f8d18a8bccbd956b860431c83edc7443b109c7e678cb37a0502fc29a3"
+  },
+  "normal020_negative_process_audit": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal020_independent_process_001\\process_summary.json",
+    "sha256": "31001bf898b84f1b030691d4a4aa5eebdb32deb812f3fa2caf696ab2f4f1359a"
+  },
+  "root_scope_review": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\preexisting_contract_recovery_001\\root_scope_review_001.json",
+    "sha256": "a6a2371714e732b73a6cabd6ed8e4ce834dcb3234582628bc41aac7306b850c9"
+  },
+  "normal021_negative_process_audit": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal021_independent_process_001\\process_summary.json",
+    "sha256": "6162aa0b59ea1c253d989853871811f95558fff28306a920805d40d13c6d162e"
+  },
+  "historical_independent_scope_review": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_polarity_guidance_review_001.json",
+    "sha256": "6fe9acac27ed206ecf452f22ad9ffd054a2a60a9c80e471c599442b01cc10e0b"
+  },
+  "normal022_negative_process_audit": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal022_independent_process_001\\process_summary.json",
+    "sha256": "0adad69e0bee18a7572606c645b0abc58c14231cdb87f8b8e3228d8982d4110c"
+  }
+}

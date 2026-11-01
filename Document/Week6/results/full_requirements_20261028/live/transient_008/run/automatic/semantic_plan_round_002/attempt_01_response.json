@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 19141.0,
+  "usage": {
+    "prompt_tokens": 1640,
+    "completion_tokens": 215,
+    "total_tokens": 1855
+  },
+  "error": null,
+  "content_length": 990,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"Revision plan focuses on completing the review and commit steps since report generation was partially successful. The final state requires both review and local commit to be explicitly performed.\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Review the BLUE report for project BETA by selecting the review option and ensuring the review is completed using visible controls.\",\n      \"expect_text\": [\"Review Complete\", \"Project BETA\", \"Theme BLUE\"],\n      \"forbid_text\": [\"Error\", \"Unavailable\", \"Connection Failed\", \"Review Pending\"],\n      \"goal_id\": \"review_report\"\n    },\n    {\n      \"instruction\": \"Commit the BLUE report for project BETA locally by selecting the commit option and confirming the commit using visible controls.\",\n      \"expect_text\": [\"LOCAL COMPLETE\", \"Project BETA\", \"Theme BLUE\", \"Commit Successful\"],\n      \"forbid_text\": [\"Error\", \"Unavailable\", \"Connection Failed\", \"Commit Failed\"],\n      \"goal_id\": \"commit_report\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

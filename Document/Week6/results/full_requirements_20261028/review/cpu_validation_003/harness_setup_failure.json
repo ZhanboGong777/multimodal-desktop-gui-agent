@@ -1,0 +1,10 @@
+{
+  "schema": "week6.independent_review_harness_failure.v1",
+  "actual_outer_exit_code": 1,
+  "pytest_started": false,
+  "tests_executed": 0,
+  "cause": "The review runner's text replacement inserted '-k' and 'audit_reader' into PINS as well as pytest arguments. Hashing the nonexistent ROOT/-k failed before subprocess.run.",
+  "source_or_production_failure": false,
+  "original_runner_preserved": "../run_independent_cpu_review_003.py",
+  "correction": "New runner 004 uses a command-specific replacement; no original evidence or production source is changed."
+}

@@ -1,0 +1,32 @@
+........................................................................ [ 64%]
+.............F..........................                                 [100%]
+================================== FAILURES ===================================
+_ test_predictions_are_not_pool_restricted_but_raw_integrity_final_conflicts_and_actual_evidence_still_apply[forbid_text-Verified part 1-final_conflict] _
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/semantic_predicted_postconditions_001/cpu_development_001/pytest_tmp/test_predictions_are_not_pool_1')
+field = 'forbid_text', bad = 'Verified part 1', meaning = 'final_conflict'
+
+    @pytest.mark.parametrize("field,bad,meaning", [
+        ("expect_text", "ERROR", "unobserved_prediction"), ("forbid_text", "Verified part 1", "final_conflict"),
+        ("expect_text", " Verified part 1", "raw_rejection"), ("expect_text", "Verified part 1 ", "raw_rejection"),
+        ("expect_text", "VERIFIED PART 1", "observed_prediction"), ("forbid_text", " ERROR ", "raw_rejection"),
+        ("expect_text", "Invented future completion label", "unobserved_prediction"),
+    ])
+    def test_predictions_are_not_pool_restricted_but_raw_integrity_final_conflicts_and_actual_evidence_still_apply(tmp_path, field, bad, meaning):
+        native = json.loads(proposal())
+        native["subgoals"][0][field] = [bad]
+        content = json.dumps(native)
+        runner, request, state, client, _ = lab(tmp_path, responses=[content, plan(), plan()], goal_calls=1)
+        result = runner.run(request, options())
+        directory = tmp_path / "semantic/semantic_plan_round_001"
+        assert json.loads((directory / "attempt_01_response.json").read_text("utf8"))["content"] == content
+        if meaning in {"raw_rejection", "final_conflict"}:
+            assert result.status == "failed" and state.attempts == 0 and state.children == [] and len(client.calls) == 1
+>           assert ("without stripping" if meaning == "raw_rejection" else "conflicts") in result.error
+E           assert 'conflicts' in "1 validation error for SemanticPlan\nsubgoals.0\n  Value error, a subgoal text cannot be both required and forbidden ...Verified part 1']}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/value_error"
+E            +  where "1 validation error for SemanticPlan\nsubgoals.0\n  Value error, a subgoal text cannot be both required and forbidden ...Verified part 1']}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/value_error" = SemanticWorkflowResult(schema_version='week6.semantic_workflow.v1', decomposition_protocol_mode='semantic_subtasks', w...rt 1']}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/value_error", notes=[]).error
+
+tests\test_week6_semantic_caller_predicates.py:92: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_week6_semantic_caller_predicates.py::test_predictions_are_not_pool_restricted_but_raw_integrity_final_conflicts_and_actual_evidence_still_apply[forbid_text-Verified part 1-final_conflict]
+1 failed, 111 passed in 56.78s

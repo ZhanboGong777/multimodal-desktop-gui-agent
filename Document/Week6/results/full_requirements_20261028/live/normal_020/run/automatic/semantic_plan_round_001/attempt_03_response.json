@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen2.5vl:3b",
+  "latency_ms": 3094.0,
+  "usage": {
+    "prompt_tokens": 2250,
+    "completion_tokens": 303,
+    "total_tokens": 2553
+  },
+  "error": null,
+  "content_length": 1338,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"The caller request is ready for execution.\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Prepare a GREEN report for project ALPHA in Week6 Local Lab.\",\n      \"expect_text\": [\"Project ALPHA\", \"GREEN report\"],\n      \"forbid_text\": [\"Theme GREEN\", \"LOCAL COMPLETE\", \"Review unavailable\", \"Commit unavailable\", \"No external communication\", \"No offline test\", \"No retry within budget\", \"No visible controls\"],\n      \"goal_id\": \"prepare_report\"\n    },\n    {\n      \"instruction\": \"Review the prepared GREEN report for project ALPHA.\",\n      \"expect_text\": [\"GREEN report\", \"Review unavailable\", \"Commit unavailable\", \"No external communication\", \"No offline test\", \"No retry within budget\", \"No visible controls\"],\n      \"forbid_text\": [\"Project ALPHA\", \"GREEN report\", \"LOCAL COMPLETE\", \"Prepare unavailable\", \"No visible controls\"],\n      \"goal_id\": \"review_report\"\n    },\n    {\n      \"instruction\": \"Commit the reviewed GREEN report for project ALPHA locally.\",\n      \"expect_text\": [\"GREEN report\", \"LOCAL COMPLETE\", \"Commit unavailable\", \"No external communication\", \"No offline test\", \"No retry within budget\", \"No visible controls\"],\n      \"forbid_text\": [\"Project ALPHA\", \"GREEN report\", \"Review unavailable\", \"Prepare unavailable\", \"No visible controls\"],\n      \"goal_id\": \"commit_report\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "schema": "week6.intent_coverage.bounded_saved_intent_probe.v1",
+  "result": {
+    "schema_version": "week6.semantic_subtasks.v6",
+    "input_modality": "caller_intent_only",
+    "image_attached": false,
+    "status": "needs_clarification",
+    "proposal": {
+      "status": "needs_clarification",
+      "reason": "The caller's request is unclear. It is not specified which application or tool should be used to prepare the report, review it, and commit it locally. Additionally, the term 'visible controls' is not defined, and it is not clear what the offline test entails. The caller's final check is not provided",
+      "subgoals": []
+    },
+    "workflow": null,
+    "planning_calls": 1,
+    "model_requests": 1,
+    "elapsed_ms": 23546.999999991385,
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\intent_coverage_001\\bounded_qwen25_generation_probe_001\\production_decomposition",
+    "error": "The caller's request is unclear. It is not specified which application or tool should be used to prepare the report, review it, and commit it locally. Additionally, the term 'visible controls' is not defined, and it is not clear what the offline test entails. The caller's final check is not provided"
+  },
+  "source_sha256": "c030bcd3d5c67f4634c93625d9a3b839d2675727d843ae9f7ddaf89a9bc28ee1",
+  "production_guards_used": true,
+  "source_unchanged": true,
+  "saved_snapshot_only": true,
+  "fresh_gui_captures": 0,
+  "gui_inputs": 0,
+  "acceptance_granted": false,
+  "meaning": "Development diagnostic on retained caller and snapshot; native model responses pass through the existing bounded parser/validation. No task execution or semantic approval follows from this result."
+}

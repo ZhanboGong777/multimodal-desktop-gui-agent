@@ -1,0 +1,254 @@
+"""Independent offline adversarial review of text/ID pre-input consistency.
+
+Synthetic observations, model replies and CPU executor doubles only. Pixel
+mapping is explicitly doubled where stated; no real window success is claimed.
+"""
+from __future__ import annotations
+
+import json
+from datetime import UTC, datetime, timedelta
+
+import pytest
+from test_runtime_runner import FakeExecutor, FakeObserver, FakePlanner, _plan, _runner
+from test_week6_automatic_decomposition import _frame
+from test_week6_rolling_actions import options
+from test_week6_semantic_subtasks import lab
+
+from gui_agent.planning.schemas import PlanStep
+from gui_agent.runtime import runner as runner_module
+from gui_agent.runtime.action_adapter import (
+    TARGET_CONSISTENCY_ERROR_PREFIX,
+    ActionAdapter,
+    ActionResolutionError,
+    validate_target_consistency,
+)
+from gui_agent.runtime.schemas import ElementRef, TaskSpec
+from gui_agent.schemas import BoundingBox, Point
+
+
+def scene(identifier, specs):
+    frame = _frame(identifier, ["Pending"])
+    frame.window_title, frame.window_class = "Offline consistency lab", "SyntheticWindow"
+    frame.captured_at = datetime(2026, 10, 28, tzinfo=UTC) + timedelta(seconds=1 if identifier == "source" else 2)
+    frame.image_path = f"/offline-double/{identifier}.png"
+    frame.elements = [
+        ElementRef(element_id=f"{identifier}-e{index:03d}", text=text,
+            bounding_box=BoundingBox(left=box[0], top=box[1], right=box[2], bottom=box[3]),
+            center=Point(x=(box[0] + box[2]) // 2, y=(box[1] + box[3]) // 2),
+            confidence=confidence, source=origin)
+        for index, (text, box, origin, confidence) in enumerate(specs)
+    ]
+    return frame
+
+
+CONTROL = (20, 20, 140, 80)
+INSIDE = (45, 35, 95, 55)
+OUTSIDE = (220, 35, 280, 55)
+
+
+def step(frame, target="GO", index=0, *, alias=False):
+    return PlanStep(step_id="s1", description="Choose the requested local operation", action_type="click",
+                    target_text=target, arguments={"target_element" if alias else "element_id":
+                                                 frame.elements[index].element_id})
+
+
+@pytest.mark.parametrize("origin", ["ocr", "contour"])
+@pytest.mark.parametrize("requested_elsewhere", [False, True])
+def test_review_labeled_id_conflict_is_not_unknown_or_silently_replaced(origin, requested_elsewhere):
+    specs = [("OTHER", CONTROL, origin, .95)]
+    if requested_elsewhere:
+        specs.append(("GO", OUTSIDE, "ocr", .95))
+    frame = scene("source", specs)
+    native = step(frame)
+    original = native.model_dump(mode="json")
+    with pytest.raises(ActionResolutionError, match=TARGET_CONSISTENCY_ERROR_PREFIX):
+        ActionAdapter(platform="win32").resolve(native, frame)
+    assert native.model_dump(mode="json") == original
+
+
+@pytest.mark.parametrize("labels", [
+    [("OTHER", INSIDE, "ocr", .95), ("GO", OUTSIDE, "ocr", .95)],
+    [("GO", (30, 35, 65, 55), "ocr", .95), ("OTHER", (80, 35, 130, 55), "ocr", .95)],
+    [("GO", (30, 35, 65, 55), "ocr", .95), ("GO", (80, 35, 120, 55), "ocr", .95)],
+])
+def test_review_anonymous_contour_cannot_hide_conflicting_or_mixed_control_labels(labels):
+    frame = scene("source", [("", CONTROL, "contour", .5), *labels])
+    native = step(frame, alias=True)
+    with pytest.raises(ActionResolutionError, match=TARGET_CONSISTENCY_ERROR_PREFIX):
+        validate_target_consistency(native, frame)
+    with pytest.raises(ActionResolutionError, match=TARGET_CONSISTENCY_ERROR_PREFIX):
+        ActionAdapter(platform="win32").resolve(native, frame)
+
+
+@pytest.mark.parametrize("words,target", [
+    ([("GO", INSIDE, "ocr", .95)], "GO"),
+    ([("GO", (30, 35, 60, 55), "ocr", .95), ("HOME", (65, 35, 120, 55), "ocr", .95)], "GO HOME"),
+])
+def test_review_one_complete_local_label_or_word_run_keeps_the_explicit_contour(words, target):
+    frame = scene("source", [("", CONTROL, "contour", .5), *words, ("UNRELATED", OUTSIDE, "ocr", .95)])
+    native = step(frame, target)
+    validate_target_consistency(native, frame)
+    resolved = ActionAdapter(platform="win32").resolve(native, frame)
+    assert resolved.element_id == frame.elements[0].element_id
+    assert resolved.screenshot_point == frame.elements[0].center
+
+
+@pytest.mark.parametrize("case", ["no_ocr", "low_confidence_local_ocr", "nearby_nonoverlapping_ocr"])
+def test_review_unknown_local_text_does_not_invent_a_conflict(case):
+    labels = []
+    if case == "low_confidence_local_ocr":
+        labels = [("OTHER", INSIDE, "ocr", .1)]
+    elif case == "nearby_nonoverlapping_ocr":
+        labels = [("OTHER", OUTSIDE, "ocr", .95)]
+    frame = scene("source", [("", CONTROL, "contour", .5), *labels])
+    native = step(frame, "Visually described icon")
+    validate_target_consistency(native, frame)
+    assert ActionAdapter(platform="win32").resolve(native, frame).element_id == frame.elements[0].element_id
+
+
+@pytest.mark.parametrize("label", ["", "OTHER"])
+def test_review_id_only_remains_id_only_even_when_other_text_is_present(label):
+    frame = scene("source", [(label, CONTROL, "contour", .95), ("GO", OUTSIDE, "ocr", .95)])
+    native = step(frame, "")
+    validate_target_consistency(native, frame)
+    assert ActionAdapter(platform="win32").resolve(native, frame).element_id == frame.elements[0].element_id
+
+
+@pytest.mark.parametrize("chosen", [0, 1])
+def test_review_consistent_id_can_disambiguate_duplicate_equal_labels(chosen):
+    frame = scene("source", [("GO", CONTROL, "ocr", .95), ("GO", OUTSIDE, "ocr", .95)])
+    native = step(frame, index=chosen)
+    resolved = ActionAdapter(platform="win32").resolve(native, frame)
+    assert resolved.element_id == frame.elements[chosen].element_id
+    assert resolved.screenshot_point == frame.elements[chosen].center
+
+
+def test_review_positive_area_overlap_refuses_even_when_the_label_center_is_outside():
+    frame = scene("source", [("", CONTROL, "contour", .5),
+        ("OTHER", (130, 35, 200, 55), "ocr", .95), ("GO", OUTSIDE, "ocr", .95)])
+    assert frame.elements[1].center.x > CONTROL[2]
+    with pytest.raises(ActionResolutionError, match=TARGET_CONSISTENCY_ERROR_PREFIX):
+        validate_target_consistency(step(frame), frame)
+
+
+def test_review_touching_an_edge_does_not_turn_nearby_text_into_local_evidence():
+    frame = scene("source", [("", CONTROL, "contour", .5),
+        ("OTHER", (140, 35, 200, 55), "ocr", .95)])
+    validate_target_consistency(step(frame), frame)
+
+
+@pytest.mark.parametrize("phase", ["source", "fresh"])
+def test_review_real_runner_refuses_source_or_refreshed_conflicts_before_dispatch(tmp_path, monkeypatch, phase):
+    if phase == "source":
+        source = scene("source", [("OTHER", CONTROL, "ocr", .95), ("GO", OUTSIDE, "ocr", .95)])
+        fresh = scene("fresh", [("GO", CONTROL, "ocr", .95)])
+    else:
+        source = scene("source", [("", CONTROL, "contour", .5), ("GO", INSIDE, "ocr", .95)])
+        fresh = scene("fresh", [("", CONTROL, "contour", .5), ("OTHER", INSIDE, "ocr", .95)])
+    native = step(source)
+    original = native.model_dump(mode="json")
+    executor = FakeExecutor()
+    runtime, _recorder = _runner(tmp_path, FakeObserver([source, fresh]), FakePlanner(_plan(native)), executor)
+    mapping_calls = []
+
+    def mapping_double(_source, _current, _identifier):
+        mapping_calls.append(_identifier)
+        return fresh.elements[0]
+
+    monkeypatch.setattr(runner_module, "match_candidate", mapping_double)
+    result = runtime.run(TaskSpec(case_id="CONSISTENCY", instruction="Perform requested local state change",
+        expect_text=["Caller complete"]), options(max_planning_attempts=1))
+    assert result.status != "succeeded" and not executor.actions
+    assert result.action_count == result.unconfirmed_action_attempts == 0 and result.planning_calls == 1
+    assert result.steps[0].action_result is None
+    assert result.steps[0].error.startswith(TARGET_CONSISTENCY_ERROR_PREFIX)
+    assert native.model_dump(mode="json") == original
+    assert len(mapping_calls) == (1 if phase == "fresh" else 0)
+    # The fresh case doubles pixel identity only; it proves the later text guard is still required.
+
+
+@pytest.mark.parametrize("cap", ["none", "http", "planning"])
+def test_review_semantic_replanning_keeps_conflict_uncredited_and_uses_shared_budgets(tmp_path, cap):
+    runtime, request, state, client, _ = lab(tmp_path, max_requests=2 if cap == "http" else 20)
+    original_factory = runtime.runner_factory
+    low_calls = []
+    original_complete = client.complete
+
+    def complete(messages, **kwargs):
+        payload = json.loads(messages[-1]["content"])
+        context = payload.get("context", {})
+        if "observation_id" in context:
+            low_calls.append(context["observation_id"])
+            identifier = context["observation_id"]
+            wrong = len(low_calls) == 1
+            client.responses[0] = json.dumps({"task_id": "offline", "instruction": "Current objective only", "steps": [{
+                "step_id": "s1", "description": "Choose the requested control", "action_type": "click",
+                "target_text": "Advance control",
+                "arguments": {"element_id": identifier + ("-e999" if wrong else "-e000")}
+            }]})
+        return original_complete(messages, **kwargs)
+
+    client.complete = complete
+
+    def factory(task, index, directory, budgeted):
+        child = original_factory(task, index, directory, budgeted)
+        observe = child.observer.observe
+
+        def with_conflicting_candidate(**kwargs):
+            frame = observe(**kwargs)
+            frame.elements.append(ElementRef(element_id=frame.observation_id + "-e999", text="OTHER CONTROL",
+                bounding_box=BoundingBox(left=300, top=10, right=400, bottom=40),
+                center=Point(x=350, y=25), confidence=.95, source="ocr"))
+            return frame
+
+        child.observer.observe = with_conflicting_candidate
+        return child
+
+    runtime.runner_factory = factory
+    result = runtime.run(request, options(max_planning_attempts=2 if cap == "planning" else 8))
+    audits = [json.loads(path.read_text("utf8")) for path in (tmp_path / "semantic").glob("goal_*/001_*/semantic_goal_audit.json")]
+    assert audits and audits[0]["steps"][0]["action_result"] is None
+    assert audits[0]["steps"][0]["error"].startswith(TARGET_CONSISTENCY_ERROR_PREFIX)
+    if cap == "none":
+        assert result.status == "succeeded" and result.total_actions == state.attempts == 2
+        assert result.planning_calls == result.model_requests == len(client.calls) == 4
+        assert len(result.completed_subgoals) == 2
+        assert [row["confirmed_input_count"] for row in audits] == [1, 1]
+        assert all(child.planner.max_steps == 7 and "plan" not in child.planner.__dict__ for child in state.children)
+    else:
+        assert result.status != "succeeded" and not result.completed_subgoals
+        assert result.total_actions == state.attempts == result.unconfirmed_action_attempts == 0
+        assert result.planning_calls == result.model_requests == len(client.calls) == 2
+        assert not audits[0]["eligible_for_semantic_credit"]
+
+
+@pytest.mark.parametrize("phase", ["before_input", "after_receipt"])
+def test_review_telemetry_keyboard_interrupt_stops_before_replay_or_final_rescue(tmp_path, phase):
+    runtime, request, state, client, _ = lab(tmp_path)
+    original_factory = runtime.runner_factory
+    raised = []
+
+    def factory(task, index, directory, budgeted):
+        child = original_factory(task, index, directory, budgeted)
+
+        def cancellation(status):
+            before = phase == "before_input" and status["stage"] == "executing" and status["actions_used"] == 0
+            after = phase == "after_receipt" and status["stage"] == "observing" and status["actions_used"] == 1
+            if not raised and (before or after):
+                raised.append(status.copy())
+                if after:
+                    state.stage = 2  # A later complete-looking frame cannot rescue cancellation.
+                raise KeyboardInterrupt
+
+        child.monitor.on_status = cancellation
+        return child
+
+    runtime.runner_factory = factory
+    result = runtime.run(request, options())
+    assert len(raised) == 1 and result.status == "cancelled"
+    assert result.total_actions == state.attempts == (1 if phase == "after_receipt" else 0)
+    assert result.unconfirmed_action_attempts == 0
+    assert not result.completed_subgoals and result.final_verification is None
+    assert result.model_requests == result.planning_calls == len(client.calls) == 2
+    assert all(child.planner.max_steps == 7 and "plan" not in child.planner.__dict__ for child in state.children)
+

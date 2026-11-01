@@ -1,0 +1,35 @@
+{
+  "status": "ready",
+  "reason": "Corrected postcondition polarity: expect_text must be visible after each goal, forbid_text must be absent after each goal. No literal appears in both lists. Caller-required final text 'LOCAL COMPLETE' is preserved in expect_text, not forbidden. No forbidden text is unjustified.",
+  "subgoals": [
+    {
+      "instruction": "Prepare the GREEN report for project ALPHA using visible controls.",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN"
+      ],
+      "forbid_text": [],
+      "goal_id": "prepare_report"
+    },
+    {
+      "instruction": "Review the prepared GREEN report for project ALPHA using visible controls.",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN",
+        "Review completed"
+      ],
+      "forbid_text": [],
+      "goal_id": "review_report"
+    },
+    {
+      "instruction": "Commit the reviewed GREEN report for project ALPHA locally using visible controls.",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [],
+      "goal_id": "commit_report"
+    }
+  ]
+}

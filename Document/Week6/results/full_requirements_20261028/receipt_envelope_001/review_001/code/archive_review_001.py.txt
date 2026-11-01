@@ -1,0 +1,56 @@
+"""Byte-exact archive of private synthetic checker qualification, not live proof."""
+from datetime import datetime, timezone
+import hashlib
+import json
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+BASE = HERE.parents[1] / "week6-worktree/Document/Week6/results/full_requirements_20261028/receipt_envelope_001"
+OUT = BASE / "review_001"
+OUT.mkdir(exist_ok=False)
+sources = [HERE / name for name in ("audit_input_receipt_protocol.py", "test_input_receipt_protocol.py", "run_checks_001.py", "archive_review_001.py")]
+sources += sorted(path for path in (HERE / "validation_001").iterdir() if path.is_file())
+copies = []
+for source in sources:
+    relative = Path("code") / (source.name + ".txt") if source.suffix == ".py" else Path("synthetic_validation") / source.name
+    destination = OUT / relative
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    raw = source.read_bytes()
+    with destination.open("xb") as stream:
+        stream.write(raw)
+    digest = hashlib.sha256(raw).hexdigest()
+    assert hashlib.sha256(destination.read_bytes()).hexdigest() == digest
+    copies.append({"source": str(source), "destination": str(destination), "bytes": len(raw), "sha256": digest})
+protocol = BASE / "protocol_001.md"
+review = {
+    "schema": "week6.sky_input_operation.private_protocol_review.v1",
+    "reviewer": "/root/week6_replanning_review (agent)",
+    "created_utc": datetime.now(timezone.utc).isoformat(),
+    "protocol_path": str(protocol), "protocol_sha256": hashlib.sha256(protocol.read_bytes()).hexdigest(),
+    "checker_path": str(HERE / "audit_input_receipt_protocol.py"),
+    "checker_sha256": hashlib.sha256((HERE / "audit_input_receipt_protocol.py").read_bytes()).hexdigest(),
+    "synthetic_records_only": True, "unit_tests": 15,
+    "actual_process_exits": {"pure_boundaries": 0, "synthetic_qualified_cli": 0, "synthetic_late_claim_cli": 1},
+    "positive_and_negative_cli_as_expected": True,
+    "live_cases_executed": [], "project_source_modified": False,
+    "changes": ["The next predeclared interval includes exact native click and immediate same-window refresh.",
+        "No old interval is changed or credited; normal018 remains owner/strict exit1."],
+    "enforced": ["Exact version and unchanged raw request/action/target title.",
+        "Input and successful fresh refresh match the explicit pre-owner unique window claim.",
+        "Explicit UTC order; outer finish is the exact original refresh-finish string.",
+        "Closed operation intervals are strictly disjoint; business events match exactly one input.",
+        "No one input receives two business transitions; no event timing tolerance.",
+        "Returned screenshot identifier is nonempty, but provider-local identifier reuse is accepted."],
+    "limits": ["JSON consistency cannot prove that recorded timestamps came from the actual tool calls, or that the refresh was immediate. Root must review original cell/tool chronology.",
+        "A successful refresh is observation transport success only, not business or task success.",
+        "Claim file SHA must be externally bound before owner start; actual fixture tree identity remains an ended-helper/Root check.",
+        "Real owner exit, complete source/dependency pins, ordinary strict audit, semantic review and monitor evidence remain independent required gates.",
+        "A caller with zero input operations is outside this input-operation qualification path.",
+        "The synthetic owner/window records are test data, not real native-window or process evidence."],
+    "copies": copies,
+}
+path = OUT / "review_summary_001.json"
+with path.open("x", encoding="utf-8", newline="\n") as stream:
+    json.dump(review, stream, ensure_ascii=False, indent=2)
+    stream.write("\n")
+print(json.dumps({"review": str(path), "sha256": hashlib.sha256(path.read_bytes()).hexdigest(), "files_copied": len(copies)}))

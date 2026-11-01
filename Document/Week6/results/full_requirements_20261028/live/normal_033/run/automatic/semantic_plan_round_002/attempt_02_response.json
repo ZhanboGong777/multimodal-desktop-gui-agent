@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 14266.0,
+  "usage": {
+    "prompt_tokens": 2476,
+    "completion_tokens": 156,
+    "total_tokens": 2632
+  },
+  "error": null,
+  "content_length": 691,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"The first goal was rejected because its postcondition already held, but the caller's intent remains unchanged. The workflow must now proceed with the remaining operations to achieve the final state: 'LOCAL COMPLETE' with no forbidden text. The new plan avoids repeating the failed goal and focuses on\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Review the report using visible controls, ensuring no errors or unavailable states, and proceed to commit if review is complete.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [\"ERROR\", \"UNAVAILABLE\", \"RETRY\"],\n      \"goal_id\": \"review_and_commit\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

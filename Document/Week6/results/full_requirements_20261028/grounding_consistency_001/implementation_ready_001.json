@@ -1,0 +1,53 @@
+{
+  "schema": "week6.grounding_consistency.implementation_ready.v1",
+  "created_at_utc": "2026-10-28T10:21:35.412943+00:00",
+  "status": "owned_files_stopped_pending_root_combined_validation_collection_freeze_and_real_runs",
+  "owned_file_sha256": {
+    "src/gui_agent/runtime/action_adapter.py": "222686942e4623d4743ac50e6da87599d4ba95d84ed9d1d855de089324a0eeda",
+    "src/gui_agent/runtime/runner.py": "91282ffc0cdc182dd6e727fb485ddc5d7244360200939c0521da56bcd8815511",
+    "src/gui_agent/planning/prompts.py": "58cdbe6220b5e1301360c24909e97fde6fd189395a4efbd0a735c76784b230b1",
+    "tests/test_week6_grounding_consistency.py": "2d86102592a0e1389f5af5c7b5f7eb42e586c01f776076ca9829615b0f185266"
+  },
+  "archive_manifest_sha256": "3fe9c8f4f54fe996e4c3026feae579f12dd56d0476e7daf21fcb3b6163fa0d29",
+  "old_freeze_sha256": "235166e04a5d697a500831ccff49bc50ad0aba45c4733cb54ef6073eebd336b5",
+  "public_guard": "gui_agent.runtime.action_adapter.validate_target_consistency(step, observation, *, min_confidence=0.35)",
+  "failure_prefix": "target consistency conflict:",
+  "input_before_policy": "Check original planning frame before grounding and current explicit-ID candidate before adapter dispatch. Reject observable text/ID conflict; never substitute another target.",
+  "ocr_scope": "Reuse current find_text and adjacent word-run matching; trustworthy nonempty selected text or positive-area overlapping OCR labels provide evidence. No local OCR/ID-only visual targets retain their existing path.",
+  "ambiguous_container_policy": "One complete matching label or word-level run must explain all readable OCR overlapping an anonymous contour; mixed controls and multiple matching labels in one large contour are refused.",
+  "preserved_semantics": [
+    "Caller final/semantic postcondition credit and existing matcher unchanged",
+    "Original model reply/step strings remain unchanged",
+    "Existing bounded target_resolution recovery and request/action/time budgets",
+    "Failed raw/zero-dispatch step remains in steps.jsonl",
+    "No model GUI executor calls during implementation",
+    "No RootREADME/config/fixture or other-agent telemetry source edits"
+  ],
+  "new_prompt_guidance": "Unique OCR text-only; duplicate labels need a consistent listed ID; no other control or caption ID.",
+  "system_prompt_characters": 997,
+  "legacy_prompt_cap": 1000,
+  "new_formal_target": {
+    "tests_passed": 49,
+    "pytest_seconds": 4.63,
+    "ruff_exit": 0,
+    "pytest_wait_exit": 0,
+    "pins": 13,
+    "pins_unchanged": true,
+    "path": "cpu_validation_001/validation.json"
+  },
+  "prior_development_target": {
+    "tests_passed": 283,
+    "tests_failed": 2,
+    "pytest_seconds": 135.24,
+    "legacy_adapter_and_runner_tests_passed": 260,
+    "failures": "New test fixture was rejected by earlier missing foreground/image evidence; another new fixture treated dict messages as objects. Old fixture bytes and exit1 artifacts retained.",
+    "path": "cpu_development_001/validation.json"
+  },
+  "combined_regression_and_real_acceptance_pending": true,
+  "limits": [
+    "Guard proves cross-field consistency, not widget roles or semantic causality",
+    "Existing substring/case behavior and negation limitations remain",
+    "Direct adapter stale-ID text fallback remains when no source frame is available; TaskRunner checks source before refresh",
+    "First ALPHA plan in normal010 was also inconsistent and will now be refused rather than accidentally repaired by stale-ID fallback"
+  ]
+}

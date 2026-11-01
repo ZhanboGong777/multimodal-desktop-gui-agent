@@ -1,0 +1,35 @@
+{
+  "status": "ready",
+  "reason": "The caller's request is clear and executable with the provided context and objectives.",
+  "subgoals": [
+    {
+      "instruction": "Prepare a GREEN report for project ALPHA in Week6 Local Lab.",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN"
+      ],
+      "forbid_text": [],
+      "goal_id": "prepare_green_report"
+    },
+    {
+      "instruction": "Locally review the prepared GREEN report for project ALPHA.",
+      "expect_text": [
+        "Review",
+        "Project ALPHA",
+        "Theme GREEN"
+      ],
+      "forbid_text": [],
+      "goal_id": "review_green_report"
+    },
+    {
+      "instruction": "Locally commit the prepared GREEN report for project ALPHA.",
+      "expect_text": [
+        "Commit",
+        "Project ALPHA",
+        "Theme GREEN"
+      ],
+      "forbid_text": [],
+      "goal_id": "commit_green_report"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "schema": "week6.normal018.readonly_helper_preflight_failure.v1",
+  "recorded_utc": "2026-10-28T14:41:28.749794+00:00",
+  "evidence_source": "Observed functions.exec / exec_command result in this task; no raw stdout file was opened before preflight failed",
+  "command": [
+    "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_normal018_independent_audit_20261029\\run_ended_audit_001.py",
+    "--owner-exit-confirmed",
+    "--operator-handoff",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_018\\operator_handoff_003.json"
+  ],
+  "actual_tool_exit_code": 1,
+  "observed_error": "KeyError: 'exec_wait' at run_ended_audit_001.py line84",
+  "helper_sha256": "806db54c59ad7ebc557465560f0ca188b11875a7e5dedca34028aeb227daf341",
+  "strict_auditor_started": false,
+  "experiment_rerun": false,
+  "explanation": "The actual ended operator handoff uses exec_actual_wait.session_closed. The old exact metadata guard stopped before OUT creation. This is distinct from the original experiment's exit1 and any later strict-auditor exit.",
+  "operator_addendum": "Root subsequently authorized final004 after all terminal metadata writes stopped. The new first strict audit will inventory004 as well; no earlier case raw inventory had been taken by the failed preflight."
+}

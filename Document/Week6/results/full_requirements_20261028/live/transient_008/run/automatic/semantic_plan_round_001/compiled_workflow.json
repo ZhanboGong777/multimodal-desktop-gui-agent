@@ -1,0 +1,199 @@
+{
+  "schema_version": "week6.semantic_subtasks.v6",
+  "native_proposal": {
+    "status": "ready",
+    "reason": "Plan outlines two distinct semantic objectives: first, prepare and review the BLUE report for project BETA; second, commit the report locally. Each step is explicitly named and preserves caller operations.",
+    "subgoals": [
+      {
+        "instruction": "Prepare a BLUE report for project BETA by selecting the project, choosing the BLUE theme, and generating the report using visible controls.",
+        "expect_text": [
+          "Project BETA",
+          "Theme BLUE",
+          "Report Generated"
+        ],
+        "forbid_text": [
+          "Error",
+          "Unavailable",
+          "Connection Failed"
+        ],
+        "goal_id": "prepare_report"
+      },
+      {
+        "instruction": "Review the prepared BLUE report for project BETA by accessing the review interface and confirming review completion using visible controls.",
+        "expect_text": [
+          "Project BETA",
+          "Theme BLUE",
+          "Review Complete"
+        ],
+        "forbid_text": [
+          "Error",
+          "Unavailable",
+          "Connection Failed"
+        ],
+        "goal_id": "review_report"
+      },
+      {
+        "instruction": "Commit the reviewed BLUE report for project BETA locally by selecting the commit option and confirming the local commit using visible controls.",
+        "expect_text": [
+          "Project BETA",
+          "Theme BLUE",
+          "LOCAL COMPLETE"
+        ],
+        "forbid_text": [
+          "Error",
+          "Unavailable",
+          "Connection Failed"
+        ],
+        "goal_id": "commit_report"
+      }
+    ]
+  },
+  "workflow": {
+    "workflow_id": "semantic_lab",
+    "instruction": "In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+    "subgoals": [
+      {
+        "case_id": "prepare_report",
+        "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Prepare a BLUE report for project BETA by selecting the project, choosing the BLUE theme, and generating the report using visible controls.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+        "target_app": null,
+        "preconditions": [],
+        "success_rules": [],
+        "verification": "automatic",
+        "expect_text": [
+          "Project BETA",
+          "Theme BLUE",
+          "Report Generated"
+        ],
+        "forbid_text": [
+          "Error",
+          "Unavailable",
+          "Connection Failed"
+        ],
+        "requires_processes": [],
+        "forbids_processes": [],
+        "must_exit_processes": [],
+        "risk": "medium",
+        "message_conversation": null,
+        "gate_on_step_verification": false
+      },
+      {
+        "case_id": "review_report",
+        "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Review the prepared BLUE report for project BETA by accessing the review interface and confirming review completion using visible controls.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+        "target_app": null,
+        "preconditions": [],
+        "success_rules": [],
+        "verification": "automatic",
+        "expect_text": [
+          "Project BETA",
+          "Theme BLUE",
+          "Review Complete"
+        ],
+        "forbid_text": [
+          "Error",
+          "Unavailable",
+          "Connection Failed"
+        ],
+        "requires_processes": [],
+        "forbids_processes": [],
+        "must_exit_processes": [],
+        "risk": "medium",
+        "message_conversation": null,
+        "gate_on_step_verification": false
+      },
+      {
+        "case_id": "commit_report",
+        "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Commit the reviewed BLUE report for project BETA locally by selecting the commit option and confirming the local commit using visible controls.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+        "target_app": null,
+        "preconditions": [],
+        "success_rules": [],
+        "verification": "automatic",
+        "expect_text": [
+          "Project BETA",
+          "Theme BLUE",
+          "LOCAL COMPLETE"
+        ],
+        "forbid_text": [
+          "Error",
+          "Unavailable",
+          "Connection Failed"
+        ],
+        "requires_processes": [],
+        "forbids_processes": [],
+        "must_exit_processes": [],
+        "risk": "medium",
+        "message_conversation": null,
+        "gate_on_step_verification": false
+      }
+    ],
+    "final_check": {
+      "case_id": "FINAL",
+      "instruction": "Independently read unchanged caller final predicates",
+      "target_app": null,
+      "preconditions": [],
+      "success_rules": [],
+      "verification": "automatic",
+      "expect_text": [
+        "Project BETA",
+        "Theme BLUE",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [],
+      "requires_processes": [],
+      "forbids_processes": [],
+      "must_exit_processes": [],
+      "risk": "low",
+      "message_conversation": null,
+      "gate_on_step_verification": true
+    }
+  },
+  "mapping": [
+    {
+      "goal_id": "prepare_report",
+      "native_instruction": "Prepare a BLUE report for project BETA by selecting the project, choosing the BLUE theme, and generating the report using visible controls.",
+      "validated_instruction": "Prepare a BLUE report for project BETA by selecting the project, choosing the BLUE theme, and generating the report using visible controls.",
+      "compiled_instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Prepare a BLUE report for project BETA by selecting the project, choosing the BLUE theme, and generating the report using visible controls.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+      "expect_text": [
+        "Project BETA",
+        "Theme BLUE",
+        "Report Generated"
+      ],
+      "forbid_text": [
+        "Error",
+        "Unavailable",
+        "Connection Failed"
+      ]
+    },
+    {
+      "goal_id": "review_report",
+      "native_instruction": "Review the prepared BLUE report for project BETA by accessing the review interface and confirming review completion using visible controls.",
+      "validated_instruction": "Review the prepared BLUE report for project BETA by accessing the review interface and confirming review completion using visible controls.",
+      "compiled_instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Review the prepared BLUE report for project BETA by accessing the review interface and confirming review completion using visible controls.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+      "expect_text": [
+        "Project BETA",
+        "Theme BLUE",
+        "Review Complete"
+      ],
+      "forbid_text": [
+        "Error",
+        "Unavailable",
+        "Connection Failed"
+      ]
+    },
+    {
+      "goal_id": "commit_report",
+      "native_instruction": "Commit the reviewed BLUE report for project BETA locally by selecting the commit option and confirming the local commit using visible controls.",
+      "validated_instruction": "Commit the reviewed BLUE report for project BETA locally by selecting the commit option and confirming the local commit using visible controls.",
+      "compiled_instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Commit the reviewed BLUE report for project BETA locally by selecting the commit option and confirming the local commit using visible controls.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+      "expect_text": [
+        "Project BETA",
+        "Theme BLUE",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [
+        "Error",
+        "Unavailable",
+        "Connection Failed"
+      ]
+    }
+  ]
+}

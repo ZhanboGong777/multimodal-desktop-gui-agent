@@ -33,7 +33,13 @@ from ..planning import PlanResult, TaskPlan, TaskPlanner
 from ..planning.schemas import PlanStep
 from ..schemas import ActionResult, BoundingBox
 from . import provenance
-from .action_adapter import ActionAdapter, ActionResolutionError, keys_for_platform
+from .action_adapter import (
+    TARGET_CONSISTENCY_ERROR_PREFIX,
+    ActionAdapter,
+    ActionResolutionError,
+    keys_for_platform,
+    validate_target_consistency,
+)
 from .cursor_parking import plan_cursor_parking, verify_parking_frame
 from .monitoring import RunMonitor
 from .processes import known as known_processes
@@ -883,6 +889,36 @@ class TaskRunner:
             actions_used=actions_used, max_actions=options.max_actions,
             remaining_ms=remaining_milliseconds(deadline, attempt_started),
         )
+        if feedback.reason == "target_resolution" and any(
+            (item.error or "").startswith((TARGET_CONSISTENCY_ERROR_PREFIX, "quoted target conflict:"))
+            for item in pass_steps
+        ):
+            feedback = feedback.model_copy(update={
+                "instruction": feedback.instruction + (
+                    " The previous plan's target_text conflicted with its explicit element ID "
+                    "or identified a container with ambiguous labels. No input was dispatched "
+                    "for that rejected step. Use the current observation and select an ID "
+                    "consistent with the same requested target; do not change the task goal."
+                    " A quoted action label must agree with the chosen target's observed label. "
+                    "When quoting an OCR target in a description, quote its exact current OCR text. "
+                    "If the intended control is clear only from pixels, choose its matching current "
+                    "allowed anonymous_without_ocr ID yourself without attaching an unrelated OCR name. "
+                    "Do not invent labels, change the caller's requested operation or relax success predicates."
+                ),
+            })
+        if feedback.reason == "target_resolution" and any(
+            item.action_result is None and (item.error or "").startswith("no element matches ")
+            for item in pass_steps
+        ):
+            feedback = feedback.model_copy(update={
+                "instruction": feedback.instruction + (
+                    " The rejected text-only target did not resolve to current OCR or adjacent words; "
+                    "no input was dispatched for that step. Use only current allowed candidates. "
+                    "If the target is visible in the screenshot without OCR, choose its matching "
+                    "anonymous_without_ocr ID yourself; do not repeat unresolved text-only targeting. "
+                    "If uncertain, return no steps with errors. Do not change the task goal."
+                ),
+            })
         observation_id: str | None = None
         outcome = "observation_failed"
         try:
@@ -1466,6 +1502,9 @@ class TaskRunner:
         notes: list[str], *, deadline: float | None = None,
     ) -> tuple[PlanStep, ObservationSnapshot, bool]:
         """Refresh only one anonymous target, preserving every approved action field."""
+        validate_target_consistency(
+            step, source, min_confidence=getattr(self.adapter, "min_confidence", 0.35)
+        )
         old_id = step.arguments.get("element_id") or step.arguments.get("target_element")
         old = source.element(old_id) if isinstance(old_id, str) else None
         anonymous = old is not None and old.source == "contour" and not old.text.strip()
@@ -2005,6 +2044,11 @@ class TaskRunner:
     def _context(
         self, snapshot: ObservationSnapshot, task: TaskSpec, options: ExecutionOptions
     ) -> dict[str, Any]:
+        from ..planning.target_bindings import (
+            candidate_visual_details,
+            derive_target_bindings,
+            generation_targeting_policy,
+        )
         from .observation import describe_elements
 
         context = {
@@ -2024,15 +2068,24 @@ class TaskRunner:
                 f"{options.task_timeout_seconds:g} s for the whole task"
             ),
             "visible_text": describe_elements(snapshot),
+            "targeting_policy": generation_targeting_policy(),
             "success_rules": task.success_rules,
         }
         if not task.message_conversation:
+            context["target_bindings"] = derive_target_bindings(
+                snapshot, min_confidence=getattr(self.adapter, "min_confidence", 0.35))
+            if getattr(getattr(self, "planner", None), "visual_candidate_details", False):
+                details, _ = candidate_visual_details(context["target_bindings"], snapshot.image_path)
+                context["candidate_visual_details"] = details
             return context
         # The recorded static T04 probe sent 300 whole-desktop targets (21806
         # tokens). The model bound typing to a sidebar/Codex target and selected
         # a sidebar click as send. Keep only observed controls inside the editor
         # region that the independent initial visual assessment authorised.
         context["visible_text"] = ""
+        context["target_bindings"] = derive_target_bindings(
+            snapshot.model_copy(update={"elements": []}), source_snapshot=snapshot,
+            min_confidence=getattr(self.adapter, "min_confidence", 0.35))
         message_context: dict[str, Any] = {
             "text_already_typed": self._message_text_typed,
             "rules": (
@@ -2061,6 +2114,9 @@ class TaskRunner:
         source = self._message_composer[0]
         visible = snapshot.model_copy(update={"elements": candidates})
         context["visible_text"] = describe_elements(visible)
+        context["target_bindings"] = derive_target_bindings(
+            visible, source_snapshot=snapshot,
+            min_confidence=getattr(self.adapter, "min_confidence", 0.35))
         editors = [
             item for item in candidates
             if item.source == "contour" and not item.text.strip() and item.bounding_box == composer

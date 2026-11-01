@@ -1,0 +1,77 @@
+{
+  "schema": "week6.root.native_operation_notes.v1",
+  "case": "normal_030",
+  "reviewer": "Root",
+  "utc": "2026-11-01T05:03:41.099374+00:00",
+  "sole_operator": true,
+  "window_id": 329296,
+  "native_initial_observation": "Fresh Choose a project with ALPHA and BETA. Lower-right uninstall notification outside Lab controls was left untouched.",
+  "inputs_actually_observed": [
+    {
+      "id": "input_001",
+      "action": "double_click",
+      "xy": [
+        1280,
+        867
+      ],
+      "start": "2026-11-01T04:59:55.894Z",
+      "dispatch_returned": "2026-11-01T04:59:56.202Z",
+      "fresh_finish": "2026-11-01T04:59:56.292Z",
+      "before": "Choose a project",
+      "after": "Project ALPHA; Choose report theme; BLUE/GREEN buttons",
+      "business_change": "project_selected"
+    },
+    {
+      "id": "input_002",
+      "action": "double_click",
+      "xy": [
+        1280,
+        1079
+      ],
+      "start": "2026-11-01T05:00:43.911Z",
+      "dispatch_returned": "2026-11-01T05:00:44.207Z",
+      "fresh_finish": "2026-11-01T05:00:44.307Z",
+      "before": "Project ALPHA; Choose report theme",
+      "after": "Project ALPHA; Theme GREEN; Draft ready; Review report",
+      "business_change": "theme_selected"
+    },
+    {
+      "id": "input_003",
+      "action": "click",
+      "xy": [
+        1282,
+        1049
+      ],
+      "start": "2026-11-01T05:01:41.788Z",
+      "dispatch_returned": "2026-11-01T05:01:41.916Z",
+      "fresh_finish": "2026-11-01T05:01:42.076Z",
+      "before": "Draft ready; Review report",
+      "after": "Review complete; Commit locally",
+      "business_change": "review_completed"
+    },
+    {
+      "id": "input_004",
+      "action": "click",
+      "xy": [
+        1281,
+        1053
+      ],
+      "original_target_description": "Commiyocally",
+      "start": "2026-11-01T05:02:34.094Z",
+      "dispatch_returned": "2026-11-01T05:02:34.269Z",
+      "fresh_finish": "2026-11-01T05:02:34.417Z",
+      "before": "Review complete; Commit locally",
+      "after": "Project ALPHA; Theme GREEN; LOCAL COMPLETE",
+      "business_change": "local_committed"
+    }
+  ],
+  "unknown_inputs": 0,
+  "operator_added_inputs": 0,
+  "local_goal_or_condition_changes": false,
+  "actual_midrun_monitor_cli_exit": 0,
+  "actual_owner_and_wrapper_exit": [
+    0,
+    0
+  ],
+  "semantic_qualification": "Pending independent saved-record guards and Root original-PNG/native-goal review. Physical final alone is not acceptance."
+}

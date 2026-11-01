@@ -1,0 +1,94 @@
+{
+  "schema": "week6.saved_message_order.diagnostic.v1",
+  "results": [
+    {
+      "actual_child_exit_code": 0,
+      "hash_seed": "0",
+      "results": [
+        {
+          "variant": "original_set_iteration",
+          "completed_goal_key_order": [
+            "instruction",
+            "goal_id",
+            "expect_text",
+            "forbid_text"
+          ],
+          "passed": false,
+          "error": "semantic_conversation_messages_not_exact_original_roles_and_content"
+        },
+        {
+          "variant": "original_producer_order",
+          "completed_goal_key_order": [
+            "goal_id",
+            "instruction",
+            "expect_text",
+            "forbid_text"
+          ],
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "actual_child_exit_code": 0,
+      "hash_seed": "1",
+      "results": [
+        {
+          "variant": "original_set_iteration",
+          "completed_goal_key_order": [
+            "instruction",
+            "expect_text",
+            "goal_id",
+            "forbid_text"
+          ],
+          "passed": false,
+          "error": "semantic_conversation_messages_not_exact_original_roles_and_content"
+        },
+        {
+          "variant": "original_producer_order",
+          "completed_goal_key_order": [
+            "goal_id",
+            "instruction",
+            "expect_text",
+            "forbid_text"
+          ],
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "actual_child_exit_code": 0,
+      "hash_seed": "2",
+      "results": [
+        {
+          "variant": "original_set_iteration",
+          "completed_goal_key_order": [
+            "goal_id",
+            "expect_text",
+            "forbid_text",
+            "instruction"
+          ],
+          "passed": false,
+          "error": "semantic_conversation_messages_not_exact_original_roles_and_content"
+        },
+        {
+          "variant": "original_producer_order",
+          "completed_goal_key_order": [
+            "goal_id",
+            "instruction",
+            "expect_text",
+            "forbid_text"
+          ],
+          "passed": true,
+          "error": null
+        }
+      ]
+    }
+  ],
+  "original_case_unchanged": true,
+  "project_source_changed": false,
+  "model_gui_calls": 0,
+  "original_strict_audit_reclassified": false,
+  "meaning": "Exact message-content check passes with original producer key order and depends on hash seed with auditor set iteration. This diagnoses auditor serialization, not task or semantic acceptance."
+}

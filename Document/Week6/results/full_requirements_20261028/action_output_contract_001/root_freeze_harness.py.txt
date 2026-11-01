@@ -1,0 +1,180 @@
+"""Bind passed offline checks to a new, unaccepted live experiment."""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import re
+import shutil
+from datetime import UTC, datetime
+from pathlib import Path
+from urllib.request import urlopen
+
+REPO = Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+BASE = REPO / 'Document/Week6/results/full_requirements_20261028'
+CHANGE = BASE / 'action_output_contract_001'
+sha = lambda path: hashlib.sha256(path.read_bytes()).hexdigest()
+load = lambda path: json.loads(path.read_text(encoding='utf-8'))
+
+
+def write(path, value):
+    with path.open('x', encoding='utf-8', newline='\n') as stream:
+        json.dump(value, stream, ensure_ascii=False, indent=2, allow_nan=False)
+        stream.write('\n')
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--validation-name', required=True)
+    args = parser.parse_args()
+    assert args.validation_name and all(c in 'abcdefghijklmnopqrstuvwxyz0123456789_-' for c in args.validation_name)
+    destination = CHANGE / 'final_source_freeze_001.json'
+    prereg_path = BASE / 'live/preregistered_v6_007.json'
+    assert not destination.exists() and not prereg_path.exists()
+    old_path = BASE / 'model_candidate_vl3b_001/final_source_freeze_001.json'
+    assert sha(old_path) == 'f45685bbf863f8decf72a1ced94329938904d8b0884cdad57111853eeeb7c0ff'
+    old = load(old_path)
+    directory = CHANGE / args.validation_name
+    validation = load(directory / 'validation.json')
+    assert validation['checks_passed'] is True and validation['code_unchanged'] is True
+    assert validation['scope'] == 'affected_action_runtime_semantic'
+    assert [item['actual_child_exit_code'] for item in validation['receipts']] == [0, 0, 0]
+    pins = load(directory / 'tested_code_pins_before.json')
+    assert pins == load(directory / 'tested_code_pins_after.json')
+    domain = {REPO / 'pyproject.toml'}
+    for folder in ('src', 'tests', 'scripts'):
+        domain.update((REPO / folder).rglob('*.py'))
+    domain.update(p for p in (REPO / 'configs').rglob('*') if p.is_file())
+    assert set(pins) == {p.relative_to(REPO).as_posix() for p in domain}
+    assert all(sha(REPO / name) == digest for name, digest in pins.items())
+    changes = {name for name in set(old['code_pins']) | set(pins)
+               if old['code_pins'].get(name) != pins.get(name)}
+    assert changes == {
+        'src/gui_agent/planning/planner.py',
+        'src/gui_agent/planning/workflow_decomposer.py',
+        'tests/test_week6_action_output_contract.py',
+        'tests/test_week6_action_output_contract_review.py',
+        'tests/test_week6_rolling_actions.py',
+    }, changes
+    assert len(pins) == 267
+    assert sha(REPO / 'README.md') == old['readme_sha256'], 'Merge independent README edits explicitly'
+    assert sha(REPO / '.gitattributes') == old['git_attributes_sha256']
+    assert load(BASE / 'review/negative_normal014_audit_001.json')['schema']
+    assert load(BASE / 'live/normal_014/owner_receipt.json')['child_exit_code'] == 1
+    assert load(BASE / 'live/normal_014/run/acceptance_observed.json')['runtime_independent_gates_passed'] is False
+    migration = CHANGE / 'legacy_rolling_assertion_migration_001'
+    quick = load(migration / 'quickcheck_001/validation.json')
+    assert quick['checks_passed'] is True and quick['all_other_test_ast_unchanged'] is True
+    assert all(receipt['actual_child_exit_code'] == 0 for receipt in quick['actual_receipts'])
+    assert load(CHANGE / 'root_affected_validation_001/validation.json')['checks_passed'] is False
+    before = CHANGE / 'README.before_action_contract.md'
+    shutil.copyfile(REPO / 'README.md', before)
+    text = before.read_text(encoding='utf-8')
+    start = text.index('The current [379-case affected semantic CPU check]')
+    end = text.index('### Week 5 submission', start)
+    count, collected = validation['targeted_tests_passed'], validation['collected_test_count']
+    addition = (
+        'The earlier [379-case affected semantic CPU check](Document/Week6/results/full_requirements_20261028/semantic_conversation_repair_001/root_semantic_validation_001/validation.json)\n'
+        'passed before the action-output change. Normal013 stopped before input\n'
+        'after three invalid native proposals. A separately registered candidate\n'
+        'uses the existing `qwen2.5vl:3b` for semantic and action planning; this\n'
+        'is a different model configuration, not a same-model improvement claim.\n'
+        'No model was downloaded or trained. Normal014 produced two valid semantic\n'
+        'objectives on its first request, then stopped because both action replies\n'
+        'omitted the TaskPlan steps array. It dispatched no input. Its actual\n'
+        'exit1 and original responses remain in the negative audit.\n\n'
+        'The action planner now sends its structured-output option to the endpoint\n'
+        'and returns actual parser errors to the model on bounded format retries.\n'
+        'The JSON-schema request uses `strict:false` because action arguments are\n'
+        'extensible objects; this is not a claim of OpenAI strict-mode compatibility\n'
+        'or a replacement for local parsing. Invalid native plans are still refused\n'
+        'without input. The caller, frame, single-step limit, grounding, semantic\n'
+        'guards and global budgets are unchanged. Each action-format attempt and\n'
+        'its raw reply is retained; oversized replies are omitted from correction\n'
+        'context rather than truncated. Transport records retain the schema parameter.\n'
+        'This source has not yet passed live acceptance.\n\n'
+        'The first affected check retained an actual failure: 837 passed and one\n'
+        'legacy rolling-actions assertion still required the endpoint format option\n'
+        'to be absent. Its unchanged runtime action, verification and budget checks\n'
+        'passed. That single interface assertion is migrated to check the low-level\n'
+        'TaskPlan format and absence of high-level goal-selector constraints; the\n'
+        'original test and complete failed-check records are retained. Explicit\n'
+        '`require_structured_output=False` still omits the endpoint schema.\n\n'
+        f'The [{count}-case affected action/runtime/semantic CPU check](Document/Week6/results/full_requirements_20261028/action_output_contract_001/{args.validation_name}/validation.json)\n'
+        f'passed with Ruff clean and {len(pins)} unchanged before/after code pins.\n'
+        f'The {collected}-case collection is not a full-suite execution. Normal015,\n'
+        'transient001 and full004 remain pending on this new freeze.\n\n'
+        f'Validation target (pending): `{collected} tests, ruff clean`. This is the\n'
+        'collected suite size, not a full regression or real-window acceptance claim.\n\n'
+    )
+    text = text[:start] + addition + text[end:]
+    text = text.replace('The next experiment represents bounded correction as explicit chat turns.',
+                        'The earlier conversation-repair experiment represented bounded correction as explicit chat turns.', 1)
+    text = text.replace('The new experiment is not yet live-accepted.',
+                        'Normal013 did not achieve live acceptance on that experiment.', 1)
+    links = []
+    for target in re.findall(r'\[[^\]]*\]\(([^)]+)\)', text):
+        if target.startswith(('https://', 'http://', '#')):
+            continue
+        assert (REPO / target.split('#', 1)[0]).exists(), target
+        links.append(target)
+    (REPO / 'README.md').write_text(text, encoding='utf-8', newline='\n')
+    qa = CHANGE / 'README.update_qa_001.json'
+    write(qa, {'schema': 'week6.pending_readme.qa.v1', 'previous_sha256': sha(before),
+               'current_sha256': sha(REPO / 'README.md'), 'local_links_checked': links,
+               'targeted_tests_passed': count, 'collection_only': collected,
+               'full_regression_passed': False, 'new_real_acceptance_passed': False})
+    shutil.copyfile(__file__, CHANGE / 'root_freeze_harness.py.txt')
+    freeze = {key: value for key, value in old.items()
+              if key not in {'code_pins', 'changed_paths', 'runtime_model_change',
+                             'root_freeze_harness_sha256', 'targeted_validation',
+                             'source_validation_binding', 'runtime_model_change_only',
+                             'code_byte_changes_from_previous_freeze'}}
+    freeze.update({
+        'schema': 'week6.semantic.action_output_contract.source_freeze.v1',
+        'created_at_utc': datetime.now(UTC).isoformat(),
+        'status': 'frozen_pending_normal015_transient001_full004',
+        'previous_freeze_sha256': sha(old_path), 'changed_paths': sorted(changes),
+        'code_pin_count': len(pins), 'code_pins': pins,
+        'readme_sha256': sha(REPO / 'README.md'), 'readme_update_qa_sha256': sha(qa),
+        'source_before_manifest_sha256': sha(CHANGE / 'source_before_manifest.json'),
+        'targeted_validation': f'{args.validation_name}/validation.json',
+        'targeted_validation_sha256': sha(directory / 'validation.json'),
+        'targeted_tests_passed': count, 'targeted_pytest_seconds': validation['targeted_pytest_seconds'],
+        'collected_test_count': collected, 'collection_test_execution': False,
+        'root_freeze_harness_sha256': sha(CHANGE / 'root_freeze_harness.py.txt'),
+        'model_gui_calls_during_changes': 0,
+        'new_real_model_gui_acceptance_completed': False, 'full004_completed': False,
+        'action_output_change': 'Endpoint non-strict JSON schema and bounded native format-error feedback; local parser and all execution guards unchanged',
+        'legacy_assertion_migration_sha256': sha(migration / 'migration.json'),
+        'legacy_assertion_migration_actual_check_sha256': sha(migration / 'quickcheck_001/validation.json'),
+    })
+    write(destination, freeze)
+    previous = load(BASE / 'live/preregistered_v6_006.json')
+    with urlopen('http://127.0.0.1:11434/api/tags', timeout=15) as response:
+        tags = json.load(response)
+    model = [item for item in tags['models'] if item['name'] == previous['model']]
+    assert len(model) == 1 and model[0]['digest'] == previous['model_digest']
+    for name in ('normal_015', 'fixture_normal_011', 'transient_001', 'fixture_transient_001'):
+        assert not (BASE / 'live' / name).exists(), name
+    previous.update({
+        'schema': 'week6.semantic_live.v6.action_contract_preregistration.v1',
+        'registered_utc': datetime.now(UTC).isoformat(),
+        'freeze': '../action_output_contract_001/final_source_freeze_001.json',
+        'freeze_sha256': sha(destination),
+        'previous_development_failures': 'normal001 through014 remain unaccepted; different source/model configurations remain separate. Normal014 high-level native two-goal proposal valid; two malformed low-level flat action replies were rejected before input. Its actual wait1 and raw records are preserved.',
+        'normal': {'name': 'normal_015', 'project': 'ALPHA', 'colour': 'GREEN',
+                   'fixture': 'fixture_normal_011', 'reuse': 'New independent fixture'},
+        'final_full_regression': f'Required after both accepted real cases; {collected} is only collection, full004 not started.',
+        'added_action_output_contract': freeze['action_output_change'],
+        'repair_experiment': 'High-level week6.semantic_repair_feedback.v2 conversation code is unchanged. This new source experiment adds low-level TaskPlanner endpoint non-strict schema and bounded parser-error/native-reply feedback with per-attempt audit, plus additive transport schema metadata. It uses the same existing qwen2.5vl3b as014 and does not relabel any normal001-014 failure as accepted.',
+        'runtime_model_change': 'Same existing qwen2.5vl3b as014, both roles, same digest and budgets; no download/train',
+    })
+    write(prereg_path, previous)
+    print(json.dumps({'freeze_sha256': sha(destination), 'prereg_sha256': sha(prereg_path),
+                      'code_pin_count': len(pins), 'targeted_tests_passed': count,
+                      'collected_test_count': collected, 'readme_sha256': sha(REPO / 'README.md')}))
+
+
+if __name__ == '__main__':
+    main()

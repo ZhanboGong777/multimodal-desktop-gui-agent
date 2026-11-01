@@ -1,0 +1,132 @@
+"""Independent AST/Boolean read-only review; no imports of production modules."""
+import ast
+import copy
+import difflib
+import hashlib
+import itertools
+import json
+from pathlib import Path
+
+ROOT = Path(r"C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+OLD = ROOT / "Document/Week6/results/full_requirements_20261028/semantic_goal_grouping_prompt_001/source_before/src/gui_agent/planning/semantic_workflow.py"
+NEW = ROOT / "src/gui_agent/planning/semantic_workflow.py"
+OUT = ROOT / "Document/Week6/results/full_requirements_20261028/review/goal_grouping_prompt_independent_review_002.json"
+old_bytes, new_bytes = OLD.read_bytes(), NEW.read_bytes()
+trees = [ast.parse(value) for value in (old_bytes, new_bytes)]
+labels = {"key in ids": "current_id", "instruction in instructions": "current_instruction",
+          "signature[1:] in signatures": "current_checks", "key in done_ids": "completed_id",
+          "instruction in done_instructions": "completed_instruction",
+          "signature[1:] in done_checks": "completed_checks"}
+
+
+def method(tree):
+    klass = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "SemanticDecomposer")
+    return next(n for n in klass.body if isinstance(n, ast.FunctionDef) and n.name == "_validate")
+
+
+def boolean(test):
+    if isinstance(test, ast.Compare) and ast.unparse(test) in labels:
+        return ast.Name(id=labels[ast.unparse(test)], ctx=ast.Load())
+    if isinstance(test, ast.BoolOp) and isinstance(test.op, ast.Or):
+        children = [boolean(value) for value in test.values]
+        if all(child is not None for child in children):
+            return ast.BoolOp(op=ast.Or(), values=children)
+    return None
+
+
+conditions, memberships = [], []
+for tree in trees:
+    expressions, terms = [], []
+    for node in ast.walk(method(tree)):
+        if not isinstance(node, ast.If):
+            continue
+        converted = boolean(node.test)
+        if converted is None:
+            continue
+        assert not node.orelse
+        assert isinstance(node.body[-1], ast.Raise) and isinstance(node.body[-1].exc, ast.Call)
+        assert isinstance(node.body[-1].exc.func, ast.Name) and node.body[-1].exc.func.id == "ValueError"
+        for before_raise in node.body[:-1]:
+            assert ast.dump(before_raise, include_attributes=False) == ast.dump(ast.parse(
+                "prior = check_owners[signature[1:]]").body[0], include_attributes=False)
+        assert all(isinstance(call.func, ast.Name) and call.func.id == "ValueError"
+                   for call in ast.walk(node) if isinstance(call, ast.Call))
+        expressions.append(compile(ast.fix_missing_locations(ast.Expression(converted)), "<guard>", "eval"))
+        terms += [labels[ast.unparse(n)] for n in ast.walk(node.test) if isinstance(n, ast.Compare)]
+    conditions.append(expressions)
+    memberships.append(sorted(terms))
+assert memberships[0] == memberships[1] == sorted(labels.values())
+truth = []
+for bits in itertools.product((False, True), repeat=6):
+    env = dict(zip(sorted(labels.values()), bits))
+    values = [any(eval(code, {"__builtins__": {}}, env) for code in clauses) for clauses in conditions]
+    assert values[0] == values[1]
+    truth.append({"conditions": env, "before_rejects": values[0], "after_rejects": values[1]})
+
+
+class StripDiagnosticChange(ast.NodeTransformer):
+    def visit_If(self, node):
+        if boolean(node.test) is not None:
+            return None
+        return self.generic_visit(node)
+
+    def visit_AnnAssign(self, node):
+        if isinstance(node.target, ast.Name) and node.target.id == "check_owners":
+            assert isinstance(node.value, ast.Dict) and not node.value.keys
+            return None
+        return self.generic_visit(node)
+
+    def visit_Assign(self, node):
+        if any(isinstance(t, ast.Subscript) and isinstance(t.value, ast.Name)
+               and t.value.id == "check_owners" for t in node.targets):
+            assert ast.unparse(node) == "check_owners[signature[1:]] = goal.goal_id"
+            return None
+        return self.generic_visit(node)
+
+
+stripped = [StripDiagnosticChange().visit(copy.deepcopy(method(tree))) for tree in trees]
+assert ast.dump(stripped[0], include_attributes=False) == ast.dump(stripped[1], include_attributes=False)
+
+
+def outside_prompt_and_validate(tree):
+    tree = copy.deepcopy(tree)
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == "SEMANTIC_SYSTEM_PROMPT" for t in node.targets):
+            node.value = ast.Constant("<reviewed-prompt>")
+    method(tree).body = [ast.Pass()]
+    return ast.dump(tree, include_attributes=False)
+
+
+assert outside_prompt_and_validate(trees[0]) == outside_prompt_and_validate(trees[1])
+prompts = [next(ast.literal_eval(node.value) for node in tree.body if isinstance(node, ast.Assign)
+    and any(isinstance(target, ast.Name) and target.id == "SEMANTIC_SYSTEM_PROMPT" for target in node.targets))
+    for tree in trees]
+prompt_diff = list(difflib.unified_diff(prompts[0].splitlines(), prompts[1].splitlines(), lineterm=""))
+added = "\n".join(line[1:] for line in prompt_diff if line.startswith("+") and not line.startswith("+++"))
+assert not any(word.casefold() in added.casefold() for word in
+               ("ALPHA", "BETA", "GREEN", "BLUE", "LOCAL COMPLETE", "Week6 Local Lab"))
+assert NEW.read_bytes() == new_bytes and OLD.read_bytes() == old_bytes
+result = {"schema_version": "week6.semantic.goal_grouping.independent_review.v1",
+    "reviewer": "/root/week6_replanning_review", "source_before": str(OLD.relative_to(ROOT)),
+    "source_before_sha256": hashlib.sha256(old_bytes).hexdigest(),
+    "source_after": str(NEW.relative_to(ROOT)), "source_after_sha256": hashlib.sha256(new_bytes).hexdigest(),
+    "only_system_prompt_and_validate_body_differ_in_production_AST": True,
+    "membership_guard_terms_before": memberships[0], "membership_guard_terms_after": memberships[1],
+    "boolean_assignments_compared": len(truth), "boolean_rejection_differences": 0,
+    "guard_blocks_only_raise_diagnostics_and_optional_prior_goal_lookup": True,
+    "remaining_validate_AST_identical_after_removing_only_diagnostic_branches_and_lookup_bookkeeping": True,
+    "protocol_schema_input_compilation_budget_credit_runtime_and_archive_code_unchanged": True,
+    "no_programmatic_merge_or_forced_goal_count": True, "new_prompt_has_no_fixture_specific_literals": True,
+    "prompt_diff": prompt_diff, "truth_table": truth,
+    "conclusion": "No acceptance guard relaxation found. The same six OR rejection terms are split into exact completed/id-instruction/check diagnostics; the model, not local code, is asked to group related unfinished operations. No model or GUI effectiveness result is implied.",
+    "limitations": "This is source/Boolean analysis, not a new full regression or live run. Previous full003 and normal007 remain bound to their original producer hashes.",
+    "operations": {"model_calls": 0, "GUI_operations": 0, "pytest_runs": 0},
+    "review_script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
+with OUT.open("x", encoding="utf-8", newline="\n") as f:
+    json.dump(result, f, ensure_ascii=False, indent=2)
+    f.write("\n")
+with OUT.with_suffix(".py.txt").open("xb") as f:
+    f.write(Path(__file__).read_bytes())
+print(json.dumps({"out": str(OUT), "no_guard_relaxation_found": True,
+                  "source_after_sha256": result["source_after_sha256"],
+                  "sha256": hashlib.sha256(OUT.read_bytes()).hexdigest()}))

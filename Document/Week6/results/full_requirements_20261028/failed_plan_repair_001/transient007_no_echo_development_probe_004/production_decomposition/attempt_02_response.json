@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 7766.0,
+  "usage": {
+    "prompt_tokens": 2345,
+    "completion_tokens": 81,
+    "total_tokens": 2426
+  },
+  "error": null,
+  "content_length": 371,
+  "content": "{\n  \"status\": \"needs_clarification\",\n  \"reason\": \"The caller's original request requires final state verification with 'LOCAL COMPLETE', but the previous model's failed prediction was based on an intermediate state ('Report Generated') that is not part of the caller's final predicates. Since the caller's final predicates are immutable and must be 1\",\n  \"subgoals\": []\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

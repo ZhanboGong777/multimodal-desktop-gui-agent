@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 19672.0,
+  "usage": {
+    "prompt_tokens": 1510,
+    "completion_tokens": 180,
+    "total_tokens": 1690
+  },
+  "error": null,
+  "content_length": 808,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"Plan outlines two distinct semantic objectives: first, prepare the GREEN report for project ALPHA; second, review and commit it locally. Each step is explicitly named and verifiable via visible text postconditions. No operation is dropped or combined prematurely. Final persistence is deferred to the\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Prepare a GREEN report for project ALPHA in Week6 Local Lab using visible controls.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"prepare_report\"\n    },\n    {\n      \"instruction\": \"Review the prepared GREEN report for project ALPHA and commit it locally.\",\n      \"expect_text\": [\"LOCAL COMPLETE\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"review_and_commit\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "schema": "week6.full_perception.plan.v1",
+  "created_utc": "2026-10-28T00:02:03.262795+00:00",
+  "purpose": "Retain screen recognition while reducing full PNG-decode + OCR + contour wall time; no OS capture, model or action claims.",
+  "arms": [
+    "native_eng_subprocess",
+    "native_bilingual_subprocess",
+    "screen_bilingual_subprocess",
+    "screen_bilingual_persistent"
+  ],
+  "fixed_parameters": {
+    "screen_scale": 2.0,
+    "screen_psm": 11,
+    "screen_oem": 1,
+    "confidence": 0.5
+  },
+  "equivalence_gate": "Persistent screen ordered UIElement text, bounds, confidence and all UI candidates equal screen subprocess for every measured frame/repetition; original pixels unchanged.",
+  "accuracy_gate": "On new holdout, persistent P/R/F1 equal screen subprocess and F1 greater than native bilingual. Score unique frames once, not correlated repeats as independent labels.",
+  "speed_gate": "All warm repetitions included. Full-frame median at least 10% lower than each of the other three arms; per-frame persistent median not over5% slower than screen. p95/max/slow frames retained.",
+  "cold_rule": "Three fresh-engine first-frame measurements per arm reported separately, including creation/loading; warmup first call per arm retained separately and never described as warm speed.",
+  "warm_rule": "3 repeats of every frame; rotate four arm order by frame+repeat, reverse odd repeats; all timing/errors/warnings preserved.",
+  "api_sources": [
+    "https://raw.githubusercontent.com/tesseract-ocr/tesseract/5.5.1/include/tesseract/capi.h",
+    "https://raw.githubusercontent.com/tesseract-ocr/tesseract/5.5.1/include/tesseract/baseapi.h"
+  ],
+  "no_gui_model_training": true,
+  "no_environment_install": true
+}

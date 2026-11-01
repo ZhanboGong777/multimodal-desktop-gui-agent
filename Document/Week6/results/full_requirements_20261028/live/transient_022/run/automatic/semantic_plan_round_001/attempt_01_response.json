@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 19359.0,
+  "usage": {
+    "prompt_tokens": 1344,
+    "completion_tokens": 176,
+    "total_tokens": 1520
+  },
+  "error": null,
+  "content_length": 753,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"Plan outlines two distinct semantic objectives: first, prepare and review the BLUE report for project BETA; second, commit the report locally. Each goal is bounded by visible text conditions to verify completion.\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Prepare a BLUE report for project BETA and review it using visible controls.\",\n      \"expect_text\": [\"Project BETA\", \"Theme BLUE\", \"Review Complete\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"prepare_review\"\n    },\n    {\n      \"instruction\": \"Commit the BLUE report for project BETA locally using visible controls.\",\n      \"expect_text\": [\"Project BETA\", \"Theme BLUE\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"commit_local\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

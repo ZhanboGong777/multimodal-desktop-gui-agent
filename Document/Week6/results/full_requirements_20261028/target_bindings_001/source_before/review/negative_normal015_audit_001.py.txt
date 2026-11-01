@@ -1,0 +1,326 @@
+"""Ended normal015 evidence audit; no model/GUI/fixture/process mutation.
+
+Only saved records and pure validation functions are used. The one spawned
+process is the existing read-only strict audit CLI, expected to reject exit1.
+"""
+from __future__ import annotations
+
+import hashlib
+import importlib.util
+import json
+import os
+import subprocess
+import sys
+import time
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path("C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+BASE = ROOT / "Document/Week6/results/full_requirements_20261028"
+PRIVATE = Path(__file__).parent
+CONTAINER = BASE / "live/normal_015"
+RUN = CONTAINER / "run"
+AUTO = RUN / "automatic"
+ROUND = AUTO / "semantic_plan_round_001"
+CHILD = AUTO / "goal_001_001_prepare_report/001_prepare_report"
+FREEZE = BASE / "action_output_contract_001/final_source_freeze_001.json"
+PREREG = BASE / "live/preregistered_v6_007.json"
+OUTPUT = BASE / "review/negative_normal015_audit_001.json"
+STRICT_OUTPUT = BASE / "review/negative_normal015_strict_gate_001.json"
+
+
+def load(path):
+    return json.loads(path.read_text("utf8"))
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def bound(path):
+    return {"path": str(path), "sha256": sha(path), "bytes": path.stat().st_size}
+
+
+def main():
+    assert not OUTPUT.exists() and not STRICT_OUTPUT.exists()
+    assert sha(FREEZE) == "132f0f708246981e558f54c0ffef6cb576940091154a202cd1bc0f1a212a3dc4"
+    assert sha(PREREG) == "0af4aed273141d48db8f4ea4203d6e42a5d0012741becce2afed3fdf7d43e432"
+    freeze, prereg = load(FREEZE), load(PREREG)
+    pins = freeze["code_pins"]
+    before_pins = {name: sha(ROOT / name) for name in pins}
+    assert len(pins) == freeze["code_pin_count"] == 267 and before_pins == pins
+    assert sha(ROOT / "README.md") == freeze["readme_sha256"] == "f9bc558ff5612816b6dcbf31830e690fa2c0eb8e30176f038a74a8b5541f5007"
+    assert prereg["freeze_sha256"] == sha(FREEZE) and (PREREG.parent / prereg["freeze"]).resolve() == FREEZE
+    contract = load(RUN / "contract.json")
+    sources = []
+    for name, digest in contract["source_sha256"].items():
+        saved = RUN / "source_snapshot" / (name + ".txt")
+        assert sha(saved) == digest == pins[name] == sha(ROOT / name)
+        sources.append(bound(saved))
+    owner, start, claim = [load(CONTAINER / name) for name in ("owner_receipt.json", "owner_start.json", "owner_claim.json")]
+    assert owner["child_exit_code"] == 1 and type(owner["child_exit_code"]) is int
+    assert abs(owner["elapsed_seconds"] - 169.203) < .001
+    assert owner["command"] == start["command"] == claim["command"]
+    assert owner["owner"] == start["owner"] == claim["owner"] and owner["launcher"] == start["launcher"]
+    assert owner["started_utc"] == start["started_utc"] == claim["started_utc"]
+    command = owner["command"]
+    fixture = Path(command[command.index("--fixture-directory") + 1])
+    assert fixture.name == prereg["normal"]["fixture"] == "fixture_normal_011"
+    assert command[command.index("--model") + 1] == owner["requested_model"] == contract["model"] == "qwen2.5vl:3b"
+    assert owner["owner_harness_sha256"] == prereg["owner_harness_sha256"] == freeze["owner_harness_sha256"] == sha(CONTAINER / "owner_harness.py.txt")
+    assert datetime.fromisoformat(prereg["registered_utc"]) < datetime.fromisoformat(owner["started_utc"])
+    handoff = load(CONTAINER / "operator_handoff_002.json")
+    assert handoff["exec_wait"] == {"closed": True, "exit_code": 1} and handoff["owner_receipt"] == owner
+    assert handoff["terminal"] is True and handoff["pending"] == handoff["bridge_files"] == []
+    assert handoff["post_code_pin_check"]["count"] == 267 and handoff["post_code_pin_check"]["mismatches"] == []
+    assert handoff["post_code_pin_check"]["readme_sha256"] == freeze["readme_sha256"]
+    result, acceptance = load(RUN / "runtime_result.json"), load(RUN / "acceptance_observed.json")
+    assert result == acceptance["automatic_result"] and result["status"] == "failed"
+    assert result["planning_calls"] == result["model_requests"] == 4
+    assert result["total_actions"] == result["unconfirmed_action_attempts"] == 0
+    assert result["semantic_goals_total"] == 2 and result["completed_subgoals"] == []
+    assert result["final_verification"] is None and result["final_observation_reference"] == ""
+    assert acceptance["runtime_pass"] is acceptance["independent_pass"] is acceptance["attribution_pass"] is False
+    assert acceptance["source_unchanged"] is True and acceptance["input_receipts"] == acceptance["transition_attribution"] == []
+
+    audit_path = ROOT / "scripts/week6_audit_semantic_acceptance.py"
+    spec = importlib.util.spec_from_file_location("independent_normal015_reader", audit_path)
+    auditor = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(auditor)
+    from gui_agent.planning.planner import _task_plan_response_format
+    from gui_agent.runtime.action_adapter import ActionResolutionError, validate_target_consistency
+
+    evidence = auditor.Evidence(CONTAINER)
+    initial = evidence.frame(AUTO / "initial_observation/observation.json")
+    before = evidence.frame(AUTO / "contract_before_001_001/observation.json")
+    assert not auditor._rolling_frame_guard(initial, before)
+    request = auditor.WorkflowRequest.model_validate(contract["request"])
+    native = evidence.load(ROUND / "native_proposal.json")
+    protocol = evidence.load(ROUND / "protocol.json")
+    saved = evidence.load(ROUND / "attempt_01_request.json")
+    high_response = evidence.load(ROUND / "attempt_01_response.json")
+    auditor.audit_native_predicates(native, request)
+    proposal = auditor.SemanticPlan.model_validate(native, strict=True)
+    auditor.SemanticDecomposer(max_subgoals=8)._validate(proposal, request, initial, [], False)
+    assert proposal.status == "ready" and len(proposal.subgoals) == 2
+    assert native == json.loads(high_response["content"]) == result["plans"][0]["proposal"]
+    assert protocol["response_format"] == auditor._semantic_response_format(request, 8)
+    context = {"original_caller_request": contract["request"], "minimum_objectives": 2, "maximum_objectives": 8,
+               "revision": False, "completed_subgoals": [], "failure": None,
+               "input_modality": "caller_intent_only", "image_attached": False}
+    high_messages = auditor.audit_semantic_repair_messages(evidence, ROUND, 1, saved, protocol, request,
+                                                          initial, [], 8, False, context)
+    auditor.audit_snapshot_archive(evidence, ROUND, initial, [], None)
+    tasks = [auditor._goal_task(goal, request) for goal in proposal.subgoals]
+    final_task = auditor._final_task(request)
+    compiled = evidence.load(ROUND / "compiled_workflow.json")
+    assert compiled["native_proposal"] == native
+    assert compiled["mapping"] == auditor.expected_native_mapping(native, proposal, tasks)
+    assert compiled["workflow"]["subgoals"] == [task.model_dump(mode="json") for task in tasks]
+    assert compiled["workflow"]["final_check"] == final_task.model_dump(mode="json")
+    frozen = evidence.load(AUTO / "goal_contract_001_001.json")
+    assert frozen["task"] == tasks[0].model_dump(mode="json") and frozen["caller_final"] == final_task.model_dump(mode="json")
+    assert frozen["before"] == before.model_dump(mode="json") and frozen["postconditions_fixed_before_input"] is True
+    before_verdict = auditor.Verifier().check_task(tasks[0], before)
+    assert before_verdict.outcome == "failed"
+    child, semantic_audit, limit = [evidence.load(CHILD / name) for name in
+                                    ("task_summary.json", "semantic_goal_audit.json", "single_step_planning_limit.json")]
+    assert child["status"] == "failed" and child["action_count"] == child["unconfirmed_action_attempts"] == 0
+    assert child["planning_calls"] == child["planning_attempts"] == 3 and len(child["steps"]) == 3
+    assert semantic_audit["steps"] == child["steps"] and semantic_audit["confirmed_input_count"] == 0
+    assert semantic_audit["eligible_for_semantic_credit"] is False and semantic_audit["post_observation_id"] is None
+    assert semantic_audit["semantic_postcondition_verification"]["outcome"] == "inconclusive"
+    assert limit["restored"] is True and limit["applied_max_steps"] == 1
+    assert limit["original_max_steps"] == limit["restored_max_steps"] == 4 and len(limit["calls"]) == 3
+    attempts = evidence.lines(AUTO / "action_planning_attempts.jsonl")
+    transport = evidence.lines(AUTO / "transport_requests.jsonl")
+    recovery = evidence.lines(CHILD / "recovery.jsonl")
+    assert len(attempts) == 3 and len(transport) == sum(row["requests_made"] for row in transport) == 4
+    assert len(recovery) == 2
+    assert transport[0]["messages"] == high_messages and transport[0]["response_format"] == protocol["response_format"]
+    assert transport[0]["response_format"]["json_schema"]["strict"] is True
+    all_calls = [{"kind": "semantic_decomposition", "messages": high_messages, "system": saved["system"],
+                  "instruction": request.instruction, "context": saved["context"], "image_path": None,
+                  "requests": 1, "response": high_response}]
+    conflicts = []
+    for index, (call, attempt, step_record, dispatch) in enumerate(zip(limit["calls"], attempts, child["steps"], transport[1:], strict=True), 1):
+        assert call["ok"] is True and call["attempts"] == call["model_requests"] == call["max_steps"] == call["returned_steps"] == 1
+        assert call["instruction"] == tasks[0].instruction and call["task_id"] == proposal.subgoals[0].goal_id
+        frame = evidence.frame(CHILD / (call["context"]["observation_id"] + ".json"))
+        fresh = evidence.frame(CHILD / (step_record["observation_id"] + ".json"))
+        assert not auditor._rolling_frame_guard(before, frame) and not auditor._rolling_frame_guard(frame, fresh)
+        auditor.audit_lowlevel_image_binding(call, frame)
+        expected_request = {"instruction": call["instruction"], "image_path": call["image_path"],
+                            "context": {**call["context"], "max_steps": 1}, "system": auditor.SYSTEM_PROMPT,
+                            "response_format": _task_plan_response_format(1)}
+        assert attempt["schema_version"] == "gui_agent.action_output_contract.v1"
+        assert attempt["attempt"] == 1 and attempt["parse_error"] is None and attempt["request"] == expected_request
+        assert "plan_format_correction" not in expected_request["context"]
+        assert attempt["response"]["content"] == call["response"]["content"] == dispatch["response"]["content"]
+        parsed = auditor.parse_plan(call["response"]["content"], instruction=tasks[0].instruction, max_steps=1, task_id=call["task_id"])
+        assert parsed.as_dict() == call["parsed_plan"] == attempt["parsed_plan"] and len(parsed.steps) == 1
+        step = parsed.steps[0]
+        assert step.action_type == "click" and step.target_text == "ALPHA"
+        assert step.arguments["element_id"] == f"obs-{2 * index - 1:04d}-e003"
+        chosen = next(element for element in frame.elements if element.element_id == step.arguments["element_id"])
+        matching = [element for element in frame.elements if element.text == step.target_text]
+        assert chosen.text == "Choose a project" and chosen.confidence > .9
+        assert len(matching) == 1 and matching[0].element_id != chosen.element_id
+        try:
+            validate_target_consistency(step, frame)
+        except ActionResolutionError as exc:
+            assert str(exc) == step_record["error"]
+        else:
+            raise AssertionError("Frozen source guard did not reproduce its original refusal")
+        assert step_record["action_result"] is step_record["resolved"] is step_record["verification"] is None
+        assert step_record["after_observation_id"] is None
+        assert dispatch["response_format"] == attempt["request"]["response_format"] == _task_plan_response_format(1)
+        assert dispatch["response_format"]["json_schema"]["strict"] is False
+        messages = [{"role": "system", "content": auditor.SYSTEM_PROMPT}, *auditor.ModelRequest(
+            instruction=call["instruction"], context=expected_request["context"], image_path=call["image_path"]).to_messages()]
+        assert dispatch["messages"] == messages
+        if index == 1:
+            assert "recovery" not in call["context"]
+        else:
+            assert call["context"]["recovery"] == recovery[index - 2]["feedback"]
+            assert recovery[index - 2]["feedback"]["reason"] == "target_resolution"
+            assert recovery[index - 2]["feedback"]["actions_used"] == 0
+            assert "No input was dispatched" in recovery[index - 2]["feedback"]["instruction"]
+        all_calls.append({"kind": "primitive_action_plan", "system": auditor.SYSTEM_PROMPT,
+                          "instruction": call["instruction"], "context": expected_request["context"],
+                          "image_path": call["image_path"], "requests": 1, "response": call["response"]})
+        conflicts.append({"planning_call": index, "native": json.loads(call["response"]["content"]),
+                          "source_frame": bound(CHILD / (frame.observation_id + ".json")),
+                          "source_pixels": bound(Path(frame.image_path)), "fresh_frame": bound(CHILD / (fresh.observation_id + ".json")),
+                          "selected_id": chosen.element_id, "selected_text": chosen.text,
+                          "selected_box": chosen.bounding_box.model_dump(mode="json"),
+                          "target": step.target_text, "correct_visible_label": matching[0].model_dump(mode="json"),
+                          "exact_guard_error_reproduced": step_record["error"], "action_receipt": None,
+                          "schema_matches_saved_dispatch": True, "parse_error": None,
+                          "recovery_feedback": call["context"].get("recovery")})
+    for index, dispatch in enumerate(transport, 1):
+        assert dispatch["dispatch"] == dispatch["requests_total"] == index and dispatch["requests_made"] == 1
+        assert dispatch["model_name"] == "qwen2.5vl:3b" and dispatch["provider"] == "openai_compatible" and dispatch["error"] == ""
+        assert len(dispatch["http_responses"]) == 1 and dispatch["http_responses"][0]["status_code"] == 200
+        assert dispatch["http_responses"][0]["body"]["choices"][0]["message"]["content"] == dispatch["response"]["content"]
+    assert auditor.transport_audit(evidence, AUTO, all_calls, 4, contract) == 4
+    independent_state = load(fixture / "independent_state.json")
+    independent_events = [json.loads(line) for line in (fixture / "independent_events.jsonl").read_text("utf8").splitlines() if line]
+    assert independent_state == acceptance["state"] and independent_events == acceptance["independent_events"]
+    assert [event["event"] for event in independent_events] == ["started"]
+    assert independent_state["stage"] == "project" and independent_state["project"] == independent_state["colour"] == ""
+    assert independent_state["committed"] is False and independent_state["review_attempts"] == 0
+    bridge_files = [path for path in (RUN / "sky_bridge").glob("*") if path.is_file()]
+    assert bridge_files == []
+    activation_requests = sorted((RUN / "sky_activation").glob("*_request.json"))
+    activations = []
+    assert len(activation_requests) == handoff["activation_receipts"] == 8
+    for path in activation_requests:
+        activation_request = load(path)
+        receipt_path = path.with_name(path.name.replace("_request.json", "_receipt.json"))
+        receipt = load(receipt_path)
+        assert receipt["id"] == activation_request["id"] and receipt["success"] is True
+        assert activation_request["required_window_title"] == receipt["window"]["title"] == "Week6 Local Lab"
+        assert datetime.fromisoformat(owner["started_utc"]) <= datetime.fromisoformat(receipt["utc"].replace("Z", "+00:00")) <= datetime.fromisoformat(owner["finished_utc"])
+        activations.append({"request": bound(path), "receipt": bound(receipt_path), "actual_receipt": receipt})
+    monitor = evidence.load(AUTO / "run_status.json")
+    assert monitor["task_status"] == "failed" and monitor["planning_pass"] == 4 and monitor["actions_used"] == 0
+    assert monitor["subgoals_completed"] == 0 and monitor["subgoals_total"] == 2
+    identities = [item for item in owner["observed_descendants"] if item["pid"] == monitor["pid"]]
+    assert len(identities) == 1
+    created = int(monitor["process_identity"].split(":", 1)[1]) / 10_000_000 - 11644473600
+    assert abs(created - identities[0]["create_time"]) < .001
+    status_events = evidence.lines(AUTO / "status_events.jsonl")
+    visible_midgoal = [event for event in status_events if event["event"] != "finished" and event["planning_pass"] >= 2]
+    assert visible_midgoal and all(event["actions_used"] == 0 for event in visible_midgoal)
+    stdout = (CONTAINER / "stdout.txt").read_text("utf8")
+    warning = "Estimating resolution as 697"
+    assert stdout.count(warning) == handoff["stdout_warning"]["occurrences"] == 8
+
+    # This remains a negative run; use the unmodified strict CLI and retain its
+    # actual rejection, rather than changing owner or completion requirements.
+    harness = Path(prereg["owner_harness"])
+    strict_command = [sys.executable, str(audit_path), "--container", str(CONTAINER),
+                      "--owner-harness", str(harness), "--fixture-directory", str(fixture), "--out", str(STRICT_OUTPUT)]
+    strict_started = datetime.now(timezone.utc).isoformat()
+    timer = time.monotonic()
+    strict = subprocess.Popen(strict_command, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                              creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
+    strict_stdout, strict_stderr = strict.communicate()
+    strict_exit = strict.wait()
+    (PRIVATE / "strict_gate.stdout.txt").write_bytes(strict_stdout)
+    (PRIVATE / "strict_gate.stderr.txt").write_bytes(strict_stderr)
+    strict_result = load(STRICT_OUTPUT)
+    assert strict_exit == 1 and strict_result["passed"] is False
+    assert strict_result["error"] == "owner_did_not_observe_real_exit_zero"
+    strict_receipt = {"command": strict_command, "started_utc": strict_started,
+                      "finished_utc": datetime.now(timezone.utc).isoformat(), "pid": strict.pid,
+                      "elapsed_seconds": time.monotonic() - timer, "actual_wait_exit_code": strict_exit,
+                      "stdout": bound(PRIVATE / "strict_gate.stdout.txt"), "stderr": bound(PRIVATE / "strict_gate.stderr.txt"),
+                      "result": bound(STRICT_OUTPUT)}
+    with (PRIVATE / "strict_gate.receipt.json").open("x", encoding="utf8") as stream:
+        json.dump(strict_receipt, stream, ensure_ascii=False, indent=2)
+        stream.write("\n")
+    assert {name: sha(ROOT / name) for name in pins} == before_pins
+    assert sha(ROOT / "README.md") == freeze["readme_sha256"]
+    original_files = [bound(path) for path in sorted(CONTAINER.rglob("*")) if path.is_file()]
+    script_archive = OUTPUT.with_suffix(".py.txt")
+    with script_archive.open("xb") as stream:
+        stream.write(Path(__file__).read_bytes())
+    audit = {"schema": "week6.independent.negative_grounding_live.v1",
+             "reviewed_utc": datetime.now(timezone.utc).isoformat(),
+             "reviewer": "/root/week6_replanning_review (independent Codex agent, not human sign-off)",
+             "scope": "Ended normal015 original records; pure parser/verifier/target consistency replay and unmodified strict-auditor CLI. No model, GUI, experiment rerun, production/test edit, process control, or fixture mutation.",
+             "freeze": bound(FREEZE), "preregistration": bound(PREREG),
+             "source_binding": {"code_pin_count": 267, "before_after_current_code_pins": before_pins,
+                                "code_pins_match_registered_freeze": True, "source_snapshots_exact": sources,
+                                "readme_sha256": freeze["readme_sha256"]},
+             "actual_owner_receipt": owner, "actual_cpython": identities[0],
+             "native_high_level": {"proposal": native, "strict_validation_and_mapping_passed": True,
+                                   "before_verdict": before_verdict.model_dump(mode="json"),
+                                   "caller_final_unchanged": final_task.model_dump(mode="json"),
+                                   "meaning": "Two proposed goals were accepted and compiled. Neither was executed or completed."},
+             "lower_level": {"native_task_plans": 3, "all_local_parser_checks_passed": True,
+                              "format_attempts_per_call": [1, 1, 1], "format_retries": 0,
+                              "each_dispatch_schema_equals_saved_attempt_and_expected_task_plan_schema": True,
+                              "schema_strict": False, "steps_max_items": 1,
+                              "source_conflicts": conflicts, "bounded_recovery_calls": 2,
+                              "recovery_was_requested_but_did_not_correct_the_id": True,
+                              "input_receipts": [], "post_observation_id": None,
+                              "semantic_postcondition_verification": semantic_audit["semantic_postcondition_verification"],
+                              "single_step_limit_restored": True},
+             "totals": {"status": "failed", "owner_exit_code": 1, "owner_elapsed_seconds": owner["elapsed_seconds"],
+                        "planning_calls": 4, "actual_http_dispatches": 4, "known_inputs": 0,
+                        "unconfirmed_inputs": 0, "proposed_goals": 2, "completed_goals": 0,
+                        "high_level_schema_strict": True, "low_level_schema_strict": False,
+                        "independent_events": ["started"], "final_verification": None},
+             "independent_fixture": {"state": independent_state, "events": independent_events,
+                                     "raw_state": bound(fixture / "independent_state.json"),
+                                     "raw_events": bound(fixture / "independent_events.jsonl"),
+                                     "read_after_real_owner_exit_only": True},
+             "monitor": {"terminal": monitor, "midgoal_events_with_live_planning_count": visible_midgoal,
+                         "meaning": "Counts advanced during child planning; zero input count stayed truthful. No CLI completion is inferred."},
+             "activation_receipts": activations,
+             "activation_scope": "Eight successful dedicated-window activation receipts. They are capture preparation, not eight task inputs or semantic transitions.",
+             "warnings": {"original_stdout": bound(CONTAINER / "stdout.txt"), "text": warning, "occurrences": 8,
+                          "preserved_unmodified": True},
+             "unmodified_strict_gate": strict_receipt,
+             "conclusion": {"classification": "Legal low-level native TaskPlans were rejected before dispatch because the requested ALPHA label contradicted the explicitly selected Choose a project element ID in all three original planning frames.",
+                            "different_from_normal014_flat_output_failure": True,
+                            "format_contract_observed_but_no_task_execution_acceptance": True,
+                            "no_actual_input_or_transient_ui_retry_acceptance": True,
+                            "no_local_id_substitution_or_failed_step_credit": True,
+                            "all_normal001_through015_remain_unaccepted": True,
+                            "wire_limit": "Saved pre-encoding messages and schema arguments, actual HTTP events and returned bodies are bound to frozen code. Raw outgoing live HTTP request bodies were not captured; offline SDK tests separately establish wire serialization."},
+             "original_files": original_files, "strict_helper_bound_files": evidence.files,
+             "audit_script": {"private": bound(Path(__file__)), "archive": bound(script_archive)}}
+    with OUTPUT.open("x", encoding="utf8") as stream:
+        json.dump(audit, stream, ensure_ascii=False, indent=2)
+        stream.write("\n")
+    print(json.dumps({"audit": str(OUTPUT), "sha256": sha(OUTPUT), "raw_files": len(original_files),
+                      "strict_gate": str(STRICT_OUTPUT), "strict_gate_sha256": sha(STRICT_OUTPUT),
+                      "strict_gate_actual_wait": strict_exit, "conflicts": len(conflicts)}, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

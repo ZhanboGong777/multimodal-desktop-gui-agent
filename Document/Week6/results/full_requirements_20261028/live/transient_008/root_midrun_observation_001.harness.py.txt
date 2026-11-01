@@ -1,0 +1,36 @@
+"""Save an actual read-only status-CLI observation; never infer task exit."""
+import argparse
+import hashlib
+import json
+import shutil
+import subprocess
+from datetime import UTC, datetime
+from pathlib import Path
+
+repo = Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+parser = argparse.ArgumentParser()
+parser.add_argument('--container', required=True)
+parser.add_argument('--name', required=True)
+args = parser.parse_args()
+for value in (args.container, args.name):
+    assert value and all(c in 'abcdefghijklmnopqrstuvwxyz0123456789_-' for c in value)
+container = repo / 'Document/Week6/results/full_requirements_20261028/live' / args.container
+assert container.is_dir()
+out = container / (args.name + '.json')
+assert not out.exists()
+command = ['D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe', '-S',
+           str(repo / 'scripts/week6_status.py'), '--run-dir', str(container / 'run/automatic')]
+started = datetime.now(UTC).isoformat()
+child = subprocess.run(command, cwd=repo, capture_output=True, encoding='utf-8', errors='strict')
+record = {'schema': 'week6.actual_readonly_monitor_observation.v1', 'command': command,
+          'started_utc': started, 'finished_utc': datetime.now(UTC).isoformat(),
+          'actual_monitor_cli_exit': child.returncode, 'stdout': child.stdout, 'stderr': child.stderr,
+          'script_sha256': hashlib.sha256((repo / 'scripts/week6_status.py').read_bytes()).hexdigest(),
+          'meaning': 'A real read-only status read. Its exit is not the task/model/trainer exit.'}
+with out.open('x', encoding='utf-8', newline='\n') as stream:
+    json.dump(record, stream, ensure_ascii=False, indent=2)
+    stream.write('\n')
+script_copy = container / (args.name + '.harness.py.txt')
+assert not script_copy.exists()
+shutil.copyfile(__file__, script_copy)
+print(json.dumps(record, ensure_ascii=True))

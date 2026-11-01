@@ -1,0 +1,86 @@
+{
+  "schema": "week6.sky_input_operation.protocol_audit.v1",
+  "passed": true,
+  "meaning": "Only ended record qualification; ordinary strict acceptance, actual owner outcome, source and semantic checks remain required.",
+  "actual_original_owner_exit": 0,
+  "window_claim": {
+    "schema": "week6.live.native_window_claim.v1",
+    "claimed_at_utc": "2026-10-28T23:59:59Z",
+    "window": {
+      "app": "synthetic-process",
+      "id": 42,
+      "title": "Synthetic protocol record"
+    },
+    "unique_returned_window_count": 1,
+    "fixture_actual_process": {
+      "pid": 42,
+      "create_time": 1.0,
+      "exe": "synthetic-only"
+    },
+    "source": "Sky returned unique window and fresh observation before owner start"
+  },
+  "protocol": {
+    "timing_protocol": "week6.sky_input_operation.v2",
+    "operation_count": 2,
+    "operations": [
+      {
+        "id": "input_001",
+        "started_utc": "2026-10-29T00:00:01.010Z",
+        "dispatch_returned_utc": "2026-10-29T00:00:01.020Z",
+        "post_refresh_started_utc": "2026-10-29T00:00:01.030Z",
+        "finished_utc": "2026-10-29T00:00:01.040Z",
+        "window": {
+          "app": "synthetic-process",
+          "id": 42,
+          "title": "Synthetic protocol record"
+        },
+        "screenshot_id": "provider-local-0",
+        "action": {
+          "action_type": "click",
+          "x": 7,
+          "y": 11,
+          "click_count": 1
+        }
+      },
+      {
+        "id": "input_002",
+        "started_utc": "2026-10-29T00:00:03.010Z",
+        "dispatch_returned_utc": "2026-10-29T00:00:03.020Z",
+        "post_refresh_started_utc": "2026-10-29T00:00:03.030Z",
+        "finished_utc": "2026-10-29T00:00:03.040Z",
+        "window": {
+          "app": "synthetic-process",
+          "id": 42,
+          "title": "Synthetic protocol record"
+        },
+        "screenshot_id": "provider-local-0",
+        "action": {
+          "action_type": "click",
+          "x": 7,
+          "y": 11,
+          "click_count": 1
+        }
+      }
+    ],
+    "business_transition_assignments": [
+      {
+        "event": "project_selected",
+        "event_utc": "2026-10-29T00:00:01.020Z",
+        "input_id": "input_001"
+      }
+    ],
+    "business_transition_count": 1,
+    "scope": "Recorded receipt protocol and interval uniqueness only; not independent proof of task completion or of the timestamp sampling process."
+  },
+  "evidence_sha256": {
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\validation_001\\synthetic_case\\owner_receipt.json": "57fc871c225bd9d0a2e31b3e49a5eefe13f04a3bd7e563b6a42aee197cbf0848",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\validation_001\\synthetic_case\\operator_handoff_003.json": "1b8295a3a7d3a1b10188c5347f7c265af7116f0b230507b2c943731d1ccaae65",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\validation_001\\synthetic_case\\window_claim_001.json": "3950bb0b9d1e95e93b1c0d4c423001217367306e1a48343513cd5b52588ad676",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\validation_001\\synthetic_case\\run\\sky_bridge\\input_001_request.json": "0d4433f5345e3a8995657f56dbf1e6c41563fb0b775a8c157d202b088f328b2c",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\validation_001\\synthetic_case\\run\\sky_bridge\\input_001_receipt.json": "399cd3c26378f48322825b769209e3577ad8fc4c94e6de866e28f97aba901db7",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\validation_001\\synthetic_case\\run\\sky_bridge\\input_002_request.json": "a9fef7179b4c1e4c042c38381eda5b7620d3e5751d8a172b865c96214cde6a34",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\validation_001\\synthetic_case\\run\\sky_bridge\\input_002_receipt.json": "97988f1b1ded9e253ec270dd1bda03c9bc06dc1b9794a22f7d9ac7c37c2602bc",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_receipt_envelope_20261029\\validation_001\\synthetic_external_events\\independent_events.jsonl": "86b5c49e385b2606ddb14d7f0ac0ea1b4eab9205407604d50326f3a2528293cf"
+  },
+  "auditor_sha256": "23ee41ca6e6255c3d09bf00665ee4051f1a01a09e359996d6a823304a0d70253"
+}

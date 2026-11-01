@@ -1,0 +1,95 @@
+"""Independent static source/test scope review; never imports or executes project code."""
+import ast
+from copy import deepcopy
+import difflib
+import hashlib
+import json
+from pathlib import Path
+
+ROOT = Path("C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+BASE = ROOT / "Document/Week6/results/full_requirements_20261028"
+FAMILY = BASE / "semantic_polarity_guidance_001"
+FREEZE = BASE / "receipt_envelope_001/final_source_freeze_002.json"
+OLD = FAMILY / "source_before/code/src/gui_agent/planning/semantic_workflow.py"
+NEW = ROOT / "src/gui_agent/planning/semantic_workflow.py"
+TEST = ROOT / "tests/test_week6_semantic_polarity_guidance.py"
+OUT = BASE / "review/semantic_polarity_guidance_review_001.json"
+ALLOWED = {"SEMANTIC_SYSTEM_PROMPT", "SEMANTIC_GENERIC_REPAIR"}
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def assignments(tree):
+    return {node.targets[0].id: ast.literal_eval(node.value) for node in tree.body
+            if isinstance(node, ast.Assign) and len(node.targets) == 1
+            and isinstance(node.targets[0], ast.Name) and node.targets[0].id in ALLOWED}
+
+
+def normalized(tree):
+    result = deepcopy(tree)
+    for node in result.body:
+        if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+            if node.targets[0].id in ALLOWED:
+                node.value = ast.Constant(value="__INDEPENDENT_REVIEWED_FIXED_PROMPT_CONSTANT__")
+    return ast.dump(result, include_attributes=False)
+
+
+assert not OUT.exists()
+freeze = json.loads(FREEZE.read_text("utf-8"))
+assert sha(FREEZE) == "70a6cde9ac0c20aa2d637d8a1747c09c33427a41c5bcb44202299da1009dbbb0"
+assert sha(FAMILY / "source_before_manifest.json") == "c9c6bc288ea2947912ed81a95c7a842b76e53c09abe0ac7d35f8e38cb6b695c6"
+assert sha(OLD) == freeze["code_pins"]["src/gui_agent/planning/semantic_workflow.py"]
+old_text, new_text = OLD.read_text("utf-8"), NEW.read_text("utf-8")
+old_tree, new_tree = ast.parse(old_text), ast.parse(new_text)
+assert normalized(old_tree) == normalized(new_tree)
+old_constants, new_constants = assignments(old_tree), assignments(new_tree)
+assert set(old_constants) == set(new_constants) == ALLOWED
+assert all(old_constants[name] != new_constants[name] for name in ALLOWED)
+assert new_constants["SEMANTIC_GENERIC_REPAIR"].startswith(old_constants["SEMANTIC_GENERIC_REPAIR"])
+old_pins = freeze["code_pins"]
+current_pins = {path: sha(ROOT / path) for path in old_pins}
+changed = [path for path in old_pins if old_pins[path] != current_pins[path]]
+assert changed == ["src/gui_agent/planning/semantic_workflow.py"]
+assert sha(ROOT / "scripts/week6_audit_semantic_acceptance.py") == old_pins["scripts/week6_audit_semantic_acceptance.py"]
+tree = ast.parse(TEST.read_text("utf-8"))
+tests = [node.name for node in tree.body if isinstance(node, ast.FunctionDef) and node.name.startswith("test_")]
+assert len(tests) == 4
+record = {"schema": "week6.semantic_polarity_guidance.independent_static_review.v1",
+    "reviewer": "/root/week6_replanning_review (agent)",
+    "old_source": {"path": str(OLD), "sha256": sha(OLD)},
+    "new_source": {"path": str(NEW), "sha256": sha(NEW)},
+    "new_test": {"path": str(TEST), "sha256": sha(TEST), "test_functions": tests},
+    "allowed_constant_names": sorted(ALLOWED), "all_other_production_ast_equal": True,
+    "existing_274_changed_paths": changed, "old_auditor_raw_bytes_equal": True,
+    "new_runtime_or_typed_rejection_or_budget_or_schema_logic": False,
+    "constant_changes": {name: {"before_characters": len(old_constants[name]),
+        "after_characters": len(new_constants[name]),
+        "diff": list(difflib.unified_diff(old_constants[name].splitlines(), new_constants[name].splitlines(),
+                                         fromfile="previous_fixed_guidance", tofile="new_fixed_guidance", lineterm=""))}
+        for name in sorted(ALLOWED)},
+    "test_scope_review": [
+        "SDK MockTransport: contradiction remains rejected and raw reply/error/base caller retained; only a subsequent native corrected answer may execute.",
+        "Three contradictory native answers still exhaust three shared calls with zero input, child, goal credit or local list rewrite.",
+        "A disjoint nonempty negative predicate remains accepted unchanged by strict SemanticPlan validation; lists are not forcibly emptied.",
+        "Both fixed constants explicitly explain AFTER-state polarity, forbid versus BEFORE checks, disjoint literals, justified absence and optional empty forbid; no scene-specific answer vocabulary appears."],
+    "assessment": "No blocking change to判定 semantics found: this is fixed generation/repair guidance, not altered acceptance or execution authority. Existing raw parsing, immutable goals/final, before/post, input, replay, budget and response-schema logic are structurally identical.",
+    "limits": [
+        "No tests or model calls were run by this reviewer; Root's actual in-flight CPU outcome is separate and was not read or predicted.",
+        "Mocked corrected answers do not prove the local real model will follow the new wording.",
+        "The BEFORE wording should mean these are postconditions, not a ban on a legitimate disappearance check whose formerly visible text is absent AFTER; unchanged validation still allows justified negative predicates.",
+        "normal019 is evidence for its old frozen prompt only. The changed candidate needs fresh same-source normal and transient acceptance plus final full regression.",
+        "The existing substring/negation limitation and all earlier failed raw records remain."],
+    "readme_sha256_at_review": sha(ROOT / "README.md"),
+    "requirements_dev_sha256_at_review": sha(ROOT / "requirements-dev.txt"),
+    "operations": {"project_imports": 0, "tests": 0, "model": 0, "gui": 0, "ocr": 0,
+                   "production_writes": 0, "original_evidence_writes": 0},
+    "reader_source_sha256": sha(Path(__file__))}
+assert current_pins == {path: sha(ROOT / path) for path in old_pins}
+with OUT.open("x", encoding="utf-8", newline="\n") as stream:
+    json.dump(record, stream, ensure_ascii=False, indent=2)
+    stream.write("\n")
+with OUT.with_suffix(".py.txt").open("xb") as stream:
+    stream.write(Path(__file__).read_bytes())
+print(json.dumps({"review": str(OUT), "sha256": sha(OUT), "new_source_sha256": sha(NEW)}))

@@ -1,0 +1,13 @@
+# Opt-in bilingual small-label screen profile. Requires eng + chi_sim traineddata.
+# On Windows set TESSDATA_PREFIX to a writable ASCII path without spaces after
+# copying Document/Week6/resources/tesseract there. See its README for provenance.
+# Other configuration fields retain the typed defaults; real execution stays off.
+perception:
+  ocr:
+    engine: tesseract
+    fallback_engine: none
+    languages: [en, zh]
+    min_confidence: 0.5
+    tesseract_profile: screen
+    tesseract_scale: 2.0
+    tesseract_tessdata_dir: null

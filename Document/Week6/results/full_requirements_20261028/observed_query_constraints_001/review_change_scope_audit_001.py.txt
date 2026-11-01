@@ -1,0 +1,71 @@
+"""Static narrow-migration proof, no project-code execution."""
+import ast
+import hashlib
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path("C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+BASE = ROOT / "Document/Week6/results/full_requirements_20261028/observed_query_constraints_001"
+BEFORE = BASE / "review_source_before"
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+def tree(path):
+    return ast.parse(path.read_text("utf8"))
+
+def guard_list(module):
+    ordered = sorted(ast.walk(module), key=lambda node: getattr(node, "lineno", -1))
+    return [ast.dump(node, include_attributes=False) for node in ordered
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "require"]
+
+old_audit = BEFORE / "scripts/week6_audit_semantic_acceptance.py.txt"
+new_audit = ROOT / "scripts/week6_audit_semantic_acceptance.py"
+old, new = guard_list(tree(old_audit)), guard_list(tree(new_audit))
+cursor = 0
+for guard in old:
+    while cursor < len(new) and new[cursor] != guard:
+        cursor += 1
+    assert cursor < len(new), "old require guard disappeared or changed"
+    cursor += 1
+
+old_test = BEFORE / "tests/test_week6_target_bindings_review.py.txt"
+new_test = ROOT / "tests/test_week6_target_bindings_review.py"
+old_tree, new_tree = tree(old_test), tree(new_test)
+allowed = "test_review_standard_json_schema_preserves_legacy_nonpoint_text_only_id_only_and_unknown_visual_paths"
+old_fun = next(node for node in old_tree.body if isinstance(node, ast.FunctionDef) and node.name == allowed)
+new_fun = next(node for node in new_tree.body if isinstance(node, ast.FunctionDef) and node.name == allowed)
+assert ast.dump(ast.Module(body=[node for node in old_tree.body if node is not old_fun], type_ignores=[]), include_attributes=False) == ast.dump(
+    ast.Module(body=[node for node in new_tree.body if node is not new_fun], type_ignores=[]), include_attributes=False)
+assert ast.dump(ast.Module(body=old_fun.decorator_list, type_ignores=[]), include_attributes=False) == ast.dump(
+    ast.Module(body=new_fun.decorator_list, type_ignores=[]), include_attributes=False)
+assert len(old_fun.body) == 1 and isinstance(old_fun.body[0], ast.Assert)
+assert len(new_fun.body) == 2 and isinstance(new_fun.body[0], ast.Assign) and isinstance(new_fun.body[1], ast.Assert)
+assert ast.dump(old_fun.body[0].test, include_attributes=False) == ast.dump(new_fun.body[0].value, include_attributes=False)
+
+value = {"schema": "week6.observed_queries.independent_migration_scope.v1",
+    "created_at_utc": datetime.now(timezone.utc).isoformat(),
+    "old_auditor_sha256": sha(old_audit), "new_auditor_sha256": sha(new_audit),
+    "old_require_guards": len(old), "new_require_guards": len(new),
+    "all_old_require_asts_preserved_in_original_order": True,
+    "legacy_test_before_sha256": sha(old_test), "legacy_test_after_sha256": sha(new_test),
+    "only_changed_old_test_function": allowed,
+    "all_old_cases_and_parameter_decorators_unchanged": True,
+    "all_other_old_module_ast_identical": True,
+    "old_assert_predicate_still_evaluated_unchanged": True,
+    "intentional_migration": "One formerly accepted arbitrary unseen text-only query is now rejected by schema.v2. All nine other supported path cases retain acceptance; runtime matching is unchanged and deliberately wider.",
+    "new_review_sha256": sha(ROOT / "tests/test_week6_observed_queries_review.py"),
+    "validation": str(BASE / "review_cpu_validation_001/validation.json"),
+    "validation_sha256": sha(BASE / "review_cpu_validation_001/validation.json"),
+    "independence": "Query events/counters are rebuilt in the audit script, without calling the producer observed_query_contract. Frozen pure text matchers qualify <=4 saved source witnesses; original pixels and final authorised subset remain upstream bound.",
+    "limitations": ["Finite generation subset, not all arbitrary runtime substrings or word-run forms",
+        "Standard JSON Schema qualification plus offline SDK transport tests do not prove every provider enforces strict:false",
+        "An unknown native text query is retained if a mock provider ignores schema; unchanged runtime no-match guard dispatches nothing, and audit rejects its schema qualification",
+        "No live model, OCR, GUI, full/shared regression or final acceptance was performed by this review"]}
+target = BASE / "review_change_scope_audit_001.json"
+with target.open("x", encoding="utf8", newline="\n") as stream:
+    json.dump(value, stream, ensure_ascii=False, indent=2)
+    stream.write("\n")
+(BASE / "review_change_scope_audit_001.py.txt").write_bytes(Path(__file__).read_bytes())
+print(json.dumps({"path": str(target), "sha256": sha(target), "old_guards": len(old), "new_guards": len(new)}, ensure_ascii=True))

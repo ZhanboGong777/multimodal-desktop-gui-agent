@@ -1,0 +1,23 @@
+{
+  "status": "ready",
+  "reason": "The caller request is ready for execution.",
+  "subgoals": [
+    {
+      "instruction": "Prepare a GREEN report for project ALPHA in Week6 Local Lab.",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN"
+      ],
+      "forbid_text": [],
+      "goal_id": "prepare_report"
+    },
+    {
+      "instruction": "Review the prepared report and commit it locally.",
+      "expect_text": [
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [],
+      "goal_id": "review_commit"
+    }
+  ]
+}

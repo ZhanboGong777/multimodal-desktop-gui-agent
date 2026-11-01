@@ -1,0 +1,110 @@
+{
+  "schema": "week6.semantic_live.observed_result.v1",
+  "status": "needs_clarification",
+  "runtime_pass": false,
+  "independent_pass": false,
+  "attribution_pass": false,
+  "source_unchanged": true,
+  "runtime_independent_gates_passed": false,
+  "semantic_audit_pending": true,
+  "meaning": "Observed evidence only. A separate read-only native-plan/semantic-goal audit and real owner exit receipt are required for final acceptance.",
+  "transition_attribution": [],
+  "input_receipts": [],
+  "state": {
+    "utc": "2026-10-28T01:03:59.032630+00:00",
+    "event": "started",
+    "stage": "project",
+    "project": "",
+    "colour": "",
+    "committed": false,
+    "review_attempts": 0,
+    "mode": "normal",
+    "events": 1
+  },
+  "independent_events": [
+    {
+      "utc": "2026-10-28T01:03:59.032630+00:00",
+      "event": "started",
+      "stage": "project",
+      "project": "",
+      "colour": "",
+      "committed": false,
+      "review_attempts": 0,
+      "mode": "normal",
+      "events": 1
+    }
+  ],
+  "automatic_result": {
+    "schema_version": "week6.semantic_workflow.v1",
+    "decomposition_protocol_mode": "semantic_subtasks",
+    "workflow_id": "semantic_lab",
+    "status": "needs_clarification",
+    "plans": [
+      {
+        "schema_version": "week6.semantic_subtasks.v4",
+        "input_modality": "screen_text_context",
+        "image_attached": false,
+        "status": "needs_clarification",
+        "proposal": {
+          "status": "needs_clarification",
+          "reason": "The caller's request specifies 'Project ALPHA' and 'Theme GREEN', but the OCR results only show 'ALPHA' and 'BETA'. There is a discrepancy between the caller's expectations and the available text in the OCR snapshot. The caller's request also mentions 'review it', but the OCR snapshot does not show控",
+          "subgoals": []
+        },
+        "workflow": null,
+        "planning_calls": 1,
+        "model_requests": 1,
+        "elapsed_ms": 58500.0,
+        "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_006\\run\\automatic\\semantic_plan_round_001",
+        "error": "The caller's request specifies 'Project ALPHA' and 'Theme GREEN', but the OCR results only show 'ALPHA' and 'BETA'. There is a discrepancy between the caller's expectations and the available text in the OCR snapshot. The caller's request also mentions 'review it', but the OCR snapshot does not show控"
+      }
+    ],
+    "goal_outcomes": [],
+    "completed_subgoals": [],
+    "semantic_goals_total": 0,
+    "workflow_result": null,
+    "workflow_results": [],
+    "final_verification": null,
+    "final_observation_reference": "",
+    "total_actions": 0,
+    "planning_calls": 1,
+    "model_requests": 1,
+    "unconfirmed_action_attempts": 0,
+    "accounting_complete": true,
+    "elapsed_ms": 81672.00000002049,
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_006\\run\\automatic",
+    "error": "The caller's request specifies 'Project ALPHA' and 'Theme GREEN', but the OCR results only show 'ALPHA' and 'BETA'. There is a discrepancy between the caller's expectations and the available text in the OCR snapshot. The caller's request also mentions 'review it', but the OCR snapshot does not show控",
+    "notes": []
+  },
+  "status_reads": [
+    {
+      "schema": "week6.status_read.v1",
+      "trusted": true,
+      "age_seconds": 0.012,
+      "state": "finished",
+      "snapshot": {
+        "schema": "week6.run_status.semantic.v1",
+        "run_id": "e2d21d8161c94459ac90a934a6ef0bcc",
+        "case_id": "semantic_lab",
+        "execute": true,
+        "pid": 86540,
+        "process_identity": "windows:134376490302494630",
+        "seq": 4,
+        "event": "finished",
+        "stage": "finished",
+        "task_status": "blocked",
+        "updated_at_utc": "2026-10-28T08:18:43.151445+00:00",
+        "elapsed_ms": 81672.00000002049,
+        "max_actions": 20,
+        "max_planning_attempts": 24,
+        "planning_pass": 1,
+        "actions_used": 0,
+        "subgoals_total": 0,
+        "subgoals_completed": 0,
+        "subgoal_id": null,
+        "detail_code": "",
+        "write_failures": []
+      },
+      "diagnostics": []
+    }
+  ]
+}

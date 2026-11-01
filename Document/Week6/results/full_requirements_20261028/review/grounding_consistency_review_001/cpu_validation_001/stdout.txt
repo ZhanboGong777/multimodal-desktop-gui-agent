@@ -1,0 +1,26 @@
+...................F.F..F                                                [100%]
+================================== FAILURES ===================================
+_ test_review_real_runner_refuses_source_or_refreshed_conflicts_before_dispatch[fresh] _
+tests\test_week6_grounding_consistency_review.py:164: in test_review_real_runner_refuses_source_or_refreshed_conflicts_before_dispatch
+    assert result.steps[0].error.startswith(TARGET_CONSISTENCY_ERROR_PREFIX)
+E   assert False
+E    +  where False = <built-in method startswith of str object at 0x0000024257247D60>('target consistency conflict:')
+E    +    where <built-in method startswith of str object at 0x0000024257247D60> = "visual grounding refused: source: unreadable image evidence: [Errno 2] No such file or directory: '\\\\offline-double\\\\source.png'".startswith
+E    +      where "visual grounding refused: source: unreadable image evidence: [Errno 2] No such file or directory: '\\\\offline-double\\\\source.png'" = StepRecord(index=1, step_id='s1', description='Choose the requested local operation', action_type='click', observation... such file or directory: '\\\\offline-double\\\\source.png'", elapsed_ms=15.000000013969839, after_observation_id=None).error
+_ test_review_semantic_replanning_keeps_conflict_uncredited_and_uses_shared_budgets[http] _
+tests\test_week6_grounding_consistency_review.py:221: in test_review_semantic_replanning_keeps_conflict_uncredited_and_uses_shared_budgets
+    assert result.planning_calls == result.model_requests == len(client.calls) == 2
+E   AssertionError: assert 3 == 2
+E    +  where 3 = SemanticWorkflowResult(schema_version='week6.semantic_workflow.v1', decomposition_protocol_mode='semantic_subtasks', w...st_review_semantic_replannin1\\semantic', error='subgoal did not finish with the required task verification', notes=[]).planning_calls
+E    +  and   2 = SemanticWorkflowResult(schema_version='week6.semantic_workflow.v1', decomposition_protocol_mode='semantic_subtasks', w...st_review_semantic_replannin1\\semantic', error='subgoal did not finish with the required task verification', notes=[]).model_requests
+_ test_review_telemetry_keyboard_interrupt_stops_before_replay_or_final_rescue[after_receipt] _
+tests\test_week6_grounding_consistency_review.py:249: in test_review_telemetry_keyboard_interrupt_stops_before_replay_or_final_rescue
+    assert result.total_actions == state.attempts == (1 if phase == "after_receipt" else 0)
+E   AssertionError: assert 0 == 1
+E    +  where 0 = SemanticWorkflowResult(schema_version='week6.semantic_workflow.v1', decomposition_protocol_mode='semantic_subtasks', w...t_review_telemetry_keyboard1\\semantic', error='child dispatch outcome is unconfirmed; no further execution', notes=[]).total_actions
+E    +  and   1 = namespace(stage=2, attempts=1, captures=4, children=[<gui_agent.runtime.runner.TaskRunner object at 0x00000242575334D0...ses=[], must_exit_processes=[], risk='medium', message_conversation=None, gate_on_step_verification=False)], root=None).attempts
+=========================== short test summary info ===========================
+FAILED tests/test_week6_grounding_consistency_review.py::test_review_real_runner_refuses_source_or_refreshed_conflicts_before_dispatch[fresh]
+FAILED tests/test_week6_grounding_consistency_review.py::test_review_semantic_replanning_keeps_conflict_uncredited_and_uses_shared_budgets[http]
+FAILED tests/test_week6_grounding_consistency_review.py::test_review_telemetry_keyboard_interrupt_stops_before_replay_or_final_rescue[after_receipt]
+3 failed, 22 passed in 9.49s

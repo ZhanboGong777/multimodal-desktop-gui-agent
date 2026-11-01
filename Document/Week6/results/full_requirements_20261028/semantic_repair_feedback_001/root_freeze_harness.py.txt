@@ -1,0 +1,118 @@
+"""Freeze one checked repair-feedback experiment; never runs a model or GUI."""
+import argparse
+import hashlib
+import json
+import re
+import shutil
+from datetime import UTC, datetime
+from pathlib import Path
+
+REPO = Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+BASE = REPO / 'Document/Week6/results/full_requirements_20261028'
+CHANGE = BASE / 'semantic_repair_feedback_001'
+sha = lambda path: hashlib.sha256(path.read_bytes()).hexdigest()
+load = lambda path: json.loads(path.read_text(encoding='utf-8'))
+
+
+def write(path, value):
+    with path.open('x', encoding='utf-8', newline='\n') as stream:
+        json.dump(value, stream, ensure_ascii=False, indent=2, allow_nan=False)
+        stream.write('\n')
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--validation-name', required=True)
+    args = parser.parse_args()
+    assert args.validation_name and all(c in 'abcdefghijklmnopqrstuvwxyz0123456789_-' for c in args.validation_name)
+    assert not (CHANGE / 'final_source_freeze_001.json').exists()
+    previous_path = BASE / 'grounding_consistency_001/final_source_freeze_001.json'
+    assert sha(previous_path) == 'f4a7ab5cf6b6f87b694b1777b8074054b3659b46e18489589f6b22ce235ec077'
+    previous = load(previous_path)
+    checked = CHANGE / args.validation_name
+    validation = load(checked / 'validation.json')
+    assert validation['checks_passed'] is True and validation['code_unchanged'] is True
+    assert [item['actual_child_exit_code'] for item in validation['receipts']] == [0, 0, 0]
+    pins = load(checked / 'tested_code_pins_before.json')
+    assert pins == load(checked / 'tested_code_pins_after.json')
+    domain = {REPO / 'pyproject.toml'}
+    for folder in ('src', 'tests', 'scripts'):
+        domain.update((REPO / folder).rglob('*.py'))
+    domain.update(path for path in (REPO / 'configs').rglob('*') if path.is_file())
+    assert set(pins) == {path.relative_to(REPO).as_posix() for path in domain}
+    assert all(sha(REPO / name) == digest for name, digest in pins.items())
+    changed = {name for name in set(previous['code_pins']) | set(pins)
+               if previous['code_pins'].get(name) != pins.get(name)}
+    assert changed == {
+        'src/gui_agent/planning/semantic_workflow.py',
+        'scripts/week6_audit_semantic_acceptance.py',
+        'tests/test_week6_semantic_repair_feedback.py',
+        'tests/test_week6_semantic_repair_feedback_review.py',
+    }, changed
+    readme = REPO / 'README.md'
+    assert sha(readme) == previous['readme_sha256'], 'Merge independent README edits explicitly'
+    shutil.copyfile(readme, CHANGE / 'README.before_repair_feedback.md')
+    text = readme.read_text(encoding='utf-8')
+    start = text.index('The current [799-case combined CPU check]')
+    end = text.index('### Week 5 submission', start)
+    count, collected = validation['targeted_tests_passed'], validation['collected_test_count']
+    addition = (
+        'The previous [799-case combined CPU check](Document/Week6/results/full_requirements_20261028/grounding_consistency_001/root_combined_validation_002/validation.json)\n'
+        'passed on the grounding/monitor freeze. Normal011 then failed before any\n'
+        'input because three native replies repeated the same complete postconditions\n'
+        'for different objectives; the duplicate guard correctly rejected them.\n\n'
+        'A new bounded repair-feedback experiment adds a fixed system reminder only\n'
+        'after a locally typed duplicate-postcondition rejection. It does not promote\n'
+        'model text or error strings into system instructions, change the caller or\n'
+        'schema, merge goals locally, or relax budgets and verification. The rejected\n'
+        'raw replies remain archived. Its effect still needs a new real-window run.\n\n'
+        f'The current [{count}-case affected semantic CPU check](Document/Week6/results/full_requirements_20261028/semantic_repair_feedback_001/{args.validation_name}/validation.json)\n'
+        f'passed with Ruff clean and {len(pins)} identical before/after code pins. The\n'
+        f'{collected}-case collection counts the full suite; it does not execute it.\n'
+        'Normal012, transient001 and full004 remain pending on this freeze.\n\n'
+        f'Validation target (pending): `{collected} tests, ruff clean`. This is the\n'
+        'collected suite size, not a full regression or real-window acceptance claim.\n\n'
+    )
+    text = text[:start] + addition + text[end:]
+    links = []
+    for target in re.findall(r'\[[^\]]*\]\(([^)]+)\)', text):
+        if target.startswith(('https://', 'http://', '#')):
+            continue
+        target = target.split('#', 1)[0]
+        assert (REPO / target).exists(), target
+        links.append(target)
+    readme.write_text(text, encoding='utf-8', newline='\n')
+    qa = CHANGE / 'README.update_qa_001.json'
+    write(qa, {'schema': 'week6.pending_readme.qa.v1', 'previous_sha256': previous['readme_sha256'],
+               'current_sha256': sha(readme), 'local_links_checked': links,
+               'local_link_count': len(links), 'targeted_tests_passed': count,
+               'collection_only': collected, 'full_regression_passed': False,
+               'new_real_acceptance_passed': False})
+    shutil.copyfile(__file__, CHANGE / 'root_freeze_harness.py.txt')
+    freeze = {'schema': 'week6.semantic.repair_feedback.source_freeze.v1',
+              'created_at_utc': datetime.now(UTC).isoformat(),
+              'status': 'frozen_pending_normal012_transient001_full004',
+              'protocol': 'week6.semantic_subtasks.v6', 'input_modality': 'caller_intent_only',
+              'repair_policy_version': 'week6.semantic_repair_feedback.v1',
+              'repair_trigger': 'typed_duplicate_semantic_postconditions',
+              'postcondition_source': 'untrusted_model_prediction', 'final_source': 'unchanged_caller',
+              'previous_freeze_sha256': sha(previous_path), 'changed_paths': sorted(changed),
+              'code_pin_count': len(pins), 'code_pins': pins, 'readme_sha256': sha(readme),
+              'git_attributes_sha256': sha(REPO / '.gitattributes'),
+              'readme_update_qa_sha256': sha(qa),
+              'targeted_validation': f'{args.validation_name}/validation.json',
+              'targeted_validation_sha256': sha(checked / 'validation.json'),
+              'targeted_tests_passed': count, 'targeted_pytest_seconds': validation['targeted_pytest_seconds'],
+              'collected_test_count': collected, 'collection_test_execution': False,
+              'model_gui_calls_during_changes': 0, 'old_failed_raw_records_retained': True,
+              'new_real_model_gui_acceptance_completed': False, 'full004_completed': False,
+              'source_before_manifest_sha256': sha(CHANGE / 'source_before_manifest.json'),
+              'root_freeze_harness_sha256': sha(CHANGE / 'root_freeze_harness.py.txt')}
+    write(CHANGE / 'final_source_freeze_001.json', freeze)
+    print(json.dumps({'freeze_sha256': sha(CHANGE / 'final_source_freeze_001.json'),
+                      'code_pin_count': len(pins), 'targeted_tests_passed': count,
+                      'collected_test_count': collected, 'readme_sha256': sha(readme)}))
+
+
+if __name__ == '__main__':
+    main()

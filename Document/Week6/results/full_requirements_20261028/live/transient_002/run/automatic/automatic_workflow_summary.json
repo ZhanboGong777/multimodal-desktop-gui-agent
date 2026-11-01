@@ -1,0 +1,926 @@
+{
+  "schema_version": "week6.semantic_workflow.v1",
+  "decomposition_protocol_mode": "semantic_subtasks",
+  "workflow_id": "semantic_lab",
+  "status": "succeeded",
+  "plans": [
+    {
+      "schema_version": "week6.semantic_subtasks.v6",
+      "input_modality": "caller_intent_only",
+      "image_attached": false,
+      "status": "ready",
+      "proposal": {
+        "status": "ready",
+        "reason": "Caller request is fully executable with visible controls; no missing parameters or unsafe operations. Two distinct semantic objectives are planned to cover preparation, review, and local commit with verifiable text outcomes.",
+        "subgoals": [
+          {
+            "instruction": "Prepare the BLUE report for project BETA by selecting the correct project and theme, then save the draft locally.",
+            "expect_text": [
+              "Project BETA",
+              "Theme BLUE",
+              "Draft Saved"
+            ],
+            "forbid_text": [
+              "Review Pending",
+              "Online Sync",
+              "Commit Failed",
+              "Network Error",
+              "Review Unavailable",
+              "Budget Exceeded",
+              "Changes Not Saved",
+              "Save Failed"
+            ],
+            "goal_id": "prepare_report"
+          },
+          {
+            "instruction": "Review the prepared BLUE report for project BETA and commit it locally using visible controls.",
+            "expect_text": [
+              "Project BETA",
+              "Theme BLUE",
+              "LOCAL COMPLETE",
+              "Commit Successful"
+            ],
+            "forbid_text": [
+              "Review Pending",
+              "Online Sync",
+              "Commit Failed",
+              "Network Error",
+              "Review Unavailable",
+              "Budget Exceeded",
+              "Changes Not Saved",
+              "Save Failed"
+            ],
+            "goal_id": "review_and_commit"
+          }
+        ]
+      },
+      "workflow": {
+        "workflow_id": "semantic_lab",
+        "instruction": "In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+        "subgoals": [
+          {
+            "case_id": "prepare_report",
+            "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Prepare the BLUE report for project BETA by selecting the correct project and theme, then save the draft locally.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+            "target_app": null,
+            "preconditions": [],
+            "success_rules": [],
+            "verification": "automatic",
+            "expect_text": [
+              "Project BETA",
+              "Theme BLUE",
+              "Draft Saved"
+            ],
+            "forbid_text": [
+              "Review Pending",
+              "Online Sync",
+              "Commit Failed",
+              "Network Error",
+              "Review Unavailable",
+              "Budget Exceeded",
+              "Changes Not Saved",
+              "Save Failed"
+            ],
+            "requires_processes": [],
+            "forbids_processes": [],
+            "must_exit_processes": [],
+            "risk": "medium",
+            "message_conversation": null,
+            "gate_on_step_verification": false
+          },
+          {
+            "case_id": "review_and_commit",
+            "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Review the prepared BLUE report for project BETA and commit it locally using visible controls.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+            "target_app": null,
+            "preconditions": [],
+            "success_rules": [],
+            "verification": "automatic",
+            "expect_text": [
+              "Project BETA",
+              "Theme BLUE",
+              "LOCAL COMPLETE",
+              "Commit Successful"
+            ],
+            "forbid_text": [
+              "Review Pending",
+              "Online Sync",
+              "Commit Failed",
+              "Network Error",
+              "Review Unavailable",
+              "Budget Exceeded",
+              "Changes Not Saved",
+              "Save Failed"
+            ],
+            "requires_processes": [],
+            "forbids_processes": [],
+            "must_exit_processes": [],
+            "risk": "medium",
+            "message_conversation": null,
+            "gate_on_step_verification": false
+          }
+        ],
+        "final_check": {
+          "case_id": "FINAL",
+          "instruction": "Independently read unchanged caller final predicates",
+          "target_app": null,
+          "preconditions": [],
+          "success_rules": [],
+          "verification": "automatic",
+          "expect_text": [
+            "Project BETA",
+            "Theme BLUE",
+            "LOCAL COMPLETE"
+          ],
+          "forbid_text": [],
+          "requires_processes": [],
+          "forbids_processes": [],
+          "must_exit_processes": [],
+          "risk": "low",
+          "message_conversation": null,
+          "gate_on_step_verification": true
+        }
+      },
+      "planning_calls": 1,
+      "model_requests": 1,
+      "elapsed_ms": 37765.99999994505,
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\semantic_plan_round_001",
+      "error": "Caller request is fully executable with visible controls; no missing parameters or unsafe operations. Two distinct semantic objectives are planned to cover preparation, review, and local commit with verifiable text outcomes."
+    },
+    {
+      "schema_version": "week6.semantic_subtasks.v6",
+      "input_modality": "caller_intent_only",
+      "image_attached": false,
+      "status": "ready",
+      "proposal": {
+        "status": "ready",
+        "reason": "The previous goal failed due to missing expected text ('Project BETA', 'Draft Saved') and no forbidden text was present. The caller request remains unchanged, and no new conditions are introduced. The current state requires completing the review and commit locally, as the draft save was not verified",
+        "subgoals": [
+          {
+            "instruction": "Review the BLUE report for project BETA using the visible controls, ensuring the review is completed locally without external sync.",
+            "expect_text": [
+              "Project BETA",
+              "Theme BLUE",
+              "Review Complete"
+            ],
+            "forbid_text": [
+              "Review Pending",
+              "Online Sync",
+              "Network Error",
+              "Review Unavailable",
+              "Budget Exceeded",
+              "Changes Not Saved",
+              "Save Failed",
+              "Commit Failed"
+            ],
+            "goal_id": "review_report"
+          },
+          {
+            "instruction": "Commit the reviewed BLUE report for project BETA locally using the visible controls, ensuring no external communication or sync occurs.",
+            "expect_text": [
+              "Project BETA",
+              "Theme BLUE",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": [
+              "Review Pending",
+              "Online Sync",
+              "Network Error",
+              "Review Unavailable",
+              "Budget Exceeded",
+              "Changes Not Saved",
+              "Save Failed",
+              "Commit Failed"
+            ],
+            "goal_id": "commit_report"
+          }
+        ]
+      },
+      "workflow": {
+        "workflow_id": "semantic_lab",
+        "instruction": "In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+        "subgoals": [
+          {
+            "case_id": "review_report",
+            "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Review the BLUE report for project BETA using the visible controls, ensuring the review is completed locally without external sync.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+            "target_app": null,
+            "preconditions": [],
+            "success_rules": [],
+            "verification": "automatic",
+            "expect_text": [
+              "Project BETA",
+              "Theme BLUE",
+              "Review Complete"
+            ],
+            "forbid_text": [
+              "Review Pending",
+              "Online Sync",
+              "Network Error",
+              "Review Unavailable",
+              "Budget Exceeded",
+              "Changes Not Saved",
+              "Save Failed",
+              "Commit Failed"
+            ],
+            "requires_processes": [],
+            "forbids_processes": [],
+            "must_exit_processes": [],
+            "risk": "medium",
+            "message_conversation": null,
+            "gate_on_step_verification": false
+          },
+          {
+            "case_id": "commit_report",
+            "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Commit the reviewed BLUE report for project BETA locally using the visible controls, ensuring no external communication or sync occurs.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+            "target_app": null,
+            "preconditions": [],
+            "success_rules": [],
+            "verification": "automatic",
+            "expect_text": [
+              "Project BETA",
+              "Theme BLUE",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": [
+              "Review Pending",
+              "Online Sync",
+              "Network Error",
+              "Review Unavailable",
+              "Budget Exceeded",
+              "Changes Not Saved",
+              "Save Failed",
+              "Commit Failed"
+            ],
+            "requires_processes": [],
+            "forbids_processes": [],
+            "must_exit_processes": [],
+            "risk": "medium",
+            "message_conversation": null,
+            "gate_on_step_verification": false
+          }
+        ],
+        "final_check": {
+          "case_id": "FINAL",
+          "instruction": "Independently read unchanged caller final predicates",
+          "target_app": null,
+          "preconditions": [],
+          "success_rules": [],
+          "verification": "automatic",
+          "expect_text": [
+            "Project BETA",
+            "Theme BLUE",
+            "LOCAL COMPLETE"
+          ],
+          "forbid_text": [],
+          "requires_processes": [],
+          "forbids_processes": [],
+          "must_exit_processes": [],
+          "risk": "low",
+          "message_conversation": null,
+          "gate_on_step_verification": true
+        }
+      },
+      "planning_calls": 1,
+      "model_requests": 1,
+      "elapsed_ms": 33094.00000004098,
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\semantic_plan_round_002",
+      "error": "The previous goal failed due to missing expected text ('Project BETA', 'Draft Saved') and no forbidden text was present. The caller request remains unchanged, and no new conditions are introduced. The current state requires completing the review and commit locally, as the draft save was not verified"
+    }
+  ],
+  "goal_outcomes": [
+    {
+      "round": 1,
+      "goal_id": "prepare_report",
+      "instruction": "Prepare the BLUE report for project BETA by selecting the correct project and theme, then save the draft locally.",
+      "expect_text": [
+        "Project BETA",
+        "Theme BLUE",
+        "Draft Saved"
+      ],
+      "forbid_text": [
+        "Review Pending",
+        "Online Sync",
+        "Commit Failed",
+        "Network Error",
+        "Review Unavailable",
+        "Budget Exceeded",
+        "Changes Not Saved",
+        "Save Failed"
+      ],
+      "status": "failed",
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_001_001_prepare_report",
+      "verification": null,
+      "task_verification": {
+        "outcome": "failed",
+        "method": "automatic",
+        "detail": "expected on screen but not found: Project BETA, Draft Saved",
+        "evidence": {
+          "observation_id": "obs-0012",
+          "missing": [
+            "Project BETA",
+            "Draft Saved"
+          ],
+          "verification_source": "frozen_model_semantic_subtask_postconditions"
+        }
+      }
+    },
+    {
+      "round": 2,
+      "goal_id": "review_report",
+      "instruction": "Review the BLUE report for project BETA using the visible controls, ensuring the review is completed locally without external sync.",
+      "expect_text": [
+        "Project BETA",
+        "Theme BLUE",
+        "Review Complete"
+      ],
+      "forbid_text": [
+        "Review Pending",
+        "Online Sync",
+        "Network Error",
+        "Review Unavailable",
+        "Budget Exceeded",
+        "Changes Not Saved",
+        "Save Failed",
+        "Commit Failed"
+      ],
+      "status": "succeeded",
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_002_001_review_report",
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "obs-0009",
+          "expect_text": [
+            "Project BETA",
+            "Theme BLUE",
+            "Review Complete"
+          ],
+          "forbid_text": [
+            "Review Pending",
+            "Online Sync",
+            "Network Error",
+            "Review Unavailable",
+            "Budget Exceeded",
+            "Changes Not Saved",
+            "Save Failed",
+            "Commit Failed"
+          ],
+          "verification_source": "frozen_model_semantic_subtask_postconditions"
+        }
+      },
+      "task_verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "obs-0008",
+          "expect_text": [
+            "Project BETA",
+            "Theme BLUE",
+            "Review Complete"
+          ],
+          "forbid_text": [
+            "Review Pending",
+            "Online Sync",
+            "Network Error",
+            "Review Unavailable",
+            "Budget Exceeded",
+            "Changes Not Saved",
+            "Save Failed",
+            "Commit Failed"
+          ],
+          "verification_source": "frozen_model_semantic_subtask_postconditions"
+        }
+      }
+    },
+    {
+      "round": 2,
+      "goal_id": "commit_report",
+      "instruction": "Commit the reviewed BLUE report for project BETA locally using the visible controls, ensuring no external communication or sync occurs.",
+      "expect_text": [
+        "Project BETA",
+        "Theme BLUE",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [
+        "Review Pending",
+        "Online Sync",
+        "Network Error",
+        "Review Unavailable",
+        "Budget Exceeded",
+        "Changes Not Saved",
+        "Save Failed",
+        "Commit Failed"
+      ],
+      "status": "succeeded",
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_002_002_commit_report",
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "obs-0005",
+          "expect_text": [
+            "Project BETA",
+            "Theme BLUE",
+            "LOCAL COMPLETE"
+          ],
+          "forbid_text": [
+            "Review Pending",
+            "Online Sync",
+            "Network Error",
+            "Review Unavailable",
+            "Budget Exceeded",
+            "Changes Not Saved",
+            "Save Failed",
+            "Commit Failed"
+          ],
+          "verification_source": "frozen_model_semantic_subtask_postconditions"
+        }
+      },
+      "task_verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "obs-0004",
+          "expect_text": [
+            "Project BETA",
+            "Theme BLUE",
+            "LOCAL COMPLETE"
+          ],
+          "forbid_text": [
+            "Review Pending",
+            "Online Sync",
+            "Network Error",
+            "Review Unavailable",
+            "Budget Exceeded",
+            "Changes Not Saved",
+            "Save Failed",
+            "Commit Failed"
+          ],
+          "verification_source": "frozen_model_semantic_subtask_postconditions"
+        }
+      }
+    }
+  ],
+  "rejected_goal_contracts": [],
+  "completed_subgoals": [
+    {
+      "round": 2,
+      "goal_id": "review_report",
+      "instruction": "Review the BLUE report for project BETA using the visible controls, ensuring the review is completed locally without external sync.",
+      "expect_text": [
+        "Project BETA",
+        "Theme BLUE",
+        "Review Complete"
+      ],
+      "forbid_text": [
+        "Review Pending",
+        "Online Sync",
+        "Network Error",
+        "Review Unavailable",
+        "Budget Exceeded",
+        "Changes Not Saved",
+        "Save Failed",
+        "Commit Failed"
+      ],
+      "status": "succeeded",
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_002_001_review_report",
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "obs-0009",
+          "expect_text": [
+            "Project BETA",
+            "Theme BLUE",
+            "Review Complete"
+          ],
+          "forbid_text": [
+            "Review Pending",
+            "Online Sync",
+            "Network Error",
+            "Review Unavailable",
+            "Budget Exceeded",
+            "Changes Not Saved",
+            "Save Failed",
+            "Commit Failed"
+          ],
+          "verification_source": "frozen_model_semantic_subtask_postconditions"
+        }
+      },
+      "task_verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "obs-0008",
+          "expect_text": [
+            "Project BETA",
+            "Theme BLUE",
+            "Review Complete"
+          ],
+          "forbid_text": [
+            "Review Pending",
+            "Online Sync",
+            "Network Error",
+            "Review Unavailable",
+            "Budget Exceeded",
+            "Changes Not Saved",
+            "Save Failed",
+            "Commit Failed"
+          ],
+          "verification_source": "frozen_model_semantic_subtask_postconditions"
+        }
+      }
+    },
+    {
+      "round": 2,
+      "goal_id": "commit_report",
+      "instruction": "Commit the reviewed BLUE report for project BETA locally using the visible controls, ensuring no external communication or sync occurs.",
+      "expect_text": [
+        "Project BETA",
+        "Theme BLUE",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [
+        "Review Pending",
+        "Online Sync",
+        "Network Error",
+        "Review Unavailable",
+        "Budget Exceeded",
+        "Changes Not Saved",
+        "Save Failed",
+        "Commit Failed"
+      ],
+      "status": "succeeded",
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_002_002_commit_report",
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "obs-0005",
+          "expect_text": [
+            "Project BETA",
+            "Theme BLUE",
+            "LOCAL COMPLETE"
+          ],
+          "forbid_text": [
+            "Review Pending",
+            "Online Sync",
+            "Network Error",
+            "Review Unavailable",
+            "Budget Exceeded",
+            "Changes Not Saved",
+            "Save Failed",
+            "Commit Failed"
+          ],
+          "verification_source": "frozen_model_semantic_subtask_postconditions"
+        }
+      },
+      "task_verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "obs-0004",
+          "expect_text": [
+            "Project BETA",
+            "Theme BLUE",
+            "LOCAL COMPLETE"
+          ],
+          "forbid_text": [
+            "Review Pending",
+            "Online Sync",
+            "Network Error",
+            "Review Unavailable",
+            "Budget Exceeded",
+            "Changes Not Saved",
+            "Save Failed",
+            "Commit Failed"
+          ],
+          "verification_source": "frozen_model_semantic_subtask_postconditions"
+        }
+      }
+    }
+  ],
+  "semantic_goals_total": 2,
+  "workflow_result": {
+    "schema_version": "week6.workflow.v1",
+    "workflow_id": "semantic_lab",
+    "status": "succeeded",
+    "execute": true,
+    "subgoals": [
+      {
+        "index": 0,
+        "case_id": "commit_report",
+        "status": "completed",
+        "child_status": "succeeded",
+        "actions": 1,
+        "unconfirmed_action_attempts": 0,
+        "planning_calls": 1,
+        "verification": {
+          "outcome": "passed",
+          "method": "automatic",
+          "detail": "all success rules matched against the current screen",
+          "evidence": {
+            "observation_id": "obs-0004",
+            "expect_text": [
+              "Project BETA",
+              "Theme BLUE",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": [
+              "Review Pending",
+              "Online Sync",
+              "Network Error",
+              "Review Unavailable",
+              "Budget Exceeded",
+              "Changes Not Saved",
+              "Save Failed",
+              "Commit Failed"
+            ],
+            "verification_source": "frozen_model_semantic_subtask_postconditions"
+          }
+        },
+        "elapsed_ms": 259452.9999999795,
+        "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_002_002_commit_report\\001_commit_report",
+        "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_002_002_commit_report\\001_commit_report\\task_summary.json",
+        "error": null
+      }
+    ],
+    "total_actions": 1,
+    "unconfirmed_action_attempts": 0,
+    "planning_calls": 1,
+    "accounting_complete": true,
+    "elapsed_ms": 281420.999999973,
+    "final_verification": {
+      "outcome": "passed",
+      "method": "automatic",
+      "detail": "all success rules matched against the current screen",
+      "evidence": {
+        "observation_id": "obs-0005",
+        "expect_text": [
+          "Project BETA",
+          "Theme BLUE",
+          "LOCAL COMPLETE"
+        ],
+        "forbid_text": [
+          "Review Pending",
+          "Online Sync",
+          "Network Error",
+          "Review Unavailable",
+          "Budget Exceeded",
+          "Changes Not Saved",
+          "Save Failed",
+          "Commit Failed"
+        ],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    },
+    "final_observation_id": "obs-0005",
+    "final_observation_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_002_002_commit_report\\001_commit_report\\obs-0005.json",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_002_002_commit_report",
+    "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_002_002_commit_report\\workflow_summary.json",
+    "checkpoint_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_002_002_commit_report\\checkpoints.jsonl",
+    "error": null,
+    "notes": []
+  },
+  "workflow_results": [
+    {
+      "schema_version": "week6.workflow.v1",
+      "workflow_id": "semantic_lab",
+      "status": "failed",
+      "execute": true,
+      "subgoals": [
+        {
+          "index": 0,
+          "case_id": "prepare_report",
+          "status": "failed",
+          "child_status": "failed",
+          "actions": 3,
+          "unconfirmed_action_attempts": 0,
+          "planning_calls": 3,
+          "verification": {
+            "outcome": "failed",
+            "method": "automatic",
+            "detail": "expected on screen but not found: Project BETA, Draft Saved",
+            "evidence": {
+              "observation_id": "obs-0012",
+              "missing": [
+                "Project BETA",
+                "Draft Saved"
+              ],
+              "verification_source": "frozen_model_semantic_subtask_postconditions"
+            }
+          },
+          "elapsed_ms": 708204.000000027,
+          "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report",
+          "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\task_summary.json",
+          "error": null
+        }
+      ],
+      "total_actions": 3,
+      "unconfirmed_action_attempts": 0,
+      "planning_calls": 3,
+      "accounting_complete": true,
+      "elapsed_ms": 708515.999999945,
+      "final_verification": null,
+      "final_observation_id": null,
+      "final_observation_reference": "",
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_001_001_prepare_report",
+      "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_001_001_prepare_report\\workflow_summary.json",
+      "checkpoint_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_001_001_prepare_report\\checkpoints.jsonl",
+      "error": "subgoal did not finish with the required task verification",
+      "notes": []
+    },
+    {
+      "schema_version": "week6.workflow.v1",
+      "workflow_id": "semantic_lab",
+      "status": "succeeded",
+      "execute": true,
+      "subgoals": [
+        {
+          "index": 0,
+          "case_id": "review_report",
+          "status": "completed",
+          "child_status": "succeeded",
+          "actions": 2,
+          "unconfirmed_action_attempts": 0,
+          "planning_calls": 2,
+          "verification": {
+            "outcome": "passed",
+            "method": "automatic",
+            "detail": "all success rules matched against the current screen",
+            "evidence": {
+              "observation_id": "obs-0008",
+              "expect_text": [
+                "Project BETA",
+                "Theme BLUE",
+                "Review Complete"
+              ],
+              "forbid_text": [
+                "Review Pending",
+                "Online Sync",
+                "Network Error",
+                "Review Unavailable",
+                "Budget Exceeded",
+                "Changes Not Saved",
+                "Save Failed",
+                "Commit Failed"
+              ],
+              "verification_source": "frozen_model_semantic_subtask_postconditions"
+            }
+          },
+          "elapsed_ms": 511077.9999999795,
+          "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_002_001_review_report\\001_review_report",
+          "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_002_001_review_report\\001_review_report\\task_summary.json",
+          "error": null
+        }
+      ],
+      "total_actions": 2,
+      "unconfirmed_action_attempts": 0,
+      "planning_calls": 2,
+      "accounting_complete": true,
+      "elapsed_ms": 534234.999999986,
+      "final_verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "obs-0009",
+          "expect_text": [
+            "Project BETA",
+            "Theme BLUE",
+            "Review Complete"
+          ],
+          "forbid_text": [
+            "Review Pending",
+            "Online Sync",
+            "Network Error",
+            "Review Unavailable",
+            "Budget Exceeded",
+            "Changes Not Saved",
+            "Save Failed",
+            "Commit Failed"
+          ],
+          "verification_source": "frozen_model_semantic_subtask_postconditions"
+        }
+      },
+      "final_observation_id": "obs-0009",
+      "final_observation_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_002_001_review_report\\001_review_report\\obs-0009.json",
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_002_001_review_report",
+      "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_002_001_review_report\\workflow_summary.json",
+      "checkpoint_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_002_001_review_report\\checkpoints.jsonl",
+      "error": null,
+      "notes": []
+    },
+    {
+      "schema_version": "week6.workflow.v1",
+      "workflow_id": "semantic_lab",
+      "status": "succeeded",
+      "execute": true,
+      "subgoals": [
+        {
+          "index": 0,
+          "case_id": "commit_report",
+          "status": "completed",
+          "child_status": "succeeded",
+          "actions": 1,
+          "unconfirmed_action_attempts": 0,
+          "planning_calls": 1,
+          "verification": {
+            "outcome": "passed",
+            "method": "automatic",
+            "detail": "all success rules matched against the current screen",
+            "evidence": {
+              "observation_id": "obs-0004",
+              "expect_text": [
+                "Project BETA",
+                "Theme BLUE",
+                "LOCAL COMPLETE"
+              ],
+              "forbid_text": [
+                "Review Pending",
+                "Online Sync",
+                "Network Error",
+                "Review Unavailable",
+                "Budget Exceeded",
+                "Changes Not Saved",
+                "Save Failed",
+                "Commit Failed"
+              ],
+              "verification_source": "frozen_model_semantic_subtask_postconditions"
+            }
+          },
+          "elapsed_ms": 259452.9999999795,
+          "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_002_002_commit_report\\001_commit_report",
+          "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_002_002_commit_report\\001_commit_report\\task_summary.json",
+          "error": null
+        }
+      ],
+      "total_actions": 1,
+      "unconfirmed_action_attempts": 0,
+      "planning_calls": 1,
+      "accounting_complete": true,
+      "elapsed_ms": 281420.999999973,
+      "final_verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "obs-0005",
+          "expect_text": [
+            "Project BETA",
+            "Theme BLUE",
+            "LOCAL COMPLETE"
+          ],
+          "forbid_text": [
+            "Review Pending",
+            "Online Sync",
+            "Network Error",
+            "Review Unavailable",
+            "Budget Exceeded",
+            "Changes Not Saved",
+            "Save Failed",
+            "Commit Failed"
+          ],
+          "verification_source": "frozen_model_semantic_subtask_postconditions"
+        }
+      },
+      "final_observation_id": "obs-0005",
+      "final_observation_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_002_002_commit_report\\001_commit_report\\obs-0005.json",
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_002_002_commit_report",
+      "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_002_002_commit_report\\workflow_summary.json",
+      "checkpoint_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_002_002_commit_report\\checkpoints.jsonl",
+      "error": null,
+      "notes": []
+    }
+  ],
+  "final_verification": {
+    "outcome": "passed",
+    "method": "automatic",
+    "detail": "all success rules matched against the current screen",
+    "evidence": {
+      "observation_id": "obs-0001",
+      "expect_text": [
+        "Project BETA",
+        "Theme BLUE",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": []
+    }
+  },
+  "final_observation_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\caller_final_round_002\\observation.json",
+  "total_actions": 6,
+  "planning_calls": 8,
+  "model_requests": 8,
+  "unconfirmed_action_attempts": 0,
+  "accounting_complete": true,
+  "elapsed_ms": 1739734.000000055,
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic",
+  "error": "",
+  "notes": []
+}

@@ -1,0 +1,193 @@
+{
+  "run_id": "001_review_commit",
+  "case_id": "review_commit",
+  "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Review the prepared report and commit it locally.\nComplete original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+  "status": "failed",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Click on the 'Review report' button.",
+      "action_type": "double_click",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "double_click",
+          "x": 1282,
+          "y": 1049,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Review report"
+        },
+        "element_id": "obs-0002-e002",
+        "screenshot_point": {
+          "x": 1282,
+          "y": 1049
+        },
+        "control_point": {
+          "x": 1282,
+          "y": 1049
+        },
+        "note": "text 'Review report' -> obs-0002-e002 (re-bound from obs-0001-e002 in an earlier frame)"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "double_click",
+          "x": 1282,
+          "y": 1049,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Review report"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: report",
+        "evidence": {
+          "observation_id": "obs-0003",
+          "changed": true,
+          "element_count": 22,
+          "expectation_tokens": [
+            "report",
+            "reviewed"
+          ],
+          "expectation_hits": [
+            "report"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 53672.00000002049,
+      "after_observation_id": "obs-0003"
+    },
+    {
+      "index": 2,
+      "step_id": "s1",
+      "description": "Click the 'Commit locally' button.",
+      "action_type": "click",
+      "observation_id": "obs-0006",
+      "resolved": null,
+      "action_result": null,
+      "verification": null,
+      "error": "no element matches 'Commit locally' in obs-0006",
+      "elapsed_ms": 14906.000000075437,
+      "after_observation_id": null
+    },
+    {
+      "index": 3,
+      "step_id": "s1",
+      "description": "Click the 'Commit locally' button.",
+      "action_type": "click",
+      "observation_id": "obs-0008",
+      "resolved": null,
+      "action_result": null,
+      "verification": null,
+      "error": "no element matches 'Commit locally' in obs-0008",
+      "elapsed_ms": 21530.99999995902,
+      "after_observation_id": null
+    }
+  ],
+  "verification": null,
+  "error": null,
+  "elapsed_ms": 175077.9999999795,
+  "execute": true,
+  "model_name": "qwen2.5vl:3b",
+  "provider": "openai_compatible",
+  "notes": [
+    "planned 1 steps from obs-0001",
+    "task verification: expected on screen but not found: LOCAL COMPLETE",
+    "re-planned from obs-0005: attempt 2 of at most 3",
+    "s1: no element matches 'Commit locally' in obs-0006",
+    "re-planned from obs-0007: attempt 3 of at most 3",
+    "s1: no element matches 'Commit locally' in obs-0008"
+  ],
+  "task_id": "review_commit",
+  "commit": "482895f",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 2560x1600, control 2560x1600",
+  "started_at": "2026-10-28T13:51:04.820576Z",
+  "finished_at": "2026-10-28T13:53:59.898576Z",
+  "planning_attempts": 3,
+  "model_requests": 6,
+  "planning_ms": 28218.999999924563,
+  "confirmation_ms": 0.0,
+  "execution_ms": 146859.00000005495,
+  "planner_ms": 24250.0,
+  "planning_calls": 3,
+  "system_elapsed_ms": 175077.9999999795,
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_017\\run\\automatic\\goal_001_002_review_commit\\001_review_commit",
+  "stop_reason": "s1: no element matches 'Commit locally' in obs-0008",
+  "error_type": "",
+  "failed_step_id": "s1",
+  "recovery_records": [
+    {
+      "next_pass": 2,
+      "outcome": "plan_ready",
+      "observation_id": "obs-0005",
+      "feedback": {
+        "previous_pass": 1,
+        "reason": "task_verification",
+        "failed_step_index": null,
+        "actions_used": 1,
+        "actions_remaining": 17,
+        "remaining_ms": 6812155.999999959,
+        "recent_steps": [
+          {
+            "index": 1,
+            "action_type": "double_click",
+            "attempted": true,
+            "succeeded": true,
+            "verification": "passed"
+          }
+        ],
+        "omitted_steps": 0,
+        "instruction": "Plan from the current observation; previous attempts do not prove success. Do not replay completed inputs to recreate an earlier state. Existing task checks and remaining budgets still apply."
+      },
+      "elapsed_ms": 21907.00000000652
+    },
+    {
+      "next_pass": 3,
+      "outcome": "plan_ready",
+      "observation_id": "obs-0007",
+      "feedback": {
+        "previous_pass": 2,
+        "reason": "target_resolution",
+        "failed_step_index": 2,
+        "actions_used": 1,
+        "actions_remaining": 17,
+        "remaining_ms": 6775140.000000014,
+        "recent_steps": [
+          {
+            "index": 2,
+            "action_type": "click",
+            "attempted": false,
+            "succeeded": null,
+            "verification": null
+          }
+        ],
+        "omitted_steps": 0,
+        "instruction": "Plan from the current observation; previous attempts do not prove success. Do not replay completed inputs to recreate an earlier state. Existing task checks and remaining budgets still apply. The rejected text-only target did not resolve to current OCR or adjacent words; no input was dispatched for that step. Use only current allowed candidates. If the target is visible in the screenshot without OCR, choose its matching anonymous_without_ocr ID yourself; do not repeat unresolved text-only targeting. If uncertain, return no steps with errors. Do not change the task goal."
+      },
+      "elapsed_ms": 22125.0
+    }
+  ],
+  "unconfirmed_action_attempts": 0,
+  "action_count": 1
+}

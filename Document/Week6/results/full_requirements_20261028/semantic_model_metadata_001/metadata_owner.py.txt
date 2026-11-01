@@ -1,0 +1,64 @@
+from pathlib import Path
+from datetime import datetime, timezone
+import hashlib
+import json
+import os
+import time
+import urllib.request
+
+out = Path(r"C:/Users/联想/Documents/ChatGPT/Intern/tmp/week6_normal012_metadata_diagnostic_20261028_001")
+out.mkdir(exist_ok=False)
+(out / "metadata_owner.py.txt").write_bytes(Path(__file__).read_bytes())
+def save(name, value):
+    with (out / name).open("x", encoding="utf-8", newline="\n") as handle:
+        json.dump(value, handle, ensure_ascii=False, indent=2)
+        handle.write("\n")
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        raise RuntimeError("Metadata diagnostic refuses redirects")
+opener = urllib.request.build_opener(NoRedirect)
+receipts = []
+def read_metadata(name, path, body=None):
+    assert path in {"/api/show", "/api/tags"}
+    payload = json.dumps(body).encode("utf-8") if body is not None else None
+    method = "POST" if payload is not None else "GET"
+    spec = {"method": method, "url": "http://127.0.0.1:11434" + path, "body": body}
+    save(name + ".request.json", spec)
+    clock = time.monotonic()
+    started = datetime.now(timezone.utc).isoformat()
+    request = urllib.request.Request(spec["url"], data=payload,
+        headers={"Content-Type": "application/json"}, method=method)
+    with opener.open(request, timeout=30) as response:
+        status = response.status
+        raw = response.read()
+    (out / (name + ".response.raw.json")).write_bytes(raw)
+    value = json.loads(raw)
+    receipt = {"endpoint": path, "method": method, "status_code": status,
+        "started_at_utc": started, "elapsed_seconds": time.monotonic() - clock,
+        "raw_response_bytes": len(raw), "raw_response_sha256": hashlib.sha256(raw).hexdigest()}
+    save(name + ".receipt.json", receipt)
+    receipts.append(receipt)
+    return value
+show = read_metadata("vl_model_show", "/api/show", {"model": "qwen2.5vl:7b", "verbose": False})
+tags = read_metadata("installed_tags", "/api/tags")
+template = show.get("template", "")
+system = show.get("system", "")
+parameters = show.get("parameters", "")
+for name, content in (("vl_template.txt", template), ("vl_system.txt", system), ("vl_parameters.txt", parameters)):
+    (out / name).write_text(content, encoding="utf-8", newline="\n")
+models = [{key: model.get(key) for key in ("name", "model", "digest", "size", "modified_at", "details")}
+          for model in tags.get("models", [])]
+summary = {"schema": "week6.normal012.local_model_metadata_readonly.v1", "owner_pid": os.getpid(),
+    "created_at_utc": datetime.now(timezone.utc).isoformat(), "receipts": receipts,
+    "vl_model": "qwen2.5vl:7b", "vl_capabilities": show.get("capabilities"), "vl_details": show.get("details"),
+    "template_sha256": hashlib.sha256(template.encode()).hexdigest(), "template_characters": len(template),
+    "template_mentions_system_field": ".System" in template,
+    "template_mentions_message_role": ".Role" in template,
+    "template_mentions_message_content": ".Content" in template,
+    "system_characters": len(system), "system_sha256": hashlib.sha256(system.encode()).hexdigest(),
+    "parameters": parameters, "installed_models": models,
+    "generation_chat_load_pull_calls": 0, "models_changed": False,
+    "no_source_tests_configs_gui_edits": True}
+save("metadata_summary.json", summary)
+print(json.dumps({key: value for key, value in summary.items() if key != "installed_models"}, ensure_ascii=False, indent=2))
+print("INSTALLED_MODELS", json.dumps(models, ensure_ascii=False, indent=2))

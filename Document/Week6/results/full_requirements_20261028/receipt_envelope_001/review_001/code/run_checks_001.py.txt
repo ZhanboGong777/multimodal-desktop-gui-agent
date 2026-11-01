@@ -1,0 +1,88 @@
+"""Actual private commands against synthetic records, never a live task result."""
+from copy import deepcopy
+from datetime import datetime, timezone
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+import sys
+import time
+
+from test_input_receipt_protocol import EXPECTED, records
+
+ROOT = Path(__file__).resolve().parent
+OUT = ROOT / "validation_001"
+OUT.mkdir(exist_ok=False)
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def write(path, value):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("x", encoding="utf-8", newline="\n") as stream:
+        json.dump(value, stream, ensure_ascii=False, indent=2)
+        stream.write("\n")
+
+
+pins = {str(path): sha(path) for path in sorted(ROOT.glob("*.py"))}
+receipts = []
+
+
+def run(name, args, expected):
+    started = datetime.now(timezone.utc).isoformat()
+    clock = time.perf_counter()
+    with (OUT / f"{name}.stdout.txt").open("xb") as stdout, (OUT / f"{name}.stderr.txt").open("xb") as stderr:
+        process = subprocess.Popen(args, stdout=stdout, stderr=stderr, cwd=ROOT)
+        actual = process.wait()
+    receipt = {"synthetic_records_only": True, "command": args, "pid": process.pid,
+               "started_utc": started, "finished_utc": datetime.now(timezone.utc).isoformat(),
+               "elapsed_seconds": time.perf_counter() - clock, "actual_exit": actual,
+               "expected_exit": expected, "exit_as_expected": actual == expected}
+    write(OUT / f"{name}.receipt.json", receipt)
+    receipts.append(receipt)
+    return actual
+
+
+run("pure_boundaries", [sys.executable, "-X", "utf8", "-B", "-m", "unittest", "-v", "test_input_receipt_protocol"], 0)
+case = OUT / "synthetic_case"
+fixture = OUT / "synthetic_external_events"
+fixture.mkdir()
+(fixture / "independent_events.jsonl").write_text(
+    json.dumps({"event": "project_selected", "utc": "2026-10-29T00:00:01.020Z"}) + "\n", encoding="utf-8")
+owner = {"child_exit_code": 0, "started_utc": "2026-10-29T00:00:00Z",
+         "finished_utc": "2026-10-29T00:00:04Z", "command": ["synthetic", "--fixture-directory", str(fixture)]}
+handoff = {"schema": "week6.live.operator_handoff.v2", "terminal": True, "pending": [],
+           "exec_wait": {"closed": True, "exit_code": 0}, "owner_receipt": owner,
+           "exec_session": "synthetic-not-a-live-session", "gui_stopped": True}
+claim = {"schema": "week6.live.native_window_claim.v1", "claimed_at_utc": "2026-10-28T23:59:59Z",
+         "window": EXPECTED, "unique_returned_window_count": 1,
+         "fixture_actual_process": {"pid": 42, "create_time": 1.0, "exe": "synthetic-only"},
+         "source": "Sky returned unique window and fresh observation before owner start"}
+write(case / "owner_receipt.json", owner)
+write(case / "operator_handoff_003.json", handoff)
+write(case / "window_claim_001.json", claim)
+for request, answered in records():
+    for suffix, data in (("request", request), ("receipt", answered)):
+        write(case / "run/sky_bridge" / f"{request['id']}_{suffix}.json", data)
+base = [sys.executable, "-X", "utf8", "-B", str(ROOT / "audit_input_receipt_protocol.py"),
+        "--container", str(case), "--operator-handoff", str(case / "operator_handoff_003.json"),
+        "--expected-window", str(case / "window_claim_001.json"), "--owner-exit-confirmed"]
+run("cli_synthetic_qualified", [*base, "--out", str(OUT / "cli_synthetic_qualified.audit.json")], 0)
+bad = deepcopy(claim)
+bad["claimed_at_utc"] = "2026-10-29T00:00:00.001Z"
+write(case / "synthetic_late_claim.json", bad)
+bad_args = base.copy()
+bad_args[bad_args.index("--expected-window") + 1] = str(case / "synthetic_late_claim.json")
+run("cli_synthetic_late_claim_rejected", [*bad_args, "--out", str(OUT / "cli_synthetic_late_claim.audit.json")], 1)
+after = {str(Path(path)): sha(Path(path)) for path in pins}
+summary = {"schema": "week6.sky_input_operation.synthetic_validation.v1", "synthetic_records_only": True,
+           "live_cases_read_or_executed": [], "private_source_before": pins, "private_source_after": after,
+           "private_source_unchanged": pins == after, "process_receipts": receipts,
+           "commands_as_expected": all(item["exit_as_expected"] for item in receipts),
+           "meaning": "Pure boundaries and CLI serialization checks only; no observed windows, OS inputs or live acceptance."}
+write(OUT / "validation.json", summary)
+print(json.dumps({"validation": str(OUT / "validation.json"), "sha256": sha(OUT / "validation.json"),
+                  "commands_as_expected": summary["commands_as_expected"]}))
+raise SystemExit(0 if summary["commands_as_expected"] and pins == after else 1)

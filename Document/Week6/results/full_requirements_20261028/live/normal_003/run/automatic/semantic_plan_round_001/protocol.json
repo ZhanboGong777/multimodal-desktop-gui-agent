@@ -1,0 +1,111 @@
+{
+  "schema_version": "week6.semantic_subtasks.v2",
+  "response_format": {
+    "type": "json_schema",
+    "json_schema": {
+      "name": "semantic_subtask_sequence",
+      "strict": true,
+      "schema": {
+        "$defs": {
+          "SemanticGoal": {
+            "additionalProperties": false,
+            "properties": {
+              "instruction": {
+                "maxLength": 600,
+                "minLength": 1,
+                "title": "Instruction",
+                "type": "string"
+              },
+              "expect_text": {
+                "items": {
+                  "maxLength": 200,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "maxItems": 8,
+                "title": "Expect Text",
+                "type": "array"
+              },
+              "forbid_text": {
+                "items": {
+                  "maxLength": 200,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "maxItems": 8,
+                "title": "Forbid Text",
+                "type": "array"
+              },
+              "goal_id": {
+                "title": "Goal Id",
+                "type": "string"
+              }
+            },
+            "required": [
+              "goal_id",
+              "instruction",
+              "expect_text",
+              "forbid_text"
+            ],
+            "title": "SemanticGoal",
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "enum": [
+              "ready",
+              "needs_clarification",
+              "refused"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 300,
+            "title": "Reason",
+            "type": "string"
+          },
+          "subgoals": {
+            "items": {
+              "$ref": "#/$defs/SemanticGoal"
+            },
+            "maxItems": 8,
+            "title": "Subgoals",
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "reason",
+          "subgoals"
+        ],
+        "title": "SemanticPlan",
+        "type": "object"
+      }
+    }
+  },
+  "caller_request": {
+    "workflow_id": "semantic_lab",
+    "instruction": "In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+    "expect_text": [
+      "Project ALPHA",
+      "Theme GREEN",
+      "LOCAL COMPLETE"
+    ],
+    "forbid_text": []
+  },
+  "revision": false,
+  "postcondition_source": "untrusted_model_semantic_proposal",
+  "final_source": "unchanged_caller",
+  "output_constraints": {
+    "schema_version": "week6.semantic_output_constraints.v1",
+    "reason_max_characters": 300,
+    "instruction_max_characters": 600,
+    "check_max_characters": 200,
+    "checks_per_list_max": 8,
+    "inline_correction_max_characters": 2000,
+    "oversized_previous_response": "archived_in_full_not_repeated_in_correction_context"
+  }
+}

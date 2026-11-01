@@ -16,7 +16,7 @@ CLIENTS: dict[str, type[ModelClient]] = {
 }
 
 
-def create_model_client(config: ModelConfig) -> ModelClient:
+def create_model_client(config: ModelConfig, *, text_model_name: str | None = None) -> ModelClient:
     """Build the backend named in the configuration."""
     try:
         factory = CLIENTS[config.provider]
@@ -31,6 +31,10 @@ def create_model_client(config: ModelConfig) -> ModelClient:
         "temperature": config.temperature,
         "max_tokens": config.max_tokens,
     }
+    if text_model_name is not None:
+        if factory is not OpenAICompatibleClient:
+            raise ModelConfigError("text_model_name requires the openai_compatible provider")
+        common["text_model_name"] = text_model_name
     if factory is MockModelClient:
         return MockModelClient(**common)
     # Both remote backends take the endpoint as a normal keyword argument.

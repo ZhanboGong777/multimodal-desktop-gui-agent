@@ -1,0 +1,26 @@
+{
+  "status": "ready",
+  "reason": "Revision plan focuses on completing the missing 'Review Complete' verification by explicitly committing the report locally after review, ensuring final persistence is only claimed in the last goal. Operations are grouped logically to avoid replaying completed steps.",
+  "subgoals": [
+    {
+      "instruction": "Review the BLUE report for project BETA using visible controls and ensure 'Review Complete' is visible.",
+      "expect_text": [
+        "Project BETA",
+        "Theme BLUE",
+        "Review Complete"
+      ],
+      "forbid_text": [],
+      "goal_id": "review_report"
+    },
+    {
+      "instruction": "Commit the BLUE report for project BETA locally after review, ensuring 'LOCAL COMPLETE' is visible.",
+      "expect_text": [
+        "Project BETA",
+        "Theme BLUE",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [],
+      "goal_id": "commit_report"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "completed_subgoals": [],
+  "failure": {
+    "round": 1,
+    "goal_id": "prepare_review",
+    "instruction": "Prepare a BLUE report for project BETA and review it using visible controls.",
+    "expect_text": [
+      "Project BETA",
+      "Theme BLUE",
+      "Review Complete"
+    ],
+    "forbid_text": [],
+    "status": "failed",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_022\\run\\automatic\\goal_001_001_prepare_review",
+    "verification": null,
+    "task_verification": {
+      "outcome": "failed",
+      "method": "automatic",
+      "detail": "expected on screen but not found: Review Complete",
+      "evidence": {
+        "observation_id": "obs-0012",
+        "missing": [
+          "Review Complete"
+        ],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    }
+  },
+  "snapshot_archive": "snapshot_archive.json",
+  "snapshot_pixels_archive": "snapshot_pixels.png",
+  "snapshot_pixels_sha256": "66176c44627f265e97985cec09a0b458bc00501f2f3d17e9bda30b61ad281dd6",
+  "snapshot_pixels_source_status": "copied_byte_exact",
+  "sent_to_high_level_model": false
+}

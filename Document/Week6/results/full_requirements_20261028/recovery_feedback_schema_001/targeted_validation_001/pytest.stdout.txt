@@ -1,0 +1,16 @@
+
+=================================== ERRORS ====================================
+______ ERROR collecting tests/test_week6_recovery_feedback_roundtrip.py _______
+ImportError while importing test module 'C:\Users\联想\Documents\ChatGPT\Intern\week6-worktree\tests\test_week6_recovery_feedback_roundtrip.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+D:\anaconda\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_week6_recovery_feedback_roundtrip.py:13: in <module>
+    from gui_agent.runtime.schemas import (
+E   ImportError: cannot import name 'Timings' from 'gui_agent.runtime.schemas' (C:\Users\联想\Documents\ChatGPT\Intern\week6-worktree\src\gui_agent\runtime\schemas.py)
+=========================== short test summary info ===========================
+ERROR tests/test_week6_recovery_feedback_roundtrip.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 33.12s

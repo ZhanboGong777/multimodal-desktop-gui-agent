@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "gemma3:4b",
+  "latency_ms": 4219.0,
+  "usage": {
+    "prompt_tokens": 1809,
+    "completion_tokens": 239,
+    "total_tokens": 2048
+  },
+  "error": null,
+  "content_length": 854,
+  "content": "{\"status\": \"ready\", \"reason\": \"Initiating report preparation and local commit based on the provided instructions.\", \"subgoals\": [{\"instruction\": \"Navigate to the project ALPHA folder and create a new document.\", \"expect_text\": [\"Project ALPHA\"], \"forbid_text\": [],\"goal_id\": \"ALPHA_REPORT_001\"}, {\"instruction\": \"Within the document, set the theme to GREEN.\", \"expect_text\": [\"Theme GREEN\"], \"forbid_text\": [],\"goal_id\": \"ALPHA_REPORT_002\"}, {\"instruction\": \"Populate the document with relevant content for the report.\", \"expect_text\": [], \"forbid_text\": [],\"goal_id\": \"ALPHA_REPORT_003\"}, {\"instruction\": \"Review the completed report.\", \"expect_text\": [\"LOCAL COMPLETE\"], \"forbid_text\": [],\"goal_id\": \"ALPHA_REPORT_004\"}, {\"instruction\": \"Commit the report locally.\", \"expect_text\": [\"LOCAL COMPLETE\"], \"forbid_text\": [],\"goal_id\": \"ALPHA_REPORT_005\"}]}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

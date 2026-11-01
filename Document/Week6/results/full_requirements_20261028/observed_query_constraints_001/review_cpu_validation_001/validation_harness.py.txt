@@ -1,0 +1,67 @@
+"""Actual narrow independent review validation; no model or GUI work."""
+import argparse
+import hashlib
+import json
+import subprocess
+import time
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path("C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+BASE = ROOT / "Document/Week6/results/full_requirements_20261028/observed_query_constraints_001"
+PYTHON = "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe"
+OWNED = ["scripts/week6_audit_semantic_acceptance.py", "tests/test_week6_target_bindings_review.py",
+         "tests/test_week6_observed_queries_review.py"]
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+def pins():
+    previous = json.loads((BASE.parent / "visual_target_guidance_001/final_source_freeze_001.json").read_bytes())
+    names = set(previous["code_pins"])
+    names |= {path.relative_to(ROOT).as_posix() for path in (ROOT / "tests").glob("test*.py")}
+    return {name: sha(ROOT / name) for name in sorted(names)}
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--name", required=True)
+args = parser.parse_args()
+assert Path(args.name).name == args.name
+out = BASE / args.name
+out.mkdir(exist_ok=False)
+before = pins()
+requirements = sha(ROOT / "requirements-dev.txt")
+readme = sha(ROOT / "README.md")
+for name in OWNED:
+    dst = out / "source_before" / (name + ".txt")
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    dst.write_bytes((ROOT / name).read_bytes())
+(out / "pins_before.json").write_text(json.dumps(before, indent=2) + "\n", encoding="utf8")
+receipts = []
+commands = [
+    ("ruff", [PYTHON, "-m", "ruff", "check", *OWNED]),
+    ("pytest", [PYTHON, "-m", "pytest", "-q", *OWNED[1:], "--tb=short", "--basetemp", str(out / "pytest_tmp")]),
+]
+for label, command in commands:
+    started, clock = datetime.now(timezone.utc).isoformat(), time.monotonic()
+    with (out / f"{label}.stdout.txt").open("xb") as stdout, (out / f"{label}.stderr.txt").open("xb") as stderr:
+        process = subprocess.Popen(command, cwd=ROOT, stdout=stdout, stderr=stderr)
+        actual = process.wait()
+    row = {"command": command, "pid": process.pid, "actual_wait": actual,
+        "started_utc": started, "finished_utc": datetime.now(timezone.utc).isoformat(),
+        "elapsed_seconds": time.monotonic() - clock, "stdout_sha256": sha(out / f"{label}.stdout.txt"),
+        "stderr_sha256": sha(out / f"{label}.stderr.txt")}
+    (out / f"{label}.receipt.json").write_text(json.dumps(row, ensure_ascii=False, indent=2) + "\n", encoding="utf8")
+    receipts.append(row)
+after = pins()
+(out / "pins_after.json").write_text(json.dumps(after, indent=2) + "\n", encoding="utf8")
+validation = {"schema": "week6.observed_queries.independent_offline_validation.v1",
+    "scope": "New independent observed-query review plus narrowly migrated old target-binding review; not full/shared regression or GUI/model evidence",
+    "commands": receipts, "pin_count": len(before), "source_unchanged": before == after,
+    "owned_sha256": {name: before[name] for name in OWNED},
+    "requirements_dev_sha256": requirements, "requirements_dev_unchanged": requirements == sha(ROOT / "requirements-dev.txt"),
+    "readme_sha256": readme, "readme_unchanged": readme == sha(ROOT / "README.md"),
+    "passed": before == after and all(row["actual_wait"] == 0 for row in receipts)}
+(out / "validation.json").write_text(json.dumps(validation, ensure_ascii=False, indent=2) + "\n", encoding="utf8")
+(out / "validation_harness.py.txt").write_bytes(Path(__file__).read_bytes())
+print(json.dumps({"directory": str(out), "validation_sha256": sha(out / "validation.json"), **validation}, ensure_ascii=True))
+raise SystemExit(0 if validation["passed"] else 1)

@@ -1,0 +1,118 @@
+I001 [*] Import block is un-sorted or un-formatted
+  --> scripts\week6_audit_semantic_acceptance.py:24:1
+   |
+22 |   sys.path.insert(0, str(ROOT / "src"))
+23 |
+24 | / from gui_agent.models.base import ModelRequest
+25 | | from gui_agent.planning.parser import PlanParseError, parse_plan
+26 | | from gui_agent.planning.planner import (
+27 | |     _FORMAT_REPAIR_INSTRUCTION,
+28 | |     _INLINE_FORMAT_ERROR_CHARACTERS,
+29 | |     _INLINE_FORMAT_RESPONSE_CHARACTERS,
+30 | |     ACTION_OUTPUT_CONTRACT_VERSION,
+31 | |     _task_plan_response_format,
+32 | | )
+33 | | from gui_agent.planning.prompts import SYSTEM_PROMPT
+34 | | from gui_agent.planning.schemas import PlanStep
+35 | | from gui_agent.planning.semantic_workflow import (
+36 | |     _INLINE_CORRECTION_MAX_CHARACTERS,
+37 | |     SEMANTIC_CHECK_MAX_CHARACTERS,
+38 | |     SEMANTIC_CHECKS_PER_LIST,
+39 | |     SEMANTIC_DUPLICATE_POSTCONDITIONS_REPAIR,
+40 | |     SEMANTIC_GENERIC_REPAIR,
+41 | |     SEMANTIC_INPUT_MODALITY,
+42 | |     SEMANTIC_INSTRUCTION_MAX_CHARACTERS,
+43 | |     SEMANTIC_PROTOCOL_VERSION,
+44 | |     SEMANTIC_REASON_MAX_CHARACTERS,
+45 | |     SEMANTIC_REPAIR_POLICY_VERSION,
+46 | |     SEMANTIC_STEP_POLICY,
+47 | |     SEMANTIC_SYSTEM_PROMPT,
+48 | |     SemanticDecomposer,
+49 | |     SemanticPlan,
+50 | |     SemanticWorkflowResult,
+51 | |     _DuplicateSemanticPostconditionsError,
+52 | |     _final_task,
+53 | |     _goal_task,
+54 | |     _initial_guard,
+55 | |     _semantic_response_format,
+56 | |     _unique_keys,
+57 | |     _validate_native_predicates,
+58 | | )
+59 | | from gui_agent.planning.workflow_decomposer import WorkflowRequest, _rolling_frame_guard
+60 | | from gui_agent.runtime.action_adapter import ActionAdapter, ActionResolutionError, validate_target_consistency
+61 | | from gui_agent.runtime.monitoring import read_run_status
+62 | | from gui_agent.runtime.observation import describe_elements
+63 | | from gui_agent.runtime.recorder import _mask_step
+64 | | from gui_agent.runtime.schemas import ObservationSnapshot
+65 | | from gui_agent.runtime.verification import Verifier
+66 | | from gui_agent.schemas import ActionResult
+   | |__________________________________________^
+help: Organize imports
+   |
+59 | from gui_agent.planning.workflow_decomposer import WorkflowRequest, _rolling_frame_guard
+   - from gui_agent.runtime.action_adapter import ActionAdapter, ActionResolutionError, validate_target_consistency
+60 + from gui_agent.runtime.action_adapter import (
+61 +     ActionAdapter,
+62 +     ActionResolutionError,
+63 +     validate_target_consistency,
+64 + )
+65 | from gui_agent.runtime.monitoring import read_run_status
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> tests\test_week6_visual_target_guidance_review.py:7:1
+   |
+ 5 |   """
+ 6 |
+ 7 | / from __future__ import annotations
+ 8 | |
+ 9 | | import copy
+10 | | import importlib.util
+11 | | import json
+12 | | from datetime import UTC, datetime, timedelta
+13 | | from pathlib import Path
+14 | | from types import SimpleNamespace
+15 | |
+16 | | import pytest
+17 | | from jsonschema import Draft202012Validator
+18 | | from PIL import Image, ImageDraw
+19 | | from test_runtime_runner import FakeExecutor, FakeObserver, _runner
+20 | | from test_week6_action_output_contract_review import Clock, _sdk
+21 | | from test_week6_target_bindings_review import _element, _snapshot
+22 | |
+23 | | from gui_agent.planning.planner import TaskPlanner, _task_plan_response_format
+24 | | from gui_agent.planning.semantic_workflow import SemanticDecomposer
+25 | | from gui_agent.planning.target_bindings import derive_target_bindings, generation_targeting_policy
+26 | | from gui_agent.planning.workflow_decomposer import BudgetedModelClient, WorkflowRequest
+27 | | from gui_agent.runtime.action_adapter import ActionAdapter
+28 | | from gui_agent.runtime.runner import TaskRunner
+29 | | from gui_agent.runtime.schemas import ExecutionOptions, ObservationSnapshot, TaskSpec
+30 | | from gui_agent.schemas import BoundingBox, ScreenInfo
+   | |_____________________________________________________^
+help: Organize imports
+   |
+31 |
+   -
+32 | POLICY_TEXT = (
+   |
+
+F401 [*] `gui_agent.planning.target_bindings.derive_target_bindings` imported but unused
+  --> tests\test_week6_visual_target_guidance_review.py:25:48
+   |
+23 | from gui_agent.planning.planner import TaskPlanner, _task_plan_response_format
+24 | from gui_agent.planning.semantic_workflow import SemanticDecomposer
+25 | from gui_agent.planning.target_bindings import derive_target_bindings, generation_targeting_policy
+   |                                                ^^^^^^^^^^^^^^^^^^^^^^
+26 | from gui_agent.planning.workflow_decomposer import BudgetedModelClient, WorkflowRequest
+27 | from gui_agent.runtime.action_adapter import ActionAdapter
+   |
+help: Remove unused import: `gui_agent.planning.target_bindings.derive_target_bindings`
+   |
+24 | from gui_agent.planning.semantic_workflow import SemanticDecomposer
+   - from gui_agent.planning.target_bindings import derive_target_bindings, generation_targeting_policy
+25 + from gui_agent.planning.target_bindings import generation_targeting_policy
+26 | from gui_agent.planning.workflow_decomposer import BudgetedModelClient, WorkflowRequest
+   |
+
+Found 3 errors.
+[*] 3 fixable with the `--fix` option.

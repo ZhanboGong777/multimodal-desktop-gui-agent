@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "gemma3:4b",
+  "latency_ms": 37078.0,
+  "usage": {
+    "prompt_tokens": 1618,
+    "completion_tokens": 152,
+    "total_tokens": 1770
+  },
+  "error": null,
+  "content_length": 536,
+  "content": "{\"status\": \"ready\", \"reason\": \"Initiating report creation and local commit for Project ALPHA.\", \"subgoals\": [{\"instruction\": \"Prepare a GREEN report for project ALPHA.\", \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\"], \"forbid_text\": [],\"goal_id\": \"ALPHA_REPORT_001\"}, {\"instruction\": \"Review the GREEN report.\", \"expect_text\": [\"Review Complete\"], \"forbid_text\": [],\"goal_id\": \"ALPHA_REVIEW_001\"}, {\"instruction\": \"Commit the GREEN report locally.\", \"expect_text\": [\"LOCAL COMPLETE\"], \"forbid_text\": [],\"goal_id\": \"ALPHA_COMMIT_001\"}]}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

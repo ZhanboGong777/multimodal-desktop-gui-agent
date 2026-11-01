@@ -1,0 +1,146 @@
+{
+  "schema": "week6.semantic.prompt002.diagnosis.v1",
+  "baseline_run": "normal_007",
+  "baseline_protocol": "week6.semantic_subtasks.v5",
+  "baseline_production_sha256": "de2586762d7d518e5e4ec6b58a635c0c26b92e165679522195191a4a966cd835",
+  "new_production_sha256": "1b35465afb1134618f9d88b0cf90c996731ee3e34e321ac9e262374c387c1b56",
+  "prompt_revision": "002",
+  "observed_failure": "Three native ready replies repeat the identical full predicate set for two different sequential objectives. Both native sequences are rejected before input; no user parameter was missing.",
+  "response_count": 3,
+  "all_response_content_equal": true,
+  "responses": [
+    {
+      "attempt": 1,
+      "original_response_sha256": "60521cb73574c9a1f254a8c28253605b149f2893949f0aa70be79a41bba570e7",
+      "content_sha256": "1b72359b953be50a37c11dedd80923d84f5ccd3d9bdb62a67522fac0c77352b8",
+      "native": {
+        "status": "ready",
+        "reason": "The caller's request is clear and executable with the provided predicates.",
+        "subgoals": [
+          {
+            "instruction": "Prepare a GREEN report for project ALPHA.",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN"
+            ],
+            "forbid_text": [],
+            "goal_id": "prepare_report"
+          },
+          {
+            "instruction": "Review the prepared GREEN report for project ALPHA.",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": [],
+            "goal_id": "review_report"
+          },
+          {
+            "instruction": "Commit the reviewed GREEN report locally for project ALPHA.",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": [],
+            "goal_id": "commit_report"
+          }
+        ]
+      }
+    },
+    {
+      "attempt": 2,
+      "original_response_sha256": "2299053be3d877a3aac3e4d7f65f1756a4ba83ca0ab81698da78ac2b38e0169d",
+      "content_sha256": "1b72359b953be50a37c11dedd80923d84f5ccd3d9bdb62a67522fac0c77352b8",
+      "native": {
+        "status": "ready",
+        "reason": "The caller's request is clear and executable with the provided predicates.",
+        "subgoals": [
+          {
+            "instruction": "Prepare a GREEN report for project ALPHA.",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN"
+            ],
+            "forbid_text": [],
+            "goal_id": "prepare_report"
+          },
+          {
+            "instruction": "Review the prepared GREEN report for project ALPHA.",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": [],
+            "goal_id": "review_report"
+          },
+          {
+            "instruction": "Commit the reviewed GREEN report locally for project ALPHA.",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": [],
+            "goal_id": "commit_report"
+          }
+        ]
+      }
+    },
+    {
+      "attempt": 3,
+      "original_response_sha256": "38b0e09775cbee8694a14f0fbe5620f73f24fa0d725ea39066b6e41a08afe4e1",
+      "content_sha256": "1b72359b953be50a37c11dedd80923d84f5ccd3d9bdb62a67522fac0c77352b8",
+      "native": {
+        "status": "ready",
+        "reason": "The caller's request is clear and executable with the provided predicates.",
+        "subgoals": [
+          {
+            "instruction": "Prepare a GREEN report for project ALPHA.",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN"
+            ],
+            "forbid_text": [],
+            "goal_id": "prepare_report"
+          },
+          {
+            "instruction": "Review the prepared GREEN report for project ALPHA.",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": [],
+            "goal_id": "review_report"
+          },
+          {
+            "instruction": "Commit the reviewed GREEN report locally for project ALPHA.",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": [],
+            "goal_id": "commit_report"
+          }
+        ]
+      }
+    }
+  ],
+  "causal_hypothesis_not_proven": "The previous general grouping language and broad duplicate/completed error did not elicit a repair. Explicit unique-outcome grouping and precise diagnostic text may help; no new model call has tested that hypothesis.",
+  "changes": [
+    "Generic prompt requires unique complete predicate set per semantic goal and model-owned combination of unfinished required operations sharing that outcome.",
+    "Generic prompt retains all caller operations and prevents assigning an overall-final predicate to an early objective with remaining operations.",
+    "Equivalent rejection criteria report completed ledger conflicts, duplicate identity, and duplicate predicate conjunctions separately."
+  ],
+  "not_changed": [
+    "Native JSON schema, producer metadata/context/result shape, v5 input modality and predicate membership guards",
+    "Shared budgets, ledger, replay protection, actual input receipts, fresh before/post/final checks and unknown stop",
+    "No local goal merging, hardcoded fixture decomposition, forced ready response, model switch or new model/GUI call"
+  ],
+  "development_style_failure_preserved": "cpu_validation_001 Ruff exit1 for import formatting only; pytest294 passed; original source/test bytes in development_001. cpu_validation_002 reruns the entire selected suite after the AST-identical import formatting fix.",
+  "real_model_quality_or_live_success_claim": false
+}

@@ -1,0 +1,34 @@
+{
+  "status": "ready",
+  "reason": "Revision plan focuses on completing the missing 'Report Generated' condition by explicitly performing the report generation step, then proceeding to review and commit. The final state requires 'LOCAL COMPLETE' as the only persistent postcondition.",
+  "subgoals": [
+    {
+      "instruction": "Generate the GREEN report for project ALPHA by selecting the project, choosing the GREEN theme, and clicking the visible 'Generate Report' control.",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN",
+        "Report Generated"
+      ],
+      "forbid_text": [
+        "ERROR",
+        "UNAVAILABLE",
+        "RETRY"
+      ],
+      "goal_id": "generate_report"
+    },
+    {
+      "instruction": "Review the generated GREEN report for project ALPHA by clicking the visible 'Review' control, then commit it locally by clicking the 'Commit Locally' control.",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [
+        "ERROR",
+        "UNAVAILABLE",
+        "RETRY"
+      ],
+      "goal_id": "review_and_commit"
+    }
+  ]
+}

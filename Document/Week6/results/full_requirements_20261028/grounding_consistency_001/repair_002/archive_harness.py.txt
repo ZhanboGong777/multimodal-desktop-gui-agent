@@ -1,0 +1,36 @@
+from pathlib import Path
+from datetime import datetime, timezone
+import hashlib
+import json
+
+root = Path(r"C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+base = root / "Document/Week6/results/full_requirements_20261028/grounding_consistency_001"
+combined = base / "root_combined_validation_001"
+out = base / "repair_002"
+out.mkdir(exist_ok=False)
+(out / "archive_harness.py.txt").write_bytes(Path(__file__).read_bytes())
+pins = json.loads((combined / "tested_code_pins_after.json").read_text("utf8"))
+copies = []
+def sha(raw):
+    return hashlib.sha256(raw).hexdigest()
+def copy(source, destination):
+    raw = source.read_bytes()
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with destination.open("xb") as handle:
+        handle.write(raw)
+    assert destination.read_bytes() == raw
+    copies.append({"source": str(source), "destination": str(destination.relative_to(out)), "bytes": len(raw), "sha256": sha(raw)})
+for key, expected in pins.items():
+    assert sha((root / key).read_bytes()) == expected
+    copy(root / key, out / "source_before" / key)
+copy(root / "README.md", out / "source_before/README.md")
+for source in sorted(combined.rglob("*")):
+    if source.is_file():
+        copy(source, out / "combined_failed_001" / source.relative_to(combined))
+assert {key: sha((root / key).read_bytes()) for key in pins} == pins
+payload = {"schema": "week6.grounding_consistency.repair002.before_archive.v1", "created_at_utc": datetime.now(timezone.utc).isoformat(), "tested_pin_count": len(pins), "all_pins_match_failed_combined": True, "file_count": len(copies), "copies": copies, "old_logs_tests_sources_unchanged": True, "root_cause": "Changing the low-level system prompt prefix from Plan GUI actions to GUI plan caused existing T04 scripted transport routers to misclassify actual TaskPlanner requests. The 16 unchanged old safety tests did not exercise their injected paths.", "repair_scope": "Restore the production Plan GUI actions prefix while retaining concise ONE JSON object instruction, new generic text/ID guidance and <=1000 characters. Do not change old routers or safety expectations.", "models_gui_calls": 0}
+manifest = out / "source_before_manifest.json"
+with manifest.open("x", encoding="utf8", newline="\n") as handle:
+    json.dump(payload, handle, ensure_ascii=False, indent=2)
+    handle.write("\n")
+print(json.dumps({"path": str(manifest), "sha256": sha(manifest.read_bytes()), "files": len(copies)}, ensure_ascii=False))

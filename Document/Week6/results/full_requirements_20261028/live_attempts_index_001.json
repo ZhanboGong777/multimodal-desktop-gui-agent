@@ -1,0 +1,51 @@
+{
+  "schema": "week6.semantic_live.attempts_index.v1",
+  "status": "acceptance_in_progress",
+  "scope": "New Week6 semantic-subtask attempts only; historical rolling-action runs are not mixed into these outcomes.",
+  "attempts": [
+    {
+      "container": "live/normal_001",
+      "model": "qwen2.5vl:7b",
+      "protocol": "week6.semantic_subtasks.v1",
+      "actual_child_exit_code": 1,
+      "runtime_status": "failed",
+      "planning_calls": 1,
+      "actual_http_requests": 1,
+      "known_inputs": 0,
+      "unconfirmed_inputs": 0,
+      "accounting_complete": true,
+      "owner_elapsed_seconds": 282.281,
+      "runtime_elapsed_seconds": 280.109,
+      "failure_class": "initial_model_transport_timeout",
+      "evidence": ["live/normal_001/owner_receipt.json", "live/normal_001/run/runtime_result.json", "live/normal_001/run/automatic/transport_requests.jsonl", "live/normal_001/transport_timeout_diagnosis/server_error_log_tail.txt"],
+      "observation": "The client timed out at its 240-second request limit. The server log records generation continuing to 1967 tokens before cancellation and then an idle slot. No task input occurred. The missing model response is not invented, and this is not an application-execution or model-quality score."
+    },
+    {
+      "container": "live/normal_002",
+      "model": "qwen2.5vl:7b",
+      "protocol": "week6.semantic_subtasks.v1",
+      "actual_child_exit_code": 1,
+      "runtime_status": "failed",
+      "planning_calls": 1,
+      "actual_http_requests": 1,
+      "known_inputs": 0,
+      "unconfirmed_inputs": 0,
+      "accounting_complete": true,
+      "owner_elapsed_seconds": 479.765,
+      "runtime_elapsed_seconds": 477.609,
+      "model_call_elapsed_seconds": 455.813,
+      "failure_class": "initial_model_response_repetition_and_output_truncation",
+      "native_completion_tokens": 4096,
+      "native_content_characters": 21287,
+      "native_finish_reason": "length",
+      "evidence": ["live/normal_002/owner_receipt.json", "live/normal_002/run/runtime_result.json", "live/normal_002/run/automatic/transport_requests.jsonl", "live/normal_002/response_length_diagnosis/server_error_log_tail.txt"],
+      "observation": "The original HTTP body contains a repetitive clarification reason claiming ALPHA was unavailable and BETA already selected. The saved initial frame and OCR expose both as available buttons. The client rejects the length-truncated response; it is not accepted as a valid semantic plan or a real need for new user information. No task input occurred."
+    }
+  ],
+  "next_change": "Versioned semantic protocol update: concise reason/objective/check limits, repetitive-reason rejection, explicit distinction between visible option buttons and selected application state, and bounded format-repair context. All pre-input/post-input goal credit and caller final gates remain in force.",
+  "setup_records": {
+    "redundant_initial_fixture": "live/fixture_normal_001.close.json",
+    "untouched_fixture_after_normal_001": "live/fixture_normal_002.close.json",
+    "meaning": "Fixture teardown receipts are not task-runtime exits and are not counted as successful or failed model executions."
+  }
+}

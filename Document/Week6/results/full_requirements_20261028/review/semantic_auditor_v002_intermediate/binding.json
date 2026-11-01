@@ -1,0 +1,18 @@
+{
+  "schema": "week6.semantic_auditor.version_snapshot.v1",
+  "version": "v002_intermediate_before_v3_modality_design",
+  "files": {
+    "week6_audit_semantic_acceptance.py.txt": "4c29bd66d6dc134b17133716e8f8d9d1ee40925eda7e9e7d633a14f511d7a065",
+    "test_week6_full_requirements_review.py.txt": "d80174194f579c7dd3563c016ee9eeb4dd4bf526b77767049e95d1cd304f5c7d"
+  },
+  "changes": [
+    "v2 raw native instruction and validated instruction mappings are checked separately",
+    "Exact versioned output constraints are bound",
+    "Every repair references its own full saved prior reply, exact character count and original error",
+    "Oversized reply absent from inline repair context; short reply retained exactly"
+  ],
+  "validation_status": "No new CPU target run yet. Ruff reported one import ordering issue in this intermediate snapshot; current working copy corrected it. This snapshot is not claimed as a passed release checker.",
+  "reason_for_preservation": "Root authorized v3 text-only high-level modality; preserve v2 intermediate bytes before adapting actual v3 schema rather than guessing field names.",
+  "real_positive_audit": null,
+  "raw_evidence_modified": false
+}

@@ -1,0 +1,29 @@
+I001 [*] Import block is un-sorted or un-formatted
+  --> tests\test_week6_semantic_failed_plan_repair.py:2:1
+   |
+ 1 |   """A repeated failed contract gets bounded generation repair, never another input."""
+ 2 | / from __future__ import annotations
+ 3 | |
+ 4 | | import copy
+ 5 | | import importlib.util
+ 6 | | import json
+ 7 | | from pathlib import Path
+ 8 | |
+ 9 | | import pytest
+10 | | from test_week6_rolling_actions import options, plan
+11 | | from test_week6_semantic_subtasks import lab, proposal
+12 | |
+13 | | from gui_agent.runtime.schemas import ObservationSnapshot
+14 | | from gui_agent.planning import semantic_workflow as semantic
+   | |____________________________________________________________^
+help: Organize imports
+   |
+12 |
+13 + from gui_agent.planning import semantic_workflow as semantic
+14 | from gui_agent.runtime.schemas import ObservationSnapshot
+   - from gui_agent.planning import semantic_workflow as semantic
+15 |
+   |
+
+Found 1 error.
+[*] 1 fixable with the `--fix` option.

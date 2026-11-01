@@ -1,0 +1,158 @@
+{
+  "schema": "week6.failed_plan_repair.saved_failure_probe.v1",
+  "original_sources": {
+    "attempt_01_request.json": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_007\\run\\automatic\\semantic_plan_round_002\\attempt_01_request.json",
+      "sha256": "bdecd8e6e81fcb0ee9f66965f3f3c956fe82d617d9cea3f62824387e3dfd354e"
+    },
+    "context_source_archive.json": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_007\\run\\automatic\\semantic_plan_round_002\\context_source_archive.json",
+      "sha256": "d2cf728bbc62a1fe2f63c5466043cee6e47ae24693bd9a1884e908799d8411a9"
+    },
+    "snapshot_archive.json": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_007\\run\\automatic\\semantic_plan_round_002\\snapshot_archive.json",
+      "sha256": "1c00b30bfdae51a78efa64a638a5d4423adf2c17d5dcf7da8c935989797dbc1d"
+    }
+  },
+  "blocked_signatures": [
+    [
+      "prepare a blue report for project beta by selecting the project, choosing the blue theme, and generating the report using visible controls.",
+      [
+        "project beta",
+        "report generated",
+        "theme blue"
+      ],
+      [
+        "connection error",
+        "external sync required",
+        "review unavailable"
+      ]
+    ]
+  ],
+  "result": {
+    "schema_version": "week6.semantic_subtasks.v6",
+    "input_modality": "caller_intent_only",
+    "image_attached": false,
+    "status": "ready",
+    "proposal": {
+      "status": "ready",
+      "reason": "The previous goal failed due to missing 'Report Generated' text, but the caller's final predicates remain unchanged. The next objective must complete the workflow by reviewing and committing the report locally, using only visible controls and preserving all original operations.",
+      "subgoals": [
+        {
+          "instruction": "Review the BLUE report for project BETA using visible controls and ensure the review is completed locally.",
+          "expect_text": [
+            "Review Complete",
+            "LOCAL COMPLETE"
+          ],
+          "forbid_text": [
+            "Review unavailable",
+            "Connection error",
+            "External sync required"
+          ],
+          "goal_id": "review_report"
+        },
+        {
+          "instruction": "Commit the BLUE report for project BETA locally using visible controls.",
+          "expect_text": [
+            "Commit Successful",
+            "LOCAL COMPLETE"
+          ],
+          "forbid_text": [
+            "Commit failed",
+            "Connection error",
+            "External sync required"
+          ],
+          "goal_id": "commit_report"
+        }
+      ]
+    },
+    "workflow": {
+      "workflow_id": "semantic_lab",
+      "instruction": "In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+      "subgoals": [
+        {
+          "case_id": "review_report",
+          "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Review the BLUE report for project BETA using visible controls and ensure the review is completed locally.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+          "target_app": null,
+          "preconditions": [],
+          "success_rules": [],
+          "verification": "automatic",
+          "expect_text": [
+            "Review Complete",
+            "LOCAL COMPLETE"
+          ],
+          "forbid_text": [
+            "Review unavailable",
+            "Connection error",
+            "External sync required"
+          ],
+          "requires_processes": [],
+          "forbids_processes": [],
+          "must_exit_processes": [],
+          "risk": "medium",
+          "message_conversation": null,
+          "gate_on_step_verification": false
+        },
+        {
+          "case_id": "commit_report",
+          "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Commit the BLUE report for project BETA locally using visible controls.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+          "target_app": null,
+          "preconditions": [],
+          "success_rules": [],
+          "verification": "automatic",
+          "expect_text": [
+            "Commit Successful",
+            "LOCAL COMPLETE"
+          ],
+          "forbid_text": [
+            "Commit failed",
+            "Connection error",
+            "External sync required"
+          ],
+          "requires_processes": [],
+          "forbids_processes": [],
+          "must_exit_processes": [],
+          "risk": "medium",
+          "message_conversation": null,
+          "gate_on_step_verification": false
+        }
+      ],
+      "final_check": {
+        "case_id": "FINAL",
+        "instruction": "Independently read unchanged caller final predicates",
+        "target_app": null,
+        "preconditions": [],
+        "success_rules": [],
+        "verification": "automatic",
+        "expect_text": [
+          "Project BETA",
+          "Theme BLUE",
+          "LOCAL COMPLETE"
+        ],
+        "forbid_text": [],
+        "requires_processes": [],
+        "forbids_processes": [],
+        "must_exit_processes": [],
+        "risk": "low",
+        "message_conversation": null,
+        "gate_on_step_verification": true
+      }
+    },
+    "planning_calls": 1,
+    "model_requests": 1,
+    "elapsed_ms": 19889.999999999418,
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\failed_plan_repair_001\\transient007_predicate_matches_development_probe_005\\production_decomposition",
+    "error": "The previous goal failed due to missing 'Report Generated' text, but the caller's final predicates remain unchanged. The next objective must complete the workflow by reviewing and committing the report locally, using only visible controls and preserving all original operations."
+  },
+  "source_sha256": "d49a681c7da5d7354dee67211e74079161f299679321a8a1c5ac3e92a8038813",
+  "source_unchanged": true,
+  "development_only_original_predicate_match_feedback": {
+    "scope": "Add original expected literals minus the original verifier complete missing list, or null when not checked. No extra screen text, geometry, files, goal rewrite or completion credit. Pending schema/auditor qualification if useful.",
+    "harness_sha256": "d5a983d52d07785f5f5f50e73fd2df62489ae5f468b8754a79d456ba8fc15ece"
+  },
+  "production_guards_used": true,
+  "fresh_gui_captures": 0,
+  "gui_inputs": 0,
+  "acceptance_granted": false,
+  "meaning": "Original caller, prior failed objective and saved observation unchanged. Native generation diagnostics only. All native replies and errors retained."
+}

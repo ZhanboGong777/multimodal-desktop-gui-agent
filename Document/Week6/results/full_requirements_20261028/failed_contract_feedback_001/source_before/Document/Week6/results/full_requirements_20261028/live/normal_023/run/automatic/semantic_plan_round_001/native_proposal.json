@@ -1,0 +1,45 @@
+{
+  "status": "ready",
+  "reason": "All requested operations are executable via visible controls; no missing or contradictory parameters.",
+  "subgoals": [
+    {
+      "instruction": "Prepare the GREEN report for project ALPHA by selecting the correct project and theme, then save the draft locally.",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN",
+        "Draft saved locally"
+      ],
+      "forbid_text": [
+        "Review unavailable",
+        "Online sync required",
+        "External communication needed",
+        "Budget exceeded",
+        "Changes not saved",
+        "Commit failed",
+        "Review pending",
+        "Local commit failed"
+      ],
+      "goal_id": "prepare_report"
+    },
+    {
+      "instruction": "Review the prepared GREEN report for project ALPHA and commit it locally using the visible controls.",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN",
+        "LOCAL COMPLETE",
+        "Commit successful"
+      ],
+      "forbid_text": [
+        "Review unavailable",
+        "Online sync required",
+        "External communication needed",
+        "Budget exceeded",
+        "Changes not saved",
+        "Commit failed",
+        "Review pending",
+        "Local commit failed"
+      ],
+      "goal_id": "review_and_commit"
+    }
+  ]
+}

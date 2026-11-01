@@ -1,0 +1,48 @@
+{
+  "status": "ready",
+  "reason": "Plan outlines two distinct semantic objectives: first, prepare and review the BLUE report for project BETA; second, commit the report locally. Each step is explicitly named and preserves caller operations.",
+  "subgoals": [
+    {
+      "instruction": "Prepare a BLUE report for project BETA by selecting the project, choosing the BLUE theme, and generating the report using visible controls.",
+      "expect_text": [
+        "Project BETA",
+        "Theme BLUE",
+        "Report Generated"
+      ],
+      "forbid_text": [
+        "Review unavailable",
+        "Connection error",
+        "External sync required"
+      ],
+      "goal_id": "prepare_report"
+    },
+    {
+      "instruction": "Review the prepared BLUE report for project BETA using visible controls, and if review is temporarily unavailable, retry within budget.",
+      "expect_text": [
+        "Review Complete",
+        "Project BETA",
+        "Theme BLUE"
+      ],
+      "forbid_text": [
+        "Review unavailable",
+        "Connection error",
+        "External sync required"
+      ],
+      "goal_id": "review_report"
+    },
+    {
+      "instruction": "Commit the reviewed BLUE report for project BETA locally using visible controls, ensuring final persistence.",
+      "expect_text": [
+        "LOCAL COMPLETE",
+        "Project BETA",
+        "Theme BLUE"
+      ],
+      "forbid_text": [
+        "Not committed",
+        "External sync required",
+        "Connection error"
+      ],
+      "goal_id": "commit_report"
+    }
+  ]
+}

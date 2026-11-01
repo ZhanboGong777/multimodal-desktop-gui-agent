@@ -1,0 +1,15 @@
+"""Development diagnostic: archive, but do not echo an already failed plan as assistant history."""
+from pathlib import Path
+import hashlib,sys
+P=Path(__file__).parent;R=P.parent.parent/'week6-worktree';sys.path.insert(0,str(R/'src'))
+from gui_agent.planning import semantic_workflow as semantic
+original=semantic._semantic_attempt_messages
+def no_echo(*args,**kwargs):
+ messages=original(*args,**kwargs)
+ if kwargs.get('repair_category')=='repeated_objective':
+  messages=[row for row in messages if row['role']!='assistant']
+ return messages
+semantic._semantic_attempt_messages=no_echo
+s=(P/'probe_failed_plan_repair_001.py').read_text('utf8').replace('transient007_saved_failure_probe_001','transient007_no_echo_development_probe_004')
+s=s.replace("'source_unchanged':True,", "'source_unchanged':True,'development_only_history_override':{'scope':'Only omit the previous assistant answer for a typed repeated-failed-objective repair; full native response remains archived. Caller, failure, system hint, parser and all guards unchanged.','harness_sha256':"+repr(hashlib.sha256(Path(__file__).read_bytes()).hexdigest())+"},")
+exec(compile(s,str(P/'probe_failed_plan_repair_001.py'),'exec'))

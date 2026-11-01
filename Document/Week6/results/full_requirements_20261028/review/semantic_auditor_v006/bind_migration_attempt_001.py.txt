@@ -1,0 +1,71 @@
+from pathlib import Path
+import ast,hashlib,json,datetime
+root=Path(r"C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+review=root/"Document/Week6/results/full_requirements_20261028/review"
+out=review/"semantic_auditor_v006"
+out.mkdir(exist_ok=False)
+old=review/"semantic_auditor_v005_pre_v6"
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+def definitions(data):
+    tree=ast.parse(data.decode("utf8-sig"))
+    return {node.name:ast.dump(node,include_attributes=False) for node in tree.body
+            if isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef))}
+manifest={"schema_version":"week6.review.v5_to_v6_migration.v1",
+    "created_utc":datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    "reviewer":"/root/week6_replanning_review",
+    "purpose":"Explicit predicate-source expansion with retained execution/evidence guards, not real-window acceptance.",
+    "before_binding":{"path":str((old/"binding_001.json").relative_to(root)),"sha256":sha((old/"binding_001.json").read_bytes())},
+    "contract":{"path":str((review/"acceptance_contract_amendment_005.md").relative_to(root)),"sha256":sha((review/"acceptance_contract_amendment_005.md").read_bytes())},
+    "files":[]}
+for rel in ["scripts/week6_audit_semantic_acceptance.py","tests/test_week6_full_requirements_review.py"]:
+    source=root/rel
+    data=source.read_bytes()
+    destination=out/(source.name+".txt")
+    destination.write_bytes(data)
+    assert sha(destination.read_bytes())==sha(data)
+    manifest["files"].append({"source":rel,"destination":str(destination.relative_to(root)),
+        "before_sha256":sha((old/(source.name+".txt")).read_bytes()),"after_sha256":sha(data)})
+old_tests=definitions((old/"test_week6_full_requirements_review.py.txt").read_bytes())
+new_tests=definitions((root/"tests/test_week6_full_requirements_review.py").read_bytes())
+renamed_from="test_review_v5_native_caller_pool_membership_is_checked_before_normalization"
+renamed_to="test_review_v6_predicted_source_changes_without_removing_runtime_or_conflict_checks"
+common_tests=[name for name in old_tests if name.startswith("test_") and name!=renamed_from]
+assert all(old_tests[name]==new_tests[name] for name in common_tests)
+assert renamed_from not in new_tests and renamed_to in new_tests
+new_test_names=sorted(name for name in new_tests if name.startswith("test_") and name not in old_tests and name!=renamed_to)
+assert len(new_test_names)==4
+manifest["original_test_coverage"]={"previous_parameterized_cases":65,"current_parameterized_cases":79,
+    "unchanged_original_test_functions_ast":common_tests,
+    "explicitly_revised_three_parameter_cases":{"before_function":renamed_from,"after_function":renamed_to,
+        "whitespace":"Still rejected before any child/input; raw response unchanged.",
+        "unknown_predicate":"New source is allowed but nonexistent postcondition requires an actual CPU input then literal failure and zero completed credit.",
+        "opposite_polarity":"Forbidding caller-required text still conflicts with immutable final and is rejected before input."},
+    "new_case_functions":new_test_names,
+    "new_parameterized_cases":14,
+    "scope":"Offline scripted observations/model replies/CPU executor doubles. No real GUI or model call."}
+old_auditor=definitions((old/"week6_audit_semantic_acceptance.py.txt").read_bytes())
+new_auditor=definitions((root/"scripts/week6_audit_semantic_acceptance.py").read_bytes())
+changed=[name for name in old_auditor if old_auditor[name]!=new_auditor.get(name)]
+assert changed==["audit_native_predicates","audit"]
+manifest["auditor_changed_functions"]=changed
+manifest["auditor_other_functions_ast_equal"]=[name for name in old_auditor if name not in changed]
+manifest["new_source_check"]={
+    "schema_version":"week6.semantic_subtasks.v6","postcondition_source":"untrusted_model_prediction",
+    "dynamic_caller_pool_removed":True,"native_strict_shape_and_no_stripping":True,
+    "native_parsed_saved_proposal_equal_required":True,"caller_final_immutable_and_fresh":True,
+    "all_independent_operation_events_and_unique_receipts_required":True,
+    "manual_native_instruction_to_actual_event_meaning_review_still_required":True,
+    "substring_negation_limit_preserved_not_fixed":True,
+    "pool_specific_caller_minimum_and_length_preflight_removed":True}
+audit_path=review/"cpu_validation_008/audit.json"
+audit=json.loads(audit_path.read_text(encoding="utf8"))
+assert audit["passed"] and audit["actual_returncode"]==0 and audit["collected_testcases"]==79 and audit["selected_source_unchanged"]
+manifest["independent_target"]={"path":str(audit_path.relative_to(root)),"sha256":sha(audit_path.read_bytes()),
+    "actual_returncode":audit["actual_returncode"],"ruff_returncode":audit["ruff_returncode"],
+    "collected_testcases":audit["collected_testcases"],"selected_source_before":audit["selected_source_before"],
+    "selected_source_unchanged":True,"pytest_reported_seconds":27.46}
+(out/"migration_binding_001.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf8")
+print(json.dumps({"manifest":str(out/"migration_binding_001.json"),"sha256":sha((out/"migration_binding_001.json").read_bytes()),
+    "changed_auditor_functions":changed,"new_test_function_count":len(new_test_names)},ensure_ascii=False))
+

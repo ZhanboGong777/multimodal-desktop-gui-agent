@@ -1,0 +1,71 @@
+# 系统 v2.1.0 发布说明（待最终验收）
+
+开发分支：`codex/week6-full-requirements`。本轮增加模型生成的有序语义子任务、逐目标执行复核、当前计划进度记录，以及显式启用的持久化 Tesseract 后端。**v5首轮源完成回归，normal007仍失败；后续通用提示修订、同源回归、正常/瞬态真实窗口验收、报告和分发文件均未完成，不能宣布全部交付通过。** 原件统一保存于 [full_requirements_20261028](results/full_requirements_20261028/)，最终交付数字由验收清单核定。
+
+## 本轮实现
+
+CLI 整体指令入口默认改为 `semantic_subtasks`。模型根据完整任务意图与调用方文字规则提出至少两个不同、有顺序的语义目标；每个目标的动作规划仍收到完整调用方请求。它不是预写步骤表，也不是旧版 `CALLER_GOAL` 容器数量的改名。支持有序序列，不声称已实现通用依赖图规划。
+
+当前语义协议为 `week6.semantic_subtasks.v5`，高层采用 `input_modality="caller_intent_only"`，只接收完整caller、不可变的最终文字规则及已验证目标/失败类别的逻辑记录，不发送当前OCR、几何、窗口snapshot或图片；`image_attached=false`、`image_path=None`。原始观察与像素仍归档，供运行检查和事后复核，不能据文件留存宣称高层见过画面。低层 `TaskPlanner` 仍收到每次输入前的新截图来定位控件。合法拒绝与澄清保留，不强制ready；纯图形高层理解和任意应用分解没有验收结论。
+
+阶段正向和禁止文字分别逐字选自调用方原始 `expect_text` 与 `forbid_text`，不换极性、不补未来页面文案；模型可读schema与传输schema使用同一候选，本地检查原生字符串后再编译。至少两个不同调用方谓词只是必要候选条件，不能单凭数量证明存在两个可验证阶段。模型仍须提出有意义的目标，真实输入、前后新帧及独立应用事件仍须核验其执行范围。本地对 `[not specified]`、`[unknown]`、`<TBD>` 等保留标记的输入前拒绝，不代表模型学会澄清，也不是通用缺参识别。
+
+进入每个目标前重新观察和核验窗口范围，相关输入前冻结该目标条件；已在当前画面全部满足的宽泛标签不能直接授予完成。每次原生动作计划最多一个步骤，执行后检查固定目标条件，并取独立新帧复核。所有目标通过后，再用另一张新帧核验不可由模型改写的调用方 final。原始动作预测的 failed/inconclusive 保留，不能替代语义目标判定。
+
+未完成目标可在有界条件下重新观察并重新分解；新条件必须在下一输入前确定，旧失败和旧合同不删除。已验证目标不自动重放，失败目标不能由一张看似满足总体 final 的画面改判成功。未知派发、取消、超时、错误观察和计数不完整继续停止自动推进；恢复共用动作、规划、格式修正、实际 HTTP 和截止时间额度。
+
+根监控新增 `week6.run_status.semantic.v1`：当前目标、累计已验证完成数与当前计划总数可读。修订时计划总数等于已完成数加新剩余数，不能低于已完成数；累计完成数保持单调，失败历史留在 ledger。旧 schema 固定总数行为保留。监控由事件驱动，不保证每毫秒更新。
+
+新增 `configs/week6_accuracy_persistent.yaml`，通过已安装的 Tesseract C API 复用实例，使用与 screen 子进程路径相同的像素处理和英中资源，每帧清理识别结果与自适应状态。它需要真实 DLL、依赖 DLL 和语言文件，缺失时明确失败，不静默退回其他后端。新版 primary/replication 原件已分目录保存，发布性能数字待最终清单核定；不把旧 screen 数据写成持久化加速结论。
+
+## 兼容与范围
+
+Python `AutomaticWorkflowRunner` 默认仍为 `observed_departure`，新模式须显式传 `protocol_mode="semantic_subtasks"`。CLI 可显式选择旧 `observed_departure` 或 `rolling_actions`；手写 `--workflow` 的最多32个有序阶段和原严格检查不变。旧 rolling.v2 仍以调用方目标为权威、每计划一个动作，模型 step 预测只作诊断；它没有模型语义序列台账。
+
+CLI 默认配置仍为 `configs/week4.yaml`。持久化配置为显式启用，避免未装 DLL 的机器默认进入不可用路径。默认 dry-run 会观察和调用模型，真实输入需 `--execute` 并在交互终端逐计划确认，没有 `--yes`。`--validate-only` 不调用模型、不截屏、不输入、不创建运行目录。既有输出目录不覆盖，旧日志不触发恢复执行。
+
+文字后置条件和模型生成目标都有适用范围；序列去重不等于对所有语义改写的幂等证明。专用窗口、两组固定目标或保存图探针都不能推出任意应用成功率。复杂依赖图、跨应用、分辨率和竞品比较不作为本轮已验证结论；Week 7 综合评估另行开展。Week 5 C11 权重、原训练、质量与资源补测不变，本轮不新增训练或消息发送。
+
+## 复现环境与首次检查
+
+声明支持 Python 3.11 至3.13，本机 CPU 检查使用 Windows 和 Python 3.12；其他系统没有相同范围的实测记录。源码环境安装方式：
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python -m pip install -e .
+python -c "import gui_agent; print(gui_agent.__version__)"
+```
+
+版本应输出 `2.1.0`。wheel 元数据没有完整运行依赖，单装 wheel 不会自动安装 `requirements.txt`；CLI、配置及实验记录从完整源码使用。新版本最终构建和分发检查仍待完成，不声明干净依赖环境安装已验证。数据集或 LangChain 功能另见 `requirements-agent.txt`。
+
+持久化配置示例依赖 `C:/Program Files/Tesseract-OCR/libtesseract-5.dll` 及其依赖 DLL，语言目录为 `D:/week6-full-ocr/tessdata`。换机器须按真实安装路径调整配置。仓库保留固定 English/Chinese traineddata、来源、SHA256 和 Apache 2.0 许可证，不附系统 DLL。复制语言资源和旧子进程路径的环境设置见 [使用说明](README.md) 与 [资源说明](resources/tesseract/README.md)。无需训练框架，也不下载或训练 OCR 模型。
+
+```powershell
+python scripts/week6_agent_cli.py --instruction "Prepare the ALPHA report with the GREEN theme and commit it locally in the open lab window" --expect-text "LOCAL COMPLETE" --expect-text "Project ALPHA" --expect-text "Theme GREEN" --validate-only
+python scripts/week6_robustness_demo.py --output-dir outputs/week6_first_check
+python -S scripts/week6_status.py --run-dir outputs/week6/your_run_id
+```
+
+上述输入验证、模拟故障演示和只读状态检查各有独立范围，不能当作真实桌面成功。
+
+## 历史验证与失败记录
+
+下列数字属于 **v2.0 rolling_actions.v2**，不验证当前语义新模式。正常017完成 ALPHA/GREEN：4次 HTTP、4规划、4输入、652.750秒；瞬态015完成 BETA/BLUE，首次审阅拒绝后恢复：5次 HTTP、5规划、5输入、275.703秒。两批当时的运行器、独立终态、不同输入回执归因、源码未变和真实 owner exit0 共同通过，未知派发0。瞬态提交后的模型 step 预测仍 failed，原始记录保留，调用方 final 通过。
+
+该瞬态拒绝发生在应用审阅层，两批已知执行器失败均0；它不等于执行器失败恢复证据。历史输入经限制于专用窗口的 Sky 桥接，不能替代普通 PyAutoGUI 跨应用验证。经过时间包含截屏、OCR、模型和 operator 桥接等待，不据分日耗时比较恢复性能。
+
+历史001至011、保存图探针与开发失败原件保留。012是旧 v1 正常通过；013受控停止真实 exit15，缺完整 acceptance；014有2个已知输入和1未知派发；016独立终态通过但提交无输入归因，之后激活超时，整体失败。旧阶段通过不拼接成新版成功，未知结果不填0。
+
+历史 [full006](results/release_validation_completed_20261026_006/validation.json) 为3027通过、0失败，pytest535.12秒、封装墙钟566.027秒、真实exit0，244份文件before、after与当时Git字节一致。v4的[235项定向检查](results/full_requirements_20261028/semantic_sequential_prompt_001/cpu_validation_001/validation.json)和[full002](results/full_requirements_20261028/full_validation_002/validation.json)也保留原版范围：full002为3184项通过、pytest634.52秒、pytest/Ruff实际退出码0、255份代码前后同字节；不能转移为v5通过。[full001](results/full_requirements_20261028/full_validation_001/validation.json)的1失败、1225通过、1958项设置错误原件保留，分别是README数量断言与验证脚本漏建basetemp父目录，不作模型质量零分。
+
+v5首轮见[冻结记录](results/full_requirements_20261028/semantic_caller_predicates_001/final_source_freeze_001.json)与[285项定向检查](results/full_requirements_20261028/semantic_caller_predicates_001/cpu_validation_001/validation.json)：pytest91.62秒、实际exit0，Ruff实际exit0，包含SDK/MockTransport与独立审计边界。[全套收集](results/full_requirements_20261028/semantic_caller_predicates_001/full_collection_001/collection.json)仅记录数量；随后[full003实际运行](results/full_requirements_20261028/full_validation_003/validation.json)为3234项通过、pytest761.44秒，pytest子进程等待766.360秒、完整验证运行器766.968秒，pytest/Ruff实际退出码均0。[复核记录](results/full_requirements_20261028/full_validation_003/root_audit_001.json)确认当时256份代码在测试前后、首轮冻结及复核时字节一致，并保留测试时根README原件。该结论不转移到后续提示修订；同源完整回归、窗口、正式报告和分发仍待完成。
+
+本轮[normal001至006](results/full_requirements_20261028/live_attempts_index_004.json)没有成功验收：001请求超时，002理由循环至长度截断，003、004及006误澄清，均未产生输入；005在模型前画面桥接超时，不记为v4模型语义失败。[三次已结束的模型开发诊断](results/full_requirements_20261028/semantic_model_diagnostic_001/diagnostic_analysis_001.json)另存完整原件：A重复条件被拒，B结构允许但后态未执行验证，C缺项目负对照失败。脚本exit0不等于GUI成功，不能替代后续正常/瞬态验收。各版本原生回复和失败记录均保留。
+
+[normal007](results/full_requirements_20261028/live/normal_007/run/runtime_result.json)再次在输入前停止：3个相同回复把审阅与提交分成重复完成条件的目标，3规划、3HTTP、0输入、0未知，实际子退出码1。后续仅调整通用提示和修正反馈，让模型自行合并共享完成条件的操作，不降低阶段、原生目标或独立终态门槛。
+
+旧 screen OCR 的6帧留出46/48、同双语 native 30/48和整帧中位增加9.75%，以及轮廓提取中位14.421→12.185 ms，仍按历史实验范围解释。原错误及真实英文保存图无准确率增益的结果不删除，也不据局部提速声称整个智能体普遍加速。
+
+更新前的三份说明已按字节备份到 [pre_full_requirements_20261028](history/pre_full_requirements_20261028/)，附 SHA256 清单。旧报告、DOCX/PDF、源码包与发布说明保留；[原实验报告](Week6_Robustness_Report.md) 仍反映其历史版本。v2.1.0 新报告、源码包、wheel 和压缩包需要本轮完成后分别核验，当前不提前标记发布通过。

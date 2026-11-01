@@ -1,0 +1,37 @@
+{
+  "schema": "week6.compact_text_anchor.scope.v1",
+  "root_reviewed": true,
+  "utc": "2026-11-01T10:40:14.469396+00:00",
+  "meaning": "Only compact original-pixel-detail generation changes. Every point action still requires a canonical current candidate ID and forbids secondary targeting aliases. A native nonblank target_text is now required except when the model selects an original anonymous_without_ocr candidate, for which null/empty remains allowed. Native text permits the existing fresh-observation text relocation; no stale-ID guard, runtime code, OCR, model, semantic contract, repairv5 or global budget changed. No native reply, label or ID is filled or replaced locally. Detailed image selection/bytes and the default-disabled feature remain unchanged. Versionv4 identifies the compact schema. Related tests cover null/empty/whitespace readable-ID rejection and actual native-text relocation against fresh IDs/moved geometry without mutating the PlanStep. Saved production probes on two ended development frames are one request each, not live acceptance or heldout accuracy.",
+  "changed_paths": [
+    "scripts/week6_audit_semantic_acceptance.py",
+    "src/gui_agent/planning/target_bindings.py",
+    "tests/test_week6_candidate_visual_details.py"
+  ],
+  "all_other283pins_identical": true,
+  "source_before_manifest": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\compact_text_anchor_001\\source_before_manifest.json",
+    "sha256": "fb8a7a341b511651e82afacb0ca4dbc2d91a2907b5549a4a8f16cea2ef6eddba"
+  },
+  "targeted_validation": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\compact_text_anchor_001\\targeted_validation_001\\validation.json",
+    "sha256": "48b5989206be0789ca9ee5a0603d71f539ae8ee74a4f37569524638176e74e9a"
+  },
+  "saved_production_probes": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\compact_text_anchor_001\\saved_production_probe_001\\result.json",
+    "sha256": "be4486ec656677ba5a77aad54afef330ce2860bbb3388a41df487e2dd9ccfb83"
+  },
+  "previous_normal_failure": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal044_independent_process_001\\process_summary.json",
+    "sha256": "72fb358ef8ba82751e955db1f88ae4004cec10d118e048273105b195a8e3e535"
+  },
+  "old_transient_acceptance_not_transferred": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\transient022_root_acceptance_001.json",
+    "sha256": "857abf7a39d240fa2f12b424223fad150a57d114bd7341ae711579a7f418afbc"
+  },
+  "previous_metadata_erratum": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\candidate_visual_details_001\\source_metadata_erratum_001.json",
+    "sha256": "d3e0730f51cd8ce5fbbae5a5e366c7dfdd8b53c1787f4534a6e44fd0c35fb68f"
+  },
+  "limitations": "Model can still choose wrong or ambiguous targets; only large anonymous contours receive bounded crops. Original per-stage/event/pixel acceptance and all runtime guards remain necessary."
+}

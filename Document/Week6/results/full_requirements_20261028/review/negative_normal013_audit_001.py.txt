@@ -1,0 +1,190 @@
+"""Independent ended normal013 evidence audit; pure validators only, no model/UI."""
+from __future__ import annotations
+
+import hashlib
+import importlib.util
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path("C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+BASE = ROOT / "Document/Week6/results/full_requirements_20261028"
+CONTAINER = BASE / "live/normal_013"
+RUN = CONTAINER / "run"
+ROUND = RUN / "automatic/semantic_plan_round_001"
+FREEZE = BASE / "semantic_conversation_repair_001/final_source_freeze_001.json"
+FREEZE_SHA = "58740f05d55c1eedc92f5c048005bd9348ca2b25b6a40ccb2450f90ca2295fe9"
+PREREG = BASE / "live/preregistered_v6_005.json"
+PREREG_SHA = "8a3b24568c5c5ff7290199b79dde7b432a75dbedb7a001bd79e7576230f7c352"
+OUTPUT = BASE / "review/negative_normal013_audit_001.json"
+
+
+def load(path):
+    return json.loads(path.read_text(encoding="utf8"))
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def bound(path):
+    return {"path": str(path), "sha256": sha(path), "bytes": path.stat().st_size}
+
+
+def main():
+    assert not OUTPUT.exists(), "Never overwrite a negative audit"
+    assert sha(FREEZE) == FREEZE_SHA and sha(PREREG) == PREREG_SHA
+    freeze, prereg = load(FREEZE), load(PREREG)
+    pins = freeze["code_pins"]
+    assert len(pins) == freeze["code_pin_count"] == 265
+    assert prereg["freeze_sha256"] == FREEZE_SHA
+    assert (PREREG.parent / prereg["freeze"]).resolve() == FREEZE.resolve()
+    assert prereg["normal"]["name"] == CONTAINER.name
+    owner, start = load(CONTAINER / "owner_receipt.json"), load(CONTAINER / "owner_start.json")
+    contract, raw = load(RUN / "contract.json"), load(RUN / "runtime_result.json")
+    observed, protocol = load(RUN / "acceptance_observed.json"), load(ROUND / "protocol.json")
+    assert type(owner["child_exit_code"]) is int and owner["child_exit_code"] == 1
+    assert abs(owner["elapsed_seconds"] - 120.110) < .001
+    assert owner["command"] == start["command"]
+    assert owner["owner_harness_sha256"] == sha(CONTAINER / "owner_harness.py.txt")
+    assert datetime.fromisoformat(prereg["registered_utc"]) < datetime.fromisoformat(owner["started_utc"])
+    fixture_argument = owner["command"][owner["command"].index("--fixture-directory") + 1]
+    assert Path(fixture_argument).name == prereg["normal"]["fixture"] == "fixture_normal_009"
+    snapshots = []
+    for relative, expected in contract["source_sha256"].items():
+        path = RUN / "source_snapshot" / (relative + ".txt")
+        assert sha(path) == expected == pins[relative]
+        snapshots.append({"relative": relative, "snapshot": bound(path), "freeze_sha256": expected})
+    assert not [relative for relative, expected in pins.items() if sha(ROOT / relative) != expected]
+    assert raw == observed["automatic_result"] and raw["status"] == "failed"
+    assert raw["planning_calls"] == raw["model_requests"] == 3
+    assert raw["total_actions"] == raw["unconfirmed_action_attempts"] == 0
+    assert raw["semantic_goals_total"] == 0 and not raw["goal_outcomes"] and not raw["completed_subgoals"]
+    assert not raw["workflow_results"] and raw["final_verification"] is None
+    assert not observed["input_receipts"] and not observed["transition_attribution"]
+    assert observed["runtime_pass"] is observed["independent_pass"] is observed["attribution_pass"] is False
+    assert observed["source_unchanged"] is True
+    assert [event["event"] for event in observed["independent_events"]] == ["started"]
+    assert not (ROUND / "native_proposal.json").exists() and not (ROUND / "compiled_workflow.json").exists()
+    auditor_path = ROOT / "scripts/week6_audit_semantic_acceptance.py"
+    assert sha(auditor_path) == pins["scripts/week6_audit_semantic_acceptance.py"]
+    spec = importlib.util.spec_from_file_location("ended_normal013_auditor", auditor_path)
+    auditor = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(auditor)
+    evidence = auditor.Evidence(CONTAINER)
+    before = evidence.frame(RUN / "automatic/initial_observation/observation.json")
+    request = auditor.WorkflowRequest.model_validate(contract["request"])
+    expected_format = auditor._semantic_response_format(request, 8)
+    assert protocol["response_format"] == expected_format
+    assert protocol["repair_policy"]["schema_version"] == "week6.semantic_repair_feedback.v2"
+    assert protocol["snapshot_sent_to_model"] is False and protocol["final_source"] == "unchanged_caller"
+    assert protocol["postcondition_source"] == "untrusted_model_prediction"
+    first = load(ROUND / "attempt_01_request.json")
+    base_context = first["context"]
+    assert base_context == {
+        "original_caller_request": contract["request"], "minimum_objectives": 2, "maximum_objectives": 8,
+        "revision": False, "completed_subgoals": [], "failure": None,
+        "input_modality": "caller_intent_only", "image_attached": False,
+    }
+    transport = [json.loads(row) for row in (RUN / "automatic/transport_requests.jsonl").read_text("utf8").splitlines()]
+    assert len(transport) == 3 and sum(row["requests_made"] for row in transport) == 3
+    attempts, contents, calls = [], [], []
+    for index, dispatch in enumerate(transport, 1):
+        saved = load(ROUND / f"attempt_{index:02d}_request.json")
+        response = load(ROUND / f"attempt_{index:02d}_response.json")
+        error = load(ROUND / f"attempt_{index:02d}_error.json")
+        native = json.loads(response["content"])
+        auditor.audit_native_predicates(native, request)
+        parsed = auditor.SemanticPlan.model_validate(native, strict=True)
+        assert parsed.status == "ready" and len(parsed.subgoals) == 3
+        try:
+            auditor.SemanticDecomposer(max_subgoals=8)._validate(parsed, request, before, [], False)
+        except auditor._DuplicateSemanticPostconditionsError as exc:
+            assert str(exc) == error["error"] == raw["error"]
+        else:
+            raise AssertionError("Original duplicate conjunction unexpectedly passed")
+        messages = auditor.audit_semantic_repair_messages(evidence, ROUND, index, saved, protocol,
+                                                         request, before, [], 8, False, base_context)
+        assert saved["messages"] == messages == dispatch["messages"]
+        assert saved["instruction"] == request.instruction and saved["response_format"] == expected_format
+        assert "previous_response" not in saved["context"]
+        roles = [message["role"] for message in messages]
+        assert roles == (["system", "user"] if index == 1 else ["system", "user", "assistant", "user"])
+        assert messages[1] == first["messages"][1]
+        if index > 1:
+            assert messages[2] == {"role": "assistant", "content": contents[-1]}
+            final_user = json.loads(messages[-1]["content"])
+            assert final_user == {"instruction": request.instruction, "context": saved["context"],
+                                  "repair_instruction": auditor.SEMANTIC_DUPLICATE_POSTCONDITIONS_REPAIR}
+        assert dispatch["count_source"] == "httpx_request_event" and dispatch["requests_made"] == 1
+        assert dispatch["dispatch"] == dispatch["requests_total"] == index
+        assert dispatch["error"] == "" and response["error"] is None
+        assert dispatch["response"]["content"] == response["content"]
+        http_response = dispatch["http_responses"]
+        assert len(http_response) == 1 and http_response[0]["status_code"] == 200
+        assert http_response[0]["body"]["choices"][0]["message"]["content"] == response["content"]
+        assert response["content_length"] == len(response["content"]) == 832
+        assert response["usage"]["completion_tokens"] == 198
+        contents.append(response["content"])
+        hint_count = saved["system"].count(auditor.SEMANTIC_DUPLICATE_POSTCONDITIONS_REPAIR)
+        assert hint_count == (0 if index == 1 else 1)
+        calls.append({"kind": "semantic_decomposition", "semantic_attempt_index": index, "messages": messages,
+                      "system": saved["system"], "instruction": request.instruction, "context": saved["context"],
+                      "image_path": None, "requests": 1, "response": response})
+        attempts.append({"attempt": index, "native": native, "roles": roles, "message_count": len(messages),
+                         "system_typed_hint_occurrences": hint_count,
+                         "content_sha256": hashlib.sha256(response["content"].encode()).hexdigest(),
+                         "content_characters": 832, "completion_tokens": 198,
+                         "saved_response_latency_ms": response["latency_ms"], "http_status_code": 200,
+                         "guard_error": error["error"], "strict_v2_message_reconstruction_passed": True})
+    assert contents[0] == contents[1] == contents[2]
+    assert auditor.transport_audit(evidence, RUN / "automatic", calls, 3, contract) == 3
+    original_files = [bound(path) for path in sorted(CONTAINER.rglob("*")) if path.is_file()]
+    script_copy = OUTPUT.with_name("negative_normal013_audit_001.py.txt")
+    with script_copy.open("xb") as stream:
+        stream.write(Path(__file__).read_bytes())
+    prior_contents = {name: load(BASE / f"live/{name}/run/automatic/semantic_plan_round_001/attempt_01_response.json")["content"]
+                      for name in ("normal_011", "normal_012")}
+    audit = {
+        "schema": "week6.independent.negative_semantic_conversation_live.v1",
+        "reviewed_utc": datetime.now(timezone.utc).isoformat(),
+        "reviewer": "/root/week6_replanning_review (independent Codex agent, not a human sign-off)",
+        "scope": "Read-only ended-run originals and pure exact frozen validator/message reconstruction. No source, model, UI, fixture-state, process-control or test mutation/call.",
+        "freeze": bound(FREEZE), "preregistration": bound(PREREG),
+        "source_binding": {"current_all_265_pins_equal_freeze": True,
+                           "run_snapshot_count": len(snapshots), "snapshot_contract_and_freeze_exact": True,
+                           "snapshots": snapshots},
+        "actual_exit": {"child_exit_code": 1, "elapsed_seconds": owner["elapsed_seconds"],
+                        "started_utc": owner["started_utc"], "finished_utc": owner["finished_utc"],
+                        "launcher": owner["launcher"], "observed_descendants": owner["observed_descendants"],
+                        "owner_harness_sha256_verified": True},
+        "actual_accounting": {"planning_calls": 3, "actual_http_requests": 3, "known_task_inputs": 0,
+                              "unconfirmed_inputs": 0, "accepted_goals": 0, "completed_goals": 0,
+                              "independent_events": ["started"], "final_verification": None,
+                              "accounting_complete": raw["accounting_complete"]},
+        "attempts": attempts,
+        "diagnosis": {"classification": "Native duplicate semantic postconditions before any child/input",
+                      "three_original_reply_contents_equal": True,
+                      "comparison_to_previous_originals": {name: contents[0] == text for name, text in prior_contents.items()},
+                      "strict_v2_roles_saved_and_transport_match": True, "message_counts": [len(call["messages"]) for call in calls],
+                      "all_three_typed_duplicate_rejections_reproduced": True,
+                      "same_immutable_base_user_each_attempt": True,
+                      "retry_assistant_is_exact_immediately_previous_native_reply": True,
+                      "final_user_fixed_repair_and_context_exact_no_inline_raw": True,
+                      "observed_effect": "Neither feedback-bearing conversation attempt produced a valid corrected plan in this preregistered run. This does not estimate all-model or general task success rates.",
+                      "no_guard_relaxation_or_local_plan_merge_justified": True,
+                      "wire_limit": "Full pre-wire message arrays, actual HTTP event counts and returned HTTP bodies are bound; no claim to have captured the original outgoing HTTP request body.",
+                      "prior_normal001_through013_remain_unaccepted": True},
+        "original_files": original_files, "strict_auditor_bound_files": evidence.files,
+        "audit_script": {"private": bound(Path(__file__)), "archive": bound(script_copy)},
+    }
+    with OUTPUT.open("x", encoding="utf8") as stream:
+        json.dump(audit, stream, ensure_ascii=False, indent=2)
+        stream.write("\n")
+    print(json.dumps({"audit": str(OUTPUT), "sha256": sha(OUTPUT), "bound_original_files": len(original_files),
+                      "source_snapshots": len(snapshots), "reply_sha256": attempts[0]["content_sha256"],
+                      "message_counts": audit["diagnosis"]["message_counts"]}, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

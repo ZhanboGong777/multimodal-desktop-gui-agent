@@ -1,0 +1,79 @@
+--- scripts/week6_audit_semantic_acceptance.py
++++ scripts/week6_audit_semantic_acceptance.py
+@@ -344,7 +344,8 @@
+ 
+ def _audit_semantic_repair_category(evidence: Evidence, directory: Path, index: int, saved: dict,
+                                     request: WorkflowRequest, before: ObservationSnapshot,
+-                                    completed: list[dict], maximum: int, revision: bool) -> tuple[str | None, str | None]:
++                                    completed: list[dict], maximum: int, revision: bool,
++                                    blocked_signatures: tuple[tuple[Any, ...], ...] = ()) -> tuple[str | None, str | None]:
+     """Recompute the previous local rejection; never trust an error's claimed type."""
+     audit_repair_context(evidence, directory, index, saved["context"], inline_previous_response=False)
+     category = None
+@@ -359,7 +360,8 @@
+             native = json.loads(content, object_pairs_hook=_unique_keys)
+             _validate_native_predicates(native, request)
+             parsed = SemanticPlan.model_validate(native, strict=True)
+-            SemanticDecomposer(max_subgoals=maximum)._validate(parsed, request, before, completed, revision)
++            SemanticDecomposer(max_subgoals=maximum)._validate(
++                parsed, request, before, completed, revision, blocked_signatures=blocked_signatures)
+         except ValueError as exc:
+             require(error.get("error") == str(exc), "semantic_repair_error_not_reproduced_from_original_reply")
+             if isinstance(exc, _DuplicateSemanticPostconditionsError):
+@@ -398,9 +400,10 @@
+ 
+ def audit_semantic_repair_system(evidence: Evidence, directory: Path, index: int, saved: dict,
+                                 protocol: dict, request: WorkflowRequest, before: ObservationSnapshot,
+-                                completed: list[dict], maximum: int, revision: bool) -> str:
++                                completed: list[dict], maximum: int, revision: bool,
++                                blocked_signatures: tuple[tuple[Any, ...], ...] = ()) -> str:
+     category, _ = _audit_semantic_repair_category(evidence, directory, index, saved, request,
+-                                                before, completed, maximum, revision)
++                                                before, completed, maximum, revision, blocked_signatures)
+     system = _audited_semantic_system(protocol, category)
+     require(saved.get("system") == system, "semantic_repair_system_not_exactly_bound_to_typed_prior_rejection")
+     return system
+@@ -409,9 +412,10 @@
+ def audit_semantic_repair_messages(evidence: Evidence, directory: Path, index: int, saved: dict,
+                                   protocol: dict, request: WorkflowRequest, before: ObservationSnapshot,
+                                   completed: list[dict], maximum: int, revision: bool,
+-                                  base_context: dict) -> list[dict]:
++                                  base_context: dict,
++                                  blocked_signatures: tuple[tuple[Any, ...], ...] = ()) -> list[dict]:
+     category, content = _audit_semantic_repair_category(evidence, directory, index, saved, request,
+-                                                      before, completed, maximum, revision)
++                                                      before, completed, maximum, revision, blocked_signatures)
+     system = _audited_semantic_system(protocol, category)
+     require(saved.get("system") == system, "semantic_repair_system_not_exactly_bound_to_typed_prior_rejection")
+     messages = [{"role": "system", "content": system},
+@@ -998,6 +1002,11 @@
+     workflow_cursor, failure = 0, None
+     rejected_contracts, rejected_signatures = [], set()
+     for round_index, plan_record in enumerate(raw["plans"], 1):
++        blocked_signatures = tuple(rejected_signatures | {
++            (row["instruction"].casefold(), tuple(sorted(x.casefold() for x in row["expect_text"])),
++             tuple(sorted(x.casefold() for x in row["forbid_text"])))
++            for row in outcomes if row["status"] != "succeeded"
++        })
+         directory = root / f"semantic_plan_round_{round_index:03d}"
+         require(Path(plan_record["evidence_directory"]).resolve() == directory.resolve()
+                 and evidence.load(directory / "result.json") == plan_record
+@@ -1045,7 +1054,7 @@
+             context = saved["context"]
+             messages = audit_semantic_repair_messages(evidence, directory, index, saved, protocol,
+                                                       request, latest, completed, maximum, round_index > 1,
+-                                                      expected_context)
++                                                      expected_context, blocked_signatures)
+             system = messages[0]["content"]
+             require(saved["instruction"] == request.instruction
+                     and saved["response_format"] == protocol["response_format"]
+@@ -1062,7 +1071,8 @@
+                                 "semantic_attempt_index": index})
+         require(json.loads(response["content"], object_pairs_hook=unique) == native,
+                 "native_proposal_differs_from_last_accepted_raw_reply")
+-        SemanticDecomposer(max_subgoals=maximum)._validate(parsed, request, latest, completed, round_index > 1)
++        SemanticDecomposer(max_subgoals=maximum)._validate(
++            parsed, request, latest, completed, round_index > 1, blocked_signatures=blocked_signatures)
+         compilation = evidence.load(directory / "compiled_workflow.json")
+         expected_tasks = [_goal_task(goal, request) for goal in parsed.subgoals]
+         require(compilation["native_proposal"] == native and compilation["schema_version"] == SEMANTIC_PROTOCOL_VERSION

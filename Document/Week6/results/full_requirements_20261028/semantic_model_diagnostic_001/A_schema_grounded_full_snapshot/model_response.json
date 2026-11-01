@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen2.5vl:7b",
+  "latency_ms": 45250.0,
+  "usage": {
+    "prompt_tokens": 2514,
+    "completion_tokens": 464,
+    "total_tokens": 2978
+  },
+  "error": null,
+  "content_length": 1906,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Select project ALPHA from the visible controls.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [\"BETA\", \"Offline report preparation\", \"Choose a project\", \"Week6 Local Lab\"],\n      \"goal_id\": \"select_project_alpha\"\n    },\n    {\n      \"instruction\": \"Select theme GREEN from the visible controls.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [\"BETA\", \"Offline report preparation\", \"Choose a project\", \"Week6 Local Lab\"],\n      \"goal_id\": \"select_theme_green\"\n    },\n    {\n      \"instruction\": \"Locate and select the 'Offline report preparation' option from the visible controls.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [\"BETA\", \"Choose a project\", \"Week6 Local Lab\"],\n      \"goal_id\": \"select_offline_report_preparation\"\n    },\n    {\n      \"instruction\": \"Locate and select the 'Choose a project' option from the visible controls.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [\"BETA\", \"Offline report preparation\", \"Week6 Local Lab\"],\n      \"goal_id\": \"select_choose_project\"\n    },\n    {\n      \"instruction\": \"Locate and select the 'Week6 Local Lab' option from the visible controls.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [\"BETA\", \"Offline report preparation\", \"Choose a project\"],\n      \"goal_id\": \"select_week6_local_lab\"\n    },\n    {\n      \"instruction\": \"Locate and select the 'LOCAL COMPLETE' option from the visible controls.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [\"BETA\", \"Offline report preparation\", \"Choose a project\", \"Week6 Local Lab\"],\n      \"goal_id\": \"select_local_complete\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "status": "ready",
+  "reason": "The previous goal 'review_report' failed due to missing expected text, but the caller request remains unchanged. The current plan focuses on completing the remaining operation: committing the GREEN report for project ALPHA locally. The final state requires 'LOCAL COMPLETE' to be visible, with no 'RE",
+  "subgoals": [
+    {
+      "instruction": "Commit the prepared GREEN report for project ALPHA locally using the visible commit controls.",
+      "expect_text": [
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [
+        "Review Pending",
+        "Review Failed",
+        "Review Error",
+        "Review Timeout",
+        "Review Cancelled",
+        "Review Not Started",
+        "Review In Progress",
+        "Review Unavailable"
+      ],
+      "goal_id": "commit_report"
+    }
+  ]
+}

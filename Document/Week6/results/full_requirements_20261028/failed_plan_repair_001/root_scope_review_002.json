@@ -1,0 +1,61 @@
+{
+  "schema": "week6.failed_plan_repair.root_scope_review.v2",
+  "utc": "2026-11-01T06:39:40.054081+00:00",
+  "reviewer": "Root agent",
+  "records": [
+    {
+      "path": "scripts/week6_audit_semantic_acceptance.py",
+      "before_sha256": "765733849846ee998a506195ec2f2037629a837bab245ae21656eaeae52ad273",
+      "after_sha256": "5cd68dc0f7288a4faac4a4d561f0cf85952d3256aa9a21b90c3ba06ac4519aab",
+      "approved_function_scopes": [
+        "_audit_semantic_repair_category",
+        "_audited_semantic_system",
+        "audit",
+        "audit_semantic_repair_messages",
+        "audit_semantic_repair_system"
+      ],
+      "all_other_ast_identical_after_exact_metadata_normalization": true,
+      "diff": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\failed_plan_repair_001\\week6_audit_semantic_acceptance.revision002.reviewed.diff.txt",
+        "sha256": "df7c6ab4212a36f471051426633bfdaf6386884591765b9a4c77cc760319c34a"
+      }
+    },
+    {
+      "path": "src/gui_agent/planning/semantic_workflow.py",
+      "before_sha256": "8f69c28c3240cccdfce2d5708b06df141f319028ca3b9671cfdd19e24ff68eeb",
+      "after_sha256": "d49a681c7da5d7354dee67211e74079161f299679321a8a1c5ac3e92a8038813",
+      "approved_function_scopes": [
+        "SemanticDecomposer._validate",
+        "SemanticDecomposer.decompose",
+        "SemanticWorkflowRunner.run",
+        "_semantic_attempt_messages",
+        "_semantic_attempt_system",
+        "_semantic_repair_policy"
+      ],
+      "all_other_ast_identical_after_exact_metadata_normalization": true,
+      "diff": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\failed_plan_repair_001\\semantic_workflow.revision002.reviewed.diff.txt",
+        "sha256": "694cd0d5a579396825acd6159dfb62ce80e32de61a4399b6fd5ede619d975121"
+      }
+    },
+    {
+      "path": "tests/test_week6_semantic_repair_feedback.py",
+      "before_sha256": "d813b8f9cd9288d71b4c1760de42d6c41ab09d2c41c888ebb1c88c049f9cef83",
+      "after_sha256": "9f812b47609dabbcee72070633883a367cfb813f325d41ec8bf1358546975a7b",
+      "approved_function_scopes": [],
+      "all_other_ast_identical_after_exact_metadata_normalization": true,
+      "diff": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\failed_plan_repair_001\\test_week6_semantic_repair_feedback.revision002.reviewed.diff.txt",
+        "sha256": "516cf64ba928e7fecf4564e459c9145e4aa72d580d697763db53229142cb3b03"
+      }
+    }
+  ],
+  "all_other_prior_pins_byte_identical": 280,
+  "added_test": "tests/test_week6_semantic_failed_plan_repair.py",
+  "additional_reviewed_scope": [
+    "Fixed repeated-objective generation hint and finite typed category, v4 exact protocol hash metadata. No model data enters system hint.",
+    "Original before-true rejection precedence restored; original test unchanged and must pass.",
+    "Existing repair-policy SDK test updates exact expected v4 metadata only, with all other AST identical."
+  ],
+  "meaning": "Exact failed/rejected signature enters existing bounded repair loop before any input. Outer failed-signature guard, action/credit/verification, cancellation and budgets retained. Auditor reconstructs failed signatures from original outcomes; recomputes typed rejection and full wire history. Hint removed on other errors. No local plan/condition authoring or acceptance transfer. Saved native diagnostics and fresh GUI cases remain required."
+}

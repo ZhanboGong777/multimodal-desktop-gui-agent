@@ -1,0 +1,58 @@
+"""Owned-file static checks only; does not run pytest or touch shared code."""
+import ast
+import hashlib
+import json
+import subprocess
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path("C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+OUT = ROOT / "Document/Week6/results/full_requirements_20261028/target_bindings_001/review_static_001"
+FILES = ["scripts/week6_audit_semantic_acceptance.py", "tests/test_week6_target_bindings_review.py"]
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def main():
+    OUT.mkdir(exist_ok=False)
+    before = {name: sha(ROOT / name) for name in FILES}
+    cases = 0
+    for name in FILES:
+        source = ROOT / name
+        target = OUT / "source_before" / (name + ".txt")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(source.read_bytes())
+        tree = ast.parse(source.read_text("utf8"))
+        if name.startswith("tests/"):
+            for node in tree.body:
+                if isinstance(node, ast.FunctionDef) and node.name.startswith("test_"):
+                    count = 1
+                    for decorator in node.decorator_list:
+                        if isinstance(decorator, ast.Call) and isinstance(decorator.func, ast.Attribute) and decorator.func.attr == "parametrize":
+                            count *= len(ast.literal_eval(decorator.args[1]))
+                    cases += count
+    command = [sys.executable, "-m", "ruff", "check", *FILES]
+    started = datetime.now(timezone.utc).isoformat()
+    child = subprocess.Popen(command, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = child.communicate()
+    actual_wait = child.wait()
+    (OUT / "ruff.stdout.txt").write_bytes(stdout)
+    (OUT / "ruff.stderr.txt").write_bytes(stderr)
+    after = {name: sha(ROOT / name) for name in FILES}
+    assert before == after
+    receipt = {"schema": "week6.target_bindings.owned_static.v1", "command": command, "started_utc": started,
+               "finished_utc": datetime.now(timezone.utc).isoformat(), "actual_wait_exit": actual_wait,
+               "owned_pins_before": before, "owned_pins_after": after, "owned_pins_unchanged": True,
+               "ast_parametrized_new_test_count": cases, "pytest_ran": False,
+               "whole_repository_unchanged_not_claimed": True}
+    (OUT / "receipt.json").write_text(json.dumps(receipt, ensure_ascii=False, indent=2) + "\n", encoding="utf8")
+    print(json.dumps({"receipt": str(OUT / "receipt.json"), "sha256": sha(OUT / "receipt.json"),
+                      "actual_wait_exit": actual_wait, "cases": cases}, ensure_ascii=False))
+    print(stdout.decode("utf8", errors="replace"))
+
+
+if __name__ == "__main__":
+    main()

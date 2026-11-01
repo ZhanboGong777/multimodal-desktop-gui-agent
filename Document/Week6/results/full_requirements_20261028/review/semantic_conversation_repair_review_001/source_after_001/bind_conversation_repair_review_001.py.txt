@@ -1,0 +1,124 @@
+"""Bind independent conversation review snapshots; do not touch source/test files."""
+from __future__ import annotations
+
+import ast
+import hashlib
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path("C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+BASE = ROOT / "Document/Week6/results/full_requirements_20261028"
+OUT = BASE / "review/semantic_conversation_repair_review_001"
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def bound(path):
+    return {"path": str(path), "sha256": sha(path), "bytes": path.stat().st_size}
+
+
+def named(tree, kind, name):
+    return next(item for item in tree.body if isinstance(item, kind) and item.name == name)
+
+
+def value(tree, name):
+    return next(item.value for item in tree.body if isinstance(item, ast.Assign)
+                and any(isinstance(target, ast.Name) and target.id == name for target in item.targets))
+
+
+def main():
+    destination = OUT / "source_after_001"
+    destination.mkdir(exist_ok=False)
+    copies = []
+    for relative in ("scripts/week6_audit_semantic_acceptance.py", "tests/test_week6_semantic_repair_feedback_review.py",
+                     "tests/test_week6_semantic_conversation_repair_review.py"):
+        source = ROOT / relative
+        target = destination / (relative + ".txt")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        with target.open("xb") as stream:
+            stream.write(source.read_bytes())
+        assert sha(source) == sha(target)
+        copies.append({"source": bound(source), "destination": bound(target)})
+    target = destination / (Path(__file__).name + ".txt")
+    with target.open("xb") as stream:
+        stream.write(Path(__file__).read_bytes())
+    copies.append({"source": bound(Path(__file__)), "destination": bound(target)})
+
+    old = BASE / "live/normal_012/run/source_snapshot/src/gui_agent/planning/semantic_workflow.py.txt"
+    current = ROOT / "src/gui_agent/planning/semantic_workflow.py"
+    before_tree, after_tree = [ast.parse(path.read_text(encoding="utf8")) for path in (old, current)]
+    for name in ("SEMANTIC_SYSTEM_PROMPT", "SEMANTIC_PROTOCOL_VERSION", "SEMANTIC_INPUT_MODALITY",
+                 "SEMANTIC_DUPLICATE_POSTCONDITIONS_REPAIR", "_INLINE_CORRECTION_MAX_CHARACTERS"):
+        assert ast.dump(value(before_tree, name)) == ast.dump(value(after_tree, name))
+    for name in ("_semantic_attempt_system", "_caller_contract_issue", "_semantic_response_format",
+                 "_validate_native_predicates", "_goal_task", "_final_task", "_initial_guard"):
+        assert ast.dump(named(before_tree, ast.FunctionDef, name)) == ast.dump(named(after_tree, ast.FunctionDef, name))
+    for name in ("SemanticGoal", "SemanticPlan", "SemanticPlanResult", "SemanticWorkflowRunner", "_SemanticChild"):
+        assert ast.dump(named(before_tree, ast.ClassDef, name)) == ast.dump(named(after_tree, ast.ClassDef, name))
+    for name in ("_validate", "__init__"):
+        old_class = named(before_tree, ast.ClassDef, "SemanticDecomposer")
+        new_class = named(after_tree, ast.ClassDef, "SemanticDecomposer")
+        prior = next(n for n in old_class.body if isinstance(n, ast.FunctionDef) and n.name == name)
+        after = next(n for n in new_class.body if isinstance(n, ast.FunctionDef) and n.name == name)
+        assert ast.dump(prior) == ast.dump(after)
+
+    prior_review = OUT / "source_before/tests/test_week6_semantic_repair_feedback_review.py.txt"
+    current_review = ROOT / "tests/test_week6_semantic_repair_feedback_review.py"
+    old_tests, new_tests = [ast.parse(path.read_text(encoding="utf8")) for path in (prior_review, current_review)]
+    old_functions = {n.name: n for n in old_tests.body if isinstance(n, ast.FunctionDef)}
+    new_functions = {n.name: n for n in new_tests.body if isinstance(n, ast.FunctionDef)}
+    assert set(old_functions) == set(new_functions)
+    changed = []
+    for name, prior in old_functions.items():
+        after = new_functions[name]
+        assert [ast.dump(d) for d in prior.decorator_list] == [ast.dump(d) for d in after.decorator_list]
+        if ast.dump(prior) != ast.dump(after):
+            changed.append(name)
+    assert set(changed) == {"_audit_attempt", "test_review_feedback_is_removed_after_a_different_format_error",
+                            "test_review_native_and_caller_canaries_stay_out_of_high_priority_feedback",
+                            "test_review_auditor_replays_native_instead_of_accepting_a_forged_error_string"}
+    summary = {
+        "schema": "week6.independent.conversation_repair.boundary_review.v1",
+        "reviewed_utc": datetime.now(timezone.utc).isoformat(),
+        "reviewer": "/root/week6_replanning_review (independent Codex agent)",
+        "code_stopped_for_root_validation": True,
+        "static_checks": {"three_owned_files_ruff_tool_actual_exit_code": 0,
+                          "pytest_or_shared_target_started_by_reviewer": False,
+                          "first_ruff_fixture_import_style_issue_preserved": bound(OUT / "static_fixture_import_correction_001.json")},
+        "producer_scope_readonly": {"source": bound(current), "native_protocol_original_system_and_typed_hint_same_AST": True,
+                                   "schema_rawchecks_preflight_and_goal_final_compilers_same_AST": True,
+                                   "initial_scope_guard_goal_result_and_all_execution_classes_same_AST": True,
+                                   "semantic_validate_and_constructor_same_AST": True,
+                                   "changed_behavior": "Versioned v2 role serialization of bounded repair attempts through the existing BudgetedModelClient retry/deadline/request counter"},
+        "old_review_cases_preserved": {"function_names_and_parametrization_decorators_identical": True,
+                                       "expected_old_case_count": 19,
+                                       "changed_helpers_or_cases_only_for_wire_representation": changed},
+        "new_case_scope": ["First actual SDK MockTransport packet exactly equals original two-message ModelRequest",
+                           "Role/control markers remain literal untrusted assistant content, never extra roles",
+                           "Exact 1999/2000/2001 threshold; oversized raw archive full and assistant omitted without truncation",
+                           "Only immediately previous raw reply is included and base user remains identical",
+                           "Forged/missing/reordered/accumulated assistant/history or extra user turns are refused by exact auditor",
+                           "Original caller, fixed final repair instruction and correction metadata cannot be rewritten",
+                           "Transport audit binds full validated message array, not a two-message approximation",
+                           "SDK HTTP cap remains counted and no history-induced extra call/input is authorized",
+                           "Unknown and cancellation after model-owned repair remain terminal without goal/final rescue"],
+        "strict_auditor": "Typed category is recomputed from archived preceding native reply and exact saved rejection. V2 ten-key policy, system, immutable base user, optional exact assistant and final user JSON are independently rebuilt and compared by equality. No startswith acceptance.",
+        "limits": ["Only source review and Ruff here; Root owns actual smoke/affected-semantic validation",
+                   "Synthetic replies/MockTransport do not establish live model compliance",
+                   "No source-level change reclassifies normal001 through normal012 as completed",
+                   "No model, UI, process-control, staging, commit or full regression by this reviewer"],
+        "source_before": bound(OUT / "source_before_manifest_001.json"), "copies": copies,
+    }
+    path = OUT / "independent_boundary_review_001.json"
+    with path.open("x", encoding="utf8") as stream:
+        json.dump(summary, stream, ensure_ascii=False, indent=2)
+        stream.write("\n")
+    print(json.dumps({"review": str(path), "sha256": sha(path), "copied_files": len(copies),
+                      "old_review_changed_functions": changed}, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

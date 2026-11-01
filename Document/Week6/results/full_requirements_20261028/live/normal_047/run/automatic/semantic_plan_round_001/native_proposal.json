@@ -1,0 +1,23 @@
+{
+  "status": "ready",
+  "reason": "Plan outlines two distinct semantic objectives: first, prepare the GREEN report for project ALPHA; second, review and commit it locally. Each step is explicitly named and verifiable via visible text postconditions. No operation is dropped or combined prematurely. Final persistence is deferred to the",
+  "subgoals": [
+    {
+      "instruction": "Prepare a GREEN report for project ALPHA in Week6 Local Lab using visible controls.",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN"
+      ],
+      "forbid_text": [],
+      "goal_id": "prepare_report"
+    },
+    {
+      "instruction": "Review the prepared GREEN report for project ALPHA and commit it locally.",
+      "expect_text": [
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [],
+      "goal_id": "review_and_commit"
+    }
+  ]
+}

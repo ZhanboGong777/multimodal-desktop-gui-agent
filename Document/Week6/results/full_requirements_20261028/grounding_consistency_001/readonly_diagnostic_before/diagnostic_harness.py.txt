@@ -1,0 +1,136 @@
+from pathlib import Path
+from datetime import datetime, timezone
+import hashlib
+import json
+
+root = Path(r"C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+run = root / "Document/Week6/results/full_requirements_20261028/live/normal_010/run"
+task = run / "automatic/goal_001_001_prepare_green_report/001_prepare_green_report"
+out = Path(r"C:/Users/联想/Documents/ChatGPT/Intern/tmp/week6_normal010_grounding_readonly_20261028_001")
+out.mkdir(exist_ok=False)
+(out / "diagnostic_harness.py.txt").write_bytes(Path(__file__).read_bytes())
+
+def digest(data):
+    return hashlib.sha256(data).hexdigest()
+
+def write_json(name, payload):
+    with (out / name).open("x", encoding="utf-8", newline="\n") as handle:
+        json.dump(payload, handle, ensure_ascii=False, indent=2)
+        handle.write("\n")
+
+freeze_path = root / "Document/Week6/results/full_requirements_20261028/semantic_predicted_postconditions_001/final_source_freeze_001.json"
+freeze = json.loads(freeze_path.read_text("utf-8"))
+def current_pins():
+    return {key: digest((root / key).read_bytes()) for key in freeze["code_pins"]}
+pins_before = current_pins()
+assert pins_before == freeze["code_pins"]
+copied = []
+data = {}
+paths = [
+    run / "sky_bridge/input_002_request.json",
+    run / "sky_bridge/input_002_receipt.json",
+    task / "single_step_planning_limit.json",
+    task / "steps.jsonl",
+    task / "task_summary.json",
+    task / "obs-0005.json", task / "obs-0006.json", task / "obs-0007.json",
+    run / "automatic/goal_contract_001_001.json",
+    run / "automatic/transport_requests.jsonl",
+]
+for path in paths:
+    raw = path.read_bytes()
+    rel = path.relative_to(run)
+    destination = out / "artifact_snapshots" / rel
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_bytes(raw)
+    copied.append({"source": str(path), "destination": str(destination), "bytes": len(raw), "sha256": digest(raw), "note": "Point-in-time read snapshot of an active run; no source artifact was modified."})
+    data[path.name] = raw.decode("utf-8")
+
+obs5 = json.loads(data["obs-0005.json"])
+obs6 = json.loads(data["obs-0006.json"])
+obs7 = json.loads(data["obs-0007.json"])
+for obs in (obs5, obs6):
+    path = Path(obs["image_path"])
+    raw = path.read_bytes()
+    destination = out / "artifact_snapshots" / "pixels" / path.name
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_bytes(raw)
+    copied.append({"source": str(path), "destination": str(destination), "bytes": len(raw), "sha256": digest(raw), "note": "Saved screenshot only; no new capture."})
+
+limit = json.loads(data["single_step_planning_limit.json"])
+call = limit["calls"][1]
+raw_native = json.loads(call["response"]["content"])
+native_step = raw_native["steps"][0]
+selected_old = next(item for item in obs5["elements"] if item["element_id"] == native_step["arguments"]["element_id"])
+request = json.loads(data["input_002_request.json"])
+receipt = json.loads(data["input_002_receipt.json"])
+steps = [json.loads(line) for line in data["steps.jsonl"].splitlines() if line.strip()]
+actual_step = next(item for item in steps if item["index"] == 2)
+selected_new = next(item for item in obs6["elements"] if item["element_id"] == actual_step["resolved"]["element_id"])
+green_old = next(item for item in obs5["elements"] if item["text"] == "GREEN")
+blue_old = next(item for item in obs5["elements"] if item["text"] == "BLUE")
+def inside(point, box):
+    return box["left"] <= point["x"] <= box["right"] and box["top"] <= point["y"] <= box["bottom"]
+assert native_step["target_text"] == "GREEN"
+assert selected_old["source"] == "contour" and selected_old["text"] == ""
+assert inside(blue_old["center"], selected_old["bounding_box"])
+assert not inside(green_old["center"], selected_old["bounding_box"])
+assert selected_new["bounding_box"] == selected_old["bounding_box"]
+assert selected_new["center"] == selected_old["center"]
+assert {"x": request["action"]["x"], "y": request["action"]["y"]} == selected_new["center"]
+assert receipt["action"] == request["action"] and receipt["success"] is True
+
+source_ranges = {
+    "src/gui_agent/runtime/action_adapter.py": [(449, 510), (575, 615)],
+    "src/gui_agent/runtime/runner.py": [(1464, 1529)],
+    "src/gui_agent/runtime/visual_grounding.py": [(197, 245)],
+    "src/gui_agent/runtime/verification.py": [(780, 821)],
+}
+source_evidence = []
+for key, ranges in source_ranges.items():
+    path = root / key
+    raw = path.read_bytes()
+    snapshot = run / "source_snapshot" / (key + ".txt")
+    assert raw == snapshot.read_bytes()
+    lines = raw.decode("utf-8").splitlines()
+    source_evidence.append({"file": key, "sha256": digest(raw), "equals_actual_run_source_snapshot": True, "excerpts": [{"first_line": first, "last_line": min(last, len(lines)), "text": "\n".join(f"{i + 1}: {lines[i]}" for i in range(first - 1, min(last, len(lines))))} for first, last in ranges]})
+
+summary = json.loads(data["task_summary.json"])
+diagnostic = {
+    "schema": "week6.normal010.target_binding_readonly_diagnostic.v1",
+    "created_at_utc": datetime.now(timezone.utc).isoformat(),
+    "scope": "Already saved second low-level plan/input of active normal010; no overall-run exit or final status inference.",
+    "classification": "Native model target-text/element-ID inconsistency, preserved by anonymous-target pixel refresh and ID-first adapter; no evidence of scaling or detector label-coordinate swap in these frames.",
+    "native_step": native_step,
+    "raw_response": call["response"],
+    "model_visible_text": call["context"]["visible_text"],
+    "model_source_image_path": call["image_path"],
+    "selected_source_element": selected_old,
+    "selected_fresh_element": selected_new,
+    "correct_target_text_candidate": green_old,
+    "competing_label_inside_selected_contour": blue_old,
+    "geometry_facts": {"selected_source_and_fresh_geometry_equal": True, "selected_contour_contains_blue_center": True, "selected_contour_contains_green_center": False, "request_equals_selected_fresh_center": True, "scale_x": request["screen"]["scale_x"], "scale_y": request["screen"]["scale_y"]},
+    "saved_pixel_visual_review": {"file": obs6["image_path"], "reviewer": "/root/week6_auto_decomposition", "method": "view_image original on existing saved PNG only", "observed": "The upper BLUE button is hovered; the lower button reads GREEN. This observation does not establish why the model selected the wrong ID."},
+    "actual_input_request": request,
+    "actual_input_receipt": receipt,
+    "raw_step_record": actual_step,
+    "post_observation_text": [item["text"] for item in obs7["elements"] if item["text"]],
+    "observed_child_summary": {"status": summary["status"], "verification": summary["verification"], "action_count": summary.get("action_count"), "planning_calls": summary.get("planning_calls"), "notes": summary.get("notes")},
+    "advisory_step_verifier_limit": "Raw step expected-result tokens ['green','theme'] received any hit ['theme'] and were marked passed; mandatory frozen semantic goal still failed because Theme GREEN was absent. No semantic or caller-final credit follows from this step verdict.",
+    "source_evidence": source_evidence,
+    "cause_boundary": {"model_selected_wrong_id": True, "adapter_implemented_id_priority_without_cross_validating_target_text": True, "coordinate_transform_bug_supported": False, "detector_swapped_blue_green_supported": False, "hover_causal_claim": False, "no_new_model_gui_executor_calls": True, "no_frozen_source_test_fixture_config_edits": True},
+    "recommended_design_not_implemented": {
+        "preferred": "Reject conflicting nonempty target_text and explicit element_id before input; preserve native plan and return a bounded replan error, rather than silently selecting the text target.",
+        "source_and_fresh_checks": "Validate the original selected candidate against supplied visible text in the planning frame, then validate again after pixel refresh in the fresh dispatch frame. Pixel identity proves the same control, not that the original control matches the intended text.",
+        "labeled_candidate": "A labeled candidate must be consistent with the supplied text under an explicitly defined existing text-match rule; an explicit ID may legitimately disambiguate repeated equal labels.",
+        "anonymous_candidate": "When supplied text matches detected visible text, require matching OCR evidence spatially contained by the chosen contour and reject if the contour contains a different competing label while the requested text is elsewhere. Blank target_text/true anonymous controls need their existing visual grounding path; do not invent labels.",
+        "ambiguity": "If text-to-candidate consistency cannot be established, fail closed/replan. Do not automatically change the model's ID to another control merely because that control has a unique label.",
+        "compatibility_tests_needed": ["Wrong anonymous ID plus unique target text outside its contour causes zero dispatch and retains raw mismatch.", "Matching text inside its actual contour remains allowed.", "Same-label multiple controls can be disambiguated only by consistent explicit ID.", "Labeled candidate with contradictory supplied text is rejected.", "Stale ID refresh cannot bypass source/fresh consistency.", "ID-only anonymous visual controls retain their explicitly supported path.", "All shared budgets, raw receipts and no unknown replay remain unchanged."],
+        "not_claimed": "Containment/text consistency is a guard against observable cross-field conflicts, not proof of widget role, caller semantics or arbitrary GUI safety. Any new policy requires separate authorization, targeted tests and a new freeze."
+    },
+}
+write_json("diagnostic.json", diagnostic)
+pins_after = current_pins()
+assert pins_before == pins_after == freeze["code_pins"]
+write_json("source_pins_unchanged.json", {"freeze_sha256": digest(freeze_path.read_bytes()), "pin_count": len(pins_before), "before": pins_before, "after": pins_after, "equal": True})
+write_json("artifact_manifest.json", {"source_files": copied, "new_captures": 0, "new_model_http_requests": 0, "new_executor_calls": 0, "active_source_files_may_later_grow": True})
+print(json.dumps({"diagnostic": str(out / "diagnostic.json"), "sha256": digest((out / "diagnostic.json").read_bytes()), "pins_unchanged": True, "copied_artifacts": len(copied)}, ensure_ascii=False))

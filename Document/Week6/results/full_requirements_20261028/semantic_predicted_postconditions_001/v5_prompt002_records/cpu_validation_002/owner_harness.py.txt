@@ -1,0 +1,30 @@
+from pathlib import Path
+import argparse, hashlib, json, os, subprocess, sys, time
+from datetime import datetime, timezone
+root=Path(r"C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+python=r"D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe"
+a=argparse.ArgumentParser(); a.add_argument("--name",required=True); a.add_argument("--tests",nargs="+",required=True); a.add_argument("--final-pins",action="store_true"); args=a.parse_args()
+out=root/"Document/Week6/results/full_requirements_20261028/semantic_goal_grouping_prompt_001"/args.name; out.mkdir(exist_ok=False)
+(out/"owner_harness.py.txt").write_bytes(Path(__file__).read_bytes())
+manifest=json.loads((root/"Document/Week6/results/full_requirements_20261028/full_validation_003/tested_code_pins_after.json").read_text("utf8"))
+keys=set(manifest); keys.add("tests/test_week6_semantic_goal_grouping.py")
+excluded=[] if args.final_pins else ["tests/test_week6_full_requirements_review.py","scripts/week6_audit_semantic_acceptance.py"]
+keys.difference_update(excluded)
+def pins(): return {k:hashlib.sha256((root/k).read_bytes()).hexdigest() for k in sorted(keys)}
+before=pins(); (out/"pins_before.json").write_text(json.dumps(before,indent=2)+"\n",encoding="utf8")
+runfiles=["src", "tests", "scripts"] if args.final_pins else ["src/gui_agent/planning/semantic_workflow.py",*args.tests]
+commands=[("ruff",[python,"-m","ruff","check",*runfiles]),("pytest",[python,"-X","utf8","-m","pytest","-q",*args.tests,"--basetemp",str(out/"pytest_tmp")])]
+receipts=[]
+for name,cmd in commands:
+ started=datetime.now(timezone.utc).isoformat(); clock=time.monotonic()
+ with (out/(name+".stdout.txt")).open("wb") as stdout,(out/(name+".stderr.txt")).open("wb") as stderr:
+  child=subprocess.Popen(cmd,cwd=root,stdout=stdout,stderr=stderr,env={**os.environ,"PYTHONUTF8":"1"})
+  code=child.wait()
+ receipt={"command":cmd,"launcher_pid":child.pid,"wait_exit_code":code,"started_at_utc":started,"elapsed_seconds":time.monotonic()-clock}
+ receipts.append(receipt); (out/(name+".receipt.json")).write_text(json.dumps(receipt,indent=2)+"\n",encoding="utf8")
+ print(name,"exit",code,flush=True)
+after=pins(); (out/"pins_after.json").write_text(json.dumps(after,indent=2)+"\n",encoding="utf8")
+summary={"schema":"week6.semantic.v5.prompt002.targeted_validation.v1","receipts":receipts,"pin_count":len(before),"pins_unchanged":before==after,"excluded_in_progress_other_agent_files":excluded,"no_model_gui_calls":True,"not_full_regression":True}
+(out/"validation.json").write_text(json.dumps(summary,indent=2)+"\n",encoding="utf8")
+print(json.dumps({"path":str(out),"pins_unchanged":before==after,"receipts":receipts}),flush=True)
+sys.exit(0 if before==after and all(x["wait_exit_code"]==0 for x in receipts) else 1)

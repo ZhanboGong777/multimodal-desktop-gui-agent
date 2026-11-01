@@ -1,0 +1,81 @@
+"""Prepare, do not run, the fresh transient saved-record audit helper."""
+import ast
+import hashlib
+import json
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+ROOT = Path("C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+BASE = ROOT / "Document/Week6/results/full_requirements_20261028"
+SOURCE = HERE.parent / "week6_normal019_independent_audit_20261029/run_ended_audit_001.py"
+TARGET = HERE / "run_ended_audit_001.py"
+OUT = BASE / "review/transient001_preparation_001"
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def bound(path):
+    return {"path": str(path), "sha256": sha(path), "bytes": path.stat().st_size}
+
+
+assert sha(SOURCE) == "232496909974915143c1955c6e4ec9420840dedd78bb43e603ee0dee6b72e7b9"
+text = SOURCE.read_text("utf-8")
+text = text.replace("normal019", "transient001").replace("normal_019", "transient_001")
+text = text.replace("fixture_normal_015", "fixture_transient_001")
+text = text.replace('prereg["normal"]', 'prereg["transient"]')
+old = 'ACK_SHA = "0c1de89ef5e2514aafe8ef08b69b600b28af11a521602b4778904d74769fbc20"\n'
+assert old in text
+text = text.replace(old, "")
+old = '    assert args.claim_ack_sha256 == ACK_SHA, "Use Root\'s already recorded external acknowledgement"'
+new = '    assert len(args.claim_ack_sha256) == 64 and all(c in "0123456789abcdef" for c in args.claim_ack_sha256), "Root must provide the actual external acknowledgement SHA at execution"'
+assert old in text
+text = text.replace(old, new)
+old = '    fixture = Path(command[command.index("--fixture-directory") + 1]).resolve()'
+assert text.count(old) == 1
+text = text.replace(old, old + '\n    assert command[command.index("--mode") + 1] == "transient"\n    assert prereg["transient"]["application_review_rejections"] == 1')
+old = '    assert launch["schema"] == "week6.fixture.launch.v1"'
+assert text.count(old) == 1
+text = text.replace(old, old + '\n    assert launch["command"][launch["command"].index("--mode") + 1] == "transient"')
+ast.parse(text, filename=str(TARGET))
+with TARGET.open("x", encoding="utf-8", newline="\n") as stream:
+    stream.write(text)
+
+freeze_path = BASE / "receipt_envelope_001/final_source_freeze_002.json"
+prereg_path = BASE / "live/preregistered_v6_011.json"
+assert sha(freeze_path) == "70a6cde9ac0c20aa2d637d8a1747c09c33427a41c5bcb44202299da1009dbbb0"
+assert sha(prereg_path) == "e891b25d91adfbac7dc7e617cafedc7b3633a7b5c6cb482a0ce2468e844a6104"
+freeze = json.loads(freeze_path.read_text("utf-8"))
+prereg = json.loads(prereg_path.read_text("utf-8"))
+assert prereg["transient"]["name"] == "transient_001" and prereg["transient"]["fixture"] == "fixture_transient_001"
+pins = {path: sha(ROOT / path) for path in freeze["code_pins"]}
+assert pins == freeze["code_pins"] and len(pins) == 274
+assert sha(ROOT / "README.md") == freeze["readme_sha256"]
+assert sha(ROOT / "requirements-dev.txt") == freeze["requirements_dev_sha256"]
+OUT.mkdir(exist_ok=False)
+for source in (TARGET, Path(__file__)):
+    with (OUT / (source.name + ".txt")).open("xb") as stream:
+        stream.write(source.read_bytes())
+record = {"schema": "week6.transient001.ended_helper_preparation.v1", "status": "prepared_not_executed",
+    "source_normal019_helper": bound(SOURCE), "helper": bound(TARGET), "preparation_script": bound(Path(__file__)),
+    "freeze": bound(freeze_path), "preregistration": bound(prereg_path), "expected_mode": "transient",
+    "predeclared_application_review_rejections": 1,
+    "code_pins_count": len(pins), "code_pins_equal_freeze": True, "current_code_pins": pins,
+    "readme_sha256": sha(ROOT / "README.md"), "requirements_dev_sha256": sha(ROOT / "requirements-dev.txt"),
+    "active_case_files_read": [], "fixture_hidden_journal_read": False, "claim_original_or_ack_read": False,
+    "saved_case_or_fixture_inventory_performed": False, "auditor_invocations": [], "helper_main_executed": False,
+    "model_gui_ocr_training_calls": 0,
+    "execution_requires": ["Root explicit actual owner/session ended authorization", "--owner-exit-confirmed",
+        "--operator-handoff .../transient_001/operator_handoff_003.json", "--claim-ack-sha256 ACTUAL_ROOT_ACK_SHA_NOT_YET_SUPPLIED"],
+    "deferred_until_actual_end": ["actual Root acknowledgement hash and pre-owner native claim",
+        "original and copied claim byte equality; fixture identity, mode and launch match",
+        "strict audit actual process exit and new receipt-protocol actual process exit",
+        "all ended case and fixture raw hashes stable; unchanged source and dependencies",
+        "Root semantic, one real transient rejection/recovery, tool chronology and mid-run monitor review"],
+    "meaning": "Static preparation only. The transient run outcome, actual retry and receipt attribution remain unobserved here."}
+path = OUT / "preparation_manifest_001.json"
+with path.open("x", encoding="utf-8", newline="\n") as stream:
+    json.dump(record, stream, ensure_ascii=False, indent=2)
+    stream.write("\n")
+print(json.dumps({"manifest": str(path), "sha256": sha(path), "helper_sha256": sha(TARGET)}))

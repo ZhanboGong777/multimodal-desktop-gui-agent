@@ -1,0 +1,111 @@
+{
+  "schema": "week6.normal012.local_model_metadata_readonly.v1",
+  "owner_pid": 80672,
+  "created_at_utc": "2026-10-28T11:24:57.622023+00:00",
+  "receipts": [
+    {
+      "endpoint": "/api/show",
+      "method": "POST",
+      "status_code": 200,
+      "started_at_utc": "2026-10-28T11:24:57.441312+00:00",
+      "elapsed_seconds": 0.09399999992456287,
+      "raw_response_bytes": 26426,
+      "raw_response_sha256": "aab17ff4fed08c64ac9c96f7b109fcfc22812242ab13a04e14c0642297938ce2"
+    },
+    {
+      "endpoint": "/api/tags",
+      "method": "GET",
+      "status_code": 200,
+      "started_at_utc": "2026-10-28T11:24:57.540282+00:00",
+      "elapsed_seconds": 0.07800000009592623,
+      "raw_response_bytes": 1278,
+      "raw_response_sha256": "c471834d2e4f35f5369ce5b164328fa04bf4f739fbc2d4b410794a094fe2100b"
+    }
+  ],
+  "vl_model": "qwen2.5vl:7b",
+  "vl_capabilities": [
+    "completion",
+    "vision"
+  ],
+  "vl_details": {
+    "parent_model": "qwen2.5vl:7b",
+    "format": "gguf",
+    "family": "qwen25vl",
+    "families": [
+      "qwen25vl"
+    ],
+    "parameter_size": "8.3B",
+    "quantization_level": "Q4_K_M"
+  },
+  "template_sha256": "a242d8dfdc8f8c2b0586ee85fba70adb408fb633aba2836fe1b05f2c46631474",
+  "template_characters": 487,
+  "template_mentions_system_field": true,
+  "template_mentions_message_role": true,
+  "template_mentions_message_content": true,
+  "system_characters": 28,
+  "system_sha256": "75357d685f238b6afd7738be9786fdafde641eb6ca9a3be7471939715a68a4de",
+  "parameters": "temperature                    0.0001\nnum_ctx                        32768",
+  "installed_models": [
+    {
+      "name": "qwen2.5vl:7b",
+      "model": "qwen2.5vl:7b",
+      "digest": "c82e67b1ceeeca8a1bbc93a7c3478934b42398d90d71ffc616b00c0f2b30e292",
+      "size": 5969245426,
+      "modified_at": "2026-10-06T11:49:40.3644314+11:00",
+      "details": {
+        "parent_model": "qwen2.5vl:7b",
+        "format": "gguf",
+        "family": "qwen25vl",
+        "families": [
+          "qwen25vl"
+        ],
+        "parameter_size": "8.3B",
+        "quantization_level": "Q4_K_M",
+        "context_length": 128000,
+        "embedding_length": 3584
+      }
+    },
+    {
+      "name": "llava:7b",
+      "model": "llava:7b",
+      "digest": "8dd30f6b0cb19f555f2c7a7ebda861449ea2cc76bf1f44e262931f45fc81d081",
+      "size": 4733363377,
+      "modified_at": "2026-09-27T02:10:33.4399384+10:00",
+      "details": {
+        "parent_model": "",
+        "format": "gguf",
+        "family": "llama",
+        "families": [
+          "llama",
+          "clip"
+        ],
+        "parameter_size": "7B",
+        "quantization_level": "Q4_0",
+        "context_length": 32768,
+        "embedding_length": 4096
+      }
+    },
+    {
+      "name": "qwen2.5vl:3b",
+      "model": "qwen2.5vl:3b",
+      "digest": "fb90415cde1ef08aa669ae74b082d49b158729b6db1ab183c941417d507e71a1",
+      "size": 3200627168,
+      "modified_at": "2026-09-27T01:33:50.1051439+10:00",
+      "details": {
+        "parent_model": "",
+        "format": "gguf",
+        "family": "qwen25vl",
+        "families": [
+          "qwen25vl"
+        ],
+        "parameter_size": "3.8B",
+        "quantization_level": "Q4_K_M",
+        "context_length": 128000,
+        "embedding_length": 2048
+      }
+    }
+  ],
+  "generation_chat_load_pull_calls": 0,
+  "models_changed": false,
+  "no_source_tests_configs_gui_edits": true
+}

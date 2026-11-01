@@ -1,0 +1,28 @@
+{
+  "schema": "week6.quoted_target.source_scope_review.v1",
+  "utc": "2026-11-01T07:32:50.647874+00:00",
+  "records": [
+    {
+      "path": "src/gui_agent/runtime/action_adapter.py",
+      "before_sha256": "222686942e4623d4743ac50e6da87599d4ba95d84ed9d1d855de089324a0eeda",
+      "after_sha256": "9eb497fdf77843cf2cdfced4363cd09fe1b0b7466c6145f98c6687f270809c9f"
+    }
+  ],
+  "original284_pins_preserved_except_scoped_action_adapter": true,
+  "all_original_function_ast_identical_after_removing_two_helper_calls": true,
+  "new_test": "tests/test_week6_quoted_target_consistency.py",
+  "new_test_sha256": "4e20f8915edfdb76889a4ebaacaeb8fa528d1892557deb2178f365a1e71b434a",
+  "saved_native_counterexample": {
+    "case": "transient_009",
+    "description": "Select the 'BETA' project button.",
+    "native_target_text": "ALPHA",
+    "actual_observation": "obs-0001",
+    "original_guard_accepted": true,
+    "current_guard_rejected": true,
+    "error": "quoted target conflict: obs-0001: description names 'BETA', but target_text 'ALPHA' and element 'obs-0001-e001' identify another readable target; refusing input without choosing a replacement",
+    "raw_step_not_rewritten": true,
+    "model_gui_calls": 0,
+    "acceptance_granted": false
+  },
+  "scope": "Narrow syntactic quoted target versus readable native target witness. Existing text/ID guards, stale-frame rules, primitive actions, semantic plan/condition parsing, completion credit, budgets and prompts unchanged. The local program rejects a contradictory answer and does not select or author a replacement. Unquoted/complex descriptions or targets without readable witnesses remain outside this check."
+}

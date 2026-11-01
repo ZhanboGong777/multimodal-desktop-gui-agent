@@ -23,6 +23,7 @@ from typing import Any
 from uuid import uuid4
 
 STATUS_SCHEMA = "week6.run_status.v1"
+SEMANTIC_STATUS_SCHEMA = "week6.run_status.semantic.v1"
 READ_SCHEMA = "week6.status_read.v1"
 STAGES = frozenset({
     "initializing", "preconditions", "decomposing", "observing", "planning",
@@ -100,7 +101,7 @@ def _validate(value: Any) -> dict[str, Any]:
     """Validate an entire record; unknown fields are never echoed by the reader."""
     if not isinstance(value, dict) or set(value) != _FIELDS:
         raise ValueError("unexpected status fields")
-    if value["schema"] != STATUS_SCHEMA or not isinstance(value["run_id"], str):
+    if value["schema"] not in {STATUS_SCHEMA, SEMANTIC_STATUS_SCHEMA} or not isinstance(value["run_id"], str):
         raise ValueError("invalid schema or run identity")
     if not _RUN_ID.fullmatch(value["run_id"]):
         raise ValueError("invalid run identity")
@@ -204,14 +205,33 @@ class RunMonitor:
     file retry. No event append, model request, or desktop action is retried.
     """
 
-    def __init__(self, directory: str | Path, *, clock: Callable[[], float] = time.monotonic):
+    def __init__(self, directory: str | Path, *, clock: Callable[[], float] = time.monotonic,
+                 on_status: Callable[[dict[str, Any]], None] | None = None):
         self.directory = Path(directory)
         self.clock = clock
         self._status: dict[str, Any] | None = None
         self._started: float | None = None
         self._finished = False
         self._failures: list[str] = []
+        self._observer_failures: list[str] = []
         self._lock = threading.RLock()
+        self.on_status = on_status
+
+    @property
+    def on_status(self) -> Callable[[dict[str, Any]], None] | None:
+        return self._on_status
+
+    @on_status.setter
+    def on_status(self, observer: Callable[[dict[str, Any]], None] | None) -> None:
+        if observer is not None and not callable(observer):
+            raise ValueError("invalid status observer")
+        with self._lock:
+            self._on_status = observer
+
+    @property
+    def observer_failures(self) -> tuple[str, ...]:
+        """Fixed telemetry diagnostics, separate from disk-write failures."""
+        return tuple(self._observer_failures)
 
     @property
     def write_failures(self) -> tuple[str, ...]:
@@ -272,22 +292,35 @@ class RunMonitor:
             self._failure("latest_write_failed")
         status["write_failures"] = list(self._failures)
         self._status = status
+        # Notify only after both saved records are available. A detached copy
+        # prevents an observer from rewriting this monitor's state or journal.
+        # Do not consume execution-clock reads or retry a failed observer.
+        if self._on_status is not None and not status["write_failures"]:
+            try:
+                self._on_status({**status, "write_failures": list(status["write_failures"])})
+            except Exception:  # noqa: BLE001 - isolate telemetry faults; preserve process cancellation/exit
+                if "status_observer_failed" not in self._observer_failures:
+                    self._observer_failures.append("status_observer_failed")
+                    _LOG.warning("Run monitor telemetry failure: status_observer_failed")
         return {**status, "write_failures": list(status["write_failures"])}
 
     def start(self, case_id: str, execute: bool, max_actions: int, max_planning_attempts: int,
-              subgoals_total: int = 0) -> dict[str, Any]:
+              subgoals_total: int = 0, *, dynamic_subgoals: bool = False) -> dict[str, Any]:
         with self._lock:
             if self._status is not None:
                 raise ValueError("monitor already started")
             if any((self.directory / name).exists() for name in ("run_status.json", "status_events.jsonl")):
                 raise ValueError("refusing to overwrite existing monitor evidence")
+            if type(dynamic_subgoals) is not bool:
+                raise ValueError("invalid dynamic_subgoals")
             started = self.clock()
             if not math.isfinite(started):
                 raise ValueError("invalid monotonic clock")
             self._started = started
             _, identity = _process_info(os.getpid())
             status = {
-                "schema": STATUS_SCHEMA, "run_id": uuid4().hex, "case_id": case_id,
+                "schema": SEMANTIC_STATUS_SCHEMA if dynamic_subgoals else STATUS_SCHEMA,
+                "run_id": uuid4().hex, "case_id": case_id,
                 "execute": execute, "pid": os.getpid(), "process_identity": identity,
                 "seq": 1, "event": "started", "stage": "initializing", "task_status": None,
                 "updated_at_utc": datetime.now(UTC).isoformat(), "elapsed_ms": 0.0,
@@ -299,12 +332,22 @@ class RunMonitor:
 
     def _next(self, stage: str, *, planning_pass: int | None, actions_used: int | None,
               subgoal_id: str | None, subgoals_completed: int | None,
-              detail_code: str, task_status: str | None = None) -> dict[str, Any]:
+              subgoals_total: int | None, detail_code: str,
+              task_status: str | None = None) -> dict[str, Any]:
         if self._status is None or self._started is None:
             raise ValueError("monitor has not started")
         if self._finished:
             raise ValueError("monitor already finished")
         status = dict(self._status)
+        if subgoals_total is not None:
+            _integer(subgoals_total, "subgoals_total", _MAX_SUBGOALS)
+            if subgoals_total != status["subgoals_total"]:
+                # Only the explicit semantic schema may accept a new remaining
+                # plan. Completed goals never regress; abandoned plans remain
+                # in the semantic ledger rather than inflating this total.
+                if status["schema"] != SEMANTIC_STATUS_SCHEMA or stage != "decomposing" or task_status:
+                    raise ValueError("subgoal total change requires semantic decomposition")
+                status["subgoals_total"] = subgoals_total
         for name, value in (("planning_pass", planning_pass), ("actions_used", actions_used),
                             ("subgoals_completed", subgoals_completed)):
             if value is not None:
@@ -322,12 +365,12 @@ class RunMonitor:
 
     def update(self, stage: str, *, planning_pass: int | None = None, actions_used: int | None = None,
                subgoal_id: str | None = None, subgoals_completed: int | None = None,
-               detail_code: str = "") -> dict[str, Any]:
+               subgoals_total: int | None = None, detail_code: str = "") -> dict[str, Any]:
         """Record a phase; None clears the current subgoal ID, without verifying it."""
         with self._lock:
             status = self._next(stage, planning_pass=planning_pass, actions_used=actions_used,
                                 subgoal_id=subgoal_id, subgoals_completed=subgoals_completed,
-                                detail_code=detail_code)
+                                subgoals_total=subgoals_total, detail_code=detail_code)
             return self._persist(status)
 
     def finish(self, status: str, *, actions_used: int | None = None,
@@ -337,7 +380,7 @@ class RunMonitor:
                 raise ValueError("unknown task status")
             result = self._next("finished", planning_pass=None, actions_used=actions_used,
                                 subgoal_id=None, subgoals_completed=subgoals_completed,
-                                detail_code=detail_code, task_status=status)
+                                subgoals_total=None, detail_code=detail_code, task_status=status)
             snapshot = self._persist(result)
             self._finished = True
             return snapshot
@@ -378,10 +421,15 @@ def _read_journal(path: Path) -> tuple[dict[str, Any] | None, list[str]]:
                     diagnostics.append("journal_sequence_mismatch")
                 if previous["event"] == "finished":
                     diagnostics.append("journal_after_finish")
-                for key in ("case_id", "execute", "pid", "process_identity", "max_actions",
-                            "max_planning_attempts", "subgoals_total"):
+                for key in ("schema", "case_id", "execute", "pid", "process_identity", "max_actions",
+                            "max_planning_attempts"):
                     if event[key] != previous[key]:
                         diagnostics.append("journal_identity_mismatch")
+                if (event["subgoals_total"] != previous["subgoals_total"]
+                        and (event["schema"] != SEMANTIC_STATUS_SCHEMA
+                            or previous["schema"] != SEMANTIC_STATUS_SCHEMA
+                            or event["stage"] != "decomposing" or event["event"] != "updated")):
+                    diagnostics.append("journal_identity_mismatch")
                 for key in ("elapsed_ms", "planning_pass", "actions_used", "subgoals_completed"):
                     if event[key] < previous[key]:
                         diagnostics.append("journal_progress_regressed")

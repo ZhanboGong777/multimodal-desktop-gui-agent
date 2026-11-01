@@ -1,0 +1,291 @@
+{
+  "schema_version": "week6.semantic_subtasks.v6",
+  "frozen_task": {
+    "case_id": "commit_local",
+    "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Commit the BLUE report for project BETA locally after review.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+    "target_app": null,
+    "preconditions": [],
+    "success_rules": [],
+    "verification": "automatic",
+    "expect_text": [
+      "Project BETA",
+      "Theme BLUE",
+      "LOCAL COMPLETE"
+    ],
+    "forbid_text": [],
+    "requires_processes": [],
+    "forbids_processes": [],
+    "must_exit_processes": [],
+    "risk": "medium",
+    "message_conversation": null,
+    "gate_on_step_verification": false
+  },
+  "child_status": "succeeded",
+  "child_verification": {
+    "outcome": "passed",
+    "method": "automatic",
+    "detail": "all success rules matched against the current screen",
+    "evidence": {
+      "observation_id": "obs-0012",
+      "expect_text": [
+        "Project BETA",
+        "Theme BLUE",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [],
+      "verification_source": "frozen_model_semantic_subtask_postconditions"
+    }
+  },
+  "semantic_postcondition_verification": {
+    "outcome": "passed",
+    "method": "automatic",
+    "detail": "all success rules matched against the current screen",
+    "evidence": {
+      "observation_id": "obs-0012",
+      "expect_text": [
+        "Project BETA",
+        "Theme BLUE",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": []
+    }
+  },
+  "post_observation_id": "obs-0012",
+  "confirmed_input_count": 3,
+  "planning_accounting_complete": true,
+  "eligible_for_semantic_credit": true,
+  "planning_limit_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_017\\run\\automatic\\goal_001_002_commit_local\\001_commit_local\\single_step_planning_limit.json",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Click the 'Review report' button to proceed with the review.",
+      "action_type": "click",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "click",
+          "x": 1282,
+          "y": 1049,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Review report"
+        },
+        "element_id": "obs-0002-e001",
+        "screenshot_point": {
+          "x": 1282,
+          "y": 1049
+        },
+        "control_point": {
+          "x": 1282,
+          "y": 1049
+        },
+        "note": "text 'Review report' -> obs-0002-e001 (re-bound from obs-0001-e001 in an earlier frame)"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "click",
+          "x": 1282,
+          "y": 1049,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Review report"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: report, review",
+        "evidence": {
+          "observation_id": "obs-0003",
+          "changed": true,
+          "element_count": 22,
+          "expectation_tokens": [
+            "report",
+            "review",
+            "interface",
+            "will",
+            "load"
+          ],
+          "expectation_hits": [
+            "report",
+            "review"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 16875.0,
+      "after_observation_id": "obs-0003"
+    },
+    {
+      "index": 2,
+      "step_id": "s1",
+      "description": "Attempt to click the 'Review report' button to proceed with the review.",
+      "action_type": "click",
+      "observation_id": "obs-0006",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "click",
+          "x": 1282,
+          "y": 1094,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Review report"
+        },
+        "element_id": "obs-0006-e001",
+        "screenshot_point": {
+          "x": 1282,
+          "y": 1094
+        },
+        "control_point": {
+          "x": 1282,
+          "y": 1094
+        },
+        "note": "text 'Review report' -> obs-0006-e001 (re-bound from obs-0005-e001 in an earlier frame)"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "click",
+          "x": 1282,
+          "y": 1094,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Review report"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: review, review",
+        "evidence": {
+          "observation_id": "obs-0007",
+          "changed": true,
+          "element_count": 20,
+          "expectation_tokens": [
+            "system",
+            "will",
+            "attempt",
+            "initiate",
+            "review",
+            "process",
+            "review",
+            "unavailable",
+            "message",
+            "will",
+            "remain"
+          ],
+          "expectation_hits": [
+            "review",
+            "review"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 18593.999999997322,
+      "after_observation_id": "obs-0007"
+    },
+    {
+      "index": 3,
+      "step_id": "s1",
+      "description": "Click the 'Commit locally' button to finalize the local commit.",
+      "action_type": "click",
+      "observation_id": "obs-0010",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "click",
+          "x": 1281,
+          "y": 1049,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Commit locally"
+        },
+        "element_id": "obs-0010-e004",
+        "screenshot_point": {
+          "x": 1281,
+          "y": 1049
+        },
+        "control_point": {
+          "x": 1281,
+          "y": 1049
+        },
+        "note": "text 'Commit locally' -> obs-0010-e004 (re-bound from obs-0009-e004 in an earlier frame)"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "click",
+          "x": 1281,
+          "y": 1049,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Commit locally"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: local",
+        "evidence": {
+          "observation_id": "obs-0011",
+          "changed": true,
+          "element_count": 25,
+          "expectation_tokens": [
+            "local",
+            "commit",
+            "executed",
+            "task",
+            "completed"
+          ],
+          "expectation_hits": [
+            "local"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 18578.000000008615,
+      "after_observation_id": "obs-0011"
+    }
+  ],
+  "meaning": "The original model-proposed literal semantic postconditions were independently checked; no raw failed step was rewritten."
+}

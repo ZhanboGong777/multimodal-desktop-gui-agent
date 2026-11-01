@@ -1,0 +1,50 @@
+{
+  "schema_version": "week6.semantic_subtasks.v6",
+  "frozen_task": {
+    "case_id": "SetPreference",
+    "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Set the requested preference\nComplete original caller request: Set the requested preference and persist the configuration",
+    "target_app": null,
+    "preconditions": [],
+    "success_rules": [],
+    "verification": "automatic",
+    "expect_text": [
+      "Verified part 1"
+    ],
+    "forbid_text": [],
+    "requires_processes": [],
+    "forbids_processes": [],
+    "must_exit_processes": [],
+    "risk": "medium",
+    "message_conversation": null,
+    "gate_on_step_verification": false
+  },
+  "child_status": "failed",
+  "child_verification": null,
+  "semantic_postcondition_verification": {
+    "outcome": "inconclusive",
+    "method": "automatic",
+    "detail": "no observation available to verify against",
+    "evidence": {}
+  },
+  "post_observation_id": null,
+  "confirmed_input_count": 0,
+  "planning_accounting_complete": true,
+  "eligible_for_semantic_credit": false,
+  "planning_limit_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\.pytest-tmp-grounding-consistency-review001\\test_review_semantic_replannin1\\semantic\\goal_001_001_SetPreference\\001_SetPreference\\single_step_planning_limit.json",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Choose the requested control",
+      "action_type": "click",
+      "observation_id": "obs-0004",
+      "resolved": null,
+      "action_result": null,
+      "verification": null,
+      "error": "target consistency conflict: obs-0003: element 'obs-0003-e999' has text 'OTHER CONTROL', inconsistent with target_text 'Advance control'; refusing to replace the supplied element ID",
+      "elapsed_ms": 0.0,
+      "after_observation_id": null
+    }
+  ],
+  "meaning": "The original model-proposed literal semantic postconditions were independently checked; no raw failed step was rewritten."
+}

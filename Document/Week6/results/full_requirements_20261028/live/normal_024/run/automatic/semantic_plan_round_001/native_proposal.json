@@ -1,0 +1,44 @@
+{
+  "status": "ready",
+  "reason": "Caller request is fully executable with visible controls; no missing parameters or unsafe operations. Two distinct semantic objectives are planned to cover preparation and review/commit.",
+  "subgoals": [
+    {
+      "instruction": "Prepare the GREEN report for project ALPHA by selecting the correct project and theme, then save the draft locally.",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN",
+        "Draft Saved"
+      ],
+      "forbid_text": [
+        "Review",
+        "Commit",
+        "Push",
+        "Sync",
+        "Online",
+        "External",
+        "Network",
+        "Connection Required"
+      ],
+      "goal_id": "prepare_report"
+    },
+    {
+      "instruction": "Review the GREEN report for project ALPHA and commit it locally, ensuring no external communication occurs.",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [
+        "Review unavailable",
+        "Retry",
+        "Budget exhausted",
+        "Online",
+        "Sync",
+        "Push",
+        "External",
+        "Connection Required"
+      ],
+      "goal_id": "review_and_commit"
+    }
+  ]
+}

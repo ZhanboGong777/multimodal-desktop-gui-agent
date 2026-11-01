@@ -1,0 +1,122 @@
+{
+  "schema_version": "week6.semantic_subtasks.v6",
+  "frozen_task": {
+    "case_id": "commit_report",
+    "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Commit the BLUE report for project BETA locally by selecting the commit option and confirming the commit using visible controls.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+    "target_app": null,
+    "preconditions": [],
+    "success_rules": [],
+    "verification": "automatic",
+    "expect_text": [
+      "LOCAL COMPLETE",
+      "Project BETA",
+      "Theme BLUE",
+      "Commit Successful"
+    ],
+    "forbid_text": [
+      "Error",
+      "Unavailable",
+      "Connection Failed",
+      "Commit Failed"
+    ],
+    "requires_processes": [],
+    "forbids_processes": [],
+    "must_exit_processes": [],
+    "risk": "medium",
+    "message_conversation": null,
+    "gate_on_step_verification": false
+  },
+  "child_status": "failed",
+  "child_verification": {
+    "outcome": "inconclusive",
+    "method": "automatic",
+    "detail": "could not look at the screen to verify: RuntimeError: dedicated-window activation receipt missing",
+    "evidence": {}
+  },
+  "semantic_postcondition_verification": {
+    "outcome": "inconclusive",
+    "method": "automatic",
+    "detail": "no observation available to verify against",
+    "evidence": {}
+  },
+  "post_observation_id": null,
+  "confirmed_input_count": 1,
+  "planning_accounting_complete": true,
+  "eligible_for_semantic_credit": false,
+  "planning_limit_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_008\\run\\automatic\\goal_002_002_commit_report\\001_commit_report\\single_step_planning_limit.json",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Click the 'Commit locally' button to commit the report.",
+      "action_type": "click",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "click",
+          "x": 1281,
+          "y": 1049,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Commit locally"
+        },
+        "element_id": "obs-0002-e004",
+        "screenshot_point": {
+          "x": 1281,
+          "y": 1049
+        },
+        "control_point": {
+          "x": 1281,
+          "y": 1049
+        },
+        "note": "text 'Commit locally' -> obs-0002-e004 (re-bound from obs-0001-e004 in an earlier frame)"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "click",
+          "x": 1281,
+          "y": 1049,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Commit locally"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: report",
+        "evidence": {
+          "observation_id": "obs-0003",
+          "changed": true,
+          "element_count": 25,
+          "expectation_tokens": [
+            "report",
+            "committed",
+            "locally"
+          ],
+          "expectation_hits": [
+            "report"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 22046.999999991385,
+      "after_observation_id": "obs-0003"
+    }
+  ],
+  "meaning": "The original model-proposed literal semantic postconditions were independently checked; no raw failed step was rewritten."
+}

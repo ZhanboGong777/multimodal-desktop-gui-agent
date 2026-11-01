@@ -1,0 +1,51 @@
+{
+  "schema": "week6.independent.repair_review.assertion_correction.v1",
+  "old_test": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_repair_feedback_review_001\\new_test_before_assertion_correction_001.py.txt",
+  "old_test_sha256": "b169ca22366a46a6ac3484ba7989a5f8864d4548bc4d6fa740fba2d20f1dd280",
+  "first_target_actual_exit": 1,
+  "first_target_passed": 17,
+  "first_target_failed": 2,
+  "production_changed": false,
+  "auditor_changed_after_first_target": false,
+  "corrections": [
+    {
+      "case": "planning budget",
+      "old": "cap1 expected an in-run failure",
+      "actual": "existing entry guard raises ValueError for fewer than decomposition-plus-action planning slots",
+      "new": "cap2 permits two bad local replies but never a third; no child/input/credit"
+    },
+    {
+      "case": "late repaired response",
+      "old": "expected producer attempt response to retain late content",
+      "actual": "transport original retains reply; BudgetedModelClient returns empty content with deadline error to producer",
+      "new": "assert both original transport content and empty rejected producer reply, unchanged counters/no child/input"
+    }
+  ],
+  "pre_target_runner_issue": {
+    "tool_reported_process_exit_code": 1,
+    "python": "bundled artifact runtime",
+    "exception": "ModuleNotFoundError: No module named psutil",
+    "pytest_started": false,
+    "correction": "run identical harness with existing project venv, no package installation"
+  },
+  "selected_originals": [
+    {
+      "source": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_repair_feedback_review_001\\cpu_validation_001\\pytest_tmp\\test_review_late_repaired_repl0\\run\\semantic\\semantic_plan_round_001\\attempt_02_response.json",
+      "destination": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_repair_feedback_review_001\\cpu_validation_001\\selected_failure_evidence\\late_reply\\semantic_plan_round_001\\attempt_02_response.json",
+      "source_sha256": "00dc5a56d0fe637b9d2d20160e4b99900316bfed17d5a6ed1806aaad6829a287",
+      "destination_sha256": "00dc5a56d0fe637b9d2d20160e4b99900316bfed17d5a6ed1806aaad6829a287"
+    },
+    {
+      "source": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_repair_feedback_review_001\\cpu_validation_001\\pytest_tmp\\test_review_late_repaired_repl0\\run\\semantic\\transport_requests.jsonl",
+      "destination": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_repair_feedback_review_001\\cpu_validation_001\\selected_failure_evidence\\late_reply\\transport_requests.jsonl",
+      "source_sha256": "d24b56639c819266b497d49965e328f8e867535f11ffdc0eb507a6b630b08f15",
+      "destination_sha256": "d24b56639c819266b497d49965e328f8e867535f11ffdc0eb507a6b630b08f15"
+    },
+    {
+      "source": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_repair_feedback_review_001\\cpu_validation_001\\pytest_tmp\\test_review_late_repaired_repl0\\run\\semantic\\automatic_workflow_summary.json",
+      "destination": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_repair_feedback_review_001\\cpu_validation_001\\selected_failure_evidence\\late_reply\\automatic_workflow_summary.json",
+      "source_sha256": "4e81559d842e7654868a796b12cff6492890d02d1af23e070984e73d625ee9bc",
+      "destination_sha256": "4e81559d842e7654868a796b12cff6492890d02d1af23e070984e73d625ee9bc"
+    }
+  ]
+}

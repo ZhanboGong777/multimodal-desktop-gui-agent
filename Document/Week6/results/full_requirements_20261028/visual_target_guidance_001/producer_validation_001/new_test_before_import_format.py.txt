@@ -1,0 +1,222 @@
+"""Fixed generation advice never replaces native targets or authorizes input."""
+from __future__ import annotations
+
+import json
+from copy import deepcopy
+from datetime import UTC, datetime, timedelta
+
+import pytest
+from PIL import Image, ImageDraw
+from test_runtime_runner import FakeExecutor, FakeObserver, _approved_message_context
+from test_week6_action_output_contract import sdk, user
+from test_week6_automatic_decomposition import Clock
+from test_week6_semantic_subtasks import lab, proposal
+from test_week6_semantic_text_context import _http_client, _persist_synthetic_pixels, _text_user
+from test_week6_target_bindings import element
+
+from gui_agent.planning.planner import PlanResult, TaskPlanner
+from gui_agent.planning.prompts import SYSTEM_PROMPT
+from gui_agent.planning.schemas import TaskPlan
+from gui_agent.planning.target_bindings import (
+    GENERATION_TARGETING_POLICY_TEXT,
+    GENERATION_TARGETING_POLICY_VERSION,
+    generation_targeting_policy,
+)
+from gui_agent.planning.workflow_decomposer import BudgetedModelClient
+from gui_agent.recording import RunSession
+from gui_agent.runtime.recorder import TaskRecorder
+from gui_agent.runtime.runner import TaskRunner, Timings
+from gui_agent.runtime.schemas import ExecutionOptions, ObservationSnapshot, StepRecord, TaskSpec, VerificationResult
+from gui_agent.runtime.verification import Verifier
+from gui_agent.schemas import BoundingBox, ScreenInfo
+
+
+def native(identifier="", *, query="Apply change"):
+    return json.dumps({"task_id": "settings", "instruction": "Apply the requested local change", "steps": [{
+        "step_id": "next", "description": "Choose the currently requested control", "action_type": "click",
+        "target_text": query, "arguments": {"element_id": identifier}, "status": "pending"}], "errors": []})
+
+
+def frames(tmp_path, *, wrong_scope=False, wordrun=False):
+    result = []
+    for index in range(1, 7):
+        oid = f"obs-{index:04d}"
+        bounds = BoundingBox(left=0, top=0, right=400, bottom=260)
+        elements = [element(oid + "-e000", "Verified outcome" if index >= 5 else "Unfinished",
+                            box=(10, 10, 180, 40))]
+        if wordrun:
+            elements.extend([element(oid + "-e001", "Apply", box=(120, 115, 170, 145)),
+                             element(oid + "-e002", "change", box=(175, 115, 245, 145))])
+        else:
+            elements.append(element(oid + "-e001", source="contour", box=(120, 110, 280, 170)))
+        path = tmp_path / (oid + ".png")
+        pixels = Image.new("RGB", (400, 260), "white")
+        draw = ImageDraw.Draw(pixels)
+        draw.rectangle((120, 110, 279, 169), fill="#b2d1ed", outline="black", width=3)
+        draw.text((140, 130), "Apply change", fill="black")
+        pixels.save(path)
+        result.append(ObservationSnapshot(observation_id=oid,
+            captured_at=datetime(2026, 10, 29, tzinfo=UTC) + timedelta(seconds=index), image_path=str(path),
+            screen_info=ScreenInfo(screenshot_width=400, screenshot_height=260, control_width=400, control_height=260),
+            elements=elements, window_title="Prepared settings", window_class="SyntheticWindow",
+            window_id="other-window" if wrong_scope and index == 4 else "prepared-window",
+            window_bounds=bounds, foreground_stable=True))
+    return result
+
+
+def runtime(tmp_path, replies, *, max_requests=4, wrong_scope=False, wordrun=False):
+    bodies = []
+    client, transport = sdk(replies, bodies)
+    clock = Clock()
+    budgeted = BudgetedModelClient(client, max_requests=max_requests, deadline=clock() + 100,
+                                   clock=clock, audit_path=tmp_path / "transport_requests.jsonl")
+    observer = FakeObserver(frames(tmp_path, wrong_scope=wrong_scope, wordrun=wordrun))
+    observer.foreground_matches = lambda _frame: True
+    executor = FakeExecutor()
+    from gui_agent.runtime.action_adapter import ActionAdapter
+    recorder = TaskRecorder(RunSession.create(tmp_path / "records", session_id="visual-flow"))
+    runner = TaskRunner(observer=observer, planner=TaskPlanner(budgeted, max_steps=1, max_format_retries=0),
+        executor=executor, adapter=ActionAdapter(platform="win32"), verifier=Verifier(), recorder=recorder,
+        clock=clock, sleep=lambda _seconds: None)
+    task = TaskSpec(case_id="Settings", instruction="Apply the requested local change",
+                    expect_text=["Verified outcome"], gate_on_step_verification=False)
+    return runner, task, executor, bodies, budgeted, transport, clock
+
+
+def test_real_sdk_and_runtime_preserve_failed_native_then_execute_only_provider_chosen_anonymous_candidate(tmp_path):
+    rejected, selected = native(), native("obs-0003-e001")
+    runner, task, executor, bodies, budgeted, transport, _ = runtime(tmp_path, [rejected, selected])
+    try:
+        result = runner.run(task, ExecutionOptions(execute=True, confirm=False, max_actions=1,
+            max_planning_attempts=2, verification_timeout_seconds=0))
+    finally:
+        transport.close()
+    assert result.status == "succeeded" and result.action_count == len(executor.actions) == 1
+    assert result.planning_calls == budgeted.request_count == len(bodies) == 2
+    assert result.steps[0].action_result is None and result.steps[0].error.startswith("no element matches ")
+    assert result.steps[1].action_result["success"] is True
+    assert result.steps[1].resolved.element_id == "obs-0004-e001"
+    assert (executor.actions[0][0].x, executor.actions[0][0].y) == (200, 140)
+    packets = [user(body) for body in bodies]
+    assert all(packet["instruction"] == task.instruction for packet in packets)
+    assert all(packet["context"]["targeting_policy"] == generation_targeting_policy() for packet in packets)
+    assert all(body["messages"][0]["content"] == SYSTEM_PROMPT and len(SYSTEM_PROMPT) == 996 for body in bodies)
+    assert "anonymous_without_ocr" in packets[1]["context"]["recovery"]["instruction"]
+    assert "no input was dispatched for that step" in packets[1]["context"]["recovery"]["instruction"]
+    assert all("plan_format_correction" not in packet["context"] for packet in packets)
+    records = [json.loads(line) for line in (tmp_path / "action_planning_attempts.jsonl").read_text("utf8").splitlines()]
+    assert [row["response"]["content"] for row in records] == [rejected, selected]
+    assert all(row["parse_error"] is None for row in records)
+    assert records[0]["parsed_plan"]["steps"][0]["arguments"] == {"element_id": ""}
+    assert records[1]["parsed_plan"]["steps"][0]["arguments"] == {"element_id": "obs-0003-e001"}
+
+
+@pytest.mark.parametrize("fault", ["bad_id", "scope", "http_cap", "planning_cap"])
+def test_guidance_never_repairs_id_bypasses_scope_or_grants_extra_budget(tmp_path, fault):
+    selected = native("obs-0003-e999" if fault == "bad_id" else "obs-0003-e001")
+    runner, task, executor, bodies, budgeted, transport, _ = runtime(tmp_path, [native(), selected],
+        max_requests=1 if fault == "http_cap" else 4, wrong_scope=fault == "scope")
+    try:
+        result = runner.run(task, ExecutionOptions(execute=True, confirm=False, max_actions=1,
+            max_planning_attempts=1 if fault == "planning_cap" else 2, verification_timeout_seconds=0))
+    finally:
+        transport.close()
+    assert result.status != "succeeded" and result.action_count == len(executor.actions) == 0
+    assert budgeted.request_count == len(bodies) == (1 if fault in {"http_cap", "planning_cap"} else 2)
+    assert result.planning_calls <= (1 if fault == "planning_cap" else 2)
+    assert all(record.action_result is None for record in result.steps)
+
+
+def test_adjacent_ocr_words_still_resolve_native_text_only_without_anonymous_selection(tmp_path):
+    runner, task, executor, bodies, _, transport, _ = runtime(tmp_path, [native()], wordrun=True)
+    # The action succeeds from the first plan; its task verification sees the goal.
+    runner.observer.frames[2].elements[0].text = "Verified outcome"
+    runner.observer.frames[3].elements[0].text = "Verified outcome"
+    try:
+        result = runner.run(task, ExecutionOptions(execute=True, confirm=False, max_actions=1,
+            max_planning_attempts=1, verification_timeout_seconds=0))
+    finally:
+        transport.close()
+    assert result.status == "succeeded" and len(executor.actions) == len(bodies) == 1
+    assert "joined from 2 adjacent elements" in result.steps[0].resolved.note
+    assert result.steps[0].resolved.element_id == "obs-0002-e001+obs-0002-e002"
+    assert not user(bodies[0])["context"]["target_bindings"]["anonymous_without_ocr_ids"]
+
+
+def test_policy_is_fixed_copy_isolated_and_keeps_actual_message_subset_authority(tmp_path):
+    first = generation_targeting_policy()
+    assert first == {"schema_version": GENERATION_TARGETING_POLICY_VERSION,
+                     "instruction": GENERATION_TARGETING_POLICY_TEXT, "generation_only": True}
+    first["instruction"] = "FORGED AUTHORITY"
+    assert generation_targeting_policy()["instruction"] == GENERATION_TARGETING_POLICY_TEXT
+    runner, task, opt, _, _, observed = _approved_message_context(tmp_path)
+    context = runner._context(observed, task, opt)
+    assert context["targeting_policy"] == generation_targeting_policy()
+    assert all(text not in json.dumps(context) for text in ("Sidebar", "Transcript", "Other app", "Partial"))
+    assert context["target_bindings"]["scope"] == "authorised_subset"
+    assert {row["element_id"] for row in context["target_bindings"]["candidates"]} == set(context["message_task"]["candidate_ids"])
+    context["targeting_policy"]["instruction"] = "FORGED AUTHORITY"
+    assert runner._context(observed, task, opt)["targeting_policy"] == generation_targeting_policy()
+    runner._message_composer = None
+    unavailable = runner._context(observed, task, opt)
+    assert unavailable["target_bindings"]["candidates"] == [] and unavailable["visible_text"] == ""
+    assert unavailable["targeting_policy"] == generation_targeting_policy()
+
+
+@pytest.mark.parametrize("scenario,expected", [
+    ("no_match", True), ("failed_receipt", False), ("known_receipt", False),
+    ("task_check", False), ("not_prefix", False), ("old_pass", False),
+])
+def test_recovery_hint_requires_this_pass_no_input_internal_no_match_and_does_not_echo_error(tmp_path, scenario, expected):
+    runner, task, _, _, _, transport, clock = runtime(tmp_path, [native()])
+    recorded = []
+    step = StepRecord(index=1, step_id="next", description="private description", action_type="click",
+                      error="no element matches 'UNTRUSTED_SECRET_987' in hidden-geometry-123")
+    if scenario == "failed_receipt":
+        step.action_result = {"success": False, "error": step.error}
+    elif scenario == "known_receipt":
+        step.action_result = {"success": True}
+    elif scenario == "not_prefix":
+        step.error = "prefix " + step.error
+    elif scenario == "old_pass":
+        runner._notes.append(step.error)
+        step.error = None
+    result = None if scenario != "task_check" else type("Outcome", (), {
+        "verification": VerificationResult(outcome="failed", detail="caller check pending")})()
+    runner._plan_from = lambda *_args, **kwargs: (recorded.append(kwargs["recovery"]) or PlanResult(
+        plan=TaskPlan.model_validate(json.loads(native())), attempts=1))
+    try:
+        runner._prepare_recovery(task, ExecutionOptions(max_planning_attempts=2), clock(), [], [step], result,
+            next_pass=2, actions_used=0, timings=Timings(started=clock()))
+    finally:
+        transport.close()
+    assert len(recorded) == 1
+    instruction = recorded[0].instruction
+    assert ("anonymous_without_ocr ID yourself" in instruction) is expected
+    assert ("no input was dispatched for that step" in instruction) is expected
+    assert all(value not in json.dumps(recorded[0].model_dump()) for value in (
+        "UNTRUSTED_SECRET_987", "hidden-geometry-123", "private description"))
+
+
+def test_actual_sdk_keeps_visual_policy_in_action_requests_and_out_of_caller_intent_planning(tmp_path):
+    from test_week6_rolling_actions import options, plan
+    runner, request, state, _, _ = lab(tmp_path)
+    _persist_synthetic_pixels(runner, tmp_path)
+    bodies = []
+    client, transport = _http_client([proposal(), plan(), plan()], bodies)
+    runner.client = client
+    original = deepcopy(request.model_dump())
+    try:
+        result = runner.run(request, options())
+    finally:
+        transport.close()
+    assert result.status == "succeeded" and state.attempts == 2 and len(bodies) == 3
+    assert request.model_dump() == original
+    high = _text_user(bodies[0])
+    assert all(key not in json.dumps(high) for key in ("targeting_policy", "anonymous_without_ocr", "visible_text"))
+    assert all(isinstance(message["content"], str) for message in bodies[0]["messages"])
+    for body in bodies[1:]:
+        packet = _text_user(body)
+        assert packet["context"]["targeting_policy"] == generation_targeting_policy()
+        assert request.instruction in packet["instruction"]
+        assert len([item for item in body["messages"][-1]["content"] if item["type"] == "image_url"]) == 1

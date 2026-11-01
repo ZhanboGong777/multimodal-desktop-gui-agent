@@ -1,0 +1,101 @@
+........................................................................ [ 20%]
+........................................................................ [ 40%]
+....................................................................F.F. [ 60%]
+........................................................................ [ 80%]
+........................................................................ [100%]
+================================== FAILURES ===================================
+_ test_existing_before_guard_gets_fixed_feedback_and_only_new_native_reply_can_run _
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/preexisting_repair_hint_001/targeted_validation_001/pytest_tmp/test_existing_before_guard_get0')
+audit_reader = <module 'repair_feedback_independent_auditor' from 'C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_audit_semantic_acceptance.py'>
+
+    def test_existing_before_guard_gets_fixed_feedback_and_only_new_native_reply_can_run(tmp_path, audit_reader):
+        raw = already_true()
+        runner, request, state, _, _ = lab(tmp_path, format_retries=1)
+        _persist_synthetic_pixels(runner, tmp_path)
+        original = request.model_dump(mode="json")
+        result, bodies = run_sdk(runner, request, [raw, proposal(), plan(), plan()])
+        assert result.status == "succeeded" and state.attempts == 2
+        assert result.planning_calls == result.model_requests == len(bodies) == 4
+        hint = semantic.SEMANTIC_PREEXISTING_POSTCONDITIONS_REPAIR
+        assert [system(body).count(hint) for body in bodies[:2]] == [0, 1]
+        assert bodies[1]["messages"][1] == bodies[0]["messages"][1]
+        assert bodies[1]["messages"][2] == {"role": "assistant", "content": raw}
+        assert json.loads(bodies[1]["messages"][-1]["content"])["repair_instruction"] == hint
+        assert request.model_dump(mode="json") == original
+        assert all(x not in system(bodies[1]) for x in ["NativeIdCanary", "NativeInstructionCanary"])
+>       assert audit_attempt(audit_reader, tmp_path, request, 2) == bodies[1]["messages"]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_week6_semantic_preexisting_repair_hint.py:56: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_week6_semantic_preexisting_repair_hint.py:35: in audit_attempt
+    return reader.audit_semantic_repair_messages(
+scripts\week6_audit_semantic_acceptance.py:413: in audit_semantic_repair_messages
+    category, content = _audit_semantic_repair_category(evidence, directory, index, saved, request,
+scripts\week6_audit_semantic_acceptance.py:349: in _audit_semantic_repair_category
+    audit_repair_context(evidence, directory, index, saved["context"], inline_previous_response=False)
+scripts\week6_audit_semantic_acceptance.py:195: in audit_repair_context
+    previous = evidence.load(previous_path)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\week6_audit_semantic_acceptance.py:156: in load
+    target = self.bind(path, scope=self.run if run_only else self.container)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\week6_audit_semantic_acceptance.py:145: in bind
+    require(path.is_relative_to((scope or self.container).resolve()), "evidence_path_escaped_selected_scope")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False, code = 'evidence_path_escaped_selected_scope'
+
+    def require(condition: Any, code: str) -> None:
+        if not condition:
+>           raise AuditError(code)
+E           repair_feedback_independent_auditor.AuditError: evidence_path_escaped_selected_scope
+
+scripts\week6_audit_semantic_acceptance.py:115: AuditError
+___________ test_typed_feedback_is_removed_after_a_different_error ____________
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/preexisting_repair_hint_001/targeted_validation_001/pytest_tmp/test_typed_feedback_is_removed0')
+audit_reader = <module 'repair_feedback_independent_auditor' from 'C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_audit_semantic_acceptance.py'>
+
+    def test_typed_feedback_is_removed_after_a_different_error(tmp_path, audit_reader):
+        runner, request, state, _, _ = lab(tmp_path, format_retries=2)
+        _persist_synthetic_pixels(runner, tmp_path)
+        result, bodies = run_sdk(runner, request, [already_true(), "not JSON", proposal(), plan(), plan()])
+        assert result.status == "succeeded" and state.attempts == 2
+        hint = semantic.SEMANTIC_PREEXISTING_POSTCONDITIONS_REPAIR
+        assert [system(b).count(hint) for b in bodies[:3]] == [0, 1, 0]
+        assert system(bodies[0]) == system(bodies[2])
+>       assert audit_attempt(audit_reader, tmp_path, request, 3) == bodies[2]["messages"]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_week6_semantic_preexisting_repair_hint.py:82: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_week6_semantic_preexisting_repair_hint.py:35: in audit_attempt
+    return reader.audit_semantic_repair_messages(
+scripts\week6_audit_semantic_acceptance.py:413: in audit_semantic_repair_messages
+    category, content = _audit_semantic_repair_category(evidence, directory, index, saved, request,
+scripts\week6_audit_semantic_acceptance.py:349: in _audit_semantic_repair_category
+    audit_repair_context(evidence, directory, index, saved["context"], inline_previous_response=False)
+scripts\week6_audit_semantic_acceptance.py:195: in audit_repair_context
+    previous = evidence.load(previous_path)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\week6_audit_semantic_acceptance.py:156: in load
+    target = self.bind(path, scope=self.run if run_only else self.container)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\week6_audit_semantic_acceptance.py:145: in bind
+    require(path.is_relative_to((scope or self.container).resolve()), "evidence_path_escaped_selected_scope")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False, code = 'evidence_path_escaped_selected_scope'
+
+    def require(condition: Any, code: str) -> None:
+        if not condition:
+>           raise AuditError(code)
+E           repair_feedback_independent_auditor.AuditError: evidence_path_escaped_selected_scope
+
+scripts\week6_audit_semantic_acceptance.py:115: AuditError
+=========================== short test summary info ===========================
+FAILED tests/test_week6_semantic_preexisting_repair_hint.py::test_existing_before_guard_gets_fixed_feedback_and_only_new_native_reply_can_run
+FAILED tests/test_week6_semantic_preexisting_repair_hint.py::test_typed_feedback_is_removed_after_a_different_error
+2 failed, 358 passed in 92.96s (0:01:32)

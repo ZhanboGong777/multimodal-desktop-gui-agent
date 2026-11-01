@@ -1,0 +1,293 @@
+{
+  "fixture": "holdout_05",
+  "arm": "screen_bilingual_subprocess",
+  "phase": "warm",
+  "repeat": 2,
+  "image_sha256": "df36f350df6ae259f0fd56380862117fdf1e2b30507b498caeb1e0eb279c74a3",
+  "started_perf_counter": 674801.269693,
+  "status": "completed",
+  "ended_perf_counter": 674801.6534507,
+  "engine_creation_ms": 0.001700012944638729,
+  "decode_ms": 2.131699933670461,
+  "ocr_ms": 376.7902000108734,
+  "ui_ms": 4.834100021980703,
+  "full_ms": 383.7576999794692,
+  "metrics": {
+    "tp": 8,
+    "fp": 0,
+    "fn": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "labels": [
+      {
+        "text": "Backup Wizard",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9834710743801653
+      },
+      {
+        "text": "Target Drive",
+        "language": "en",
+        "matched": true,
+        "iou": 1.0
+      },
+      {
+        "text": "Schedule Backup",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9914529914529915
+      },
+      {
+        "text": "Create",
+        "language": "en",
+        "matched": true,
+        "iou": 1.0
+      },
+      {
+        "text": "Restore",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9622641509433962
+      },
+      {
+        "text": "备份向导",
+        "language": "zh",
+        "matched": true,
+        "iou": 0.6311360448807855
+      },
+      {
+        "text": "恢复文件",
+        "language": "zh",
+        "matched": true,
+        "iou": 0.6521739130434783
+      },
+      {
+        "text": "计划",
+        "language": "zh",
+        "matched": true,
+        "iou": 0.9666666666666667
+      }
+    ]
+  },
+  "control_metrics": {
+    "tp": 6,
+    "fp": 0,
+    "fn": 0,
+    "iou_threshold": 0.8
+  },
+  "predictions": [
+    {
+      "text": "Backup Wizard",
+      "bounding_box": {
+        "left": 43,
+        "top": 38,
+        "right": 162,
+        "bottom": 55
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 102,
+        "y": 46
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Target Drive",
+      "bounding_box": {
+        "left": 42,
+        "top": 115,
+        "right": 123,
+        "bottom": 129
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 82,
+        "y": 122
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "备份向导",
+      "bounding_box": {
+        "left": 716,
+        "top": 113,
+        "right": 778,
+        "bottom": 136
+      },
+      "confidence": 0.92,
+      "center": {
+        "x": 747,
+        "y": 124
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Schedule Backup",
+      "bounding_box": {
+        "left": 42,
+        "top": 201,
+        "right": 158,
+        "bottom": 215
+      },
+      "confidence": 0.89,
+      "center": {
+        "x": 100,
+        "y": 208
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "恢复文件",
+      "bounding_box": {
+        "left": 716,
+        "top": 199,
+        "right": 776,
+        "bottom": 222
+      },
+      "confidence": 0.93,
+      "center": {
+        "x": 746,
+        "y": 210
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Create",
+      "bounding_box": {
+        "left": 42,
+        "top": 305,
+        "right": 87,
+        "bottom": 316
+      },
+      "confidence": 0.89,
+      "center": {
+        "x": 64,
+        "y": 310
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Restore",
+      "bounding_box": {
+        "left": 257,
+        "top": 305,
+        "right": 308,
+        "bottom": 316
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 282,
+        "y": 310
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "计划",
+      "bounding_box": {
+        "left": 716,
+        "top": 306,
+        "right": 745,
+        "bottom": 320
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 730,
+        "y": 313
+      },
+      "source": "ocr"
+    }
+  ],
+  "ui_candidates": [
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 704,
+        "top": 291,
+        "right": 859,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 781,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 244,
+        "top": 291,
+        "right": 399,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 321,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 30,
+        "top": 291,
+        "right": 185,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 704,
+        "top": 187,
+        "right": 859,
+        "bottom": 244
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 781,
+        "y": 215
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 30,
+        "top": 187,
+        "right": 185,
+        "bottom": 244
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 215
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 704,
+        "top": 101,
+        "right": 859,
+        "bottom": 158
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 781,
+        "y": 129
+      },
+      "source": "contour"
+    }
+  ],
+  "errors": []
+}

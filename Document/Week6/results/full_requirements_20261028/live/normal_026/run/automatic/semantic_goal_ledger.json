@@ -1,0 +1,37 @@
+[
+  {
+    "round": 1,
+    "goal_id": "prepare_report",
+    "instruction": "Prepare the GREEN report for project ALPHA by selecting the correct project and theme, then save the draft locally.",
+    "expect_text": [
+      "Project ALPHA",
+      "Theme GREEN",
+      "Draft saved locally"
+    ],
+    "forbid_text": [
+      "Review unavailable",
+      "Online sync required",
+      "External communication needed",
+      "Budget exceeded",
+      "Changes not saved",
+      "Commit failed",
+      "Review pending",
+      "Save failed"
+    ],
+    "status": "failed",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_026\\run\\automatic\\goal_001_001_prepare_report",
+    "verification": null,
+    "task_verification": {
+      "outcome": "failed",
+      "method": "automatic",
+      "detail": "expected on screen but not found: Draft saved locally",
+      "evidence": {
+        "observation_id": "obs-0012",
+        "missing": [
+          "Draft saved locally"
+        ],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    }
+  }
+]

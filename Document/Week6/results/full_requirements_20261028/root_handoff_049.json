@@ -1,0 +1,97 @@
+{
+  "schema": "week6.full_requirements.handoff.v4",
+  "previous": {
+    "path": "root_handoff_048.json",
+    "sha256": "a65487ce5d91eda136f0cc4e4be7a4891fdd1758b1173f6184586a9cdd0d8a7b"
+  },
+  "updated_utc": "2026-10-28T14:10:39.985277+00:00",
+  "status": "in_progress",
+  "branch": "codex/week6-full-requirements",
+  "phase": "observed_query_schema_v2_source_and_independent_tests_in_progress",
+  "active_model_or_gui_task": null,
+  "active_cpu_task": null,
+  "freeze": {
+    "path": "visual_target_guidance_001/final_source_freeze_001.json",
+    "sha256": "6bf0bbe60e067fa2558f69938c7b5b5fd0e5e9c5c4477ff2eaa3ee97ac3d6fd0"
+  },
+  "code_pin_count": 272,
+  "package_python_count": 91,
+  "combined_validation": "1063 passed172.95s/Ruff0; actualwait0 elapsed186.641s; 272pins+requirements-dev stable;3560 collected only, full004 not run",
+  "last_case": {
+    "name": "normal_017",
+    "actual_child_exit_code": 1,
+    "owner_elapsed_seconds": 456.985,
+    "exec_session": 55839,
+    "exec_session_closed": true,
+    "runtime_elapsed_ms": 454860,
+    "actions": 3,
+    "planning_calls": 6,
+    "http_requests": 6,
+    "unknown_actions": 0,
+    "completed_goals": 1,
+    "native_semantic_goals": 2,
+    "source_unchanged": true,
+    "negative_audit": {
+      "path": "review/negative_normal017_audit_001.json",
+      "sha256": "1c4523e3714f294cc62a5d320208c42abc0bfa68450b468922ca7193c743539c"
+    },
+    "operator_terminal": {
+      "path": "live/normal_017/operator_handoff_003.json",
+      "sha256": "f6c63021d8dfa2a7ab19aaa85013ea89ddc1fea38516f342dc101a414f91f7f4"
+    },
+    "midgoal_cli": {
+      "path": "live/normal_017/after_first_known_input_001.json",
+      "sha256": "606deec15afc2775dad27e6524fa7339d6ba63d82c144ea303a7dec98b0bb300"
+    },
+    "reason": "Native ALPHA double_click/GREEN click/Review report double_click executed. Fixed guidance was in all five low-level user contexts and no-match feedback in final retry. Last two native plans still chose Commit locally with empty ID; absent OCR caused fresh obs6/8 resolution refusal before input. No commit/final success; two ignored secondclick events retained."
+  },
+  "fixture": {
+    "name": "fixture_normal_013",
+    "close": {
+      "path": "live/fixture_normal_013.close.json",
+      "sha256": "d366844bd1b2018921260cea7b0bef634b3881fe74bf607c6da477f4ebf8f026"
+    },
+    "actual_pid": 76460,
+    "create_time": 1793195148.286693,
+    "parent_pid": 75132,
+    "actual_wait_exit_code": 15,
+    "meaning": "Exact identity-checked fixture teardown, not model task exit."
+  },
+  "readonly_provider_ps": {
+    "path": "visual_target_guidance_001/provider_readonly_ps_after_normal017_001.json",
+    "sha256": "62877bd91faf450a2fd4c8528a6551ae9c40197c45db460843033168aeb1316c"
+  },
+  "provider_context_length_observed": 16384,
+  "truncation_cause_proven": false,
+  "next": "Wait writers and exact API/receipts/proofs, Root inspect source/AST migrations, unified affected pytest+Ruff+collection. Only after all stable and passing create new freeze/prereg010/freshnormal018/fixture014. No model/GUI running or authorised yet.",
+  "remaining": [
+    "genuine normal and transient model/GUI acceptance on same final source",
+    "independent audit, Root semantic review and live count proof",
+    "full004 pytest/Ruff and exact final-source/README/dev binding",
+    "final engineering gate and revised natural Chinese report with all-page visual QA",
+    "final wheel/source ZIP/branch commit and external final-delivery audit"
+  ],
+  "overall_complete": false,
+  "source_before_manifest": {
+    "path": "observed_query_constraints_001/source_before_manifest.json",
+    "sha256": "2a859d3a9a8e6bf60ba7d573d43516646c86ad4f17fc2195fe4511e66ce6e434"
+  },
+  "current_source_frozen": false,
+  "code_pin_count_meaning": "272 is prior frozen baseline; current writers may add/change authorised source, not a current freeze",
+  "authorised_change": {
+    "generation_schema": "gui_agent.target_binding_schema.v2 finite snapshot-derived text queries; no-ID unknown text is outside grammar",
+    "runtime_and_scope": "packetv1/adapter/parser/runner/SYSTEM/highlevel/budgets unchanged",
+    "producer_owned": [
+      "src/gui_agent/planning/target_bindings.py",
+      "src/gui_agent/planning/planner.py",
+      "tests/test_week6_target_bindings.py",
+      "tests/test_week6_observed_queries.py"
+    ],
+    "reviewer_owned": [
+      "scripts/week6_audit_semantic_acceptance.py",
+      "tests/test_week6_target_bindings_review.py",
+      "tests/test_week6_observed_queries_review.py"
+    ],
+    "not_selected": "Visual gallery only read-only proposed; no image transform implemented or authorised in this candidate"
+  }
+}

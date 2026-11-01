@@ -1,0 +1,32 @@
+{
+  "status": "ready",
+  "reason": "The previous goal failed due to missing 'Report Generated' text, but the caller's final predicates remain unchanged. The next objective must complete the workflow by reviewing and committing the report locally, using only visible controls and preserving all original operations.",
+  "subgoals": [
+    {
+      "instruction": "Review the BLUE report for project BETA using visible controls and ensure the review is completed locally.",
+      "expect_text": [
+        "Review Complete",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [
+        "Review unavailable",
+        "Connection error",
+        "External sync required"
+      ],
+      "goal_id": "review_report"
+    },
+    {
+      "instruction": "Commit the BLUE report for project BETA locally using visible controls.",
+      "expect_text": [
+        "Commit Successful",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [
+        "Commit failed",
+        "Connection error",
+        "External sync required"
+      ],
+      "goal_id": "commit_report"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 19032.0,
+  "usage": {
+    "prompt_tokens": 1633,
+    "completion_tokens": 217,
+    "total_tokens": 1850
+  },
+  "error": null,
+  "content_length": 984,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"Revision plan focuses on completing the review and commit steps since report preparation was partially successful. The review step is critical to ensure final persistence before commit. The instruction explicitly names all required operations to achieve the final state.\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Review the BLUE report for project BETA by selecting the review option and confirming the report's content using visible controls.\",\n      \"expect_text\": [\"Project BETA\", \"Theme BLUE\", \"REVIEW COMPLETE\"],\n      \"forbid_text\": [\"ERROR\", \"UNAVAILABLE\", \"RETRY\"],\n      \"goal_id\": \"review_report\"\n    },\n    {\n      \"instruction\": \"Commit the BLUE report for project BETA locally by selecting the commit option and confirming the commit using visible controls.\",\n      \"expect_text\": [\"Project BETA\", \"Theme BLUE\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [\"ERROR\", \"UNAVAILABLE\", \"RETRY\"],\n      \"goal_id\": \"commit_report\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

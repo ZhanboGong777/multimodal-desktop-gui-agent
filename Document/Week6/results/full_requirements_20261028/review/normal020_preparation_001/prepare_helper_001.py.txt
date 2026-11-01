@@ -1,0 +1,96 @@
+"""Prepare only: no normal020 case, native claim, fixture journal or audit read."""
+import ast
+import hashlib
+import json
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+ROOT = Path("C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+BASE = ROOT / "Document/Week6/results/full_requirements_20261028"
+SOURCE = HERE.parent / "week6_normal019_independent_audit_20261029/run_ended_audit_001.py"
+TARGET = HERE / "run_ended_audit_001.py"
+OUT = BASE / "review/normal020_preparation_001"
+FREEZE = BASE / "semantic_polarity_guidance_001/final_source_freeze_001.json"
+PREREG = BASE / "live/preregistered_v6_012.json"
+FREEZE_SHA = "a99bf7b8bc95326440bb6974aba636f7dca498450b5e27e88ffc198255b6c6f2"
+PREREG_SHA = "9693e65614280966eda9de388f00b23986fefbe837a97d32219932b42b1b8be1"
+README_SHA = "d87303ea0d3eb099b8e04193bfbae13037688faaa07e4f5452d252670a20f3e3"
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def bound(path):
+    return {"path": str(path), "sha256": sha(path), "bytes": path.stat().st_size}
+
+
+assert sha(SOURCE) == "232496909974915143c1955c6e4ec9420840dedd78bb43e603ee0dee6b72e7b9"
+text = SOURCE.read_text("utf-8")
+replacements = {
+    "normal019": "normal020", "normal_019": "normal_020", "fixture_normal_015": "fixture_normal_016",
+    "receipt_envelope_001/final_source_freeze_002.json": "semantic_polarity_guidance_001/final_source_freeze_001.json",
+    "preregistered_v6_011.json": "preregistered_v6_012.json",
+    "70a6cde9ac0c20aa2d637d8a1747c09c33427a41c5bcb44202299da1009dbbb0": FREEZE_SHA,
+    "e891b25d91adfbac7dc7e617cafedc7b3633a7b5c6cb482a0ce2468e844a6104": PREREG_SHA,
+    "7adf0cc36868f159d19d0c2f3d271a4ca0c1da9dee8a709be22995e00e412519": README_SHA,
+    'freeze["code_pin_count"] == 274': 'freeze["code_pin_count"] == 275',
+}
+for old, new in replacements.items():
+    assert old in text
+    text = text.replace(old, new)
+old = 'ACK_SHA = "0c1de89ef5e2514aafe8ef08b69b600b28af11a521602b4778904d74769fbc20"\n'
+assert old in text
+text = text.replace(old, "")
+old = '    assert args.claim_ack_sha256 == ACK_SHA, "Use Root\'s already recorded external acknowledgement"'
+new = '    assert len(args.claim_ack_sha256) == 64 and all(c in "0123456789abcdef" for c in args.claim_ack_sha256), "Root must provide the actual external acknowledgement SHA at execution"'
+assert old in text
+text = text.replace(old, new)
+old = '    fixture = Path(command[command.index("--fixture-directory") + 1]).resolve()'
+assert text.count(old) == 1
+text = text.replace(old, old + '\n    assert command[command.index("--mode") + 1] == "normal"')
+old = '    assert launch["schema"] == "week6.fixture.launch.v1"'
+assert text.count(old) == 1
+text = text.replace(old, old + '\n    assert launch["command"][launch["command"].index("--mode") + 1] == "normal"')
+old = '    assert before == freeze["code_pins"] and len(before) == freeze["code_pin_count"] == 275'
+assert text.count(old) == 1
+text = text.replace(old, old + '\n    assert freeze["package_python_file_count"] == len(list((ROOT / "src/gui_agent").rglob("*.py"))) == 91')
+old = '        "root_semantic_and_midrun_review_still_required": True,'
+assert text.count(old) == 1
+text = text.replace(old, old + '\n        "measurement_protocol_origin_scope": "The unchanged protocol document describes its original 274-file measurement candidate; this case source identity is governed by the current 275-file freeze and preregistration.",')
+ast.parse(text, filename=str(TARGET))
+with TARGET.open("x", encoding="utf-8", newline="\n") as stream:
+    stream.write(text)
+
+assert sha(FREEZE) == FREEZE_SHA and sha(PREREG) == PREREG_SHA
+freeze, prereg = json.loads(FREEZE.read_text("utf-8")), json.loads(PREREG.read_text("utf-8"))
+assert prereg["freeze_sha256"] == FREEZE_SHA
+assert prereg["normal"]["name"] == "normal_020" and prereg["normal"]["fixture"] == "fixture_normal_016"
+pins = {path: sha(ROOT / path) for path in freeze["code_pins"]}
+assert pins == freeze["code_pins"] and len(pins) == 275
+assert freeze["package_python_file_count"] == len(list((ROOT / "src/gui_agent").rglob("*.py"))) == 91
+assert sha(ROOT / "README.md") == freeze["readme_sha256"] == README_SHA
+assert sha(ROOT / "requirements-dev.txt") == freeze["requirements_dev_sha256"]
+assert sha(ROOT / "scripts/week6_audit_semantic_acceptance.py") == "eb2e3c4ed8da2a6b7b347381e820c028a23af5c4bb45fb47ebd2160b02baa68d"
+assert sha(Path(freeze["private_receipt_checker"]["path"])) == "23ee41ca6e6255c3d09bf00665ee4051f1a01a09e359996d6a823304a0d70253"
+OUT.mkdir(exist_ok=False)
+for source in (TARGET, Path(__file__)):
+    with (OUT / (source.name + ".txt")).open("xb") as stream:
+        stream.write(source.read_bytes())
+record = {"schema": "week6.normal020.ended_helper_preparation.v1", "status": "prepared_not_executed",
+    "source_normal019_helper": bound(SOURCE), "helper": bound(TARGET), "preparation_script": bound(Path(__file__)),
+    "freeze": bound(FREEZE), "preregistration": bound(PREREG), "expected_mode": "normal",
+    "code_pin_count": len(pins), "package_python_file_count": 91, "code_pins_equal_freeze": True,
+    "current_code_pins": pins, "readme_sha256": README_SHA,
+    "requirements_dev_sha256": sha(ROOT / "requirements-dev.txt"),
+    "active_case_files_read": [], "fixture_hidden_journal_read": False, "claim_or_ack_read": False,
+    "helper_main_executed": False, "auditor_invocations": [], "model_gui_ocr_training_calls": 0,
+    "execution_requires": ["Root explicit actual ended/session-closed authorization", "--owner-exit-confirmed",
+        "--operator-handoff .../normal_020/operator_handoff_003.json", "--claim-ack-sha256 ACTUAL_ROOT_ACK_SHA_NOT_YET_SUPPLIED"],
+    "measurement_protocol_origin_scope": "Protocol text is retained from its old 274-file measurement origin, while this case is bound to the 275-file polarity-guidance freeze/preregistration.",
+    "meaning": "Static helper parse and registered source verification only; no new case outcome is observed or predicted."}
+path = OUT / "preparation_manifest_001.json"
+with path.open("x", encoding="utf-8", newline="\n") as stream:
+    json.dump(record, stream, ensure_ascii=False, indent=2)
+    stream.write("\n")
+print(json.dumps({"manifest": str(path), "sha256": sha(path), "helper_sha256": sha(TARGET)}))

@@ -1,0 +1,46 @@
+{
+  "schema_version": "week6.workflow.v1",
+  "workflow_id": "semantic_lab",
+  "status": "failed",
+  "execute": true,
+  "subgoals": [
+    {
+      "index": 0,
+      "case_id": "prepare_review",
+      "status": "failed",
+      "child_status": "failed",
+      "actions": 3,
+      "unconfirmed_action_attempts": 0,
+      "planning_calls": 3,
+      "verification": {
+        "outcome": "failed",
+        "method": "automatic",
+        "detail": "expected on screen but not found: Review Complete",
+        "evidence": {
+          "observation_id": "obs-0012",
+          "missing": [
+            "Review Complete"
+          ],
+          "verification_source": "frozen_model_semantic_subtask_postconditions"
+        }
+      },
+      "elapsed_ms": 161858.99999999674,
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_022\\run\\automatic\\goal_001_001_prepare_review\\001_prepare_review",
+      "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_022\\run\\automatic\\goal_001_001_prepare_review\\001_prepare_review\\task_summary.json",
+      "error": null
+    }
+  ],
+  "total_actions": 3,
+  "unconfirmed_action_attempts": 0,
+  "planning_calls": 3,
+  "accounting_complete": true,
+  "elapsed_ms": 162187.99999999464,
+  "final_verification": null,
+  "final_observation_id": null,
+  "final_observation_reference": "",
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_022\\run\\automatic\\goal_001_001_prepare_review",
+  "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_022\\run\\automatic\\goal_001_001_prepare_review\\workflow_summary.json",
+  "checkpoint_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_022\\run\\automatic\\goal_001_001_prepare_review\\checkpoints.jsonl",
+  "error": "subgoal did not finish with the required task verification",
+  "notes": []
+}

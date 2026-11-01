@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 17453.0,
+  "usage": {
+    "prompt_tokens": 2052,
+    "completion_tokens": 196,
+    "total_tokens": 2248
+  },
+  "error": null,
+  "content_length": 897,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"Corrected validation error by removing unsupported message-sending references. All caller operations preserved, postconditions properly defined, and schema constraints satisfied.\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Prepare a BLUE report for project BETA by selecting the correct project and theme, then review the report using visible controls.\",\n      \"expect_text\": [\"Project BETA\", \"Theme BLUE\", \"Review Complete\"],\n      \"forbid_text\": [\"Connection Error\", \"Review Unavailable\", \"Timeout\"],\n      \"goal_id\": \"prepare_review\"\n    },\n    {\n      \"instruction\": \"Commit the BLUE report for project BETA locally after review, ensuring the commit message includes 'LOCAL COMPLETE'.\",\n      \"expect_text\": [\"LOCAL COMPLETE\"],\n      \"forbid_text\": [\"Connection Error\", \"Commit Failed\", \"Uncommitted Changes\"],\n      \"goal_id\": \"commit_report\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

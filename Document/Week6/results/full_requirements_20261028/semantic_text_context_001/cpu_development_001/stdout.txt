@@ -1,0 +1,94 @@
+FF...                                                                    [100%]
+================================== FAILURES ===================================
+__ test_real_sdk_wire_keeps_high_level_text_only_and_low_level_pixels[False] __
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/semantic_text_context_001/cpu_development_001/pytest_tmp/test_real_sdk_wire_keeps_high_0')
+repair = False
+
+    @pytest.mark.parametrize("repair", [False, True])
+    def test_real_sdk_wire_keeps_high_level_text_only_and_low_level_pixels(tmp_path, repair):
+        replies = (["invalid JSON"] if repair else []) + [proposal(), plan(), plan()]
+        runner, request, state, _, _ = lab(tmp_path, format_retries=int(repair))
+        request.instruction += " Additional caller constraints: " + "preserve local settings; " * 240
+        original_request = request.model_dump(mode="json")
+        snapshots = _persist_synthetic_pixels(runner, tmp_path)
+        bodies = []
+        client, sdk = _http_client(replies, bodies)
+        runner.client = client
+        try:
+            result = runner.run(request, options())
+        finally:
+            sdk.close()
+        assert result.status == "succeeded", result.error
+        assert state.attempts == result.total_actions == 2
+        high_calls = 2 if repair else 1
+        assert result.planning_calls == result.model_requests == len(bodies) == high_calls + 2
+        assert request.model_dump(mode="json") == original_request
+        assert result.plans[0].schema_version == "week6.semantic_subtasks.v3"
+        assert result.plans[0].input_modality == "screen_text_context" and not result.plans[0].image_attached
+        directory = tmp_path / "semantic/semantic_plan_round_001"
+        protocol = json.loads((directory / "protocol.json").read_text("utf8"))
+        assert protocol["input_modality"] == "screen_text_context" and protocol["image_attached"] is False
+        assert protocol["snapshot_image_path_provenance"] == snapshots[0]["image_path"]
+        assert Path(snapshots[0]["image_path"]).is_file()
+        for index, body in enumerate(bodies[:high_calls], 1):
+            assert all(isinstance(message["content"], str) for message in body["messages"])
+            actual = _text_user(body)
+            assert "image_path" not in actual
+>           assert actual["instruction"] == request.instruction
+E           AssertionError: assert 'Set the requ...cal settings;' == 'Set the requ...al settings; '
+E             
+E             Skipping 6078 identical leading characters in diff, use -v to show
+E             - l settings; 
+E             ?            -
+E             + l settings;
+
+tests\test_week6_semantic_text_context.py:110: AssertionError
+__ test_real_sdk_wire_keeps_high_level_text_only_and_low_level_pixels[True] ___
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/semantic_text_context_001/cpu_development_001/pytest_tmp/test_real_sdk_wire_keeps_high_1')
+repair = True
+
+    @pytest.mark.parametrize("repair", [False, True])
+    def test_real_sdk_wire_keeps_high_level_text_only_and_low_level_pixels(tmp_path, repair):
+        replies = (["invalid JSON"] if repair else []) + [proposal(), plan(), plan()]
+        runner, request, state, _, _ = lab(tmp_path, format_retries=int(repair))
+        request.instruction += " Additional caller constraints: " + "preserve local settings; " * 240
+        original_request = request.model_dump(mode="json")
+        snapshots = _persist_synthetic_pixels(runner, tmp_path)
+        bodies = []
+        client, sdk = _http_client(replies, bodies)
+        runner.client = client
+        try:
+            result = runner.run(request, options())
+        finally:
+            sdk.close()
+        assert result.status == "succeeded", result.error
+        assert state.attempts == result.total_actions == 2
+        high_calls = 2 if repair else 1
+        assert result.planning_calls == result.model_requests == len(bodies) == high_calls + 2
+        assert request.model_dump(mode="json") == original_request
+        assert result.plans[0].schema_version == "week6.semantic_subtasks.v3"
+        assert result.plans[0].input_modality == "screen_text_context" and not result.plans[0].image_attached
+        directory = tmp_path / "semantic/semantic_plan_round_001"
+        protocol = json.loads((directory / "protocol.json").read_text("utf8"))
+        assert protocol["input_modality"] == "screen_text_context" and protocol["image_attached"] is False
+        assert protocol["snapshot_image_path_provenance"] == snapshots[0]["image_path"]
+        assert Path(snapshots[0]["image_path"]).is_file()
+        for index, body in enumerate(bodies[:high_calls], 1):
+            assert all(isinstance(message["content"], str) for message in body["messages"])
+            actual = _text_user(body)
+            assert "image_path" not in actual
+>           assert actual["instruction"] == request.instruction
+E           AssertionError: assert 'Set the requ...cal settings;' == 'Set the requ...al settings; '
+E             
+E             Skipping 6078 identical leading characters in diff, use -v to show
+E             - l settings; 
+E             ?            -
+E             + l settings;
+
+tests\test_week6_semantic_text_context.py:110: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_week6_semantic_text_context.py::test_real_sdk_wire_keeps_high_level_text_only_and_low_level_pixels[False]
+FAILED tests/test_week6_semantic_text_context.py::test_real_sdk_wire_keeps_high_level_text_only_and_low_level_pixels[True]
+2 failed, 3 passed in 8.30s

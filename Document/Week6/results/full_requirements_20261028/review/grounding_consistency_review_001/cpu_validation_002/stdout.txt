@@ -1,0 +1,18 @@
+...................F.F....                                               [100%]
+================================== FAILURES ===================================
+_ test_review_real_runner_refuses_source_or_refreshed_conflicts_before_dispatch[fresh] _
+tests\test_week6_grounding_consistency_review.py:168: in test_review_real_runner_refuses_source_or_refreshed_conflicts_before_dispatch
+    assert result.steps[0].error.startswith(TARGET_CONSISTENCY_ERROR_PREFIX)
+E   AssertionError: assert False
+E    +  where False = <built-in method startswith of str object at 0x00000160F09A0DB0>('target consistency conflict:')
+E    +    where <built-in method startswith of str object at 0x00000160F09A0DB0> = 'visual grounding refused: foreground changed immediately before dispatch'.startswith
+E    +      where 'visual grounding refused: foreground changed immediately before dispatch' = StepRecord(index=1, step_id='s1', description='Choose the requested local operation', action_type='click', observation...ding refused: foreground changed immediately before dispatch', elapsed_ms=61.99999991804361, after_observation_id=None).error
+_ test_review_semantic_replanning_keeps_conflict_uncredited_and_uses_shared_budgets[http] _
+tests\test_week6_grounding_consistency_review.py:228: in test_review_semantic_replanning_keeps_conflict_uncredited_and_uses_shared_budgets
+    assert audits[0]["planning_calls"][-1]["model_requests"] == 0
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'planning_calls'
+=========================== short test summary info ===========================
+FAILED tests/test_week6_grounding_consistency_review.py::test_review_real_runner_refuses_source_or_refreshed_conflicts_before_dispatch[fresh]
+FAILED tests/test_week6_grounding_consistency_review.py::test_review_semantic_replanning_keeps_conflict_uncredited_and_uses_shared_budgets[http]
+2 failed, 24 passed in 10.34s

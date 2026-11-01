@@ -1,0 +1,21 @@
+.......FF..........                                                      [100%]
+================================== FAILURES ===================================
+_ test_review_typed_feedback_never_adds_budget_or_an_uncounted_retry[planning] _
+tests\test_week6_semantic_repair_feedback_review.py:159: in test_review_typed_feedback_never_adds_budget_or_an_uncounted_retry
+    result = runner.run(request, options(max_planning_attempts=1 if cap == "planning" else 8))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\gui_agent\planning\workflow_decomposer.py:1286: in run
+    return SemanticWorkflowRunner(
+src\gui_agent\planning\semantic_workflow.py:591: in run
+    raise ValueError("semantic execution needs a finite deadline and decomposition plus action planning budget")
+E   ValueError: semantic execution needs a finite deadline and decomposition plus action planning budget
+___ test_review_late_repaired_reply_is_counted_without_compilation_or_input ___
+tests\test_week6_semantic_repair_feedback_review.py:172: in test_review_late_repaired_reply_is_counted_without_compilation_or_input
+    assert _load(_round(tmp_path) / "attempt_02_response.json")["content"] == proposal()
+E   assert '' == '{"status": "..._text": []}]}'
+E     
+E     - {"status": "ready", "reason": "Two requested state changes", "subgoals": [{"goal_id": "SetPreference", "instruction": "Set the requested preference", "expect_text": ["Verified part 1"], "forbid_text": []}, {"goal_id": "PersistConfig", "instruction": "Persist the requested configuration", "expect_text": ["Verified part 2"], "forbid_text": []}]}
+=========================== short test summary info ===========================
+FAILED tests/test_week6_semantic_repair_feedback_review.py::test_review_typed_feedback_never_adds_budget_or_an_uncounted_retry[planning]
+FAILED tests/test_week6_semantic_repair_feedback_review.py::test_review_late_repaired_reply_is_counted_without_compilation_or_input
+2 failed, 17 passed in 6.81s

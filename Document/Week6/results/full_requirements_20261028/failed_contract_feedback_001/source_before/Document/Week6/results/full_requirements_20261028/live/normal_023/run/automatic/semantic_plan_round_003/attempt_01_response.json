@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 16640.0,
+  "usage": {
+    "prompt_tokens": 1437,
+    "completion_tokens": 173,
+    "total_tokens": 1610
+  },
+  "error": null,
+  "content_length": 776,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"The request requires reviewing and committing the GREEN report for project ALPHA locally. The previous goal 'prepare_report' is completed, so the next logical step is to review the report and ensure it is committed locally. The final state must include 'LOCAL COMPLETE' as a visible text indicator.\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Review the GREEN report for project ALPHA and ensure it is ready for local commit.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [\"Review unavailable\", \"Connection error\", \"Commit failed\", \"Not ready to commit\", \"Review pending\", \"Review in progress\", \"Review timeout\", \"Review canceled\"],\n      \"goal_id\": \"review_and_commit_report\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

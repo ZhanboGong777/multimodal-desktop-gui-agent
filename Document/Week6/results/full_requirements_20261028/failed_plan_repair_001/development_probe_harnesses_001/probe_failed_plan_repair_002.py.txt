@@ -1,0 +1,21 @@
+"""Reproduce the original saved failed-plan request; no desktop or task acceptance."""
+import hashlib,json,sys,time
+from pathlib import Path
+R=Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree');B=R/'Document/Week6/results/full_requirements_20261028';D=B/'failed_plan_repair_001/transient007_saved_failure_probe_002';sys.path.insert(0,str(R/'src'))
+from gui_agent.models.openai_compatible import OpenAICompatibleClient
+from gui_agent.planning.semantic_workflow import SemanticDecomposer
+from gui_agent.planning.workflow_decomposer import BudgetedModelClient,WorkflowRequest
+from gui_agent.runtime.schemas import ObservationSnapshot
+load=lambda p:json.loads(p.read_bytes());sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+D.mkdir(exist_ok=False);old=B/'live/transient_007/run/automatic/semantic_plan_round_002';ctx=load(old/'context_source_archive.json');wire=load(old/'attempt_01_request.json')
+request=WorkflowRequest.model_validate(wire['context']['original_caller_request']);frame=ObservationSnapshot.model_validate(load(old/'snapshot_archive.json'));f=ctx['failure']
+blocked=((f['instruction'].casefold(),tuple(sorted(x.casefold()for x in f['expect_text'])),tuple(sorted(x.casefold()for x in f['forbid_text']))),)
+source=R/'src/gui_agent/planning/semantic_workflow.py';before=sha(source);deadline=time.monotonic()+900
+client=OpenAICompatibleClient(model_name='qwen3-vl:8b-instruct',text_model_name='qwen3-vl:8b-instruct',base_url='http://127.0.0.1:11434/v1',api_key='ollama',timeout_seconds=900,max_retries=0,temperature=0,max_tokens=4096)
+budget=BudgetedModelClient(client,max_requests=3,deadline=deadline,audit_path=D/'transport_requests.jsonl')
+result=SemanticDecomposer().decompose(request,evidence_directory=D/'production_decomposition',budgeted_client=budget,initial_observation=frame,completed_subgoals=ctx['completed_subgoals'],max_calls=3,deadline=deadline,revision=True,failure=f,blocked_signatures=blocked)
+assert sha(source)==before
+v={'schema':'week6.failed_plan_repair.saved_failure_probe.v1','original_sources':{n:{'path':str(old/n),'sha256':sha(old/n)}for n in ['attempt_01_request.json','context_source_archive.json','snapshot_archive.json']},'blocked_signatures':blocked,'result':result.model_dump(mode='json'),'source_sha256':before,'source_unchanged':True,'production_guards_used':True,'fresh_gui_captures':0,'gui_inputs':0,'acceptance_granted':False,'meaning':'Original caller, prior failed objective and saved observation unchanged. Native generation diagnostics only. All native replies and errors retained.'}
+with(D/'result.json').open('x',encoding='utf8')as s:json.dump(v,s,ensure_ascii=False,indent=2)
+print(json.dumps({'status':result.status,'planning_calls':result.planning_calls,'model_requests':result.model_requests,'error':result.error,'proposal':result.proposal.model_dump(mode='json')if result.proposal else None},ensure_ascii=True))
+raise SystemExit(0 if result.status=='ready' else 1)

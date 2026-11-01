@@ -1,0 +1,142 @@
+"""Rebuild paired CPU benchmark facts from original per-call JSON, not flags."""
+from __future__ import annotations
+
+import hashlib
+import json
+import math
+import statistics
+from datetime import UTC, datetime
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+BASE = ROOT / "Document/Week6/results/full_requirements_20261028"
+DATA = BASE / "perception_fixture_001"
+ARMS = ["native_eng_subprocess", "native_bilingual_subprocess",
+        "screen_bilingual_subprocess", "screen_bilingual_persistent"]
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def load(path):
+    return json.loads(path.read_bytes())
+
+
+def stat(values):
+    values = sorted(values)
+    return {"n": len(values), "median_ms": statistics.median(values),
+            "p95_nearest_rank_ms": values[math.ceil(.95*len(values))-1], "max_ms": values[-1]}
+
+
+def overlap(a, b):
+    width = max(0, min(a[2], b[2])-max(a[0], b[0]))
+    height = max(0, min(a[3], b[3])-max(a[1], b[1]))
+    intersection = width * height
+    union = (a[2]-a[0])*(a[3]-a[1]) + (b[2]-b[0])*(b[3]-b[1]) - intersection
+    return intersection / union if union else 0
+
+
+def box(element):
+    bounds = element["bounding_box"]
+    return [bounds[key] for key in ("left", "top", "right", "bottom")]
+
+
+def score(labels, predictions):
+    possibilities = []
+    for gi, gt in enumerate(labels):
+        for pi, pred in enumerate(predictions):
+            if " ".join(gt["text"].split()).casefold() == " ".join(pred["text"].split()).casefold():
+                possibilities.append((overlap(gt["box"], box(pred)), gi, pi))
+    gt_used, pred_used = set(), set()
+    for iou, gi, pi in sorted(possibilities, reverse=True):
+        if iou >= .5 and gi not in gt_used and pi not in pred_used:
+            gt_used.add(gi)
+            pred_used.add(pi)
+    return {"tp": len(gt_used), "fp": len(predictions)-len(pred_used), "fn": len(labels)-len(gt_used)}
+
+
+if __name__ == "__main__":
+    manifest = load(DATA / "frozen_manifest.json")
+    fixtures = {f["id"]: f for f in manifest["fixtures"] if f["split"] == "holdout"}
+    freeze = load(BASE / "perception_source_freeze_001.json")
+    batches = {}
+    for name in ["perception_holdout_primary_001", "perception_holdout_replication_001"]:
+        folder = BASE / name
+        rows = [load(path) for path in sorted(folder.glob("*.json"))
+                if path.name not in {"summary.json", "evaluation_claim.json"}]
+        summary = load(folder / "summary.json")
+        receipt = load(BASE / (name+"_owner") / "receipt.json")
+        assert receipt["actual_wait_returncode"] == 0
+        assert receipt["summary_sha256"] == sha(folder / "summary.json")
+        assert len(rows) == 364 and len({(r['fixture'],r['arm'],r['phase'],r['repeat']) for r in rows}) == 364
+        assert all(r["status"] == "completed" and not r["errors"] for r in rows)
+        assert all(r["image_sha256"] == fixtures[r["fixture"]]["sha256"] for r in rows)
+        assert all(abs(r['full_ms']-(r['ended_perf_counter']-r['started_perf_counter'])*1000) < 1e-6 for r in rows)
+        assert summary["source_pins_before"] == summary["source_pins_after"] == freeze["source_pins"]
+        assert summary["runtime_pins_before"] == summary["runtime_pins_after"] == freeze["runtime_pins"]
+        totals, timings, per_frame, pairs, screen_exact = {}, {}, {}, [], []
+        for arm in ARMS:
+            selected = [r for r in rows if r["arm"] == arm]
+            assert len(selected) == 91
+            totals[arm] = {k: 0 for k in ("tp", "fp", "fn")}
+            for r in selected:
+                if r["phase"] == "warm" and r["repeat"] == 0:
+                    scored = score(fixtures[r["fixture"]]["labels"], r["predictions"])
+                    assert all(scored[k] == r["metrics"][k] for k in scored)
+                    for key in scored:
+                        totals[arm][key] += scored[key]
+            tp, fp, fn = (totals[arm][k] for k in ("tp", "fp", "fn"))
+            totals[arm].update(precision=tp/(tp+fp), recall=tp/(tp+fn), f1=2*tp/(2*tp+fp+fn))
+            assert all(totals[arm][k] == summary['unique_frame_accuracy'][arm][k] for k in totals[arm])
+            timings[arm] = {phase: stat([r["full_ms"] for r in selected if r["phase"] == phase])
+                            for phase in ("cold", "warmup", "warm")}
+            assert [timings[arm][phase]["n"] for phase in ("cold", "warmup", "warm")] == [3,8,80]
+        for fixture in fixtures:
+            per_frame[fixture] = {}
+            for arm in ARMS:
+                selected = [r for r in rows if r["fixture"] == fixture and r["arm"] == arm and r["phase"] == "warm"]
+                assert {r['repeat'] for r in selected} == set(range(10))
+                per_frame[fixture][arm] = stat([r["full_ms"] for r in selected])
+            for rep in range(10):
+                selected = {r["arm"]: r for r in rows if r['fixture'] == fixture and r['phase'] == 'warm' and r['repeat'] == rep}
+                for arm in ARMS[:3]:
+                    before, after = selected[arm]['full_ms'], selected[ARMS[3]]['full_ms']
+                    pairs.append({'fixture':fixture,'repeat':rep,'baseline':arm,'difference_ms':after-before,'reduction':1-after/before})
+        for candidate in [r for r in rows if r["arm"] == ARMS[3]]:
+            baseline = [r for r in rows if r['arm'] == ARMS[2] and all(r[k] == candidate[k] for k in ('fixture','phase','repeat'))]
+            assert len(baseline) == 1
+            assert all(candidate[k] == baseline[0][k] for k in ('predictions','ui_candidates','metrics','control_metrics'))
+            screen_exact.append((candidate['fixture'],candidate['phase'],candidate['repeat']))
+        reductions = {arm:1-timings[ARMS[3]]['warm']['median_ms']/timings[arm]['warm']['median_ms'] for arm in ARMS[:3]}
+        assert all(value >= .1 for value in reductions.values())
+        assert all(totals[ARMS[3]]['f1'] > totals[arm]['f1'] for arm in ARMS[:2])
+        assert all(frame[ARMS[3]]['median_ms'] <= frame[ARMS[2]]['median_ms']*1.05 for frame in per_frame.values())
+        log = BASE / (name+"_owner") / "stdout_stderr.log"
+        diagnostics = [line for line in log.read_text(encoding='utf-8').splitlines()
+                       if line.startswith('Estimating resolution') or any(word in line.lower() for word in ('warning:', 'error:', 'failed loading'))]
+        batches[name] = {'summary_sha256':sha(folder/'summary.json'),'owner_receipt_sha256':sha(BASE/(name+'_owner')/'receipt.json'),
+                         'stdout_stderr_sha256':sha(log),'genuine_exit':receipt['actual_wait_returncode'],
+                         'records_rebuilt':len(rows),'screen_equivalent_pairs':len(screen_exact),'unique_frames':8,'unique_labels':64,
+                         'accuracy_rebuilt':totals,'timings_rebuilt':timings,'per_frame':per_frame,'paired_differences':pairs,
+                         'median_reductions':reductions,'native_c_api_diagnostics':diagnostics,
+                         'counts_rectangle':summary['unique_frame_rectangle_metrics'],'all_independent_assertions_passed':True}
+    review = load(BASE/'review/cpu_validation_002/audit.json')
+    primary = load(BASE/'perception_holdout_primary_001_owner/claim.json')
+    gap = (datetime.fromisoformat(primary['started_utc'])-datetime.fromisoformat(review['finished_utc'])).total_seconds()
+    assert gap > 0
+    assert all(sha(ROOT/path) == digest for path,digest in freeze['source_pins'].items())
+    assert all(sha(Path(path)) == digest for path,digest in freeze['runtime_pins'].items())
+    result = {'schema':'week6.full_perception.independent_raw_audit.v1','created_utc':datetime.now(UTC).isoformat(),
+              'source_freeze_sha256':sha(BASE/'perception_source_freeze_001.json'),
+              'preregister_v3_sha256':sha(DATA/'preregistered_plan_v3.json'),
+              'review_cpu_finished_utc':review['finished_utc'],'primary_started_utc':primary['started_utc'],
+              'quiet_known_review_to_primary_gap_seconds':gap,'batches':batches,
+              'both_batches_passed':True,'limits':['Eight synthetic fully annotated frames, correlated repeats; not arbitrary-app performance.',
+              'Cold fresh-engine cost and all warmup records remain separate; application CLI/YAML startup and OS capture excluded.',
+              'No real screenshot validation included yet; no model/GUI/input invoked by this audit.']}
+    path = BASE/'perception_result_audit_001.json'
+    with path.open('xb') as stream:
+        stream.write((json.dumps(result,ensure_ascii=False,indent=2)+'\n').encode('utf-8'))
+    print(path)
+    print(sha(path))

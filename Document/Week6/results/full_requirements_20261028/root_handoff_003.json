@@ -1,0 +1,94 @@
+{
+  "schema": "week6.full_requirements.handoff.v2",
+  "superseded_by": "root_handoff_004.json",
+  "status": "in_progress",
+  "updated_utc": "2026-10-28T01:03:22.429476+00:00",
+  "current_phase": "semantic_future_stage_prompt_revision",
+  "branch": "codex/week6-full-requirements",
+  "finished_attempt_index": "live_attempts_index_002.json",
+  "fixture": "fixture_normal_005",
+  "fixture_launch_claim": null,
+  "observed_processes": [
+    {
+      "pid": 59900,
+      "create_time": 1793149397.5750124,
+      "cmdline": [
+        "C:\\Users\\联想\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+        "-Command",
+        "try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}\n& 'D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe' -X utf8 'C:/Users/联想/Documents/ChatGPT/Intern/tmp/week6_full_requirements_20261028/record_progress.py' --index live_attempts_index_002.json --handoff root_handoff_003.json --phase semantic_future_stage_prompt_revision --fixture fixture_normal_005"
+      ],
+      "exe": "C:\\Users\\联想\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe"
+    },
+    {
+      "pid": 69416,
+      "create_time": 1793148998.6234436,
+      "cmdline": [
+        "D:\\anaconda\\python.exe",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_local_lab.py",
+        "--directory",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\fixture_normal_005",
+        "--mode",
+        "normal"
+      ],
+      "exe": "D:\\anaconda\\python.exe"
+    },
+    {
+      "pid": 72456,
+      "create_time": 1793148998.5622396,
+      "cmdline": [
+        "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_local_lab.py",
+        "--directory",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\fixture_normal_005",
+        "--mode",
+        "normal"
+      ],
+      "exe": "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe"
+    },
+    {
+      "pid": 78004,
+      "create_time": 1793149398.1266286,
+      "cmdline": [
+        "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe",
+        "-X",
+        "utf8",
+        "C:/Users/联想/Documents/ChatGPT/Intern/tmp/week6_full_requirements_20261028/record_progress.py",
+        "--index",
+        "live_attempts_index_002.json",
+        "--handoff",
+        "root_handoff_003.json",
+        "--phase",
+        "semantic_future_stage_prompt_revision",
+        "--fixture",
+        "fixture_normal_005"
+      ],
+      "exe": "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe"
+    },
+    {
+      "pid": 82384,
+      "create_time": 1793149398.17358,
+      "cmdline": [
+        "D:\\anaconda\\python.exe",
+        "-X",
+        "utf8",
+        "C:/Users/联想/Documents/ChatGPT/Intern/tmp/week6_full_requirements_20261028/record_progress.py",
+        "--index",
+        "live_attempts_index_002.json",
+        "--handoff",
+        "root_handoff_003.json",
+        "--phase",
+        "semantic_future_stage_prompt_revision",
+        "--fixture",
+        "fixture_normal_005"
+      ],
+      "exe": "D:\\anaconda\\python.exe"
+    }
+  ],
+  "instructions": "Verify PID+create_time and exact tree; never repeat owner/model load or fill missing exits. Use unique new attempt names. Current source may be under agent work; require its strict freeze before a new real run.",
+  "pending": [
+    "New successful semantic normal and transient real-model/Sky cases with original evidence and independent audit",
+    "Final frozen full pytest and Ruff",
+    "Engineering acceptance, report all-page QA, source/wheel/archive consistency and final delivery"
+  ],
+  "report_status": "Draft only; no whole-task completion yet. Preserve all failed attempts and existing user reports."
+}

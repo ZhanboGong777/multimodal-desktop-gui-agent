@@ -1,0 +1,293 @@
+{
+  "fixture": "holdout_08",
+  "arm": "screen_bilingual_subprocess",
+  "phase": "warm",
+  "repeat": 0,
+  "image_sha256": "6930ffbae3c701923202303354f710b0502e670921790a6d1a1e6d9191b4a34d",
+  "started_perf_counter": 674834.0073297,
+  "status": "completed",
+  "ended_perf_counter": 674834.3792889,
+  "engine_creation_ms": 0.0014998950064182281,
+  "decode_ms": 1.883000019006431,
+  "ocr_ms": 364.88850007299334,
+  "ui_ms": 5.186199909076095,
+  "full_ms": 371.9591998960823,
+  "metrics": {
+    "tp": 8,
+    "fp": 0,
+    "fn": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "labels": [
+      {
+        "text": "Security Center",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9375
+      },
+      {
+        "text": "Access Policy",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9885057471264368
+      },
+      {
+        "text": "Review Access",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9893617021276596
+      },
+      {
+        "text": "Permit",
+        "language": "en",
+        "matched": true,
+        "iou": 0.8869179600886918
+      },
+      {
+        "text": "Revoke",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9791666666666666
+      },
+      {
+        "text": "安全中心",
+        "language": "zh",
+        "matched": true,
+        "iou": 0.9230769230769231
+      },
+      {
+        "text": "访问策略",
+        "language": "zh",
+        "matched": true,
+        "iou": 1.0
+      },
+      {
+        "text": "授权",
+        "language": "zh",
+        "matched": true,
+        "iou": 0.9230769230769231
+      }
+    ]
+  },
+  "control_metrics": {
+    "tp": 6,
+    "fp": 0,
+    "fn": 0,
+    "iou_threshold": 0.8
+  },
+  "predictions": [
+    {
+      "text": "Security Center",
+      "bounding_box": {
+        "left": 42,
+        "top": 38,
+        "right": 159,
+        "bottom": 53
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 100,
+        "y": 45
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Access Policy",
+      "bounding_box": {
+        "left": 42,
+        "top": 115,
+        "right": 128,
+        "bottom": 128
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 85,
+        "y": 121
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "安全中心",
+      "bounding_box": {
+        "left": 752,
+        "top": 116,
+        "right": 808,
+        "bottom": 128
+      },
+      "confidence": 0.92,
+      "center": {
+        "x": 780,
+        "y": 122
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Review Access",
+      "bounding_box": {
+        "left": 43,
+        "top": 201,
+        "right": 136,
+        "bottom": 211
+      },
+      "confidence": 0.84,
+      "center": {
+        "x": 89,
+        "y": 206
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "访问策略",
+      "bounding_box": {
+        "left": 752,
+        "top": 202,
+        "right": 808,
+        "bottom": 215
+      },
+      "confidence": 0.93,
+      "center": {
+        "x": 780,
+        "y": 208
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Permit",
+      "bounding_box": {
+        "left": 43,
+        "top": 305,
+        "right": 83,
+        "bottom": 315
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 63,
+        "y": 310
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Revoke",
+      "bounding_box": {
+        "left": 257,
+        "top": 305,
+        "right": 304,
+        "bottom": 315
+      },
+      "confidence": 0.92,
+      "center": {
+        "x": 280,
+        "y": 310
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "授权",
+      "bounding_box": {
+        "left": 752,
+        "top": 306,
+        "right": 780,
+        "bottom": 318
+      },
+      "confidence": 0.95,
+      "center": {
+        "x": 766,
+        "y": 312
+      },
+      "source": "ocr"
+    }
+  ],
+  "ui_candidates": [
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 740,
+        "top": 291,
+        "right": 895,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 817,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 244,
+        "top": 291,
+        "right": 399,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 321,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 30,
+        "top": 291,
+        "right": 185,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 740,
+        "top": 187,
+        "right": 895,
+        "bottom": 244
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 817,
+        "y": 215
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 30,
+        "top": 187,
+        "right": 185,
+        "bottom": 244
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 215
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 740,
+        "top": 101,
+        "right": 895,
+        "bottom": 158
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 817,
+        "y": 129
+      },
+      "source": "contour"
+    }
+  ],
+  "errors": []
+}

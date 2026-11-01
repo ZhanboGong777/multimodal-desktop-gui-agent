@@ -1,0 +1,320 @@
+........................................................................ [  1%]
+........................................................................ [  3%]
+........................................................................ [  5%]
+........................................................................ [  7%]
+........................................................................ [  9%]
+........................................................................ [ 11%]
+........................................................................ [ 13%]
+........................................................................ [ 15%]
+........................................................................ [ 17%]
+........................................................................ [ 18%]
+........................................................................ [ 20%]
+........................................................................ [ 22%]
+........................................................................ [ 24%]
+........................................................................ [ 26%]
+........................................................................ [ 28%]
+........................................................................ [ 30%]
+........................................................................ [ 32%]
+........................................................................ [ 34%]
+........................................................................ [ 35%]
+........................................................................ [ 37%]
+........................................................................ [ 39%]
+........................................................................ [ 41%]
+........................................................................ [ 43%]
+........................................................................ [ 45%]
+........................................................................ [ 47%]
+........................................................................ [ 49%]
+........................................................................ [ 51%]
+........................................................................ [ 53%]
+........................................................................ [ 54%]
+........................................................................ [ 56%]
+........................................................................ [ 58%]
+........................................................................ [ 60%]
+........................................................................ [ 62%]
+........................................................................ [ 64%]
+........................................................................ [ 66%]
+........................................................................ [ 68%]
+........................................................................ [ 70%]
+........................................................................ [ 71%]
+..............................................................FFFFFF.... [ 73%]
+.F........FFF.....F..................................................... [ 75%]
+........................................................................ [ 77%]
+........................................................................ [ 79%]
+........................................................................ [ 81%]
+........................................................................ [ 83%]
+........................................................................ [ 85%]
+........................................................................ [ 87%]
+........................................................................ [ 88%]
+........................................................................ [ 90%]
+........................................................................ [ 92%]
+........................................................................ [ 94%]
+........................................................................ [ 96%]
+........................................................................ [ 98%]
+...........................................................              [100%]
+================================== FAILURES ===================================
+_ test_failed_feedback_copies_only_the_original_native_contract_and_own_mismatch_literals _
+
+audit_reader = <module 'feedback_independent_auditor' from 'C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_audit_semantic_acceptance.py'>
+
+    def test_failed_feedback_copies_only_the_original_native_contract_and_own_mismatch_literals(audit_reader):
+        record = failed_record()
+        native_before = copy.deepcopy(record)
+        logical = _logical_failure(record)
+>       assert logical == audit_reader.audited_logical_failure(record)
+E       assert {'category': ...k succeeded.'} == {'category': ...k succeeded.'}
+E         
+E         Omitting 3 identical items, use -vv to show
+E         Differing items:
+E         {'required_revision': 'Distinguish execution failure from an unjustified predicted caption. A missing literal that is ...ess banner for a later objective. This is guidance, not permission to force ready or claim old failed work succeeded.'} != {'required_revision': "The previous model's predicted conditions were not achieved; the caller request has not changed...ess banner for a later objective. This is guidance, not permission to force ready or claim old failed work succeeded."}
+E         Use -v to get more diff
+
+tests\test_week6_failed_contract_feedback.py:73: AssertionError
+_ test_forbidden_feedback_remains_a_native_literal_and_other_checks_remain_unknown _
+
+audit_reader = <module 'feedback_independent_auditor' from 'C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_audit_semantic_acceptance.py'>
+
+    def test_forbidden_feedback_remains_a_native_literal_and_other_checks_remain_unknown(audit_reader):
+        record = failed_record()
+        evidence = record["task_verification"]["evidence"]
+        evidence.pop("missing")
+        evidence["unexpected"] = ["Conflict"]
+        logical = _logical_failure(record)
+        assert logical["predicate_feedback"] == {
+            "missing_expected_text": None, "present_forbidden_text": ["Conflict"], "present_expected_text": None}
+>       assert logical == audit_reader.audited_logical_failure(record)
+E       assert {'category': ...k succeeded.'} == {'category': ...k succeeded.'}
+E         
+E         Omitting 3 identical items, use -vv to show
+E         Differing items:
+E         {'required_revision': 'Distinguish execution failure from an unjustified predicted caption. A missing literal that is ...ess banner for a later objective. This is guidance, not permission to force ready or claim old failed work succeeded.'} != {'required_revision': "The previous model's predicted conditions were not achieved; the caller request has not changed...ess banner for a later objective. This is guidance, not permission to force ready or claim old failed work succeeded."}
+E         Use -v to get more diff
+
+tests\test_week6_failed_contract_feedback.py:93: AssertionError
+___ test_unavailable_verifier_details_are_unknown_not_empty_or_passed[None] ___
+
+audit_reader = <module 'feedback_independent_auditor' from 'C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_audit_semantic_acceptance.py'>
+verification = None
+
+    @pytest.mark.parametrize("verification", [None, {"outcome": "passed"},
+        {"outcome": "failed", "evidence": {"missing": ["RawScreenCanary"]}},
+        {"outcome": "failed", "evidence": "UnusableCanary"}])
+    def test_unavailable_verifier_details_are_unknown_not_empty_or_passed(audit_reader, verification):
+        record = failed_record()
+        record["task_verification"] = verification
+        logical = _logical_failure(record)
+        assert logical["predicate_feedback"] == {"missing_expected_text": None, "present_forbidden_text": None, "present_expected_text": None}
+>       assert logical == audit_reader.audited_logical_failure(record)
+E       assert {'category': ...k succeeded.'} == {'category': ...k succeeded.'}
+E         
+E         Omitting 3 identical items, use -vv to show
+E         Differing items:
+E         {'required_revision': 'Distinguish execution failure from an unjustified predicted caption. A missing literal that is ...ess banner for a later objective. This is guidance, not permission to force ready or claim old failed work succeeded.'} != {'required_revision': "The previous model's predicted conditions were not achieved; the caller request has not changed...ess banner for a later objective. This is guidance, not permission to force ready or claim old failed work succeeded."}
+E         Use -v to get more diff
+
+tests\test_week6_failed_contract_feedback.py:104: AssertionError
+_ test_unavailable_verifier_details_are_unknown_not_empty_or_passed[verification1] _
+
+audit_reader = <module 'feedback_independent_auditor' from 'C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_audit_semantic_acceptance.py'>
+verification = {'outcome': 'passed'}
+
+    @pytest.mark.parametrize("verification", [None, {"outcome": "passed"},
+        {"outcome": "failed", "evidence": {"missing": ["RawScreenCanary"]}},
+        {"outcome": "failed", "evidence": "UnusableCanary"}])
+    def test_unavailable_verifier_details_are_unknown_not_empty_or_passed(audit_reader, verification):
+        record = failed_record()
+        record["task_verification"] = verification
+        logical = _logical_failure(record)
+        assert logical["predicate_feedback"] == {"missing_expected_text": None, "present_forbidden_text": None, "present_expected_text": None}
+>       assert logical == audit_reader.audited_logical_failure(record)
+E       assert {'category': ...k succeeded.'} == {'category': ...k succeeded.'}
+E         
+E         Omitting 3 identical items, use -vv to show
+E         Differing items:
+E         {'required_revision': 'Distinguish execution failure from an unjustified predicted caption. A missing literal that is ...ess banner for a later objective. This is guidance, not permission to force ready or claim old failed work succeeded.'} != {'required_revision': "The previous model's predicted conditions were not achieved; the caller request has not changed...ess banner for a later objective. This is guidance, not permission to force ready or claim old failed work succeeded."}
+E         Use -v to get more diff
+
+tests\test_week6_failed_contract_feedback.py:104: AssertionError
+_ test_unavailable_verifier_details_are_unknown_not_empty_or_passed[verification2] _
+
+audit_reader = <module 'feedback_independent_auditor' from 'C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_audit_semantic_acceptance.py'>
+verification = {'outcome': 'failed', 'evidence': {'missing': ['RawScreenCanary']}}
+
+    @pytest.mark.parametrize("verification", [None, {"outcome": "passed"},
+        {"outcome": "failed", "evidence": {"missing": ["RawScreenCanary"]}},
+        {"outcome": "failed", "evidence": "UnusableCanary"}])
+    def test_unavailable_verifier_details_are_unknown_not_empty_or_passed(audit_reader, verification):
+        record = failed_record()
+        record["task_verification"] = verification
+        logical = _logical_failure(record)
+        assert logical["predicate_feedback"] == {"missing_expected_text": None, "present_forbidden_text": None, "present_expected_text": None}
+>       assert logical == audit_reader.audited_logical_failure(record)
+E       assert {'category': ...k succeeded.'} == {'category': ...k succeeded.'}
+E         
+E         Omitting 3 identical items, use -vv to show
+E         Differing items:
+E         {'required_revision': 'Distinguish execution failure from an unjustified predicted caption. A missing literal that is ...ess banner for a later objective. This is guidance, not permission to force ready or claim old failed work succeeded.'} != {'required_revision': "The previous model's predicted conditions were not achieved; the caller request has not changed...ess banner for a later objective. This is guidance, not permission to force ready or claim old failed work succeeded."}
+E         Use -v to get more diff
+
+tests\test_week6_failed_contract_feedback.py:104: AssertionError
+_ test_unavailable_verifier_details_are_unknown_not_empty_or_passed[verification3] _
+
+audit_reader = <module 'feedback_independent_auditor' from 'C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_audit_semantic_acceptance.py'>
+verification = {'outcome': 'failed', 'evidence': 'UnusableCanary'}
+
+    @pytest.mark.parametrize("verification", [None, {"outcome": "passed"},
+        {"outcome": "failed", "evidence": {"missing": ["RawScreenCanary"]}},
+        {"outcome": "failed", "evidence": "UnusableCanary"}])
+    def test_unavailable_verifier_details_are_unknown_not_empty_or_passed(audit_reader, verification):
+        record = failed_record()
+        record["task_verification"] = verification
+        logical = _logical_failure(record)
+        assert logical["predicate_feedback"] == {"missing_expected_text": None, "present_forbidden_text": None, "present_expected_text": None}
+>       assert logical == audit_reader.audited_logical_failure(record)
+E       assert {'category': ...k succeeded.'} == {'category': ...k succeeded.'}
+E         
+E         Omitting 3 identical items, use -vv to show
+E         Differing items:
+E         {'required_revision': 'Distinguish execution failure from an unjustified predicted caption. A missing literal that is ...ess banner for a later objective. This is guidance, not permission to force ready or claim old failed work succeeded.'} != {'required_revision': "The previous model's predicted conditions were not achieved; the caller request has not changed...ess banner for a later objective. This is guidance, not permission to force ready or claim old failed work succeeded."}
+E         Use -v to get more diff
+
+tests\test_week6_failed_contract_feedback.py:104: AssertionError
+_ test_both_bound_logical_recovery_forms_are_allowed_without_sending_the_archived_screen[failed] _
+
+audit_reader = <module 'feedback_independent_auditor' from 'C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_audit_semantic_acceptance.py'>
+kind = 'failed'
+
+    @pytest.mark.parametrize("kind", ["failed", "rejected"])
+    def test_both_bound_logical_recovery_forms_are_allowed_without_sending_the_archived_screen(audit_reader, kind):
+        saved, protocol, record, frame, archived = _text_binding_arguments()
+        failure = failed_record()
+        if kind == "rejected":
+            failure = {"status": "rejected_before_input", "goal": {
+                key: failure[key] for key in ("goal_id", "instruction", "expect_text", "forbid_text")}}
+        saved["context"]["failure"] = _logical_failure(failure)
+>       audit_reader.audit_highlevel_intent_binding(saved, protocol, record, frame, archived)
+
+tests\test_week6_failed_contract_feedback.py:129: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\week6_audit_semantic_acceptance.py:495: in audit_highlevel_intent_binding
+    audit_logical_failure_shape(context["failure"])
+scripts\week6_audit_semantic_acceptance.py:336: in audit_logical_failure_shape
+    require(logical == expected, "highlevel_logical_failure_not_exact_fixed_contract")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False, code = 'highlevel_logical_failure_not_exact_fixed_contract'
+
+    def require(condition: Any, code: str) -> None:
+        if not condition:
+>           raise AuditError(code)
+E           feedback_independent_auditor.AuditError: highlevel_logical_failure_not_exact_fixed_contract
+
+scripts\week6_audit_semantic_acceptance.py:128: AuditError
+_ test_match_feedback_is_exact_original_order_complement[missing0-expected0] __
+
+audit_reader = <module 'feedback_independent_auditor' from 'C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_audit_semantic_acceptance.py'>
+missing = [], expected = ['First matched', 'Second matched', 'Third matched']
+
+    @pytest.mark.parametrize("missing,expected", [
+        ([], ["First matched", "Second matched", "Third matched"]),
+        (["First matched", "Third matched"], ["Second matched"]),
+        (["First matched", "Second matched", "Third matched"], []),
+    ])
+    def test_match_feedback_is_exact_original_order_complement(audit_reader, missing, expected):
+        record = failed_record()
+        record["expect_text"] = ["First matched", "Second matched", "Third matched"]
+        record["task_verification"]["evidence"]["missing"] = missing
+        original = copy.deepcopy(record)
+        logical = _logical_failure(record)
+        assert logical["predicate_feedback"]["present_expected_text"] == expected
+>       assert logical == audit_reader.audited_logical_failure(record)
+E       assert {'category': ...k succeeded.'} == {'category': ...k succeeded.'}
+E         
+E         Omitting 3 identical items, use -vv to show
+E         Differing items:
+E         {'required_revision': 'Distinguish execution failure from an unjustified predicted caption. A missing literal that is ...ess banner for a later objective. This is guidance, not permission to force ready or claim old failed work succeeded.'} != {'required_revision': "The previous model's predicted conditions were not achieved; the caller request has not changed...ess banner for a later objective. This is guidance, not permission to force ready or claim old failed work succeeded."}
+E         Use -v to get more diff
+
+tests\test_week6_failed_contract_feedback.py:196: AssertionError
+_ test_match_feedback_is_exact_original_order_complement[missing1-expected1] __
+
+audit_reader = <module 'feedback_independent_auditor' from 'C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_audit_semantic_acceptance.py'>
+missing = ['First matched', 'Third matched'], expected = ['Second matched']
+
+    @pytest.mark.parametrize("missing,expected", [
+        ([], ["First matched", "Second matched", "Third matched"]),
+        (["First matched", "Third matched"], ["Second matched"]),
+        (["First matched", "Second matched", "Third matched"], []),
+    ])
+    def test_match_feedback_is_exact_original_order_complement(audit_reader, missing, expected):
+        record = failed_record()
+        record["expect_text"] = ["First matched", "Second matched", "Third matched"]
+        record["task_verification"]["evidence"]["missing"] = missing
+        original = copy.deepcopy(record)
+        logical = _logical_failure(record)
+        assert logical["predicate_feedback"]["present_expected_text"] == expected
+>       assert logical == audit_reader.audited_logical_failure(record)
+E       assert {'category': ...k succeeded.'} == {'category': ...k succeeded.'}
+E         
+E         Omitting 3 identical items, use -vv to show
+E         Differing items:
+E         {'required_revision': 'Distinguish execution failure from an unjustified predicted caption. A missing literal that is ...ess banner for a later objective. This is guidance, not permission to force ready or claim old failed work succeeded.'} != {'required_revision': "The previous model's predicted conditions were not achieved; the caller request has not changed...ess banner for a later objective. This is guidance, not permission to force ready or claim old failed work succeeded."}
+E         Use -v to get more diff
+
+tests\test_week6_failed_contract_feedback.py:196: AssertionError
+_ test_match_feedback_is_exact_original_order_complement[missing2-expected2] __
+
+audit_reader = <module 'feedback_independent_auditor' from 'C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_audit_semantic_acceptance.py'>
+missing = ['First matched', 'Second matched', 'Third matched'], expected = []
+
+    @pytest.mark.parametrize("missing,expected", [
+        ([], ["First matched", "Second matched", "Third matched"]),
+        (["First matched", "Third matched"], ["Second matched"]),
+        (["First matched", "Second matched", "Third matched"], []),
+    ])
+    def test_match_feedback_is_exact_original_order_complement(audit_reader, missing, expected):
+        record = failed_record()
+        record["expect_text"] = ["First matched", "Second matched", "Third matched"]
+        record["task_verification"]["evidence"]["missing"] = missing
+        original = copy.deepcopy(record)
+        logical = _logical_failure(record)
+        assert logical["predicate_feedback"]["present_expected_text"] == expected
+>       assert logical == audit_reader.audited_logical_failure(record)
+E       assert {'category': ...k succeeded.'} == {'category': ...k succeeded.'}
+E         
+E         Omitting 3 identical items, use -vv to show
+E         Differing items:
+E         {'required_revision': 'Distinguish execution failure from an unjustified predicted caption. A missing literal that is ...ess banner for a later objective. This is guidance, not permission to force ready or claim old failed work succeeded.'} != {'required_revision': "The previous model's predicted conditions were not achieved; the caller request has not changed...ess banner for a later objective. This is guidance, not permission to force ready or claim old failed work succeeded."}
+E         Use -v to get more diff
+
+tests\test_week6_failed_contract_feedback.py:196: AssertionError
+____ test_match_feedback_does_not_trust_supplied_positive_or_screen_fields ____
+
+audit_reader = <module 'feedback_independent_auditor' from 'C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_audit_semantic_acceptance.py'>
+
+    def test_match_feedback_does_not_trust_supplied_positive_or_screen_fields(audit_reader):
+        record = failed_record()
+        record["task_verification"]["evidence"]["present_expected_text"] = ["RawScreenCanary"]
+        logical = _logical_failure(record)
+        assert logical["predicate_feedback"]["present_expected_text"] == ["Selected preference"]
+>       assert logical == audit_reader.audited_logical_failure(record)
+E       assert {'category': ...k succeeded.'} == {'category': ...k succeeded.'}
+E         
+E         Omitting 3 identical items, use -vv to show
+E         Differing items:
+E         {'required_revision': 'Distinguish execution failure from an unjustified predicted caption. A missing literal that is ...ess banner for a later objective. This is guidance, not permission to force ready or claim old failed work succeeded.'} != {'required_revision': "The previous model's predicted conditions were not achieved; the caller request has not changed...ess banner for a later objective. This is guidance, not permission to force ready or claim old failed work succeeded."}
+E         Use -v to get more diff
+
+tests\test_week6_failed_contract_feedback.py:216: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_week6_failed_contract_feedback.py::test_failed_feedback_copies_only_the_original_native_contract_and_own_mismatch_literals
+FAILED tests/test_week6_failed_contract_feedback.py::test_forbidden_feedback_remains_a_native_literal_and_other_checks_remain_unknown
+FAILED tests/test_week6_failed_contract_feedback.py::test_unavailable_verifier_details_are_unknown_not_empty_or_passed[None]
+FAILED tests/test_week6_failed_contract_feedback.py::test_unavailable_verifier_details_are_unknown_not_empty_or_passed[verification1]
+FAILED tests/test_week6_failed_contract_feedback.py::test_unavailable_verifier_details_are_unknown_not_empty_or_passed[verification2]
+FAILED tests/test_week6_failed_contract_feedback.py::test_unavailable_verifier_details_are_unknown_not_empty_or_passed[verification3]
+FAILED tests/test_week6_failed_contract_feedback.py::test_both_bound_logical_recovery_forms_are_allowed_without_sending_the_archived_screen[failed]
+FAILED tests/test_week6_failed_contract_feedback.py::test_match_feedback_is_exact_original_order_complement[missing0-expected0]
+FAILED tests/test_week6_failed_contract_feedback.py::test_match_feedback_is_exact_original_order_complement[missing1-expected1]
+FAILED tests/test_week6_failed_contract_feedback.py::test_match_feedback_is_exact_original_order_complement[missing2-expected2]
+FAILED tests/test_week6_failed_contract_feedback.py::test_match_feedback_does_not_trust_supplied_positive_or_screen_fields
+11 failed, 3792 passed in 690.29s (0:11:30)

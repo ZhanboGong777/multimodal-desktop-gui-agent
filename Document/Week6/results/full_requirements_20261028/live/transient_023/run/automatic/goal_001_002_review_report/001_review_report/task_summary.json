@@ -1,0 +1,154 @@
+{
+  "run_id": "001_review_report",
+  "case_id": "review_report",
+  "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Review the prepared BLUE report using the visible review controls.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+  "status": "failed",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Click the 'Review report' button to start reviewing the report.",
+      "action_type": "click",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "click",
+          "x": 1282,
+          "y": 1049,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Review report"
+        },
+        "element_id": "obs-0002-e001",
+        "screenshot_point": {
+          "x": 1282,
+          "y": 1049
+        },
+        "control_point": {
+          "x": 1282,
+          "y": 1049
+        },
+        "note": "text 'Review report' -> obs-0002-e001 (re-bound from obs-0001-e001 in an earlier frame)"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "click",
+          "x": 1282,
+          "y": 1049,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Review report"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: report, review",
+        "evidence": {
+          "observation_id": "obs-0003",
+          "changed": true,
+          "element_count": 11,
+          "expectation_tokens": [
+            "report",
+            "review",
+            "interface",
+            "should",
+            "load"
+          ],
+          "expectation_hits": [
+            "report",
+            "review"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 19797.000000005937,
+      "after_observation_id": "obs-0003"
+    }
+  ],
+  "verification": {
+    "outcome": "failed",
+    "method": "automatic",
+    "detail": "expected on screen but not found: Review Complete",
+    "evidence": {
+      "observation_id": "obs-0004",
+      "missing": [
+        "Review Complete"
+      ],
+      "verification_source": "frozen_model_semantic_subtask_postconditions"
+    }
+  },
+  "error": null,
+  "elapsed_ms": 86139.99999999942,
+  "execute": true,
+  "model_name": "qwen3-vl:8b-instruct",
+  "provider": "openai_compatible",
+  "notes": [
+    "planned 1 steps from obs-0001",
+    "task verification: expected on screen but not found: Review Complete",
+    "re-planning attempt 2 reports errors and will not be executed: Review unavailable. Please retry."
+  ],
+  "task_id": "review_report",
+  "commit": "482895f",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 2560x1600, control 2560x1600",
+  "started_at": "2026-11-01T10:56:11.801865Z",
+  "finished_at": "2026-11-01T10:57:37.941865Z",
+  "planning_attempts": 2,
+  "model_requests": 6,
+  "planning_ms": 29609.000000011292,
+  "confirmation_ms": 15.999999988707714,
+  "execution_ms": 56514.99999999942,
+  "planner_ms": 53264.99999999942,
+  "planning_calls": 2,
+  "system_elapsed_ms": 86124.00000001071,
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_023\\run\\automatic\\goal_001_002_review_report\\001_review_report",
+  "stop_reason": "re-planning attempt 2 reports errors and will not be executed: Review unavailable. Please retry.",
+  "error_type": "",
+  "failed_step_id": null,
+  "recovery_records": [
+    {
+      "next_pass": 2,
+      "outcome": "plan_errors",
+      "observation_id": "obs-0005",
+      "feedback": {
+        "previous_pass": 1,
+        "reason": "task_verification",
+        "failed_step_index": null,
+        "actions_used": 1,
+        "actions_remaining": 17,
+        "remaining_ms": 6945953.000000008,
+        "recent_steps": [
+          {
+            "index": 1,
+            "action_type": "click",
+            "attempted": true,
+            "succeeded": true,
+            "verification": "passed"
+          }
+        ],
+        "omitted_steps": 0,
+        "instruction": "Plan from the current observation; previous attempts do not prove success. Do not replay completed inputs to recreate an earlier state. Existing task checks and remaining budgets still apply."
+      },
+      "elapsed_ms": 30030.999999988126
+    }
+  ],
+  "unconfirmed_action_attempts": 0,
+  "action_count": 1
+}

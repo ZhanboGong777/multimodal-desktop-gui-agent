@@ -1,0 +1,40 @@
+{
+  "schema_version": "week6.semantic_auditor.v5_review.v1",
+  "reviewer": "/root/week6_replanning_review",
+  "created_utc": "2026-10-28T08:58:09.816253+00:00",
+  "copies": [
+    {
+      "source": "scripts/week6_audit_semantic_acceptance.py",
+      "destination": "Document/Week6/results/full_requirements_20261028/review/semantic_auditor_v005/week6_audit_semantic_acceptance.py.txt",
+      "sha256": "41f7d1669eea3aedc382e58c86d68e9aa8e03f65be1564e659e42c5530435732"
+    },
+    {
+      "source": "tests/test_week6_full_requirements_review.py",
+      "destination": "Document/Week6/results/full_requirements_20261028/review/semantic_auditor_v005/test_week6_full_requirements_review.py.txt",
+      "sha256": "58916c5cbcc82cc470a78476eae79b8aa5faa48b56f69e525f2ec0dec332dfa0"
+    },
+    {
+      "source": "src/gui_agent/planning/semantic_workflow.py",
+      "destination": "Document/Week6/results/full_requirements_20261028/review/semantic_auditor_v005/semantic_workflow.py.txt",
+      "sha256": "de2586762d7d518e5e4ec6b58a635c0c26b92e165679522195191a4a966cd835"
+    }
+  ],
+  "cpu_validation": "Document\\Week6\\results\\full_requirements_20261028\\review\\cpu_validation_007\\audit.json",
+  "cpu_validation_sha256": "2359d2d99ae492f0eb3a7f99ca99ce3f8c4323d91f775aac0bc90a04647d6d9b",
+  "offline_cases": 65,
+  "old_cases_preserved": 50,
+  "new_v5_cases": 15,
+  "pytest_seconds_from_stdout": 22.76,
+  "pytest_actual_exit": 0,
+  "ruff_actual_exit": 0,
+  "selected_pins": 13,
+  "selected_pins_unchanged": true,
+  "producer_status": "Reviewed stable v5 draft used in this target; final multi-file freeze is a separate record.",
+  "current_positive_live_semantic_audit": null,
+  "operations": {
+    "model_calls": 0,
+    "gui_operations": 0,
+    "full_suite_runs": 0
+  },
+  "semantic_scope": "Exact polarity-preserving caller-predicate selection plus immutable final, fresh per-goal contracts and actual input/event attribution. Predicate counts do not prove stage distinguishability or arbitrary instruction meaning."
+}

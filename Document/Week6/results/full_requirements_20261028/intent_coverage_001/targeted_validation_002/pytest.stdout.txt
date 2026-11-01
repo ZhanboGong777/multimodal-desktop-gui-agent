@@ -1,0 +1,46 @@
+........................................................................ [ 10%]
+........................................................................ [ 20%]
+................................................................F....... [ 31%]
+........................................................................ [ 41%]
+........................................................................ [ 51%]
+........................................................................ [ 62%]
+........................................................................ [ 72%]
+...................................................F.................... [ 82%]
+........................................................................ [ 93%]
+..............................................                           [100%]
+================================== FAILURES ===================================
+___ test_generation_guidance_is_generic_and_does_not_encode_the_lab_answer ____
+
+    def test_generation_guidance_is_generic_and_does_not_encode_the_lab_answer():
+>       assert "FEWEST justified literal conditions" in SEMANTIC_SYSTEM_PROMPT
+E       assert 'FEWEST justified literal conditions' in "Plan the caller's COMPLETE requested workflow. This is a future plan: you have not executed or observed anything. Ret...eturn no actions, coordinates, IDs, final-check replacements, budgets or extra fields. Never send external messages.\n"
+
+tests\test_week6_failed_contract_feedback.py:175: AssertionError
+___ test_sequential_planning_contract_reaches_wire_but_does_not_force_ready ___
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/intent_coverage_001/targeted_validation_002/pytest_tmp/test_sequential_planning_contr0')
+
+    def test_sequential_planning_contract_reaches_wire_but_does_not_force_ready(tmp_path):
+        # This checks supplied instructions and refusal preservation, not whether a
+        # real model understands sequential planning; Root's live run checks that.
+        native = {"status": "needs_clarification", "reason":
+                  "The caller has not identified the local document to modify.", "subgoals": []}
+        runner, request, state, _, _ = lab(tmp_path)
+        _persist_synthetic_pixels(runner, tmp_path)
+        bodies = []
+        client, sdk = _http_client([json.dumps(native)], bodies)
+        runner.client = client
+        try:
+            result = runner.run(request, options())
+        finally:
+            sdk.close()
+        system = next(message["content"] for message in bodies[0]["messages"] if message["role"] == "system")
+        normalized = " ".join(system.split())
+>       assert "Absence of a later control is not missing caller information" in normalized
+E       assert 'Absence of a later control is not missing caller information' in 'Plan the caller\'s COMPLETE requested workflow. This is a future plan: you have not executed or observed anything. Re...Subgoals", "type": "array"}}, "required": ["status", "reason", "subgoals"], "title": "SemanticPlan", "type": "object"}'
+
+tests\test_week6_semantic_text_context.py:191: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_week6_failed_contract_feedback.py::test_generation_guidance_is_generic_and_does_not_encode_the_lab_answer
+FAILED tests/test_week6_semantic_text_context.py::test_sequential_planning_contract_reaches_wire_but_does_not_force_ready
+2 failed, 692 passed in 107.01s (0:01:47)

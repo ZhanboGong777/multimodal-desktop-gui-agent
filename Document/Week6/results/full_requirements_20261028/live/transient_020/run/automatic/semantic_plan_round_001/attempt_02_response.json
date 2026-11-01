@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 21375.0,
+  "usage": {
+    "prompt_tokens": 1965,
+    "completion_tokens": 234,
+    "total_tokens": 2199
+  },
+  "error": null,
+  "content_length": 1035,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"Regenerated plan adheres strictly to caller intent: no message composition, only visible verification text. Operations are named explicitly and verifiable via expect_text/forbid_text.\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Prepare a BLUE report for project BETA by selecting the correct project and theme, then save the draft locally.\",\n      \"expect_text\": [\"Project BETA\", \"Theme BLUE\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"prepare_report\"\n    },\n    {\n      \"instruction\": \"Review the prepared BLUE report using the visible review controls, ensuring all content is verified.\",\n      \"expect_text\": [\"Project BETA\", \"Theme BLUE\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"review_report\"\n    },\n    {\n      \"instruction\": \"Commit the reviewed BLUE report locally using the visible commit controls, ensuring 'LOCAL COMPLETE' is visible as confirmation.\",\n      \"expect_text\": [\"LOCAL COMPLETE\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"commit_report\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

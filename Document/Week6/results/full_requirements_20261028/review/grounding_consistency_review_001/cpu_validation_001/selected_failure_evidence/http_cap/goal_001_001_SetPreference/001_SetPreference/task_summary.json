@@ -1,0 +1,81 @@
+{
+  "run_id": "001_SetPreference",
+  "case_id": "SetPreference",
+  "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Set the requested preference\nComplete original caller request: Set the requested preference and persist the configuration",
+  "status": "failed",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Choose the requested control",
+      "action_type": "click",
+      "observation_id": "obs-0004",
+      "resolved": null,
+      "action_result": null,
+      "verification": null,
+      "error": "target consistency conflict: obs-0003: element 'obs-0003-e999' has text 'OTHER CONTROL', inconsistent with target_text 'Advance control'; refusing to replace the supplied element ID",
+      "elapsed_ms": 0.0,
+      "after_observation_id": null
+    }
+  ],
+  "verification": null,
+  "error": null,
+  "elapsed_ms": 0.0,
+  "execute": true,
+  "model_name": "offline-scripted",
+  "provider": "test_explicit_transport",
+  "notes": [
+    "planned 1 steps from obs-0003",
+    "s1: target consistency conflict: obs-0003: element 'obs-0003-e999' has text 'OTHER CONTROL', inconsistent with target_text 'Advance control'; refusing to replace the supplied element ID",
+    "re-planning attempt 2 produced no steps; stopping"
+  ],
+  "task_id": "SetPreference",
+  "commit": "482895f",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 1470x956, control 1470x956",
+  "started_at": "2026-10-28T10:22:23.312786Z",
+  "finished_at": "2026-10-28T10:22:23.312786Z",
+  "planning_attempts": 2,
+  "model_requests": 2,
+  "planning_ms": 0.0,
+  "confirmation_ms": 0.0,
+  "execution_ms": 0.0,
+  "planner_ms": 0.0,
+  "planning_calls": 2,
+  "system_elapsed_ms": 0.0,
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\.pytest-tmp-grounding-consistency-review001\\test_review_semantic_replannin1\\semantic\\goal_001_001_SetPreference\\001_SetPreference",
+  "stop_reason": "re-planning attempt 2 produced no steps; stopping",
+  "error_type": "",
+  "failed_step_id": "s1",
+  "recovery_records": [
+    {
+      "next_pass": 2,
+      "outcome": "no_plan",
+      "observation_id": "obs-0005",
+      "feedback": {
+        "previous_pass": 1,
+        "reason": "target_resolution",
+        "failed_step_index": 1,
+        "actions_used": 0,
+        "actions_remaining": 8,
+        "remaining_ms": 240000.0,
+        "recent_steps": [
+          {
+            "index": 1,
+            "action_type": "click",
+            "attempted": false,
+            "succeeded": null,
+            "verification": null
+          }
+        ],
+        "omitted_steps": 0,
+        "instruction": "Plan from the current observation; previous attempts do not prove success. Do not replay completed inputs to recreate an earlier state. Existing task checks and remaining budgets still apply. The previous plan's target_text conflicted with its explicit element ID or identified a container with ambiguous labels. No input was dispatched for that rejected step. Use the current observation and select an ID consistent with the same requested target; do not change the task goal."
+      },
+      "elapsed_ms": 0.0
+    }
+  ],
+  "unconfirmed_action_attempts": 0,
+  "action_count": 0
+}

@@ -1,0 +1,50 @@
+........................................................................ [ 25%]
+........................................................................ [ 50%]
+........................................................................ [ 75%]
+..................................................................FF.    [100%]
+================================== FAILURES ===================================
+_ test_fresh_conflict_is_refused_even_when_pixel_refresh_returns_that_current_id _
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/grounding_consistency_001/cpu_development_001/pytest_tmp/test_fresh_conflict_is_refused0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002695C6A6AE0>
+
+    def test_fresh_conflict_is_refused_even_when_pixel_refresh_returns_that_current_id(tmp_path, monkeypatch):
+        source, current = frame("obs-0001"), frame("obs-0002", swapped=True)
+        runner, task, executor, client, _ = runtime(tmp_path, [source, current], [native("obs-0001", 2)])
+        # This isolates the dispatch consistency guard from the separately tested pixel matcher.
+        monkeypatch.setattr(runner_module, "match_candidate", lambda _old, fresh, _id: fresh.elements[2])
+        result = runner.run(task, ExecutionOptions(execute=True, confirm=False))
+        assert result.status == "failed" and executor.actions == [] and result.action_count == 0
+>       assert len(client.calls) == 1 and "obs-0002" in result.steps[0].error
+E       assert (1 == 1 and 'obs-0002' in 'visual grounding refused: obs-0001: unknown or unstable foreground')
+E        +  where 1 = len([{'messages': [{'role': 'system', 'content': 'Plan GUI actions. Reply with ONE JSON object.\n\n{"task_id":"t1","instru...135)  box=(10,110,150,160)", "success_rules": [], "max_steps": 10}}'}], 'kwargs': {'image_path': None}, 'timeout': 90}])
+E        +    where [{'messages': [{'role': 'system', 'content': 'Plan GUI actions. Reply with ONE JSON object.\n\n{"task_id":"t1","instru...135)  box=(10,110,150,160)", "success_rules": [], "max_steps": 10}}'}], 'kwargs': {'image_path': None}, 'timeout': 90}] = <test_week6_automatic_decomposition.ScriptedClient object at 0x000002695C6A71A0>.calls
+E        +  and   'visual grounding refused: obs-0001: unknown or unstable foreground' = StepRecord(index=1, step_id='choose', description='Choose the requested control', action_type='click', observation_id=...grounding refused: obs-0001: unknown or unstable foreground', elapsed_ms=30.999999959021807, after_observation_id=None).error
+
+tests\test_week6_grounding_consistency.py:173: AssertionError
+_ test_rejected_plan_uses_existing_budgeted_recovery_and_only_the_corrected_plan_dispatches _
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/grounding_consistency_001/cpu_development_001/pytest_tmp/test_rejected_plan_uses_existi0')
+
+    def test_rejected_plan_uses_existing_budgeted_recovery_and_only_the_corrected_plan_dispatches(tmp_path):
+        frames = [frame(f"obs-{index:04d}", finished=index >= 5) for index in range(1, 7)]
+        bad, corrected = native("obs-0001", 3), native("obs-0003", 0)
+        runner, task, executor, client, recorder = runtime(tmp_path, frames, [bad, corrected])
+        result = runner.run(task, ExecutionOptions(execute=True, confirm=False, max_actions=1,
+                                                  max_planning_attempts=2))
+        assert result.status == "succeeded" and result.action_count == len(executor.actions) == 1
+        assert result.planning_calls == len(client.calls) == 2
+        assert result.steps[0].error.startswith(TARGET_CONSISTENCY_ERROR_PREFIX)
+        assert result.steps[0].action_result is None and result.steps[1].action_result["success"] is True
+        action = executor.actions[0][0]
+        assert (action.x, action.y) == (60, 30)
+        messages = client.calls[1]["messages"]
+>       payload = json.loads(messages[-1].content)
+                             ^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'dict' object has no attribute 'content'
+
+tests\test_week6_grounding_consistency.py:190: AttributeError
+=========================== short test summary info ===========================
+FAILED tests/test_week6_grounding_consistency.py::test_fresh_conflict_is_refused_even_when_pixel_refresh_returns_that_current_id
+FAILED tests/test_week6_grounding_consistency.py::test_rejected_plan_uses_existing_budgeted_recovery_and_only_the_corrected_plan_dispatches
+2 failed, 283 passed in 135.24s (0:02:15)

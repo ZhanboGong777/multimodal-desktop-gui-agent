@@ -1,0 +1,127 @@
+{
+  "name": "install",
+  "command": [
+    "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+    "-X",
+    "utf8",
+    "-c",
+    "import json,runpy,sys\nfrom pathlib import Path\nimport psutil\np=psutil.Process()\nPath(sys.argv[1]).write_text(json.dumps({\"pid\":p.pid,\"create_time\":p.create_time(),\"exe\":p.exe(),\"cmdline\":p.cmdline(),\"parents\":[{\"pid\":x.pid,\"create_time\":x.create_time(),\"exe\":x.exe()} for x in p.parents()[:5]]},ensure_ascii=False,indent=2)+\"\\n\",encoding=\"utf8\")\nsys.argv=[\"pip\",*sys.argv[2:]]\nrunpy.run_module(\"pip\",run_name=\"__main__\")\n",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_distribution_20261028_002\\run_final_001\\install.actual_child_identity.json",
+    "install",
+    "--no-index",
+    "--no-deps",
+    "--no-compile",
+    "--target",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_distribution_20261028_002\\run_final_001\\isolated_install",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_distribution_20261028_002\\run_final_001\\wheel\\multimodal_desktop_gui_agent-2.1.0-py3-none-any.whl"
+  ],
+  "effective_pip_arguments": [
+    "install",
+    "--no-index",
+    "--no-deps",
+    "--no-compile",
+    "--target",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_distribution_20261028_002\\run_final_001\\isolated_install",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_distribution_20261028_002\\run_final_001\\wheel\\multimodal_desktop_gui_agent-2.1.0-py3-none-any.whl"
+  ],
+  "cwd": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_distribution_20261028_002\\run_final_001",
+  "started_at_utc": "2026-11-01T12:34:21.118831+00:00",
+  "elapsed_seconds": 1.937999999994645,
+  "waited_child_launcher": {
+    "pid": 42552,
+    "create_time": 1793536461.1221151,
+    "exe": "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe",
+    "cmdline": [
+      "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+      "-X",
+      "utf8",
+      "-c",
+      "import json,runpy,sys\nfrom pathlib import Path\nimport psutil\np=psutil.Process()\nPath(sys.argv[1]).write_text(json.dumps({\"pid\":p.pid,\"create_time\":p.create_time(),\"exe\":p.exe(),\"cmdline\":p.cmdline(),\"parents\":[{\"pid\":x.pid,\"create_time\":x.create_time(),\"exe\":x.exe()} for x in p.parents()[:5]]},ensure_ascii=False,indent=2)+\"\\n\",encoding=\"utf8\")\nsys.argv=[\"pip\",*sys.argv[2:]]\nrunpy.run_module(\"pip\",run_name=\"__main__\")\n",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_distribution_20261028_002\\run_final_001\\install.actual_child_identity.json",
+      "install",
+      "--no-index",
+      "--no-deps",
+      "--no-compile",
+      "--target",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_distribution_20261028_002\\run_final_001\\isolated_install",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_distribution_20261028_002\\run_final_001\\wheel\\multimodal_desktop_gui_agent-2.1.0-py3-none-any.whl"
+    ],
+    "parents": [
+      {
+        "pid": 37712,
+        "create_time": 1793536444.5523343,
+        "exe": "D:\\anaconda\\python.exe"
+      },
+      {
+        "pid": 21320,
+        "create_time": 1793536444.522702,
+        "exe": "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe"
+      },
+      {
+        "pid": 33520,
+        "create_time": 1793536444.166651,
+        "exe": "D:\\anaconda\\python.exe"
+      },
+      {
+        "pid": 40412,
+        "create_time": 1793536444.1113508,
+        "exe": "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe"
+      },
+      {
+        "pid": 41632,
+        "create_time": 1793536443.6229548,
+        "exe": "C:\\Users\\联想\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe"
+      }
+    ]
+  },
+  "wait_exit_code": 0,
+  "actual_child_identity": {
+    "pid": 16644,
+    "create_time": 1793536461.15281,
+    "exe": "D:\\anaconda\\python.exe",
+    "cmdline": [
+      "D:\\anaconda\\python.exe",
+      "-X",
+      "utf8",
+      "-c",
+      "import json,runpy,sys\nfrom pathlib import Path\nimport psutil\np=psutil.Process()\nPath(sys.argv[1]).write_text(json.dumps({\"pid\":p.pid,\"create_time\":p.create_time(),\"exe\":p.exe(),\"cmdline\":p.cmdline(),\"parents\":[{\"pid\":x.pid,\"create_time\":x.create_time(),\"exe\":x.exe()} for x in p.parents()[:5]]},ensure_ascii=False,indent=2)+\"\\n\",encoding=\"utf8\")\nsys.argv=[\"pip\",*sys.argv[2:]]\nrunpy.run_module(\"pip\",run_name=\"__main__\")\n",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_distribution_20261028_002\\run_final_001\\install.actual_child_identity.json",
+      "install",
+      "--no-index",
+      "--no-deps",
+      "--no-compile",
+      "--target",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_distribution_20261028_002\\run_final_001\\isolated_install",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_distribution_20261028_002\\run_final_001\\wheel\\multimodal_desktop_gui_agent-2.1.0-py3-none-any.whl"
+    ],
+    "parents": [
+      {
+        "pid": 42552,
+        "create_time": 1793536461.1221151,
+        "exe": "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe"
+      },
+      {
+        "pid": 37712,
+        "create_time": 1793536444.5523343,
+        "exe": "D:\\anaconda\\python.exe"
+      },
+      {
+        "pid": 21320,
+        "create_time": 1793536444.522702,
+        "exe": "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe"
+      },
+      {
+        "pid": 33520,
+        "create_time": 1793536444.166651,
+        "exe": "D:\\anaconda\\python.exe"
+      },
+      {
+        "pid": 40412,
+        "create_time": 1793536444.1113508,
+        "exe": "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe"
+      }
+    ]
+  },
+  "stdout_sha256": "ec8daeda1fded86523120c6456583c10bbc587c33b52a6e67b1e6af2644f2cb3",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

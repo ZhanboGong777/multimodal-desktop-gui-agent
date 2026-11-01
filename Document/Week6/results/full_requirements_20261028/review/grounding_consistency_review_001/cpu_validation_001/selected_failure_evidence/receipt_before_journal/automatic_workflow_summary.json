@@ -1,0 +1,209 @@
+{
+  "schema_version": "week6.semantic_workflow.v1",
+  "decomposition_protocol_mode": "semantic_subtasks",
+  "workflow_id": "SemanticLab",
+  "status": "cancelled",
+  "plans": [
+    {
+      "schema_version": "week6.semantic_subtasks.v6",
+      "input_modality": "caller_intent_only",
+      "image_attached": false,
+      "status": "ready",
+      "proposal": {
+        "status": "ready",
+        "reason": "Two requested state changes",
+        "subgoals": [
+          {
+            "instruction": "Set the requested preference",
+            "expect_text": [
+              "Verified part 1"
+            ],
+            "forbid_text": [],
+            "goal_id": "SetPreference"
+          },
+          {
+            "instruction": "Persist the requested configuration",
+            "expect_text": [
+              "Verified part 2"
+            ],
+            "forbid_text": [],
+            "goal_id": "PersistConfig"
+          }
+        ]
+      },
+      "workflow": {
+        "workflow_id": "SemanticLab",
+        "instruction": "Set the requested preference and persist the configuration",
+        "subgoals": [
+          {
+            "case_id": "SetPreference",
+            "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Set the requested preference\nComplete original caller request: Set the requested preference and persist the configuration",
+            "target_app": null,
+            "preconditions": [],
+            "success_rules": [],
+            "verification": "automatic",
+            "expect_text": [
+              "Verified part 1"
+            ],
+            "forbid_text": [],
+            "requires_processes": [],
+            "forbids_processes": [],
+            "must_exit_processes": [],
+            "risk": "medium",
+            "message_conversation": null,
+            "gate_on_step_verification": false
+          },
+          {
+            "case_id": "PersistConfig",
+            "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Persist the requested configuration\nComplete original caller request: Set the requested preference and persist the configuration",
+            "target_app": null,
+            "preconditions": [],
+            "success_rules": [],
+            "verification": "automatic",
+            "expect_text": [
+              "Verified part 2"
+            ],
+            "forbid_text": [],
+            "requires_processes": [],
+            "forbids_processes": [],
+            "must_exit_processes": [],
+            "risk": "medium",
+            "message_conversation": null,
+            "gate_on_step_verification": false
+          }
+        ],
+        "final_check": {
+          "case_id": "FINAL",
+          "instruction": "Independently read unchanged caller final predicates",
+          "target_app": null,
+          "preconditions": [],
+          "success_rules": [],
+          "verification": "automatic",
+          "expect_text": [
+            "Verified part 1",
+            "Verified part 2",
+            "Final accepted"
+          ],
+          "forbid_text": [
+            "ERROR"
+          ],
+          "requires_processes": [],
+          "forbids_processes": [],
+          "must_exit_processes": [],
+          "risk": "low",
+          "message_conversation": null,
+          "gate_on_step_verification": true
+        }
+      },
+      "planning_calls": 1,
+      "model_requests": 1,
+      "elapsed_ms": 0.0,
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\.pytest-tmp-grounding-consistency-review001\\test_review_telemetry_keyboard1\\semantic\\semantic_plan_round_001",
+      "error": "Two requested state changes"
+    }
+  ],
+  "goal_outcomes": [
+    {
+      "round": 1,
+      "goal_id": "SetPreference",
+      "instruction": "Set the requested preference",
+      "expect_text": [
+        "Verified part 1"
+      ],
+      "forbid_text": [],
+      "status": "cancelled",
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\.pytest-tmp-grounding-consistency-review001\\test_review_telemetry_keyboard1\\semantic\\goal_001_001_SetPreference",
+      "verification": null,
+      "task_verification": null
+    }
+  ],
+  "completed_subgoals": [],
+  "semantic_goals_total": 2,
+  "workflow_result": {
+    "schema_version": "week6.workflow.v1",
+    "workflow_id": "SemanticLab",
+    "status": "cancelled",
+    "execute": true,
+    "subgoals": [
+      {
+        "index": 0,
+        "case_id": "SetPreference",
+        "status": "cancelled",
+        "child_status": "cancelled",
+        "actions": 0,
+        "unconfirmed_action_attempts": 1,
+        "planning_calls": 1,
+        "verification": null,
+        "elapsed_ms": 0.0,
+        "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\.pytest-tmp-grounding-consistency-review001\\test_review_telemetry_keyboard1\\semantic\\goal_001_001_SetPreference\\001_SetPreference",
+        "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\.pytest-tmp-grounding-consistency-review001\\test_review_telemetry_keyboard1\\semantic\\goal_001_001_SetPreference\\001_SetPreference\\task_summary.json",
+        "error": null
+      }
+    ],
+    "total_actions": 0,
+    "unconfirmed_action_attempts": 1,
+    "planning_calls": 1,
+    "accounting_complete": false,
+    "elapsed_ms": 0.0,
+    "final_verification": null,
+    "final_observation_id": null,
+    "final_observation_reference": "",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\.pytest-tmp-grounding-consistency-review001\\test_review_telemetry_keyboard1\\semantic\\goal_001_001_SetPreference",
+    "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\.pytest-tmp-grounding-consistency-review001\\test_review_telemetry_keyboard1\\semantic\\goal_001_001_SetPreference\\workflow_summary.json",
+    "checkpoint_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\.pytest-tmp-grounding-consistency-review001\\test_review_telemetry_keyboard1\\semantic\\goal_001_001_SetPreference\\checkpoints.jsonl",
+    "error": "child dispatch outcome is unconfirmed; no further execution",
+    "notes": [
+      "A child reports unconfirmed dispatch attempts; total_actions is a confirmed lower bound. Later subgoals will not run."
+    ]
+  },
+  "workflow_results": [
+    {
+      "schema_version": "week6.workflow.v1",
+      "workflow_id": "SemanticLab",
+      "status": "cancelled",
+      "execute": true,
+      "subgoals": [
+        {
+          "index": 0,
+          "case_id": "SetPreference",
+          "status": "cancelled",
+          "child_status": "cancelled",
+          "actions": 0,
+          "unconfirmed_action_attempts": 1,
+          "planning_calls": 1,
+          "verification": null,
+          "elapsed_ms": 0.0,
+          "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\.pytest-tmp-grounding-consistency-review001\\test_review_telemetry_keyboard1\\semantic\\goal_001_001_SetPreference\\001_SetPreference",
+          "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\.pytest-tmp-grounding-consistency-review001\\test_review_telemetry_keyboard1\\semantic\\goal_001_001_SetPreference\\001_SetPreference\\task_summary.json",
+          "error": null
+        }
+      ],
+      "total_actions": 0,
+      "unconfirmed_action_attempts": 1,
+      "planning_calls": 1,
+      "accounting_complete": false,
+      "elapsed_ms": 0.0,
+      "final_verification": null,
+      "final_observation_id": null,
+      "final_observation_reference": "",
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\.pytest-tmp-grounding-consistency-review001\\test_review_telemetry_keyboard1\\semantic\\goal_001_001_SetPreference",
+      "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\.pytest-tmp-grounding-consistency-review001\\test_review_telemetry_keyboard1\\semantic\\goal_001_001_SetPreference\\workflow_summary.json",
+      "checkpoint_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\.pytest-tmp-grounding-consistency-review001\\test_review_telemetry_keyboard1\\semantic\\goal_001_001_SetPreference\\checkpoints.jsonl",
+      "error": "child dispatch outcome is unconfirmed; no further execution",
+      "notes": [
+        "A child reports unconfirmed dispatch attempts; total_actions is a confirmed lower bound. Later subgoals will not run."
+      ]
+    }
+  ],
+  "final_verification": null,
+  "final_observation_reference": "",
+  "total_actions": 0,
+  "planning_calls": 2,
+  "model_requests": 2,
+  "unconfirmed_action_attempts": 1,
+  "accounting_complete": false,
+  "elapsed_ms": 0.0,
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\.pytest-tmp-grounding-consistency-review001\\test_review_telemetry_keyboard1\\semantic",
+  "error": "child dispatch outcome is unconfirmed; no further execution",
+  "notes": []
+}

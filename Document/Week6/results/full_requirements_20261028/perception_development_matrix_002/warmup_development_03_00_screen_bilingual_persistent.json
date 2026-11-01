@@ -1,0 +1,293 @@
+{
+  "fixture": "development_03",
+  "arm": "screen_bilingual_persistent",
+  "phase": "warmup",
+  "repeat": 0,
+  "image_sha256": "742c4f9f842d3f7c2f6e198aa6805dcde4f5a235b4b4a33e79242603c1855235",
+  "started_perf_counter": 674556.1162747,
+  "status": "completed",
+  "ended_perf_counter": 674556.2314129,
+  "engine_creation_ms": 0.001600012183189392,
+  "decode_ms": 1.8183999927714467,
+  "ocr_ms": 107.97479993198067,
+  "ui_ms": 5.343400058336556,
+  "full_ms": 115.13819999527186,
+  "metrics": {
+    "tp": 8,
+    "fp": 0,
+    "fn": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "labels": [
+      {
+        "text": "Storage View",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9831932773109243
+      },
+      {
+        "text": "Disk Capacity",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9284855769230769
+      },
+      {
+        "text": "Scan Storage",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9375
+      },
+      {
+        "text": "Browse",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9649122807017544
+      },
+      {
+        "text": "Eject",
+        "language": "en",
+        "matched": true,
+        "iou": 0.912828947368421
+      },
+      {
+        "text": "存储空间",
+        "language": "zh",
+        "matched": true,
+        "iou": 0.9852941176470589
+      },
+      {
+        "text": "扫描磁盘",
+        "language": "zh",
+        "matched": true,
+        "iou": 0.6570048309178744
+      },
+      {
+        "text": "弹出",
+        "language": "zh",
+        "matched": true,
+        "iou": 0.9705882352941176
+      }
+    ]
+  },
+  "control_metrics": {
+    "tp": 6,
+    "fp": 0,
+    "fn": 0,
+    "iou_threshold": 0.8
+  },
+  "predictions": [
+    {
+      "text": "Storage View",
+      "bounding_box": {
+        "left": 43,
+        "top": 38,
+        "right": 160,
+        "bottom": 57
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 101,
+        "y": 47
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Disk Capacity",
+      "bounding_box": {
+        "left": 43,
+        "top": 116,
+        "right": 146,
+        "bottom": 131
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 94,
+        "y": 123
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "存储空间",
+      "bounding_box": {
+        "left": 548,
+        "top": 116,
+        "right": 615,
+        "bottom": 133
+      },
+      "confidence": 0.95,
+      "center": {
+        "x": 581,
+        "y": 124
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Scan Storage",
+      "bounding_box": {
+        "left": 42,
+        "top": 202,
+        "right": 145,
+        "bottom": 217
+      },
+      "confidence": 0.84,
+      "center": {
+        "x": 93,
+        "y": 209
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "扫描磁盘",
+      "bounding_box": {
+        "left": 548,
+        "top": 199,
+        "right": 617,
+        "bottom": 226
+      },
+      "confidence": 0.79,
+      "center": {
+        "x": 582,
+        "y": 212
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Browse",
+      "bounding_box": {
+        "left": 43,
+        "top": 306,
+        "right": 98,
+        "bottom": 318
+      },
+      "confidence": 0.92,
+      "center": {
+        "x": 70,
+        "y": 312
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Eject",
+      "bounding_box": {
+        "left": 257,
+        "top": 306,
+        "right": 294,
+        "bottom": 321
+      },
+      "confidence": 0.9,
+      "center": {
+        "x": 275,
+        "y": 313
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "弹出",
+      "bounding_box": {
+        "left": 548,
+        "top": 306,
+        "right": 581,
+        "bottom": 322
+      },
+      "confidence": 0.94,
+      "center": {
+        "x": 564,
+        "y": 314
+      },
+      "source": "ocr"
+    }
+  ],
+  "ui_candidates": [
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 536,
+        "top": 291,
+        "right": 691,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 613,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 244,
+        "top": 291,
+        "right": 399,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 321,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 30,
+        "top": 291,
+        "right": 185,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 536,
+        "top": 187,
+        "right": 691,
+        "bottom": 244
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 613,
+        "y": 215
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 30,
+        "top": 187,
+        "right": 185,
+        "bottom": 244
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 215
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 536,
+        "top": 101,
+        "right": 691,
+        "bottom": 158
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 613,
+        "y": 129
+      },
+      "source": "contour"
+    }
+  ],
+  "errors": []
+}

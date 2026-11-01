@@ -1,0 +1,77 @@
+{
+  "schema_version": "week6.semantic_subtasks.v6",
+  "frozen_task": {
+    "case_id": "prepare_report",
+    "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Prepare a GREEN report for project ALPHA in Week6 Local Lab.\nComplete original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+    "target_app": null,
+    "preconditions": [],
+    "success_rules": [],
+    "verification": "automatic",
+    "expect_text": [
+      "Project ALPHA",
+      "Theme GREEN"
+    ],
+    "forbid_text": [],
+    "requires_processes": [],
+    "forbids_processes": [],
+    "must_exit_processes": [],
+    "risk": "medium",
+    "message_conversation": null,
+    "gate_on_step_verification": false
+  },
+  "child_status": "failed",
+  "child_verification": null,
+  "semantic_postcondition_verification": {
+    "outcome": "inconclusive",
+    "method": "automatic",
+    "detail": "no observation available to verify against",
+    "evidence": {}
+  },
+  "post_observation_id": null,
+  "confirmed_input_count": 0,
+  "planning_accounting_complete": true,
+  "eligible_for_semantic_credit": false,
+  "planning_limit_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\single_step_planning_limit.json",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Click on the 'ALPHA' button to select the project.",
+      "action_type": "click",
+      "observation_id": "obs-0002",
+      "resolved": null,
+      "action_result": null,
+      "verification": null,
+      "error": "target consistency conflict: obs-0001: element 'obs-0001-e003' has text 'Choose a project', inconsistent with target_text 'ALPHA'; refusing to replace the supplied element ID",
+      "elapsed_ms": 11594.000000040978,
+      "after_observation_id": null
+    },
+    {
+      "index": 2,
+      "step_id": "s1",
+      "description": "Click on the 'ALPHA' project button.",
+      "action_type": "click",
+      "observation_id": "obs-0004",
+      "resolved": null,
+      "action_result": null,
+      "verification": null,
+      "error": "target consistency conflict: obs-0003: element 'obs-0003-e003' has text 'Choose a project', inconsistent with target_text 'ALPHA'; refusing to replace the supplied element ID",
+      "elapsed_ms": 18609.99999998603,
+      "after_observation_id": null
+    },
+    {
+      "index": 3,
+      "step_id": "s1",
+      "description": "Click on the 'ALPHA' project button.",
+      "action_type": "click",
+      "observation_id": "obs-0006",
+      "resolved": null,
+      "action_result": null,
+      "verification": null,
+      "error": "target consistency conflict: obs-0005: element 'obs-0005-e003' has text 'Choose a project', inconsistent with target_text 'ALPHA'; refusing to replace the supplied element ID",
+      "elapsed_ms": 14312.000000034459,
+      "after_observation_id": null
+    }
+  ],
+  "meaning": "The original model-proposed literal semantic postconditions were independently checked; no raw failed step was rewritten."
+}

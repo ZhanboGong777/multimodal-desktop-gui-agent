@@ -1,0 +1,91 @@
+{
+  "schema": "week6.visual_target_guidance.offline.claim.v1",
+  "owner": {
+    "pid": 74536,
+    "create_time": 1793194878.409929,
+    "exe": "D:\\anaconda\\python.exe",
+    "cmdline": [
+      "D:\\anaconda\\python.exe",
+      "-X",
+      "utf8",
+      "C:/Users/联想/Documents/ChatGPT/Intern/tmp/week6_full_requirements_20261028/validate_visual_target_guidance.py",
+      "--name",
+      "root_affected_validation_001"
+    ]
+  },
+  "started_utc": "2026-10-28T13:41:18.690352+00:00",
+  "commands": [
+    [
+      "ruff",
+      [
+        "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+        "-m",
+        "ruff",
+        "check",
+        "src",
+        "tests",
+        "scripts"
+      ]
+    ],
+    [
+      "pytest",
+      [
+        "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+        "-X",
+        "utf8",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_action_adapter.py",
+        "tests/test_langchain_integration.py",
+        "tests/test_model_config.py",
+        "tests/test_model_mock.py",
+        "tests/test_planner.py",
+        "tests/test_runtime_runner.py",
+        "tests/test_runtime_verification.py",
+        "tests/test_week4_integration.py",
+        "tests/test_week4_prompts.py",
+        "tests/test_week6_action_output_contract.py",
+        "tests/test_week6_action_output_contract_review.py",
+        "tests/test_week6_auto_cli.py",
+        "tests/test_week6_automatic_decomposition.py",
+        "tests/test_week6_cli.py",
+        "tests/test_week6_grounding_consistency.py",
+        "tests/test_week6_observed_departure.py",
+        "tests/test_week6_rolling_actions.py",
+        "tests/test_week6_semantic_caller_predicates.py",
+        "tests/test_week6_semantic_conversation_repair.py",
+        "tests/test_week6_semantic_conversation_repair_review.py",
+        "tests/test_week6_semantic_goal_grouping.py",
+        "tests/test_week6_semantic_live_monitoring.py",
+        "tests/test_week6_semantic_monitoring.py",
+        "tests/test_week6_semantic_output_constraints.py",
+        "tests/test_week6_semantic_predicted_postconditions.py",
+        "tests/test_week6_semantic_repair_feedback.py",
+        "tests/test_week6_semantic_repair_feedback_review.py",
+        "tests/test_week6_semantic_subtasks.py",
+        "tests/test_week6_semantic_text_context.py",
+        "tests/test_week6_target_bindings.py",
+        "tests/test_week6_target_bindings_review.py",
+        "tests/test_week6_visual_target_guidance.py",
+        "tests/test_week6_visual_target_guidance_review.py",
+        "--basetemp",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\visual_target_guidance_001\\root_affected_validation_001\\pytest_tmp"
+      ]
+    ],
+    [
+      "collection",
+      [
+        "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+        "-X",
+        "utf8",
+        "-m",
+        "pytest",
+        "--collect-only",
+        "-q"
+      ]
+    ]
+  ],
+  "model_gui_calls": 0,
+  "full_regression": false
+}

@@ -1,0 +1,34 @@
+{
+  "schema": "week6.observed_query_constraints.producer_test_migration.v1",
+  "path": "tests/test_week6_target_bindings.py",
+  "old_sha256": "1157010febc7453bd764d170016506258e5c26e579b0424856cdc0b0f02f53cd",
+  "new_sha256": "cfac29e5c7f3f88921615c71a0d80592a408708fd03ac2798c277f3ab0cfd34f",
+  "migrated_cases": [
+    {
+      "kind": "unobserved top query without ID",
+      "old": "generation accepted",
+      "new": "generation rejected"
+    },
+    {
+      "kind": "unobserved arguments.target without ID",
+      "old": "generation accepted",
+      "new": "generation rejected"
+    },
+    {
+      "kind": "empty frame unknown query",
+      "old": "generation accepted",
+      "new": "generation rejected"
+    }
+  ],
+  "metadata_added_fields": [
+    "observed_query_contract",
+    "observed_query_contract_sha256"
+  ],
+  "old_positive_remaining_six_parameters_exact": true,
+  "all_other_test_AST_exact_after_only_above_migrations": true,
+  "original_case_count": 29,
+  "migrated_case_count": 29,
+  "assertions_not_deleted": true,
+  "runtime_matching_unchanged": true,
+  "generation_runtime_language_equivalence_claimed": false
+}

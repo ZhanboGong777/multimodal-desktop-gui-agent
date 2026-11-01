@@ -1,0 +1,13 @@
+# Explicit opt-in. Uses the same screen pixels/segmentation/resources as Week6
+# screen subprocess; only the installed Tesseract C API lifetime changes.
+perception:
+  ocr:
+    engine: tesseract
+    fallback_engine: none
+    languages: [en, zh]
+    min_confidence: 0.5
+    tesseract_profile: screen
+    tesseract_scale: 2.0
+    tesseract_tessdata_dir: D:/week6-full-ocr/tessdata
+    tesseract_transport: persistent
+    tesseract_library_path: C:/Program Files/Tesseract-OCR/libtesseract-5.dll

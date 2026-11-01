@@ -1,0 +1,36 @@
+[
+  {
+    "schema_version": "week6.semantic.rejected_pre_input_contract.v1",
+    "round": 1,
+    "goal_index": 2,
+    "goal": {
+      "instruction": "Locally review the prepared GREEN report for project ALPHA.",
+      "expect_text": [
+        "Review",
+        "Project ALPHA",
+        "Theme GREEN"
+      ],
+      "forbid_text": [],
+      "goal_id": "review_report"
+    },
+    "status": "rejected_before_input",
+    "reason": "semantic goal checks already hold before input; no completion credit",
+    "before_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_022\\run\\automatic\\contract_before_001_002\\observation.json",
+    "before_verification": {
+      "outcome": "passed",
+      "method": "automatic",
+      "detail": "all success rules matched against the current screen",
+      "evidence": {
+        "observation_id": "obs-0001",
+        "expect_text": [
+          "Review",
+          "Project ALPHA",
+          "Theme GREEN"
+        ],
+        "forbid_text": []
+      }
+    },
+    "confirmed_inputs": 0,
+    "eligible_for_semantic_credit": false
+  }
+]

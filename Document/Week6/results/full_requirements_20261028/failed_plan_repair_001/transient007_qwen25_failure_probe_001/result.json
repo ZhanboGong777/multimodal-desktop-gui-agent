@@ -1,0 +1,52 @@
+{
+  "schema": "week6.failed_plan_repair.saved_failure_probe.v1",
+  "original_sources": {
+    "attempt_01_request.json": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_007\\run\\automatic\\semantic_plan_round_002\\attempt_01_request.json",
+      "sha256": "bdecd8e6e81fcb0ee9f66965f3f3c956fe82d617d9cea3f62824387e3dfd354e"
+    },
+    "context_source_archive.json": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_007\\run\\automatic\\semantic_plan_round_002\\context_source_archive.json",
+      "sha256": "d2cf728bbc62a1fe2f63c5466043cee6e47ae24693bd9a1884e908799d8411a9"
+    },
+    "snapshot_archive.json": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_007\\run\\automatic\\semantic_plan_round_002\\snapshot_archive.json",
+      "sha256": "1c00b30bfdae51a78efa64a638a5d4423adf2c17d5dcf7da8c935989797dbc1d"
+    }
+  },
+  "blocked_signatures": [
+    [
+      "prepare a blue report for project beta by selecting the project, choosing the blue theme, and generating the report using visible controls.",
+      [
+        "project beta",
+        "report generated",
+        "theme blue"
+      ],
+      [
+        "connection error",
+        "external sync required",
+        "review unavailable"
+      ]
+    ]
+  ],
+  "result": {
+    "schema_version": "week6.semantic_subtasks.v6",
+    "input_modality": "caller_intent_only",
+    "image_attached": false,
+    "status": "failed",
+    "proposal": null,
+    "workflow": null,
+    "planning_calls": 3,
+    "model_requests": 3,
+    "elapsed_ms": 82327.99999999406,
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\failed_plan_repair_001\\transient007_qwen25_failure_probe_001\\production_decomposition",
+    "error": "1 validation error for SemanticPlan\n  Value error, non-ready plan needs a reason and no executable objectives [type=value_error, input_value={'status': 'needs_clarifi..._id': 'commit_report'}]}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/value_error"
+  },
+  "source_sha256": "d49a681c7da5d7354dee67211e74079161f299679321a8a1c5ac3e92a8038813",
+  "source_unchanged": true,
+  "production_guards_used": true,
+  "fresh_gui_captures": 0,
+  "gui_inputs": 0,
+  "acceptance_granted": false,
+  "meaning": "Original caller, prior failed objective and saved observation unchanged. Native generation diagnostics only. All native replies and errors retained."
+}

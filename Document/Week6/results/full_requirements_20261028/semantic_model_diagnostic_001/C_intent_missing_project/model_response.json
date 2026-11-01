@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen2.5vl:7b",
+  "latency_ms": 13438.0,
+  "usage": {
+    "prompt_tokens": 1008,
+    "completion_tokens": 168,
+    "total_tokens": 1176
+  },
+  "error": null,
+  "content_length": 682,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Prepare a GREEN report for project [not specified] in Week6 Local Lab.\",\n      \"expect_text\": [\"Theme GREEN\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"prepare_green_report\"\n    },\n    {\n      \"instruction\": \"Review the prepared GREEN report locally.\",\n      \"expect_text\": [\"Review Complete\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"review_report\"\n    },\n    {\n      \"instruction\": \"Commit the reviewed GREEN report locally.\",\n      \"expect_text\": [\"Commit Complete\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"commit_report\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

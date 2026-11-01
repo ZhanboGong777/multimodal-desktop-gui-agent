@@ -122,7 +122,17 @@ def test_real_runtime_rolls_one_action_at_a_time_on_full_goal_without_selector_o
     final = json.loads(Path(result.final_observation_reference).read_text(encoding="utf-8"))
     assert final["observation_id"] != result.rolling_actions_audit.post_observation_id
     assert final["window_id"] == "test-window" and final["foreground_stable"]
-    assert len(client.calls) == 2 and all("response_format" not in value["kwargs"] for value in client.calls)
+    assert len(client.calls) == 2
+    for value in client.calls:
+        response_format = value["kwargs"]["response_format"]
+        assert response_format["type"] == "json_schema"
+        assert response_format["json_schema"]["name"] == "gui_task_plan"
+        assert response_format["json_schema"]["strict"] is False
+        schema = response_format["json_schema"]["schema"]
+        assert "steps" in schema["required"] and schema["properties"]["steps"]["maxItems"] == 1
+        assert "subgoals" not in schema["properties"]
+        assert not {"disappearing_text", "caller_instruction_anchor", "candidates",
+                    "raw_checks", "derived_progress_checks"} & schema["properties"].keys()
     assert read_run_status(tmp_path / "automatic")["snapshot"]["task_status"] == "succeeded"
 
 

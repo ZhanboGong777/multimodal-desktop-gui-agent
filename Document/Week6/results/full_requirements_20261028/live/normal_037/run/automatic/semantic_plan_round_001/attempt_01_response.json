@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 24968.0,
+  "usage": {
+    "prompt_tokens": 1286,
+    "completion_tokens": 285,
+    "total_tokens": 1571
+  },
+  "error": null,
+  "content_length": 1298,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"Plan outlines two distinct semantic objectives: first, prepare and review the GREEN report for project ALPHA; second, commit the report locally. Each step is explicitly named and preserves caller operations.\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Prepare a GREEN report for project ALPHA by selecting the project, choosing the GREEN theme, and generating the report using visible controls.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\", \"Report Generated\"],\n      \"forbid_text\": [\"ERROR\", \"UNAVAILABLE\", \"RETRY\"],\n      \"goal_id\": \"prepare_report\"\n    },\n    {\n      \"instruction\": \"Review the prepared GREEN report for project ALPHA by accessing the review interface and confirming review completion using visible controls.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\", \"REVIEW COMPLETE\"],\n      \"forbid_text\": [\"ERROR\", \"UNAVAILABLE\", \"RETRY\"],\n      \"goal_id\": \"review_report\"\n    },\n    {\n      \"instruction\": \"Commit the reviewed GREEN report for project ALPHA locally by selecting the commit option and confirming the local commit using visible controls.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [\"ERROR\", \"UNAVAILABLE\", \"RETRY\"],\n      \"goal_id\": \"commit_report\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

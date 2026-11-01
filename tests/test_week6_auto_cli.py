@@ -167,8 +167,8 @@ def test_model_clarification_cannot_become_dry_run_success(cli, offline, monkeyp
     assert raw["status"] == "needs_clarification" and raw["decomposition"]["error"] == "which local editor?"
 
 
-@pytest.mark.parametrize("protocol", [None, "observed_departure"])
-def test_cli_selects_rolling_actions_by_default_and_preserves_explicit_stage_mode(
+@pytest.mark.parametrize("protocol", [None, "semantic_subtasks", "rolling_actions", "observed_departure"])
+def test_cli_selects_semantic_subtasks_by_default_and_preserves_explicit_legacy_modes(
     cli, offline, monkeypatch, tmp_path, protocol,
 ):
     captured = {}
@@ -190,13 +190,14 @@ def test_cli_selects_rolling_actions_by_default_and_preserves_explicit_stage_mod
     del argv[position:position + 2]
     if protocol:
         argv.extend(["--automatic-protocol", protocol])
-    else:
+    if protocol == "rolling_actions":
         argv.extend(["--planning-attempts", "1"])
+    else:
+        argv.extend(["--planning-attempts", "2"])
     assert cli.main(argv) == 0
-    assert captured["protocol_mode"] == (protocol or "rolling_actions")
+    assert captured["protocol_mode"] == (protocol or "semantic_subtasks")
     assert captured["request"].expect_text == ["AllDone"]
     assert captured["request"].forbid_text == ["ERROR"]
     assert not captured["options"].execute and captured["options"].confirm
-    if protocol is None:
-        assert captured["options"].max_planning_attempts == 1
+    assert captured["options"].max_planning_attempts == (1 if protocol == "rolling_actions" else 2)
     assert offline.runs == [] and offline.observed_frames == 0

@@ -1,0 +1,65 @@
+"""Static helper preparation; deliberately does not open the active case/fixture."""
+import ast
+import hashlib
+import json
+from pathlib import Path
+
+ROOT = Path("C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+BASE = ROOT / "Document/Week6/results/full_requirements_20261028"
+HERE = Path(__file__).resolve().parent
+OUT = BASE / "review/normal019_preparation_001"
+OUT.mkdir(exist_ok=False)
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def item(path):
+    return {"path": str(path), "sha256": sha(path), "bytes": path.stat().st_size}
+
+
+freeze_path = BASE / "receipt_envelope_001/final_source_freeze_002.json"
+prereg_path = BASE / "live/preregistered_v6_011.json"
+ack_path = BASE / "receipt_envelope_001/window_claims/normal_019/root_claim_ack_001.json"
+assert sha(freeze_path) == "70a6cde9ac0c20aa2d637d8a1747c09c33427a41c5bcb44202299da1009dbbb0"
+assert sha(prereg_path) == "e891b25d91adfbac7dc7e617cafedc7b3633a7b5c6cb482a0ce2468e844a6104"
+assert sha(ack_path) == "0c1de89ef5e2514aafe8ef08b69b600b28af11a521602b4778904d74769fbc20"
+freeze = json.loads(freeze_path.read_text("utf-8"))
+prereg = json.loads(prereg_path.read_text("utf-8"))
+ack = json.loads(ack_path.read_text("utf-8"))
+assert prereg["freeze_sha256"] == sha(freeze_path)
+pins = {path: sha(ROOT / path) for path in freeze["code_pins"]}
+assert pins == freeze["code_pins"] and len(pins) == 274
+assert sha(ROOT / "README.md") == freeze["readme_sha256"]
+assert sha(ROOT / "requirements-dev.txt") == freeze["requirements_dev_sha256"]
+original_claim, launch = Path(ack["claim"]["path"]), Path(ack["fixture_launch"]["path"])
+assert sha(original_claim) == ack["claim"]["sha256"]
+assert sha(launch) == ack["fixture_launch"]["sha256"]
+helper = HERE / "run_ended_audit_001.py"
+ast.parse(helper.read_text("utf-8"), filename=str(helper))
+for source in (helper, Path(__file__)):
+    with (OUT / (source.name + ".txt")).open("xb") as stream:
+        stream.write(source.read_bytes())
+record = {"schema": "week6.normal019.ended_helper_preparation.v1", "status": "prepared_not_executed",
+    "helper": item(helper), "preparation_script": item(Path(__file__)),
+    "freeze": item(freeze_path), "preregistration": item(prereg_path), "root_external_claim_ack": item(ack_path),
+    "original_claim": item(original_claim), "fixture_launch_metadata": item(launch),
+    "code_pins_count": len(pins), "code_pins_equal_freeze": True, "current_code_pins": pins,
+    "readme_sha256": sha(ROOT / "README.md"), "requirements_dev_sha256": sha(ROOT / "requirements-dev.txt"),
+    "active_case_files_read": [], "fixture_hidden_journal_read": False,
+    "saved_case_or_fixture_inventory_performed": False, "auditor_invocations": [],
+    "helper_main_executed": False, "model_gui_ocr_training_calls": 0,
+    "execution_requires": ["Root explicit actual ended/session-closed authorization",
+        "--owner-exit-confirmed", "--operator-handoff .../normal_019/operator_handoff_003.json",
+        "--claim-ack-sha256 " + sha(ack_path)],
+    "deferred_until_actual_end": ["original window claim and case copy byte equality",
+        "actual owner/claim/launch/native identity and pre-owner acknowledgement time",
+        "strict saved-evidence audit real process exit", "receipt-protocol audit real process exit",
+        "all ended case and fixture raw hashes stable before/after", "Root stage semantic and mid-run monitor review"],
+    "meaning": "Static parsing and registered input/source hashes only; no live case outcome is inferred."}
+path = OUT / "preparation_manifest_001.json"
+with path.open("x", encoding="utf-8", newline="\n") as stream:
+    json.dump(record, stream, ensure_ascii=False, indent=2)
+    stream.write("\n")
+print(json.dumps({"manifest": str(path), "sha256": sha(path), "helper_sha256": sha(helper)}))

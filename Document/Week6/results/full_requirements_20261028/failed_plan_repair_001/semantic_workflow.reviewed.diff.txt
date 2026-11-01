@@ -1,0 +1,68 @@
+--- src/gui_agent/planning/semantic_workflow.py
++++ src/gui_agent/planning/semantic_workflow.py
+@@ -111,6 +111,10 @@
+     """The existing full-predicate before check alone supplies this category."""
+ 
+ 
++class _RepeatedSemanticObjectiveError(ValueError):
++    """A previously failed/rejected native objective must not be dispatched again."""
++
++
+ def _semantic_attempt_system(
+     response_format: dict[str, Any],
+     repair_category: Literal["duplicate_postconditions", "preexisting_postconditions"] | None = None,
+@@ -378,7 +382,8 @@
+     def decompose(self, request: WorkflowRequest, *, evidence_directory: Path,
+                   budgeted_client: BudgetedModelClient, initial_observation: ObservationSnapshot,
+                   completed_subgoals: list[dict[str, Any]], max_calls: int, deadline: float,
+-                  revision: bool = False, failure: dict[str, Any] | None = None) -> SemanticPlanResult:
++                  revision: bool = False, failure: dict[str, Any] | None = None,
++                  blocked_signatures: tuple[tuple[Any, ...], ...] = ()) -> SemanticPlanResult:
+         directory = Path(evidence_directory)
+         directory.mkdir(parents=True, exist_ok=False)
+         started, before_requests = self.clock(), budgeted_client.request_count
+@@ -471,8 +476,10 @@
+                     native = json.loads(response.content, object_pairs_hook=_unique_keys)
+                     _validate_native_predicates(native, request)
+                     proposal = SemanticPlan.model_validate(native, strict=True)
+-                    self._validate(proposal, request, initial_observation, completed_subgoals, revision)
++                    self._validate(proposal, request, initial_observation, completed_subgoals, revision,
++                                   blocked_signatures=blocked_signatures)
+                 except ValueError as exc:
++                    result.status = "blocked" if isinstance(exc, _RepeatedSemanticObjectiveError) else "failed"
+                     result.error = str(exc)
+                     repair_category = None
+                     if isinstance(exc, _DuplicateSemanticPostconditionsError):
+@@ -515,7 +522,8 @@
+         return result
+ 
+     def _validate(self, proposal: SemanticPlan, request: WorkflowRequest, before: ObservationSnapshot,
+-                  completed: list[dict[str, Any]], revision: bool) -> None:
++                  completed: list[dict[str, Any]], revision: bool, *,
++                  blocked_signatures: tuple[tuple[Any, ...], ...] = ()) -> None:
+         if proposal.status != "ready":
+             return
+         if not (1 if revision else 2) <= len(proposal.subgoals) <= self.max_subgoals:
+@@ -550,6 +558,12 @@
+             instructions.add(instruction)
+             signatures.add(signature[1:])
+             check_owners[signature[1:]] = goal.goal_id
++        if any(_signature(goal) in blocked_signatures for goal in proposal.subgoals):
++            raise _RepeatedSemanticObjectiveError(
++                "semantic replanning repeated an unchanged failed/rejected objective; "
++                "regenerate only unfinished work without replaying that native contract. "
++                "Do not rename it or claim the missing predicted caption is a caller requirement."
++            )
+         if Verifier().check_task(_goal_task(proposal.subgoals[0], request), before).passed:
+             raise _PreexistingSemanticPostconditionsError(
+                 "first semantic goal postconditions already hold; existing context cannot prove execution"
+@@ -741,7 +755,8 @@
+                     evidence_directory=self.directory / f"semantic_plan_round_{round_index:03d}",
+                     budgeted_client=client, initial_observation=before, completed_subgoals=result.completed_subgoals,
+                     max_calls=options.max_planning_attempts - result.planning_calls - 1, deadline=deadline,
+-                    revision=round_index > 1, failure=failure)
++                    revision=round_index > 1, failure=failure,
++                    blocked_signatures=tuple(failed_objectives))
+                 result.plans.append(plan)
+                 result.planning_calls += plan.planning_calls
+                 if plan.status != "ready" or plan.workflow is None or plan.proposal is None:

@@ -1,0 +1,72 @@
+"""Saved-real-frame raw record audit; no OCR, model, GUI or input invocation."""
+import hashlib
+import importlib.util
+import json
+import math
+import statistics
+from datetime import UTC,datetime
+from pathlib import Path
+
+ROOT=Path(__file__).resolve().parents[2]
+BASE=ROOT/'Document/Week6/results/full_requirements_20261028/perception_external_real_001'
+ARMS=['native_eng_subprocess','native_bilingual_subprocess','screen_bilingual_subprocess','screen_bilingual_persistent']
+
+
+def read(path):return json.loads(Path(path).read_bytes())
+def sha(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+if __name__=='__main__':
+    folder=BASE/'paired_measurement_001'
+    summary=read(folder/'summary.json')
+    gt=read(BASE/'ground_truth_frozen_001.json')
+    receipt=read(BASE/'measurement_owner_001/receipt.json')
+    source=read(folder/'source_freeze.json')
+    assert receipt['actual_child_wait_returncode']==0
+    assert receipt['summary_sha256']==sha(folder/'summary.json')
+    assert receipt['gt_sha256']==source['gt_sha256']==sha(BASE/'ground_truth_frozen_001.json')
+    assert datetime.fromisoformat(gt['created_utc']) < datetime.fromisoformat(source['created_utc'])
+    assert sha(gt['source_path'])==sha(gt['copied_path'])==gt['source_sha256']
+    assert sha(ROOT/'scripts/week6_benchmark_persistent_external.py')==receipt['measurement_source_sha256']==source['script_sha256']
+    rows=[read(p) for p in folder.glob('*.json') if p.name not in {'summary.json','source_freeze.json'}]
+    assert len(rows)==56 and len({(r['arm'],r['phase'],r['repeat']) for r in rows})==56
+    assert all(r['status']=='completed' and not r['errors'] for r in rows)
+    assert all(r['input_full_size']==[2560,1600] and r['image_sha256']==gt['source_sha256'] for r in rows)
+    assert all(abs(r['full_ms']-(r['ended_perf_counter']-r['started_perf_counter'])*1000)<1e-6 for r in rows)
+    assert all(r['full_frame_precision'] is None and r['full_frame_recall'] is None for r in rows)
+    for phase in ('cold','warmup','warm'):
+        expected={'cold':3,'warmup':1,'warm':10}[phase]
+        for arm in ARMS:
+            values=sorted(r['full_ms'] for r in rows if r['phase']==phase and r['arm']==arm)
+            assert len(values)==expected
+            stats={'n':len(values),'median_ms':statistics.median(values),
+                   'p95_nearest_rank_ms':values[math.ceil(.95*len(values))-1],'max_ms':max(values)}
+            assert stats==summary['timings'][phase][arm]
+    matches=0
+    for candidate in [r for r in rows if r['arm']==ARMS[3]]:
+        other=next(r for r in rows if r['arm']==ARMS[2] and r['phase']==candidate['phase'] and r['repeat']==candidate['repeat'])
+        assert all(candidate[k]==other[k] for k in ('predictions','ui_candidates','roi_metrics','roi_control_metrics'))
+        matches+=1
+    assert matches==14
+    # Independently rematch the human labels to raw ROI predictions.
+    spec=importlib.util.spec_from_file_location('raw_score',Path(__file__).with_name('audit_frozen_results.py'))
+    scoring=importlib.util.module_from_spec(spec);spec.loader.exec_module(scoring)
+    roi=gt['scoring_roi']
+    for row in rows:
+        selected=[p for p in row['predictions'] if p['bounding_box']['left']>=roi[0] and
+                  p['bounding_box']['top']>=roi[1] and p['bounding_box']['right']<=roi[2] and p['bounding_box']['bottom']<=roi[3]]
+        assert scoring.score(gt['labels'],selected)=={'tp':5,'fp':0,'fn':0}
+        assert row['roi_control_metrics']['tp']==2 and row['roi_control_metrics']['fp']==row['roi_control_metrics']['fn']==0
+    candidate=summary['timings']['warm'][ARMS[3]]['median_ms']
+    reductions={arm:1-candidate/summary['timings']['warm'][arm]['median_ms'] for arm in ARMS[:3]}
+    result={'schema':'week6.full_perception.external_raw_audit.v1','created_utc':datetime.now(UTC).isoformat(),
+            'source_sha256':gt['source_sha256'],'gt_sha256':sha(BASE/'ground_truth_frozen_001.json'),
+            'summary_sha256':sha(folder/'summary.json'),'owner_receipt_sha256':sha(BASE/'measurement_owner_001/receipt.json'),
+            'actual_child_wait_returncode':0,'records_rebuilt':56,'screen_ordered_full_output_pairs':matches,
+            'roi_unique_labels':5,'roi_unique_controls':2,'all_calls_roi_text_5_of_5_controls_2_of_2':True,
+            'warm_median_reduction_vs':reductions,'full_frame_precision':None,'full_frame_recall':None,
+            'all_assertions_passed':True,'meaning':'Pixel validation only. No accuracy gain on this English ROI. Screen C API is faster than screen CLI, slower than native English; small native bilingual difference is not an assured speedup. No desktop success is inferred.'}
+    with (BASE/'independent_raw_audit_001.json').open('xb') as stream:
+        stream.write((json.dumps(result,ensure_ascii=False,indent=2)+'\n').encode('utf-8'))
+    print(json.dumps(result,ensure_ascii=False,indent=2))
+    print(sha(BASE/'independent_raw_audit_001.json'))

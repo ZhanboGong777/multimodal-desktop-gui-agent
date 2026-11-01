@@ -1,0 +1,150 @@
+{
+  "schema": "week6.independent.repair_feedback.narrow_cpu.v1",
+  "focused_source_pin_count": 16,
+  "focused_source_pins_unchanged": true,
+  "whole_repository_source_freeze_claimed": false,
+  "ruff": {
+    "command": [
+      "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+      "-m",
+      "ruff",
+      "check",
+      "scripts/week6_audit_semantic_acceptance.py",
+      "tests/test_week6_semantic_repair_feedback_review.py"
+    ],
+    "started_utc": "2026-10-28T11:05:12.229156+00:00",
+    "finished_utc": "2026-10-28T11:05:12.493610+00:00",
+    "elapsed_seconds": 0.26400780002586544,
+    "launcher": {
+      "pid": 87568,
+      "cmdline": [
+        "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+        "-m",
+        "ruff",
+        "check",
+        "scripts/week6_audit_semantic_acceptance.py",
+        "tests/test_week6_semantic_repair_feedback_review.py"
+      ],
+      "exe": "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe",
+      "create_time": 1793185512.2336485
+    },
+    "observed_descendants": [
+      {
+        "cmdline": [
+          "D:\\anaconda\\python.exe",
+          "-m",
+          "ruff",
+          "check",
+          "scripts/week6_audit_semantic_acceptance.py",
+          "tests/test_week6_semantic_repair_feedback_review.py"
+        ],
+        "exe": "D:\\anaconda\\python.exe",
+        "create_time": 1793185512.2587943,
+        "pid": 72636
+      },
+      {
+        "cmdline": [
+          "D:\\Developer\\multimodal-desktop-gui-agent\\.venv\\Scripts\\ruff.exe",
+          "check",
+          "scripts/week6_audit_semantic_acceptance.py",
+          "tests/test_week6_semantic_repair_feedback_review.py"
+        ],
+        "exe": "D:\\Developer\\multimodal-desktop-gui-agent\\.venv\\Scripts\\ruff.exe",
+        "create_time": 1793185512.3412385,
+        "pid": 69004
+      }
+    ],
+    "actual_child_exit_code": 0
+  },
+  "pytest": {
+    "command": [
+      "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+      "-X",
+      "utf8",
+      "-m",
+      "pytest",
+      "-q",
+      "tests/test_week6_semantic_repair_feedback_review.py",
+      "--basetemp",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_repair_feedback_review_001\\cpu_validation_001\\pytest_tmp",
+      "--tb=short"
+    ],
+    "started_utc": "2026-10-28T11:05:12.495612+00:00",
+    "finished_utc": "2026-10-28T11:05:21.552916+00:00",
+    "elapsed_seconds": 9.05735229991842,
+    "launcher": {
+      "pid": 69544,
+      "cmdline": [
+        "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+        "-X",
+        "utf8",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_week6_semantic_repair_feedback_review.py",
+        "--basetemp",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_repair_feedback_review_001\\cpu_validation_001\\pytest_tmp",
+        "--tb=short"
+      ],
+      "exe": "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe",
+      "create_time": 1793185512.50043
+    },
+    "observed_descendants": [
+      {
+        "cmdline": [
+          "D:\\anaconda\\python.exe",
+          "-X",
+          "utf8",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_week6_semantic_repair_feedback_review.py",
+          "--basetemp",
+          "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_repair_feedback_review_001\\cpu_validation_001\\pytest_tmp",
+          "--tb=short"
+        ],
+        "exe": "D:\\anaconda\\python.exe",
+        "create_time": 1793185512.5230153,
+        "pid": 85340
+      },
+      {
+        "cmdline": [
+          "git",
+          "rev-parse",
+          "--short",
+          "HEAD"
+        ],
+        "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+        "create_time": 1793185518.977402,
+        "pid": 79672
+      },
+      {
+        "cmdline": [
+          "git",
+          "rev-parse",
+          "--short",
+          "HEAD"
+        ],
+        "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+        "create_time": 1793185519.5760825,
+        "pid": 79832
+      },
+      {
+        "cmdline": [
+          "git",
+          "rev-parse",
+          "--short",
+          "HEAD"
+        ],
+        "exe": "C:\\Program Files\\Git\\cmd\\git.exe",
+        "create_time": 1793185519.7052972,
+        "pid": 67032
+      }
+    ],
+    "actual_child_exit_code": 1
+  },
+  "summary": "2 failed, 17 passed in 6.81s",
+  "model_gui_calls": 0,
+  "full_regression": false,
+  "all_narrow_checks_passed": false
+}

@@ -1,0 +1,64 @@
+{
+  "schema": "week6.full_requirements.independent_cpu_review.v1",
+  "reviewer": "/root/week6_replanning_review",
+  "started_utc": "2026-10-28T00:14:54.336349+00:00",
+  "finished_utc": "2026-10-28T00:15:07.448241+00:00",
+  "command": [
+    "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/test_week6_full_requirements_review.py",
+    "--basetemp=.pytest-tmp-fullrequirements-review001",
+    "--tb=short",
+    "--junitxml=C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\cpu_validation_001\\junit.xml"
+  ],
+  "cwd": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree",
+  "actual_returncode": 1,
+  "wrapper_wall_seconds": 13.080657699960284,
+  "collected_testcases": 23,
+  "failed_testcases": [
+    "test_review_completed_objective_cannot_be_reintroduced_under_partial_renaming[id]",
+    "test_review_completed_objective_cannot_be_reintroduced_under_partial_renaming[checks]",
+    "test_review_child_reused_capture_provenance_stops_before_credit[time]",
+    "test_review_child_reused_capture_provenance_stops_before_credit[path]",
+    "test_review_child_reused_capture_provenance_stops_before_credit[id]"
+  ],
+  "selected_source_before": {
+    "src/gui_agent/planning/semantic_workflow.py": "885178ca770c28177afaec724e2ebeff5abb238a234683bd06f88183f8e041fb",
+    "src/gui_agent/planning/workflow_decomposer.py": "d9881631677d4223c16669bee7a7780bb4c6014ffe9066a488ad37683bfbe826",
+    "src/gui_agent/planning/planner.py": "afa72e8faa640d9c8127154f283828105fb0d53d2ea21ca1f36843ca0e18bb6d",
+    "src/gui_agent/runtime/monitoring.py": "1ee8ea4d3ce699c476d2e0502af72cde9e1c4001b16ed5a0e6af10392c1ed0de",
+    "src/gui_agent/runtime/workflow.py": "13a6ae067662b2ceda1f5082bb9ed0c544f201be06b5fb21cabdf7f7098fe889",
+    "src/gui_agent/runtime/runner.py": "e3fe1cfd49f338afa29c5cae2b13c12fa972a694327b9def13a97c0d803ffe56",
+    "src/gui_agent/runtime/schemas.py": "06aa355ba24ed50a6307d7fc84cd920dc91b81dc7d844ec68c461cb614b5f6f7",
+    "src/gui_agent/runtime/verification.py": "abc72375f2959fb765fb53dbf4bbf63401513e5cdfeaeb445d0c148b0be1cd4c",
+    "tests/test_week6_full_requirements_review.py": "e859d6ded7cc37525c31bb980e9a6f09821ce485d54aa361eb06328c41031b56",
+    "tests/test_week6_semantic_subtasks.py": "4f40a094ea64f7eb5fb4149290c64385651b7048716313a06891cd3b6eb6af42",
+    "tests/test_week6_automatic_decomposition.py": "b28ec24c5d06982f1160c3b110f706b0461113eabcd26f4c7d5b1365378000ad",
+    "tests/test_week6_rolling_actions.py": "fe669d6e50df3dc1e1b44b5aaa81b1c770a4c5b516a9df73cd120d047d9a9193"
+  },
+  "selected_source_after": {
+    "src/gui_agent/planning/semantic_workflow.py": "885178ca770c28177afaec724e2ebeff5abb238a234683bd06f88183f8e041fb",
+    "src/gui_agent/planning/workflow_decomposer.py": "d9881631677d4223c16669bee7a7780bb4c6014ffe9066a488ad37683bfbe826",
+    "src/gui_agent/planning/planner.py": "afa72e8faa640d9c8127154f283828105fb0d53d2ea21ca1f36843ca0e18bb6d",
+    "src/gui_agent/runtime/monitoring.py": "1ee8ea4d3ce699c476d2e0502af72cde9e1c4001b16ed5a0e6af10392c1ed0de",
+    "src/gui_agent/runtime/workflow.py": "13a6ae067662b2ceda1f5082bb9ed0c544f201be06b5fb21cabdf7f7098fe889",
+    "src/gui_agent/runtime/runner.py": "e3fe1cfd49f338afa29c5cae2b13c12fa972a694327b9def13a97c0d803ffe56",
+    "src/gui_agent/runtime/schemas.py": "06aa355ba24ed50a6307d7fc84cd920dc91b81dc7d844ec68c461cb614b5f6f7",
+    "src/gui_agent/runtime/verification.py": "abc72375f2959fb765fb53dbf4bbf63401513e5cdfeaeb445d0c148b0be1cd4c",
+    "tests/test_week6_full_requirements_review.py": "e859d6ded7cc37525c31bb980e9a6f09821ce485d54aa361eb06328c41031b56",
+    "tests/test_week6_semantic_subtasks.py": "4f40a094ea64f7eb5fb4149290c64385651b7048716313a06891cd3b6eb6af42",
+    "tests/test_week6_automatic_decomposition.py": "b28ec24c5d06982f1160c3b110f706b0461113eabcd26f4c7d5b1365378000ad",
+    "tests/test_week6_rolling_actions.py": "fe669d6e50df3dc1e1b44b5aaa81b1c770a4c5b516a9df73cd120d047d9a9193"
+  },
+  "selected_source_unchanged": true,
+  "artifacts": {
+    "stdout.txt": "51ba1baa7774c64c26cc09f1a795495f9bac30befd78198e187fa5c8f2b6ce8e",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "junit.xml": "522dd540f5309adc6218aa4b289fb848f5187e37b979024b1ab1c3f182282b33"
+  },
+  "runner_sha256": "f0159183443aac4edc376d8f00326369694b5510e9d289fa2895d9420a8efd61",
+  "scope": "Offline scripted observations/model replies/CPU executor doubles using real runtime. No real model requests, GUI operations, OCR measurements or task-success claims.",
+  "passed": false
+}

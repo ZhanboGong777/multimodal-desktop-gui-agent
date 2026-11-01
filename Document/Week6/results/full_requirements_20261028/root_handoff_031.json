@@ -1,0 +1,63 @@
+{
+  "schema": "week6.full_requirements.handoff.v3",
+  "previous": "root_handoff_030.json",
+  "updated_utc": "2026-10-28T12:09:13.6801837Z",
+  "status": "in_progress",
+  "branch": "codex/week6-full-requirements",
+  "phase": "generic_action_contract_repair_offline_checks_pending",
+  "active_model_or_gui_task": null,
+  "freeze": "model_candidate_vl3b_001/final_source_freeze_001.json",
+  "freeze_sha256": "f45685bbf863f8decf72a1ced94329938904d8b0884cdad57111853eeeb7c0ff",
+  "code_pin_count": 265,
+  "combined_validation": "379passed76.88s/Ruff0/scopeaffected_semantic/actualownerexit0/88.563s,265beforeafterexact,3380collectionONLY",
+  "last_case": {
+    "cause": "High-level native two-goal plan valid on first request. Two action replies flat action object without steps; parser correctly refused all inputs. Actual repeated messages identical; TaskPlanner has no format error feedback and require_structured_output stored but not sent.",
+    "model_requests": 3,
+    "model": "qwen2.5vl:3b",
+    "completed_goals": 0,
+    "actions": 0,
+    "source_unchanged": true,
+    "name": "normal_014",
+    "elapsed_seconds": 82.641,
+    "unknown_actions": 0,
+    "independent_audit": "review/negative_normal014_audit_001.json SHA e00027aba65a18f946f8c5b4e3d3ec0628203d92681293cae9a149caa55f8b59",
+    "actual_child_exit_code": 1,
+    "planning_calls": 2,
+    "native_semantic_goals": 2,
+    "operator_handoff": "live/normal_014/operator_handoff_002.json"
+  },
+  "fixture": {
+    "actual_pid": 72620,
+    "launcher_pid": 75104,
+    "sky_window": 13567918,
+    "state": "Controlled teardown after negative audit; exact PID/create_time/exe/cmd/ppid verified, actual fixture wait15",
+    "name": "fixture_normal_010",
+    "create_time": 1793188317.1042483,
+    "close_receipt": "live/fixture_normal_010.close.json"
+  },
+  "next": "Await both source owners ready/stopped; inspect combined changes, actual offline affected validation, derive action_output_contract_001 new freeze/prereg007, then fresh normal015 fixture011. No blind retry or old case reuse.",
+  "remaining": "Normalandtransient actualmodel/Skyacceptance,livecountsproof,full004,samesourceaudit,engineeringgate,finalreport/allpageQA,finalwheel/sourceZIP/branchcommit",
+  "overall_complete": false,
+  "negative_normal011": "review/negative_normal011_audit_001.json SHA30025e7a78787f440a7a61e545a508ae7f0dffcc79be345e5f0c09316a7ffcae,128originals bound",
+  "active_cpu_task": null,
+  "new_source": {
+    "code_pin_count": 265,
+    "repair_policy": "week6.semantic_repair_feedback.v2",
+    "source_before_manifest_sha256": "58b86b77b4d4a24ed8758e9e110dd66877de1b660865d518e712ee9a2ba066c1",
+    "auditor_sha256": "6f2c50c1ce5083a1b9425cc6656c1c0dea6ebc00be01dc7c6f1778e2badecd09",
+    "semantic_workflow_sha256": "ae50b05e029e0ee5330430ec67d5a5bb0d49fe62487d47ecb34b914fcb0d8337",
+    "source_writes": "Auto owns planner.py/new producer test; independent reviewer owns transport schema metadata/new review test; no GUI/model active",
+    "proposed_change": "TaskPlanner endpoint non-strict JSON schema, bounded parser-error/raw feedback with full per-attempt audit; local parser/guards/caller/budgets unchanged. Not yet CPU or live accepted."
+  },
+  "readonly_model_metadata": "tmp/week6_normal012_metadata_diagnostic_20261028_001/diagnostic_assessment.json SHAb6d6a12313a3ff303c62b101d32f7edcb6d70031a87ba6df60049603b0a28fd5; show/tags200only,0generation/load/pull; templateSystem+user/assistant roles; installedVL7b/VL3b/llava7b only; no evidenceclientdropssystem orresponsecutoff, complianceunproven",
+  "changed_smoke": "semantic_conversation_repair_001/root_changed_validation_001/validation.json,61 actualpass15.26snotfull",
+  "gui_operator": {
+    "exclusive": true,
+    "status": "stopped after terminal truewait, no pending input",
+    "preregistration": "live/preregistered_v6_006.json",
+    "fixture": "fixture_normal_010",
+    "prereg_sha256": "6734253d4a1bedd4afa07ca9e249c9f39765a1865d6ee08ec9cc5937734874c4",
+    "agent": "/root/week6_live_operator",
+    "case": "normal_014"
+  }
+}

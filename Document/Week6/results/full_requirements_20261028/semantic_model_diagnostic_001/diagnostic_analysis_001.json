@@ -1,0 +1,411 @@
+{
+  "schema": "week6.semantic_private_diagnostic_analysis.v1",
+  "created_at_utc": "2026-10-28T08:40:19.085980+00:00",
+  "scope": "Development-only model diagnosis. No GUI/capture/executor/input, no production changes, no live success claim.",
+  "pre_registration_sha256": "dec2b75d924e5827d119e824a7dc59b52ae1157a83c0514194e62d0a7558974f",
+  "runner_sha256": "5dd95278450cf471126c903a42d57fabdcf82e3270ea98c4cbdc0646fa6f4602",
+  "execution": {
+    "real_owner_pid": 70492,
+    "owner_create_time": 1793176269.9870002,
+    "owner_exe": "D:\\anaconda\\python.exe",
+    "waited_venv_launcher_pid": 77968,
+    "actual_worker_pid": 80576,
+    "worker_create_time": 1793176270.4758828,
+    "worker_exe": "D:\\anaconda\\python.exe",
+    "child_wait_exit_code": 0,
+    "owner_elapsed_seconds": 77.20300000009593,
+    "actual_http_requests": 3,
+    "pin_count": 255,
+    "pins_equal": true,
+    "new_gui_capture_input_executor_calls": 0,
+    "exit0_meaning": "Diagnostic harness completed; it does not mean semantic plans or GUI tasks succeeded."
+  },
+  "baseline_normal006": {
+    "actual_message_roles": [
+      "system",
+      "user"
+    ],
+    "system_equals_saved_arguments": true,
+    "complete_caller_and_context_equal_saved_arguments": true,
+    "image_argument_is_none": true,
+    "schema_in_response_format_but_not_as_text_in_messages": true,
+    "http_status": 200,
+    "requested_model": "qwen2.5vl:7b",
+    "returned_model": "qwen2.5vl:7b",
+    "finish_reason": "stop",
+    "usage": {
+      "prompt_tokens": 2171,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "completion_tokens": 91,
+      "total_tokens": 2262
+    },
+    "reason_characters": 300,
+    "native_status": "needs_clarification",
+    "native_reason": "The caller's request specifies 'Project ALPHA' and 'Theme GREEN', but the OCR results only show 'ALPHA' and 'BETA'. There is a discrepancy between the caller's expectations and the available text in the OCR snapshot. The caller's request also mentions 'review it', but the OCR snapshot does not show控",
+    "transport_log_elapsed_ms": 40282.00000000652,
+    "evidence_limit": "Transport logger retains arguments/messages and full provider responses, not a separately captured raw wire request body. No evidence of deleted caller text or wrong role ordering; stop and small usage do not support output-token exhaustion. Exact reason length 300 alone does not establish decoder internals."
+  },
+  "cases": [
+    {
+      "case": "A_schema_grounded_full_snapshot",
+      "response_ok": true,
+      "requests": 1,
+      "requests_cumulative": 1,
+      "elapsed_seconds": 45.25,
+      "native_status": "ready",
+      "schema_valid": true,
+      "archived_snapshot_local_constraints_valid": false,
+      "validation_error": "duplicate or completed semantic objective/checks cannot be replayed",
+      "operational_error": null,
+      "executed": false,
+      "reason": "",
+      "goal_count": 6,
+      "pre_registered_arguments_sha256": "e11e5c90151c3351c530be8cb960c294fbc9c9f4e27c9de9f188f6695cf1db42",
+      "all_messages_exactly_pre_registered": true,
+      "response_format_exactly_baseline": true,
+      "image_argument_is_none": true,
+      "actual_http_status": 200,
+      "http_count_source": "httpx_request_event",
+      "transport_log_elapsed_ms": 43469.00000004098,
+      "returned_model": "qwen2.5vl:7b",
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 2514,
+        "prompt_tokens_details": {
+          "cached_tokens": 466
+        },
+        "completion_tokens": 464,
+        "total_tokens": 2978
+      },
+      "native_proposal": {
+        "status": "ready",
+        "reason": "",
+        "subgoals": [
+          {
+            "instruction": "Select project ALPHA from the visible controls.",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": [
+              "BETA",
+              "Offline report preparation",
+              "Choose a project",
+              "Week6 Local Lab"
+            ],
+            "goal_id": "select_project_alpha"
+          },
+          {
+            "instruction": "Select theme GREEN from the visible controls.",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": [
+              "BETA",
+              "Offline report preparation",
+              "Choose a project",
+              "Week6 Local Lab"
+            ],
+            "goal_id": "select_theme_green"
+          },
+          {
+            "instruction": "Locate and select the 'Offline report preparation' option from the visible controls.",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": [
+              "BETA",
+              "Choose a project",
+              "Week6 Local Lab"
+            ],
+            "goal_id": "select_offline_report_preparation"
+          },
+          {
+            "instruction": "Locate and select the 'Choose a project' option from the visible controls.",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": [
+              "BETA",
+              "Offline report preparation",
+              "Week6 Local Lab"
+            ],
+            "goal_id": "select_choose_project"
+          },
+          {
+            "instruction": "Locate and select the 'Week6 Local Lab' option from the visible controls.",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": [
+              "BETA",
+              "Offline report preparation",
+              "Choose a project"
+            ],
+            "goal_id": "select_week6_local_lab"
+          },
+          {
+            "instruction": "Locate and select the 'LOCAL COMPLETE' option from the visible controls.",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": [
+              "BETA",
+              "Offline report preparation",
+              "Choose a project",
+              "Week6 Local Lab"
+            ],
+            "goal_id": "select_local_complete"
+          }
+        ]
+      },
+      "artifact_sha256": {
+        "request_arguments.json": "33c6403d1a5086d3005d640cd1e8d54825d3a045894ea26c4afff57cc57bf4b9",
+        "messages_pre_registered.json": "a0ef6486c17a5f583c6baf86a71a37472a30fc401bd1b1f004087217671ba7b0",
+        "transport_requests.jsonl": "917586085e5b51658736c4a2536c48b175b20f698486194ee4abb705833614fb",
+        "provider_native_content.txt": "40e6fb17b6ad5fedd337d00da502fdada701bbe5a09eaae5df4bab689b0b724a",
+        "native_proposal.json": "6b366ae470163dfd79b27f8614b8e8f4a6a12eaf56f6138eec9e5116f0577820",
+        "result.json": "ed4ca7953fd7782277666b1a9b79e6bce7f12ddd30ccfb9bd39698e7fd9c707d"
+      }
+    },
+    {
+      "case": "B_schema_grounded_intent_only",
+      "response_ok": true,
+      "requests": 1,
+      "requests_cumulative": 2,
+      "elapsed_seconds": 15.047000000020489,
+      "native_status": "ready",
+      "schema_valid": true,
+      "archived_snapshot_local_constraints_valid": true,
+      "validation_error": "",
+      "operational_error": null,
+      "executed": false,
+      "reason": "",
+      "goal_count": 3,
+      "pre_registered_arguments_sha256": "7110140e2b85df174251d88d53bd0759ecdf89a576c9afb281e184c457b99f71",
+      "all_messages_exactly_pre_registered": true,
+      "response_format_exactly_baseline": true,
+      "image_argument_is_none": true,
+      "actual_http_status": 200,
+      "http_count_source": "httpx_request_event",
+      "transport_log_elapsed_ms": 15032.00000000652,
+      "returned_model": "qwen2.5vl:7b",
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 1008,
+        "prompt_tokens_details": {
+          "cached_tokens": 993
+        },
+        "completion_tokens": 175,
+        "total_tokens": 1183
+      },
+      "native_proposal": {
+        "status": "ready",
+        "reason": "",
+        "subgoals": [
+          {
+            "instruction": "Prepare a GREEN report for project ALPHA.",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN"
+            ],
+            "forbid_text": [],
+            "goal_id": "prepare_green_report"
+          },
+          {
+            "instruction": "Review the prepared GREEN report for project ALPHA.",
+            "expect_text": [
+              "Review",
+              "Project ALPHA",
+              "Theme GREEN"
+            ],
+            "forbid_text": [],
+            "goal_id": "review_report"
+          },
+          {
+            "instruction": "Commit the reviewed GREEN report for project ALPHA locally.",
+            "expect_text": [
+              "Commit",
+              "Project ALPHA",
+              "Theme GREEN",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": [],
+            "goal_id": "commit_report"
+          }
+        ]
+      },
+      "artifact_sha256": {
+        "request_arguments.json": "471d23bd343d13a7f1c0168934cf5219b7a2190405d86c0b6f5d5a223f0f1736",
+        "messages_pre_registered.json": "f8231ee8a458e91ba60d2772dbe98e911ea521244e83709e563fcd68d5d6ae7c",
+        "transport_requests.jsonl": "dd31228ea4659855f3b49f781d18aa4b67f0aee48b4177279f3d8117d3aefd03",
+        "provider_native_content.txt": "2946aa48fd81685dd9e819e33916238f23dc87e60ff562bda92b3af8713e4118",
+        "native_proposal.json": "d4ce90c8956a9b9c74dcadf8d9268ca8608b5b23ca925faed6e657a3eb1fb616",
+        "result.json": "e7b51972cab2fd3c8107d4802cafbf318d5f3d4bf68ee4eb85fb59ddc566c73e"
+      }
+    },
+    {
+      "case": "C_intent_missing_project",
+      "response_ok": true,
+      "requests": 1,
+      "requests_cumulative": 3,
+      "elapsed_seconds": 13.437999999965541,
+      "native_status": "ready",
+      "schema_valid": true,
+      "archived_snapshot_local_constraints_valid": true,
+      "validation_error": "",
+      "operational_error": null,
+      "executed": false,
+      "reason": "",
+      "goal_count": 3,
+      "pre_registered_arguments_sha256": "065802dfb89cc829a4a0771b2130bd348961ef06b4346679b9884853a2b5f52a",
+      "all_messages_exactly_pre_registered": true,
+      "response_format_exactly_baseline": true,
+      "image_argument_is_none": true,
+      "actual_http_status": 200,
+      "http_count_source": "httpx_request_event",
+      "transport_log_elapsed_ms": 13422.00000002049,
+      "returned_model": "qwen2.5vl:7b",
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 1008,
+        "prompt_tokens_details": {
+          "cached_tokens": 831
+        },
+        "completion_tokens": 168,
+        "total_tokens": 1176
+      },
+      "native_proposal": {
+        "status": "ready",
+        "reason": "",
+        "subgoals": [
+          {
+            "instruction": "Prepare a GREEN report for project [not specified] in Week6 Local Lab.",
+            "expect_text": [
+              "Theme GREEN",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": [],
+            "goal_id": "prepare_green_report"
+          },
+          {
+            "instruction": "Review the prepared GREEN report locally.",
+            "expect_text": [
+              "Review Complete",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": [],
+            "goal_id": "review_report"
+          },
+          {
+            "instruction": "Commit the reviewed GREEN report locally.",
+            "expect_text": [
+              "Commit Complete",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": [],
+            "goal_id": "commit_report"
+          }
+        ]
+      },
+      "artifact_sha256": {
+        "request_arguments.json": "3b32485196f081a430b4107edad9524860ce2dca71eec08ce8e62a5eea8783ab",
+        "messages_pre_registered.json": "31ae912891e7ea9b172f28e06fb4a08119734989ce554e1c349213a123e77644",
+        "transport_requests.jsonl": "382354307ce2c0a52a9fd75c77bfbafa8147bcfb3acf4612225500c25f7f0625",
+        "provider_native_content.txt": "40798561bb2084d44beb9943f296d1b52b4753ba69cb59446d9a815d012c9461",
+        "native_proposal.json": "96c876be30d8e29c67b5869b3a5f12d3cc49679aab3f874f86926e976e593b42",
+        "result.json": "e96b767712993e35f77b430c83323f5a46e6ff65dbd8e65b64d7791c9a585739"
+      }
+    }
+  ],
+  "findings": [
+    {
+      "kind": "observation",
+      "finding": "A made status ready after adding the exact schema text, but duplicate postconditions and title-as-action instructions made the plan invalid. Schema visibility is not a semantic correctness fix."
+    },
+    {
+      "kind": "observation",
+      "finding": "B produced a cleaner three-objective intent sequence without the current snapshot. Existing local validation passed; no goal was executed. Review and Commit are speculative UI literals and can be visible before the operation or absent afterward."
+    },
+    {
+      "kind": "observation",
+      "finding": "C failed the explicit missing-project negative control. It returned ready and copied [not specified] into an executable objective, with invented completion labels."
+    },
+    {
+      "kind": "inference",
+      "finding": "Current-screen affordance labels and future intended states are being conflated; separating intent and UI grounding is promising but is not proven sufficient by these three probes."
+    },
+    {
+      "kind": "inference",
+      "finding": "Schema text, property order/status priming, and limited model capability may affect output. This serial three-case development experiment does not establish a unique cause or a success rate."
+    }
+  ],
+  "registered_limitations": [
+    "B/C intentionally retain the A/v4 system sentence describing OCR/window input although no current snapshot is supplied; their failure alone cannot disprove intent-only architecture.",
+    "No new GUI observation or executor is constructed or called; local postparse checks use only the archived normal006 snapshot.",
+    "All outputs including nonready, invalid or errored replies are retained without correction; no format retry.",
+    "Readiness is development evidence only, not real task execution, independent final success or general application quality."
+  ],
+  "primary_source": {
+    "url": "https://docs.ollama.com/capabilities/structured-outputs",
+    "supported_claim": "Ollama documents OpenAI-compatible response_format support and recommends supplying the schema as text in the prompt too."
+  },
+  "proposed_v5_assessment": {
+    "recommendation": "A constrained caller-predicate protocol is a principled restriction, not a proof of general semantic planning. Do not ship B unchanged or force ready.",
+    "minimal_surface": [
+      "semantic_workflow.py protocol/context/schema/local parser",
+      "dedicated CPU contract/negative tests; no action layer, observation, executor or monitor changes required"
+    ],
+    "required_rules": [
+      "Archive the complete initial snapshot/pixels, but declare high-level caller-intent-only input honestly. Keep current pixels in the action layer.",
+      "Send the same dynamic schema both as response_format and as prompt text. Preserve legitimate refusal/clarification and do not impose minItems=2 on the non-ready branch.",
+      "Only original caller.expect values may appear as positive goal predicates; only original caller.forbid values may appear as negative predicates. Validate exact native membership before normalization; never fabricate, invert, truncate or silently repair strings.",
+      "Detect a bounded declared set of explicit unresolved placeholders before model dispatch and stop with named evidence. This is not general natural-language ambiguity detection.",
+      "Keep at least two native meaningful objectives initially; permit model-chosen grouping of adjacent requested operations when their completion can be tied to caller predicates. Do not provide a fixture-specific goal skeleton.",
+      "Keep duplicate/replay checks and fresh before-input whole-predicate false requirement for every goal. More than one supplied final string does not imply distinct achievable stages.",
+      "Preserve successful real OS-input receipts, fresh scoped error-free post observations, unchanged caller final verification, shared request/action/planning/deadline limits, and unknown/cancel/failure stop semantics.",
+      "Retain raw failed contracts and raw proposals; future revisions occur before subsequent input and cannot relabel earlier failed checks as passed."
+    ],
+    "risks": [
+      "Three caller strings may be equivalent by case/substring or become true together. Count alone is not proof of two independently distinguishable stages; use exact syntactic checks plus runtime before guards and report unsupported cases candidly.",
+      "A text conjunction may establish an observable result without proving every requested hidden semantic operation. Independent fixture events/actual receipts are still needed for acceptance coverage; do not claim arbitrary application semantic correctness.",
+      "Current per-goal check limits are 200 characters/8 items; caller values outside representable bounds require explicit unsupported/clarification, not truncation.",
+      "An unresolved-slot detector only covers declared placeholder forms. It does not guarantee recognition of all missing required values in ordinary prose.",
+      "A model may still output semantically unrelated instructions despite exact predicate membership. Negative controls and real complete native sequence execution remain mandatory."
+    ],
+    "acceptance_needed": [
+      "Native initial sequence with at least two distinct objectives and caller-grounded frozen predicates",
+      "Explicit missing-slot negative stops before any HTTP/input",
+      "Unapproved literals/case or whitespace substitutions rejected locally",
+      "Real normal and transient full runs with each stage before/receipt/post evidence and independent unchanged fresh final",
+      "Independent event audit verifies requested operations actually occurred without replay or unknown dispatch"
+    ],
+    "no_implementation_or_new_calls_authorized_by_this_analysis": true
+  },
+  "evidence_sha256": {
+    "owner_receipt.json": "ac2b617740ab21ee1fcd43da38d7b5c52be189e7db95640ab3fb47704b93f69d",
+    "owner_start.json": "ab9e9c49f52c032c2d452ddf524f2b71a260b2382f5a370bccacd94a3a6cba63",
+    "child_launch.json": "6c078c53982ca703430f2f807ddf38b3e6837c42df7a10977d3486286f864503",
+    "worker_start.json": "98dd5d5edd68087e70a5b76ff47f6a9d6385214450120bc553ebe9cd16be0297",
+    "worker_summary.json": "35bf13799296d29c574e97ed31b95a863bb63e9483adad230611d5e06a12ec0e",
+    "code_pins_before.json": "7c9737954d9940d1f60110d6fdc035219461175103c7c1ea619b9e87439f85ae",
+    "code_pins_after.json": "7c9737954d9940d1f60110d6fdc035219461175103c7c1ea619b9e87439f85ae",
+    "normal006_archive/archive_manifest.json": "eb58831a53d05c31217ee28712702f35122d6eebaf128c518d3935f99bc54569",
+    "normal006_archive/initial_snapshot_pixels.png": "888965af2fa09dac55bcb448f0fd3e26be3e89d47c8cfdf06d06391ff4dcb406"
+  },
+  "production_source_sha256": "86ae6f989be8fe364452c800f65c8e56588b85f0ab3e53df6d300d70dc050659",
+  "completion_claim": false
+}

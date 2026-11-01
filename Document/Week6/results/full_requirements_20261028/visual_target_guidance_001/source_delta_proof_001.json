@@ -1,0 +1,36 @@
+{
+  "schema": "week6.visual_guidance.source_delta.v1",
+  "prior_freeze_sha256": "47db55adf8dc555160fb734b92d5fe4ba53d21803fde8a250dc53ae9a13a7e38",
+  "source_before_manifest_sha256": "e197fcb723896e7edf7bf1f756f481803adcc7007ee4e7a7d2a14858ee16d710",
+  "changed_paths": [
+    "scripts/week6_audit_semantic_acceptance.py",
+    "src/gui_agent/planning/target_bindings.py",
+    "src/gui_agent/runtime/runner.py",
+    "tests/test_runtime_runner.py",
+    "tests/test_week6_visual_target_guidance.py",
+    "tests/test_week6_visual_target_guidance_review.py"
+  ],
+  "code_pin_count": 272,
+  "changed_sha256": {
+    "scripts/week6_audit_semantic_acceptance.py": "01e6f2574d5d2096fa012b891a4a1d718457b00908f4a8961181386ede928650",
+    "src/gui_agent/planning/target_bindings.py": "943103bce978a08a8e894c36777db1c8f6b87d4eea1faf4c6b49b598b9fe59d1",
+    "src/gui_agent/runtime/runner.py": "d79477fd6936eb63b08a49e10fb63b612fc40cb14ddaf38811eb9158bd0a459a",
+    "tests/test_runtime_runner.py": "a1107beb8cfb2bf9f91af8194061bce23f2af6831f2062e8fa8bd516151e9940",
+    "tests/test_week6_visual_target_guidance.py": "1b71c9cdc450c1b5494cb693ea027eec838f2d15a805050bc1abe606a392496d",
+    "tests/test_week6_visual_target_guidance_review.py": "bcfa386b8950162833d0e2afdbce20648ff4a4de97128cfeb2f38fcd2cec109b"
+  },
+  "runner_changed_methods": [
+    "_prepare_recovery",
+    "_context"
+  ],
+  "original_runner_AST_unchanged_outside_two_fixed_insertions": true,
+  "original_target_binding_packet_schema_and_helpers_AST_unchanged": true,
+  "generation_targeting_policy": {
+    "schema_version": "gui_agent.generation_targeting_policy.v1",
+    "instruction": "Generation guidance only; it grants neither input nor success authority. Use only candidates in the current target_bindings scope, including the final authorised subset. Use text-only targeting only when current OCR labels or adjacent OCR words can locate the target. If a target is visible in the screenshot but absent from OCR, choose its matching current ID yourself from target_bindings.anonymous_without_ocr_ids; never invent or replace an ID. If no matching allowed candidate is certain, return no steps and explain in errors.",
+    "generation_only": true
+  },
+  "migration_proof_sha256": "8dfef3438acb9bee519679a253e51aaab0969b2548910790bdbc4c56373cf0d8",
+  "producer_scope": "14 new offline tests plus one authorised legacy context-node migration",
+  "no_model_GUI_or_actual_OCR_calls": true
+}

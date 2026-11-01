@@ -1,0 +1,148 @@
+{
+  "schema": "week6.independent.semantic_repair_boundary_review.v1",
+  "reviewed_utc": "2026-10-28T11:10:03.382508+00:00",
+  "reviewer": "/root/week6_replanning_review (independent Codex agent)",
+  "frozen_for_root_unified_validation": true,
+  "actual_own_target": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_repair_feedback_review_001\\cpu_validation_003\\audit.json",
+    "sha256": "628dd837f35b8405f13e81aad93ef707cb03913294f0a27ba1f1c04964cce211",
+    "bytes": 6270
+  },
+  "source_before": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_repair_feedback_review_001\\source_before_manifest_001.json",
+    "sha256": "2f9681c07dd089e28e49ec77a71aae28eb19d46122994cdccfc931da735bdb6b",
+    "bytes": 1186
+  },
+  "initial_narrow_failures_preserved": [
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_repair_feedback_review_001\\cpu_validation_001\\audit.json",
+      "sha256": "ec4bc57565fb20f5e162cf2b62ebd79af29c8be83d24d91f1b650d5ab7673a75",
+      "bytes": 4942
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_repair_feedback_review_001\\cpu_validation_002\\audit.json",
+      "sha256": "590606bb419e839474ba94d64441e37bdde456fae9e85e6b91c0933d3bd14b7c",
+      "bytes": 4955
+    }
+  ],
+  "fixture_assertion_corrections": [
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_repair_feedback_review_001\\assertion_corrections_001.json",
+      "sha256": "1ca73a7844951bab758e312edd1e386b9a0c5fdad1ef951bf6a3d10eefc6e186",
+      "bytes": 3974
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_repair_feedback_review_001\\assertion_corrections_002.json",
+      "sha256": "ccdc5a05cbba389383254e33d6499643f6839efb87d5adc99b164b29c932ec14",
+      "bytes": 860
+    }
+  ],
+  "source_scope": {
+    "old_native_protocol_and_original_system_same_AST": true,
+    "raw_predicate_and_schema_and_caller_preflight_and_final_goal_compilers_same_AST": true,
+    "goal_plan_result_and_execution_classes_same_AST": true,
+    "validate_same_AST_after_only_normalizing_typed_exception_to_previous_ValueError": true,
+    "changed_preexisting_f4_freeze_paths": [
+      "scripts/week6_audit_semantic_acceptance.py",
+      "src/gui_agent/planning/semantic_workflow.py"
+    ],
+    "production_source": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\src\\gui_agent\\planning\\semantic_workflow.py",
+      "sha256": "8019728a21f8c64ac7b19f52f33d0324380458a04033979bcea1ea1c7d630694",
+      "bytes": 55680
+    }
+  },
+  "independent_behavior_checks": [
+    "Ordinary ValueError with identical duplicate-message text does not receive typed feedback",
+    "Duplicate then JSON failure removes old hint; hints do not accumulate",
+    "Three identical bad replies remain rejected with zero child/input/completion",
+    "Native IDs/instructions/checks/reason and caller canaries never enter fixed system feedback",
+    "Refused and needs_clarification remain native terminal outcomes",
+    "Actual model-request and shared planning/deadline accounting remain bounded; late original reply is preserved only as transport evidence and cannot authorize input",
+    "Actual SDK MockTransport body and saved requests have exact base/hint/schema ordering and unchanged output schema",
+    "Original raw bad reply and model-owned repaired native map exactly to compiled goals; no local merge",
+    "Auditor replays raw prior reply through frozen validators, compares exact error, and derives typed category locally",
+    "Auditor rejects missing/tampered policy, extra/duplicate/misplaced system text, first-attempt hint, and a forged prior rejection for a locally valid native reply"
+  ],
+  "audit_enforcement": "Exact system equality, not prefix matching; exact four-key repair policy; original repair references and content lengths retained; current transport message binding remains unchanged",
+  "limitations": [
+    "No model, GUI, fixture or owner rerun",
+    "Offline doubles and MockTransport do not prove a real model repairs its answer",
+    "Narrow 19-case pass is not full regression or live semantic completion",
+    "normal001 through normal011 remain failed historical attempts"
+  ],
+  "copies": [
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_audit_semantic_acceptance.py",
+        "sha256": "be72401f3740812de2296df576187155b06e3792966681fe5537f7127f9feb34",
+        "bytes": 53173
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_repair_feedback_review_001\\source_after_001\\scripts\\week6_audit_semantic_acceptance.py.txt",
+        "sha256": "be72401f3740812de2296df576187155b06e3792966681fe5537f7127f9feb34",
+        "bytes": 53173
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\tests\\test_week6_semantic_repair_feedback_review.py",
+        "sha256": "a871d98fe2b72439013e5678beaf890326eddc94645eebbd6712b7848105b019",
+        "bytes": 14348
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_repair_feedback_review_001\\source_after_001\\tests\\test_week6_semantic_repair_feedback_review.py.txt",
+        "sha256": "a871d98fe2b72439013e5678beaf890326eddc94645eebbd6712b7848105b019",
+        "bytes": 14348
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_replanning_review\\run_repair_feedback_review_001.py",
+        "sha256": "7b0e0290b6398f193cd6e3c1d4e9889b9578c08af1076c5e6e29722575a0a698",
+        "bytes": 4231
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_repair_feedback_review_001\\source_after_001\\run_repair_feedback_review_001.py.txt",
+        "sha256": "7b0e0290b6398f193cd6e3c1d4e9889b9578c08af1076c5e6e29722575a0a698",
+        "bytes": 4231
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_replanning_review\\run_repair_feedback_review_002.py",
+        "sha256": "d40e6c179c525c1d89962d2c9a1e7ba5baebdffffaf41c012643a14e73bf391c",
+        "bytes": 4318
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_repair_feedback_review_001\\source_after_001\\run_repair_feedback_review_002.py.txt",
+        "sha256": "d40e6c179c525c1d89962d2c9a1e7ba5baebdffffaf41c012643a14e73bf391c",
+        "bytes": 4318
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_replanning_review\\run_repair_feedback_review_003.py",
+        "sha256": "defd326efe492e4a463f2316cd0fd426a8fb1ae19096b9eb1420a39f4a943ae5",
+        "bytes": 4318
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_repair_feedback_review_001\\source_after_001\\run_repair_feedback_review_003.py.txt",
+        "sha256": "defd326efe492e4a463f2316cd0fd426a8fb1ae19096b9eb1420a39f4a943ae5",
+        "bytes": 4318
+      }
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_replanning_review\\bind_repair_feedback_review_001.py",
+        "sha256": "63eaf31b88f62f8227109312ef71a91105194ce9aa1fcbee77957f31c7000def",
+        "bytes": 7592
+      },
+      "destination": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\semantic_repair_feedback_review_001\\source_after_001\\bind_repair_feedback_review_001.py.txt",
+        "sha256": "63eaf31b88f62f8227109312ef71a91105194ce9aa1fcbee77957f31c7000def",
+        "bytes": 7592
+      }
+    }
+  ]
+}

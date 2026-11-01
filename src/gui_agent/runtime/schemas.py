@@ -272,10 +272,49 @@ class RecoveryFeedback(SchemaModel):
     remaining_ms: float | None = Field(default=None, ge=0, allow_inf_nan=False)
     recent_steps: list[RecoveryStep] = Field(default_factory=list, max_length=5)
     omitted_steps: int = Field(default=0, ge=0)
+    # The runner emits only this base text and its two fixed target hints,
+    # in this order. Saved records must round-trip without admitting free prose.
     instruction: Literal[
-        "Plan from the current observation; previous attempts do not prove success. "
+        ("Plan from the current observation; previous attempts do not prove success. "
+        "Do not replay completed inputs to recreate an earlier state. "
+        "Existing task checks and remaining budgets still apply."),
+        ("Plan from the current observation; previous attempts do not prove success. "
         "Do not replay completed inputs to recreate an earlier state. "
         "Existing task checks and remaining budgets still apply."
+        " The previous plan's target_text conflicted with its explicit element ID "
+        "or identified a container with ambiguous labels. No input was dispatched "
+        "for that rejected step. Use the current observation and select an ID "
+        "consistent with the same requested target; do not change the task goal."
+        " A quoted action label must agree with the chosen target's observed label. "
+        "When quoting an OCR target in a description, quote its exact current OCR text. "
+        "If the intended control is clear only from pixels, choose its matching current "
+        "allowed anonymous_without_ocr ID yourself without attaching an unrelated OCR name. "
+        "Do not invent labels, change the caller's requested operation or relax success predicates."),
+        ("Plan from the current observation; previous attempts do not prove success. "
+        "Do not replay completed inputs to recreate an earlier state. "
+        "Existing task checks and remaining budgets still apply."
+        " The rejected text-only target did not resolve to current OCR or adjacent words; "
+        "no input was dispatched for that step. Use only current allowed candidates. "
+        "If the target is visible in the screenshot without OCR, choose its matching "
+        "anonymous_without_ocr ID yourself; do not repeat unresolved text-only targeting. "
+        "If uncertain, return no steps with errors. Do not change the task goal."),
+        ("Plan from the current observation; previous attempts do not prove success. "
+        "Do not replay completed inputs to recreate an earlier state. "
+        "Existing task checks and remaining budgets still apply."
+        " The previous plan's target_text conflicted with its explicit element ID "
+        "or identified a container with ambiguous labels. No input was dispatched "
+        "for that rejected step. Use the current observation and select an ID "
+        "consistent with the same requested target; do not change the task goal."
+        " A quoted action label must agree with the chosen target's observed label. "
+        "When quoting an OCR target in a description, quote its exact current OCR text. "
+        "If the intended control is clear only from pixels, choose its matching current "
+        "allowed anonymous_without_ocr ID yourself without attaching an unrelated OCR name. "
+        "Do not invent labels, change the caller's requested operation or relax success predicates."
+        " The rejected text-only target did not resolve to current OCR or adjacent words; "
+        "no input was dispatched for that step. Use only current allowed candidates. "
+        "If the target is visible in the screenshot without OCR, choose its matching "
+        "anonymous_without_ocr ID yourself; do not repeat unresolved text-only targeting. "
+        "If uncertain, return no steps with errors. Do not change the task goal."),
     ] = (
         "Plan from the current observation; previous attempts do not prove success. "
         "Do not replay completed inputs to recreate an earlier state. "

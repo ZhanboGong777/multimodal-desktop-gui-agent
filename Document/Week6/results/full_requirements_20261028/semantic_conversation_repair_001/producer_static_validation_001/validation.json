@@ -1,0 +1,59 @@
+{
+  "schema": "week6.semantic_conversation_repair.producer_static.v1",
+  "paths": [
+    "src/gui_agent/planning/semantic_workflow.py",
+    "tests/test_week6_semantic_repair_feedback.py",
+    "tests/test_week6_semantic_goal_grouping.py",
+    "tests/test_week6_semantic_conversation_repair.py"
+  ],
+  "before": {
+    "src/gui_agent/planning/semantic_workflow.py": "ae50b05e029e0ee5330430ec67d5a5bb0d49fe62487d47ecb34b914fcb0d8337",
+    "tests/test_week6_semantic_repair_feedback.py": "b51411546a15ae0c792c58ca1d567ac78eeca42b3611cd821f115b3e93b8066c",
+    "tests/test_week6_semantic_goal_grouping.py": "30398765aead3706e5317d6e9f20c8c11fdddcc8d5bf9b40b19040327fea60c7",
+    "tests/test_week6_semantic_conversation_repair.py": "b71b133f1b2555e61bec6b11a13827fa5a1145afd65cd09003c53abfce3843f9"
+  },
+  "after": {
+    "src/gui_agent/planning/semantic_workflow.py": "ae50b05e029e0ee5330430ec67d5a5bb0d49fe62487d47ecb34b914fcb0d8337",
+    "tests/test_week6_semantic_repair_feedback.py": "b51411546a15ae0c792c58ca1d567ac78eeca42b3611cd821f115b3e93b8066c",
+    "tests/test_week6_semantic_goal_grouping.py": "30398765aead3706e5317d6e9f20c8c11fdddcc8d5bf9b40b19040327fea60c7",
+    "tests/test_week6_semantic_conversation_repair.py": "b71b133f1b2555e61bec6b11a13827fa5a1145afd65cd09003c53abfce3843f9"
+  },
+  "owned_source_unchanged_during_static": true,
+  "ast_parse_all": true,
+  "native_guard_schema_goal_ast_equal_to_prior_freeze": {
+    "_validate": true,
+    "_validate_native_predicates": true,
+    "SemanticGoal": true,
+    "SemanticPlan": true,
+    "SemanticPlanResult": true,
+    "_caller_contract_issue": true,
+    "_initial_guard": true,
+    "_goal_task": true,
+    "_final_task": true,
+    "_logical_completed": true,
+    "_logical_failure": true
+  },
+  "base_system_prompt_byte_string_equal": true,
+  "ruff": {
+    "command": [
+      "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+      "-X",
+      "utf8",
+      "-m",
+      "ruff",
+      "check",
+      "src/gui_agent/planning/semantic_workflow.py",
+      "tests/test_week6_semantic_repair_feedback.py",
+      "tests/test_week6_semantic_goal_grouping.py",
+      "tests/test_week6_semantic_conversation_repair.py"
+    ],
+    "pid": 81832,
+    "actual_wait_exit_code": 0,
+    "started_utc": "2026-10-28T11:34:54.898379+00:00",
+    "elapsed_seconds": 0.18799999996554106
+  },
+  "pytest_run": false,
+  "collect_run": false,
+  "model_gui_calls": 0,
+  "status": "ready_for_root_unified_validation"
+}

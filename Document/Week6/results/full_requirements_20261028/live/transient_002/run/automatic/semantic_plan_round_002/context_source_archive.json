@@ -1,0 +1,44 @@
+{
+  "completed_subgoals": [],
+  "failure": {
+    "round": 1,
+    "goal_id": "prepare_report",
+    "instruction": "Prepare the BLUE report for project BETA by selecting the correct project and theme, then save the draft locally.",
+    "expect_text": [
+      "Project BETA",
+      "Theme BLUE",
+      "Draft Saved"
+    ],
+    "forbid_text": [
+      "Review Pending",
+      "Online Sync",
+      "Commit Failed",
+      "Network Error",
+      "Review Unavailable",
+      "Budget Exceeded",
+      "Changes Not Saved",
+      "Save Failed"
+    ],
+    "status": "failed",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_001_001_prepare_report",
+    "verification": null,
+    "task_verification": {
+      "outcome": "failed",
+      "method": "automatic",
+      "detail": "expected on screen but not found: Project BETA, Draft Saved",
+      "evidence": {
+        "observation_id": "obs-0012",
+        "missing": [
+          "Project BETA",
+          "Draft Saved"
+        ],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    }
+  },
+  "snapshot_archive": "snapshot_archive.json",
+  "snapshot_pixels_archive": "snapshot_pixels.png",
+  "snapshot_pixels_sha256": "b4e1ca38741780fce56b581e1b0a4b736a0091f32441f4aea4c7590fccc20d2d",
+  "snapshot_pixels_source_status": "copied_byte_exact",
+  "sent_to_high_level_model": false
+}

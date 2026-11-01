@@ -1,0 +1,71 @@
+{
+  "schema": "week6.live.root_acceptance.v1",
+  "case": "transient_006",
+  "accepted": false,
+  "reviewed_utc": "2026-11-01T05:12:11.339734+00:00",
+  "source_freeze": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\role_model_routing_001\\final_source_freeze_001.json",
+    "sha256": "b28f6b1f0661703da05ecd773be933b6a86758e3030c8a21d793d6c81a96c928"
+  },
+  "actual_owner_exit": 0,
+  "actual_exec_session": 40327,
+  "actual_exec_exit": 0,
+  "independent_process_summary": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\transient006_independent_process_001\\process_summary.json",
+    "sha256": "7666641eab7db84308928db6d1d7506d534aeaf5aa3d063ef5408a2eeaf463b9"
+  },
+  "operator_terminal": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_006\\operator_handoff_003.json",
+    "sha256": "9d6bd6f218e947375720a6c868e25072cb34fe9f999ab3590740e2d9dc02f931"
+  },
+  "actually_viewed_saved_original_pixels": [
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_006\\run\\automatic\\contract_before_001_002\\monitor1_20261101_160710_811.png",
+      "sha256": "e9b335f9a4af7b4443d4eff3d8181ca79c9c330f453ec9b4a913f4f8ebac49ad"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_006\\run\\automatic\\goal_001_002_GOAL_2\\001_GOAL_2\\monitor1_20261101_160753_989.png",
+      "sha256": "c4e5354be67496ae882744027d037eef2214ec70b728bd746eef6df0a8c7fed9"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_006\\run\\automatic\\goal_001_002_GOAL_2\\001_GOAL_2\\monitor1_20261101_160847_799.png",
+      "sha256": "34f97d8f25e58788ff7a7b306e9a8ddcd5cf03b4689e9eccf41d3323f03b3ab4"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_006\\run\\automatic\\caller_final_round_001\\monitor1_20261101_160952_014.png",
+      "sha256": "1675b03be327098fbcdfcde24eeac2ced93567eb12580e6f4eb7dc42809c86e0"
+    }
+  ],
+  "machine_checks_passed": true,
+  "raw_runtime_status": "succeeded",
+  "physical_business_events": [
+    "project_selected",
+    "theme_selected",
+    "review_rejected",
+    "review_accepted",
+    "local_commit"
+  ],
+  "unknown_input_count": 0,
+  "operator_added_inputs": 0,
+  "stages": [
+    {
+      "stage_key": "1:1:GOAL_1",
+      "native_instruction": "Create a report titled 'Project BETA' and set the theme to 'Theme BLUE'.",
+      "semantic_alignment_passed": true,
+      "rationale": "Report preparation covers BETA and BLUE and matches only its two original selection events."
+    },
+    {
+      "stage_key": "1:2:GOAL_2",
+      "native_instruction": "Review the generated report and confirm its accuracy.",
+      "expect_text": [
+        "LOCAL COMPLETE"
+      ],
+      "semantic_alignment_passed": false,
+      "rationale": "Review and confirm accuracy does not explicitly request the separate local commit. Native success literal LOCAL COMPLETE and actual local_commit cannot silently broaden that instruction. Root withholds qualification consistently with normal027."
+    }
+  ],
+  "failure_kind": "native_instruction_postcondition_semantic_mismatch",
+  "raw_records_modified": false,
+  "whole_week6_complete": false,
+  "scope": "Application review recovered after its one preregistered rejection, and original machine checks passed. Semantic qualification is an additional required gate, so this is not an accepted recovery case."
+}

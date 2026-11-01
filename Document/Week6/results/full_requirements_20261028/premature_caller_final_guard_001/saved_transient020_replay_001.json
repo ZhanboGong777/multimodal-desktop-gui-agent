@@ -1,0 +1,26 @@
+{
+  "schema": "week6.saved_native.premature_final.readonly_replay.v1",
+  "native": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_020\\run\\automatic\\semantic_plan_round_001\\native_proposal.json",
+    "sha256": "6216d4da27f9b197b194e28230a8ac1c47549f1e6222f806f834bd07ada43620"
+  },
+  "original_compiled_before_change": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_020\\run\\automatic\\semantic_plan_round_001\\compiled_workflow.json",
+    "sha256": "3f3746e7b46881c54f3baa9368129c3d2d75ffa4b07735fce88733a89aa041a5"
+  },
+  "original_request": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_020\\run\\automatic\\semantic_plan_round_001\\attempt_02_request.json",
+    "sha256": "b35bab52c8f9d003263b8da4fecf6979fadff05641dea6bdd352bd4cead0fba2"
+  },
+  "new_producer_source": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\src\\gui_agent\\planning\\semantic_workflow.py",
+    "sha256": "1c102ddf32281571a834683d370cbb23874e67eb5b657e6035c28190fbb16012"
+  },
+  "original_native_and_caller_preserved": true,
+  "new_guard_rejected": true,
+  "actual_exception_type": "_DuplicateSemanticPostconditionsError",
+  "actual_error": "duplicate semantic postconditions between intermediate goal 'review_report' and the immutable caller-final verification: the complete caller-final conjunction cannot verify an intermediate objective while later requested objectives remain. Regenerate the native plan with a justified intermediate outcome or explicitly group the unfinished required operations in the last objective. Preserve every caller operation and all original final predicates.",
+  "before_frame_used": false,
+  "explanation": "The structural rejection precedes any before-frame check; no synthetic observation or GUI/model call was used. Original compiled accepted proposal remains byte-identical. This replay is not native or GUI acceptance.",
+  "model_gui_ocr_training_calls": 0
+}

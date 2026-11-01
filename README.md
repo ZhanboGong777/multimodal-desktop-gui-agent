@@ -1,14 +1,108 @@
 # Multimodal Desktop GUI Agent
 
-### Week 6 system v2.0
+### Week 6 system v2.1.0
 
-System v2.0 adds verified subgoals, shared workflow budgets, bounded failure
-recovery, passive live status records and measured perception-stage timings.
-The development branch is `codex/week6-delivery`, based on the retained Week 6
-phase-one commit and the Week 5 submission. See [Document/Week6](Document/Week6/README.md)
-for the entry points, reproducible experiments, test records and capability limits.
-The real local-model probe retains an ambiguous-target failure; simulated
-fault recovery and saved-image planning are reported separately from desktop success.
+The `codex/week6-full-requirements` branch implements model-generated ordered
+semantic objectives, bounded recovery, persistent bilingual OCR, and parent/child
+execution monitoring. Natural-language CLI requests default to
+`week6.semantic_subtasks.v6`; the Python API retains its compatible default and
+uses `protocol_mode="semantic_subtasks"` for this path.
+
+The same286-file source freeze passed controlled normal048 and transient027
+desktop acceptance with the installed `qwen3-vl:8b-instruct` digest for both model roles. The recovery
+case includes the fixture's real first review rejection and a subsequent native
+fresh-screen action retry within the second semantic objective before local commit. The report records actual event attribution,
+the normal-case auxiliary age-check deviation and model-prediction limitations. Failed objectives
+remain failed, even when later work reaches the caller's final state. These two
+functional cases do not establish a general desktop success rate.
+
+The unfiltered final regression passed **3803 tests in 664.89s**;
+pytest and Ruff actually exited0. All286 source/config/test files matched before,
+after and against the freeze. The tested README is retained separately because
+this final documentation update follows testing.
+
+Validation summary: `3803 tests, ruff clean`.
+
+On8 fully annotated synthetic held-out frames, persistent bilingual OCR achieved
+93.6508% text F1; two batches measured108.291 and109.888ms warm full-frame median
+time. This includes decoding, preprocessing, actual OCR and coordinate output,
+excluding OS capture, model calls and input. Cold start remained slower than the
+English baseline. One separately saved real frame showed no ROI accuracy gain
+and no universal speed advantage. No OCR/model training was performed.
+
+Quoted action descriptions are checked against the chosen readable control.
+An exact competing label still refuses input. Absent ASCII alphabetic labels
+allow bounded OCR spelling uncertainty on the already-selected witness only:
+one edit for4..9letters, at most2when both names have at least10letters.
+Whitespace-only differences also remain uncertain. This does not replace the
+native target, ID or coordinates, prove arbitrary intent, or grant completion.
+Numeric and shorter names retain the refusal. All original task checks remain.
+
+Caller-final verification text describes evidence to observe, not content to type.
+Local save or commit does not add message, title or description editing. Native
+unsupported operations still fail the original validation. The same refusal
+now explicitly explains local message-content composition; its matching and
+refusal branch remain unchanged.
+
+Repair policyv5 adds a fixed unsupported-message retry only for the actual local
+guard exception. Its rejected reply stays archived but is omitted from that
+retry conversation; caller intent and bounded errors remain. The independent
+auditor reconstructs the exception and exact messages. All other histories,
+actions, predicates and budgets remain unchanged.
+
+A nonfinal native objective cannot reuse the exact whole immutable caller-final
+conjunction while later objectives remain. The existing duplicate-condition
+feedback requests a new native reply; no plan is rewritten locally. Partial
+conditions and operation meanings still need original evidence review.
+
+After full006 exposed11 producer/auditor feedback-literal mismatches, only the
+independent auditor fixed literal was synchronized. All other285 frozen paths,
+including executed runtime, configuration and tests, remain byte-identical to
+the original GUI pair. New actual saved-record audits passed for both cases;
+the original physical evidence and acceptance remain linked, with no new GUI
+experiment or new image-viewing claim. Full006 remains a failed historical run.
+
+The final controlled recovery occurred inside one semantic objective, with no
+failed semantic objective or new high-level decomposition round. The normal
+case retains one operator deviation: the auxiliary30s age check exited1 at38s,
+but input was still dispatched within the original bridge deadline. Original
+identity checks, immediate pixels, receipts and application events are retained;
+there is no fabricated passing precheck record. The strict and receipt audits
+passed. This qualification is included in the report.
+
+Optional visual candidate details attach original anonymous contour crops with
+current IDs, not synthetic labels. Readable controls require nonblank native
+target text. Generation guidance asks that each objective name the operations
+needed for its outcome; missing immutable caller-final text means unfinished
+work. Guidance does not rewrite native replies or relax guards. The final
+high-level failure prompt was not exercised by the successful GUI path.
+
+The high-level model reads caller intent and bounded logical feedback without
+current screen text, coordinates or images; action planning observes fresh
+screenshots. Model intermediate predicates are untrusted predictions fixed
+before input. Credit requires an initially unsatisfied condition, confirmed
+input and fresh verification; the caller final is checked separately. Unknown
+dispatch stops without replay. Substring matching cannot prove arbitrary
+negation or business causality, so original pixels and independent fixture
+events supplement controlled acceptance. Monitoring is event-driven and may
+be stale during long model calls. Generation guidance does not guarantee that
+the model will avoid adding unsupported requirements; validation remains active.
+
+See [usage](Document/Week6/README.md), [release notes](Document/Week6/Release_Notes.md),
+[report](Document/Week6/Week6_Robustness_Report.md),
+[source freeze](Document/Week6/results/full_requirements_20261028/auditor_prompt_sync_001/final_source_freeze_001.json),
+[full regression](Document/Week6/results/full_requirements_20261028/full_validation_007/root_audit_001.json),
+[normal acceptance](Document/Week6/results/full_requirements_20261028/review/normal048_root_acceptance_003.json),
+[recovery acceptance](Document/Week6/results/full_requirements_20261028/review/transient027_root_acceptance_003.json),
+and [ended development attempts](Document/Week6/results/full_requirements_20261028/live_attempts_index_016.json).
+
+Prior documentation bytes are retained in
+[history](Document/Week6/history/pre_final_acceptance_20261101_016/manifest.json).
+Earlier v2.0 manifests and pending/version-specific records describe those
+historical artifacts. The final external distribution receipt binds the actual
+Git commit, publication, source ZIP, wheel and new report bytes. The report uses
+the supplied Week5 typography/tables and has no cover date/timezone line.
+Week7 comparisons remain outside this delivery.
 
 ### Week 5 submission
 
@@ -77,8 +171,9 @@ Three properties the loop is built around:
   with an actual current candidate, confirmed against a further screenshot after
   any visual mapping call. Missing, ambiguous or unsafe evidence stops the pass.
 
-3027 tests, ruff clean (current Week6 suite). See `Document/Week4/Week4_Usage.md` for the flags, the
-safety model and the record layout.
+The historical Week 6 v2.0 [full006](Document/Week6/results/release_validation_completed_20261026_006/validation.json)
+record has 3027 passing tests and a clean Ruff check; the v2.1.0 full regression is
+pending. See `Document/Week4/Week4_Usage.md` for the flags, safety model and record layout.
 
 The Chinese deliverables - `Week4_中文实验报告.(md|docx)`, `Week4_Windows复核手册.md`
 and the `sync_report_numbers.py` tool that keeps their numbers in step with this
@@ -168,8 +263,10 @@ python scripts/week3_model_demo.py --provider mock
 python scripts/week3_planning_demo.py --provider mock --instruction "Open the browser"
 ```
 
-3027 tests, ruff clean (current Week6 suite). The model client's retry, timeout and
-error-classification paths are covered, along with the four vision-payload
+The historical Week 6 v2.0 [full006](Document/Week6/results/release_validation_completed_20261026_006/validation.json)
+record has 3027 passing tests and a clean Ruff check; this is not the current
+v2.1.0 suite result. The model client's retry, timeout and error-classification
+paths are covered, along with the four vision-payload
 failure modes (missing, empty, oversized, unknown type) and the TaskPlan
 schema boundaries. Dataset and model dependencies live in
 `requirements-agent.txt`, deliberately separate from the base requirements so that a

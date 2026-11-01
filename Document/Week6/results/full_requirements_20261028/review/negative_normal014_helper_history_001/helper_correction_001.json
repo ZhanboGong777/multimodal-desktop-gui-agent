@@ -1,0 +1,17 @@
+{
+  "schema": "week6.independent.audit_helper_correction.v1",
+  "original_helper": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_negative_normal014_20261028\\audit_negative_normal014_001.py",
+  "original_helper_sha256": "cf75829561757e20c697ec66e56f5d67fff267cd06e0d316765d778b03534b33",
+  "observed_helper_exit_code": 1,
+  "observed_exception": "gui_agent.planning.parser.PlanParseError: the plan contains no steps",
+  "cause": "The private audit helper caught ValueError, while the historical parser raises PlanParseError. The parser rejection itself was expected. This helper failure is not the ended owner process exit or a new GUI/model experiment.",
+  "replacement_helper": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_negative_normal014_20261028\\audit_negative_normal014_002.py",
+  "replacement_helper_sha256": "ee42f39272ba91130a3af5909b21d1742d99f3f8bc1016bcd4f5c645d861b090",
+  "changes": [
+    "Catch the exact exception type imported from the pinned historical parser.",
+    "Verify existing private replay copy hashes and reuse them without overwriting.",
+    "Include this correction record in the audit."
+  ],
+  "production_changes": false,
+  "original_evidence_changed": false
+}

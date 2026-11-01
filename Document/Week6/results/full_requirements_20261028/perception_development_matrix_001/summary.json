@@ -1,0 +1,458 @@
+{
+  "schema": "week6.full_perception.result.v1",
+  "split": "development",
+  "created_utc": "2026-10-28T00:07:32.760054+00:00",
+  "source_pins_before": {
+    "src\\gui_agent\\perception\\__init__.py": "a521ef24fbd707c3b683dd64fc2e7d9f4ff719bb21f8022cd7d09298010bc139",
+    "src\\gui_agent\\perception\\capture.py": "2e4b65983343bfe2f264a580287f7102ede60a4b201d77a585290c7b20210717",
+    "src\\gui_agent\\perception\\grounding.py": "b0ca16924c280f7817e03bf1cd7951d07751a60d69da442e1af440d0840afb77",
+    "src\\gui_agent\\perception\\ocr.py": "0f0c42bc4b9537475adcf7c185672c3ee63db11cf662b870599efaca755ff28a",
+    "src\\gui_agent\\perception\\preprocessing.py": "afaa9db640c2df42ca8c3758e765941e579e2d400e6c66231b4d98469495618f",
+    "src\\gui_agent\\perception\\tesseract_api.py": "f4eab845017f9973a988328fee11f5a51a125789f6fd73be22e7e416b37f1346",
+    "src\\gui_agent\\perception\\ui_detection.py": "4cb75d461fd9ef55fbe3671c9efd7fd72a64148a2a6e37eccdf3f7ff3e908a5d",
+    "src\\gui_agent\\perception\\visualization.py": "0c787c6509a3a631a5abd81a28aaf26b67e06b65870d5781817336949adfa072",
+    "src\\gui_agent\\config.py": "dc138edf320423b373e5c932b86fab14e2b0439fe8d251c4c439e74c6124b91d",
+    "scripts\\week6_benchmark_persistent_ocr.py": "02d922865cf79f06ee31b295cc088ef2b007fe0bcf535f2779056f46e8f7bf6f",
+    "configs\\week6_accuracy_persistent.yaml": "f7785b6c4c9c92320e7fd7292bdd65f189fc9290736be9c3ff70bdb72b56adbd"
+  },
+  "source_pins_after": {
+    "src\\gui_agent\\perception\\__init__.py": "a521ef24fbd707c3b683dd64fc2e7d9f4ff719bb21f8022cd7d09298010bc139",
+    "src\\gui_agent\\perception\\capture.py": "2e4b65983343bfe2f264a580287f7102ede60a4b201d77a585290c7b20210717",
+    "src\\gui_agent\\perception\\grounding.py": "b0ca16924c280f7817e03bf1cd7951d07751a60d69da442e1af440d0840afb77",
+    "src\\gui_agent\\perception\\ocr.py": "0f0c42bc4b9537475adcf7c185672c3ee63db11cf662b870599efaca755ff28a",
+    "src\\gui_agent\\perception\\preprocessing.py": "afaa9db640c2df42ca8c3758e765941e579e2d400e6c66231b4d98469495618f",
+    "src\\gui_agent\\perception\\tesseract_api.py": "f4eab845017f9973a988328fee11f5a51a125789f6fd73be22e7e416b37f1346",
+    "src\\gui_agent\\perception\\ui_detection.py": "4cb75d461fd9ef55fbe3671c9efd7fd72a64148a2a6e37eccdf3f7ff3e908a5d",
+    "src\\gui_agent\\perception\\visualization.py": "0c787c6509a3a631a5abd81a28aaf26b67e06b65870d5781817336949adfa072",
+    "src\\gui_agent\\config.py": "dc138edf320423b373e5c932b86fab14e2b0439fe8d251c4c439e74c6124b91d",
+    "scripts\\week6_benchmark_persistent_ocr.py": "02d922865cf79f06ee31b295cc088ef2b007fe0bcf535f2779056f46e8f7bf6f",
+    "configs\\week6_accuracy_persistent.yaml": "f7785b6c4c9c92320e7fd7292bdd65f189fc9290736be9c3ff70bdb72b56adbd"
+  },
+  "fixture_manifest_sha256": "f7b4913e62b5e21eb9267e09a719d58d6212233b73f977fb120fbac9612a0537",
+  "repeats": 3,
+  "checks": {
+    "no_measurement_errors": true,
+    "ordered_screen_predictions_and_ui_exact": true,
+    "accuracy_preserved_and_above_native_bilingual": true,
+    "warm_full_frame_median_10pct_faster_than_all_three": true,
+    "no_frame_median_over_5pct_slower_than_screen": true,
+    "sources_unchanged": true,
+    "no_gpu_frameworks_imported": true
+  },
+  "all_criteria_passed": true,
+  "timings": {
+    "cold": {
+      "native_eng_subprocess": {
+        "n": 3,
+        "median_ms": 174.78270002175122,
+        "p95_nearest_rank_ms": 285.19099997356534,
+        "max_ms": 285.19099997356534,
+        "all_records_included": true
+      },
+      "native_bilingual_subprocess": {
+        "n": 3,
+        "median_ms": 283.95589999854565,
+        "p95_nearest_rank_ms": 292.7275999682024,
+        "max_ms": 292.7275999682024,
+        "all_records_included": true
+      },
+      "screen_bilingual_subprocess": {
+        "n": 3,
+        "median_ms": 323.36230005603284,
+        "p95_nearest_rank_ms": 328.08200002182275,
+        "max_ms": 328.08200002182275,
+        "all_records_included": true
+      },
+      "screen_bilingual_persistent": {
+        "n": 3,
+        "median_ms": 300.7454000180587,
+        "p95_nearest_rank_ms": 344.1502000205219,
+        "max_ms": 344.1502000205219,
+        "all_records_included": true
+      }
+    },
+    "warmup": {
+      "native_eng_subprocess": {
+        "n": 1,
+        "median_ms": 167.41300001740456,
+        "p95_nearest_rank_ms": 167.41300001740456,
+        "max_ms": 167.41300001740456,
+        "all_records_included": true
+      },
+      "native_bilingual_subprocess": {
+        "n": 1,
+        "median_ms": 281.741900020279,
+        "p95_nearest_rank_ms": 281.741900020279,
+        "max_ms": 281.741900020279,
+        "all_records_included": true
+      },
+      "screen_bilingual_subprocess": {
+        "n": 1,
+        "median_ms": 329.33049998246133,
+        "p95_nearest_rank_ms": 329.33049998246133,
+        "max_ms": 329.33049998246133,
+        "all_records_included": true
+      },
+      "screen_bilingual_persistent": {
+        "n": 1,
+        "median_ms": 288.31289999652654,
+        "p95_nearest_rank_ms": 288.31289999652654,
+        "max_ms": 288.31289999652654,
+        "all_records_included": true
+      }
+    },
+    "warm": {
+      "native_eng_subprocess": {
+        "n": 12,
+        "median_ms": 188.3784499950707,
+        "p95_nearest_rank_ms": 217.61499997228384,
+        "max_ms": 217.61499997228384,
+        "all_records_included": true
+      },
+      "native_bilingual_subprocess": {
+        "n": 12,
+        "median_ms": 308.6434499709867,
+        "p95_nearest_rank_ms": 348.1996998889372,
+        "max_ms": 348.1996998889372,
+        "all_records_included": true
+      },
+      "screen_bilingual_subprocess": {
+        "n": 12,
+        "median_ms": 334.5770499436185,
+        "p95_nearest_rank_ms": 368.61580004915595,
+        "max_ms": 368.61580004915595,
+        "all_records_included": true
+      },
+      "screen_bilingual_persistent": {
+        "n": 12,
+        "median_ms": 92.30364998802543,
+        "p95_nearest_rank_ms": 106.51730000972748,
+        "max_ms": 106.51730000972748,
+        "all_records_included": true
+      }
+    }
+  },
+  "full_frame_median_reduction_vs": {
+    "native_eng_subprocess": 0.5100095048534441,
+    "native_bilingual_subprocess": 0.7009376029308181,
+    "screen_bilingual_subprocess": 0.7241184056002046
+  },
+  "unique_frame_accuracy": {
+    "native_eng_subprocess": {
+      "tp": 20,
+      "fp": 1,
+      "fn": 12,
+      "precision": 0.9523809523809523,
+      "recall": 0.625,
+      "f1": 0.7547169811320755,
+      "ocr_median_ms": 186.66454998310655,
+      "ui_median_ms": 5.056949972640723,
+      "decode_ocr_ui_median_ms": 193.30450001871213,
+      "by_language": {
+        "en": {
+          "matched": 20,
+          "total": 20
+        },
+        "zh": {
+          "matched": 0,
+          "total": 12
+        }
+      }
+    },
+    "native_bilingual_subprocess": {
+      "tp": 22,
+      "fp": 8,
+      "fn": 10,
+      "precision": 0.7333333333333333,
+      "recall": 0.6875,
+      "f1": 0.7096774193548387,
+      "ocr_median_ms": 312.2637000051327,
+      "ui_median_ms": 4.986950021702796,
+      "decode_ocr_ui_median_ms": 318.74219997553155,
+      "by_language": {
+        "en": {
+          "matched": 20,
+          "total": 20
+        },
+        "zh": {
+          "matched": 2,
+          "total": 12
+        }
+      }
+    },
+    "screen_bilingual_subprocess": {
+      "tp": 30,
+      "fp": 1,
+      "fn": 2,
+      "precision": 0.967741935483871,
+      "recall": 0.9375,
+      "f1": 0.9523809523809523,
+      "ocr_median_ms": 332.0177000714466,
+      "ui_median_ms": 4.931300005409867,
+      "decode_ocr_ui_median_ms": 338.59899995150045,
+      "by_language": {
+        "en": {
+          "matched": 20,
+          "total": 20
+        },
+        "zh": {
+          "matched": 10,
+          "total": 12
+        }
+      }
+    },
+    "screen_bilingual_persistent": {
+      "tp": 30,
+      "fp": 1,
+      "fn": 2,
+      "precision": 0.967741935483871,
+      "recall": 0.9375,
+      "f1": 0.9523809523809523,
+      "ocr_median_ms": 90.75660002417862,
+      "ui_median_ms": 4.612349963281304,
+      "decode_ocr_ui_median_ms": 96.73089999705553,
+      "by_language": {
+        "en": {
+          "matched": 20,
+          "total": 20
+        },
+        "zh": {
+          "matched": 10,
+          "total": 12
+        }
+      }
+    }
+  },
+  "per_frame_timings": {
+    "development_01": {
+      "native_eng_subprocess": {
+        "n": 3,
+        "median_ms": 179.77290006820112,
+        "p95_nearest_rank_ms": 180.82410003989935,
+        "max_ms": 180.82410003989935,
+        "all_records_included": true
+      },
+      "native_bilingual_subprocess": {
+        "n": 3,
+        "median_ms": 288.8365000253543,
+        "p95_nearest_rank_ms": 289.2950000241399,
+        "max_ms": 289.2950000241399,
+        "all_records_included": true
+      },
+      "screen_bilingual_subprocess": {
+        "n": 3,
+        "median_ms": 341.1492999875918,
+        "p95_nearest_rank_ms": 341.6636000620201,
+        "max_ms": 341.6636000620201,
+        "all_records_included": true
+      },
+      "screen_bilingual_persistent": {
+        "n": 3,
+        "median_ms": 93.10950001236051,
+        "p95_nearest_rank_ms": 101.96400003042072,
+        "max_ms": 101.96400003042072,
+        "all_records_included": true
+      }
+    },
+    "development_02": {
+      "native_eng_subprocess": {
+        "n": 3,
+        "median_ms": 189.49609994888306,
+        "p95_nearest_rank_ms": 212.57069997955114,
+        "max_ms": 212.57069997955114,
+        "all_records_included": true
+      },
+      "native_bilingual_subprocess": {
+        "n": 3,
+        "median_ms": 334.82340001501143,
+        "p95_nearest_rank_ms": 342.3336000414565,
+        "max_ms": 342.3336000414565,
+        "all_records_included": true
+      },
+      "screen_bilingual_subprocess": {
+        "n": 3,
+        "median_ms": 336.0486999154091,
+        "p95_nearest_rank_ms": 348.03800005465746,
+        "max_ms": 348.03800005465746,
+        "all_records_included": true
+      },
+      "screen_bilingual_persistent": {
+        "n": 3,
+        "median_ms": 91.49779996369034,
+        "p95_nearest_rank_ms": 96.25770000275224,
+        "max_ms": 96.25770000275224,
+        "all_records_included": true
+      }
+    },
+    "development_03": {
+      "native_eng_subprocess": {
+        "n": 3,
+        "median_ms": 191.54799997340888,
+        "p95_nearest_rank_ms": 217.61499997228384,
+        "max_ms": 217.61499997228384,
+        "all_records_included": true
+      },
+      "native_bilingual_subprocess": {
+        "n": 3,
+        "median_ms": 319.3081000354141,
+        "p95_nearest_rank_ms": 348.1996998889372,
+        "max_ms": 348.1996998889372,
+        "all_records_included": true
+      },
+      "screen_bilingual_subprocess": {
+        "n": 3,
+        "median_ms": 357.4656000128016,
+        "p95_nearest_rank_ms": 368.61580004915595,
+        "max_ms": 368.61580004915595,
+        "all_records_included": true
+      },
+      "screen_bilingual_persistent": {
+        "n": 3,
+        "median_ms": 100.086500053294,
+        "p95_nearest_rank_ms": 106.51730000972748,
+        "max_ms": 106.51730000972748,
+        "all_records_included": true
+      }
+    },
+    "development_04": {
+      "native_eng_subprocess": {
+        "n": 3,
+        "median_ms": 185.85799995344132,
+        "p95_nearest_rank_ms": 197.27380003314465,
+        "max_ms": 197.27380003314465,
+        "all_records_included": true
+      },
+      "native_bilingual_subprocess": {
+        "n": 3,
+        "median_ms": 305.4162999615073,
+        "p95_nearest_rank_ms": 311.87059998046607,
+        "max_ms": 311.87059998046607,
+        "all_records_included": true
+      },
+      "screen_bilingual_subprocess": {
+        "n": 3,
+        "median_ms": 321.5675000101328,
+        "p95_nearest_rank_ms": 333.10539997182786,
+        "max_ms": 333.10539997182786,
+        "all_records_included": true
+      },
+      "screen_bilingual_persistent": {
+        "n": 3,
+        "median_ms": 85.210399935022,
+        "p95_nearest_rank_ms": 86.32119989488274,
+        "max_ms": 86.32119989488274,
+        "all_records_included": true
+      }
+    }
+  },
+  "equivalence_checks": [
+    {
+      "fixture": "development_01",
+      "phase": "cold",
+      "repeat": 0,
+      "passed": true
+    },
+    {
+      "fixture": "development_01",
+      "phase": "cold",
+      "repeat": 1,
+      "passed": true
+    },
+    {
+      "fixture": "development_01",
+      "phase": "cold",
+      "repeat": 2,
+      "passed": true
+    },
+    {
+      "fixture": "development_01",
+      "phase": "warmup",
+      "repeat": 0,
+      "passed": true
+    },
+    {
+      "fixture": "development_01",
+      "phase": "warm",
+      "repeat": 0,
+      "passed": true
+    },
+    {
+      "fixture": "development_01",
+      "phase": "warm",
+      "repeat": 1,
+      "passed": true
+    },
+    {
+      "fixture": "development_01",
+      "phase": "warm",
+      "repeat": 2,
+      "passed": true
+    },
+    {
+      "fixture": "development_02",
+      "phase": "warm",
+      "repeat": 0,
+      "passed": true
+    },
+    {
+      "fixture": "development_02",
+      "phase": "warm",
+      "repeat": 1,
+      "passed": true
+    },
+    {
+      "fixture": "development_02",
+      "phase": "warm",
+      "repeat": 2,
+      "passed": true
+    },
+    {
+      "fixture": "development_03",
+      "phase": "warm",
+      "repeat": 0,
+      "passed": true
+    },
+    {
+      "fixture": "development_03",
+      "phase": "warm",
+      "repeat": 1,
+      "passed": true
+    },
+    {
+      "fixture": "development_03",
+      "phase": "warm",
+      "repeat": 2,
+      "passed": true
+    },
+    {
+      "fixture": "development_04",
+      "phase": "warm",
+      "repeat": 0,
+      "passed": true
+    },
+    {
+      "fixture": "development_04",
+      "phase": "warm",
+      "repeat": 1,
+      "passed": true
+    },
+    {
+      "fixture": "development_04",
+      "phase": "warm",
+      "repeat": 2,
+      "passed": true
+    }
+  ],
+  "all_errors": [],
+  "records": 64,
+  "python": "3.12.4",
+  "executable": "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe",
+  "tesseract_version": "5.5.3.20260724",
+  "library_sha256": "54d54528b453ce3a5ba79487687f8df43e7b194b9ea97beba74200453fe1fb46",
+  "omp_environment": {
+    "OMP_THREAD_LIMIT": null,
+    "OMP_NUM_THREADS": null
+  },
+  "latency_scope": "Complete PNG decode + real CPU OCR (including same screen processing) + contour extraction. Cold also includes engine creation/lazy initialization. No OS capture/model/input.",
+  "sampling_limits": "Repeated frames correlated; unique-frame accuracy scored once. No dropped slow samples; stdout/stderr preserves C API diagnostics."
+}

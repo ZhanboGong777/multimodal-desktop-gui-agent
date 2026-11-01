@@ -1,0 +1,130 @@
+{
+  "run_id": "001_review_report",
+  "case_id": "review_report",
+  "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Review the BLUE report for project BETA by selecting the review option and confirming the report's content using visible controls.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+  "status": "failed",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Select the BLUE theme button to prepare the report.",
+      "action_type": "double_click",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "double_click",
+          "x": 1282,
+          "y": 915,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "BLUE"
+        },
+        "element_id": "obs-0002-e002",
+        "screenshot_point": {
+          "x": 1282,
+          "y": 915
+        },
+        "control_point": {
+          "x": 1282,
+          "y": 915
+        },
+        "note": "text 'BLUE' -> obs-0002-e002 (re-bound from obs-0001-e002 in an earlier frame)"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "double_click",
+          "x": 1282,
+          "y": 915,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "BLUE"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: blue, theme, report",
+        "evidence": {
+          "observation_id": "obs-0003",
+          "changed": true,
+          "element_count": 19,
+          "expectation_tokens": [
+            "blue",
+            "theme",
+            "report",
+            "preparation",
+            "proceeds"
+          ],
+          "expectation_hits": [
+            "blue",
+            "theme",
+            "report",
+            "preparation"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 18250.0,
+      "after_observation_id": "obs-0003"
+    }
+  ],
+  "verification": {
+    "outcome": "failed",
+    "method": "automatic",
+    "detail": "expected on screen but not found: Project BETA, REVIEW COMPLETE",
+    "evidence": {
+      "observation_id": "obs-0004",
+      "missing": [
+        "Project BETA",
+        "REVIEW COMPLETE"
+      ],
+      "verification_source": "frozen_model_semantic_subtask_postconditions"
+    }
+  },
+  "error": null,
+  "elapsed_ms": 84125.0,
+  "execute": true,
+  "model_name": "qwen3-vl:8b-instruct",
+  "provider": "openai_compatible",
+  "notes": [
+    "planned 1 steps from obs-0001",
+    "task verification: expected on screen but not found: Project BETA, REVIEW COMPLETE"
+  ],
+  "task_id": "review_report",
+  "commit": "482895f",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 2560x1600, control 2560x1600",
+  "started_at": "2026-11-01T07:23:36.051718Z",
+  "finished_at": "2026-11-01T07:25:00.176718Z",
+  "planning_attempts": 1,
+  "model_requests": 6,
+  "planning_ms": 54062.000000005355,
+  "confirmation_ms": 16.00000000325963,
+  "execution_ms": 30046.999999991385,
+  "planner_ms": 32358.99999999674,
+  "planning_calls": 1,
+  "system_elapsed_ms": 84108.99999999674,
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_009\\run\\automatic\\goal_002_001_review_report\\001_review_report",
+  "stop_reason": "task verification: expected on screen but not found: Project BETA, REVIEW COMPLETE",
+  "error_type": "",
+  "failed_step_id": null,
+  "recovery_records": [],
+  "unconfirmed_action_attempts": 0,
+  "action_count": 1
+}

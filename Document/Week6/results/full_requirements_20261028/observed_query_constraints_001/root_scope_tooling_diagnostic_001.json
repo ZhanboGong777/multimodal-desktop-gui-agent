@@ -1,0 +1,20 @@
+{
+  "schema": "week6.root_scope_tooling.diagnostic.v1",
+  "recorded_utc": "2026-10-28T14:23:32.149863+00:00",
+  "actual_exec_chunk": "869b48",
+  "actual_exec_exit_code": 1,
+  "command": [
+    "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+    "-X",
+    "utf8",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_full_requirements_20261028\\review_observed_query_scope.py"
+  ],
+  "failure": "AssertionError at private review_observed_query_scope.py line119 whole helper AST comparison",
+  "diagnosis": "The private normalizer removed new islice import but omitted the new pairwise import used inside the declared added query function. Runtime/source checks did not fail. Add pairwise to declared new-import normalization, preserving the same AST equality requirement.",
+  "preserved_private_harness": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\observed_query_constraints_001\\root_scope_tooling_before_pairwise_001.py.txt",
+    "sha256": "2613cf771b46785c59933fc91ec40b637bd983d4a9004f0b7322a6e01e079fd3"
+  },
+  "project_validation": "1123 passed177.49s/Ruff0/all274 stable/3620 collection only; unchanged",
+  "not_a_model_or_runtime_exit": true
+}

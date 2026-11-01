@@ -1,0 +1,170 @@
+I001 [*] Import block is un-sorted or un-formatted
+  --> scripts\week6_audit_semantic_acceptance.py:27:1
+   |
+25 |   sys.path.insert(0, str(ROOT / "src"))
+26 |
+27 | / from gui_agent.models.base import ModelRequest
+28 | | from gui_agent.planning.parser import PlanParseError, parse_plan
+29 | | from gui_agent.planning.planner import (
+30 | |     _FORMAT_REPAIR_INSTRUCTION,
+31 | |     _INLINE_FORMAT_ERROR_CHARACTERS,
+32 | |     _INLINE_FORMAT_RESPONSE_CHARACTERS,
+33 | |     ACTION_OUTPUT_CONTRACT_VERSION,
+34 | |     _task_plan_response_format,
+35 | | )
+36 | | from gui_agent.planning.prompts import SYSTEM_PROMPT
+37 | | from gui_agent.planning.schemas import PlanStep
+38 | | from gui_agent.planning.semantic_workflow import (
+39 | |     _INLINE_CORRECTION_MAX_CHARACTERS,
+40 | |     SEMANTIC_CHECK_MAX_CHARACTERS,
+41 | |     SEMANTIC_CHECKS_PER_LIST,
+42 | |     SEMANTIC_DUPLICATE_POSTCONDITIONS_REPAIR,
+43 | |     SEMANTIC_GENERIC_REPAIR,
+44 | |     SEMANTIC_INPUT_MODALITY,
+45 | |     SEMANTIC_INSTRUCTION_MAX_CHARACTERS,
+46 | |     SEMANTIC_PREEXISTING_POSTCONDITIONS_REPAIR,
+47 | |     SEMANTIC_PROTOCOL_VERSION,
+48 | |     SEMANTIC_REASON_MAX_CHARACTERS,
+49 | |     SEMANTIC_REPAIR_POLICY_VERSION,
+50 | |     SEMANTIC_REPEATED_OBJECTIVE_REPAIR,
+51 | |     SEMANTIC_UNSUPPORTED_MESSAGE_REPAIR,
+52 | |     SEMANTIC_STEP_POLICY,
+53 | |     SEMANTIC_SYSTEM_PROMPT,
+54 | |     SemanticDecomposer,
+55 | |     SemanticPlan,
+56 | |     SemanticWorkflowResult,
+57 | |     _DuplicateSemanticPostconditionsError,
+58 | |     _final_task,
+59 | |     _goal_task,
+60 | |     _initial_guard,
+61 | |     _PreexistingSemanticPostconditionsError,
+62 | |     _RepeatedSemanticObjectiveError,
+63 | |     _semantic_response_format,
+64 | |     _unique_keys,
+65 | |     _validate_native_predicates,
+66 | | )
+67 | | from gui_agent.planning.workflow_decomposer import (
+68 | |     WorkflowRequest, _rolling_frame_guard, _UnsupportedWorkflowMessageError,
+69 | | )
+70 | | from gui_agent.runtime.action_adapter import (
+71 | |     ActionAdapter,
+72 | |     ActionResolutionError,
+73 | |     validate_target_consistency,
+74 | | )
+75 | | from gui_agent.runtime.monitoring import read_run_status
+76 | | from gui_agent.runtime.observation import describe_elements
+77 | | from gui_agent.runtime.recorder import _mask_step
+78 | | from gui_agent.runtime.schemas import ObservationSnapshot
+79 | | from gui_agent.runtime.verification import Verifier
+80 | | from gui_agent.schemas import ActionResult
+   | |__________________________________________^
+help: Organize imports
+   |
+50 |     SEMANTIC_REPEATED_OBJECTIVE_REPAIR,
+   -     SEMANTIC_UNSUPPORTED_MESSAGE_REPAIR,
+51 |     SEMANTIC_STEP_POLICY,
+52 |     SEMANTIC_SYSTEM_PROMPT,
+53 +     SEMANTIC_UNSUPPORTED_MESSAGE_REPAIR,
+54 |     SemanticDecomposer,
+--------------------------------------------------------------------------------
+67 | from gui_agent.planning.workflow_decomposer import (
+   -     WorkflowRequest, _rolling_frame_guard, _UnsupportedWorkflowMessageError,
+68 +     WorkflowRequest,
+69 +     _rolling_frame_guard,
+70 +     _UnsupportedWorkflowMessageError,
+71 | )
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> src\gui_agent\planning\semantic_workflow.py:8:1
+   |
+ 6 |   """
+ 7 |
+ 8 | / from __future__ import annotations
+ 9 | |
+10 | | import hashlib
+11 | | import json
+12 | | import math
+13 | | import re
+14 | | import time
+15 | | from collections.abc import Callable
+16 | | from pathlib import Path
+17 | | from typing import Annotated, Any, Literal
+18 | |
+19 | | from pydantic import Field, ValidationError, field_validator, model_validator
+20 | |
+21 | | from ..models.base import ModelClient, ModelRequest
+22 | | from ..models.openai_compatible import OpenAICompatibleClient
+23 | | from ..runtime.monitoring import RunMonitor
+24 | | from ..runtime.runner import TaskRunner
+25 | | from ..runtime.schemas import ExecutionOptions, ObservationSnapshot, TaskSpec, VerificationResult
+26 | | from ..runtime.verification import Verifier
+27 | | from ..runtime.workflow import WorkflowRunner, WorkflowRunResult, WorkflowSpec, _safe_id
+28 | | from ..schemas import ActionResult, SchemaModel
+29 | | from .planner import TaskPlanner
+30 | | from .workflow_decomposer import (
+31 | |     BudgetedModelClient,
+32 | |     ProposedSubgoal,
+33 | |     WorkflowRequest,
+34 | |     _UnsupportedWorkflowMessageError,
+35 | |     _ProgressChild,
+36 | |     _rolling_frame_guard,
+37 | |     _RollingFrames,
+38 | |     _RollingVerifier,
+39 | |     _unique_keys,
+40 | |     _write_json,
+41 | |     _write_new_json,
+42 | | )
+   | |_^
+43 |
+44 |   SEMANTIC_PROTOCOL_VERSION = "week6.semantic_subtasks.v6"
+   |
+help: Organize imports
+   |
+33 |     WorkflowRequest,
+   -     _UnsupportedWorkflowMessageError,
+34 |     _ProgressChild,
+--------------------------------------------------------------------------------
+38 |     _unique_keys,
+39 +     _UnsupportedWorkflowMessageError,
+40 |     _write_json,
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> tests\test_week6_semantic_repair_feedback.py:7:1
+   |
+ 5 |   """
+ 6 |
+ 7 | / from __future__ import annotations
+ 8 | |
+ 9 | | import hashlib
+10 | | import json
+11 | |
+12 | | import pytest
+13 | | from test_week6_rolling_actions import options, plan
+14 | | from test_week6_semantic_goal_grouping import _duplicate_and_grouped
+15 | | from test_week6_semantic_subtasks import lab
+16 | | from test_week6_semantic_text_context import _http_client, _persist_synthetic_pixels, _text_user
+17 | |
+18 | | from gui_agent.planning.semantic_workflow import (
+19 | |     SEMANTIC_DUPLICATE_POSTCONDITIONS_REPAIR,
+20 | |     SEMANTIC_GENERIC_REPAIR,
+21 | |     SEMANTIC_PREEXISTING_POSTCONDITIONS_REPAIR,
+22 | |     SEMANTIC_REPAIR_POLICY_VERSION,
+23 | |     SEMANTIC_REPEATED_OBJECTIVE_REPAIR,
+24 | |     SEMANTIC_UNSUPPORTED_MESSAGE_REPAIR,
+25 | |     SEMANTIC_SYSTEM_PROMPT,
+26 | |     _semantic_attempt_system,
+27 | | )
+   | |_^
+help: Organize imports
+   |
+23 |     SEMANTIC_REPEATED_OBJECTIVE_REPAIR,
+24 +     SEMANTIC_SYSTEM_PROMPT,
+25 |     SEMANTIC_UNSUPPORTED_MESSAGE_REPAIR,
+   -     SEMANTIC_SYSTEM_PROMPT,
+26 |     _semantic_attempt_system,
+   |
+
+Found 3 errors.
+[*] 3 fixable with the `--fix` option.

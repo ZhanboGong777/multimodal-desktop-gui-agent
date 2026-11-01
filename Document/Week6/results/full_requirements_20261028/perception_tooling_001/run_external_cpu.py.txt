@@ -1,0 +1,49 @@
+"""Actual owner wait receipt for the saved-frame CPU measurement."""
+import hashlib
+import json
+import os
+import subprocess
+import sys
+import time
+from datetime import UTC, datetime
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+BASE = ROOT/"Document/Week6/results/full_requirements_20261028/perception_external_real_001"
+
+
+def sha(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def write(path,value):
+    with Path(path).open("xb") as stream:
+        stream.write((json.dumps(value,ensure_ascii=False,indent=2)+"\n").encode("utf-8"))
+
+
+if __name__ == "__main__":
+    owner=BASE/"measurement_owner_001"
+    owner.mkdir(exist_ok=False)
+    script=ROOT/"scripts/week6_benchmark_persistent_external.py"
+    command=["D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",str(script)]
+    env=os.environ.copy()
+    env.update(PYTHONUTF8="1",PYTHONIOENCODING="utf-8",PYTHONPATH=str(ROOT/"src"))
+    started=time.perf_counter()
+    claim={"command":command,"cwd":str(ROOT),"owner_pid":os.getpid(),
+           "owner_source_sha256":sha(__file__),"measurement_source_sha256":sha(script),
+           "started_utc":datetime.now(UTC).isoformat(),"gt_sha256":sha(BASE/"ground_truth_frozen_001.json")}
+    write(owner/"claim.json",claim)
+    with (owner/"stdout_stderr.log").open("xb") as output:
+        process=subprocess.Popen(command,cwd=ROOT,env=env,stdout=output,stderr=subprocess.STDOUT,
+                                 creationflags=subprocess.CREATE_NO_WINDOW)
+        write(owner/"child_started.json",{"launcher_pid":process.pid,"utc":datetime.now(UTC).isoformat()})
+        code=process.wait()
+    summary=BASE/"paired_measurement_001/summary.json"
+    receipt={**claim,"actual_child_wait_returncode":code,"child_launcher_pid":process.pid,
+             "ended_utc":datetime.now(UTC).isoformat(),"elapsed_seconds":time.perf_counter()-started,
+             "summary_sha256":sha(summary) if summary.exists() else None,
+             "stdout_stderr_sha256":sha(owner/"stdout_stderr.log"),
+             "measurement_source_unchanged":sha(script)==claim["measurement_source_sha256"]}
+    write(owner/"receipt.json",receipt)
+    print(json.dumps(receipt,ensure_ascii=True,indent=2),flush=True)
+    sys.exit(code)

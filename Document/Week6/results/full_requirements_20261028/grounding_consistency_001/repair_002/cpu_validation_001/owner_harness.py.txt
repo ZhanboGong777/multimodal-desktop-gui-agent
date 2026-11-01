@@ -1,0 +1,44 @@
+from pathlib import Path
+from datetime import datetime, timezone
+import argparse
+import hashlib
+import json
+import os
+import subprocess
+import sys
+import time
+
+root = Path(r"C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+python = r"D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe"
+parser = argparse.ArgumentParser()
+parser.add_argument("--name", required=True)
+parser.add_argument("--tests", nargs="+")
+args = parser.parse_args()
+out = root / "Document/Week6/results/full_requirements_20261028/grounding_consistency_001" / args.name
+out.mkdir(exist_ok=False)
+(out / "owner_harness.py.txt").write_bytes(Path(__file__).read_bytes())
+owned = ["src/gui_agent/runtime/action_adapter.py", "src/gui_agent/runtime/runner.py", "src/gui_agent/planning/prompts.py", "tests/test_week6_grounding_consistency.py"]
+tests = args.tests or ["tests/test_action_adapter.py", "tests/test_runtime_runner.py", "tests/test_week6_grounding_consistency.py", "tests/test_week4_prompts.py", "tests/test_planner.py"]
+keys = sorted(set(owned + tests + ["src/gui_agent/runtime/recovery.py", "src/gui_agent/runtime/schemas.py", "src/gui_agent/runtime/visual_grounding.py", "src/gui_agent/perception/grounding.py", "src/gui_agent/planning/planner.py", "src/gui_agent/planning/schemas.py", "src/gui_agent/schemas.py"]))
+def pins():
+    return {key: hashlib.sha256((root / key).read_bytes()).hexdigest() for key in keys}
+def save(name, value):
+    (out / name).write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+before = pins()
+save("pins_before.json", before)
+receipts = []
+commands = [("ruff", [python, "-m", "ruff", "check", *owned]), ("pytest", [python, "-X", "utf8", "-m", "pytest", "-q", *tests, "--basetemp", str(out / "pytest_tmp")])]
+for name, command in commands:
+    started = datetime.now(timezone.utc).isoformat()
+    monotonic = time.monotonic()
+    with (out / (name + ".stdout.txt")).open("wb") as stdout, (out / (name + ".stderr.txt")).open("wb") as stderr:
+        child = subprocess.Popen(command, cwd=root, stdout=stdout, stderr=stderr, env={**os.environ, "PYTHONUTF8": "1"})
+        code = child.wait()
+    receipt = {"command": command, "launcher_pid": child.pid, "wait_exit_code": code, "started_at_utc": started, "elapsed_seconds": time.monotonic() - monotonic}
+    save(name + ".receipt.json", receipt)
+    receipts.append(receipt)
+    print(name, code, flush=True)
+after = pins()
+save("pins_after.json", after)
+save("validation.json", {"schema": "week6.grounding_consistency.development_narrow_validation.v1", "receipts": receipts, "pin_count": len(before), "pins_unchanged": before == after, "pin_scope": keys, "other_agent_files_in_progress_not_pinned": ["src/gui_agent/runtime/monitoring.py", "src/gui_agent/planning/semantic_workflow.py", "tests/test_week6_grounding_consistency_review.py", "tests/test_week6_semantic_live_monitoring.py"], "not_a_full_or_combined_freeze_validation": True, "new_actual_model_gui_calls": 0})
+sys.exit(0 if before == after and all(item["wait_exit_code"] == 0 for item in receipts) else 1)

@@ -1,0 +1,85 @@
+"""Development checks of four owned files, not a unified source freeze."""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import shutil
+import subprocess
+import time
+from datetime import UTC, datetime
+from pathlib import Path
+
+import psutil
+
+REPO = Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+BASE = REPO / 'Document/Week6/results/full_requirements_20261028/visual_target_guidance_001'
+PYTHON = 'D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe'
+OWNED = ['src/gui_agent/planning/target_bindings.py', 'src/gui_agent/runtime/runner.py',
+         'tests/test_runtime_runner.py', 'tests/test_week6_visual_target_guidance.py']
+
+
+def write(path, value):
+    with path.open('x', encoding='utf8', newline='\n') as handle:
+        json.dump(value, handle, ensure_ascii=False, indent=2)
+        handle.write('\n')
+
+
+def pins():
+    return {name: hashlib.sha256((REPO / name).read_bytes()).hexdigest() for name in OWNED}
+
+
+def identity(process):
+    return dict(pid=process.pid, create_time=process.create_time(), exe=process.exe(), cmdline=process.cmdline())
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--name', required=True)
+    args = parser.parse_args()
+    assert args.name and all(c.isalnum() or c in '_-' for c in args.name)
+    directory = BASE / args.name
+    directory.mkdir(exist_ok=False)
+    shutil.copyfile(__file__, directory / 'owner_harness.py.txt')
+    before = pins()
+    write(directory / 'owned_pins_before.json', before)
+    write(directory / 'owner_claim.json', dict(owner=identity(psutil.Process()),
+          started_utc=datetime.now(UTC).isoformat(), scope='owned development only; reviewer may write other files',
+          real_model_calls=0, gui_calls=0, full_regression=False))
+    commands = [('ruff', [PYTHON, '-m', 'ruff', 'check', *OWNED]),
+                ('pytest', [PYTHON, '-X', 'utf8', '-m', 'pytest', '-q', 'tests/test_week6_visual_target_guidance.py',
+                            'tests/test_runtime_runner.py::test_non_message_planning_context_remains_the_complete_observation',
+                            '--basetemp', str(directory / 'pytest_tmp')])]
+    receipts = []
+    env = dict(os.environ, PYTHONUTF8='1', PYTHONIOENCODING='utf-8')
+    for name, command in commands:
+        tick, descendants = time.monotonic(), {}
+        with (directory / f'{name}.stdout.txt').open('x', encoding='utf8') as out:
+            with (directory / f'{name}.stderr.txt').open('x', encoding='utf8') as err:
+                child = subprocess.Popen(command, cwd=REPO, env=env, stdout=out, stderr=err)
+                launcher = identity(psutil.Process(child.pid))
+                while child.poll() is None:
+                    try:
+                        for process in psutil.Process(child.pid).children(recursive=True):
+                            descendants[(process.pid, process.create_time())] = identity(process)
+                    except (psutil.NoSuchProcess, psutil.AccessDenied):
+                        pass
+                    time.sleep(.05)
+                code = child.wait()
+        receipt = dict(command=command, launcher=launcher, observed_descendants=list(descendants.values()),
+                       actual_child_exit_code=code, elapsed_seconds=time.monotonic() - tick)
+        write(directory / f'{name}.receipt.json', receipt)
+        receipts.append(receipt)
+    after = pins()
+    write(directory / 'owned_pins_after.json', after)
+    result = dict(receipts=receipts, owned_source_unchanged=before == after,
+                  checks_passed=before == after and all(x['actual_child_exit_code'] == 0 for x in receipts),
+                  scope='producer file only, not combined source regression or live acceptance')
+    write(directory / 'audit.json', result)
+    print(json.dumps(result, ensure_ascii=False))
+    return 0 if result['checks_passed'] else 1
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

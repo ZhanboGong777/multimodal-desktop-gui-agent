@@ -12,8 +12,9 @@ import math
 import re
 import time
 from collections.abc import Callable, Mapping, Sequence
+from copy import deepcopy
 from pathlib import Path
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 from pydantic import Field, field_validator, model_validator
 
@@ -38,6 +39,9 @@ from ..runtime.workflow import (
 )
 from ..schemas import ActionResult, SchemaModel
 from .planner import TaskPlanner
+
+if TYPE_CHECKING:
+    from .semantic_workflow import SemanticWorkflowResult
 
 SYSTEM_PROMPT = """You decompose one local desktop task into ordered, observable subgoals.
 Return exactly one JSON object, without Markdown or additional keys:
@@ -132,9 +136,17 @@ def _text(value: str) -> str:
     return value
 
 
+class _UnsupportedWorkflowMessageError(ValueError):
+    """Only the existing message guard supplies this local rejection type."""
+
+
 def _no_messages(value: str) -> str:
     if _MESSAGE.search(value):
-        raise ValueError("message sending is not supported by automatic workflows")
+        raise _UnsupportedWorkflowMessageError(
+            "message sending is not supported by automatic workflows. "
+            "This includes composing local commit-message content; verification text "
+            "is not a request to compose content."
+        )
     return value
 
 
@@ -339,6 +351,11 @@ the wall time remains in the result. No subsequent request is sent after expiry.
         self.audit_path = audit_path
         self.transport_records: list[dict[str, Any]] = []
 
+    def model_for_request(
+        self, messages: Sequence[Mapping[str, Any]], *, image_path: str | None = None,
+    ) -> str:
+        return self.client.model_for_request(messages, image_path=image_path)
+
     def complete(self, messages: Sequence[Mapping[str, Any]], **kwargs: Any) -> ModelResponse:
         remaining = self.deadline - self.clock()
         if remaining <= 0:
@@ -404,8 +421,10 @@ the wall time remains in the result. No subsequent request is sent after expiry.
         before_count = self.request_count if sdk is not None else self.request_count - 1
         record: dict[str, Any] = {
             "dispatch": len(self.transport_records) + 1, "messages": [dict(message) for message in messages],
+            "response_format": deepcopy(kwargs.get("response_format")),
             "timeout_seconds": self.client.timeout_seconds, "provider": self.name,
-            "model_name": self.model_name, "error": "", "response": None,
+            "model_name": self.model_for_request(messages, image_path=kwargs.get("image_path")),
+            "error": "", "response": None,
             "count_source": "httpx_request_event" if sdk is not None else "explicit_offline_transport",
             "http_responses": [],
         }
@@ -1111,7 +1130,7 @@ class AutomaticWorkflowRunner:
                  max_format_retries: int = 2, clock: Callable[[], float] = time.monotonic,
                  initial_observer: Callable[[Path], ObservationSnapshot] | None = None,
                  max_decomposition_rounds: int = 4,
-                 protocol_mode: Literal["observed_departure", "rolling_actions"] = "observed_departure") -> None:
+                 protocol_mode: Literal["observed_departure", "rolling_actions", "semantic_subtasks"] = "observed_departure") -> None:
         if type(max_decomposition_rounds) is not int or not 1 <= max_decomposition_rounds <= 8:
             raise ValueError("max_decomposition_rounds must be an integer in 1..8")
         self.directory, self.client, self.runner_factory = Path(directory), client, runner_factory
@@ -1119,7 +1138,7 @@ class AutomaticWorkflowRunner:
         self.max_format_retries, self.clock = max_format_retries, clock
         self.initial_observer = initial_observer
         self.max_decomposition_rounds = max_decomposition_rounds
-        if protocol_mode not in {"observed_departure", "rolling_actions"}:
+        if protocol_mode not in {"observed_departure", "rolling_actions", "semantic_subtasks"}:
             raise ValueError("unsupported automatic workflow protocol")
         self.protocol_mode = protocol_mode
 
@@ -1272,11 +1291,20 @@ class AutomaticWorkflowRunner:
             _write_json(self.directory / "automatic_workflow_summary.json", result.model_dump(mode="json"))
         return result
 
-    def run(self, request: WorkflowRequest, options: ExecutionOptions, **callbacks: Any) -> AutomaticWorkflowResult:
+    def run(self, request: WorkflowRequest, options: ExecutionOptions, **callbacks: Any) -> AutomaticWorkflowResult | SemanticWorkflowResult:
         request = WorkflowRequest.model_validate(request.model_dump())
         options = ExecutionOptions.model_validate(options.model_dump())
         if not math.isfinite(options.task_timeout_seconds):
             raise ValueError("automatic workflow deadline must be finite")
+        if self.protocol_mode == "semantic_subtasks":
+            from .semantic_workflow import SemanticWorkflowRunner
+
+            return SemanticWorkflowRunner(
+                self.directory, self.client, self.runner_factory, initial_observer=self.initial_observer,
+                max_model_requests=self.max_model_requests, max_subgoals=self.max_subgoals,
+                max_format_retries=self.max_format_retries, max_decomposition_rounds=self.max_decomposition_rounds,
+                clock=self.clock,
+            ).run(request, options, **callbacks)
         if self.protocol_mode == "rolling_actions":
             return self._run_rolling_actions(request, options, **callbacks)
         if options.max_planning_attempts < 2:

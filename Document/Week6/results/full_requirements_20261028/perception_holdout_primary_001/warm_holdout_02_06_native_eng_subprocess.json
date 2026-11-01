@@ -1,0 +1,308 @@
+{
+  "fixture": "holdout_02",
+  "arm": "native_eng_subprocess",
+  "phase": "warm",
+  "repeat": 6,
+  "image_sha256": "4c20ff6979e0d5a9064e5a017ea94671c33ccd39238f2735aec5c4b79a6fd406",
+  "started_perf_counter": 674667.906081,
+  "status": "completed",
+  "ended_perf_counter": 674668.1138089,
+  "engine_creation_ms": 0.001900014467537403,
+  "decode_ms": 1.6938999760895967,
+  "ocr_ms": 200.31620003283024,
+  "ui_ms": 5.715899984352291,
+  "full_ms": 207.72790000773966,
+  "metrics": {
+    "tp": 5,
+    "fp": 0,
+    "fn": 3,
+    "precision": 1.0,
+    "recall": 0.625,
+    "labels": [
+      {
+        "text": "Display Panel",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9827586206896551
+      },
+      {
+        "text": "Screen Mode",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9789473684210527
+      },
+      {
+        "text": "Adjust Display",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9901960784313726
+      },
+      {
+        "text": "Extend",
+        "language": "en",
+        "matched": true,
+        "iou": 0.96
+      },
+      {
+        "text": "Mirror",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9761904761904762
+      },
+      {
+        "text": "显示面板",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "调整亮度",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "投影",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      }
+    ]
+  },
+  "control_metrics": {
+    "tp": 6,
+    "fp": 4,
+    "fn": 0,
+    "iou_threshold": 0.8
+  },
+  "predictions": [
+    {
+      "text": "Display Panel",
+      "bounding_box": {
+        "left": 43,
+        "top": 38,
+        "right": 157,
+        "bottom": 56
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 100,
+        "y": 47
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Screen Mode",
+      "bounding_box": {
+        "left": 43,
+        "top": 115,
+        "right": 136,
+        "bottom": 127
+      },
+      "confidence": 0.95,
+      "center": {
+        "x": 89,
+        "y": 121
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Adjust Display",
+      "bounding_box": {
+        "left": 42,
+        "top": 201,
+        "right": 143,
+        "bottom": 216
+      },
+      "confidence": 0.95,
+      "center": {
+        "x": 92,
+        "y": 208
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Extend",
+      "bounding_box": {
+        "left": 43,
+        "top": 305,
+        "right": 91,
+        "bottom": 317
+      },
+      "confidence": 0.95,
+      "center": {
+        "x": 67,
+        "y": 311
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Mirror",
+      "bounding_box": {
+        "left": 257,
+        "top": 305,
+        "right": 298,
+        "bottom": 317
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 277,
+        "y": 311
+      },
+      "source": "ocr"
+    }
+  ],
+  "ui_candidates": [
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 668,
+        "top": 291,
+        "right": 823,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 745,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 244,
+        "top": 291,
+        "right": 399,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 321,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 30,
+        "top": 291,
+        "right": 185,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 668,
+        "top": 187,
+        "right": 823,
+        "bottom": 244
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 745,
+        "y": 215
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 30,
+        "top": 187,
+        "right": 185,
+        "bottom": 244
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 215
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 668,
+        "top": 101,
+        "right": 823,
+        "bottom": 158
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 745,
+        "y": 129
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 680,
+        "top": 115,
+        "right": 745,
+        "bottom": 133
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 712,
+        "y": 124
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 680,
+        "top": 202,
+        "right": 745,
+        "bottom": 219
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 712,
+        "y": 210
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 680,
+        "top": 306,
+        "right": 713,
+        "bottom": 323
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 696,
+        "y": 314
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 715,
+        "top": 204,
+        "right": 726,
+        "bottom": 215
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 720,
+        "y": 209
+      },
+      "source": "contour"
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,63 @@
+{
+  "schema": "week6.grounding_consistency.development_narrow_validation.v1",
+  "receipts": [
+    {
+      "command": [
+        "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+        "-m",
+        "ruff",
+        "check",
+        "src/gui_agent/runtime/action_adapter.py",
+        "src/gui_agent/runtime/runner.py",
+        "tests/test_week6_grounding_consistency.py"
+      ],
+      "launcher_pid": 80656,
+      "wait_exit_code": 0,
+      "started_at_utc": "2026-10-28T10:15:13.700700+00:00",
+      "elapsed_seconds": 0.21799999999348074
+    },
+    {
+      "command": [
+        "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+        "-X",
+        "utf8",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_action_adapter.py",
+        "tests/test_runtime_runner.py",
+        "tests/test_week6_grounding_consistency.py",
+        "--basetemp",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\grounding_consistency_001\\cpu_development_001\\pytest_tmp"
+      ],
+      "launcher_pid": 66284,
+      "wait_exit_code": 1,
+      "started_at_utc": "2026-10-28T10:15:13.922824+00:00",
+      "elapsed_seconds": 137.90700000000652
+    }
+  ],
+  "pin_count": 12,
+  "pins_unchanged": true,
+  "pin_scope": [
+    "src/gui_agent/perception/grounding.py",
+    "src/gui_agent/planning/planner.py",
+    "src/gui_agent/planning/schemas.py",
+    "src/gui_agent/runtime/action_adapter.py",
+    "src/gui_agent/runtime/recovery.py",
+    "src/gui_agent/runtime/runner.py",
+    "src/gui_agent/runtime/schemas.py",
+    "src/gui_agent/runtime/visual_grounding.py",
+    "src/gui_agent/schemas.py",
+    "tests/test_action_adapter.py",
+    "tests/test_runtime_runner.py",
+    "tests/test_week6_grounding_consistency.py"
+  ],
+  "other_agent_files_in_progress_not_pinned": [
+    "src/gui_agent/runtime/monitoring.py",
+    "src/gui_agent/planning/semantic_workflow.py",
+    "tests/test_week6_grounding_consistency_review.py",
+    "tests/test_week6_semantic_live_monitoring.py"
+  ],
+  "not_a_full_or_combined_freeze_validation": true,
+  "new_actual_model_gui_calls": 0
+}

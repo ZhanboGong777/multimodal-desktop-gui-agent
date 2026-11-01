@@ -1,0 +1,70 @@
+I001 [*] Import block is un-sorted or un-formatted
+  --> scripts\week6_audit_semantic_acceptance.py:24:1
+   |
+22 |   sys.path.insert(0, str(ROOT / "src"))
+23 |
+24 | / from gui_agent.models.base import ModelRequest
+25 | | from gui_agent.planning.parser import PlanParseError, parse_plan
+26 | | from gui_agent.planning.planner import (
+27 | |     ACTION_OUTPUT_CONTRACT_VERSION,
+28 | |     _FORMAT_REPAIR_INSTRUCTION,
+29 | |     _INLINE_FORMAT_ERROR_CHARACTERS,
+30 | |     _INLINE_FORMAT_RESPONSE_CHARACTERS,
+31 | |     _task_plan_response_format,
+32 | | )
+33 | | from gui_agent.planning.prompts import SYSTEM_PROMPT
+34 | | from gui_agent.planning.semantic_workflow import (
+35 | |     _INLINE_CORRECTION_MAX_CHARACTERS,
+36 | |     SEMANTIC_CHECK_MAX_CHARACTERS,
+37 | |     SEMANTIC_CHECKS_PER_LIST,
+38 | |     SEMANTIC_DUPLICATE_POSTCONDITIONS_REPAIR,
+39 | |     SEMANTIC_GENERIC_REPAIR,
+40 | |     SEMANTIC_INPUT_MODALITY,
+41 | |     SEMANTIC_INSTRUCTION_MAX_CHARACTERS,
+42 | |     SEMANTIC_PROTOCOL_VERSION,
+43 | |     SEMANTIC_REASON_MAX_CHARACTERS,
+44 | |     SEMANTIC_REPAIR_POLICY_VERSION,
+45 | |     SEMANTIC_STEP_POLICY,
+46 | |     SEMANTIC_SYSTEM_PROMPT,
+47 | |     SemanticDecomposer,
+48 | |     SemanticPlan,
+49 | |     SemanticWorkflowResult,
+50 | |     _DuplicateSemanticPostconditionsError,
+51 | |     _final_task,
+52 | |     _goal_task,
+53 | |     _initial_guard,
+54 | |     _semantic_response_format,
+55 | |     _unique_keys,
+56 | |     _validate_native_predicates,
+57 | | )
+58 | | from gui_agent.planning.schemas import PlanStep
+59 | | from gui_agent.planning.workflow_decomposer import WorkflowRequest, _rolling_frame_guard
+60 | | from gui_agent.runtime.action_adapter import ActionResolutionError, validate_target_consistency
+61 | | from gui_agent.runtime.monitoring import read_run_status
+62 | | from gui_agent.runtime.observation import describe_elements
+63 | | from gui_agent.runtime.recorder import _mask_step
+64 | | from gui_agent.runtime.schemas import ObservationSnapshot
+65 | | from gui_agent.runtime.verification import Verifier
+66 | | from gui_agent.schemas import ActionResult
+   | |__________________________________________^
+help: Organize imports
+   |
+26 | from gui_agent.planning.planner import (
+   -     ACTION_OUTPUT_CONTRACT_VERSION,
+27 |     _FORMAT_REPAIR_INSTRUCTION,
+28 |     _INLINE_FORMAT_ERROR_CHARACTERS,
+29 |     _INLINE_FORMAT_RESPONSE_CHARACTERS,
+30 +     ACTION_OUTPUT_CONTRACT_VERSION,
+31 |     _task_plan_response_format,
+32 | )
+33 | from gui_agent.planning.prompts import SYSTEM_PROMPT
+34 + from gui_agent.planning.schemas import PlanStep
+35 | from gui_agent.planning.semantic_workflow import (
+--------------------------------------------------------------------------------
+58 | )
+   - from gui_agent.planning.schemas import PlanStep
+59 | from gui_agent.planning.workflow_decomposer import WorkflowRequest, _rolling_frame_guard
+   |
+
+Found 1 error.
+[*] 1 fixable with the `--fix` option.

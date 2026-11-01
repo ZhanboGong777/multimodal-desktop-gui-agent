@@ -1,0 +1,91 @@
+{
+  "schema": "week6.live.operator_diagnostics.v2",
+  "operator": "Root sole native operator; no independent human sign-off",
+  "utc": "2026-11-01T05:48:53.931430+00:00",
+  "source_freeze": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\intent_coverage_001\\final_source_freeze_001.json",
+    "sha256": "9a6c10e337739a1927a1cae2c3f39364d286eed06f84ec754e6cdc6d209ba1c5"
+  },
+  "owner_receipt": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_031\\owner_receipt.json",
+    "sha256": "e68bd6aa041ac7ae813c90dac441fbf91b3e4c8a19263771aa10d71228c863c0"
+  },
+  "wrapper_proof": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_031\\exec_wrapper_wait_001.json",
+    "sha256": "c53e97744d6fa5f3436cf36205c32fb35453a5f259b58e04ef6f0db9debb14c7"
+  },
+  "operator_notes": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal031_operator_failure_notes_001.json",
+    "sha256": "ca71221f850b2ab21d93040efc7e2336b5643ff6e37e30bd1fd4b46cc48fdb7d"
+  },
+  "notes": {
+    "utc": "2026-11-01T05:48:46.799078+00:00",
+    "accepted": false,
+    "failure_type": "operator bridge response timeout and late input after actual owner exit",
+    "actual_owner_exit": 1,
+    "owner_finished_utc": "2026-11-01T05:47:31.225690+00:00",
+    "runtime_confirmed_actions": 2,
+    "runtime_unconfirmed_action_attempts": 1,
+    "planning_calls": 4,
+    "model_requests": 4,
+    "late_input_003": {
+      "started_utc": "2026-11-01T05:47:53.866Z",
+      "dispatch_returned_utc": "2026-11-01T05:47:54.001Z",
+      "finished_utc": "2026-11-01T05:47:54.160Z",
+      "dispatch_known": true,
+      "business_state_after": "Review complete, Commit locally visible",
+      "counts_as_in_run_success": false
+    },
+    "original_failure_preserved": true,
+    "root_error": "Root dispatched the pending click without first checking the owner receipt after context restoration. Owner had already exited. No final task completion, no commit occurred.",
+    "semantic_limitation": "Original prepare_report predicted Saved Locally and was never verified. No semantic success credit.",
+    "new_attempt_justification": "A fresh fixture may be used only after original closure; same frozen source and budgets, no pending request replay, owner/launcher/child identity checked before each input."
+  },
+  "original_process_identities_gone": [
+    {
+      "pid": 41728,
+      "expected_create_time": 1793511603.3860097,
+      "observed_create_time": null,
+      "same_identity_alive": false
+    },
+    {
+      "pid": 38688,
+      "expected_create_time": 1793511603.585575,
+      "observed_create_time": null,
+      "same_identity_alive": false
+    },
+    {
+      "pid": 16872,
+      "expected_create_time": 1793511603.6146903,
+      "observed_create_time": null,
+      "same_identity_alive": false
+    },
+    {
+      "pid": 5624,
+      "expected_create_time": 1793512050.432609,
+      "observed_create_time": null,
+      "same_identity_alive": false
+    }
+  ],
+  "capture_count": 12,
+  "input_count": 3,
+  "input_receipt_refs": [
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_031\\run\\sky_bridge\\input_001_receipt.json",
+      "sha256": "a00aec55d850ebe9e08f8d63e25965f7d82db9519111de9b5094aef24bc90636"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_031\\run\\sky_bridge\\input_002_receipt.json",
+      "sha256": "95fede4aa1b7f79f6bdb78c0045fbc0a1bb4108b85f97c9d0dcac857560af376"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_031\\run\\sky_bridge\\input_003_receipt.json",
+      "sha256": "7b7967a1d9de96e2ae5155fd775f571b4e09839e17f2cd7d5bc98fdfa268aafb"
+    }
+  ],
+  "all_inputs_known_success": true,
+  "pending": [],
+  "code_and_readme_dev_unchanged": true,
+  "raw_evidence_not_repaired": true,
+  "separate_semantic_review_required": true
+}

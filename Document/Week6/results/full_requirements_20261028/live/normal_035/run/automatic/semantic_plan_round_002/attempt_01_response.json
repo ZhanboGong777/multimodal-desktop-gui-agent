@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 12969.0,
+  "usage": {
+    "prompt_tokens": 1636,
+    "completion_tokens": 145,
+    "total_tokens": 1781
+  },
+  "error": null,
+  "content_length": 694,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"Revision plan focuses on completing the review and commit steps since report generation is already confirmed. The final state requires both review and local commit, so these are grouped into one objective to avoid redundant checks and ensure full persistence.\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Review the GREEN report for project ALPHA and commit it locally using visible controls. If review is temporarily unavailable, retry within budget.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [\"Review unavailable\", \"Connection error\", \"Commit failed\"],\n      \"goal_id\": \"review_and_commit\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

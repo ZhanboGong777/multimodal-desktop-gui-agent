@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 14672.0,
+  "usage": {
+    "prompt_tokens": 1643,
+    "completion_tokens": 130,
+    "total_tokens": 1773
+  },
+  "error": null,
+  "content_length": 594,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"Revision plan focuses on completing the review and commit steps since report generation is already verified. The final state requires both review and local commit, with explicit operations to ensure persistence.\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Review the BLUE report for project BETA using visible controls, then commit it locally.\",\n      \"expect_text\": [\"Project BETA\", \"Theme BLUE\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [\"Review unavailable\", \"Connection error\", \"External sync required\"],\n      \"goal_id\": \"review_and_commit\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

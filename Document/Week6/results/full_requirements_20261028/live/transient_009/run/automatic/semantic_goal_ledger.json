@@ -1,0 +1,31 @@
+[
+  {
+    "round": 1,
+    "goal_id": "prepare_report",
+    "instruction": "Prepare a BLUE report for project BETA by selecting the project, choosing the BLUE theme, and generating the report using visible controls.",
+    "expect_text": [
+      "Project BETA",
+      "Theme BLUE"
+    ],
+    "forbid_text": [
+      "ERROR",
+      "UNAVAILABLE",
+      "RETRY"
+    ],
+    "status": "failed",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_009\\run\\automatic\\goal_001_001_prepare_report",
+    "verification": null,
+    "task_verification": {
+      "outcome": "failed",
+      "method": "automatic",
+      "detail": "expected on screen but not found: Project BETA",
+      "evidence": {
+        "observation_id": "obs-0012",
+        "missing": [
+          "Project BETA"
+        ],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    }
+  }
+]

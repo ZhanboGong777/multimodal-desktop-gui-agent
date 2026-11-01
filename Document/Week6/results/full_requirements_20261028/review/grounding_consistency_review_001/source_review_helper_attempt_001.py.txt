@@ -1,0 +1,79 @@
+"""Read-only source-scope review bound to the finished independent CPU snapshots."""
+from pathlib import Path
+import ast,hashlib,json,datetime
+ROOT=Path(r"C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+BASE=ROOT/"Document/Week6/results/full_requirements_20261028/review/grounding_consistency_review_001"
+OUT=BASE/"independent_source_review_001.json"
+assert not OUT.exists()
+audit=json.loads((BASE/"cpu_validation_003/audit.json").read_text(encoding="utf8"))
+assert audit["passed"] and audit["collected_testcases"]==26
+def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+def source(rel,old=False):
+ return BASE/("source_before" if old else "cpu_validation_003/source_snapshot")/(rel+".txt")
+def cls_methods(path,name):
+ tree=ast.parse(path.read_bytes())
+ klass=next(n for n in tree.body if isinstance(n,ast.ClassDef) and n.name==name)
+ return {n.name:ast.dump(n,include_attributes=False) for n in klass.body if isinstance(n,ast.FunctionDef)}
+old_runner=cls_methods(source("src/gui_agent/runtime/runner.py",True),"TaskRunner")
+new_runner=cls_methods(source("src/gui_agent/runtime/runner.py"),"TaskRunner")
+changed_runner=[name for name in old_runner if new_runner.get(name)!=old_runner[name]]
+assert set(changed_runner)=={"_retry_plan","_ground_step"},changed_runner
+old_monitor=cls_methods(source("src/gui_agent/runtime/monitoring.py",True),"RunMonitor")
+new_monitor=cls_methods(source("src/gui_agent/runtime/monitoring.py"),"RunMonitor")
+changed_monitor=[name for name in old_monitor if new_monitor.get(name)!=old_monitor[name]]
+assert set(changed_monitor)=={"__init__","_persist"},changed_monitor
+old_sem=cls_methods(source("src/gui_agent/planning/semantic_workflow.py",True),"SemanticWorkflowRunner")
+new_sem=cls_methods(source("src/gui_agent/planning/semantic_workflow.py"),"SemanticWorkflowRunner")
+assert [name for name in old_sem if new_sem.get(name)!=old_sem[name]]==["run"]
+old_adapter=cls_methods(source("src/gui_agent/runtime/action_adapter.py",True),"ActionAdapter")
+new_adapter=cls_methods(source("src/gui_agent/runtime/action_adapter.py"),"ActionAdapter")
+assert [name for name in old_adapter if new_adapter.get(name)!=old_adapter[name]]==["_locate"]
+for name in ("_finish","_abandon","_status"):
+ assert old_runner[name]==new_runner[name]
+sem_data=source("src/gui_agent/planning/semantic_workflow.py").read_text(encoding="utf8")
+monitor_data=source("src/gui_agent/runtime/monitoring.py").read_text(encoding="utf8")
+assert 'monitor = RunMonitor(self.directory)' in sem_data
+assert 'previous: Callable | None = previous_observer' in sem_data
+assert 'actions_start: int = actions_start, calls_start: int = calls_start' in sem_data
+assert 'monitor.update("executing", actions_used=live_actions' in sem_data
+assert 'subgoals_completed=len(result.completed_subgoals)' in sem_data
+assert 'except Exception:  # noqa: BLE001 - isolate telemetry faults; preserve process cancellation/exit' in monitor_data
+assert 'self._on_status({**status, "write_failures": list(status["write_failures"])})' in monitor_data
+before_fields=ast.parse(source("src/gui_agent/runtime/monitoring.py",True).read_bytes())
+after_fields=ast.parse(source("src/gui_agent/runtime/monitoring.py").read_bytes())
+def named(tree,name):
+ return next(ast.dump(n,include_attributes=False) for n in tree.body
+  if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id==name for t in n.targets))
+assert named(before_fields,"_FIELDS")==named(after_fields,"_FIELDS")
+result={"schema_version":"week6.grounding_monitoring.independent_source_review.v1",
+"created_utc":datetime.datetime.now(datetime.timezone.utc).isoformat(),"reviewer":"/root/week6_replanning_review",
+"scope":"Independent source read and offline CPU counterexamples; no real-window acceptance and no human signature.",
+"source_pins":audit["selected_source_before"],
+"independent_cpu":{"record":"cpu_validation_003/audit.json","sha256":sha(BASE/"cpu_validation_003/audit.json"),
+ "actual_exit":0,"case_count":26,"pytest_reported_seconds":8.13,"ruff_exit":0,"17_selected_pins_before_equal_after":True},
+"scope_checks":{"TaskRunner_changed_methods":changed_runner,"ActionAdapter_changed_methods":["_locate"],
+ "RunMonitor_changed_old_methods":changed_monitor,"SemanticWorkflowRunner_changed_methods":["run"],
+ "old_cancellation_methods_ast_identical":True,"existing_run_status_FIELDS_ast_identical":True,
+ "completed_ledger_and_semantic_postconditions_unchanged":True},
+"read_review":{
+"source_and_fresh":"Original source consistency is checked before anonymous mapping; current explicit ID is checked by adapter before dispatch. No conflicting native ID is silently changed to the text target.",
+"anonymous_ocr":"Positive-area overlapping readable OCR must be one complete matching label or existing word-run ID set. Mixed controls and duplicate same-name labels inside a large contour are rejected. No local OCR/low-confidence/nonoverlapping labels do not invent a conflict.",
+"duplicate_and_unknown":"ID-only and consistent explicit ID among repeated labels remain supported. Unknown OCR is not promoted to semantic proof.",
+"native_prompt":"Generic future native-output guidance prefers text-only for unique visible OCR, consistent ID for repeated labels; it does not patch a returned native plan or add budget.",
+"telemetry":"Detached flat status copy after both persisted records. Ordinary observer Exception is isolated with fixed diagnostic. KeyboardInterrupt/SystemExit propagate into normal cancellation.",
+"offsets":"Factory and relay bind per-child goal and actions/planning offsets. Root telemetry stays executing with child stage detail and monotonic count high-water marks; completed credit comes only from verified outer ledger.",
+"clock":"Root RunMonitor now uses its default independent monotonic clock; execution deadline clock is unchanged. No model/budget authority is derived from status.",
+"cancel_journal":"Before input known0/unknown0; returned but not journaled receipt known0/unknown1; after journal known1/unknown0. Each actual attempt count remains conserved, cancelled, no replay and no final rescue.",
+"http":"A locally denied planning call can be counted without an HTTP request; tested cap case is planning3/actualHTTP2, zero task inputs."},
+"limitations":["Text/ID consistency does not prove widget role, arbitrary instruction meaning or global GUI safety.",
+"Fresh-case pixel mapping and foreground checking are explicit CPU doubles; no pixel-grounding or live-window success is claimed.",
+"Current matching and negation limitations are not repaired by this guard.",
+"Live acceptance, native instruction versus independent operation events, source freeze and final regression remain Root prerequisites."],
+"preserved_failed_targets":["cpu_validation_001","cpu_validation_002"],
+"correction_manifests":["fixture_and_assertion_corrections_001.json","fixture_and_assertion_corrections_002.json"],
+"raw_evidence_modified":False,"operations":{"models":0,"gui":0,"full_pytest":0},
+"script_sha256":sha(Path(__file__))}
+OUT.write_text(json.dumps(result,ensure_ascii=False,indent=2)+"\n",encoding="utf8")
+OUT.with_suffix(".py.txt").write_bytes(Path(__file__).read_bytes())
+print(json.dumps({"out":str(OUT),"sha256":sha(OUT)},ensure_ascii=False))
+

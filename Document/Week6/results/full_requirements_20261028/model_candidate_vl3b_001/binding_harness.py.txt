@@ -1,0 +1,130 @@
+"""Bind an existing alternate model to unchanged code; no model generation."""
+import argparse
+import hashlib
+import json
+import re
+import shutil
+from datetime import UTC, datetime
+from pathlib import Path
+from urllib.request import urlopen
+
+REPO = Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+BASE = REPO / 'Document/Week6/results/full_requirements_20261028'
+sha = lambda path: hashlib.sha256(path.read_bytes()).hexdigest()
+load = lambda path: json.loads(path.read_text(encoding='utf-8'))
+
+
+def write(path, value):
+    with path.open('x', encoding='utf-8', newline='\n') as stream:
+        json.dump(value, stream, ensure_ascii=False, indent=2, allow_nan=False)
+        stream.write('\n')
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--owner-harness', type=Path, required=True)
+    args = parser.parse_args()
+    assert args.owner_harness.is_file()
+    prior_path = BASE / 'semantic_conversation_repair_001/final_source_freeze_001.json'
+    assert sha(prior_path) == '58740f05d55c1eedc92f5c048005bd9348ca2b25b6a40ccb2450f90ca2295fe9'
+    prior = load(prior_path)
+    assert all(sha(REPO / name) == digest for name, digest in prior['code_pins'].items())
+    assert sha(REPO / 'README.md') == prior['readme_sha256']
+    assert sha(REPO / '.gitattributes') == prior['git_attributes_sha256']
+    for name in ('normal_014', 'fixture_normal_010', 'transient_001', 'fixture_transient_001'):
+        assert not (BASE / 'live' / name).exists(), name
+    terminal = load(BASE / 'live/normal_013/owner_receipt.json')
+    assert terminal['child_exit_code'] == 1
+    assert load(BASE / 'live/fixture_normal_009.close.json')['actual_process_wait_exit_code'] == 15
+    with urlopen('http://127.0.0.1:11434/api/tags', timeout=15) as response:
+        tags = json.load(response)
+    choices = [item for item in tags['models'] if item['name'] == 'qwen2.5vl:3b']
+    assert len(choices) == 1
+    model = choices[0]
+    assert model['digest'] == 'fb90415cde1ef08aa669ae74b082d49b158729b6db1ab183c941417d507e71a1'
+    directory = BASE / 'model_candidate_vl3b_001'
+    directory.mkdir(exist_ok=False)
+    write(directory / 'installed_model_tags_readonly.json', tags)
+    shutil.copyfile(args.owner_harness, directory / 'owner_harness.py.txt')
+    readme = REPO / 'README.md'
+    shutil.copyfile(readme, directory / 'README.before_model_candidate.md')
+    text = readme.read_text(encoding='utf-8')
+    old = 'Normal013, transient001 and full004 remain pending on this freeze.'
+    assert text.count(old) == 1
+    replacement = (
+        'Normal013 also stopped before input after three invalid native proposals.\n'
+        'The next separately registered runtime candidate uses the already installed\n'
+        '`qwen2.5vl:3b` for both semantic and action planning via the existing model\n'
+        'CLI option. The 265 code pins, caller, OCR configuration and all budgets\n'
+        'are unchanged. No model is downloaded, trained or silently substituted;\n'
+        'the prior 7B runs retain their original model and failed status. This is\n'
+        'a different model configuration, not a same-model improvement claim.\n'
+        'Normal014, transient001 and full004 remain pending on this binding.'
+    )
+    text = text.replace(old, replacement)
+    links = []
+    for target in re.findall(r'\[[^\]]*\]\(([^)]+)\)', text):
+        if target.startswith(('https://', 'http://', '#')):
+            continue
+        target = target.split('#', 1)[0]
+        assert (REPO / target).exists(), target
+        links.append(target)
+    readme.write_text(text, encoding='utf-8', newline='\n')
+    write(directory / 'README.update_qa_001.json', {
+        'previous_sha256': prior['readme_sha256'], 'current_sha256': sha(readme),
+        'local_links_checked': links, 'model_candidate_accepted': False,
+        'code_changes': 0, 'download_train_generate_calls_during_binding': 0})
+    original_validation = prior_path.parent / prior['targeted_validation']
+    proof = load(original_validation)
+    assert proof['checks_passed'] is True and proof['scope'] == 'affected_semantic'
+    assert proof['code_unchanged'] is True
+    copied_validation = directory / 'source_validation_binding_001'
+    copied_validation.mkdir()
+    copied = {}
+    for path in original_validation.parent.iterdir():
+        if path.is_file():
+            shutil.copyfile(path, copied_validation / path.name)
+            assert sha(path) == sha(copied_validation / path.name)
+            copied[path.name] = sha(path)
+    write(directory / 'source_validation_copy_receipt_001.json', {
+        'original_validation': str(original_validation.relative_to(REPO)),
+        'original_validation_sha256': sha(original_validation), 'copied_files': copied,
+        'meaning': 'Existing CPU proof copied byte-exact because every code pin is unchanged. Not a model test or new pytest run.'})
+    shutil.copyfile(__file__, directory / 'binding_harness.py.txt')
+    freeze = {**prior, 'schema': 'week6.semantic.model_candidate.source_freeze.v1',
+              'created_at_utc': datetime.now(UTC).isoformat(),
+              'status': 'frozen_pending_vl3b_normal014_transient001_full004',
+              'previous_freeze_sha256': sha(prior_path), 'changed_paths': [],
+              'readme_sha256': sha(readme), 'targeted_validation': 'source_validation_binding_001/validation.json',
+              'readme_update_qa_sha256': sha(directory / 'README.update_qa_001.json'),
+              'root_freeze_harness_sha256': sha(directory / 'binding_harness.py.txt'),
+              'targeted_validation_sha256': sha(original_validation),
+              'runtime_model': model['name'], 'runtime_model_digest': model['digest'],
+              'runtime_model_size_bytes': model['size'], 'model_roles': ['semantic', 'action'],
+              'runtime_model_change_only': True, 'code_byte_changes_from_previous_freeze': 0,
+              'new_real_model_gui_acceptance_completed': False, 'full004_completed': False,
+              'owner_harness_sha256': sha(args.owner_harness)}
+    write(directory / 'final_source_freeze_001.json', freeze)
+    prereg = load(BASE / 'live/preregistered_v6_005.json')
+    prereg.update(schema='week6.semantic_live.v6.existing_vl3b_candidate_preregistration.v1',
+                  registered_utc=datetime.now(UTC).isoformat(),
+                  freeze='../model_candidate_vl3b_001/final_source_freeze_001.json',
+                  freeze_sha256=sha(directory / 'final_source_freeze_001.json'),
+                  model=model['name'], model_digest=model['digest'],
+                  model_metadata={'name': model['name'], 'digest': model['digest'], 'size': model['size'],
+                                  'meaning': 'Already installed VL model; read-only tags, no download or generation'},
+                  previous_development_failures='normal001 through013 remain unaccepted; normal013 used actual v2 role conversations and still returned duplicate goal checks before any input. Different model configurations are kept separate.',
+                  runtime_model_change='Both semantic and action roles use the existing qwen2.5vl3b CLI model option. It is a VL model, not a dedicated text model. Source/caller/OCR/budgets unchanged; not a same-model comparison.',
+                  repair_experiment='The same frozen week6.semantic_repair_feedback.v2 bounded role-conversation strategy is used without code changes. This separately registered candidate changes the runtime model to the already installed qwen2.5vl3b for both roles; it does not reclassify any old 7B failure.',
+                  owner_harness=str(args.owner_harness.resolve()), owner_harness_sha256=sha(args.owner_harness),
+                  normal={'name': 'normal_014', 'project': 'ALPHA', 'colour': 'GREEN', 'fixture': 'fixture_normal_010', 'reuse': 'New independent fixture'},
+                  transient={'name': 'transient_001', 'project': 'BETA', 'colour': 'BLUE', 'fixture': 'fixture_transient_001', 'application_review_rejections': 1})
+    write(BASE / 'live/preregistered_v6_006.json', prereg)
+    print(json.dumps({'freeze_sha256': sha(directory / 'final_source_freeze_001.json'),
+                      'preregistration_sha256': sha(BASE / 'live/preregistered_v6_006.json'),
+                      'readme_sha256': sha(readme), 'code_pins': len(freeze['code_pins']),
+                      'model': model['name'], 'digest': model['digest'], 'new_generation_calls': 0}))
+
+
+if __name__ == '__main__':
+    main()

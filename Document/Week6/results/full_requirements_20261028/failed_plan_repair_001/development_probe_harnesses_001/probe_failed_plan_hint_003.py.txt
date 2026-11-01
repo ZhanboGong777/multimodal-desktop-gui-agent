@@ -1,0 +1,24 @@
+"""Development-only fixed-hint diagnostic, no source mutation or task acceptance."""
+from pathlib import Path
+import hashlib,json
+import sys
+P=Path(__file__).parent;R=P.parent.parent/'week6-worktree';sys.path.insert(0,str(R/'src'))
+from gui_agent.planning import semantic_workflow as semantic
+hint=(
+    "The prior failed contract is your prediction, not a caller requirement. "
+    "Re-plan the unfinished requested operations from the unchanged caller request. "
+    "A revision may use one objective combining remaining operations when its "
+    "instruction explicitly names them all and their outcome is justified. Keep "
+    "the original final predicates and check them only after actual input. Do not "
+    "require an invented intermediate caption again or restart established selections. "
+    "Missing your own predicted text alone is not a missing or conflicting caller "
+    "parameter and does not justify needs_clarification. The action layer will inspect "
+    "visible controls and attempt the remaining operations. Use needs_clarification "
+    "only for an actual caller conflict, missing required parameter, or no justified "
+    "actionable workflow, with no goals. Never force ready, drop caller operations "
+    "or claim that the old failed objective succeeded."
+)
+semantic.SEMANTIC_REPEATED_OBJECTIVE_REPAIR=hint
+s=(P/'probe_failed_plan_repair_001.py').read_text('utf8').replace('transient007_saved_failure_probe_001','transient007_hint_development_probe_003')
+s=s.replace("'source_unchanged':True,", "'source_unchanged':True,'development_only_fixed_hint_override':{'text':"+repr(hint)+",'sha256':"+repr(hashlib.sha256(hint.encode()).hexdigest())+"},")
+exec(compile(s,str(P/'probe_failed_plan_repair_001.py'),'exec'))

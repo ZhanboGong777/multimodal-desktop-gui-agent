@@ -1,0 +1,25 @@
+{
+  "status": "ready",
+  "reason": "The previous goal failed due to missing expected text ('Project ALPHA', 'Draft Saved') and no forbidden text was present. The current request requires completing the review and commit locally. The next logical step is to ensure the report is reviewed and committed, with visible controls only, and no",
+  "subgoals": [
+    {
+      "instruction": "Review the GREEN report for project ALPHA and commit it locally using visible controls.",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [
+        "Review",
+        "Commit",
+        "Push",
+        "Sync",
+        "Online",
+        "External",
+        "Network",
+        "Connection Required"
+      ],
+      "goal_id": "review_and_commit"
+    }
+  ]
+}

@@ -1,0 +1,212 @@
+"""Freeze a reviewed, actually CPU-tested observed-query candidate; no inference/UI."""
+from __future__ import annotations
+
+import argparse
+import importlib.util
+import json
+import re
+from datetime import UTC, datetime
+from hashlib import sha256
+from pathlib import Path
+from urllib.request import urlopen
+
+REPO = Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+BASE = REPO/'Document/Week6/results/full_requirements_20261028'
+CHANGE = BASE/'observed_query_constraints_001'
+PRIOR_SHA = '6bf0bbe60e067fa2558f69938c7b5b5fd0e5e9c5c4477ff2eaa3ee97ac3d6fd0'
+BEFORE_SHA = '2a859d3a9a8e6bf60ba7d573d43516646c86ad4f17fc2195fe4511e66ce6e434'
+NEGATIVE_SHA = '1c4523e3714f294cc62a5d320208c42abc0bfa68450b468922ca7193c743539c'
+CHANGED = {
+    'src/gui_agent/planning/target_bindings.py', 'src/gui_agent/planning/planner.py',
+    'scripts/week6_audit_semantic_acceptance.py', 'tests/test_week6_target_bindings.py',
+    'tests/test_week6_target_bindings_review.py', 'tests/test_week6_observed_queries.py',
+    'tests/test_week6_observed_queries_review.py',
+}
+
+
+def sha(path):
+    return sha256(path.read_bytes()).hexdigest()
+
+
+def load(path):
+    return json.loads(path.read_text('utf-8'))
+
+
+def write(path, value):
+    with path.open('x', encoding='utf-8', newline='\n') as handle:
+        json.dump(value, handle, ensure_ascii=False, indent=2, allow_nan=False)
+        handle.write('\n')
+
+
+def inventory():
+    paths = {REPO/'pyproject.toml'}
+    for folder in ('src', 'tests', 'scripts'):
+        paths.update((REPO/folder).rglob('*.py'))
+    paths.update(p for p in (REPO/'configs').rglob('*') if p.is_file())
+    return {p.relative_to(REPO).as_posix(): sha(p) for p in sorted(paths)}
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--scope-review', required=True, type=Path)
+    parser.add_argument('--scope-review-sha256', required=True)
+    args = parser.parse_args()
+    assert sha(args.scope_review) == args.scope_review_sha256
+    review = load(args.scope_review)
+    assert review['schema'] == 'week6.observed_query_constraints.root_scope_review.v1'
+    assert review['approved_for_fresh_experiment'] is True
+    assert review['model_gui_acceptance'] is False
+    prior_file = BASE/'visual_target_guidance_001/final_source_freeze_001.json'
+    assert sha(prior_file) == PRIOR_SHA
+    prior = load(prior_file)
+    manifest_file = CHANGE/'source_before_manifest.json'
+    assert sha(manifest_file) == BEFORE_SHA
+    manifest = load(manifest_file)
+    assert manifest['prior_freeze_sha256'] == PRIOR_SHA
+    assert manifest['code_pin_count'] == 272 and len(manifest['files']) == 518
+    archived_code = {}
+    seen = set()
+    for row in manifest['files']:
+        destination = (CHANGE/row['destination']).resolve()
+        assert destination.is_relative_to((CHANGE/'source_before').resolve())
+        assert destination not in seen
+        seen.add(destination)
+        assert sha(destination) == row['sha256'] and destination.stat().st_size == row['bytes']
+        prefix = 'source_before/code/'
+        if row['destination'].startswith(prefix):
+            archived_code[row['destination'][len(prefix):]] = row['sha256']
+        elif not row['destination'].startswith('source_before/auxiliary/'):
+            assert sha(Path(row['source'])) == row['sha256']
+    assert archived_code == prior['code_pins']
+    pins = inventory()
+    changed = {name for name in set(pins)|set(prior['code_pins'])
+               if pins.get(name) != prior['code_pins'].get(name)}
+    assert changed == CHANGED == set(review['changed_paths'])
+    assert review['current_code_pins'] == pins
+    assert review['prior_freeze_sha256'] == PRIOR_SHA
+    assert review['archive_sha256'] == BEFORE_SHA
+    assert review['original_runtime_guards_unchanged'] is True
+    assert review['original_auditor_require_guards_preserved_in_order'] is True
+    assert review['legacy_test_migrations_recomputed'] is True
+    for row in review['reviewed_proofs']:
+        assert sha(Path(row['path'])) == row['sha256']
+    validation_dir = CHANGE/'root_affected_validation_001'
+    validation = load(validation_dir/'validation.json')
+    assert validation['schema'] == 'week6.observed_query_constraints.offline.actual.v1'
+    assert validation['checks_passed'] is True and validation['full_regression'] is False
+    assert validation['model_gui_calls'] == 0 and validation['code_unchanged'] is True
+    assert load(validation_dir/'tested_code_pins_before.json') == pins
+    assert load(validation_dir/'tested_code_pins_after.json') == pins
+    for name in ('ruff', 'pytest', 'collection'):
+        receipt = load(validation_dir/f'{name}.receipt.json')
+        assert receipt['actual_child_exit_code'] == 0
+        assert receipt in validation['receipts']
+    collected = validation['collected_test_count']
+    assert type(collected) is int and collected > 0
+    assert all(sha(REPO/name) == prior[key] for name, key in (
+        ('README.md','readme_sha256'), ('requirements-dev.txt','requirements_dev_sha256'),
+        ('.gitattributes','git_attributes_sha256')))
+    assert validation['requirements_dev_sha256_before'] == validation['requirements_dev_sha256_after'] == prior['requirements_dev_sha256']
+    negative_file = BASE/'review/negative_normal017_audit_001.json'
+    assert sha(negative_file) == NEGATIVE_SHA
+    owner = load(BASE/'live/normal_017/owner_receipt.json')
+    terminal = load(BASE/'live/normal_017/operator_handoff_003.json')
+    closed = load(BASE/'live/fixture_normal_013.close.json')
+    assert owner['child_exit_code'] == 1 and terminal['terminal'] is True and terminal['pending'] == []
+    assert terminal['exec_wait'] == {'closed': True, 'exit_code': 1}
+    assert closed['actual_process_wait_exit_code'] == 15
+    assert closed['checked_actual_process']['pid'] == 76460
+    assert closed['checked_actual_process']['create_time'] == 1793195148.286693
+    assert not any((BASE/'live'/name).exists() for name in ('normal_018','fixture_normal_014','fixture_normal_014.launch.json','transient_001','fixture_transient_001','fixture_transient_001.launch.json'))
+    spec = importlib.util.spec_from_file_location('frozen_observed_query_helper', REPO/'src/gui_agent/planning/target_bindings.py')
+    helper = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(helper)
+    assert helper.TARGET_BINDING_SCHEMA_VERSION == 'gui_agent.target_binding_schema.v2'
+    assert helper.generation_targeting_policy() == prior['generation_targeting_policy']
+    tags = json.load(urlopen('http://127.0.0.1:11434/api/tags', timeout=10))
+    model = [m for m in tags['models'] if m['name'] == prior['runtime_model']]
+    assert len(model) == 1 and model[0]['digest'] == prior['runtime_model_digest']
+    write(CHANGE/'provider_readonly_tags_001.json', {'schema':'week6.provider_readonly_tags.v1',
+        'observed_utc':datetime.now(UTC).isoformat(), 'method':'GET', 'url':'http://127.0.0.1:11434/api/tags',
+        'tags':tags, 'selected':model[0], 'inference_requested':False})
+    readme = REPO/'README.md'
+    text = readme.read_text('utf-8')
+    start = text.index('The new candidate adds the fixed `gui_agent.generation_targeting_policy.v1` guidance')
+    end = text.index('### Week 5 submission', start)
+    replacement = f'''The preceding fixed-guidance candidate passed its [1063-case affected CPU check](Document/Week6/results/full_requirements_20261028/visual_target_guidance_001/root_affected_validation_001/validation.json).
+Normal017 still ended with actual task exit 1 after 456.985 seconds.
+It made three native inputs and completed one of two objectives. The fixed
+policy and recovery feedback reached the model, but two text-only commit
+plans still had no matching OCR target. Neither was dispatched. Its two
+ignored second-click events remain in the [independent negative audit](Document/Week6/results/full_requirements_20261028/review/negative_normal017_audit_001.json).
+There is no established truncation or cursor-causation explanation.
+
+The current `gui_agent.target_binding_schema.v2` candidate closes the open
+text-only generation alternative. It permits observed full labels and a
+bounded, snapshot-derived set of canonical word spans and neighbouring word
+runs. Query sources, limits and observed truncation are retained per attempt.
+This deliberately narrows generation; the unchanged runtime still accepts
+its wider direct text/substring/word-run interface. Current ID-only targets,
+anonymous visual IDs and non-point actions remain available. No local code
+chooses a replacement ID or edits a native action. Both query aliases and
+both ID aliases are constrained. The endpoint remains `strict:false`.
+
+The [current affected CPU check](Document/Week6/results/full_requirements_20261028/observed_query_constraints_001/root_affected_validation_001/validation.json)
+passed {validation['targeted_tests_passed']} tests with Ruff clean and {len(pins)} unchanged code pins.
+Development dependency bytes remain bound separately. This is offline
+evidence only. The {collected}-case collection is not a full execution.
+Fresh normal018 and transient001, final full004, report and package QA
+remain pending. All normal001 through017 failures retain their original
+records and distinct configurations; no case or fixture is reused.
+
+Validation target (pending): `{collected} tests, ruff clean`. This is the
+collected suite size, not a full regression or desktop acceptance.
+
+'''
+    new_text = text[:start]+replacement+text[end:]
+    for target in re.findall(r'\]\((Document/Week6/results/[^)]+)\)', new_text):
+        assert (REPO/target).is_file(), target
+    readme.write_text(new_text, encoding='utf-8', newline='\n')
+    freeze = {key:prior[key] for key in ('protocol','input_modality','repair_policy_version','postcondition_source','final_source','runtime_model','runtime_model_digest','model_roles','generation_targeting_policy')}
+    freeze.update(schema='week6.semantic.observed_query_constraints.source_freeze.v1',
+        created_at_utc=datetime.now(UTC).isoformat(), status='frozen_pending_normal018_transient001_full004',
+        previous_freeze_sha256=PRIOR_SHA, changed_paths=sorted(changed), code_pins=pins,
+        code_pin_count=len(pins), package_python_file_count=sum(name.startswith('src/gui_agent/') and name.endswith('.py') for name in pins),
+        readme_sha256=sha(readme), requirements_dev_sha256=prior['requirements_dev_sha256'],
+        git_attributes_sha256=prior['git_attributes_sha256'], source_before_manifest_sha256=BEFORE_SHA,
+        preserved_original_count=518, root_scope_review_sha256=sha(args.scope_review),
+        targeted_validation='root_affected_validation_001/validation.json', targeted_validation_sha256=sha(validation_dir/'validation.json'),
+        targeted_tests_passed=validation['targeted_tests_passed'], targeted_pytest_seconds=validation['targeted_pytest_seconds'],
+        collected_test_count=collected, collection_test_execution=False, full004_completed=False,
+        new_real_model_gui_acceptance_completed=False, model_gui_calls_during_changes=0,
+        old_failed_raw_records_retained=True, normal017_negative_audit_sha256=NEGATIVE_SHA,
+        root_freeze_harness_sha256=sha(Path(__file__)), target_binding_schema_version=helper.TARGET_BINDING_SCHEMA_VERSION,
+        observed_query_contract_version=helper.OBSERVED_QUERY_CONTRACT_VERSION,
+        finite_query_limits=dict(helper._QUERY_LIMITS),
+        finite_query_limits_scope='Extras only; ASCII word-token spans and geometrically neighbouring runs. Original full labels are retained without the extra-query character cap. Not all runtime substrings or multilingual word runs are generated.')
+    freeze_file = CHANGE/'final_source_freeze_001.json'
+    write(freeze_file, freeze)
+    prereg = load(BASE/'live/preregistered_v6_009.json')
+    prereg.update(schema='week6.semantic_live.v6.observed_queries_preregistration.v1',
+        freeze='../observed_query_constraints_001/final_source_freeze_001.json', freeze_sha256=sha(freeze_file),
+        registered_utc=datetime.now(UTC).isoformat(),
+        previous_development_failures='normal001 through017 remain unaccepted; normal016 and017 completed one prepare goal but no commit and no overall acceptance. Original replies and negative evidence retained.',
+        normal={'name':'normal_018','project':'ALPHA','colour':'GREEN','fixture':'fixture_normal_014','reuse':'New independent fixture only'},
+        final_full_regression=f'Required after both accepted fresh cases; {collected} is collection only, full004 not started.',
+        repair_experiment='Same fixed guidance and bounded feedback; explicit finite observed-query generation schema v2. No image transformation or local target/action rewriting.',
+        auditor_source_sha256=pins['scripts/week6_audit_semantic_acceptance.py'],
+        source_before_manifest_sha256=BEFORE_SHA, root_scope_review_sha256=sha(args.scope_review),
+        normal017_negative_audit_sha256=NEGATIVE_SHA, target_binding_schema_version=helper.TARGET_BINDING_SCHEMA_VERSION,
+        observed_query_contract_version=helper.OBSERVED_QUERY_CONTRACT_VERSION,
+        finite_query_limits=dict(helper._QUERY_LIMITS),
+        finite_query_limits_scope=freeze['finite_query_limits_scope'])
+    for key in ('migration_proof_sha256','source_delta_proof_sha256'):
+        prereg.pop(key, None)
+    write(BASE/'live/preregistered_v6_010.json', prereg)
+    assert inventory() == pins
+    print(json.dumps({'freeze_sha256':sha(freeze_file),'prereg_sha256':sha(BASE/'live/preregistered_v6_010.json'),
+        'readme_sha256':sha(readme),'code_pin_count':len(pins),'collected_only':collected}))
+
+
+if __name__ == '__main__':
+    main()

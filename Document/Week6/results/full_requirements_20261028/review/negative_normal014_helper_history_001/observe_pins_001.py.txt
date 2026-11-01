@@ -1,0 +1,26 @@
+"""Timestamped read-only byte check before the next independent repair."""
+import hashlib
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+
+root = Path("C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+base = root / "Document/Week6/results/full_requirements_20261028"
+freeze_path = base / "model_candidate_vl3b_001/final_source_freeze_001.json"
+freeze = json.loads(freeze_path.read_text("utf8"))
+started = datetime.now(timezone.utc).isoformat()
+observed = {name: hashlib.sha256((root / name).read_bytes()).hexdigest() for name in freeze["code_pins"]}
+mismatches = [name for name, digest in observed.items() if digest != freeze["code_pins"][name]]
+readme = hashlib.sha256((root / "README.md").read_bytes()).hexdigest()
+result = {"schema": "week6.independent.normal014.pin_observation.v1", "started_utc": started,
+          "finished_utc": datetime.now(timezone.utc).isoformat(), "freeze": str(freeze_path),
+          "freeze_sha256": hashlib.sha256(freeze_path.read_bytes()).hexdigest(),
+          "pin_count": len(observed), "observed_code_pins": observed, "mismatches": mismatches,
+          "readme_sha256": readme, "readme_matches_freeze": readme == freeze["readme_sha256"],
+          "meaning": "Read-only timestamped current bytes; later recorded source changes do not rewrite normal014 history."}
+destination = Path(__file__).with_name("current_code_pins_observed_001.json")
+with destination.open("x", encoding="utf8") as stream:
+    json.dump(result, stream, ensure_ascii=False, indent=2)
+    stream.write("\n")
+print(json.dumps({"path": str(destination), "sha256": hashlib.sha256(destination.read_bytes()).hexdigest(),
+                  "count": len(observed), "mismatches": mismatches, "readme_matches": result["readme_matches_freeze"]}))

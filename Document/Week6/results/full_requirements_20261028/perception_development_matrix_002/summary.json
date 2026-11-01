@@ -1,0 +1,579 @@
+{
+  "schema": "week6.full_perception.result.v1",
+  "split": "development",
+  "created_utc": "2026-10-28T00:14:55.340828+00:00",
+  "source_pins_before": {
+    "src\\gui_agent\\perception\\__init__.py": "a521ef24fbd707c3b683dd64fc2e7d9f4ff719bb21f8022cd7d09298010bc139",
+    "src\\gui_agent\\perception\\capture.py": "2e4b65983343bfe2f264a580287f7102ede60a4b201d77a585290c7b20210717",
+    "src\\gui_agent\\perception\\grounding.py": "b0ca16924c280f7817e03bf1cd7951d07751a60d69da442e1af440d0840afb77",
+    "src\\gui_agent\\perception\\ocr.py": "0f0c42bc4b9537475adcf7c185672c3ee63db11cf662b870599efaca755ff28a",
+    "src\\gui_agent\\perception\\preprocessing.py": "afaa9db640c2df42ca8c3758e765941e579e2d400e6c66231b4d98469495618f",
+    "src\\gui_agent\\perception\\tesseract_api.py": "73a2ec0a6f03ba32b28e137afcc24399c87d73ebb02b43c1aa52711be26feee4",
+    "src\\gui_agent\\perception\\ui_detection.py": "4cb75d461fd9ef55fbe3671c9efd7fd72a64148a2a6e37eccdf3f7ff3e908a5d",
+    "src\\gui_agent\\perception\\visualization.py": "0c787c6509a3a631a5abd81a28aaf26b67e06b65870d5781817336949adfa072",
+    "src\\gui_agent\\config.py": "dc138edf320423b373e5c932b86fab14e2b0439fe8d251c4c439e74c6124b91d",
+    "scripts\\week6_benchmark_persistent_ocr.py": "dadfe1a7c274633042d58fe2c9039336cd1b5a6d2b80ef780d3e066ed0e5ba56",
+    "scripts\\week6_benchmark_accuracy.py": "bcfd626bddd53d7e1d7a814ddfea7f3bb45461bd4d1902b64a9bbf38d09135fb",
+    "configs\\week6_accuracy_persistent.yaml": "f7785b6c4c9c92320e7fd7292bdd65f189fc9290736be9c3ff70bdb72b56adbd",
+    "tests\\test_week6_persistent_ocr.py": "55e374249e63e0de0ee1ea59f0a3737f45a4813d94a50a8a852d2373e865044a"
+  },
+  "source_pins_after": {
+    "src\\gui_agent\\perception\\__init__.py": "a521ef24fbd707c3b683dd64fc2e7d9f4ff719bb21f8022cd7d09298010bc139",
+    "src\\gui_agent\\perception\\capture.py": "2e4b65983343bfe2f264a580287f7102ede60a4b201d77a585290c7b20210717",
+    "src\\gui_agent\\perception\\grounding.py": "b0ca16924c280f7817e03bf1cd7951d07751a60d69da442e1af440d0840afb77",
+    "src\\gui_agent\\perception\\ocr.py": "0f0c42bc4b9537475adcf7c185672c3ee63db11cf662b870599efaca755ff28a",
+    "src\\gui_agent\\perception\\preprocessing.py": "afaa9db640c2df42ca8c3758e765941e579e2d400e6c66231b4d98469495618f",
+    "src\\gui_agent\\perception\\tesseract_api.py": "73a2ec0a6f03ba32b28e137afcc24399c87d73ebb02b43c1aa52711be26feee4",
+    "src\\gui_agent\\perception\\ui_detection.py": "4cb75d461fd9ef55fbe3671c9efd7fd72a64148a2a6e37eccdf3f7ff3e908a5d",
+    "src\\gui_agent\\perception\\visualization.py": "0c787c6509a3a631a5abd81a28aaf26b67e06b65870d5781817336949adfa072",
+    "src\\gui_agent\\config.py": "dc138edf320423b373e5c932b86fab14e2b0439fe8d251c4c439e74c6124b91d",
+    "scripts\\week6_benchmark_persistent_ocr.py": "dadfe1a7c274633042d58fe2c9039336cd1b5a6d2b80ef780d3e066ed0e5ba56",
+    "scripts\\week6_benchmark_accuracy.py": "bcfd626bddd53d7e1d7a814ddfea7f3bb45461bd4d1902b64a9bbf38d09135fb",
+    "configs\\week6_accuracy_persistent.yaml": "f7785b6c4c9c92320e7fd7292bdd65f189fc9290736be9c3ff70bdb72b56adbd",
+    "tests\\test_week6_persistent_ocr.py": "55e374249e63e0de0ee1ea59f0a3737f45a4813d94a50a8a852d2373e865044a"
+  },
+  "runtime_pins_before": {
+    "D:\\week6-full-ocr\\tessdata\\eng.traineddata": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
+    "D:\\week6-full-ocr\\tessdata\\chi_sim.traineddata": "a5fcb6f0db1e1d6d8522f39db4e848f05984669172e584e8d76b6b3141e1f730",
+    "C:\\Program Files\\Tesseract-OCR\\tesseract.EXE": "c66f0f12ed76f6aa455dac97684bbc86756d6a732380bee09122454cfda3f420",
+    "C:\\Program Files\\Tesseract-OCR\\libtesseract-5.dll": "54d54528b453ce3a5ba79487687f8df43e7b194b9ea97beba74200453fe1fb46"
+  },
+  "runtime_pins_after": {
+    "D:\\week6-full-ocr\\tessdata\\eng.traineddata": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
+    "D:\\week6-full-ocr\\tessdata\\chi_sim.traineddata": "a5fcb6f0db1e1d6d8522f39db4e848f05984669172e584e8d76b6b3141e1f730",
+    "C:\\Program Files\\Tesseract-OCR\\tesseract.EXE": "c66f0f12ed76f6aa455dac97684bbc86756d6a732380bee09122454cfda3f420",
+    "C:\\Program Files\\Tesseract-OCR\\libtesseract-5.dll": "54d54528b453ce3a5ba79487687f8df43e7b194b9ea97beba74200453fe1fb46"
+  },
+  "fixture_manifest_sha256": "f7b4913e62b5e21eb9267e09a719d58d6212233b73f977fb120fbac9612a0537",
+  "repeats": 1,
+  "checks": {
+    "expected_record_count": true,
+    "no_measurement_errors": true,
+    "ordered_screen_predictions_and_ui_exact": true,
+    "accuracy_preserved_and_above_both_native": true,
+    "rectangle_metrics_exact_to_screen": true,
+    "warm_full_frame_median_10pct_faster_than_all_three": true,
+    "no_frame_median_over_5pct_slower_than_screen": true,
+    "sources_unchanged": true,
+    "runtime_libraries_resources_unchanged": true,
+    "no_gpu_frameworks_imported": true
+  },
+  "all_criteria_passed": true,
+  "timings": {
+    "cold": {
+      "native_eng_subprocess": {
+        "n": 3,
+        "median_ms": 206.5731999464333,
+        "p95_nearest_rank_ms": 277.85579999908805,
+        "max_ms": 277.85579999908805,
+        "all_records_included": true
+      },
+      "native_bilingual_subprocess": {
+        "n": 3,
+        "median_ms": 297.80729999765754,
+        "p95_nearest_rank_ms": 298.28360001556575,
+        "max_ms": 298.28360001556575,
+        "all_records_included": true
+      },
+      "screen_bilingual_subprocess": {
+        "n": 3,
+        "median_ms": 346.82139998767525,
+        "p95_nearest_rank_ms": 365.7377000199631,
+        "max_ms": 365.7377000199631,
+        "all_records_included": true
+      },
+      "screen_bilingual_persistent": {
+        "n": 3,
+        "median_ms": 340.8886999823153,
+        "p95_nearest_rank_ms": 342.6047000102699,
+        "max_ms": 342.6047000102699,
+        "all_records_included": true
+      }
+    },
+    "warmup": {
+      "native_eng_subprocess": {
+        "n": 4,
+        "median_ms": 194.01815003948286,
+        "p95_nearest_rank_ms": 212.67819998320192,
+        "max_ms": 212.67819998320192,
+        "all_records_included": true
+      },
+      "native_bilingual_subprocess": {
+        "n": 4,
+        "median_ms": 330.08990000234917,
+        "p95_nearest_rank_ms": 354.2530999984592,
+        "max_ms": 354.2530999984592,
+        "all_records_included": true
+      },
+      "screen_bilingual_subprocess": {
+        "n": 4,
+        "median_ms": 369.8749500908889,
+        "p95_nearest_rank_ms": 402.00200001709163,
+        "max_ms": 402.00200001709163,
+        "all_records_included": true
+      },
+      "screen_bilingual_persistent": {
+        "n": 4,
+        "median_ms": 108.2450000103563,
+        "p95_nearest_rank_ms": 306.4009000081569,
+        "max_ms": 306.4009000081569,
+        "all_records_included": true
+      }
+    },
+    "warm": {
+      "native_eng_subprocess": {
+        "n": 4,
+        "median_ms": 200.713150028605,
+        "p95_nearest_rank_ms": 209.29060003254563,
+        "max_ms": 209.29060003254563,
+        "all_records_included": true
+      },
+      "native_bilingual_subprocess": {
+        "n": 4,
+        "median_ms": 333.02374999038875,
+        "p95_nearest_rank_ms": 349.1075999336317,
+        "max_ms": 349.1075999336317,
+        "all_records_included": true
+      },
+      "screen_bilingual_subprocess": {
+        "n": 4,
+        "median_ms": 364.9734999635257,
+        "p95_nearest_rank_ms": 408.1327000167221,
+        "max_ms": 408.1327000167221,
+        "all_records_included": true
+      },
+      "screen_bilingual_persistent": {
+        "n": 4,
+        "median_ms": 108.44830004498363,
+        "p95_nearest_rank_ms": 115.41690002195537,
+        "max_ms": 115.41690002195537,
+        "all_records_included": true
+      }
+    }
+  },
+  "full_frame_median_reduction_vs": {
+    "native_eng_subprocess": 0.45968512760859015,
+    "native_bilingual_subprocess": 0.674352654883883,
+    "screen_bilingual_subprocess": 0.7028597965172222
+  },
+  "unique_frame_accuracy": {
+    "native_eng_subprocess": {
+      "tp": 20,
+      "fp": 1,
+      "fn": 12,
+      "precision": 0.9523809523809523,
+      "recall": 0.625,
+      "f1": 0.7547169811320755,
+      "ocr_median_ms": 194.36060002772138,
+      "ui_median_ms": 4.951999988406897,
+      "decode_ocr_ui_median_ms": 200.713150028605,
+      "by_language": {
+        "en": {
+          "matched": 20,
+          "total": 20
+        },
+        "zh": {
+          "matched": 0,
+          "total": 12
+        }
+      }
+    },
+    "native_bilingual_subprocess": {
+      "tp": 22,
+      "fp": 8,
+      "fn": 10,
+      "precision": 0.7333333333333333,
+      "recall": 0.6875,
+      "f1": 0.7096774193548387,
+      "ocr_median_ms": 326.5663999482058,
+      "ui_median_ms": 4.784399992786348,
+      "decode_ocr_ui_median_ms": 333.02374999038875,
+      "by_language": {
+        "en": {
+          "matched": 20,
+          "total": 20
+        },
+        "zh": {
+          "matched": 2,
+          "total": 12
+        }
+      }
+    },
+    "screen_bilingual_subprocess": {
+      "tp": 30,
+      "fp": 1,
+      "fn": 2,
+      "precision": 0.967741935483871,
+      "recall": 0.9375,
+      "f1": 0.9523809523809523,
+      "ocr_median_ms": 358.1920500146225,
+      "ui_median_ms": 5.1367999403737485,
+      "decode_ocr_ui_median_ms": 364.9734999635257,
+      "by_language": {
+        "en": {
+          "matched": 20,
+          "total": 20
+        },
+        "zh": {
+          "matched": 10,
+          "total": 12
+        }
+      }
+    },
+    "screen_bilingual_persistent": {
+      "tp": 30,
+      "fp": 1,
+      "fn": 2,
+      "precision": 0.967741935483871,
+      "recall": 0.9375,
+      "f1": 0.9523809523809523,
+      "ocr_median_ms": 101.40745004173368,
+      "ui_median_ms": 5.155449965968728,
+      "decode_ocr_ui_median_ms": 108.44830004498363,
+      "by_language": {
+        "en": {
+          "matched": 20,
+          "total": 20
+        },
+        "zh": {
+          "matched": 10,
+          "total": 12
+        }
+      }
+    }
+  },
+  "per_frame_timings": {
+    "development_01": {
+      "native_eng_subprocess": {
+        "n": 1,
+        "median_ms": 179.78510004468262,
+        "p95_nearest_rank_ms": 179.78510004468262,
+        "max_ms": 179.78510004468262,
+        "all_records_included": true
+      },
+      "native_bilingual_subprocess": {
+        "n": 1,
+        "median_ms": 308.8367000455037,
+        "p95_nearest_rank_ms": 308.8367000455037,
+        "max_ms": 308.8367000455037,
+        "all_records_included": true
+      },
+      "screen_bilingual_subprocess": {
+        "n": 1,
+        "median_ms": 333.3583000348881,
+        "p95_nearest_rank_ms": 333.3583000348881,
+        "max_ms": 333.3583000348881,
+        "all_records_included": true
+      },
+      "screen_bilingual_persistent": {
+        "n": 1,
+        "median_ms": 115.41690002195537,
+        "p95_nearest_rank_ms": 115.41690002195537,
+        "max_ms": 115.41690002195537,
+        "all_records_included": true
+      }
+    },
+    "development_02": {
+      "native_eng_subprocess": {
+        "n": 1,
+        "median_ms": 206.03030000347644,
+        "p95_nearest_rank_ms": 206.03030000347644,
+        "max_ms": 206.03030000347644,
+        "all_records_included": true
+      },
+      "native_bilingual_subprocess": {
+        "n": 1,
+        "median_ms": 332.844499964267,
+        "p95_nearest_rank_ms": 332.844499964267,
+        "max_ms": 332.844499964267,
+        "all_records_included": true
+      },
+      "screen_bilingual_subprocess": {
+        "n": 1,
+        "median_ms": 343.6349999392405,
+        "p95_nearest_rank_ms": 343.6349999392405,
+        "max_ms": 343.6349999392405,
+        "all_records_included": true
+      },
+      "screen_bilingual_persistent": {
+        "n": 1,
+        "median_ms": 101.77790001034737,
+        "p95_nearest_rank_ms": 101.77790001034737,
+        "max_ms": 101.77790001034737,
+        "all_records_included": true
+      }
+    },
+    "development_03": {
+      "native_eng_subprocess": {
+        "n": 1,
+        "median_ms": 195.3960000537336,
+        "p95_nearest_rank_ms": 195.3960000537336,
+        "max_ms": 195.3960000537336,
+        "all_records_included": true
+      },
+      "native_bilingual_subprocess": {
+        "n": 1,
+        "median_ms": 333.2030000165105,
+        "p95_nearest_rank_ms": 333.2030000165105,
+        "max_ms": 333.2030000165105,
+        "all_records_included": true
+      },
+      "screen_bilingual_subprocess": {
+        "n": 1,
+        "median_ms": 386.31199998781085,
+        "p95_nearest_rank_ms": 386.31199998781085,
+        "max_ms": 386.31199998781085,
+        "all_records_included": true
+      },
+      "screen_bilingual_persistent": {
+        "n": 1,
+        "median_ms": 111.09270004089922,
+        "p95_nearest_rank_ms": 111.09270004089922,
+        "max_ms": 111.09270004089922,
+        "all_records_included": true
+      }
+    },
+    "development_04": {
+      "native_eng_subprocess": {
+        "n": 1,
+        "median_ms": 209.29060003254563,
+        "p95_nearest_rank_ms": 209.29060003254563,
+        "max_ms": 209.29060003254563,
+        "all_records_included": true
+      },
+      "native_bilingual_subprocess": {
+        "n": 1,
+        "median_ms": 349.1075999336317,
+        "p95_nearest_rank_ms": 349.1075999336317,
+        "max_ms": 349.1075999336317,
+        "all_records_included": true
+      },
+      "screen_bilingual_subprocess": {
+        "n": 1,
+        "median_ms": 408.1327000167221,
+        "p95_nearest_rank_ms": 408.1327000167221,
+        "max_ms": 408.1327000167221,
+        "all_records_included": true
+      },
+      "screen_bilingual_persistent": {
+        "n": 1,
+        "median_ms": 105.80390004906803,
+        "p95_nearest_rank_ms": 105.80390004906803,
+        "max_ms": 105.80390004906803,
+        "all_records_included": true
+      }
+    }
+  },
+  "paired_warm_differences": [
+    {
+      "fixture": "development_01",
+      "repeat": 0,
+      "baseline": "native_eng_subprocess",
+      "baseline_full_ms": 179.78510004468262,
+      "candidate_full_ms": 115.41690002195537,
+      "candidate_minus_baseline_ms": -64.36820002272725,
+      "relative_reduction": 0.3580285574651604
+    },
+    {
+      "fixture": "development_01",
+      "repeat": 0,
+      "baseline": "native_bilingual_subprocess",
+      "baseline_full_ms": 308.8367000455037,
+      "candidate_full_ms": 115.41690002195537,
+      "candidate_minus_baseline_ms": -193.4198000235483,
+      "relative_reduction": 0.6262850237521966
+    },
+    {
+      "fixture": "development_01",
+      "repeat": 0,
+      "baseline": "screen_bilingual_subprocess",
+      "baseline_full_ms": 333.3583000348881,
+      "candidate_full_ms": 115.41690002195537,
+      "candidate_minus_baseline_ms": -217.94140001293272,
+      "relative_reduction": 0.6537752322054791
+    },
+    {
+      "fixture": "development_02",
+      "repeat": 0,
+      "baseline": "native_eng_subprocess",
+      "baseline_full_ms": 206.03030000347644,
+      "candidate_full_ms": 101.77790001034737,
+      "candidate_minus_baseline_ms": -104.25239999312907,
+      "relative_reduction": 0.5060051846324058
+    },
+    {
+      "fixture": "development_02",
+      "repeat": 0,
+      "baseline": "native_bilingual_subprocess",
+      "baseline_full_ms": 332.844499964267,
+      "candidate_full_ms": 101.77790001034737,
+      "candidate_minus_baseline_ms": -231.06659995391965,
+      "relative_reduction": 0.6942178704431833
+    },
+    {
+      "fixture": "development_02",
+      "repeat": 0,
+      "baseline": "screen_bilingual_subprocess",
+      "baseline_full_ms": 343.6349999392405,
+      "candidate_full_ms": 101.77790001034737,
+      "candidate_minus_baseline_ms": -241.85709992889315,
+      "relative_reduction": 0.7038197505249957
+    },
+    {
+      "fixture": "development_03",
+      "repeat": 0,
+      "baseline": "native_eng_subprocess",
+      "baseline_full_ms": 195.3960000537336,
+      "candidate_full_ms": 111.09270004089922,
+      "candidate_minus_baseline_ms": -84.30330001283437,
+      "relative_reduction": 0.43144844310861585
+    },
+    {
+      "fixture": "development_03",
+      "repeat": 0,
+      "baseline": "native_bilingual_subprocess",
+      "baseline_full_ms": 333.2030000165105,
+      "candidate_full_ms": 111.09270004089922,
+      "candidate_minus_baseline_ms": -222.11029997561127,
+      "relative_reduction": 0.6665915371848559
+    },
+    {
+      "fixture": "development_03",
+      "repeat": 0,
+      "baseline": "screen_bilingual_subprocess",
+      "baseline_full_ms": 386.31199998781085,
+      "candidate_full_ms": 111.09270004089922,
+      "candidate_minus_baseline_ms": -275.21929994691163,
+      "relative_reduction": 0.7124275196100445
+    },
+    {
+      "fixture": "development_04",
+      "repeat": 0,
+      "baseline": "native_eng_subprocess",
+      "baseline_full_ms": 209.29060003254563,
+      "candidate_full_ms": 105.80390004906803,
+      "candidate_minus_baseline_ms": -103.48669998347759,
+      "relative_reduction": 0.4944641563805777
+    },
+    {
+      "fixture": "development_04",
+      "repeat": 0,
+      "baseline": "native_bilingual_subprocess",
+      "baseline_full_ms": 349.1075999336317,
+      "candidate_full_ms": 105.80390004906803,
+      "candidate_minus_baseline_ms": -243.30369988456368,
+      "relative_reduction": 0.6969304017753202
+    },
+    {
+      "fixture": "development_04",
+      "repeat": 0,
+      "baseline": "screen_bilingual_subprocess",
+      "baseline_full_ms": 408.1327000167221,
+      "candidate_full_ms": 105.80390004906803,
+      "candidate_minus_baseline_ms": -302.32879996765405,
+      "relative_reduction": 0.740761031780269
+    }
+  ],
+  "unique_frame_rectangle_metrics": {
+    "native_eng_subprocess": {
+      "tp": 24,
+      "fp": 12,
+      "fn": 0
+    },
+    "native_bilingual_subprocess": {
+      "tp": 24,
+      "fp": 3,
+      "fn": 0
+    },
+    "screen_bilingual_subprocess": {
+      "tp": 24,
+      "fp": 2,
+      "fn": 0
+    },
+    "screen_bilingual_persistent": {
+      "tp": 24,
+      "fp": 2,
+      "fn": 0
+    }
+  },
+  "equivalence_checks": [
+    {
+      "fixture": "development_01",
+      "phase": "cold",
+      "repeat": 0,
+      "passed": true
+    },
+    {
+      "fixture": "development_01",
+      "phase": "cold",
+      "repeat": 1,
+      "passed": true
+    },
+    {
+      "fixture": "development_01",
+      "phase": "cold",
+      "repeat": 2,
+      "passed": true
+    },
+    {
+      "fixture": "development_01",
+      "phase": "warmup",
+      "repeat": 0,
+      "passed": true
+    },
+    {
+      "fixture": "development_01",
+      "phase": "warm",
+      "repeat": 0,
+      "passed": true
+    },
+    {
+      "fixture": "development_02",
+      "phase": "warmup",
+      "repeat": 0,
+      "passed": true
+    },
+    {
+      "fixture": "development_02",
+      "phase": "warm",
+      "repeat": 0,
+      "passed": true
+    },
+    {
+      "fixture": "development_03",
+      "phase": "warmup",
+      "repeat": 0,
+      "passed": true
+    },
+    {
+      "fixture": "development_03",
+      "phase": "warm",
+      "repeat": 0,
+      "passed": true
+    },
+    {
+      "fixture": "development_04",
+      "phase": "warmup",
+      "repeat": 0,
+      "passed": true
+    },
+    {
+      "fixture": "development_04",
+      "phase": "warm",
+      "repeat": 0,
+      "passed": true
+    }
+  ],
+  "all_errors": [],
+  "records": 44,
+  "python": "3.12.4",
+  "executable": "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe",
+  "tesseract_version": "5.5.3.20260724",
+  "library_sha256": "54d54528b453ce3a5ba79487687f8df43e7b194b9ea97beba74200453fe1fb46",
+  "omp_environment": {
+    "OMP_THREAD_LIMIT": null,
+    "OMP_NUM_THREADS": null
+  },
+  "latency_scope": "Complete PNG decode + input pixel-preservation snapshot + real CPU OCR (including same screen processing) + contour extraction. Cold also includes engine creation/lazy initialization; teardown excluded. No OS capture/model/input.",
+  "sampling_limits": "Repeated frames correlated; unique-frame accuracy scored once. No dropped slow samples; stdout/stderr preserves C API diagnostics. Cold means a fresh engine, not a cold OS page cache; application CLI/YAML startup is outside this benchmark."
+}

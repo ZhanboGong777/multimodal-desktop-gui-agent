@@ -1,0 +1,73 @@
+{
+  "schema_version": "week6.workflow.v1",
+  "workflow_id": "semantic_lab",
+  "status": "succeeded",
+  "execute": true,
+  "subgoals": [
+    {
+      "index": 0,
+      "case_id": "review_report",
+      "status": "completed",
+      "child_status": "succeeded",
+      "actions": 1,
+      "unconfirmed_action_attempts": 0,
+      "planning_calls": 1,
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "all success rules matched against the current screen",
+        "evidence": {
+          "observation_id": "obs-0004",
+          "expect_text": [
+            "Review Complete",
+            "Project BETA",
+            "Theme BLUE"
+          ],
+          "forbid_text": [
+            "Error",
+            "Unavailable",
+            "Connection Failed",
+            "Review Pending"
+          ],
+          "verification_source": "frozen_model_semantic_subtask_postconditions"
+        }
+      },
+      "elapsed_ms": 201577.99999999406,
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_008\\run\\automatic\\goal_002_001_review_report\\001_review_report",
+      "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_008\\run\\automatic\\goal_002_001_review_report\\001_review_report\\task_summary.json",
+      "error": null
+    }
+  ],
+  "total_actions": 1,
+  "unconfirmed_action_attempts": 0,
+  "planning_calls": 1,
+  "accounting_complete": true,
+  "elapsed_ms": 222516.00000000326,
+  "final_verification": {
+    "outcome": "passed",
+    "method": "automatic",
+    "detail": "all success rules matched against the current screen",
+    "evidence": {
+      "observation_id": "obs-0005",
+      "expect_text": [
+        "Review Complete",
+        "Project BETA",
+        "Theme BLUE"
+      ],
+      "forbid_text": [
+        "Error",
+        "Unavailable",
+        "Connection Failed",
+        "Review Pending"
+      ],
+      "verification_source": "frozen_model_semantic_subtask_postconditions"
+    }
+  },
+  "final_observation_id": "obs-0005",
+  "final_observation_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_008\\run\\automatic\\goal_002_001_review_report\\001_review_report\\obs-0005.json",
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_008\\run\\automatic\\goal_002_001_review_report",
+  "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_008\\run\\automatic\\goal_002_001_review_report\\workflow_summary.json",
+  "checkpoint_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_008\\run\\automatic\\goal_002_001_review_report\\checkpoints.jsonl",
+  "error": null,
+  "notes": []
+}

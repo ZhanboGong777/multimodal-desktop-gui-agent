@@ -1,0 +1,290 @@
+{
+  "fixture": "development_01",
+  "arm": "screen_bilingual_subprocess",
+  "phase": "cold",
+  "repeat": 1,
+  "status": "completed",
+  "engine_creation_ms": 0.018400023691356182,
+  "decode_ms": 1.3692000648006797,
+  "ocr_ms": 317.42469989694655,
+  "ui_ms": 4.550000070594251,
+  "full_ms": 323.36230005603284,
+  "metrics": {
+    "tp": 7,
+    "fp": 0,
+    "fn": 1,
+    "precision": 1.0,
+    "recall": 0.875,
+    "labels": [
+      {
+        "text": "Access Panel",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9795918367346939
+      },
+      {
+        "text": "Session Code",
+        "language": "en",
+        "matched": true,
+        "iou": 1.0
+      },
+      {
+        "text": "Change Folder",
+        "language": "en",
+        "matched": true,
+        "iou": 1.0
+      },
+      {
+        "text": "Accept",
+        "language": "en",
+        "matched": true,
+        "iou": 0.975609756097561
+      },
+      {
+        "text": "Dismiss",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9565217391304348
+      },
+      {
+        "text": "设备连接",
+        "language": "zh",
+        "matched": true,
+        "iou": 0.5306122448979592
+      },
+      {
+        "text": "保存配置",
+        "language": "zh",
+        "matched": true,
+        "iou": 0.5502645502645502
+      },
+      {
+        "text": "重启",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      }
+    ]
+  },
+  "control_metrics": {
+    "tp": 6,
+    "fp": 1,
+    "fn": 0,
+    "iou_threshold": 0.8
+  },
+  "predictions": [
+    {
+      "text": "Access Panel",
+      "bounding_box": {
+        "left": 42,
+        "top": 37,
+        "right": 138,
+        "bottom": 49
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 90,
+        "y": 43
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Session Code",
+      "bounding_box": {
+        "left": 42,
+        "top": 114,
+        "right": 123,
+        "bottom": 124
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 82,
+        "y": 119
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "设备连接",
+      "bounding_box": {
+        "left": 546,
+        "top": 113,
+        "right": 602,
+        "bottom": 134
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 574,
+        "y": 123
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Change Folder",
+      "bounding_box": {
+        "left": 42,
+        "top": 200,
+        "right": 129,
+        "bottom": 213
+      },
+      "confidence": 0.9,
+      "center": {
+        "x": 85,
+        "y": 206
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "保存配置",
+      "bounding_box": {
+        "left": 546,
+        "top": 199,
+        "right": 600,
+        "bottom": 220
+      },
+      "confidence": 0.62,
+      "center": {
+        "x": 573,
+        "y": 209
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Dismiss",
+      "bounding_box": {
+        "left": 257,
+        "top": 304,
+        "right": 301,
+        "bottom": 314
+      },
+      "confidence": 0.92,
+      "center": {
+        "x": 279,
+        "y": 309
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Accept",
+      "bounding_box": {
+        "left": 42,
+        "top": 304,
+        "right": 82,
+        "bottom": 317
+      },
+      "confidence": 0.92,
+      "center": {
+        "x": 62,
+        "y": 310
+      },
+      "source": "ocr"
+    }
+  ],
+  "ui_candidates": [
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 536,
+        "top": 291,
+        "right": 691,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 613,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 244,
+        "top": 291,
+        "right": 399,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 321,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 30,
+        "top": 291,
+        "right": 185,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 536,
+        "top": 187,
+        "right": 691,
+        "bottom": 244
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 613,
+        "y": 215
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 30,
+        "top": 187,
+        "right": 185,
+        "bottom": 244
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 215
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 536,
+        "top": 101,
+        "right": 691,
+        "bottom": 158
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 613,
+        "y": 129
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 548,
+        "top": 305,
+        "right": 575,
+        "bottom": 319
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 561,
+        "y": 312
+      },
+      "source": "contour"
+    }
+  ],
+  "errors": []
+}

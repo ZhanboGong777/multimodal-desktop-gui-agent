@@ -1,0 +1,244 @@
+"""Read-only diagnosis of combined001; no model, GUI, pytest, or repo edits.
+
+The extracted test routers are exercised in isolated namespaces with inert
+response/element doubles. These are posthoc CPU demonstrations, not original
+wire captures and not a repetition of the actual failed pytest run.
+"""
+
+from __future__ import annotations
+
+import ast
+import copy
+import hashlib
+import json
+import re
+from datetime import datetime, timezone
+from pathlib import Path
+from types import SimpleNamespace
+
+
+ROOT = Path("C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+BASE = ROOT / "Document/Week6/results/full_requirements_20261028"
+CASE = BASE / "grounding_consistency_001/root_combined_validation_001"
+DEST = BASE / "review/negative_combined_cpu_prefix_001"
+PROMPT = BASE / "grounding_consistency_001/source_ready/src/gui_agent/planning/prompts.py"
+TESTS = BASE / "grounding_consistency_001/source_before/tests/test_runtime_runner.py"
+
+
+def digest(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def load(path: Path):
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def write_new(path: Path, data: bytes) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("xb") as stream:
+        stream.write(data)
+
+
+def record(path: Path) -> dict:
+    return {"path": str(path), "sha256": digest(path), "bytes": path.stat().st_size}
+
+
+def extracted_function(tree: ast.Module, owner: str, name: str = "complete"):
+    parent = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == owner)
+    return next(n for n in parent.body if isinstance(n, ast.FunctionDef) and n.name == name)
+
+
+def make_function(node: ast.FunctionDef, namespace: dict):
+    module = ast.Module(body=[copy.deepcopy(node)], type_ignores=[])
+    ast.fix_missing_locations(module)
+    exec(compile(module, str(TESTS), "exec"), namespace)
+    return namespace[node.name]
+
+
+def main() -> None:
+    if DEST.exists():
+        raise FileExistsError(f"Refusing to overwrite {DEST}")
+    before = load(CASE / "tested_code_pins_before.json")
+    after = load(CASE / "tested_code_pins_after.json")
+    validation = load(CASE / "validation.json")
+    pytest_receipt = load(CASE / "pytest.receipt.json")
+    ruff_receipt = load(CASE / "ruff.receipt.json")
+    collection_receipt = load(CASE / "collection.receipt.json")
+    stdout = (CASE / "pytest.stdout.txt").read_text(encoding="utf-8")
+    failed = re.findall(r"^FAILED (.+)$", stdout, flags=re.MULTILINE)
+    assert len(before) == len(after) == 261 and before == after
+    assert validation["code_pin_count"] == 261 and validation["code_unchanged"] is True
+    assert validation["checks_passed"] is False and validation["full_regression"] is False
+    assert validation["targeted_tests_passed"] == 783
+    assert validation["targeted_pytest_seconds"] == 298.59
+    assert validation["collected_test_count"] == 3328
+    assert pytest_receipt["actual_child_exit_code"] == 1
+    assert ruff_receipt["actual_child_exit_code"] == collection_receipt["actual_child_exit_code"] == 0
+    assert len(failed) == 16 and all(n.startswith("tests/test_runtime_runner.py::test_t04_") for n in failed)
+    assert "16 failed, 783 passed in 298.59s" in stdout
+    assert digest(PROMPT) == before["src/gui_agent/planning/prompts.py"]
+    assert digest(TESTS) == before["tests/test_runtime_runner.py"]
+
+    # Evaluate only literal ActionType and the two historical prompt assignments.
+    schema_path = ROOT / "src/gui_agent/schemas.py"
+    planner_path = ROOT / "src/gui_agent/planning/planner.py"
+    planning_schema_path = ROOT / "src/gui_agent/planning/schemas.py"
+    base_model_path = ROOT / "src/gui_agent/models/base.py"
+    for path in (schema_path, planner_path, planning_schema_path, base_model_path):
+        assert digest(path) == before[path.relative_to(ROOT).as_posix()]
+    schema_tree = ast.parse(schema_path.read_text(encoding="utf-8"))
+    action_type = next(n for n in schema_tree.body if isinstance(n, ast.Assign)
+                       and any(isinstance(t, ast.Name) and t.id == "ActionType" for t in n.targets))
+    action_values = ast.literal_eval(action_type.value.slice)
+    namespace = {"PLAN_ACTION_TYPES": (*action_values, "finish")}
+    prompt_tree = ast.parse(PROMPT.read_text(encoding="utf-8"))
+    for node in prompt_tree.body:
+        if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id in {"_JSON_EXAMPLE", "SYSTEM_PROMPT"} for t in node.targets):
+            exec(compile(ast.Module(body=[node], type_ignores=[]), str(PROMPT), "exec"), namespace)
+    system = namespace["SYSTEM_PROMPT"]
+    assert system.startswith("GUI plan: ONE JSON object.") and len(system) == 997
+    prefix = "Plan GUI actions"
+    compatible = prefix + ": ONE JSON object."
+    assert not system.startswith(prefix) and compatible.startswith(prefix)
+
+    tests_tree = ast.parse(TESTS.read_text(encoding="utf-8"))
+    routers = []
+    for node in ast.walk(tests_tree):
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == "startswith" and node.args:
+            if isinstance(node.args[0], ast.Constant) and node.args[0].value == prefix:
+                routers.append({"line": node.lineno, "expression": ast.get_source_segment(TESTS.read_text(encoding="utf-8"), node)})
+    assert len(routers) == 4
+    saved = load(CASE / "pytest_tmp/test_t04_planning_failures_kee1/records/simulated-T04/planning_0001.json")
+    assert saved["context"]["message_task"]["text_already_typed"] is False
+    assert saved["error"] is None and saved["parsed_plan"] is not None
+    assert saved["provider"] == "mock" if "provider" in saved else True
+    envelope = {"instruction": saved["instruction"], "context": {**saved["context"], "max_steps": 10}, "image_path": saved["image_path"]}
+
+    def messages(header):
+        return [{"role": "system", "content": header}, {"role": "user", "content": json.dumps(envelope, ensure_ascii=False)}]
+
+    demonstrations = []
+    failure_node = extracted_function(tests_tree, "test_t04_planning_failures_keep_actual_request_and_response_or_exception")
+    for failure in ("invalid_response", "provider_exception", "interrupted"):
+        for header_name, header in (("executed_historical_prefix", system), ("compatible_prefix_counterfactual", compatible)):
+            calls = []
+
+            def fallback(*args, **kwargs):
+                calls.append(True)
+                return SimpleNamespace(content="inert fallback response")
+
+            local = {"failure": failure, "original": fallback, "ModelResponse": SimpleNamespace,
+                     "client": SimpleNamespace(model_name="inert", name="mock")}
+            fn = make_function(failure_node, local)
+            try:
+                response = fn(messages(header))
+                observed = response.content
+            except BaseException as exc:
+                observed = type(exc).__name__
+            assert (len(calls) == 1 and observed == "inert fallback response") if header is system else (
+                len(calls) == 0 and observed == {"invalid_response": "invalid prepared response", "provider_exception": "RuntimeError", "interrupted": "KeyboardInterrupt"}[failure]
+            )
+            demonstrations.append({"router": "provider_failure", "failure": failure, "header": header_name,
+                                   "fallback_calls": len(calls), "observed": observed})
+
+    capture_node = next(n for n in tests_tree.body if isinstance(n, ast.FunctionDef) and n.name == "_capture_t04_stage_transport")
+    capture_node = copy.deepcopy(capture_node)
+    capture_node.body = [n for n in capture_node.body if not isinstance(n, ast.ImportFrom)]
+    for header_name, header in (("executed_historical_prefix", system), ("compatible_prefix_counterfactual", compatible)):
+        local = {"json": json, "ModelResponse": SimpleNamespace}
+        attach = make_function(capture_node, local)
+        client = SimpleNamespace(complete=lambda *_args, **_kwargs: SimpleNamespace(content="inert fallback response"))
+        captured = attach(client)
+        client.complete(messages(header))
+        assert len(captured) == int(header is compatible)
+        demonstrations.append({"router": "request_capture", "header": header_name, "captured_requests": len(captured)})
+
+    timing_node = extracted_function(tests_tree, "test_t04_automated_planning_evidence_time_is_never_subtracted_as_human_confirmation")
+    for header_name, header in (("executed_historical_prefix", system), ("compatible_prefix_counterfactual", compatible)):
+        clock = SimpleNamespace(value=0)
+        fn = make_function(timing_node, {"clock": clock, "original_complete": lambda *_args, **_kwargs: None})
+        fn(messages(header))
+        assert clock.value == (2 if header is compatible else 0)
+        demonstrations.append({"router": "manual_planning_clock_injection", "header": header_name, "injected_seconds": clock.value})
+
+    class Element:
+        def model_copy(self, **_kwargs):
+            return Element()
+
+    editor_node = extracted_function(tests_tree, "_prepared_editor_mapping_run")
+    for header_name, header in (("executed_historical_prefix", system), ("compatible_prefix_counterfactual", compatible)):
+        source = SimpleNamespace(observation_id="sim-0001", elements=[Element()])
+        stub = lambda *_args, **_kwargs: SimpleNamespace(content=json.dumps({"steps": [{"step_id": "send", "arguments": {}}]}))
+        local = {"json": json, "original_complete": stub, "phase_fault": "source_ambiguous",
+                 "chat": SimpleNamespace(frames={"sim-0001": [source]}), "mapping_contexts": [],
+                 "mapped_role": "editor", "ModelResponse": SimpleNamespace,
+                 "client": SimpleNamespace(model_name="inert", name="mock")}
+        editor_envelope = copy.deepcopy(envelope)
+        editor_envelope["context"]["message_task"]["send_candidate_id"] = "sim-0001-e091"
+        editor_messages = [{"role": "system", "content": header}, {"role": "user", "content": json.dumps(editor_envelope)}]
+        fn = make_function(editor_node, local)
+        fn(editor_messages)
+        assert len(source.elements) == (2 if header is compatible else 1)
+        demonstrations.append({"router": "source_ambiguous_fault_injection", "header": header_name,
+                               "source_elements_after_mock_response": len(source.elements)})
+
+    # Copy selected real failed-run raw records out of recursive pytest scratch.
+    originals = [CASE / name for name in ("validation.json", "pytest.receipt.json", "pytest.stdout.txt", "pytest.stderr.txt", "ruff.receipt.json", "ruff.stdout.txt", "ruff.stderr.txt", "collection.receipt.json", "collection.stdout.txt", "collection.stderr.txt", "tested_code_pins_before.json", "tested_code_pins_after.json")]
+    selection = ["test_t04_planning_failures_kee0", "test_t04_planning_failures_kee1", "test_t04_planning_failures_kee2", "test_t04_automated_planning_ev0", "test_t04_editor_role_or_post_m0"]
+    summaries = []
+    for folder in selection:
+        directory = CASE / "pytest_tmp" / folder / "records/simulated-T04"
+        for name in ("planning_0001.json", "task_summary.json"):
+            path = directory / name
+            assert path.is_file(), str(path)
+            originals.append(path)
+        summary = load(directory / "task_summary.json")
+        plan = load(directory / "planning_0001.json")
+        summaries.append({"case_directory": folder, "status": summary["status"], "planner_ms": summary["planner_ms"],
+                          "planning_ms": summary["planning_ms"], "planning_error": plan["error"],
+                          "parsed_plan_present": plan["parsed_plan"] is not None,
+                          "step_records": len(summary.get("steps", [])),
+                          "successful_saved_action_receipts": sum(s.get("action_result", {}).get("success") is True for s in summary.get("steps", []))})
+    manifests = []
+    for source in originals:
+        relative = source.relative_to(CASE)
+        destination = DEST / "selected_originals" / relative
+        write_new(destination, source.read_bytes())
+        assert digest(source) == digest(destination)
+        manifests.append({"source": record(source), "destination": record(destination)})
+    script_destination = DEST / "negative_combined_cpu_prefix_001.py.txt"
+    write_new(script_destination, Path(__file__).read_bytes())
+    report = {
+        "schema": "week6.independent.negative_combined_cpu_prefix.v1",
+        "reviewed_utc": datetime.now(timezone.utc).isoformat(),
+        "reviewer": "/root/week6_replanning_review (Codex independent agent)",
+        "scope": "Read-only original evidence and isolated extracted-AST CPU demonstrations; no pytest/model/GUI or source edits",
+        "actual_failed_run": {"pytest_exit_code": 1, "failed": 16, "passed": 783, "pytest_reported_seconds": 298.59,
+                              "ruff_exit_code": 0, "collection_exit_code": 0, "collected_only_count": 3328,
+                              "pins_count": 261, "pins_before_equal_after": True, "full_regression": False,
+                              "failed_nodes": failed},
+        "historical_sources": [record(PROMPT), record(TESTS), record(planner_path), record(planning_schema_path), record(schema_path), record(base_model_path)],
+        "historical_system": {"first_line": system.splitlines()[0], "characters": len(system),
+                              "sha256_of_evaluated_utf8": hashlib.sha256(system.encode()).hexdigest(),
+                              "old_router_prefix": prefix, "old_router_matches": False,
+                              "provenance": "Reconstructed from exact pinned historical source. Original saved planning records do not contain a raw system/wire request body; no claim of original wire capture."},
+        "exact_old_router_sites": routers,
+        "posthoc_extracted_ast_demonstrations": demonstrations,
+        "selected_failed_run_records": summaries,
+        "conclusion": {"classification": "Prompt-prefix / scripted transport routing compatibility regression in CPU tests",
+                       "causal_mechanism": "The historical planning system begins GUI plan. Four existing exact startswith Plan GUI actions branches are false: capture, response/exception/KI injection, manual clock injection, and source ambiguity mutation are skipped. The base ChatModel else still returns a valid plan.",
+                       "cross_test_pollution_required_to_explain": False,
+                       "source_accepted": False,
+                       "not_claimed": ["16 real GUI failures", "Real provider exceptions or keyboard interrupts were ignored", "A truly ambiguous saved source frame was accepted", "General safety correctness from this diagnosis"],
+                       "required_followup": "Keep all failures and old tests unchanged; restore compatible generic prompt prefix and rerun the full affected runtime suite plus combined target before source freeze."},
+        "copied_originals": manifests,
+        "audit_script": {"source": record(Path(__file__)), "archive": record(script_destination)},
+    }
+    audit_path = DEST / "negative_combined_cpu_audit_001.json"
+    write_new(audit_path, (json.dumps(report, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
+    print(json.dumps({"audit": str(audit_path), "sha256": digest(audit_path), "copied_original_files": len(manifests),
+                      "isolated_demonstrations": len(demonstrations), "actual_failed_test_count": len(failed)}, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

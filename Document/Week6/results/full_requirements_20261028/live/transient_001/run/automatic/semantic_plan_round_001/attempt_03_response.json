@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen2.5vl:3b",
+  "latency_ms": 1875.0,
+  "usage": {
+    "prompt_tokens": 1935,
+    "completion_tokens": 184,
+    "total_tokens": 2119
+  },
+  "error": null,
+  "content_length": 769,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"The caller request is ready for execution.\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Prepare a BLUE report for project BETA in Week6 Local Lab.\",\n      \"expect_text\": [\"Project BETA\", \"Theme BLUE\"],\n      \"forbid_text\": [\"Project BETA\", \"Theme BLUE\", \"LOCAL COMPLETE\", \"Review unavailable\", \"Commit unavailable\", \"No controls visible\", \"No controls available\", \"No controls present\"],\n      \"goal_id\": \"prepare_report\"\n    },\n    {\n      \"instruction\": \"Review the prepared report and commit it locally.\",\n      \"expect_text\": [\"LOCAL COMPLETE\"],\n      \"forbid_text\": [\"Review unavailable\", \"Commit unavailable\", \"No controls visible\", \"No controls available\", \"No controls present\"],\n      \"goal_id\": \"review_commit\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

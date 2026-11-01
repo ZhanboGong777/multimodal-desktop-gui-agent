@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 25281.0,
+  "usage": {
+    "prompt_tokens": 2934,
+    "completion_tokens": 275,
+    "total_tokens": 3209
+  },
+  "error": null,
+  "content_length": 1192,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"The previous goal failed because 'Draft saved locally' was not visible, but the caller request remains unchanged. The next step is to ensure the report is saved locally with the correct project and theme, then proceed to review and commit. The review may be temporarily unavailable, but retrying is a\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Select project ALPHA and theme GREEN to prepare the report.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"select_project_theme\"\n    },\n    {\n      \"instruction\": \"Save the draft locally to ensure it is prepared for review.\",\n      \"expect_text\": [\"Draft saved locally\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"save_draft\"\n    },\n    {\n      \"instruction\": \"Review the report locally if available; if not, retry within budget.\",\n      \"expect_text\": [\"Review completed locally\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"review_report\"\n    },\n    {\n      \"instruction\": \"Commit the report locally after review or retry.\",\n      \"expect_text\": [\"LOCAL COMPLETE\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"commit_report\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

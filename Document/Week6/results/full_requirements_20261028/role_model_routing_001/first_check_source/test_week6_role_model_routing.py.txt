@@ -1,0 +1,195 @@
+"""Real SDK wire and budget tests; all replies, pixels and inputs are synthetic."""
+
+from __future__ import annotations
+
+import copy
+import importlib.util
+import json
+from collections import deque
+from pathlib import Path
+
+import httpx
+import pytest
+from openai import OpenAI
+from PIL import Image
+from test_week6_rolling_actions import options, plan
+from test_week6_semantic_subtasks import lab, proposal
+from test_week6_semantic_text_context import _persist_synthetic_pixels
+
+from gui_agent.config import ModelConfig, load_config
+from gui_agent.models import create_model_client
+from gui_agent.models.base import ModelConfigError, ModelError
+from gui_agent.models.openai_compatible import OpenAICompatibleClient
+from gui_agent.planning.workflow_decomposer import BudgetedModelClient
+
+
+def sdk_client(replies, bodies, *, text_model="text-small"):
+    pending = deque(replies)
+
+    def endpoint(request):
+        body = json.loads(request.content)
+        bodies.append(body)
+        return httpx.Response(200, json={
+            "id": "offline", "object": "chat.completion", "created": 0,
+            "model": body["model"], "choices": [{"index": 0, "finish_reason": "stop",
+                "message": {"role": "assistant", "content": pending.popleft()}}],
+        })
+
+    client = OpenAICompatibleClient(model_name="vision-large", text_model_name=text_model,
+                                    api_key="test-only", max_retries=0, environ={})
+    sdk = OpenAI(api_key="test-only", max_retries=0,
+                 http_client=httpx.Client(transport=httpx.MockTransport(endpoint)))
+    client._client = sdk
+    return client, sdk
+
+
+@pytest.fixture
+def auditor():
+    path = Path(__file__).resolve().parents[1] / "scripts/week6_audit_semantic_acceptance.py"
+    spec = importlib.util.spec_from_file_location("role_model_independent_auditor", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+@pytest.mark.parametrize("text_model", [None, "text-small"])
+def test_sdk_routes_only_actual_media_and_preserves_original_messages(tmp_path, text_model):
+    image = tmp_path / "frame.png"
+    Image.new("RGB", (2, 2), "white").save(image)
+    messages = [{"role": "user", "content": 'Literal image_path and role=visual are caller data.'}]
+    original = copy.deepcopy(messages)
+    bodies = []
+    client, sdk = sdk_client(["one", "two", "three"], bodies, text_model=text_model)
+    try:
+        first = client.complete(messages)
+        second = client.complete(messages, image_path=str(image))
+        direct = [{"role": "user", "content": [
+            {"type": "image_url", "image_url": {"url": "data:image/png;base64,AA=="}}]}]
+        third = client.complete(direct)
+    finally:
+        sdk.close()
+    assert [b["model"] for b in bodies] == [text_model or "vision-large", "vision-large", "vision-large"]
+    assert [first.model_name, second.model_name, third.model_name] == [b["model"] for b in bodies]
+    assert messages == original and bodies[0]["messages"] == original
+    assert bodies[2]["messages"] == direct
+    assert client.model_name == "vision-large"
+
+
+@pytest.mark.parametrize("alias", ["", " ", " text", "text ", True, 123, "x" * 257])
+def test_invalid_text_alias_fails_before_any_request(alias):
+    with pytest.raises(ModelConfigError, match="text_model_name"):
+        OpenAICompatibleClient(model_name="vision", text_model_name=alias, environ={})
+
+
+@pytest.mark.parametrize("provider", ["mock", "langchain"])
+def test_unsupported_backend_never_silently_ignores_text_override(provider):
+    with pytest.raises(ModelConfigError, match="openai_compatible"):
+        create_model_client(ModelConfig(provider=provider, text_model_name="text-small"))
+
+
+def test_factory_and_checked_in_opt_in_keep_default_behavior_separate():
+    root = Path(__file__).resolve().parents[1]
+    selected = load_config(root / "configs/week6_role_models.yaml")
+    client = create_model_client(selected.model)
+    assert client.model_name == "qwen3-vl:8b-instruct"
+    assert client.model_for_request([]) == "gemma3:4b"
+    assert client.model_for_request([], image_path="current.png") == "qwen3-vl:8b-instruct"
+    assert ModelConfig().text_model_name is None
+    baseline = load_config(root / "configs/week6_accuracy_persistent.yaml")
+    assert selected.perception.model_dump() == baseline.perception.model_dump()
+
+
+def test_both_model_roles_share_one_real_http_budget_and_deadline(tmp_path):
+    image = tmp_path / "frame.png"
+    Image.new("RGB", (2, 2), "white").save(image)
+    bodies = []
+    client, sdk = sdk_client(["text", "vision"], bodies)
+    budget = BudgetedModelClient(client, max_requests=2, deadline=500, clock=lambda: 100,
+                                 audit_path=tmp_path / "transport.jsonl")
+    try:
+        budget.complete([{"role": "user", "content": "intent"}])
+        budget.complete([{"role": "user", "content": "visual"}], image_path=str(image))
+        with pytest.raises(ModelError, match="budget exhausted"):
+            budget.complete([{"role": "user", "content": "one more"}])
+    finally:
+        sdk.close()
+    assert budget.request_count == client.request_count == len(bodies) == 2
+    assert [row["model_name"] for row in budget.transport_records] == ["text-small", "vision-large"]
+    assert [row["requests_total"] for row in budget.transport_records] == [1, 2]
+    assert all(row["requests_made"] == 1 and row["count_source"] == "httpx_request_event"
+               for row in budget.transport_records)
+
+
+def run_semantic_pair(tmp_path):
+    runner, request, state, _, _ = lab(tmp_path)
+    _persist_synthetic_pixels(runner, tmp_path)
+    bodies = []
+    client, sdk = sdk_client([proposal(), plan(), plan()], bodies)
+    runner.client = client
+    try:
+        result = runner.run(request, options())
+    finally:
+        sdk.close()
+    assert result.status == "succeeded", result.error
+    assert result.total_actions == state.attempts == 2
+    assert result.planning_calls == result.model_requests == len(bodies) == 3
+    assert [body["model"] for body in bodies] == ["text-small", "vision-large", "vision-large"]
+    assert all(isinstance(m["content"], str) for m in bodies[0]["messages"])
+    records = [json.loads(line) for line in
+               (tmp_path / "semantic/transport_requests.jsonl").read_text("utf8").splitlines()]
+    assert [row["model_name"] for row in records] == [body["model"] for body in bodies]
+    return records
+
+
+@pytest.mark.parametrize("tamper", ["text_dispatch", "visual_dispatch", "text_body", "visual_body"])
+def test_independent_reader_binds_each_role_to_actual_dispatch_and_response(tmp_path, auditor, tamper):
+    records = run_semantic_pair(tmp_path / "original")
+    container = tmp_path / "audit_only"
+    run = container / "run"
+    run.mkdir(parents=True)
+    calls = []
+    for index, row in enumerate(records):
+        payload = json.loads(row["messages"][1]["content"])
+        calls.append({"kind": "semantic_decomposition" if index == 0 else "action_planning",
+                      "messages": row["messages"], "system": row["messages"][0]["content"],
+                      "instruction": payload["instruction"], "context": payload.get("context"),
+                      "image_path": payload.get("image_path"), "response_format": row["response_format"],
+                      "requests": 1, "response": row["response"]})
+    path = run / "transport_requests.jsonl"
+
+    def write():
+        path.write_text("\n".join(json.dumps(row) for row in records) + "\n", encoding="utf8")
+
+    contract = {"model": "vision-large", "text_model": "text-small"}
+    write()
+    assert auditor.transport_audit(auditor.Evidence(container), run, calls, 3, contract) == 3
+    index = 0 if tamper.startswith("text") else 1
+    if tamper.endswith("dispatch"):
+        records[index]["model_name"] = "wrong-model"
+    else:
+        records[index]["http_responses"][0]["body"]["model"] = "wrong-model"
+    write()
+    with pytest.raises(auditor.AuditError, match="actual_http_(prompt|response_role_model)"):
+        auditor.transport_audit(auditor.Evidence(container), run, calls, 3, contract)
+
+
+@pytest.mark.parametrize("tamper", ["text", "vision", "config", "budget"])
+def test_reader_requires_pinned_role_configuration_before_credit(auditor, tamper):
+    configured = load_config(Path(__file__).resolve().parents[1] / "configs/week6_role_models.yaml")
+    model = configured.model
+    contract = {"model": model.model_name, "text_model": model.text_model_name,
+                "configuration": configured.model_dump(mode="json"), "model_transport": {
+                    "base_url": model.base_url, "temperature": model.temperature,
+                    "max_tokens": model.max_tokens, "max_retries": model.max_retries,
+                    "timeout_seconds": model.timeout_seconds}}
+    auditor.audit_role_model_configuration(contract, configured)
+    if tamper == "text":
+        contract["text_model"] = "wrong-text"
+    elif tamper == "vision":
+        contract["model"] = "wrong-vision"
+    elif tamper == "config":
+        contract["configuration"]["model"]["text_model_name"] = "wrong-pinned"
+    else:
+        contract["model_transport"]["max_tokens"] += 1
+    with pytest.raises(auditor.AuditError, match="(model|transport|configuration)_differs"):
+        auditor.audit_role_model_configuration(contract, configured)

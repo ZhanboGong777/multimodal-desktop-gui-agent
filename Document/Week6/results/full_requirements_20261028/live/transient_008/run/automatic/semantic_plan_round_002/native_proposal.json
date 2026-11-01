@@ -1,0 +1,37 @@
+{
+  "status": "ready",
+  "reason": "Revision plan focuses on completing the review and commit steps since report generation was partially successful. The final state requires both review and local commit to be explicitly performed.",
+  "subgoals": [
+    {
+      "instruction": "Review the BLUE report for project BETA by selecting the review option and ensuring the review is completed using visible controls.",
+      "expect_text": [
+        "Review Complete",
+        "Project BETA",
+        "Theme BLUE"
+      ],
+      "forbid_text": [
+        "Error",
+        "Unavailable",
+        "Connection Failed",
+        "Review Pending"
+      ],
+      "goal_id": "review_report"
+    },
+    {
+      "instruction": "Commit the BLUE report for project BETA locally by selecting the commit option and confirming the commit using visible controls.",
+      "expect_text": [
+        "LOCAL COMPLETE",
+        "Project BETA",
+        "Theme BLUE",
+        "Commit Successful"
+      ],
+      "forbid_text": [
+        "Error",
+        "Unavailable",
+        "Connection Failed",
+        "Commit Failed"
+      ],
+      "goal_id": "commit_report"
+    }
+  ]
+}

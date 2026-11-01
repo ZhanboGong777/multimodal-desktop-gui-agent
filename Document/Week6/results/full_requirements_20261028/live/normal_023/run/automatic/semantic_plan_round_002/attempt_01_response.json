@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 33906.0,
+  "usage": {
+    "prompt_tokens": 1396,
+    "completion_tokens": 329,
+    "total_tokens": 1725
+  },
+  "error": null,
+  "content_length": 1487,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"The request requires preparing, reviewing, and committing a GREEN report for project ALPHA locally. The visible controls must be used, and the final state must show 'Project ALPHA', 'Theme GREEN', and 'LOCAL COMPLETE'. No external communication is allowed, and retry is permitted if review is briefly\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Prepare the GREEN report for project ALPHA using visible controls.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\"],\n      \"forbid_text\": [\"LOCAL COMPLETE\", \"Review unavailable\", \"Commit failed\", \"Network error\", \"External communication\", \"Online status\", \"Syncing\", \"Pending review\"],\n      \"goal_id\": \"prepare_report\"\n    },\n    {\n      \"instruction\": \"Review the prepared GREEN report for project ALPHA using visible controls.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\", \"Review completed\"],\n      \"forbid_text\": [\"LOCAL COMPLETE\", \"Commit failed\", \"Network error\", \"External communication\", \"Online status\", \"Syncing\", \"Pending review\", \"Review unavailable\"],\n      \"goal_id\": \"review_report\"\n    },\n    {\n      \"instruction\": \"Commit the reviewed GREEN report for project ALPHA locally using visible controls.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\", \"LOCAL COMPLETE\"],\n      \"forbid_text\": [\"Review unavailable\", \"Commit failed\", \"Network error\", \"External communication\", \"Online status\", \"Syncing\", \"Pending review\"],\n      \"goal_id\": \"commit_report\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

@@ -1,0 +1,458 @@
+"""Independent scoped-candidate, JSON Schema and saved-evidence counterexamples.
+
+All frames, SDK replies and authorisation fixtures are synthetic. No network,
+model, screen capture or OS input is used, and no GUI success is inferred.
+"""
+
+from __future__ import annotations
+
+import copy
+import importlib.util
+import json
+from datetime import timedelta
+from pathlib import Path
+from types import SimpleNamespace
+
+import pytest
+from jsonschema import Draft202012Validator
+from PIL import Image
+from test_runtime_runner import FakeExecutor, FakeObserver, _runner
+from test_week6_action_output_contract_review import Clock, _sdk
+from test_week6_automatic_decomposition import _frame
+from test_week6_rolling_actions import options
+
+from gui_agent.planning.planner import TaskPlanner, _task_plan_response_format
+from gui_agent.planning.target_bindings import derive_target_bindings
+from gui_agent.planning.workflow_decomposer import BudgetedModelClient
+from gui_agent.runtime.action_adapter import ActionAdapter
+from gui_agent.runtime.observation import describe_elements
+from gui_agent.runtime.runner import TaskRunner
+from gui_agent.runtime.schemas import ElementRef, ExecutionOptions, TaskSpec
+from gui_agent.schemas import BoundingBox
+
+
+@pytest.fixture
+def auditor():
+    path = Path(__file__).resolve().parents[1] / "scripts/week6_audit_semantic_acceptance.py"
+    spec = importlib.util.spec_from_file_location("target_bindings_independent_auditor", path)
+    result = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(result)
+    return result
+
+
+def _element(identifier, text, box, *, source="ocr", confidence=.95):
+    bounds = BoundingBox(left=box[0], top=box[1], right=box[2], bottom=box[3])
+    return ElementRef(element_id=identifier, text=text, bounding_box=bounds,
+                      center=bounds.center, source=source, confidence=confidence)
+
+
+def _snapshot():
+    frame = _frame("review-current", [])
+    frame.elements = [
+        _element("label-a", "Choice A", (10, 10, 60, 30)),
+        _element("label-b", "Choice B", (80, 10, 130, 30)),
+        _element("heading", "Choose an option", (10, 60, 130, 80)),
+        _element("single-box", "", (5, 5, 65, 35), source="contour", confidence=.5),
+        _element("mixed-box", "", (5, 5, 135, 35), source="contour", confidence=.5),
+        _element("unknown-box", "", (160, 5, 210, 35), source="contour", confidence=.5),
+        _element("duplicate-a", "Choice A", (10, 100, 60, 120)),
+    ]
+    return frame
+
+
+def _context(frame, **extra):
+    return {"observation_id": frame.observation_id, "visible_text": describe_elements(frame),
+            "target_bindings": derive_target_bindings(frame), **extra}
+
+
+def _native(*, text="Choice A", arguments=None, action="click"):
+    return {"task_id": "review-task", "instruction": "Choose the requested local option",
+            "steps": [{"step_id": "one", "description": "Choose the requested option",
+                       "action_type": action, "target_text": text,
+                       "arguments": arguments if arguments is not None else {"element_id": "label-a"}}]}
+
+
+def _schema(frame):
+    return _task_plan_response_format(1, target_bindings=derive_target_bindings(frame))["json_schema"]["schema"]
+
+
+def test_review_independent_binding_rebuild_preserves_raw_labels_order_duplicates_and_container_evidence(auditor):
+    frame = _snapshot()
+    frame.elements[0].text = "  Choice A  "
+    context = _context(frame)
+    assert auditor.audit_target_bindings(context, frame) == context["target_bindings"]
+    values = {item["element_id"]: item for item in context["target_bindings"]["candidates"]}
+    assert values["label-a"]["text"] == "  Choice A  "
+    assert values["single-box"]["classification"] == "anonymous_with_single_ocr"
+    assert values["mixed-box"]["classification"] == "anonymous_mixed_ocr"
+    assert values["mixed-box"]["overlapping_ocr_ids"] == ["label-a", "label-b"]
+    assert context["target_bindings"]["anonymous_without_ocr_ids"] == ["unknown-box"]
+
+
+@pytest.mark.parametrize("tamper", ["id", "text", "box", "threshold", "scope", "version", "drop", "reorder",
+                                   "mixed_to_unknown", "foreign_compatible_id", "caller_invented_label"])
+def test_review_saved_binding_mutations_cannot_replace_the_original_observed_candidate_contract(auditor, tamper):
+    frame = _snapshot()
+    context = _context(frame)
+    value = context["target_bindings"]
+    if tamper == "id":
+        value["observation_id"] = "other-frame"
+    elif tamper == "text":
+        value["candidates"][0]["text"] = "Other label"
+    elif tamper == "box":
+        value["candidates"][0]["bounding_box"]["left"] += 1
+    elif tamper == "threshold":
+        value["min_confidence"] = .999
+    elif tamper == "scope":
+        value["scope"] = "authorised_subset"
+    elif tamper == "version":
+        value["schema_version"] = "invented-version"
+    elif tamper == "drop":
+        value["candidates"].pop()
+    elif tamper == "reorder":
+        value["candidates"].reverse()
+    elif tamper == "mixed_to_unknown":
+        value["candidates"][4]["classification"] = "anonymous_without_ocr"
+        value["candidates"][4]["overlapping_ocr_ids"] = []
+        value["anonymous_without_ocr_ids"].append("mixed-box")
+    elif tamper == "foreign_compatible_id":
+        value["labels"][0]["element_ids"].append("heading")
+    else:
+        value["labels"].append({"text": "CallerFutureSuccess", "element_ids": ["heading"]})
+    with pytest.raises(auditor.AuditError, match="target_binding"):
+        auditor.audit_target_bindings(context, frame)
+
+
+@pytest.mark.parametrize("arguments", [
+    {"element_id": "heading"}, {"target_element": "heading"},
+    {"element_id": "heading", "target_element": "label-a"},
+    {"element_id": "label-a", "target_element": "heading"},
+    {"element_id": "label-a", "target": "Choice B"},
+    {"element_id": "mixed-box"},
+])
+def test_review_standard_json_schema_rejects_wrong_current_ids_all_aliases_and_mixed_containers(arguments):
+    schema = _schema(_snapshot())
+    Draft202012Validator.check_schema(schema)
+    assert not Draft202012Validator(schema).is_valid(_native(arguments=arguments))
+
+
+@pytest.mark.parametrize("text,arguments,action", [
+    ("Choice A", {"element_id": "label-a"}, "click"),
+    ("Choice A", {"target_element": "duplicate-a"}, "double_click"),
+    ("Choice A", {"element_id": "single-box"}, "right_click"),
+    (None, {"target": "Choice A", "target_element": "label-a"}, "click"),
+    ("Choice A", {}, "click"),
+    ("A multiword textual query", {}, "click"),
+    (None, {"element_id": "heading"}, "click"),
+    ("A visual icon description", {"element_id": "unknown-box"}, "click"),
+    (None, {"text": "Local text", "vendor_extension": {"x": 7}}, "type_text"),
+    (None, {"duration": .1}, "wait"),
+])
+def test_review_standard_json_schema_preserves_legacy_nonpoint_text_only_id_only_and_unknown_visual_paths(text, arguments, action):
+    assert Draft202012Validator(_schema(_snapshot())).is_valid(_native(text=text, arguments=arguments, action=action))
+
+
+def test_review_schema_is_a_self_contained_positive_union_without_conditional_or_negative_shortcuts():
+    schema = _schema(_snapshot())
+    branches = schema["$defs"]["PlanStep"]["anyOf"]
+    assert len(branches) > 1 and all(branch["type"] == "object" for branch in branches)
+    assert all({"step_id", "description", "action_type"} <= set(branch["required"]) for branch in branches)
+    forbidden = {"not", "if", "then", "else", "allOf", "dependentSchemas"}
+
+    def inspect(value):
+        if isinstance(value, dict):
+            assert not forbidden & value.keys()
+            assert not ({"anyOf", "properties"} <= value.keys())
+            for item in value.values():
+                inspect(item)
+        elif isinstance(value, list):
+            for item in value:
+                inspect(item)
+
+    inspect(schema)
+
+
+def test_review_authorised_subset_does_not_leak_excluded_text_or_claim_an_overlapping_contour_has_no_ocr(auditor):
+    source = _snapshot()
+    subset = source.model_copy(update={"elements": [source.elements[3], source.elements[5]]})
+    value = derive_target_bindings(subset, source_snapshot=source)
+    context = {"observation_id": source.observation_id, "visible_text": describe_elements(subset), "target_bindings": value}
+    assert auditor.audit_target_bindings(context, source, authorised_candidate_ids=["single-box", "unknown-box"]) == value
+    assert value["candidates"][0]["external_ocr_overlap"] is True
+    assert value["candidates"][0]["classification"] == "untrusted_or_other"
+    assert value["anonymous_without_ocr_ids"] == ["unknown-box"]
+    encoded = json.dumps(value)
+    assert "Choice A" not in encoded and "label-a" not in encoded and "Choose an option" not in encoded
+    forged = copy.deepcopy(context)
+    forged["target_bindings"]["candidates"][0]["external_ocr_overlap"] = False
+    forged["target_bindings"]["candidates"][0]["classification"] = "anonymous_without_ocr"
+    forged["target_bindings"]["anonymous_without_ocr_ids"].insert(0, "single-box")
+    with pytest.raises(auditor.AuditError, match="target_bindings_not_rebuilt"):
+        auditor.audit_target_bindings(forged, source, authorised_candidate_ids=["single-box", "unknown-box"])
+
+
+@pytest.mark.parametrize("available", [False, True])
+def test_review_real_context_uses_only_final_message_candidates_and_unavailable_context_stays_empty(auditor, available):
+    frame = _snapshot()
+    authorised = [frame.elements[5]]
+    state = SimpleNamespace(adapter=ActionAdapter(platform="win32"), _message_text_typed=False,
+                            _message_composer=(frame, frame.window_bounds) if available else None,
+                            _message_controls=lambda _frame: (frame.window_bounds, authorised))
+    task = TaskSpec(case_id="scope-review", instruction="Use the authorised local editor", message_conversation="local-test")
+    context = TaskRunner._context(state, frame, task, ExecutionOptions())
+    expected_ids = ["unknown-box"] if available else []
+    auditor.audit_target_bindings(context, frame, authorised_candidate_ids=expected_ids)
+    assert [item["element_id"] for item in context["target_bindings"]["candidates"]] == expected_ids
+    assert "Choice A" not in context["visible_text"]
+    assert "Choice A" not in json.dumps(context["target_bindings"])
+
+
+def _run_offline(tmp_path, replies, *, maximum_requests=8):
+    frame = _snapshot()
+    image = tmp_path / "frame.png"
+    Image.new("RGB", (1470, 956), "white").save(image)
+    frame.image_path = str(image)
+    context = _context(frame)
+    bodies = []
+    client, sdk = _sdk(replies, bodies)
+    budgeted = BudgetedModelClient(client, max_requests=maximum_requests, deadline=100, clock=Clock(),
+                                   audit_path=tmp_path / "transport_requests.jsonl")
+    try:
+        result = TaskPlanner(budgeted, max_steps=1, max_format_retries=1).plan(
+            "Choose the requested local option", context=context, image_path=str(image), task_id="review-task")
+    finally:
+        sdk.close()
+    response = {**result.response.as_dict(), "content": result.response.content, "raw_response": result.response.raw_response}
+    call = {"instruction": "Choose the requested local option", "context": context,
+            "image_path": str(image), "task_id": "review-task", "attempts": result.attempts,
+            "model_requests": budgeted.request_count, "ok": result.ok,
+            "parsed_plan": result.plan.as_dict() if result.plan else None, "response": response}
+    records = [json.loads(line) for line in (tmp_path / "action_planning_attempts.jsonl").read_text("utf8").splitlines()]
+    return frame, call, records, bodies, result, budgeted
+
+
+def test_review_sdk_format_retry_rebuilds_each_actual_request_schema_and_raw_response_without_extra_dispatch(auditor, tmp_path):
+    raw = json.dumps({"action_type": "click", "target_text": "Choice A", "arguments": {}, "status": "success"})
+    frame, call, records, bodies, result, budgeted = _run_offline(tmp_path, [raw, json.dumps(_native())])
+    assert result.ok and result.attempts == len(bodies) == budgeted.request_count == 2
+    bindings = auditor.audit_target_bindings(call["context"], frame)
+    response_format = _task_plan_response_format(1, target_bindings=bindings)
+    audited = auditor.audit_action_attempts(call, frame, records, response_format)
+    assert len(audited) == 2 and audited[0]["messages"] != audited[1]["messages"]
+    assert all(body["response_format"] == response_format for body in bodies)
+    assert all(row["response_format"] == response_format for row in budgeted.transport_records)
+    assert records[0]["parse_error"] == "the plan contains no steps" and records[1]["parse_error"] is None
+    assert records[0]["response"]["content"] == raw
+    # Only the old basecontext and a correction reconstructed from this exact raw
+    # reply differ. This is schema qualification, not task or OS-input success.
+    user = bodies[1]["messages"][-1]["content"]
+    packet = json.loads(next(item["text"] for item in user if item["type"] == "text"))
+    assert packet["context"]["plan_format_correction"]["previous_response"] == raw
+
+
+@pytest.mark.parametrize("tamper", ["caller", "source_id", "image", "schema", "raw", "parse_error",
+                                   "correction_raw", "correction_error", "correction_hash", "extra_correction",
+                                   "binding_contract", "bindings_hash", "schema_hash", "generation_authority"])
+def test_review_action_attempt_auditor_rejects_arbitrary_schema_native_or_correction_rewrites(auditor, tmp_path, tamper):
+    frame, call, records, _, _, _ = _run_offline(tmp_path, ["BadRawCanary", json.dumps(_native())])
+    expected = _task_plan_response_format(1, target_bindings=auditor.audit_target_bindings(call["context"], frame))
+    if tamper == "caller":
+        records[1]["request"]["instruction"] = "Other caller"
+    elif tamper == "source_id":
+        records[1]["request"]["context"]["observation_id"] = "other"
+    elif tamper == "image":
+        records[1]["request"]["image_path"] = "/other.png"
+    elif tamper == "schema":
+        records[1]["request"]["response_format"]["json_schema"]["schema"]["properties"]["steps"]["maxItems"] = 2
+    elif tamper == "raw":
+        records[0]["response"]["content"] = "ForgedRawCanary"
+    elif tamper == "parse_error":
+        records[0]["parse_error"] = "A forged parser error"
+    elif tamper in {"binding_contract", "bindings_hash", "schema_hash", "generation_authority"}:
+        if tamper == "binding_contract":
+            records[1].pop("target_binding_contract")
+        elif tamper == "generation_authority":
+            records[1]["target_binding_contract"]["generation_only"] = False
+        else:
+            key = "bindings_sha256" if tamper == "bindings_hash" else "response_format_sha256"
+            records[1]["target_binding_contract"][key] = "0" * 64
+    else:
+        correction = records[1]["request"]["context"]["plan_format_correction"]
+        field = {"correction_raw": "previous_response", "correction_error": "format_error",
+                 "correction_hash": "previous_response_sha256", "extra_correction": "caller_override"}[tamper]
+        correction[field] = "ForgedCorrectionCanary"
+    with pytest.raises(auditor.AuditError, match="action_"):
+        auditor.audit_action_attempts(call, frame, records, expected)
+
+
+def test_review_schema_ineligible_unused_secondary_alias_is_not_misreported_as_legacy_runtime_no_dispatch(auditor, tmp_path):
+    raw = json.dumps(_native(arguments={"element_id": "label-a", "target_element": "heading"}))
+    frame, call, records, _, result, _ = _run_offline(tmp_path, [raw])
+    assert result.ok  # The unchanged local parser does not enforce provider schema.
+    expected = _task_plan_response_format(1, target_bindings=auditor.audit_target_bindings(call["context"], frame))
+    with pytest.raises(auditor.AuditError, match="action_native_violates_predeclared_generation_schema"):
+        auditor.audit_action_attempts(call, frame, records, expected)
+
+
+@pytest.mark.parametrize("length", [2000, 2001])
+def test_review_auditor_recomputes_exact_raw_reply_threshold_without_accepting_a_truncated_echo(auditor, tmp_path, length):
+    raw = "X" * length
+    frame, call, records, _, _, _ = _run_offline(tmp_path, [raw, json.dumps(_native())])
+    expected = _task_plan_response_format(1, target_bindings=auditor.audit_target_bindings(call["context"], frame))
+    assert auditor.audit_action_attempts(call, frame, records, expected)
+    assert records[0]["response"]["content"] == raw
+    correction = records[1]["request"]["context"]["plan_format_correction"]
+    assert ("previous_response" in correction) == (length <= 2000)
+    correction["previous_response"] = raw[:1999]
+    with pytest.raises(auditor.AuditError, match="action_attempt_request"):
+        auditor.audit_action_attempts(call, frame, records, expected)
+
+
+def test_review_oversize_parser_error_and_reply_are_full_in_evidence_but_only_length_hash_enter_the_correction(auditor, tmp_path):
+    invalid = _native(action="UnknownActionCanary" + "Z" * 2500)
+    raw = json.dumps(invalid)
+    frame, call, records, _, _, _ = _run_offline(tmp_path, [raw, json.dumps(_native())])
+    expected = _task_plan_response_format(1, target_bindings=auditor.audit_target_bindings(call["context"], frame))
+    assert len(records[0]["parse_error"]) > 2000 and len(records[0]["response"]["content"]) > 2000
+    assert auditor.audit_action_attempts(call, frame, records, expected)
+    correction = records[1]["request"]["context"]["plan_format_correction"]
+    assert "format_error" not in correction and "previous_response" not in correction
+    correction["format_error"] = records[0]["parse_error"][:2000]
+    with pytest.raises(auditor.AuditError, match="action_attempt_request"):
+        auditor.audit_action_attempts(call, frame, records, expected)
+
+
+@pytest.mark.parametrize("structured", [False, True])
+@pytest.mark.parametrize("tamper", ["version", "stale", "mixed_to_unknown"])
+def test_review_malformed_or_stale_binding_context_refuses_before_any_sdk_dispatch(tamper, structured):
+    frame = _snapshot()
+    context = _context(frame)
+    if tamper == "version":
+        context["target_bindings"]["schema_version"] = "foreign-version"
+    elif tamper == "stale":
+        context["observation_id"] = "different-current-frame"
+    else:
+        context["target_bindings"]["candidates"][4]["classification"] = "anonymous_without_ocr"
+        context["target_bindings"]["anonymous_without_ocr_ids"].append("mixed-box")
+    bodies = []
+    client, sdk = _sdk([json.dumps(_native())], bodies)
+    try:
+        result = TaskPlanner(client, require_structured_output=structured).plan("Choose locally", context=context)
+    finally:
+        sdk.close()
+    assert not result.ok and result.plan is None and result.attempts == len(bodies) == 0
+    assert "invalid target_bindings" in result.error
+
+
+def test_review_malicious_provider_ignoring_schema_cannot_dispatch_a_conflicting_primary_id(tmp_path):
+    source = _snapshot()
+    fresh = source.model_copy(deep=True)
+    fresh.observation_id = "fresh-after-planning"
+    fresh.captured_at = source.captured_at + timedelta(seconds=1)
+    for frame in (source, fresh):
+        frame.image_path = str(tmp_path / (frame.observation_id + ".png"))
+        Image.new("RGB", (1470, 956), "white").save(frame.image_path)
+    raw = json.dumps(_native(arguments={"element_id": "heading"}))
+    bodies = []
+    client, sdk = _sdk([raw], bodies)
+    executor = FakeExecutor()
+    observer = FakeObserver([source, fresh])
+    observer.foreground_matches = lambda frame: frame.foreground_stable
+    runtime, _ = _runner(tmp_path, observer, TaskPlanner(client, max_steps=1, max_format_retries=0), executor)
+    try:
+        result = runtime.run(TaskSpec(case_id="binding-review", instruction="Choose the requested option",
+                                     expect_text=["Caller complete"]), options(max_planning_attempts=1))
+    finally:
+        sdk.close()
+    assert len(bodies) == result.planning_calls == 1
+    assert not Draft202012Validator(bodies[0]["response_format"]["json_schema"]["schema"]).is_valid(json.loads(raw))
+    assert result.status != "succeeded" and result.action_count == result.unconfirmed_action_attempts == 0
+    assert not executor.actions and result.steps[0].action_result is None
+    assert "target consistency conflict:" in result.steps[0].error
+
+
+@pytest.mark.parametrize("tamper", ["schema", "message", "provider", "count", "normalized_reply", "body_reply"])
+def test_review_validated_per_attempt_requests_bind_every_transport_segment_and_reject_tampering(auditor, tmp_path, tamper):
+    run = tmp_path / "run"
+    run.mkdir()
+    frame, call, records, _, _, _ = _run_offline(run, ["BadRawCanary", json.dumps(_native())])
+    expected = _task_plan_response_format(1, target_bindings=auditor.audit_target_bindings(call["context"], frame))
+    calls = auditor.audit_action_attempts(call, frame, records, expected)
+    assert auditor.transport_audit(auditor.Evidence(tmp_path), run, calls, 2, {"model": "review-offline"}) == 2
+    path = run / "transport_requests.jsonl"
+    rows = [json.loads(line) for line in path.read_text("utf8").splitlines()]
+    if tamper == "schema":
+        rows[1]["response_format"]["json_schema"]["strict"] = True
+    elif tamper == "message":
+        rows[1]["messages"] = rows[0]["messages"]
+    elif tamper == "provider":
+        rows[1]["model_name"] = "other-model"
+    elif tamper == "count":
+        rows[1]["requests_total"] += 1
+    elif tamper == "normalized_reply":
+        rows[1]["response"]["content"] = "ForgedNormalizedReply"
+    else:
+        rows[1]["http_responses"][0]["body"]["choices"][0]["message"]["content"] = "ForgedBodyReply"
+    path.write_text("\n".join(json.dumps(row) for row in rows) + "\n", encoding="utf8")
+    with pytest.raises(auditor.AuditError):
+        auditor.transport_audit(auditor.Evidence(tmp_path), run, calls, 2, {"model": "review-offline"})
+
+
+@pytest.mark.parametrize("exit_code", [1, None, True])
+def test_review_new_schema_audit_cannot_bypass_the_original_actual_owner_exit_gate(auditor, tmp_path, exit_code):
+    for name, value in [("owner_claim.json", {"schema": "week6.semantic.live.claim.v1"}),
+                        ("owner_start.json", {}),
+                        ("owner_receipt.json", {"schema": "week6.semantic.live.actual_exit.v1", "child_exit_code": exit_code})]:
+        (tmp_path / name).write_text(json.dumps(value), encoding="utf8")
+    (tmp_path / "stdout.txt").write_text("Synthetic negative owner fixture", encoding="utf8")
+    with pytest.raises(auditor.AuditError, match="owner_did_not_observe_real_exit_zero"):
+        auditor.owner_audit(auditor.Evidence(tmp_path), tmp_path / "absent-harness", tmp_path / "absent-fixture")
+
+
+@pytest.mark.parametrize("violation", ["unknown", "cancelled", "incomplete", "actions", "planning", "http", "deadline", "caller_final"])
+def test_review_full_gate_still_rejects_unknown_cancelled_budget_and_changed_final_before_later_evidence(auditor, tmp_path, monkeypatch, violation):
+    # Only the already-tested owner/source gates are doubled here. No valid live
+    # acceptance record is fabricated; each case must stop before frame/ledger work.
+    directory = tmp_path / "run" / "automatic"
+    caller = auditor.WorkflowRequest(workflow_id="semantic_lab",
+        instruction="In Week6 Local Lab, prepare a C report for project P, review it and commit it locally. "
+                    "Use the visible controls. This is an offline test with no external communication. "
+                    "If review is temporarily unavailable, retry within budget.",
+        expect_text=["Project P", "Theme C", "LOCAL COMPLETE"])
+    options_value = ExecutionOptions(max_actions=20, max_planning_attempts=24, task_timeout_seconds=7200).model_dump(mode="json")
+    raw = auditor.SemanticWorkflowResult(workflow_id="semantic_lab", status="succeeded", total_actions=1,
+        planning_calls=1, model_requests=1, elapsed_ms=1, evidence_directory=str(directory)).model_dump(mode="json")
+    contract = {"schema": "week6.semantic_live.contract.v1", "automatic_protocol": "semantic_subtasks",
+                "request": caller.model_dump(mode="json"), "fixture_mode": "normal", "options": options_value,
+                "max_model_requests": 32, "independent_expected": {
+                    "project": "P", "colour": "C", "stage": "completed", "committed": True,
+                    "event_order": ["project_selected", "theme_selected", "review_accepted", "local_commit"],
+                    "review_rejections": 0}}
+    if violation == "unknown":
+        raw["unconfirmed_action_attempts"] = 1
+    elif violation == "cancelled":
+        raw["status"] = "cancelled"
+    elif violation == "incomplete":
+        raw["accounting_complete"] = False
+    elif violation == "actions":
+        raw["total_actions"] = 21
+    elif violation == "planning":
+        raw["planning_calls"] = 25
+    elif violation == "http":
+        raw["model_requests"] = 33
+    elif violation == "deadline":
+        raw["elapsed_ms"] = 7200000
+    else:
+        contract["request"]["expect_text"] = ["Changed final predicate"]
+    table = {"contract.json": contract, "runtime_result.json": raw, "automatic_workflow_summary.json": raw,
+             "acceptance_observed.json": {"automatic_result": raw},
+             "semantic_request.json": {"schema_version": auditor.SEMANTIC_PROTOCOL_VERSION,
+                 "caller_request": caller.model_dump(mode="json"), "options": options_value, "max_model_requests": 32},
+             "semantic_preflight.json": {"schema_version": auditor.SEMANTIC_PROTOCOL_VERSION, "supported": True,
+                 "issue": "", "scope": "declared unresolved literal forms and contradictory caller final predicates only"}}
+    evidence = SimpleNamespace(run=tmp_path / "run", load=lambda path: table[path.name])
+    owner = {"command": ["offline", "--project", "P", "--colour", "C", "--mode", "normal"]}
+    monkeypatch.setattr(auditor, "owner_audit", lambda *_args: owner)
+    monkeypatch.setattr(auditor, "source_audit", lambda *_args: {"synthetic_source_boundary": True})
+    with pytest.raises(auditor.AuditError, match="runtime_not_completed|global_budget|original_caller_final"):
+        auditor.audit(tmp_path, tmp_path / "harness", tmp_path / "fixture", evidence)

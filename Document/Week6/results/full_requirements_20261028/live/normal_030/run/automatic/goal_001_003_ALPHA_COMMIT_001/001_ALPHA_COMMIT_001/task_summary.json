@@ -1,0 +1,124 @@
+{
+  "run_id": "001_ALPHA_COMMIT_001",
+  "case_id": "ALPHA_COMMIT_001",
+  "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Commit the GREEN report locally.\nComplete original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+  "status": "succeeded",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Click the 'Commit locally' button to finalize the report.",
+      "action_type": "click",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "click",
+          "x": 1281,
+          "y": 1053,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Commiyocally"
+        },
+        "element_id": "obs-0002-e008",
+        "screenshot_point": {
+          "x": 1281,
+          "y": 1053
+        },
+        "control_point": {
+          "x": 1281,
+          "y": 1053
+        },
+        "note": "text 'Commiyocally' -> obs-0002-e008 (re-bound from obs-0001-e008 in an earlier frame)"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "click",
+          "x": 1281,
+          "y": 1053,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Commiyocally"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: report",
+        "evidence": {
+          "observation_id": "obs-0003",
+          "changed": true,
+          "element_count": 25,
+          "expectation_tokens": [
+            "report",
+            "committed",
+            "locally"
+          ],
+          "expectation_hits": [
+            "report"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 10546.999999991385,
+      "after_observation_id": "obs-0003"
+    }
+  ],
+  "verification": {
+    "outcome": "passed",
+    "method": "automatic",
+    "detail": "all success rules matched against the current screen",
+    "evidence": {
+      "observation_id": "obs-0004",
+      "expect_text": [
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [],
+      "verification_source": "frozen_model_semantic_subtask_postconditions"
+    }
+  },
+  "error": null,
+  "elapsed_ms": 47437.999999994645,
+  "execute": true,
+  "model_name": "qwen3-vl:8b-instruct",
+  "provider": "openai_compatible",
+  "notes": [
+    "planned 1 steps from obs-0001"
+  ],
+  "task_id": "ALPHA_COMMIT_001",
+  "commit": "482895f",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 2560x1600, control 2560x1600",
+  "started_at": "2026-11-01T05:01:54.861953Z",
+  "finished_at": "2026-11-01T05:02:42.299953Z",
+  "planning_attempts": 1,
+  "model_requests": 5,
+  "planning_ms": 33375.0,
+  "confirmation_ms": 16.00000000325963,
+  "execution_ms": 14046.999999991385,
+  "planner_ms": 29827.999999994063,
+  "planning_calls": 1,
+  "system_elapsed_ms": 47421.999999991385,
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_030\\run\\automatic\\goal_001_003_ALPHA_COMMIT_001\\001_ALPHA_COMMIT_001",
+  "stop_reason": "",
+  "error_type": "",
+  "failed_step_id": null,
+  "recovery_records": [],
+  "unconfirmed_action_attempts": 0,
+  "action_count": 1
+}

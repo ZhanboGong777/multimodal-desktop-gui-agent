@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 23547.0,
+  "usage": {
+    "prompt_tokens": 1570,
+    "completion_tokens": 242,
+    "total_tokens": 1812
+  },
+  "error": null,
+  "content_length": 1115,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"All requested operations are executable via visible controls; no external communication is needed; retry logic is supported within budget.\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Prepare the GREEN report for project ALPHA by selecting the correct project and theme, then save the draft locally.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\", \"Draft saved locally\"],\n      \"forbid_text\": [\"Review unavailable\", \"Online sync required\", \"External communication needed\", \"Budget exceeded\", \"Changes not saved\", \"Commit failed\", \"Review pending\", \"Save failed\"],\n      \"goal_id\": \"prepare_report\"\n    },\n    {\n      \"instruction\": \"Review the GREEN report for project ALPHA using the visible review controls, then commit it locally.\",\n      \"expect_text\": [\"Project ALPHA\", \"Theme GREEN\", \"LOCAL COMPLETE\", \"Commit successful\"],\n      \"forbid_text\": [\"Review unavailable\", \"Online sync required\", \"External communication needed\", \"Budget exceeded\", \"Changes not saved\", \"Commit failed\", \"Review pending\", \"Save failed\"],\n      \"goal_id\": \"review_and_commit\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

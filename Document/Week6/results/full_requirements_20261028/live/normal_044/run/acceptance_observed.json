@@ -1,0 +1,393 @@
+{
+  "schema": "week6.semantic_live.observed_result.v1",
+  "status": "failed",
+  "runtime_pass": false,
+  "independent_pass": false,
+  "attribution_pass": false,
+  "source_unchanged": true,
+  "runtime_independent_gates_passed": false,
+  "semantic_audit_pending": true,
+  "meaning": "Observed evidence only. A separate read-only native-plan/semantic-goal audit and real owner exit receipt are required for final acceptance.",
+  "transition_attribution": [],
+  "input_receipts": [],
+  "state": {
+    "utc": "2026-11-01T10:28:31.429120+00:00",
+    "event": "started",
+    "stage": "project",
+    "project": "",
+    "colour": "",
+    "committed": false,
+    "review_attempts": 0,
+    "mode": "normal",
+    "events": 1
+  },
+  "independent_events": [
+    {
+      "utc": "2026-11-01T10:28:31.429120+00:00",
+      "event": "started",
+      "stage": "project",
+      "project": "",
+      "colour": "",
+      "committed": false,
+      "review_attempts": 0,
+      "mode": "normal",
+      "events": 1
+    }
+  ],
+  "automatic_result": {
+    "schema_version": "week6.semantic_workflow.v1",
+    "decomposition_protocol_mode": "semantic_subtasks",
+    "workflow_id": "semantic_lab",
+    "status": "failed",
+    "plans": [
+      {
+        "schema_version": "week6.semantic_subtasks.v6",
+        "input_modality": "caller_intent_only",
+        "image_attached": false,
+        "status": "ready",
+        "proposal": {
+          "status": "ready",
+          "reason": "Plan outlines two distinct semantic objectives: first, prepare and review the GREEN report for project ALPHA; second, commit the report locally. Each step is explicitly named and preserves caller operations without combining or omitting.",
+          "subgoals": [
+            {
+              "instruction": "Prepare a GREEN report for project ALPHA by selecting the project, choosing the GREEN theme, and generating the report using visible controls.",
+              "expect_text": [
+                "Project ALPHA",
+                "Theme GREEN",
+                "Report Generated"
+              ],
+              "forbid_text": [
+                "Review unavailable",
+                "Commit failed",
+                "Network error"
+              ],
+              "goal_id": "prepare_report"
+            },
+            {
+              "instruction": "Review the prepared GREEN report for project ALPHA and commit it locally using visible controls.",
+              "expect_text": [
+                "Project ALPHA",
+                "Theme GREEN",
+                "LOCAL COMPLETE"
+              ],
+              "forbid_text": [
+                "Review unavailable",
+                "Commit failed",
+                "Network error"
+              ],
+              "goal_id": "review_and_commit"
+            }
+          ]
+        },
+        "workflow": {
+          "workflow_id": "semantic_lab",
+          "instruction": "In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+          "subgoals": [
+            {
+              "case_id": "prepare_report",
+              "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Prepare a GREEN report for project ALPHA by selecting the project, choosing the GREEN theme, and generating the report using visible controls.\nComplete original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+              "target_app": null,
+              "preconditions": [],
+              "success_rules": [],
+              "verification": "automatic",
+              "expect_text": [
+                "Project ALPHA",
+                "Theme GREEN",
+                "Report Generated"
+              ],
+              "forbid_text": [
+                "Review unavailable",
+                "Commit failed",
+                "Network error"
+              ],
+              "requires_processes": [],
+              "forbids_processes": [],
+              "must_exit_processes": [],
+              "risk": "medium",
+              "message_conversation": null,
+              "gate_on_step_verification": false
+            },
+            {
+              "case_id": "review_and_commit",
+              "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Review the prepared GREEN report for project ALPHA and commit it locally using visible controls.\nComplete original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+              "target_app": null,
+              "preconditions": [],
+              "success_rules": [],
+              "verification": "automatic",
+              "expect_text": [
+                "Project ALPHA",
+                "Theme GREEN",
+                "LOCAL COMPLETE"
+              ],
+              "forbid_text": [
+                "Review unavailable",
+                "Commit failed",
+                "Network error"
+              ],
+              "requires_processes": [],
+              "forbids_processes": [],
+              "must_exit_processes": [],
+              "risk": "medium",
+              "message_conversation": null,
+              "gate_on_step_verification": false
+            }
+          ],
+          "final_check": {
+            "case_id": "FINAL",
+            "instruction": "Independently read unchanged caller final predicates",
+            "target_app": null,
+            "preconditions": [],
+            "success_rules": [],
+            "verification": "automatic",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": [],
+            "requires_processes": [],
+            "forbids_processes": [],
+            "must_exit_processes": [],
+            "risk": "low",
+            "message_conversation": null,
+            "gate_on_step_verification": true
+          }
+        },
+        "planning_calls": 1,
+        "model_requests": 1,
+        "elapsed_ms": 22203.999999997905,
+        "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_044\\run\\automatic\\semantic_plan_round_001",
+        "error": "Plan outlines two distinct semantic objectives: first, prepare and review the GREEN report for project ALPHA; second, commit the report locally. Each step is explicitly named and preserves caller operations without combining or omitting."
+      }
+    ],
+    "goal_outcomes": [
+      {
+        "round": 1,
+        "goal_id": "prepare_report",
+        "instruction": "Prepare a GREEN report for project ALPHA by selecting the project, choosing the GREEN theme, and generating the report using visible controls.",
+        "expect_text": [
+          "Project ALPHA",
+          "Theme GREEN",
+          "Report Generated"
+        ],
+        "forbid_text": [
+          "Review unavailable",
+          "Commit failed",
+          "Network error"
+        ],
+        "status": "failed",
+        "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_044\\run\\automatic\\goal_001_001_prepare_report",
+        "verification": null,
+        "task_verification": null
+      }
+    ],
+    "rejected_goal_contracts": [],
+    "completed_subgoals": [],
+    "semantic_goals_total": 2,
+    "workflow_result": {
+      "schema_version": "week6.workflow.v1",
+      "workflow_id": "semantic_lab",
+      "status": "failed",
+      "execute": true,
+      "subgoals": [
+        {
+          "index": 0,
+          "case_id": "prepare_report",
+          "status": "failed",
+          "child_status": "failed",
+          "actions": 0,
+          "unconfirmed_action_attempts": 0,
+          "planning_calls": 3,
+          "verification": null,
+          "elapsed_ms": 119078.9999999979,
+          "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_044\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report",
+          "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_044\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\task_summary.json",
+          "error": null
+        }
+      ],
+      "total_actions": 0,
+      "unconfirmed_action_attempts": 0,
+      "planning_calls": 3,
+      "accounting_complete": true,
+      "elapsed_ms": 119422.00000000594,
+      "final_verification": null,
+      "final_observation_id": null,
+      "final_observation_reference": "",
+      "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_044\\run\\automatic\\goal_001_001_prepare_report",
+      "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_044\\run\\automatic\\goal_001_001_prepare_report\\workflow_summary.json",
+      "checkpoint_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_044\\run\\automatic\\goal_001_001_prepare_report\\checkpoints.jsonl",
+      "error": "subgoal did not finish with the required task verification",
+      "notes": []
+    },
+    "workflow_results": [
+      {
+        "schema_version": "week6.workflow.v1",
+        "workflow_id": "semantic_lab",
+        "status": "failed",
+        "execute": true,
+        "subgoals": [
+          {
+            "index": 0,
+            "case_id": "prepare_report",
+            "status": "failed",
+            "child_status": "failed",
+            "actions": 0,
+            "unconfirmed_action_attempts": 0,
+            "planning_calls": 3,
+            "verification": null,
+            "elapsed_ms": 119078.9999999979,
+            "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_044\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report",
+            "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_044\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\task_summary.json",
+            "error": null
+          }
+        ],
+        "total_actions": 0,
+        "unconfirmed_action_attempts": 0,
+        "planning_calls": 3,
+        "accounting_complete": true,
+        "elapsed_ms": 119422.00000000594,
+        "final_verification": null,
+        "final_observation_id": null,
+        "final_observation_reference": "",
+        "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_044\\run\\automatic\\goal_001_001_prepare_report",
+        "summary_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_044\\run\\automatic\\goal_001_001_prepare_report\\workflow_summary.json",
+        "checkpoint_reference": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_044\\run\\automatic\\goal_001_001_prepare_report\\checkpoints.jsonl",
+        "error": "subgoal did not finish with the required task verification",
+        "notes": []
+      }
+    ],
+    "final_verification": null,
+    "final_observation_reference": "",
+    "total_actions": 0,
+    "planning_calls": 4,
+    "model_requests": 4,
+    "unconfirmed_action_attempts": 0,
+    "accounting_complete": true,
+    "elapsed_ms": 153468.99999999732,
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_044\\run\\automatic",
+    "error": "subgoal did not finish with the required task verification",
+    "notes": []
+  },
+  "status_reads": [
+    {
+      "schema": "week6.status_read.v1",
+      "trusted": true,
+      "age_seconds": 0.005,
+      "state": "active",
+      "snapshot": {
+        "schema": "week6.run_status.semantic.v1",
+        "run_id": "f31bbaa52dc94a2191033a4fca538ec6",
+        "case_id": "semantic_lab",
+        "execute": true,
+        "pid": 16060,
+        "process_identity": "windows:134380025262962060",
+        "seq": 4,
+        "event": "updated",
+        "stage": "executing",
+        "task_status": null,
+        "updated_at_utc": "2026-11-01T10:29:21.308202+00:00",
+        "elapsed_ms": 34015.99999998871,
+        "max_actions": 20,
+        "max_planning_attempts": 24,
+        "planning_pass": 1,
+        "actions_used": 0,
+        "subgoals_total": 2,
+        "subgoals_completed": 0,
+        "subgoal_id": "prepare_report",
+        "detail_code": "",
+        "write_failures": []
+      },
+      "diagnostics": []
+    },
+    {
+      "schema": "week6.status_read.v1",
+      "trusted": true,
+      "age_seconds": 0.007,
+      "state": "active",
+      "snapshot": {
+        "schema": "week6.run_status.semantic.v1",
+        "run_id": "f31bbaa52dc94a2191033a4fca538ec6",
+        "case_id": "semantic_lab",
+        "execute": true,
+        "pid": 16060,
+        "process_identity": "windows:134380025262962060",
+        "seq": 5,
+        "event": "updated",
+        "stage": "executing",
+        "task_status": null,
+        "updated_at_utc": "2026-11-01T10:29:21.355390+00:00",
+        "elapsed_ms": 34062.999999994645,
+        "max_actions": 20,
+        "max_planning_attempts": 24,
+        "planning_pass": 1,
+        "actions_used": 0,
+        "subgoals_total": 2,
+        "subgoals_completed": 0,
+        "subgoal_id": "prepare_report",
+        "detail_code": "",
+        "write_failures": []
+      },
+      "diagnostics": []
+    },
+    {
+      "schema": "week6.status_read.v1",
+      "trusted": true,
+      "age_seconds": 0.004,
+      "state": "active",
+      "snapshot": {
+        "schema": "week6.run_status.semantic.v1",
+        "run_id": "f31bbaa52dc94a2191033a4fca538ec6",
+        "case_id": "semantic_lab",
+        "execute": true,
+        "pid": 16060,
+        "process_identity": "windows:134380025262962060",
+        "seq": 24,
+        "event": "updated",
+        "stage": "executing",
+        "task_status": null,
+        "updated_at_utc": "2026-11-01T10:31:20.694450+00:00",
+        "elapsed_ms": 153405.99999998813,
+        "max_actions": 20,
+        "max_planning_attempts": 24,
+        "planning_pass": 4,
+        "actions_used": 0,
+        "subgoals_total": 2,
+        "subgoals_completed": 0,
+        "subgoal_id": "prepare_report",
+        "detail_code": "",
+        "write_failures": []
+      },
+      "diagnostics": []
+    },
+    {
+      "schema": "week6.status_read.v1",
+      "trusted": true,
+      "age_seconds": 0.022,
+      "state": "finished",
+      "snapshot": {
+        "schema": "week6.run_status.semantic.v1",
+        "run_id": "f31bbaa52dc94a2191033a4fca538ec6",
+        "case_id": "semantic_lab",
+        "execute": true,
+        "pid": 16060,
+        "process_identity": "windows:134380025262962060",
+        "seq": 26,
+        "event": "finished",
+        "stage": "finished",
+        "task_status": "failed",
+        "updated_at_utc": "2026-11-01T10:31:20.760373+00:00",
+        "elapsed_ms": 153468.99999999732,
+        "max_actions": 20,
+        "max_planning_attempts": 24,
+        "planning_pass": 4,
+        "actions_used": 0,
+        "subgoals_total": 2,
+        "subgoals_completed": 0,
+        "subgoal_id": null,
+        "detail_code": "",
+        "write_failures": []
+      },
+      "diagnostics": []
+    }
+  ]
+}

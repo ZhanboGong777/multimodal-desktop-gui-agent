@@ -1,0 +1,2822 @@
+{
+  "schema": "week6.independent.negative_grounding_live.v1",
+  "reviewed_utc": "2026-10-28T12:29:23.828970+00:00",
+  "reviewer": "/root/week6_replanning_review (independent Codex agent, not human sign-off)",
+  "scope": "Ended normal015 original records; pure parser/verifier/target consistency replay and unmodified strict-auditor CLI. No model, GUI, experiment rerun, production/test edit, process control, or fixture mutation.",
+  "freeze": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\action_output_contract_001\\final_source_freeze_001.json",
+    "sha256": "132f0f708246981e558f54c0ffef6cb576940091154a202cd1bc0f1a212a3dc4",
+    "bytes": 32363
+  },
+  "preregistration": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\preregistered_v6_007.json",
+    "sha256": "0af4aed273141d48db8f4ea4203d6e42a5d0012741becce2afed3fdf7d43e432",
+    "bytes": 4979
+  },
+  "source_binding": {
+    "code_pin_count": 267,
+    "before_after_current_code_pins": {
+      "configs/default.yaml": "301d655dbd7254e38fcf09d0acd991bf0a763c5d393be5ae349fa2d3e5cd1389",
+      "configs/week4.yaml": "e6d5941f2089aed81c1bce7485f216d1a0da2f35a271d67191289f54b5cd6731",
+      "configs/week6_accuracy.yaml": "989e81d5767d76fb64f60baf15f76d54fe4dfc22bfc5395c48255301e347ba9e",
+      "configs/week6_accuracy_persistent.yaml": "f7785b6c4c9c92320e7fd7292bdd65f189fc9290736be9c3ff70bdb72b56adbd",
+      "configs/week6_example_workflow.json": "8d1d9bcc7cb89f470262e89e41e7377e10a2e93cc92721ae67359236ece66006",
+      "pyproject.toml": "d3050d887709980ad50def520fb63dcc240c9855910571744edcead23f8a6c5b",
+      "scripts/benchmark_capture.py": "788578fe5b19b89dac82708dce4146ee1f5cb3ad4a0f76679025a2c70bb0c615",
+      "scripts/benchmark_ocr.py": "df2ead58e22cad1829e8e1199904f9d4420f6b603ca9c56f13de8863298389c3",
+      "scripts/check_coordinate_spaces.py": "e5915ee9b60d10ed7915498cf4f35a0257ace28bf4e9ebf4d380ca152d41242e",
+      "scripts/check_environment.py": "6089a17dcfe3813b2f56a3c1afd064af1dfc627c96c49b2eda0d8d81ad54c416",
+      "scripts/smoke_test_control.py": "f3b2b6b4df0814ac21bea9c6b66d56816ab42c46d21c0eddee6cc8ed8f7012df",
+      "scripts/smoke_test_image_processing.py": "24210af9e18bc87328bc6646d291207810969ba3c5db9cef27f99b2e3b41b811",
+      "scripts/smoke_test_perception.py": "09a1693912cf3a73731cae87d56ab46277f43d346eabe65fc12c9bf4da1d741c",
+      "scripts/week2_closed_loop_demo.py": "1bb1268550d529329d55b5b5ca5b3215cff2a595b356c7445a4c3b360e0b89c5",
+      "scripts/week2_control_demo.py": "43af09d03f5c5cc20bf9d99298e7d7a3fe7e3ac88a6a36515bcdb93383998ce2",
+      "scripts/week2_perception_demo.py": "8bcdf58e55d8a6e3b1815cd5f7177a58106ddeccbc5031046eb7e399c80b628f",
+      "scripts/week3_model_demo.py": "5986472fac5999897e561f69d022e6dd3d1f4c2b8fd4f3c991603c096a329420",
+      "scripts/week3_planning_demo.py": "f24656d25203e74256feff7738cf72e3cb798c01a435023d78f21777ff3a7744",
+      "scripts/week3_prepare_dataset.py": "31f603ed288dfe121c225c21cc1ac23ced16b8a1bffe5784725d6d47cd1d4f8e",
+      "scripts/week4_agent_cli.py": "c0acc13e47a9ba4afc77f6f73e96d99b80cd26287a3b7ed62dbed54e82c21834",
+      "scripts/week4_capture_probe.py": "d95b11646ed0d023773b78126def7c5b473fbf2f3fbaca55b23f5e66c3edbe3a",
+      "scripts/week4_collect_evidence.py": "cf7e63d0f44df3f4371f818bdb29dd90bf5ae14b7880edd0337d358b21e4f1d6",
+      "scripts/week4_e2e_benchmark.py": "83dd0170a8d35211d05e7a138f19f880ad9919f934f810dc2bd740b696cd1431",
+      "scripts/week4_offline_demo.py": "17d2a220800d0edbfe1591484b59c68474598993c0fe7c7f2756dc120c75ba40",
+      "scripts/week4_preflight.py": "066c47c69daabf7a8e91a7004c623b441a2344412b0271def4aae00a14c3a94b",
+      "scripts/week4_t04_verify.py": "8f627e96cb1c80f0a89ae238df83b141984599ef1d0dbd3f34931f4ceca8cd2f",
+      "scripts/week4_warmup.py": "73563fce16e9397c7e54b1b8c050da00f5a405291d759f1c9fc270980299dc67",
+      "scripts/week5_augment_pointer_ids.py": "3e7a6eacc8072f35f9e2328ef72cc949c551be325a303bd9f1df2e870d37452f",
+      "scripts/week5_build_report.py": "b3b161545e6d447fceaa2493978edf28e0838d9ca56682773c7997abba26eb52",
+      "scripts/week5_c11.py": "6bbaecd74b5fd56804f577fd02c135171b31d6dfa8aaa30c88aa0be91809773a",
+      "scripts/week5_candidate_grounding.py": "3734a56cce1b3c6f7bf1875eba894d19354d8a91ba8246ac928833259fb193d0",
+      "scripts/week5_compare_validation.py": "b7d433933bffff8b59230632a5a4ebf66ad4d66a2cadc1ce5c6f1679debf8ed1",
+      "scripts/week5_diagnose.py": "fd70362bc46915724656a39b084c196befdb61427f91800b2279650dd7fb9a4b",
+      "scripts/week5_download_assets.py": "339a8ea6a819e0ecacb3daf101376431558600ffc5b43f5e7ef882637ece5dbc",
+      "scripts/week5_evaluate.py": "51784896c28c8720e35c6fbf5755c13a8cadca818c606c55f2c1cdcaf8569e37",
+      "scripts/week5_measure_visual_input.py": "490b69af96a7a8fca0a38c8ec882b9a9e462f40240dd465fbf697b8e48840f22",
+      "scripts/week5_prepare_actor_contract.py": "6624a825338146409163cbec89b5262cb42974ae3900a0ec7aca228ff8cab5d6",
+      "scripts/week5_prepare_bilingual.py": "2a07519ba72f5fb9b857815e98dfd52b43d32a8517829b80cd1d898884d601cf",
+      "scripts/week5_prepare_data.py": "93914ac2b5fb56f02afa7da2175e12f8b77c2ffe808d86b49896c1ef9802ac94",
+      "scripts/week5_prepare_original_goals.py": "c2e9f2ae24b3be66a344b59521663a5796bf94891a4e1f4d82bce8c965c61594",
+      "scripts/week5_prepare_pointer.py": "87c4d5882a9793ec1f8939c607b5dd93f68e78064dad572f98feffcd20581a03",
+      "scripts/week5_prepare_request_actor_train.py": "dac9d37999cba5ee4991e9bec4aa35b5367b5b22f050f2b63cf886e6686788aa",
+      "scripts/week5_prepare_visual_input.py": "7288136e9686994fece430904d384484a47565c205ff8a17c0e3a9f01aad1d19",
+      "scripts/week5_targeted_probe.py": "2eec5ae5e89fd0379bf60f3323bee71226f1552a3c6d3a44d55c590fab8cf58b",
+      "scripts/week5_train_lora.py": "02de18f11522419dcfc6e80a7bc0bb52cfad7b251214e93b1bfc502c3d5f8200",
+      "scripts/week5_validation_ablation.py": "57f9fe8e10e7fc810024cd121c29524e5a8508ad6ef5e50980a9e0cffa859c80",
+      "scripts/week5_verify_submission.py": "67416804c54604c82ef169944ed3c59ef33a5246ea0c28d22a222d8050374628",
+      "scripts/week6_agent_cli.py": "e4bcff65ce32cc3e68f93e80bcff5e3ad44ede0dcc2eb7a802cfd8a58ea9b870",
+      "scripts/week6_audit_semantic_acceptance.py": "6f2c50c1ce5083a1b9425cc6656c1c0dea6ebc00be01dc7c6f1778e2badecd09",
+      "scripts/week6_benchmark_accuracy.py": "bcfd626bddd53d7e1d7a814ddfea7f3bb45461bd4d1902b64a9bbf38d09135fb",
+      "scripts/week6_benchmark_accuracy_live.py": "fa8c56661fc4e2eeb682d248094d44b4897f5f17e20b32cce79d21d5221ccc6c",
+      "scripts/week6_benchmark_perception.py": "e3266c5c2b1c64c49a2ccdb2b9c24a634eca7024fe56792b94dd09ab5d688ce4",
+      "scripts/week6_benchmark_persistent_external.py": "d363c464e6640656066bdcde4d60ce7f52fe130ea099383d84a186990d9962f2",
+      "scripts/week6_benchmark_persistent_ocr.py": "dadfe1a7c274633042d58fe2c9039336cd1b5a6d2b80ef780d3e066ed0e5ba56",
+      "scripts/week6_lab_acceptance.py": "ee754ec29718abc074bddf9b06543d8a14c87c4ec57fe01cecfcdddfdca107ee",
+      "scripts/week6_local_lab.py": "bcafc8c688ce61aa1c1e8c93b26d8721a79cf6af1171af1d2b386b00f661d761",
+      "scripts/week6_model_recovery_probe.py": "2f1b6234a03a6f06adbc383ee849262bec41a2bdcddcf51318f0377d27c15107",
+      "scripts/week6_robustness_demo.py": "7d3d1591d2fc7e910c4727a203a14f87e38d82c228d11fceb35c9b553c93a0e7",
+      "scripts/week6_semantic_acceptance.py": "7b5b2c66f59d2ac0467d0a4d171f6e58c5c61ec729d7363025deb7820e09adcb",
+      "scripts/week6_status.py": "69ba6c3100bdb5cf7c0bd588dbedf8080905b6863ae0a2c4b6ae4c2f29552e83",
+      "src/gui_agent/__init__.py": "ee56b669afc4c9e288b9cf690f14d38471a30864841e3d4664fbcc5924d8c338",
+      "src/gui_agent/config.py": "dc138edf320423b373e5c932b86fab14e2b0439fe8d251c4c439e74c6124b91d",
+      "src/gui_agent/control/__init__.py": "25fb0fdc039a9578d6214de7a2480a3583118564e01a126c54f62828e04f65eb",
+      "src/gui_agent/control/actions.py": "77547cb650340f85cfe663ad08a8ffded0708b529adefbdc35f79dda91e80d07",
+      "src/gui_agent/control/executor.py": "67249eec8ba616ebf97f2b8e41296bca8a42358cdea71501000fdbd07030b733",
+      "src/gui_agent/control/safety.py": "748177d41b5b68af7fd59156749b343c16ffca4f8fb30356786da58a04e2f65d",
+      "src/gui_agent/coordinates.py": "474d897cbc5c85461003e5060951318690ed5d3d1b6a5cfd64a56aa4574ed5be",
+      "src/gui_agent/datasets/__init__.py": "14c8ad57d3d5c18dcc400bef21378868155c7bb111dbb2e92c45fdf10df1dca8",
+      "src/gui_agent/datasets/base.py": "3be5bf346a55bd62267f43af900fc8acaf27bc127c3603d205841d9bfe5ff05b",
+      "src/gui_agent/datasets/mind2web.py": "4849b6ed54e21fc33417f108a2bc5fd6aee54dff1ec4c73c1017e6e45e561e83",
+      "src/gui_agent/datasets/normalize.py": "2c878806422026f71a34d0a2195f5581f1e6b4071a9faa08f83307cf5bc0e79e",
+      "src/gui_agent/datasets/schemas.py": "934d5d5105082a80b4c56c099b9f40b2fbb43191068415fd1a20237ddf5a7753",
+      "src/gui_agent/datasets/screenagent.py": "e20f44432514b3012e5bdc6efeda37df661d0737743ebe251afdc0c6885e48be",
+      "src/gui_agent/datasets/validation.py": "4e8786ce9b8d0321f195b92d1d5ab5cde1960734ce537ce69752be12f61d6ad1",
+      "src/gui_agent/datasets/webarena.py": "f8248e58b0d1e4ecbc881afe9972d382c0d0f1d06259ab97db1604bde1c68b9c",
+      "src/gui_agent/finetuning/__init__.py": "50c3b0497f5a6551552495728e24df6589c94607f720c9a6bcfda2cf4ab18599",
+      "src/gui_agent/finetuning/action_constraints.py": "34dc20797581413695d809a6920389a726820cf547ffb68899559ddc242a4de9",
+      "src/gui_agent/finetuning/actor_contract.py": "91444f8c33e50f8584634ea1b5bd604f640c37e8196e64bb8670f121ac668d0c",
+      "src/gui_agent/finetuning/c11_training.py": "eb6c5158d0a71b33fa9535a3724264373f767b98767db3951c8bc1380c7abf59",
+      "src/gui_agent/finetuning/candidate_gallery.py": "f6910c65289e5ee2b01b926a5b7054188e794c975768d005d1e5e46644f93b01",
+      "src/gui_agent/finetuning/candidate_grounding.py": "42e9fa849b191e2edc047c99ac74781e889b2e7ba05336a517bc646de89f6e50",
+      "src/gui_agent/finetuning/data.py": "1070201cde6850da855f26daeb6dc4848a5bd4fdbe836d55d55bf9c77b8ac824",
+      "src/gui_agent/finetuning/diagnostics.py": "3dac64d0df27df9a4499b76b6391ce871692179fa487dc3ee474ab5cd4ccfc2c",
+      "src/gui_agent/finetuning/embedding_memory.py": "cf23ae0a2959d8dcb61c4425ffa9876f33111b11e5406d61d47e31c196090bc6",
+      "src/gui_agent/finetuning/evaluation.py": "183ddbdbc2cfa9939dfdddd6bf0bd9ecef301b8718ec49df6e14019b5634f868",
+      "src/gui_agent/finetuning/native_spatial_artifacts.py": "46b81f01870f32cde1e1b92a525b84dd99726507293c32c86b48f20382f71269",
+      "src/gui_agent/finetuning/native_spatial_grid_artifacts.py": "fe0e058624de7a77c4efe3315353123b44f7f7c6983476e1597999a29e6a149d",
+      "src/gui_agent/finetuning/native_spatial_grid_geometry.py": "4415c76a62a565b529391424e2823d684a3d251c0abddeb688f2be4817862cef",
+      "src/gui_agent/finetuning/native_spatial_grid_head.py": "194a016fdcae500fd6f663ac646b45bd074e1de23831e6bc1479d9986a48d073",
+      "src/gui_agent/finetuning/native_spatial_grid_inference.py": "257ed1e78147a20137210812fbb58bbd8be5751b4c50a2d861b8e0af8414c1fb",
+      "src/gui_agent/finetuning/native_spatial_head.py": "d89966267e14eb521163c0e5a856ebe341b04d5c3d91f0ff4bb07719c330e62d",
+      "src/gui_agent/finetuning/native_spatial_inference.py": "d4cc30854d933c02b7c8e0ae0cbea46b2ccec478bc1835e1a525d9f22a2a4adb",
+      "src/gui_agent/finetuning/numeric_value_loss.py": "57fcc2d98650d88d67ae6e49c2aee338c2cd3d8fdeaa69b0bc088fff2c7af621",
+      "src/gui_agent/finetuning/offset_geometry_loss.py": "a019c4c76907fa93ddc8e6b6b9618b340e7bd81c118acee7216bc4f516579866",
+      "src/gui_agent/finetuning/pointer_candidates_v2.py": "32119f7d64a7428c5075db0903203fb73ab28f3d832c779789a958570cc964ff",
+      "src/gui_agent/finetuning/pointer_candidates_v3.py": "be1a944c6b6b0b3b48337fae7f3ff662edf83804fd50c1c18c822c1fe8b0774f",
+      "src/gui_agent/finetuning/pointer_numbering.py": "83243845690285ea07aab33970b1bba8f9e1980ffec2cfdfd841a951e4a2ce24",
+      "src/gui_agent/finetuning/pointer_protocol.py": "a9a33226d9883d43a717eb2c0f942860be8f59f2514a90c9666b776d63831aad",
+      "src/gui_agent/finetuning/prompts.py": "184a38d760d51c941a954de29c9dda4e973a24e14fa298a0f97bf338e7fec9b0",
+      "src/gui_agent/finetuning/request_actor_contract.py": "2cbd39ab533eecb47c8e85f16dfbab463786ac88ab06b8070eab6452d3f70351",
+      "src/gui_agent/finetuning/resized_contract.py": "24c39763b768bdc77d6e7450352f72a0cfaeeaf51d3b60fe68246456c3270b2c",
+      "src/gui_agent/finetuning/step_contract.py": "b5298055b78abad081d45b3ca1c97e37be97d35ad673001ea662d1fff05c1236",
+      "src/gui_agent/finetuning/structured_ce.py": "43fa93ae9a9d62d909fa152f4a3161d5c985e1a9dd6f7ce8fe38bda7511063e5",
+      "src/gui_agent/finetuning/t04_prompts.py": "a79c613cf7b403008a485f0a3d4a2bf5b980387bda1a8bd543eeb591316c1ad3",
+      "src/gui_agent/finetuning/training.py": "f5b14acbd01e3e13c33a9f575fd15850c04e0b5fe7dd74cc27e2fdb177244849",
+      "src/gui_agent/finetuning/visual_pointer.py": "e31ee8c08667acc24d1a949ffefb43a07f22aae0f1206a3f69631717cdcb98f7",
+      "src/gui_agent/finetuning/visual_pointer_inference.py": "90d015a9fc179080392354b892d4a3fa84ee15d700a38c98242ee7d2ad7abe7e",
+      "src/gui_agent/finetuning/visual_pointer_input.py": "4d9d0e711526e0e78f455a8bcc2247048ef76ab17f0320f94c00cfe0ee130a3e",
+      "src/gui_agent/finetuning/visual_pointer_prompts.py": "d43f8a6ff2c14b10129d03660e6c90908a57c788f465cc8e8566b274786402e4",
+      "src/gui_agent/finetuning/visual_pointer_v2.py": "8bed0467d37d0628fa78d17ba9a309a09866ea03f6586e5c19b2fcbfa38b4f74",
+      "src/gui_agent/models/__init__.py": "ea363710fd7d7d8616ecaed1504d9d27af6667d53b79c1ba8c959cbba5b2f3ef",
+      "src/gui_agent/models/base.py": "22b120a3149adde737bb27f2eb9a533d174fbe014dd7d92758f716b162fc851f",
+      "src/gui_agent/models/langchain_adapter.py": "c5eab5dcf611547ca871b387a67ccfc26ff1ba1d0674ae648b580b5991788041",
+      "src/gui_agent/models/mock.py": "a9ded660c48b14755be2db76d680cd2486410c890c98102172a9e42a2e4bea78",
+      "src/gui_agent/models/openai_compatible.py": "74470bce82fdc7c41a32b59f4390226f22f4a42eb30a68535e6df92e678ec2df",
+      "src/gui_agent/perception/__init__.py": "a521ef24fbd707c3b683dd64fc2e7d9f4ff719bb21f8022cd7d09298010bc139",
+      "src/gui_agent/perception/capture.py": "2e4b65983343bfe2f264a580287f7102ede60a4b201d77a585290c7b20210717",
+      "src/gui_agent/perception/grounding.py": "b0ca16924c280f7817e03bf1cd7951d07751a60d69da442e1af440d0840afb77",
+      "src/gui_agent/perception/ocr.py": "0f0c42bc4b9537475adcf7c185672c3ee63db11cf662b870599efaca755ff28a",
+      "src/gui_agent/perception/preprocessing.py": "afaa9db640c2df42ca8c3758e765941e579e2d400e6c66231b4d98469495618f",
+      "src/gui_agent/perception/tesseract_api.py": "73a2ec0a6f03ba32b28e137afcc24399c87d73ebb02b43c1aa52711be26feee4",
+      "src/gui_agent/perception/ui_detection.py": "4cb75d461fd9ef55fbe3671c9efd7fd72a64148a2a6e37eccdf3f7ff3e908a5d",
+      "src/gui_agent/perception/visualization.py": "0c787c6509a3a631a5abd81a28aaf26b67e06b65870d5781817336949adfa072",
+      "src/gui_agent/planning/__init__.py": "51311a72d5dccb5dec7eae267976747a192543cb1104f9183e3085401b8f3daa",
+      "src/gui_agent/planning/parser.py": "94fe09f8d72fb50338e209d453f5abded95a1fdd811e2abc2396d0f6c4955b99",
+      "src/gui_agent/planning/planner.py": "54aa1d46d94205d37b4d53c56135cf43aa9860a00e2a06191c5a1ddbe79e7c08",
+      "src/gui_agent/planning/prompts.py": "c471c406a2ec33ee23a85e911c1eeb84a08bd7e27204932c75e0ad994e4e5d24",
+      "src/gui_agent/planning/schemas.py": "0f6d2a7c668daea28d979fb73ebcd4af207f4defaf34ee137d676693ed83e357",
+      "src/gui_agent/planning/semantic_workflow.py": "ae50b05e029e0ee5330430ec67d5a5bb0d49fe62487d47ecb34b914fcb0d8337",
+      "src/gui_agent/planning/workflow_decomposer.py": "7e1c03a67069b946056cbcbbb63f23377c5cd869b1e8c46a4c292ac6ec85a6f0",
+      "src/gui_agent/recording.py": "5fd8cbcade4bc3a85e77f7482445274c561bb8ea5cf8e9b534c5d8fe915aa187",
+      "src/gui_agent/runtime/__init__.py": "524d1eecd51df0a13d173b25c8e451c843c82f8906391db32dfca11d42afb6c8",
+      "src/gui_agent/runtime/action_adapter.py": "222686942e4623d4743ac50e6da87599d4ba95d84ed9d1d855de089324a0eeda",
+      "src/gui_agent/runtime/cursor_parking.py": "6ff4f5396a869092d678db2627bdd22241a1b20e33ee6d55b929fb289be27eaf",
+      "src/gui_agent/runtime/message_regions.py": "6e9f86346a361ac529448175652e9c657ea3e26b6266a006d40e6aaa1054af48",
+      "src/gui_agent/runtime/monitoring.py": "fdfd51964074385e683c20b952c156bd252fdc32dc49b2e7b04849a00ab8be5f",
+      "src/gui_agent/runtime/observation.py": "c882b1a8e7f20a8fdcca58637139c7b1d606d61b9771968801df1572e32981c7",
+      "src/gui_agent/runtime/processes.py": "a810e7a8e9c0e309dd5c952561aed352cd1750f592702ef283d35d4d8c4a04a3",
+      "src/gui_agent/runtime/provenance.py": "19979ab84dec9c6dc8e50bd149d24d02c7efcb403daec4975d036117c72bc7e4",
+      "src/gui_agent/runtime/recorder.py": "0214800eea60b994f24d8d5fc3cace6f590d645b5039573e9c88546dac4a84aa",
+      "src/gui_agent/runtime/recovery.py": "f69c0f2e268213ae265b8324ed0f30caf3ed36c59ffaaa78884d68d3e59f946f",
+      "src/gui_agent/runtime/runner.py": "91282ffc0cdc182dd6e727fb485ddc5d7244360200939c0521da56bcd8815511",
+      "src/gui_agent/runtime/schemas.py": "06aa355ba24ed50a6307d7fc84cd920dc91b81dc7d844ec68c461cb614b5f6f7",
+      "src/gui_agent/runtime/screenshot_quality.py": "291ff4527eae6d2ece467370f15b3175cc66b5e7deb38ccbfae690e76ad922e1",
+      "src/gui_agent/runtime/target_grounding.py": "7ec229441d3e34cf89b124a47b630754c5e99e4987727a4b594c500e17d1162f",
+      "src/gui_agent/runtime/tasks.py": "a88f8bf3c2fd2c0aa11518c081db7555982f0f3b5041b152e1d943a49420e4f2",
+      "src/gui_agent/runtime/verification.py": "abc72375f2959fb765fb53dbf4bbf63401513e5cdfeaeb445d0c148b0be1cd4c",
+      "src/gui_agent/runtime/visual_grounding.py": "3e12a9dc97d45a6d3635913adbb477d07fa6dde3e8f9798c3431557ac4f22bcd",
+      "src/gui_agent/runtime/workflow.py": "13a6ae067662b2ceda1f5082bb9ed0c544f201be06b5fb21cabdf7f7098fe889",
+      "src/gui_agent/schemas.py": "51dda2400bf39b7793609235d3d76884fcc96047e008fd3a8076551bafa82480",
+      "tests/test_action_adapter.py": "74ac2896f4082cbc81a58415cea029d00fe05a0a557b04a500f969bcedee6d97",
+      "tests/test_capture.py": "056cddbd3183a7c6a46ed4c570097ce33410684ab124e4b1e5223b3f4833f5bc",
+      "tests/test_config.py": "5179416e7dd7db5644ab8e2bb836ac835b9fe1bb1b12d3c74fed18e9f8026755",
+      "tests/test_control_safety.py": "8cc666b9ebb2a0f523e7ea393eaf0dce44c6a55f287243b75370b67ea5b7ca63",
+      "tests/test_coordinate_mapping.py": "9e0d13b5ccdc5f98a90e727d113c58c801c5d637c8cdf618ada962c38c5bfde4",
+      "tests/test_dataset_adapters.py": "e7cf4a0c7ab68ebd86e7a04da6e0e946e93e3ea53f58490972c6209323677a30",
+      "tests/test_dataset_schemas.py": "1c284bbff3918733adcd079a304cd59fdf63625f216a3122c110e12eab05a23c",
+      "tests/test_dataset_validation.py": "5b8c88f6341d7a32b3ea544ca5d718025a367068c2e55eec3dcbbb50e4e4e490",
+      "tests/test_documented_counts.py": "baf2072efff09e03bbee35ba984bb969c6d5ee2f5cc552c72cb654a2d2072e24",
+      "tests/test_grounding.py": "773ed682f724f91df9720b643510541f95a2b23971b356dcc10aa2707b89e0b3",
+      "tests/test_langchain_adapter.py": "0c476b438847880537aacb05cbce9a9a31191c4e067fe0f1d90725a367051894",
+      "tests/test_langchain_integration.py": "1367b564fb12be31124953e02efe90abb2fc455f28bd758e1828c6589c1abd0e",
+      "tests/test_message_regions.py": "2c39003015d0050d196bd2d0536dc8f69a2bbfc64a034671d6e1cf409815235a",
+      "tests/test_model_config.py": "260e84a5209d5ec1c5e2fd4afa4e9cf4e1374a9c50a07d37f7fe4fa055de06cc",
+      "tests/test_model_mock.py": "63ceba025bd76a34957a57379cd4a93f4dea2b89827b3f8f095b5a1c48863ec1",
+      "tests/test_ocr.py": "d3eab7887b8a10c4342666a83c90cfa97a1a2517d12d8511e0018e543a07e11b",
+      "tests/test_plan_parser.py": "94260c93b045739a40da0509989015fca6b5c9da6893ca586bcd0808f9b83b3f",
+      "tests/test_planner.py": "e2981d650822e2e4f82f7abbe0813365794103035550eaa833563d9e8ea72211",
+      "tests/test_prepare_dataset_cli.py": "19be43efdda0343128845e6dba4dd80cc52febfc7aff453e66025cd74ab63bec",
+      "tests/test_preprocessing.py": "efac6c05597623371f856f6a187df017d787581e3a5f9dbb0b1e62a4a2e7d552",
+      "tests/test_recording.py": "25ef08bf8f5049834fdf1e22918cabea33c3259d85a0b1f9110ee9684b3edd5a",
+      "tests/test_runtime_observation.py": "1aff83b62c4a7e29494c69d3345b0d9b391798b418b70c4758b238b7f729a5fd",
+      "tests/test_runtime_processes.py": "6da691bd6900ff55e9e000551b5e181fe63d243dde511df4e476432642f056b9",
+      "tests/test_runtime_recording.py": "4cce79846fb324d22a7d3f62e85283f7d1bbf2becd1f54ca6855f7903fd7d140",
+      "tests/test_runtime_runner.py": "34342b57f4bad8a65867c2299b53f041c15ae2eeb467404ba36d0929f58a6c85",
+      "tests/test_runtime_verification.py": "623076aab008111eff5e761d33e3fd931734d4dd857fff7d6a354926781fc10d",
+      "tests/test_schemas.py": "83bfa9b14c1ed9610b262932930d4db3fc5d75485a1df3f8326864bcda08bcd9",
+      "tests/test_smoke.py": "3c11267f860541e3ed3cdc1b6462e98e80a03372f3c8b7110db4fa5d9218c24f",
+      "tests/test_ui_detection.py": "ac62b0ef45a95d6758bd3702036d90c708aa1e6e2f353c328c059cf99ab9dc62",
+      "tests/test_visualization.py": "095fbed55f4792696ed29c42a59ec1498cf27b12781bbac36c3af2223cb4cc57",
+      "tests/test_week4_cases.py": "eecb012b151d993df20f9a65d076eb1543112552fd6286456917131e61f8241e",
+      "tests/test_week4_cli.py": "f145a75eae304e0935b74fea740e98bc38979ce1a11e24ac6ca8f370cdfe16e0",
+      "tests/test_week4_demo.py": "dddd6868ac03687544870663c66d724090a32ee120ea63fac56cf2b991bbe062",
+      "tests/test_week4_e2e_benchmark.py": "b84e1f428e54c58d34ecbd0aee140e7abc53c54f39131841dd0e83df78c83452",
+      "tests/test_week4_evidence.py": "97f894d70d0d32891dfe578315b8d1d84e76655560947f81850a2ac7ff1f24c3",
+      "tests/test_week4_integration.py": "f57cb331d3871b91b99f748e85ea1923e464db6aac1fb5f23f0ffa63810114c2",
+      "tests/test_week4_preflight.py": "96a675fae44c0630a79425618fa01c27017bd44fd75ab79228266d9791ef92b7",
+      "tests/test_week4_prompts.py": "053d5f9d4e1169f2722ef764cd7e72e0d164a19d0a7f66ed6876238b9223b1eb",
+      "tests/test_week4_warmup.py": "00d41b8c27e2c62a8fd942cc7d6e3394f377d24776e61593b7524098587099c4",
+      "tests/test_week5_action_constraints.py": "745f9d67dadc317c1894c4662651da3825a24ef1d84830f300d870523ee1b07f",
+      "tests/test_week5_actor_contract.py": "e16e82cba73a4b79534355586ffb95d538dc5e3ace6fe25fc997fe09aa031eff",
+      "tests/test_week5_atomic_artifacts.py": "8e4db26a3c5acd9b0ded96f68dc5657a59c4c29c306c0e78fb19aeae16baad64",
+      "tests/test_week5_bilingual.py": "92ef08d99d7ba5f9b9c099871baba3f97d2ff268c53af35a299854dba1111692",
+      "tests/test_week5_c11_submission.py": "2fd1eb373d30382be757fb1c500da8b93069a531b1bfb254079fcc39cdfeac52",
+      "tests/test_week5_candidate_gallery.py": "946c046eb5b50b4296b6e80a25275dad0ffbed90fd0fe7405a2aa78c91da53fb",
+      "tests/test_week5_candidate_grounding.py": "716ba31f51fcdaee8e5069472ea66e4fd20dc29d3882b4e7c9bbd7c21b2b060a",
+      "tests/test_week5_compare_validation.py": "2969a16606a1125facf80a5bb2d0b3d553b1bf0efe9fa917006c4942050f5a0d",
+      "tests/test_week5_cursor_parking.py": "9b4bc06f3e7e124daafb3897de2568808b9c0739c0ac48ecbde41945026b18fc",
+      "tests/test_week5_data.py": "46d944f1a603edae4caa1898b0492ba03083add211e09b3dd8370fca34d60a04",
+      "tests/test_week5_diagnostics.py": "725e9114919ce0ed92c8a04920fba8b164f37322ec3efbde8b70c1ac3bb993fc",
+      "tests/test_week5_download.py": "32b858b66c2be92556291349c7e12b49791fdbe0589038cceca4c456df37373f",
+      "tests/test_week5_evaluation.py": "7f808190eb253186a1392c1ef5b4b6a30536d9a31c44b66677d9e97184fe6271",
+      "tests/test_week5_gallery_protocol.py": "8a26559631fe29685efa5fc0f3a62ea97972b6abe900f909e6c3e495446a60d3",
+      "tests/test_week5_message_header.py": "dccb2208524ba234d54d8f38adb0dea9961d798efabed9a04cf843af0c546f8d",
+      "tests/test_week5_native_spatial_artifacts.py": "91fc583390d29f40e79ccd41576cf62bb20943b8febddc7ef24e3c875fe1d0ec",
+      "tests/test_week5_native_spatial_grid_artifacts.py": "efaf72d9019e84377bda25312d1de02c104aa5240bede623feefeb2e395dfe11",
+      "tests/test_week5_native_spatial_grid_geometry.py": "4e2ab011f000c3b976d8d006635deea46ab7cb99427cd8700ca9c276289fec8d",
+      "tests/test_week5_native_spatial_grid_head.py": "06ebc16b0948b29cb3bb1903722b955b8c3d0c5be46d33224a917e22cec3fb84",
+      "tests/test_week5_native_spatial_grid_inference.py": "154b564a589af702202f2da05a0a86de81f6bf1a84fa52c98c33bab4a40f6d1d",
+      "tests/test_week5_native_spatial_grid_refine_loss.py": "450df4bc884e20722b004305f3695919cd84e06bbc5d0e5b94f8bfe584314080",
+      "tests/test_week5_native_spatial_grid_training.py": "184cb72725f9207b90ed331ca7d2311d514f9b4ed186727cbba9bc04c3c5a058",
+      "tests/test_week5_native_spatial_head.py": "c9f8d434d1cab3ac6ef0ba3eef1e99b6e9dd2851b449c7eaec12f6f58fce5a26",
+      "tests/test_week5_native_spatial_inference.py": "2c32e6a27182ea0f03ccca3a27fa9fa348777e2ebed5581c8d0947498612fe8d",
+      "tests/test_week5_native_spatial_stability.py": "0e0598d88f1e7c51f87923c3e382f88bffedf18abbad40524cc9142a6b9bfe6a",
+      "tests/test_week5_native_spatial_training.py": "1f9edbd838c414a56dfe0b1bb6325a01d776614ee8f01f7ae9795b87b729c862",
+      "tests/test_week5_numeric_value_loss.py": "54d8af14249a3d50e510b96c405ecd06c2a59dddc7b331fa664daea5d0dd08f1",
+      "tests/test_week5_offset_geometry_loss.py": "da825646d7f8a39bd8c7883fc8eb5ba9bc849904dd8b7aec4d4fa3b29fc7ccce",
+      "tests/test_week5_pointer_candidates_v2.py": "49fd58eb6f1be0623ef453c94f3462bb94ae4c7a506e99251d55d70443ec2294",
+      "tests/test_week5_pointer_candidates_v3.py": "ad5c6cb27a0ae80acfb50c041db1df733bf2b38047c10aafbc68d586fd5c3557",
+      "tests/test_week5_pointer_context.py": "11d7304b34c818a19c6add7ed1225af6a59f6320b670e1f64429a10933b208ec",
+      "tests/test_week5_pointer_numbering.py": "b4cd31d2690527eee38e6e2108209239c2e1257f5c367fb84ece8a03519381d9",
+      "tests/test_week5_pointer_protocol.py": "f56d4a46ef5e8dbd437b52ee6c177a1abca851dd6e7e5c67b8c52c472421254e",
+      "tests/test_week5_prepare_pointer.py": "06fca7bbf816e314d6ac75a764392058aafeb755c502ef93d57d0886f83eb4cc",
+      "tests/test_week5_prompts.py": "1bf9e757880cc1ea84f83798edfd3261fddca7951e214dc7908897ee967e7b2a",
+      "tests/test_week5_quality_runner.py": "c11c053e74a3453ca0863bc76507f21a8ef12940981e71851225b65d2a76c88f",
+      "tests/test_week5_request_actor_contract.py": "b4f246699c9bbec5f529e282769d96e157ab2049a24faf537b97fd80cc847ee1",
+      "tests/test_week5_screenshot_quality.py": "56b15895ae6a3241e352ec1186b43b8fa93ce226eb2cc779813f6dc37b6ec9db",
+      "tests/test_week5_step_contract.py": "cafddfb338c134bd54564dda2295829fbfd3c31150bfb2174ff7ec27b1527736",
+      "tests/test_week5_targeted_probe.py": "976df8ecbd1d771b78b7697649c7d871cbdbc3bab48367ad83e14c72de63c30e",
+      "tests/test_week5_training.py": "a11b48b27260a38a95ff5894144fe31dcece03d32bfda8cc27a374a753d05dec",
+      "tests/test_week5_validation_ablation.py": "8e1916c796d34cecd4afcc16a177294b49043e66a0f41118442b0d69647491c3",
+      "tests/test_week5_visual_pointer.py": "74462782ad5f88758075e853abaeb797d48c7d7fd9166733698146d4ce509cfa",
+      "tests/test_week5_visual_pointer_inference.py": "34ce8249d8a40c07f8c88257fb91c48700797664714df4d3e7a93b21e5f00192",
+      "tests/test_week5_visual_pointer_input.py": "612d9da66ae598665e6d54580271c3089b54a8b4d001dbc02a35f9c4b04c00b9",
+      "tests/test_week5_visual_pointer_prompts.py": "c71cdb2a803013aea8372136641cb92ae2e5737aa95bae633737a37eef58e16e",
+      "tests/test_week5_visual_pointer_training.py": "5aad2bb7b1735e7d4649d0a684040848c9e3882f26721ca0c363c7808cfdad72",
+      "tests/test_week5_visual_pointer_v2.py": "2a059b8678ffefba4eb1e3561087370091c13c4a204adbdd901dd75ee348990b",
+      "tests/test_week6_action_output_contract.py": "ce8aa837cdc88115dd90d9ec9547fbfd0fe57a04b0604557f122e86d8c15994c",
+      "tests/test_week6_action_output_contract_review.py": "728c4da3e46a7d063c193fbd6928c9c547d7cfcdb46943d91ce4dfc5338b6f35",
+      "tests/test_week6_auto_cli.py": "3e4c8823834dc1036abbf642d62902d73204ba4cf52390dee78f18db1eca74da",
+      "tests/test_week6_automatic_decomposition.py": "b28ec24c5d06982f1160c3b110f706b0461113eabcd26f4c7d5b1365378000ad",
+      "tests/test_week6_cli.py": "b42915b12063c0a0e3a72a19207364420fb416ae127b27ad4a94ea3fef9f0ffd",
+      "tests/test_week6_full_requirements_review.py": "448a5a6ecca04db745018acd2dd64a1994d3cbdc325056b20b9d4f25727cab33",
+      "tests/test_week6_grounding_consistency.py": "bfbacd519be5449f5bea6bd0c7527dc4e0681ac725dbaa7877077abda9b6536e",
+      "tests/test_week6_grounding_consistency_review.py": "e330220a730580d8364e4fdd70e638f0c6796eea50961923f0d1c2d369c94478",
+      "tests/test_week6_monitoring.py": "9bc55578b2a2a2fda5925178a872ffff42c037a78119add95958af4685429ed6",
+      "tests/test_week6_observed_departure.py": "6783960bec854eebda4b6e38f57906c38918cf9f2a27722df4c0586f92a248f1",
+      "tests/test_week6_perception.py": "de3744925bf2b43f8d28acacf09ea1aa3b36df6f209ccec3c3b9cf0e1bcb64c9",
+      "tests/test_week6_perception_accuracy.py": "c626276a75aa62bac776be608beb2ad0ef284927f6d64920057476a734135750",
+      "tests/test_week6_persistent_ocr.py": "55e374249e63e0de0ee1ea59f0a3737f45a4813d94a50a8a852d2373e865044a",
+      "tests/test_week6_progress_contract.py": "b824f18476b730c477a8a318f51b8757693eef3dda2f285d58a16a949a6f61fb",
+      "tests/test_week6_recovery.py": "324065c177810ca4e580a4d8c0b7df68448188c8d90537909841056d4c939cfd",
+      "tests/test_week6_rolling_actions.py": "64c673454e065b1df6916914749cb7b6a9abf2336c99233c1750ad134a48a38a",
+      "tests/test_week6_runtime_v2.py": "9da574396066310972560c486132b73ae9c99bc08a58d9ef059b96bd8fb4ea0c",
+      "tests/test_week6_semantic_caller_predicates.py": "bc8c290bcecbd256d18ca33e47b7b5e333d4429c3c48da2bd578eda92fc5819d",
+      "tests/test_week6_semantic_conversation_repair.py": "b71b133f1b2555e61bec6b11a13827fa5a1145afd65cd09003c53abfce3843f9",
+      "tests/test_week6_semantic_conversation_repair_review.py": "3ccdf8d0ee3771098acb0570a0069786b81c94ea9e4c98a80878b0293b23f88a",
+      "tests/test_week6_semantic_goal_grouping.py": "30398765aead3706e5317d6e9f20c8c11fdddcc8d5bf9b40b19040327fea60c7",
+      "tests/test_week6_semantic_live_monitoring.py": "b188bb0ea5aad26ede8ee2638f18acbc3d7e25eb825a5cd1ea0e0ee2a1e496f5",
+      "tests/test_week6_semantic_monitoring.py": "c7975740294ba8b7148d610ef46ff29465bde19a2e9d7c31a43fca47f6217331",
+      "tests/test_week6_semantic_output_constraints.py": "36e5c987532cd3caf54fc669db3c26ffdf1e5ef9e4d40bcff747e99ea2c36f58",
+      "tests/test_week6_semantic_predicted_postconditions.py": "c3fbbf94d656676d1a195c773a5e910ff7ee9508036032926c14e4145c30e2f5",
+      "tests/test_week6_semantic_repair_feedback.py": "b51411546a15ae0c792c58ca1d567ac78eeca42b3611cd821f115b3e93b8066c",
+      "tests/test_week6_semantic_repair_feedback_review.py": "7898959fa7f0276100a2e331faf1043d6d33ccb14019abbc517559c8d3cf6d78",
+      "tests/test_week6_semantic_subtasks.py": "a0fa608d2e893e4a3bf5072591edc5e7b24411a27807c9cef534eda7cfee66e5",
+      "tests/test_week6_semantic_text_context.py": "31ec9d4ce0ba60184f4673e3c9b2b1a4cdb66dbfaf8c6eefd9ab2e90b458f38c",
+      "tests/test_week6_workflow.py": "d3e9996ce96c4a15973c1478ad2d690d29f8c69fb467cce86c85a04f4d1e817d"
+    },
+    "code_pins_match_registered_freeze": true,
+    "source_snapshots_exact": [
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\configs\\week6_accuracy_persistent.yaml.txt",
+        "sha256": "f7785b6c4c9c92320e7fd7292bdd65f189fc9290736be9c3ff70bdb72b56adbd",
+        "bytes": 492
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\pyproject.toml.txt",
+        "sha256": "d3050d887709980ad50def520fb63dcc240c9855910571744edcead23f8a6c5b",
+        "bytes": 973
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\scripts\\week6_agent_cli.py.txt",
+        "sha256": "e4bcff65ce32cc3e68f93e80bcff5e3ad44ede0dcc2eb7a802cfd8a58ea9b870",
+        "bytes": 11687
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\scripts\\week6_lab_acceptance.py.txt",
+        "sha256": "ee754ec29718abc074bddf9b06543d8a14c87c4ec57fe01cecfcdddfdca107ee",
+        "bytes": 13013
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\scripts\\week6_local_lab.py.txt",
+        "sha256": "bcafc8c688ce61aa1c1e8c93b26d8721a79cf6af1171af1d2b386b00f661d761",
+        "bytes": 4607
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\scripts\\week6_semantic_acceptance.py.txt",
+        "sha256": "7b5b2c66f59d2ac0467d0a4d171f6e58c5c61ec729d7363025deb7820e09adcb",
+        "bytes": 10453
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\__init__.py.txt",
+        "sha256": "ee56b669afc4c9e288b9cf690f14d38471a30864841e3d4664fbcc5924d8c338",
+        "bytes": 67
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\config.py.txt",
+        "sha256": "dc138edf320423b373e5c932b86fab14e2b0439fe8d251c4c439e74c6124b91d",
+        "bytes": 10825
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\control\\__init__.py.txt",
+        "sha256": "25fb0fdc039a9578d6214de7a2480a3583118564e01a126c54f62828e04f65eb",
+        "bytes": 54
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\control\\actions.py.txt",
+        "sha256": "77547cb650340f85cfe663ad08a8ffded0708b529adefbdc35f79dda91e80d07",
+        "bytes": 8357
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\control\\executor.py.txt",
+        "sha256": "67249eec8ba616ebf97f2b8e41296bca8a42358cdea71501000fdbd07030b733",
+        "bytes": 6223
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\control\\safety.py.txt",
+        "sha256": "748177d41b5b68af7fd59156749b343c16ffca4f8fb30356786da58a04e2f65d",
+        "bytes": 4258
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\coordinates.py.txt",
+        "sha256": "474d897cbc5c85461003e5060951318690ed5d3d1b6a5cfd64a56aa4574ed5be",
+        "bytes": 2224
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\datasets\\__init__.py.txt",
+        "sha256": "14c8ad57d3d5c18dcc400bef21378868155c7bb111dbb2e92c45fdf10df1dca8",
+        "bytes": 1247
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\datasets\\base.py.txt",
+        "sha256": "3be5bf346a55bd62267f43af900fc8acaf27bc127c3603d205841d9bfe5ff05b",
+        "bytes": 4860
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\datasets\\mind2web.py.txt",
+        "sha256": "4849b6ed54e21fc33417f108a2bc5fd6aee54dff1ec4c73c1017e6e45e561e83",
+        "bytes": 7242
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\datasets\\normalize.py.txt",
+        "sha256": "2c878806422026f71a34d0a2195f5581f1e6b4071a9faa08f83307cf5bc0e79e",
+        "bytes": 3268
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\datasets\\schemas.py.txt",
+        "sha256": "934d5d5105082a80b4c56c099b9f40b2fbb43191068415fd1a20237ddf5a7753",
+        "bytes": 2683
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\datasets\\screenagent.py.txt",
+        "sha256": "e20f44432514b3012e5bdc6efeda37df661d0737743ebe251afdc0c6885e48be",
+        "bytes": 8333
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\datasets\\validation.py.txt",
+        "sha256": "4e8786ce9b8d0321f195b92d1d5ab5cde1960734ce537ce69752be12f61d6ad1",
+        "bytes": 5079
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\datasets\\webarena.py.txt",
+        "sha256": "f8248e58b0d1e4ecbc881afe9972d382c0d0f1d06259ab97db1604bde1c68b9c",
+        "bytes": 2193
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\__init__.py.txt",
+        "sha256": "50c3b0497f5a6551552495728e24df6589c94607f720c9a6bcfda2cf4ab18599",
+        "bytes": 77
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\action_constraints.py.txt",
+        "sha256": "34dc20797581413695d809a6920389a726820cf547ffb68899559ddc242a4de9",
+        "bytes": 7129
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\actor_contract.py.txt",
+        "sha256": "91444f8c33e50f8584634ea1b5bd604f640c37e8196e64bb8670f121ac668d0c",
+        "bytes": 17656
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\c11_training.py.txt",
+        "sha256": "eb6c5158d0a71b33fa9535a3724264373f767b98767db3951c8bc1380c7abf59",
+        "bytes": 12590
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\candidate_gallery.py.txt",
+        "sha256": "f6910c65289e5ee2b01b926a5b7054188e794c975768d005d1e5e46644f93b01",
+        "bytes": 14181
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\candidate_grounding.py.txt",
+        "sha256": "42e9fa849b191e2edc047c99ac74781e889b2e7ba05336a517bc646de89f6e50",
+        "bytes": 25534
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\data.py.txt",
+        "sha256": "1070201cde6850da855f26daeb6dc4848a5bd4fdbe836d55d55bf9c77b8ac824",
+        "bytes": 26812
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\diagnostics.py.txt",
+        "sha256": "3dac64d0df27df9a4499b76b6391ce871692179fa487dc3ee474ab5cd4ccfc2c",
+        "bytes": 28885
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\embedding_memory.py.txt",
+        "sha256": "cf23ae0a2959d8dcb61c4425ffa9876f33111b11e5406d61d47e31c196090bc6",
+        "bytes": 12438
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\evaluation.py.txt",
+        "sha256": "183ddbdbc2cfa9939dfdddd6bf0bd9ecef301b8718ec49df6e14019b5634f868",
+        "bytes": 49348
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\native_spatial_artifacts.py.txt",
+        "sha256": "46b81f01870f32cde1e1b92a525b84dd99726507293c32c86b48f20382f71269",
+        "bytes": 9717
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\native_spatial_grid_artifacts.py.txt",
+        "sha256": "fe0e058624de7a77c4efe3315353123b44f7f7c6983476e1597999a29e6a149d",
+        "bytes": 9752
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\native_spatial_grid_geometry.py.txt",
+        "sha256": "4415c76a62a565b529391424e2823d684a3d251c0abddeb688f2be4817862cef",
+        "bytes": 11262
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\native_spatial_grid_head.py.txt",
+        "sha256": "194a016fdcae500fd6f663ac646b45bd074e1de23831e6bc1479d9986a48d073",
+        "bytes": 34481
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\native_spatial_grid_inference.py.txt",
+        "sha256": "257ed1e78147a20137210812fbb58bbd8be5751b4c50a2d861b8e0af8414c1fb",
+        "bytes": 38335
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\native_spatial_head.py.txt",
+        "sha256": "d89966267e14eb521163c0e5a856ebe341b04d5c3d91f0ff4bb07719c330e62d",
+        "bytes": 38749
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\native_spatial_inference.py.txt",
+        "sha256": "d4cc30854d933c02b7c8e0ae0cbea46b2ccec478bc1835e1a525d9f22a2a4adb",
+        "bytes": 24792
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\numeric_value_loss.py.txt",
+        "sha256": "57fcc2d98650d88d67ae6e49c2aee338c2cd3d8fdeaa69b0bc088fff2c7af621",
+        "bytes": 12238
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\offset_geometry_loss.py.txt",
+        "sha256": "a019c4c76907fa93ddc8e6b6b9618b340e7bd81c118acee7216bc4f516579866",
+        "bytes": 16076
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\pointer_candidates_v2.py.txt",
+        "sha256": "32119f7d64a7428c5075db0903203fb73ab28f3d832c779789a958570cc964ff",
+        "bytes": 2961
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\pointer_candidates_v3.py.txt",
+        "sha256": "be1a944c6b6b0b3b48337fae7f3ff662edf83804fd50c1c18c822c1fe8b0774f",
+        "bytes": 12001
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\pointer_numbering.py.txt",
+        "sha256": "83243845690285ea07aab33970b1bba8f9e1980ffec2cfdfd841a951e4a2ce24",
+        "bytes": 6388
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\pointer_protocol.py.txt",
+        "sha256": "a9a33226d9883d43a717eb2c0f942860be8f59f2514a90c9666b776d63831aad",
+        "bytes": 18486
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\prompts.py.txt",
+        "sha256": "184a38d760d51c941a954de29c9dda4e973a24e14fa298a0f97bf338e7fec9b0",
+        "bytes": 7154
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\request_actor_contract.py.txt",
+        "sha256": "2cbd39ab533eecb47c8e85f16dfbab463786ac88ab06b8070eab6452d3f70351",
+        "bytes": 21348
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\resized_contract.py.txt",
+        "sha256": "24c39763b768bdc77d6e7450352f72a0cfaeeaf51d3b60fe68246456c3270b2c",
+        "bytes": 10776
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\step_contract.py.txt",
+        "sha256": "b5298055b78abad081d45b3ca1c97e37be97d35ad673001ea662d1fff05c1236",
+        "bytes": 9687
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\structured_ce.py.txt",
+        "sha256": "43fa93ae9a9d62d909fa152f4a3161d5c985e1a9dd6f7ce8fe38bda7511063e5",
+        "bytes": 14462
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\t04_prompts.py.txt",
+        "sha256": "a79c613cf7b403008a485f0a3d4a2bf5b980387bda1a8bd543eeb591316c1ad3",
+        "bytes": 1884
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\training.py.txt",
+        "sha256": "f5b14acbd01e3e13c33a9f575fd15850c04e0b5fe7dd74cc27e2fdb177244849",
+        "bytes": 103722
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\visual_pointer.py.txt",
+        "sha256": "e31ee8c08667acc24d1a949ffefb43a07f22aae0f1206a3f69631717cdcb98f7",
+        "bytes": 23008
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\visual_pointer_inference.py.txt",
+        "sha256": "90d015a9fc179080392354b892d4a3fa84ee15d700a38c98242ee7d2ad7abe7e",
+        "bytes": 16244
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\visual_pointer_input.py.txt",
+        "sha256": "4d9d0e711526e0e78f455a8bcc2247048ef76ab17f0320f94c00cfe0ee130a3e",
+        "bytes": 35678
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\visual_pointer_prompts.py.txt",
+        "sha256": "d43f8a6ff2c14b10129d03660e6c90908a57c788f465cc8e8566b274786402e4",
+        "bytes": 6515
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\visual_pointer_v2.py.txt",
+        "sha256": "8bed0467d37d0628fa78d17ba9a309a09866ea03f6586e5c19b2fcbfa38b4f74",
+        "bytes": 21445
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\models\\__init__.py.txt",
+        "sha256": "ea363710fd7d7d8616ecaed1504d9d27af6667d53b79c1ba8c959cbba5b2f3ef",
+        "bytes": 1629
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\models\\base.py.txt",
+        "sha256": "22b120a3149adde737bb27f2eb9a533d174fbe014dd7d92758f716b162fc851f",
+        "bytes": 6387
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\models\\langchain_adapter.py.txt",
+        "sha256": "c5eab5dcf611547ca871b387a67ccfc26ff1ba1d0674ae648b580b5991788041",
+        "bytes": 5316
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\models\\mock.py.txt",
+        "sha256": "a9ded660c48b14755be2db76d680cd2486410c890c98102172a9e42a2e4bea78",
+        "bytes": 9421
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\models\\openai_compatible.py.txt",
+        "sha256": "74470bce82fdc7c41a32b59f4390226f22f4a42eb30a68535e6df92e678ec2df",
+        "bytes": 8641
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\perception\\__init__.py.txt",
+        "sha256": "a521ef24fbd707c3b683dd64fc2e7d9f4ff719bb21f8022cd7d09298010bc139",
+        "bytes": 62
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\perception\\capture.py.txt",
+        "sha256": "2e4b65983343bfe2f264a580287f7102ede60a4b201d77a585290c7b20210717",
+        "bytes": 18531
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\perception\\grounding.py.txt",
+        "sha256": "b0ca16924c280f7817e03bf1cd7951d07751a60d69da442e1af440d0840afb77",
+        "bytes": 7333
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\perception\\ocr.py.txt",
+        "sha256": "0f0c42bc4b9537475adcf7c185672c3ee63db11cf662b870599efaca755ff28a",
+        "bytes": 25670
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\perception\\preprocessing.py.txt",
+        "sha256": "afaa9db640c2df42ca8c3758e765941e579e2d400e6c66231b4d98469495618f",
+        "bytes": 5024
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\perception\\tesseract_api.py.txt",
+        "sha256": "73a2ec0a6f03ba32b28e137afcc24399c87d73ebb02b43c1aa52711be26feee4",
+        "bytes": 8263
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\perception\\ui_detection.py.txt",
+        "sha256": "4cb75d461fd9ef55fbe3671c9efd7fd72a64148a2a6e37eccdf3f7ff3e908a5d",
+        "bytes": 8390
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\perception\\visualization.py.txt",
+        "sha256": "0c787c6509a3a631a5abd81a28aaf26b67e06b65870d5781817336949adfa072",
+        "bytes": 4446
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\planning\\__init__.py.txt",
+        "sha256": "51311a72d5dccb5dec7eae267976747a192543cb1104f9183e3085401b8f3daa",
+        "bytes": 711
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\planning\\parser.py.txt",
+        "sha256": "94fe09f8d72fb50338e209d453f5abded95a1fdd811e2abc2396d0f6c4955b99",
+        "bytes": 2868
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\planning\\planner.py.txt",
+        "sha256": "54aa1d46d94205d37b4d53c56135cf43aa9860a00e2a06191c5a1ddbe79e7c08",
+        "bytes": 9679
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\planning\\prompts.py.txt",
+        "sha256": "c471c406a2ec33ee23a85e911c1eeb84a08bd7e27204932c75e0ad994e4e5d24",
+        "bytes": 7908
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\planning\\schemas.py.txt",
+        "sha256": "0f6d2a7c668daea28d979fb73ebcd4af207f4defaf34ee137d676693ed83e357",
+        "bytes": 4600
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\planning\\semantic_workflow.py.txt",
+        "sha256": "ae50b05e029e0ee5330430ec67d5a5bb0d49fe62487d47ecb34b914fcb0d8337",
+        "bytes": 58692
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\planning\\workflow_decomposer.py.txt",
+        "sha256": "7e1c03a67069b946056cbcbbb63f23377c5cd869b1e8c46a4c292ac6ec85a6f0",
+        "bytes": 92097
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\recording.py.txt",
+        "sha256": "5fd8cbcade4bc3a85e77f7482445274c561bb8ea5cf8e9b534c5d8fe915aa187",
+        "bytes": 4762
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\__init__.py.txt",
+        "sha256": "524d1eecd51df0a13d173b25c8e451c843c82f8906391db32dfca11d42afb6c8",
+        "bytes": 1135
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\action_adapter.py.txt",
+        "sha256": "222686942e4623d4743ac50e6da87599d4ba95d84ed9d1d855de089324a0eeda",
+        "bytes": 38373
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\cursor_parking.py.txt",
+        "sha256": "6ff4f5396a869092d678db2627bdd22241a1b20e33ee6d55b929fb289be27eaf",
+        "bytes": 5615
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\message_regions.py.txt",
+        "sha256": "6e9f86346a361ac529448175652e9c657ea3e26b6266a006d40e6aaa1054af48",
+        "bytes": 16469
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\monitoring.py.txt",
+        "sha256": "fdfd51964074385e683c20b952c156bd252fdc32dc49b2e7b04849a00ab8be5f",
+        "bytes": 26997
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\observation.py.txt",
+        "sha256": "c882b1a8e7f20a8fdcca58637139c7b1d606d61b9771968801df1572e32981c7",
+        "bytes": 10651
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\processes.py.txt",
+        "sha256": "a810e7a8e9c0e309dd5c952561aed352cd1750f592702ef283d35d4d8c4a04a3",
+        "bytes": 4677
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\provenance.py.txt",
+        "sha256": "19979ab84dec9c6dc8e50bd149d24d02c7efcb403daec4975d036117c72bc7e4",
+        "bytes": 2767
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\recorder.py.txt",
+        "sha256": "0214800eea60b994f24d8d5fc3cace6f590d645b5039573e9c88546dac4a84aa",
+        "bytes": 12111
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\recovery.py.txt",
+        "sha256": "f69c0f2e268213ae265b8324ed0f30caf3ed36c59ffaaa78884d68d3e59f946f",
+        "bytes": 3421
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\runner.py.txt",
+        "sha256": "91282ffc0cdc182dd6e727fb485ddc5d7244360200939c0521da56bcd8815511",
+        "bytes": 118026
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\schemas.py.txt",
+        "sha256": "06aa355ba24ed50a6307d7fc84cd920dc91b81dc7d844ec68c461cb614b5f6f7",
+        "bytes": 16452
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\screenshot_quality.py.txt",
+        "sha256": "291ff4527eae6d2ece467370f15b3175cc66b5e7deb38ccbfae690e76ad922e1",
+        "bytes": 6045
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\target_grounding.py.txt",
+        "sha256": "7ec229441d3e34cf89b124a47b630754c5e99e4987727a4b594c500e17d1162f",
+        "bytes": 10154
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\tasks.py.txt",
+        "sha256": "a88f8bf3c2fd2c0aa11518c081db7555982f0f3b5041b152e1d943a49420e4f2",
+        "bytes": 16154
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\verification.py.txt",
+        "sha256": "abc72375f2959fb765fb53dbf4bbf63401513e5cdfeaeb445d0c148b0be1cd4c",
+        "bytes": 53465
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\visual_grounding.py.txt",
+        "sha256": "3e12a9dc97d45a6d3635913adbb477d07fa6dde3e8f9798c3431557ac4f22bcd",
+        "bytes": 11044
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\workflow.py.txt",
+        "sha256": "13a6ae067662b2ceda1f5082bb9ed0c544f201be06b5fb21cabdf7f7098fe889",
+        "bytes": 20930
+      },
+      {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\schemas.py.txt",
+        "sha256": "51dda2400bf39b7793609235d3d76884fcc96047e008fd3a8076551bafa82480",
+        "bytes": 5482
+      }
+    ],
+    "readme_sha256": "f9bc558ff5612816b6dcbf31830e690fa2c0eb8e30176f038a74a8b5541f5007"
+  },
+  "actual_owner_receipt": {
+    "schema": "week6.semantic.live.actual_exit.v1",
+    "owner": {
+      "pid": 86772,
+      "create_time": 1793190127.9200413,
+      "exe": "D:\\anaconda\\python.exe",
+      "cmdline": [
+        "D:\\anaconda\\python.exe",
+        "-X",
+        "utf8",
+        "C:/Users/联想/Documents/ChatGPT/Intern/tmp/week6_full_requirements_20261028/run_owned_model.py",
+        "--name",
+        "normal_015",
+        "--fixture-directory",
+        "C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/live/fixture_normal_011",
+        "--project",
+        "ALPHA",
+        "--colour",
+        "GREEN",
+        "--mode",
+        "normal",
+        "--config",
+        "C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/configs/week6_accuracy_persistent.yaml",
+        "--task-timeout",
+        "7200",
+        "--model-timeout",
+        "900",
+        "--model",
+        "qwen2.5vl:3b"
+      ]
+    },
+    "launcher": {
+      "pid": 65108,
+      "create_time": 1793190128.1477032,
+      "exe": "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe",
+      "cmdline": [
+        "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_semantic_acceptance.py",
+        "--directory",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run",
+        "--fixture-directory",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\fixture_normal_011",
+        "--project",
+        "ALPHA",
+        "--colour",
+        "GREEN",
+        "--mode",
+        "normal",
+        "--config",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\configs\\week6_accuracy_persistent.yaml",
+        "--task-timeout",
+        "7200.0",
+        "--model-timeout",
+        "900.0",
+        "--model",
+        "qwen2.5vl:3b"
+      ]
+    },
+    "observed_descendants": [
+      {
+        "pid": 79016,
+        "create_time": 1793190128.1778333,
+        "exe": "D:\\anaconda\\python.exe",
+        "cmdline": [
+          "D:\\anaconda\\python.exe",
+          "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_semantic_acceptance.py",
+          "--directory",
+          "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run",
+          "--fixture-directory",
+          "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\fixture_normal_011",
+          "--project",
+          "ALPHA",
+          "--colour",
+          "GREEN",
+          "--mode",
+          "normal",
+          "--config",
+          "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\configs\\week6_accuracy_persistent.yaml",
+          "--task-timeout",
+          "7200.0",
+          "--model-timeout",
+          "900.0",
+          "--model",
+          "qwen2.5vl:3b"
+        ]
+      }
+    ],
+    "started_utc": "2026-10-28T12:22:08.142407+00:00",
+    "finished_utc": "2026-10-28T12:24:57.352774+00:00",
+    "elapsed_seconds": 169.2029999999795,
+    "child_exit_code": 1,
+    "command": [
+      "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_semantic_acceptance.py",
+      "--directory",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run",
+      "--fixture-directory",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\fixture_normal_011",
+      "--project",
+      "ALPHA",
+      "--colour",
+      "GREEN",
+      "--mode",
+      "normal",
+      "--config",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\configs\\week6_accuracy_persistent.yaml",
+      "--task-timeout",
+      "7200.0",
+      "--model-timeout",
+      "900.0",
+      "--model",
+      "qwen2.5vl:3b"
+    ],
+    "requested_model": "qwen2.5vl:3b",
+    "owner_harness_sha256": "bbe7cc2f8d220a39f03710a71ea9f7fc83311aaa4f9dcaaa395e2cd7f8cb5a5d",
+    "meaning": "Actual subprocess.wait result; semantic acceptance is independently audited."
+  },
+  "actual_cpython": {
+    "pid": 79016,
+    "create_time": 1793190128.1778333,
+    "exe": "D:\\anaconda\\python.exe",
+    "cmdline": [
+      "D:\\anaconda\\python.exe",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_semantic_acceptance.py",
+      "--directory",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run",
+      "--fixture-directory",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\fixture_normal_011",
+      "--project",
+      "ALPHA",
+      "--colour",
+      "GREEN",
+      "--mode",
+      "normal",
+      "--config",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\configs\\week6_accuracy_persistent.yaml",
+      "--task-timeout",
+      "7200.0",
+      "--model-timeout",
+      "900.0",
+      "--model",
+      "qwen2.5vl:3b"
+    ]
+  },
+  "native_high_level": {
+    "proposal": {
+      "status": "ready",
+      "reason": "The caller request is ready for execution.",
+      "subgoals": [
+        {
+          "instruction": "Prepare a GREEN report for project ALPHA in Week6 Local Lab.",
+          "expect_text": [
+            "Project ALPHA",
+            "Theme GREEN"
+          ],
+          "forbid_text": [],
+          "goal_id": "prepare_report"
+        },
+        {
+          "instruction": "Review the prepared report and commit it locally.",
+          "expect_text": [
+            "LOCAL COMPLETE"
+          ],
+          "forbid_text": [],
+          "goal_id": "review_commit"
+        }
+      ]
+    },
+    "strict_validation_and_mapping_passed": true,
+    "before_verdict": {
+      "outcome": "failed",
+      "method": "automatic",
+      "detail": "expected on screen but not found: Project ALPHA, Theme GREEN",
+      "evidence": {
+        "observation_id": "obs-0001",
+        "missing": [
+          "Project ALPHA",
+          "Theme GREEN"
+        ]
+      }
+    },
+    "caller_final_unchanged": {
+      "case_id": "FINAL",
+      "instruction": "Independently read unchanged caller final predicates",
+      "target_app": null,
+      "preconditions": [],
+      "success_rules": [],
+      "verification": "automatic",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [],
+      "requires_processes": [],
+      "forbids_processes": [],
+      "must_exit_processes": [],
+      "risk": "low",
+      "message_conversation": null,
+      "gate_on_step_verification": true
+    },
+    "meaning": "Two proposed goals were accepted and compiled. Neither was executed or completed."
+  },
+  "lower_level": {
+    "native_task_plans": 3,
+    "all_local_parser_checks_passed": true,
+    "format_attempts_per_call": [
+      1,
+      1,
+      1
+    ],
+    "format_retries": 0,
+    "each_dispatch_schema_equals_saved_attempt_and_expected_task_plan_schema": true,
+    "schema_strict": false,
+    "steps_max_items": 1,
+    "source_conflicts": [
+      {
+        "planning_call": 1,
+        "native": {
+          "task_id": "t1",
+          "instruction": "Prepare a GREEN report for project ALPHA in Week6 Local Lab.",
+          "steps": [
+            {
+              "step_id": "s1",
+              "description": "Click on the 'ALPHA' button to select the project.",
+              "action_type": "click",
+              "target_text": "ALPHA",
+              "arguments": {
+                "element_id": "obs-0001-e003"
+              },
+              "expected_result": "The 'ALPHA' button is clicked.",
+              "status": "pending"
+            }
+          ],
+          "errors": []
+        },
+        "source_frame": {
+          "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\obs-0001.json",
+          "sha256": "ef0380a5074b74201bf23f0965261109b74f9ffcc5fbb10b4fac4fd7237e3ca2",
+          "bytes": 3876
+        },
+        "source_pixels": {
+          "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\monitor1_20261028_232319_113.png",
+          "sha256": "669461a2df60c4c3fe6298c3ba748492fa8ce880113ec61f15be4e946913a401",
+          "bytes": 81751
+        },
+        "fresh_frame": {
+          "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\obs-0002.json",
+          "sha256": "d29533a79819ea2477342117d9477182b8af97369b64c8b3b9e16c22633b2eea",
+          "bytes": 3876
+        },
+        "selected_id": "obs-0001-e003",
+        "selected_text": "Choose a project",
+        "selected_box": {
+          "left": 1137,
+          "top": 721,
+          "right": 1427,
+          "bottom": 762
+        },
+        "target": "ALPHA",
+        "correct_visible_label": {
+          "element_id": "obs-0001-e000",
+          "text": "ALPHA",
+          "bounding_box": {
+            "left": 1218,
+            "top": 853,
+            "right": 1343,
+            "bottom": 881
+          },
+          "center": {
+            "x": 1280,
+            "y": 867
+          },
+          "confidence": 0.96,
+          "source": "ocr"
+        },
+        "exact_guard_error_reproduced": "target consistency conflict: obs-0001: element 'obs-0001-e003' has text 'Choose a project', inconsistent with target_text 'ALPHA'; refusing to replace the supplied element ID",
+        "action_receipt": null,
+        "schema_matches_saved_dispatch": true,
+        "parse_error": null,
+        "recovery_feedback": null
+      },
+      {
+        "planning_call": 2,
+        "native": {
+          "task_id": "t1",
+          "instruction": "Prepare a GREEN report for project ALPHA in Week6 Local Lab.",
+          "steps": [
+            {
+              "step_id": "s1",
+              "description": "Click on the 'ALPHA' project button.",
+              "action_type": "click",
+              "target_text": "ALPHA",
+              "arguments": {
+                "element_id": "obs-0003-e003"
+              },
+              "expected_result": "The 'ALPHA' project button is clicked.",
+              "status": "pending"
+            }
+          ],
+          "errors": []
+        },
+        "source_frame": {
+          "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\obs-0003.json",
+          "sha256": "cdd15d5e3aeddb761aa75438ea92444ec07e0b8b4c3bcab675054a6b85ce8030",
+          "bytes": 3875
+        },
+        "source_pixels": {
+          "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\monitor1_20261028_232355_725.png",
+          "sha256": "669461a2df60c4c3fe6298c3ba748492fa8ce880113ec61f15be4e946913a401",
+          "bytes": 81751
+        },
+        "fresh_frame": {
+          "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\obs-0004.json",
+          "sha256": "a13cb836f8be2eb95944234c434714d010947ecdfcc79c01d0214044095b64db",
+          "bytes": 3876
+        },
+        "selected_id": "obs-0003-e003",
+        "selected_text": "Choose a project",
+        "selected_box": {
+          "left": 1137,
+          "top": 721,
+          "right": 1427,
+          "bottom": 762
+        },
+        "target": "ALPHA",
+        "correct_visible_label": {
+          "element_id": "obs-0003-e000",
+          "text": "ALPHA",
+          "bounding_box": {
+            "left": 1218,
+            "top": 853,
+            "right": 1343,
+            "bottom": 881
+          },
+          "center": {
+            "x": 1280,
+            "y": 867
+          },
+          "confidence": 0.96,
+          "source": "ocr"
+        },
+        "exact_guard_error_reproduced": "target consistency conflict: obs-0003: element 'obs-0003-e003' has text 'Choose a project', inconsistent with target_text 'ALPHA'; refusing to replace the supplied element ID",
+        "action_receipt": null,
+        "schema_matches_saved_dispatch": true,
+        "parse_error": null,
+        "recovery_feedback": {
+          "previous_pass": 1,
+          "reason": "target_resolution",
+          "failed_step_index": 1,
+          "actions_used": 0,
+          "actions_remaining": 20,
+          "remaining_ms": 7093422.0000000205,
+          "recent_steps": [
+            {
+              "index": 1,
+              "action_type": "click",
+              "attempted": false,
+              "succeeded": null,
+              "verification": null
+            }
+          ],
+          "omitted_steps": 0,
+          "instruction": "Plan from the current observation; previous attempts do not prove success. Do not replay completed inputs to recreate an earlier state. Existing task checks and remaining budgets still apply. The previous plan's target_text conflicted with its explicit element ID or identified a container with ambiguous labels. No input was dispatched for that rejected step. Use the current observation and select an ID consistent with the same requested target; do not change the task goal."
+        }
+      },
+      {
+        "planning_call": 3,
+        "native": {
+          "task_id": "t1",
+          "instruction": "Prepare a GREEN report for project ALPHA in Week6 Local Lab.",
+          "steps": [
+            {
+              "step_id": "s1",
+              "description": "Click on the 'ALPHA' project button.",
+              "action_type": "click",
+              "target_text": "ALPHA",
+              "arguments": {
+                "element_id": "obs-0005-e003"
+              },
+              "expected_result": "The 'ALPHA' project button is clicked.",
+              "status": "pending"
+            }
+          ],
+          "errors": []
+        },
+        "source_frame": {
+          "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\obs-0005.json",
+          "sha256": "46312edbc36d9439ac3bbb673b8ce9f9509a68c7e11ce6f19e39732202f03ab1",
+          "bytes": 3876
+        },
+        "source_pixels": {
+          "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\monitor1_20261028_232433_571.png",
+          "sha256": "669461a2df60c4c3fe6298c3ba748492fa8ce880113ec61f15be4e946913a401",
+          "bytes": 81751
+        },
+        "fresh_frame": {
+          "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\obs-0006.json",
+          "sha256": "b436e76508d8f9212465298eddbacfd36d05e870832e05921770f47031aa0bc0",
+          "bytes": 3876
+        },
+        "selected_id": "obs-0005-e003",
+        "selected_text": "Choose a project",
+        "selected_box": {
+          "left": 1137,
+          "top": 721,
+          "right": 1427,
+          "bottom": 762
+        },
+        "target": "ALPHA",
+        "correct_visible_label": {
+          "element_id": "obs-0005-e000",
+          "text": "ALPHA",
+          "bounding_box": {
+            "left": 1218,
+            "top": 853,
+            "right": 1343,
+            "bottom": 881
+          },
+          "center": {
+            "x": 1280,
+            "y": 867
+          },
+          "confidence": 0.96,
+          "source": "ocr"
+        },
+        "exact_guard_error_reproduced": "target consistency conflict: obs-0005: element 'obs-0005-e003' has text 'Choose a project', inconsistent with target_text 'ALPHA'; refusing to replace the supplied element ID",
+        "action_receipt": null,
+        "schema_matches_saved_dispatch": true,
+        "parse_error": null,
+        "recovery_feedback": {
+          "previous_pass": 2,
+          "reason": "target_resolution",
+          "failed_step_index": 2,
+          "actions_used": 0,
+          "actions_remaining": 20,
+          "remaining_ms": 7055562.999999966,
+          "recent_steps": [
+            {
+              "index": 2,
+              "action_type": "click",
+              "attempted": false,
+              "succeeded": null,
+              "verification": null
+            }
+          ],
+          "omitted_steps": 0,
+          "instruction": "Plan from the current observation; previous attempts do not prove success. Do not replay completed inputs to recreate an earlier state. Existing task checks and remaining budgets still apply. The previous plan's target_text conflicted with its explicit element ID or identified a container with ambiguous labels. No input was dispatched for that rejected step. Use the current observation and select an ID consistent with the same requested target; do not change the task goal."
+        }
+      }
+    ],
+    "bounded_recovery_calls": 2,
+    "recovery_was_requested_but_did_not_correct_the_id": true,
+    "input_receipts": [],
+    "post_observation_id": null,
+    "semantic_postcondition_verification": {
+      "outcome": "inconclusive",
+      "method": "automatic",
+      "detail": "no observation available to verify against",
+      "evidence": {}
+    },
+    "single_step_limit_restored": true
+  },
+  "totals": {
+    "status": "failed",
+    "owner_exit_code": 1,
+    "owner_elapsed_seconds": 169.2029999999795,
+    "planning_calls": 4,
+    "actual_http_dispatches": 4,
+    "known_inputs": 0,
+    "unconfirmed_inputs": 0,
+    "proposed_goals": 2,
+    "completed_goals": 0,
+    "high_level_schema_strict": true,
+    "low_level_schema_strict": false,
+    "independent_events": [
+      "started"
+    ],
+    "final_verification": null
+  },
+  "independent_fixture": {
+    "state": {
+      "utc": "2026-10-28T12:21:33.588417+00:00",
+      "event": "started",
+      "stage": "project",
+      "project": "",
+      "colour": "",
+      "committed": false,
+      "review_attempts": 0,
+      "mode": "normal",
+      "events": 1
+    },
+    "events": [
+      {
+        "utc": "2026-10-28T12:21:33.588417+00:00",
+        "event": "started",
+        "stage": "project",
+        "project": "",
+        "colour": "",
+        "committed": false,
+        "review_attempts": 0,
+        "mode": "normal",
+        "events": 1
+      }
+    ],
+    "raw_state": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\fixture_normal_011\\independent_state.json",
+      "sha256": "770e1141c5e3cb4ecb1522711376a198e12e27c0d2bf5216c5b40433c1c833f0",
+      "bytes": 217
+    },
+    "raw_events": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\fixture_normal_011\\independent_events.jsonl",
+      "sha256": "0009d65cce34e9a0948cc54a03e7d3f00d67aa1684d6f3f9897a393b75fc9d0c",
+      "bytes": 187
+    },
+    "read_after_real_owner_exit_only": true
+  },
+  "monitor": {
+    "terminal": {
+      "schema": "week6.run_status.semantic.v1",
+      "run_id": "157d65e49b0f4677afc53af965448770",
+      "case_id": "semantic_lab",
+      "execute": true,
+      "pid": 79016,
+      "process_identity": "windows:134376637281778332",
+      "seq": 26,
+      "event": "finished",
+      "stage": "finished",
+      "task_status": "failed",
+      "updated_at_utc": "2026-10-28T12:24:56.390803+00:00",
+      "elapsed_ms": 166765.00000001397,
+      "max_actions": 20,
+      "max_planning_attempts": 24,
+      "planning_pass": 4,
+      "actions_used": 0,
+      "subgoals_total": 2,
+      "subgoals_completed": 0,
+      "subgoal_id": null,
+      "detail_code": "",
+      "write_failures": []
+    },
+    "midgoal_events_with_live_planning_count": [
+      {
+        "schema": "week6.run_status.semantic.v1",
+        "run_id": "157d65e49b0f4677afc53af965448770",
+        "case_id": "semantic_lab",
+        "execute": true,
+        "pid": 79016,
+        "process_identity": "windows:134376637281778332",
+        "seq": 9,
+        "event": "updated",
+        "stage": "executing",
+        "task_status": null,
+        "updated_at_utc": "2026-10-28T12:23:19.959095+00:00",
+        "elapsed_ms": 70327.99999997951,
+        "max_actions": 20,
+        "max_planning_attempts": 24,
+        "planning_pass": 2,
+        "actions_used": 0,
+        "subgoals_total": 2,
+        "subgoals_completed": 0,
+        "subgoal_id": "prepare_report",
+        "detail_code": "child_planning",
+        "write_failures": []
+      },
+      {
+        "schema": "week6.run_status.semantic.v1",
+        "run_id": "157d65e49b0f4677afc53af965448770",
+        "case_id": "semantic_lab",
+        "execute": true,
+        "pid": 79016,
+        "process_identity": "windows:134376637281778332",
+        "seq": 10,
+        "event": "updated",
+        "stage": "executing",
+        "task_status": null,
+        "updated_at_utc": "2026-10-28T12:23:28.417326+00:00",
+        "elapsed_ms": 78795.99999997299,
+        "max_actions": 20,
+        "max_planning_attempts": 24,
+        "planning_pass": 2,
+        "actions_used": 0,
+        "subgoals_total": 2,
+        "subgoals_completed": 0,
+        "subgoal_id": "prepare_report",
+        "detail_code": "child_confirmation",
+        "write_failures": []
+      },
+      {
+        "schema": "week6.run_status.semantic.v1",
+        "run_id": "157d65e49b0f4677afc53af965448770",
+        "case_id": "semantic_lab",
+        "execute": true,
+        "pid": 79016,
+        "process_identity": "windows:134376637281778332",
+        "seq": 11,
+        "event": "updated",
+        "stage": "executing",
+        "task_status": null,
+        "updated_at_utc": "2026-10-28T12:23:28.429243+00:00",
+        "elapsed_ms": 78795.99999997299,
+        "max_actions": 20,
+        "max_planning_attempts": 24,
+        "planning_pass": 2,
+        "actions_used": 0,
+        "subgoals_total": 2,
+        "subgoals_completed": 0,
+        "subgoal_id": "prepare_report",
+        "detail_code": "child_observing",
+        "write_failures": []
+      },
+      {
+        "schema": "week6.run_status.semantic.v1",
+        "run_id": "157d65e49b0f4677afc53af965448770",
+        "case_id": "semantic_lab",
+        "execute": true,
+        "pid": 79016,
+        "process_identity": "windows:134376637281778332",
+        "seq": 12,
+        "event": "updated",
+        "stage": "executing",
+        "task_status": null,
+        "updated_at_utc": "2026-10-28T12:23:40.010053+00:00",
+        "elapsed_ms": 90375.0,
+        "max_actions": 20,
+        "max_planning_attempts": 24,
+        "planning_pass": 2,
+        "actions_used": 0,
+        "subgoals_total": 2,
+        "subgoals_completed": 0,
+        "subgoal_id": "prepare_report",
+        "detail_code": "child_resolving",
+        "write_failures": []
+      },
+      {
+        "schema": "week6.run_status.semantic.v1",
+        "run_id": "157d65e49b0f4677afc53af965448770",
+        "case_id": "semantic_lab",
+        "execute": true,
+        "pid": 79016,
+        "process_identity": "windows:134376637281778332",
+        "seq": 13,
+        "event": "updated",
+        "stage": "executing",
+        "task_status": null,
+        "updated_at_utc": "2026-10-28T12:23:40.024061+00:00",
+        "elapsed_ms": 90390.00000001397,
+        "max_actions": 20,
+        "max_planning_attempts": 24,
+        "planning_pass": 3,
+        "actions_used": 0,
+        "subgoals_total": 2,
+        "subgoals_completed": 0,
+        "subgoal_id": "prepare_report",
+        "detail_code": "child_recovering",
+        "write_failures": []
+      },
+      {
+        "schema": "week6.run_status.semantic.v1",
+        "run_id": "157d65e49b0f4677afc53af965448770",
+        "case_id": "semantic_lab",
+        "execute": true,
+        "pid": 79016,
+        "process_identity": "windows:134376637281778332",
+        "seq": 14,
+        "event": "updated",
+        "stage": "executing",
+        "task_status": null,
+        "updated_at_utc": "2026-10-28T12:23:40.035571+00:00",
+        "elapsed_ms": 90405.99999995902,
+        "max_actions": 20,
+        "max_planning_attempts": 24,
+        "planning_pass": 3,
+        "actions_used": 0,
+        "subgoals_total": 2,
+        "subgoals_completed": 0,
+        "subgoal_id": "prepare_report",
+        "detail_code": "child_observing",
+        "write_failures": []
+      },
+      {
+        "schema": "week6.run_status.semantic.v1",
+        "run_id": "157d65e49b0f4677afc53af965448770",
+        "case_id": "semantic_lab",
+        "execute": true,
+        "pid": 79016,
+        "process_identity": "windows:134376637281778332",
+        "seq": 15,
+        "event": "updated",
+        "stage": "executing",
+        "task_status": null,
+        "updated_at_utc": "2026-10-28T12:23:56.210092+00:00",
+        "elapsed_ms": 106577.99999997951,
+        "max_actions": 20,
+        "max_planning_attempts": 24,
+        "planning_pass": 3,
+        "actions_used": 0,
+        "subgoals_total": 2,
+        "subgoals_completed": 0,
+        "subgoal_id": "prepare_report",
+        "detail_code": "child_planning",
+        "write_failures": []
+      },
+      {
+        "schema": "week6.run_status.semantic.v1",
+        "run_id": "157d65e49b0f4677afc53af965448770",
+        "case_id": "semantic_lab",
+        "execute": true,
+        "pid": 79016,
+        "process_identity": "windows:134376637281778332",
+        "seq": 16,
+        "event": "updated",
+        "stage": "executing",
+        "task_status": null,
+        "updated_at_utc": "2026-10-28T12:24:03.969959+00:00",
+        "elapsed_ms": 114342.99999999348,
+        "max_actions": 20,
+        "max_planning_attempts": 24,
+        "planning_pass": 3,
+        "actions_used": 0,
+        "subgoals_total": 2,
+        "subgoals_completed": 0,
+        "subgoal_id": "prepare_report",
+        "detail_code": "child_observing",
+        "write_failures": []
+      },
+      {
+        "schema": "week6.run_status.semantic.v1",
+        "run_id": "157d65e49b0f4677afc53af965448770",
+        "case_id": "semantic_lab",
+        "execute": true,
+        "pid": 79016,
+        "process_identity": "windows:134376637281778332",
+        "seq": 17,
+        "event": "updated",
+        "stage": "executing",
+        "task_status": null,
+        "updated_at_utc": "2026-10-28T12:24:22.580063+00:00",
+        "elapsed_ms": 132952.9999999795,
+        "max_actions": 20,
+        "max_planning_attempts": 24,
+        "planning_pass": 3,
+        "actions_used": 0,
+        "subgoals_total": 2,
+        "subgoals_completed": 0,
+        "subgoal_id": "prepare_report",
+        "detail_code": "child_resolving",
+        "write_failures": []
+      },
+      {
+        "schema": "week6.run_status.semantic.v1",
+        "run_id": "157d65e49b0f4677afc53af965448770",
+        "case_id": "semantic_lab",
+        "execute": true,
+        "pid": 79016,
+        "process_identity": "windows:134376637281778332",
+        "seq": 18,
+        "event": "updated",
+        "stage": "executing",
+        "task_status": null,
+        "updated_at_utc": "2026-10-28T12:24:22.594140+00:00",
+        "elapsed_ms": 132967.99999999348,
+        "max_actions": 20,
+        "max_planning_attempts": 24,
+        "planning_pass": 4,
+        "actions_used": 0,
+        "subgoals_total": 2,
+        "subgoals_completed": 0,
+        "subgoal_id": "prepare_report",
+        "detail_code": "child_recovering",
+        "write_failures": []
+      },
+      {
+        "schema": "week6.run_status.semantic.v1",
+        "run_id": "157d65e49b0f4677afc53af965448770",
+        "case_id": "semantic_lab",
+        "execute": true,
+        "pid": 79016,
+        "process_identity": "windows:134376637281778332",
+        "seq": 19,
+        "event": "updated",
+        "stage": "executing",
+        "task_status": null,
+        "updated_at_utc": "2026-10-28T12:24:22.606651+00:00",
+        "elapsed_ms": 132984.00000005495,
+        "max_actions": 20,
+        "max_planning_attempts": 24,
+        "planning_pass": 4,
+        "actions_used": 0,
+        "subgoals_total": 2,
+        "subgoals_completed": 0,
+        "subgoal_id": "prepare_report",
+        "detail_code": "child_observing",
+        "write_failures": []
+      },
+      {
+        "schema": "week6.run_status.semantic.v1",
+        "run_id": "157d65e49b0f4677afc53af965448770",
+        "case_id": "semantic_lab",
+        "execute": true,
+        "pid": 79016,
+        "process_identity": "windows:134376637281778332",
+        "seq": 20,
+        "event": "updated",
+        "stage": "executing",
+        "task_status": null,
+        "updated_at_utc": "2026-10-28T12:24:34.067999+00:00",
+        "elapsed_ms": 144437.00000003446,
+        "max_actions": 20,
+        "max_planning_attempts": 24,
+        "planning_pass": 4,
+        "actions_used": 0,
+        "subgoals_total": 2,
+        "subgoals_completed": 0,
+        "subgoal_id": "prepare_report",
+        "detail_code": "child_planning",
+        "write_failures": []
+      },
+      {
+        "schema": "week6.run_status.semantic.v1",
+        "run_id": "157d65e49b0f4677afc53af965448770",
+        "case_id": "semantic_lab",
+        "execute": true,
+        "pid": 79016,
+        "process_identity": "windows:134376637281778332",
+        "seq": 21,
+        "event": "updated",
+        "stage": "executing",
+        "task_status": null,
+        "updated_at_utc": "2026-10-28T12:24:41.789587+00:00",
+        "elapsed_ms": 152155.99999995902,
+        "max_actions": 20,
+        "max_planning_attempts": 24,
+        "planning_pass": 4,
+        "actions_used": 0,
+        "subgoals_total": 2,
+        "subgoals_completed": 0,
+        "subgoal_id": "prepare_report",
+        "detail_code": "child_observing",
+        "write_failures": []
+      },
+      {
+        "schema": "week6.run_status.semantic.v1",
+        "run_id": "157d65e49b0f4677afc53af965448770",
+        "case_id": "semantic_lab",
+        "execute": true,
+        "pid": 79016,
+        "process_identity": "windows:134376637281778332",
+        "seq": 22,
+        "event": "updated",
+        "stage": "executing",
+        "task_status": null,
+        "updated_at_utc": "2026-10-28T12:24:56.095848+00:00",
+        "elapsed_ms": 166467.99999999348,
+        "max_actions": 20,
+        "max_planning_attempts": 24,
+        "planning_pass": 4,
+        "actions_used": 0,
+        "subgoals_total": 2,
+        "subgoals_completed": 0,
+        "subgoal_id": "prepare_report",
+        "detail_code": "child_resolving",
+        "write_failures": []
+      },
+      {
+        "schema": "week6.run_status.semantic.v1",
+        "run_id": "157d65e49b0f4677afc53af965448770",
+        "case_id": "semantic_lab",
+        "execute": true,
+        "pid": 79016,
+        "process_identity": "windows:134376637281778332",
+        "seq": 23,
+        "event": "updated",
+        "stage": "executing",
+        "task_status": null,
+        "updated_at_utc": "2026-10-28T12:24:56.263906+00:00",
+        "elapsed_ms": 166640.00000001397,
+        "max_actions": 20,
+        "max_planning_attempts": 24,
+        "planning_pass": 4,
+        "actions_used": 0,
+        "subgoals_total": 2,
+        "subgoals_completed": 0,
+        "subgoal_id": "prepare_report",
+        "detail_code": "child_finished",
+        "write_failures": []
+      },
+      {
+        "schema": "week6.run_status.semantic.v1",
+        "run_id": "157d65e49b0f4677afc53af965448770",
+        "case_id": "semantic_lab",
+        "execute": true,
+        "pid": 79016,
+        "process_identity": "windows:134376637281778332",
+        "seq": 24,
+        "event": "updated",
+        "stage": "executing",
+        "task_status": null,
+        "updated_at_utc": "2026-10-28T12:24:56.316771+00:00",
+        "elapsed_ms": 166687.00000003446,
+        "max_actions": 20,
+        "max_planning_attempts": 24,
+        "planning_pass": 4,
+        "actions_used": 0,
+        "subgoals_total": 2,
+        "subgoals_completed": 0,
+        "subgoal_id": "prepare_report",
+        "detail_code": "",
+        "write_failures": []
+      },
+      {
+        "schema": "week6.run_status.semantic.v1",
+        "run_id": "157d65e49b0f4677afc53af965448770",
+        "case_id": "semantic_lab",
+        "execute": true,
+        "pid": 79016,
+        "process_identity": "windows:134376637281778332",
+        "seq": 25,
+        "event": "updated",
+        "stage": "task_verification",
+        "task_status": null,
+        "updated_at_utc": "2026-10-28T12:24:56.384804+00:00",
+        "elapsed_ms": 166750.0,
+        "max_actions": 20,
+        "max_planning_attempts": 24,
+        "planning_pass": 4,
+        "actions_used": 0,
+        "subgoals_total": 2,
+        "subgoals_completed": 0,
+        "subgoal_id": null,
+        "detail_code": "",
+        "write_failures": []
+      }
+    ],
+    "meaning": "Counts advanced during child planning; zero input count stayed truthful. No CLI completion is inferred."
+  },
+  "activation_receipts": [
+    {
+      "request": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718192890000000_request.json",
+        "sha256": "de4086c56f2b128ba05ac9f67d3d66f5399d5773ea84bd39accf07595a82c434",
+        "bytes": 88
+      },
+      "receipt": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718192890000000_receipt.json",
+        "sha256": "7872784374dae120d24c043321f4c106ac5818d5eea8fd553293b828625f750e",
+        "bytes": 246
+      },
+      "actual_receipt": {
+        "id": "capture_718192890000000",
+        "success": true,
+        "window": {
+          "app": "process:D:\\anaconda\\python.exe",
+          "id": 10755280,
+          "title": "Week6 Local Lab"
+        },
+        "screenshot_id": "screenshot-0",
+        "utc": "2026-10-28T12:22:37.767Z"
+      }
+    },
+    {
+      "request": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718228937000000_request.json",
+        "sha256": "45f2492802f8f2a81a7354c531b902f247cccd4ffb5e73ac5e628be4451ee6c5",
+        "bytes": 88
+      },
+      "receipt": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718228937000000_receipt.json",
+        "sha256": "84b2aed6fa0ee02f09cc9c7944e272ba6a39992464f351703746adee20fa133d",
+        "bytes": 246
+      },
+      "actual_receipt": {
+        "id": "capture_718228937000000",
+        "success": true,
+        "window": {
+          "app": "process:D:\\anaconda\\python.exe",
+          "id": 10755280,
+          "title": "Week6 Local Lab"
+        },
+        "screenshot_id": "screenshot-0",
+        "utc": "2026-10-28T12:23:03.970Z"
+      }
+    },
+    {
+      "request": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718248250000000_request.json",
+        "sha256": "9b27507f9e5ba1444568c620b49b01760070006479e0ae0e966f0c12bf7993b0",
+        "bytes": 88
+      },
+      "receipt": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718248250000000_receipt.json",
+        "sha256": "b6a1bffc648c2cd796b16b12563fb0cea3839fe7fa52ec380837a749bd00cfc7",
+        "bytes": 246
+      },
+      "actual_receipt": {
+        "id": "capture_718248250000000",
+        "success": true,
+        "window": {
+          "app": "process:D:\\anaconda\\python.exe",
+          "id": 10755280,
+          "title": "Week6 Local Lab"
+        },
+        "screenshot_id": "screenshot-0",
+        "utc": "2026-10-28T12:23:19.030Z"
+      }
+    },
+    {
+      "request": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718271671000000_request.json",
+        "sha256": "c19f4052bc22185b53cf093972e8c6065c257ac06a843943d8f8226e12c4369a",
+        "bytes": 88
+      },
+      "receipt": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718271671000000_receipt.json",
+        "sha256": "ca41705060476032845b5c58fd8eb8f9adf56afba1b6d3ba625aa82b448b025c",
+        "bytes": 246
+      },
+      "actual_receipt": {
+        "id": "capture_718271671000000",
+        "success": true,
+        "window": {
+          "app": "process:D:\\anaconda\\python.exe",
+          "id": 10755280,
+          "title": "Week6 Local Lab"
+        },
+        "screenshot_id": "screenshot-0",
+        "utc": "2026-10-28T12:23:39.301Z"
+      }
+    },
+    {
+      "request": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718283296000000_request.json",
+        "sha256": "8f688cbac552e3d0628f71dfe5ff0c3c798a3d668e1f3cc3940f6d0a300377a9",
+        "bytes": 88
+      },
+      "receipt": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718283296000000_receipt.json",
+        "sha256": "3e35bc4308242f183a82ceccfd7f19bd453b3c071a784e3456ba798693f9c844",
+        "bytes": 246
+      },
+      "actual_receipt": {
+        "id": "capture_718283296000000",
+        "success": true,
+        "window": {
+          "app": "process:D:\\anaconda\\python.exe",
+          "id": 10755280,
+          "title": "Week6 Local Lab"
+        },
+        "screenshot_id": "screenshot-0",
+        "utc": "2026-10-28T12:23:55.637Z"
+      }
+    },
+    {
+      "request": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718307218000000_request.json",
+        "sha256": "eff0a132a26025190767b83de52f407f77d21d8700cbcb3058900efa1b80164a",
+        "bytes": 88
+      },
+      "receipt": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718307218000000_receipt.json",
+        "sha256": "c9bc9261456327f0bc09f89384fb942fb388ffc5a3a164d76bad9f6eb2bec910",
+        "bytes": 246
+      },
+      "actual_receipt": {
+        "id": "capture_718307218000000",
+        "success": true,
+        "window": {
+          "app": "process:D:\\anaconda\\python.exe",
+          "id": 10755280,
+          "title": "Week6 Local Lab"
+        },
+        "screenshot_id": "screenshot-0",
+        "utc": "2026-10-28T12:24:21.912Z"
+      }
+    },
+    {
+      "request": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718325859000000_request.json",
+        "sha256": "3e7647c5833623759d74315b1e6aea48e7b808540e6b477c8017fa774168d75c",
+        "bytes": 88
+      },
+      "receipt": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718325859000000_receipt.json",
+        "sha256": "9329193ec74f98e21e132c9e80c05c71a7eb8286a6e9c1f5a194e96635653eb6",
+        "bytes": 246
+      },
+      "actual_receipt": {
+        "id": "capture_718325859000000",
+        "success": true,
+        "window": {
+          "app": "process:D:\\anaconda\\python.exe",
+          "id": 10755280,
+          "title": "Week6 Local Lab"
+        },
+        "screenshot_id": "screenshot-0",
+        "utc": "2026-10-28T12:24:33.486Z"
+      }
+    },
+    {
+      "request": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718345046000000_request.json",
+        "sha256": "335044646f979e0773e90b11fddc442f98a6d6b2e215abbb61faff7a0f05ab20",
+        "bytes": 88
+      },
+      "receipt": {
+        "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718345046000000_receipt.json",
+        "sha256": "92cbeadbcd8aab9401c2f4123ed77147a49ba5cf3c4926806d33279e9044ea7a",
+        "bytes": 246
+      },
+      "actual_receipt": {
+        "id": "capture_718345046000000",
+        "success": true,
+        "window": {
+          "app": "process:D:\\anaconda\\python.exe",
+          "id": 10755280,
+          "title": "Week6 Local Lab"
+        },
+        "screenshot_id": "screenshot-0",
+        "utc": "2026-10-28T12:24:55.391Z"
+      }
+    }
+  ],
+  "activation_scope": "Eight successful dedicated-window activation receipts. They are capture preparation, not eight task inputs or semantic transitions.",
+  "warnings": {
+    "original_stdout": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\stdout.txt",
+      "sha256": "0790647e09f8a9fecce025d2e9c526f5aff50453e9999c62644373a120f828a5",
+      "bytes": 498
+    },
+    "text": "Estimating resolution as 697",
+    "occurrences": 8,
+    "preserved_unmodified": true
+  },
+  "unmodified_strict_gate": {
+    "command": [
+      "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_audit_semantic_acceptance.py",
+      "--container",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015",
+      "--owner-harness",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_full_requirements_20261028\\run_owned_model.py",
+      "--fixture-directory",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\fixture_normal_011",
+      "--out",
+      "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_normal015_strict_gate_001.json"
+    ],
+    "started_utc": "2026-10-28T12:29:22.517444+00:00",
+    "finished_utc": "2026-10-28T12:29:23.500567+00:00",
+    "pid": 69256,
+    "elapsed_seconds": 0.9849999999860302,
+    "actual_wait_exit_code": 1,
+    "stdout": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_negative_normal015_20261028\\strict_gate.stdout.txt",
+      "sha256": "a111908349c068faee0d99b30c02734725448cfb00a9d5d055925857fb1d4b41",
+      "bytes": 319
+    },
+    "stderr": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_negative_normal015_20261028\\strict_gate.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "result": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_normal015_strict_gate_001.json",
+      "sha256": "b2cdb889b156753ae9b3c25f8ce39139de9c5a59f1efca2eba71cc80bedeb523",
+      "bytes": 921
+    }
+  },
+  "conclusion": {
+    "classification": "Legal low-level native TaskPlans were rejected before dispatch because the requested ALPHA label contradicted the explicitly selected Choose a project element ID in all three original planning frames.",
+    "different_from_normal014_flat_output_failure": true,
+    "format_contract_observed_but_no_task_execution_acceptance": true,
+    "no_actual_input_or_transient_ui_retry_acceptance": true,
+    "no_local_id_substitution_or_failed_step_credit": true,
+    "all_normal001_through015_remain_unaccepted": true,
+    "wire_limit": "Saved pre-encoding messages and schema arguments, actual HTTP events and returned bodies are bound to frozen code. Raw outgoing live HTTP request bodies were not captured; offline SDK tests separately establish wire serialization."
+  },
+  "original_files": [
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\operator_handoff_001.json",
+      "sha256": "ad76767fa6736ff9f45fd0c6a091dd80769273561aebcccb4ec77bf829661708",
+      "bytes": 4381
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\operator_handoff_002.json",
+      "sha256": "78065a6e1f9af45db01c8fa5558788b1132fe1c05e9078bdf9874ef4c0fc9423",
+      "bytes": 14570
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\owner_claim.json",
+      "sha256": "1ee9eddc8d06e18f3e3014d08a68e11505456024b07157fb7a3b63d7e0bada5f",
+      "bytes": 2000
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\owner_harness.py.txt",
+      "sha256": "bbe7cc2f8d220a39f03710a71ea9f7fc83311aaa4f9dcaaa395e2cd7f8cb5a5d",
+      "bytes": 4186
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\owner_receipt.json",
+      "sha256": "51313503f7305f114b870edb2838f3c8385245337cea5986a78b18956c7efc7f",
+      "bytes": 4293
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\owner_start.json",
+      "sha256": "3a3ee8168b7a95b39b71d3167077c37c69e1132ca6b9df4b2f872f8b8c7d2a81",
+      "bytes": 2978
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\acceptance_observed.json",
+      "sha256": "6b604bfd72be9596056a9e0795ef3fa70d898b318ff5620ef89bee7dcc7946ec",
+      "bytes": 15183
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\action_planning_attempts.jsonl",
+      "sha256": "329e923225ed39cbdb1687d88cfebc3218b84423e0e87862da351a9240ccb543",
+      "bytes": 20848
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\automatic_workflow_summary.json",
+      "sha256": "cf756a71779ea959a5dac9e1b0978a181bdf95465951af2fcab9f5510bd2a019",
+      "bytes": 9935
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\contract_before_001_001\\monitor1_20261028_232304_067.png",
+      "sha256": "669461a2df60c4c3fe6298c3ba748492fa8ce880113ec61f15be4e946913a401",
+      "bytes": 81751
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\contract_before_001_001\\observation.json",
+      "sha256": "6bfc8eb9f6c74bf421b358006ab69384e34c4deb43dd310520546b61e1838c2b",
+      "bytes": 4073
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\monitor1_20261028_232319_113.png",
+      "sha256": "669461a2df60c4c3fe6298c3ba748492fa8ce880113ec61f15be4e946913a401",
+      "bytes": 81751
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\monitor1_20261028_232339_384.png",
+      "sha256": "669461a2df60c4c3fe6298c3ba748492fa8ce880113ec61f15be4e946913a401",
+      "bytes": 81751
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\monitor1_20261028_232355_725.png",
+      "sha256": "669461a2df60c4c3fe6298c3ba748492fa8ce880113ec61f15be4e946913a401",
+      "bytes": 81751
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\monitor1_20261028_232422_016.png",
+      "sha256": "669461a2df60c4c3fe6298c3ba748492fa8ce880113ec61f15be4e946913a401",
+      "bytes": 81751
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\monitor1_20261028_232433_571.png",
+      "sha256": "669461a2df60c4c3fe6298c3ba748492fa8ce880113ec61f15be4e946913a401",
+      "bytes": 81751
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\monitor1_20261028_232455_479.png",
+      "sha256": "669461a2df60c4c3fe6298c3ba748492fa8ce880113ec61f15be4e946913a401",
+      "bytes": 81751
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\obs-0001.json",
+      "sha256": "ef0380a5074b74201bf23f0965261109b74f9ffcc5fbb10b4fac4fd7237e3ca2",
+      "bytes": 3876
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\obs-0002.json",
+      "sha256": "d29533a79819ea2477342117d9477182b8af97369b64c8b3b9e16c22633b2eea",
+      "bytes": 3876
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\obs-0003.json",
+      "sha256": "cdd15d5e3aeddb761aa75438ea92444ec07e0b8b4c3bcab675054a6b85ce8030",
+      "bytes": 3875
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\obs-0004.json",
+      "sha256": "a13cb836f8be2eb95944234c434714d010947ecdfcc79c01d0214044095b64db",
+      "bytes": 3876
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\obs-0005.json",
+      "sha256": "46312edbc36d9439ac3bbb673b8ce9f9509a68c7e11ce6f19e39732202f03ab1",
+      "bytes": 3876
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\obs-0006.json",
+      "sha256": "b436e76508d8f9212465298eddbacfd36d05e870832e05921770f47031aa0bc0",
+      "bytes": 3876
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\recovery.jsonl",
+      "sha256": "40be13b8cb2b18a0f460fb78d5231564e4430765a1da12624bb821f63d3dc5db",
+      "bytes": 1745
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\run_status.json",
+      "sha256": "4324725e61102294927841c98cd5594b603c338853fc19504b2cabce0df10fac",
+      "bytes": 508
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\semantic_goal_audit.json",
+      "sha256": "3e34068c67e3bbfa72604b2f1d5266aed29380c76d50212e9c0336faa7462ccc",
+      "bytes": 3498
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\single_step_planning_limit.json",
+      "sha256": "719a7a33d552e550c769f7b42b89df1132ed2f8e22393723074b7d9cecc32133",
+      "bytes": 17859
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\status_events.jsonl",
+      "sha256": "b41d10dfdec303029747efe8e26fabb9a39046d6168bd6ef9c3d5a3eab64757f",
+      "bytes": 9026
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\steps.jsonl",
+      "sha256": "7e43811d95574cfd89ed94a4e16f4073f12923dd16c1b730b65d26ec9c765190",
+      "bytes": 1375
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\task_summary.json",
+      "sha256": "7fa8780040e11b520c025ac44a7f7f5f1274d2f0a8119e41b80ef69f267eb82e",
+      "bytes": 6597
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\checkpoints.jsonl",
+      "sha256": "3c079a821251b4384099030c7d07f76f5b7a60332a0e8e145c6a73bc5c7342bb",
+      "bytes": 655
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_001_001_prepare_report\\workflow_summary.json",
+      "sha256": "3b3b193cc0691e3de159c736823669da6cd31ba112ae91e11844a455c856e363",
+      "bytes": 1926
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\goal_contract_001_001.json",
+      "sha256": "90bbcf6cd7c25d33a6cd84fbae0e62b2985291f2215f3219952edc75df2774e9",
+      "bytes": 6324
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\initial_observation\\monitor1_20261028_232238_288.png",
+      "sha256": "669461a2df60c4c3fe6298c3ba748492fa8ce880113ec61f15be4e946913a401",
+      "bytes": 81751
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\initial_observation\\observation.json",
+      "sha256": "e0faed31bd05520bc50005217dd325bfee591a84d38177c7080f689718f4d009",
+      "bytes": 4070
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\run_status.json",
+      "sha256": "e7750aa53a672408a802712b4a0f66e06b101c61f4ee44ae2836fcb2ffde89f6",
+      "bytes": 516
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\semantic_goal_ledger.json",
+      "sha256": "09dd9d227d0127474f972a12f393c56fe17949d29fe74fd9cb6efcf2b42502f5",
+      "bytes": 542
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\semantic_plan_round_001\\attempt_01_request.json",
+      "sha256": "4b158f5e90235a794f3b3f466b18ada483f8ef97651c0ffe766468bd65f05257",
+      "bytes": 15271
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\semantic_plan_round_001\\attempt_01_response.json",
+      "sha256": "bf15c2a4845db42c00336f6de462f65ad77b8926f2df09428b2bd1f1c7ae620a",
+      "bytes": 878
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\semantic_plan_round_001\\compiled_workflow.json",
+      "sha256": "3dc0253030efe05d790623176f6e7fa9930144a8682f26a88a0ccf29265e116a",
+      "bytes": 5378
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\semantic_plan_round_001\\context_source_archive.json",
+      "sha256": "ede38459bf18b5333263231b26c98bab4b41e24d86cb630763045923b0fbe179",
+      "bytes": 347
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\semantic_plan_round_001\\native_proposal.json",
+      "sha256": "2d38ae001448759c0a6973507b5d42c357c0aca521a8c7e810ace68d3823d18c",
+      "bytes": 563
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\semantic_plan_round_001\\protocol.json",
+      "sha256": "fe86caab11be373baea1fac1f05e8983dcbdc25a1fe355d0f3ab58a9a7427788",
+      "bytes": 4434
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\semantic_plan_round_001\\result.json",
+      "sha256": "f5e317b8e8e637599a41be50a3413f0451c2627fdbbe39d057b3168395bae7b9",
+      "bytes": 4091
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\semantic_plan_round_001\\snapshot_archive.json",
+      "sha256": "e0faed31bd05520bc50005217dd325bfee591a84d38177c7080f689718f4d009",
+      "bytes": 4070
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\semantic_plan_round_001\\snapshot_pixels.png",
+      "sha256": "669461a2df60c4c3fe6298c3ba748492fa8ce880113ec61f15be4e946913a401",
+      "bytes": 81751
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\semantic_preflight.json",
+      "sha256": "d98a62704fdaed598a71046ebfb0c2f83d7a864a5305400a89393d3310cbb743",
+      "bytes": 190
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\semantic_request.json",
+      "sha256": "7339866170702d9fa3151d350405941f9d02d15b30720869312334d3b41df327",
+      "bytes": 888
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\status_events.jsonl",
+      "sha256": "e72b0636c1268f613a844ee0f93ded12ad85d66b400011e064c5ce8337bed1a1",
+      "bytes": 13807
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\automatic\\transport_requests.jsonl",
+      "sha256": "0f54128943da2ebe391ed79979b0130f715a857a1705355935ae122ffa5d8d2d",
+      "bytes": 32943
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\contract.json",
+      "sha256": "62386020533e17a2d73b43fb405ad3734192c1f2d81f1ed1e850ce46c6bd8127",
+      "bytes": 15403
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\runtime_result.json",
+      "sha256": "cf756a71779ea959a5dac9e1b0978a181bdf95465951af2fcab9f5510bd2a019",
+      "bytes": 9935
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718192890000000_receipt.json",
+      "sha256": "7872784374dae120d24c043321f4c106ac5818d5eea8fd553293b828625f750e",
+      "bytes": 246
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718192890000000_request.json",
+      "sha256": "de4086c56f2b128ba05ac9f67d3d66f5399d5773ea84bd39accf07595a82c434",
+      "bytes": 88
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718228937000000_receipt.json",
+      "sha256": "84b2aed6fa0ee02f09cc9c7944e272ba6a39992464f351703746adee20fa133d",
+      "bytes": 246
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718228937000000_request.json",
+      "sha256": "45f2492802f8f2a81a7354c531b902f247cccd4ffb5e73ac5e628be4451ee6c5",
+      "bytes": 88
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718248250000000_receipt.json",
+      "sha256": "b6a1bffc648c2cd796b16b12563fb0cea3839fe7fa52ec380837a749bd00cfc7",
+      "bytes": 246
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718248250000000_request.json",
+      "sha256": "9b27507f9e5ba1444568c620b49b01760070006479e0ae0e966f0c12bf7993b0",
+      "bytes": 88
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718271671000000_receipt.json",
+      "sha256": "ca41705060476032845b5c58fd8eb8f9adf56afba1b6d3ba625aa82b448b025c",
+      "bytes": 246
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718271671000000_request.json",
+      "sha256": "c19f4052bc22185b53cf093972e8c6065c257ac06a843943d8f8226e12c4369a",
+      "bytes": 88
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718283296000000_receipt.json",
+      "sha256": "3e35bc4308242f183a82ceccfd7f19bd453b3c071a784e3456ba798693f9c844",
+      "bytes": 246
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718283296000000_request.json",
+      "sha256": "8f688cbac552e3d0628f71dfe5ff0c3c798a3d668e1f3cc3940f6d0a300377a9",
+      "bytes": 88
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718307218000000_receipt.json",
+      "sha256": "c9bc9261456327f0bc09f89384fb942fb388ffc5a3a164d76bad9f6eb2bec910",
+      "bytes": 246
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718307218000000_request.json",
+      "sha256": "eff0a132a26025190767b83de52f407f77d21d8700cbcb3058900efa1b80164a",
+      "bytes": 88
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718325859000000_receipt.json",
+      "sha256": "9329193ec74f98e21e132c9e80c05c71a7eb8286a6e9c1f5a194e96635653eb6",
+      "bytes": 246
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718325859000000_request.json",
+      "sha256": "3e7647c5833623759d74315b1e6aea48e7b808540e6b477c8017fa774168d75c",
+      "bytes": 88
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718345046000000_receipt.json",
+      "sha256": "92cbeadbcd8aab9401c2f4123ed77147a49ba5cf3c4926806d33279e9044ea7a",
+      "bytes": 246
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\sky_activation\\capture_718345046000000_request.json",
+      "sha256": "335044646f979e0773e90b11fddc442f98a6d6b2e215abbb61faff7a0f05ab20",
+      "bytes": 88
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\configs\\week6_accuracy_persistent.yaml.txt",
+      "sha256": "f7785b6c4c9c92320e7fd7292bdd65f189fc9290736be9c3ff70bdb72b56adbd",
+      "bytes": 492
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\pyproject.toml.txt",
+      "sha256": "d3050d887709980ad50def520fb63dcc240c9855910571744edcead23f8a6c5b",
+      "bytes": 973
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\scripts\\week6_agent_cli.py.txt",
+      "sha256": "e4bcff65ce32cc3e68f93e80bcff5e3ad44ede0dcc2eb7a802cfd8a58ea9b870",
+      "bytes": 11687
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\scripts\\week6_lab_acceptance.py.txt",
+      "sha256": "ee754ec29718abc074bddf9b06543d8a14c87c4ec57fe01cecfcdddfdca107ee",
+      "bytes": 13013
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\scripts\\week6_local_lab.py.txt",
+      "sha256": "bcafc8c688ce61aa1c1e8c93b26d8721a79cf6af1171af1d2b386b00f661d761",
+      "bytes": 4607
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\scripts\\week6_semantic_acceptance.py.txt",
+      "sha256": "7b5b2c66f59d2ac0467d0a4d171f6e58c5c61ec729d7363025deb7820e09adcb",
+      "bytes": 10453
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\__init__.py.txt",
+      "sha256": "ee56b669afc4c9e288b9cf690f14d38471a30864841e3d4664fbcc5924d8c338",
+      "bytes": 67
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\config.py.txt",
+      "sha256": "dc138edf320423b373e5c932b86fab14e2b0439fe8d251c4c439e74c6124b91d",
+      "bytes": 10825
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\control\\__init__.py.txt",
+      "sha256": "25fb0fdc039a9578d6214de7a2480a3583118564e01a126c54f62828e04f65eb",
+      "bytes": 54
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\control\\actions.py.txt",
+      "sha256": "77547cb650340f85cfe663ad08a8ffded0708b529adefbdc35f79dda91e80d07",
+      "bytes": 8357
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\control\\executor.py.txt",
+      "sha256": "67249eec8ba616ebf97f2b8e41296bca8a42358cdea71501000fdbd07030b733",
+      "bytes": 6223
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\control\\safety.py.txt",
+      "sha256": "748177d41b5b68af7fd59156749b343c16ffca4f8fb30356786da58a04e2f65d",
+      "bytes": 4258
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\coordinates.py.txt",
+      "sha256": "474d897cbc5c85461003e5060951318690ed5d3d1b6a5cfd64a56aa4574ed5be",
+      "bytes": 2224
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\datasets\\__init__.py.txt",
+      "sha256": "14c8ad57d3d5c18dcc400bef21378868155c7bb111dbb2e92c45fdf10df1dca8",
+      "bytes": 1247
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\datasets\\base.py.txt",
+      "sha256": "3be5bf346a55bd62267f43af900fc8acaf27bc127c3603d205841d9bfe5ff05b",
+      "bytes": 4860
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\datasets\\mind2web.py.txt",
+      "sha256": "4849b6ed54e21fc33417f108a2bc5fd6aee54dff1ec4c73c1017e6e45e561e83",
+      "bytes": 7242
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\datasets\\normalize.py.txt",
+      "sha256": "2c878806422026f71a34d0a2195f5581f1e6b4071a9faa08f83307cf5bc0e79e",
+      "bytes": 3268
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\datasets\\schemas.py.txt",
+      "sha256": "934d5d5105082a80b4c56c099b9f40b2fbb43191068415fd1a20237ddf5a7753",
+      "bytes": 2683
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\datasets\\screenagent.py.txt",
+      "sha256": "e20f44432514b3012e5bdc6efeda37df661d0737743ebe251afdc0c6885e48be",
+      "bytes": 8333
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\datasets\\validation.py.txt",
+      "sha256": "4e8786ce9b8d0321f195b92d1d5ab5cde1960734ce537ce69752be12f61d6ad1",
+      "bytes": 5079
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\datasets\\webarena.py.txt",
+      "sha256": "f8248e58b0d1e4ecbc881afe9972d382c0d0f1d06259ab97db1604bde1c68b9c",
+      "bytes": 2193
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\__init__.py.txt",
+      "sha256": "50c3b0497f5a6551552495728e24df6589c94607f720c9a6bcfda2cf4ab18599",
+      "bytes": 77
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\action_constraints.py.txt",
+      "sha256": "34dc20797581413695d809a6920389a726820cf547ffb68899559ddc242a4de9",
+      "bytes": 7129
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\actor_contract.py.txt",
+      "sha256": "91444f8c33e50f8584634ea1b5bd604f640c37e8196e64bb8670f121ac668d0c",
+      "bytes": 17656
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\c11_training.py.txt",
+      "sha256": "eb6c5158d0a71b33fa9535a3724264373f767b98767db3951c8bc1380c7abf59",
+      "bytes": 12590
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\candidate_gallery.py.txt",
+      "sha256": "f6910c65289e5ee2b01b926a5b7054188e794c975768d005d1e5e46644f93b01",
+      "bytes": 14181
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\candidate_grounding.py.txt",
+      "sha256": "42e9fa849b191e2edc047c99ac74781e889b2e7ba05336a517bc646de89f6e50",
+      "bytes": 25534
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\data.py.txt",
+      "sha256": "1070201cde6850da855f26daeb6dc4848a5bd4fdbe836d55d55bf9c77b8ac824",
+      "bytes": 26812
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\diagnostics.py.txt",
+      "sha256": "3dac64d0df27df9a4499b76b6391ce871692179fa487dc3ee474ab5cd4ccfc2c",
+      "bytes": 28885
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\embedding_memory.py.txt",
+      "sha256": "cf23ae0a2959d8dcb61c4425ffa9876f33111b11e5406d61d47e31c196090bc6",
+      "bytes": 12438
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\evaluation.py.txt",
+      "sha256": "183ddbdbc2cfa9939dfdddd6bf0bd9ecef301b8718ec49df6e14019b5634f868",
+      "bytes": 49348
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\native_spatial_artifacts.py.txt",
+      "sha256": "46b81f01870f32cde1e1b92a525b84dd99726507293c32c86b48f20382f71269",
+      "bytes": 9717
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\native_spatial_grid_artifacts.py.txt",
+      "sha256": "fe0e058624de7a77c4efe3315353123b44f7f7c6983476e1597999a29e6a149d",
+      "bytes": 9752
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\native_spatial_grid_geometry.py.txt",
+      "sha256": "4415c76a62a565b529391424e2823d684a3d251c0abddeb688f2be4817862cef",
+      "bytes": 11262
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\native_spatial_grid_head.py.txt",
+      "sha256": "194a016fdcae500fd6f663ac646b45bd074e1de23831e6bc1479d9986a48d073",
+      "bytes": 34481
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\native_spatial_grid_inference.py.txt",
+      "sha256": "257ed1e78147a20137210812fbb58bbd8be5751b4c50a2d861b8e0af8414c1fb",
+      "bytes": 38335
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\native_spatial_head.py.txt",
+      "sha256": "d89966267e14eb521163c0e5a856ebe341b04d5c3d91f0ff4bb07719c330e62d",
+      "bytes": 38749
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\native_spatial_inference.py.txt",
+      "sha256": "d4cc30854d933c02b7c8e0ae0cbea46b2ccec478bc1835e1a525d9f22a2a4adb",
+      "bytes": 24792
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\numeric_value_loss.py.txt",
+      "sha256": "57fcc2d98650d88d67ae6e49c2aee338c2cd3d8fdeaa69b0bc088fff2c7af621",
+      "bytes": 12238
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\offset_geometry_loss.py.txt",
+      "sha256": "a019c4c76907fa93ddc8e6b6b9618b340e7bd81c118acee7216bc4f516579866",
+      "bytes": 16076
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\pointer_candidates_v2.py.txt",
+      "sha256": "32119f7d64a7428c5075db0903203fb73ab28f3d832c779789a958570cc964ff",
+      "bytes": 2961
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\pointer_candidates_v3.py.txt",
+      "sha256": "be1a944c6b6b0b3b48337fae7f3ff662edf83804fd50c1c18c822c1fe8b0774f",
+      "bytes": 12001
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\pointer_numbering.py.txt",
+      "sha256": "83243845690285ea07aab33970b1bba8f9e1980ffec2cfdfd841a951e4a2ce24",
+      "bytes": 6388
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\pointer_protocol.py.txt",
+      "sha256": "a9a33226d9883d43a717eb2c0f942860be8f59f2514a90c9666b776d63831aad",
+      "bytes": 18486
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\prompts.py.txt",
+      "sha256": "184a38d760d51c941a954de29c9dda4e973a24e14fa298a0f97bf338e7fec9b0",
+      "bytes": 7154
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\request_actor_contract.py.txt",
+      "sha256": "2cbd39ab533eecb47c8e85f16dfbab463786ac88ab06b8070eab6452d3f70351",
+      "bytes": 21348
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\resized_contract.py.txt",
+      "sha256": "24c39763b768bdc77d6e7450352f72a0cfaeeaf51d3b60fe68246456c3270b2c",
+      "bytes": 10776
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\step_contract.py.txt",
+      "sha256": "b5298055b78abad081d45b3ca1c97e37be97d35ad673001ea662d1fff05c1236",
+      "bytes": 9687
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\structured_ce.py.txt",
+      "sha256": "43fa93ae9a9d62d909fa152f4a3161d5c985e1a9dd6f7ce8fe38bda7511063e5",
+      "bytes": 14462
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\t04_prompts.py.txt",
+      "sha256": "a79c613cf7b403008a485f0a3d4a2bf5b980387bda1a8bd543eeb591316c1ad3",
+      "bytes": 1884
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\training.py.txt",
+      "sha256": "f5b14acbd01e3e13c33a9f575fd15850c04e0b5fe7dd74cc27e2fdb177244849",
+      "bytes": 103722
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\visual_pointer.py.txt",
+      "sha256": "e31ee8c08667acc24d1a949ffefb43a07f22aae0f1206a3f69631717cdcb98f7",
+      "bytes": 23008
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\visual_pointer_inference.py.txt",
+      "sha256": "90d015a9fc179080392354b892d4a3fa84ee15d700a38c98242ee7d2ad7abe7e",
+      "bytes": 16244
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\visual_pointer_input.py.txt",
+      "sha256": "4d9d0e711526e0e78f455a8bcc2247048ef76ab17f0320f94c00cfe0ee130a3e",
+      "bytes": 35678
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\visual_pointer_prompts.py.txt",
+      "sha256": "d43f8a6ff2c14b10129d03660e6c90908a57c788f465cc8e8566b274786402e4",
+      "bytes": 6515
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\finetuning\\visual_pointer_v2.py.txt",
+      "sha256": "8bed0467d37d0628fa78d17ba9a309a09866ea03f6586e5c19b2fcbfa38b4f74",
+      "bytes": 21445
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\models\\__init__.py.txt",
+      "sha256": "ea363710fd7d7d8616ecaed1504d9d27af6667d53b79c1ba8c959cbba5b2f3ef",
+      "bytes": 1629
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\models\\base.py.txt",
+      "sha256": "22b120a3149adde737bb27f2eb9a533d174fbe014dd7d92758f716b162fc851f",
+      "bytes": 6387
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\models\\langchain_adapter.py.txt",
+      "sha256": "c5eab5dcf611547ca871b387a67ccfc26ff1ba1d0674ae648b580b5991788041",
+      "bytes": 5316
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\models\\mock.py.txt",
+      "sha256": "a9ded660c48b14755be2db76d680cd2486410c890c98102172a9e42a2e4bea78",
+      "bytes": 9421
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\models\\openai_compatible.py.txt",
+      "sha256": "74470bce82fdc7c41a32b59f4390226f22f4a42eb30a68535e6df92e678ec2df",
+      "bytes": 8641
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\perception\\__init__.py.txt",
+      "sha256": "a521ef24fbd707c3b683dd64fc2e7d9f4ff719bb21f8022cd7d09298010bc139",
+      "bytes": 62
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\perception\\capture.py.txt",
+      "sha256": "2e4b65983343bfe2f264a580287f7102ede60a4b201d77a585290c7b20210717",
+      "bytes": 18531
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\perception\\grounding.py.txt",
+      "sha256": "b0ca16924c280f7817e03bf1cd7951d07751a60d69da442e1af440d0840afb77",
+      "bytes": 7333
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\perception\\ocr.py.txt",
+      "sha256": "0f0c42bc4b9537475adcf7c185672c3ee63db11cf662b870599efaca755ff28a",
+      "bytes": 25670
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\perception\\preprocessing.py.txt",
+      "sha256": "afaa9db640c2df42ca8c3758e765941e579e2d400e6c66231b4d98469495618f",
+      "bytes": 5024
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\perception\\tesseract_api.py.txt",
+      "sha256": "73a2ec0a6f03ba32b28e137afcc24399c87d73ebb02b43c1aa52711be26feee4",
+      "bytes": 8263
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\perception\\ui_detection.py.txt",
+      "sha256": "4cb75d461fd9ef55fbe3671c9efd7fd72a64148a2a6e37eccdf3f7ff3e908a5d",
+      "bytes": 8390
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\perception\\visualization.py.txt",
+      "sha256": "0c787c6509a3a631a5abd81a28aaf26b67e06b65870d5781817336949adfa072",
+      "bytes": 4446
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\planning\\__init__.py.txt",
+      "sha256": "51311a72d5dccb5dec7eae267976747a192543cb1104f9183e3085401b8f3daa",
+      "bytes": 711
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\planning\\parser.py.txt",
+      "sha256": "94fe09f8d72fb50338e209d453f5abded95a1fdd811e2abc2396d0f6c4955b99",
+      "bytes": 2868
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\planning\\planner.py.txt",
+      "sha256": "54aa1d46d94205d37b4d53c56135cf43aa9860a00e2a06191c5a1ddbe79e7c08",
+      "bytes": 9679
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\planning\\prompts.py.txt",
+      "sha256": "c471c406a2ec33ee23a85e911c1eeb84a08bd7e27204932c75e0ad994e4e5d24",
+      "bytes": 7908
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\planning\\schemas.py.txt",
+      "sha256": "0f6d2a7c668daea28d979fb73ebcd4af207f4defaf34ee137d676693ed83e357",
+      "bytes": 4600
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\planning\\semantic_workflow.py.txt",
+      "sha256": "ae50b05e029e0ee5330430ec67d5a5bb0d49fe62487d47ecb34b914fcb0d8337",
+      "bytes": 58692
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\planning\\workflow_decomposer.py.txt",
+      "sha256": "7e1c03a67069b946056cbcbbb63f23377c5cd869b1e8c46a4c292ac6ec85a6f0",
+      "bytes": 92097
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\recording.py.txt",
+      "sha256": "5fd8cbcade4bc3a85e77f7482445274c561bb8ea5cf8e9b534c5d8fe915aa187",
+      "bytes": 4762
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\__init__.py.txt",
+      "sha256": "524d1eecd51df0a13d173b25c8e451c843c82f8906391db32dfca11d42afb6c8",
+      "bytes": 1135
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\action_adapter.py.txt",
+      "sha256": "222686942e4623d4743ac50e6da87599d4ba95d84ed9d1d855de089324a0eeda",
+      "bytes": 38373
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\cursor_parking.py.txt",
+      "sha256": "6ff4f5396a869092d678db2627bdd22241a1b20e33ee6d55b929fb289be27eaf",
+      "bytes": 5615
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\message_regions.py.txt",
+      "sha256": "6e9f86346a361ac529448175652e9c657ea3e26b6266a006d40e6aaa1054af48",
+      "bytes": 16469
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\monitoring.py.txt",
+      "sha256": "fdfd51964074385e683c20b952c156bd252fdc32dc49b2e7b04849a00ab8be5f",
+      "bytes": 26997
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\observation.py.txt",
+      "sha256": "c882b1a8e7f20a8fdcca58637139c7b1d606d61b9771968801df1572e32981c7",
+      "bytes": 10651
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\processes.py.txt",
+      "sha256": "a810e7a8e9c0e309dd5c952561aed352cd1750f592702ef283d35d4d8c4a04a3",
+      "bytes": 4677
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\provenance.py.txt",
+      "sha256": "19979ab84dec9c6dc8e50bd149d24d02c7efcb403daec4975d036117c72bc7e4",
+      "bytes": 2767
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\recorder.py.txt",
+      "sha256": "0214800eea60b994f24d8d5fc3cace6f590d645b5039573e9c88546dac4a84aa",
+      "bytes": 12111
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\recovery.py.txt",
+      "sha256": "f69c0f2e268213ae265b8324ed0f30caf3ed36c59ffaaa78884d68d3e59f946f",
+      "bytes": 3421
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\runner.py.txt",
+      "sha256": "91282ffc0cdc182dd6e727fb485ddc5d7244360200939c0521da56bcd8815511",
+      "bytes": 118026
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\schemas.py.txt",
+      "sha256": "06aa355ba24ed50a6307d7fc84cd920dc91b81dc7d844ec68c461cb614b5f6f7",
+      "bytes": 16452
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\screenshot_quality.py.txt",
+      "sha256": "291ff4527eae6d2ece467370f15b3175cc66b5e7deb38ccbfae690e76ad922e1",
+      "bytes": 6045
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\target_grounding.py.txt",
+      "sha256": "7ec229441d3e34cf89b124a47b630754c5e99e4987727a4b594c500e17d1162f",
+      "bytes": 10154
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\tasks.py.txt",
+      "sha256": "a88f8bf3c2fd2c0aa11518c081db7555982f0f3b5041b152e1d943a49420e4f2",
+      "bytes": 16154
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\verification.py.txt",
+      "sha256": "abc72375f2959fb765fb53dbf4bbf63401513e5cdfeaeb445d0c148b0be1cd4c",
+      "bytes": 53465
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\visual_grounding.py.txt",
+      "sha256": "3e12a9dc97d45a6d3635913adbb477d07fa6dde3e8f9798c3431557ac4f22bcd",
+      "bytes": 11044
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\runtime\\workflow.py.txt",
+      "sha256": "13a6ae067662b2ceda1f5082bb9ed0c544f201be06b5fb21cabdf7f7098fe889",
+      "bytes": 20930
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\run\\source_snapshot\\src\\gui_agent\\schemas.py.txt",
+      "sha256": "51dda2400bf39b7793609235d3d76884fcc96047e008fd3a8076551bafa82480",
+      "bytes": 5482
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_015\\stdout.txt",
+      "sha256": "0790647e09f8a9fecce025d2e9c526f5aff50453e9999c62644373a120f828a5",
+      "bytes": 498
+    }
+  ],
+  "strict_helper_bound_files": {
+    "run/automatic/initial_observation/observation.json": "e0faed31bd05520bc50005217dd325bfee591a84d38177c7080f689718f4d009",
+    "run/automatic/initial_observation/monitor1_20261028_232238_288.png": "669461a2df60c4c3fe6298c3ba748492fa8ce880113ec61f15be4e946913a401",
+    "run/automatic/contract_before_001_001/observation.json": "6bfc8eb9f6c74bf421b358006ab69384e34c4deb43dd310520546b61e1838c2b",
+    "run/automatic/contract_before_001_001/monitor1_20261028_232304_067.png": "669461a2df60c4c3fe6298c3ba748492fa8ce880113ec61f15be4e946913a401",
+    "run/automatic/semantic_plan_round_001/native_proposal.json": "2d38ae001448759c0a6973507b5d42c357c0aca521a8c7e810ace68d3823d18c",
+    "run/automatic/semantic_plan_round_001/protocol.json": "fe86caab11be373baea1fac1f05e8983dcbdc25a1fe355d0f3ab58a9a7427788",
+    "run/automatic/semantic_plan_round_001/attempt_01_request.json": "4b158f5e90235a794f3b3f466b18ada483f8ef97651c0ffe766468bd65f05257",
+    "run/automatic/semantic_plan_round_001/attempt_01_response.json": "bf15c2a4845db42c00336f6de462f65ad77b8926f2df09428b2bd1f1c7ae620a",
+    "run/automatic/semantic_plan_round_001/snapshot_archive.json": "e0faed31bd05520bc50005217dd325bfee591a84d38177c7080f689718f4d009",
+    "run/automatic/semantic_plan_round_001/context_source_archive.json": "ede38459bf18b5333263231b26c98bab4b41e24d86cb630763045923b0fbe179",
+    "run/automatic/semantic_plan_round_001/snapshot_pixels.png": "669461a2df60c4c3fe6298c3ba748492fa8ce880113ec61f15be4e946913a401",
+    "run/automatic/semantic_plan_round_001/compiled_workflow.json": "3dc0253030efe05d790623176f6e7fa9930144a8682f26a88a0ccf29265e116a",
+    "run/automatic/goal_contract_001_001.json": "90bbcf6cd7c25d33a6cd84fbae0e62b2985291f2215f3219952edc75df2774e9",
+    "run/automatic/goal_001_001_prepare_report/001_prepare_report/task_summary.json": "7fa8780040e11b520c025ac44a7f7f5f1274d2f0a8119e41b80ef69f267eb82e",
+    "run/automatic/goal_001_001_prepare_report/001_prepare_report/semantic_goal_audit.json": "3e34068c67e3bbfa72604b2f1d5266aed29380c76d50212e9c0336faa7462ccc",
+    "run/automatic/goal_001_001_prepare_report/001_prepare_report/single_step_planning_limit.json": "719a7a33d552e550c769f7b42b89df1132ed2f8e22393723074b7d9cecc32133",
+    "run/automatic/action_planning_attempts.jsonl": "329e923225ed39cbdb1687d88cfebc3218b84423e0e87862da351a9240ccb543",
+    "run/automatic/transport_requests.jsonl": "0f54128943da2ebe391ed79979b0130f715a857a1705355935ae122ffa5d8d2d",
+    "run/automatic/goal_001_001_prepare_report/001_prepare_report/recovery.jsonl": "40be13b8cb2b18a0f460fb78d5231564e4430765a1da12624bb821f63d3dc5db",
+    "run/automatic/goal_001_001_prepare_report/001_prepare_report/obs-0001.json": "ef0380a5074b74201bf23f0965261109b74f9ffcc5fbb10b4fac4fd7237e3ca2",
+    "run/automatic/goal_001_001_prepare_report/001_prepare_report/monitor1_20261028_232319_113.png": "669461a2df60c4c3fe6298c3ba748492fa8ce880113ec61f15be4e946913a401",
+    "run/automatic/goal_001_001_prepare_report/001_prepare_report/obs-0002.json": "d29533a79819ea2477342117d9477182b8af97369b64c8b3b9e16c22633b2eea",
+    "run/automatic/goal_001_001_prepare_report/001_prepare_report/monitor1_20261028_232339_384.png": "669461a2df60c4c3fe6298c3ba748492fa8ce880113ec61f15be4e946913a401",
+    "run/automatic/goal_001_001_prepare_report/001_prepare_report/obs-0003.json": "cdd15d5e3aeddb761aa75438ea92444ec07e0b8b4c3bcab675054a6b85ce8030",
+    "run/automatic/goal_001_001_prepare_report/001_prepare_report/monitor1_20261028_232355_725.png": "669461a2df60c4c3fe6298c3ba748492fa8ce880113ec61f15be4e946913a401",
+    "run/automatic/goal_001_001_prepare_report/001_prepare_report/obs-0004.json": "a13cb836f8be2eb95944234c434714d010947ecdfcc79c01d0214044095b64db",
+    "run/automatic/goal_001_001_prepare_report/001_prepare_report/monitor1_20261028_232422_016.png": "669461a2df60c4c3fe6298c3ba748492fa8ce880113ec61f15be4e946913a401",
+    "run/automatic/goal_001_001_prepare_report/001_prepare_report/obs-0005.json": "46312edbc36d9439ac3bbb673b8ce9f9509a68c7e11ce6f19e39732202f03ab1",
+    "run/automatic/goal_001_001_prepare_report/001_prepare_report/monitor1_20261028_232433_571.png": "669461a2df60c4c3fe6298c3ba748492fa8ce880113ec61f15be4e946913a401",
+    "run/automatic/goal_001_001_prepare_report/001_prepare_report/obs-0006.json": "b436e76508d8f9212465298eddbacfd36d05e870832e05921770f47031aa0bc0",
+    "run/automatic/goal_001_001_prepare_report/001_prepare_report/monitor1_20261028_232455_479.png": "669461a2df60c4c3fe6298c3ba748492fa8ce880113ec61f15be4e946913a401",
+    "run/automatic/run_status.json": "e7750aa53a672408a802712b4a0f66e06b101c61f4ee44ae2836fcb2ffde89f6",
+    "run/automatic/status_events.jsonl": "e72b0636c1268f613a844ee0f93ded12ad85d66b400011e064c5ce8337bed1a1"
+  },
+  "audit_script": {
+    "private": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_negative_normal015_20261028\\audit_negative_normal015_001.py",
+      "sha256": "6af08ead8825f3e2160fdfe114509519092278c5bfe4c7af03e83c4f3c712e6b",
+      "bytes": 24614
+    },
+    "archive": {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\negative_normal015_audit_001.py.txt",
+      "sha256": "6af08ead8825f3e2160fdfe114509519092278c5bfe4c7af03e83c4f3c712e6b",
+      "bytes": 24614
+    }
+  }
+}

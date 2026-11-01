@@ -1,0 +1,58 @@
+"""Record a genuine CPU benchmark child wait result; no model or desktop APIs."""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import subprocess
+import sys
+import time
+from datetime import UTC, datetime
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+BASE = ROOT / "Document/Week6/results/full_requirements_20261028"
+PYTHON = Path("D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe")
+
+
+def write_new(path: Path, value: dict) -> None:
+    with path.open("xb") as stream:
+        stream.write((json.dumps(value, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
+
+
+def sha(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("batch", choices=["perception_holdout_primary_001", "perception_holdout_replication_001"])
+    args = parser.parse_args()
+    owner = BASE / (args.batch + "_owner")
+    owner.mkdir(exist_ok=False)
+    command = [str(PYTHON), "scripts/week6_benchmark_persistent_ocr.py", "--run",
+               "--split", "holdout", "--batch", args.batch, "--repeats", "10"]
+    environment = os.environ.copy()
+    environment.update(PYTHONUTF8="1", PYTHONIOENCODING="utf-8", PYTHONPATH=str(ROOT / "src"))
+    started = time.perf_counter()
+    claim = {"command": command, "cwd": str(ROOT), "owner_pid": os.getpid(),
+             "started_utc": datetime.now(UTC).isoformat(), "started_perf_counter": started,
+             "script_sha256": sha(ROOT / command[1]),
+             "source_freeze_sha256": sha(BASE / "perception_source_freeze_001.json"),
+             "meaning": "Actual subprocess owner; receipt is created only after wait(). No synthetic result."}
+    write_new(owner / "claim.json", claim)
+    with (owner / "stdout_stderr.log").open("xb") as output:
+        child = subprocess.Popen(command, cwd=ROOT, env=environment, stdout=output,
+                                 stderr=subprocess.STDOUT, creationflags=subprocess.CREATE_NO_WINDOW)
+        write_new(owner / "child_started.json", {"launcher_pid": child.pid,
+                  "started_utc": datetime.now(UTC).isoformat()})
+        code = child.wait()
+    result = BASE / args.batch / "summary.json"
+    receipt = {**claim, "child_launcher_pid": child.pid, "actual_wait_returncode": code,
+               "ended_utc": datetime.now(UTC).isoformat(), "elapsed_seconds": time.perf_counter()-started,
+               "stdout_stderr_sha256": sha(owner / "stdout_stderr.log"),
+               "summary_exists": result.exists(), "summary_sha256": sha(result) if result.exists() else None}
+    write_new(owner / "receipt.json", receipt)
+    print(json.dumps(receipt, ensure_ascii=True, indent=2), flush=True)
+    sys.exit(code)

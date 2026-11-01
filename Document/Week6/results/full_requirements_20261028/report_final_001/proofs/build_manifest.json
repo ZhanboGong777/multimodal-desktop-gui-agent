@@ -1,0 +1,241 @@
+{
+  "schema": "week6.full_report.final_build.v1",
+  "engineering_gate": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_full_report_20261028\\engineering_gate.completed_002.json",
+  "engineering_gate_sha256": "6aba30e28e66c454d0286aad10244162d10d12b2e7441506276e1f232b97f450",
+  "final_prose": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_full_report_20261028\\final_prose_002.json",
+  "final_prose_sha256": "6987147732784b3bef580b846615f942e81b6e569b58828a5a3ce8900fc208e5",
+  "builder_sha256": "dc55339102d0c1744afb01b85df9ecf7413e30da2624fc2bcec7155b51206a41",
+  "gate_checker_sha256": "eebcb5ebc0353d494d4aafffe8eee9a95a888c243a93348364699bb15dd57415",
+  "retained_layout_builder_sha256": "c13cfc4f70307ba2a088ed071cdefc77ad88037428ac67abf02bf93e59c28ec8",
+  "reference_sha256": "f117680176cb238aa18b69b2d39557313a1b5f916ad2bf2106403cb403172218",
+  "report_generation_gate_passed": true,
+  "overall_delivery_complete": false,
+  "report_ready_for_delivery": false,
+  "delivery_status": "report_pages_and_package_qa_pending",
+  "numerical_facts": {
+    "full": {
+      "passed": 3803,
+      "pytest_seconds": 664.89,
+      "pytest_owned_seconds": 668.5,
+      "owner_seconds": 669.2339999999967,
+      "pins": 286,
+      "pytest_exit": 0,
+      "ruff_exit": 0
+    },
+    "live": {
+      "normal": {
+        "container": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_048",
+        "name": "normal_048",
+        "actions": 4,
+        "planning": 5,
+        "http": 5,
+        "owner_seconds": 385.15699999999197,
+        "stages": 2,
+        "native_stages": [
+          {
+            "round": 1,
+            "goal_id": "prepare_report",
+            "stage_key": "1:1:prepare_report",
+            "instruction": "Prepare a GREEN report for project ALPHA in Week6 Local Lab using visible controls.",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN"
+            ],
+            "forbid_text": [],
+            "status": "succeeded",
+            "confirmed_inputs": 2,
+            "executor_failures": 0,
+            "semantic_postcondition": "passed",
+            "raw_step_outcomes": [
+              "passed",
+              "passed"
+            ],
+            "independent_transitions": [
+              "project_selected",
+              "theme_selected"
+            ]
+          },
+          {
+            "round": 1,
+            "goal_id": "review_and_commit",
+            "stage_key": "1:2:review_and_commit",
+            "instruction": "Review the prepared GREEN report for project ALPHA and commit it locally.",
+            "expect_text": [
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": [],
+            "status": "succeeded",
+            "confirmed_inputs": 2,
+            "executor_failures": 0,
+            "semantic_postcondition": "passed",
+            "raw_step_outcomes": [
+              "passed",
+              "passed"
+            ],
+            "independent_transitions": [
+              "review_accepted",
+              "local_commit"
+            ]
+          }
+        ],
+        "transitions": [
+          {
+            "event": "project_selected",
+            "utc": "2026-11-01T11:54:01.848630+00:00",
+            "input_receipt": "input_001",
+            "goal_id": "prepare_report",
+            "stage_key": "1:1:prepare_report"
+          },
+          {
+            "event": "theme_selected",
+            "utc": "2026-11-01T11:55:36.191690+00:00",
+            "input_receipt": "input_002",
+            "goal_id": "prepare_report",
+            "stage_key": "1:1:prepare_report"
+          },
+          {
+            "event": "review_accepted",
+            "utc": "2026-11-01T11:57:15.483173+00:00",
+            "input_receipt": "input_003",
+            "goal_id": "review_and_commit",
+            "stage_key": "1:2:review_and_commit"
+          },
+          {
+            "event": "local_commit",
+            "utc": "2026-11-01T11:58:28.607462+00:00",
+            "input_receipt": "input_004",
+            "goal_id": "review_and_commit",
+            "stage_key": "1:2:review_and_commit"
+          }
+        ],
+        "monitor": {
+          "parent_seq": 14,
+          "child_seq": 9,
+          "actions": 1,
+          "planning": 2,
+          "completed": 0
+        },
+        "model": "qwen3-vl:8b-instruct",
+        "text_model": "qwen3-vl:8b-instruct"
+      },
+      "transient": {
+        "container": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_027",
+        "name": "transient_027",
+        "actions": 5,
+        "planning": 6,
+        "http": 6,
+        "owner_seconds": 366.7030000000086,
+        "stages": 2,
+        "native_stages": [
+          {
+            "round": 1,
+            "goal_id": "prepare_report",
+            "stage_key": "1:1:prepare_report",
+            "instruction": "Prepare a BLUE report for project BETA in Week6 Local Lab using visible controls.",
+            "expect_text": [
+              "Project BETA",
+              "Theme BLUE"
+            ],
+            "forbid_text": [],
+            "status": "succeeded",
+            "confirmed_inputs": 2,
+            "executor_failures": 0,
+            "semantic_postcondition": "passed",
+            "raw_step_outcomes": [
+              "passed",
+              "passed"
+            ],
+            "independent_transitions": [
+              "project_selected",
+              "theme_selected"
+            ]
+          },
+          {
+            "round": 1,
+            "goal_id": "review_and_commit",
+            "stage_key": "1:2:review_and_commit",
+            "instruction": "Review the prepared BLUE report for project BETA and commit it locally.",
+            "expect_text": [
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": [],
+            "status": "succeeded",
+            "confirmed_inputs": 3,
+            "executor_failures": 0,
+            "semantic_postcondition": "passed",
+            "raw_step_outcomes": [
+              "passed",
+              "passed",
+              "passed"
+            ],
+            "independent_transitions": [
+              "review_rejected",
+              "review_accepted",
+              "local_commit"
+            ]
+          }
+        ],
+        "transitions": [
+          {
+            "event": "project_selected",
+            "utc": "2026-11-01T11:46:16.723598+00:00",
+            "input_receipt": "input_001",
+            "goal_id": "prepare_report",
+            "stage_key": "1:1:prepare_report"
+          },
+          {
+            "event": "theme_selected",
+            "utc": "2026-11-01T11:47:15.223500+00:00",
+            "input_receipt": "input_002",
+            "goal_id": "prepare_report",
+            "stage_key": "1:1:prepare_report"
+          },
+          {
+            "event": "review_rejected",
+            "utc": "2026-11-01T11:48:27.300210+00:00",
+            "input_receipt": "input_003",
+            "goal_id": "review_and_commit",
+            "stage_key": "1:2:review_and_commit"
+          },
+          {
+            "event": "review_accepted",
+            "utc": "2026-11-01T11:49:32.732636+00:00",
+            "input_receipt": "input_004",
+            "goal_id": "review_and_commit",
+            "stage_key": "1:2:review_and_commit"
+          },
+          {
+            "event": "local_commit",
+            "utc": "2026-11-01T11:50:37.557076+00:00",
+            "input_receipt": "input_005",
+            "goal_id": "review_and_commit",
+            "stage_key": "1:2:review_and_commit"
+          }
+        ],
+        "monitor": {
+          "parent_seq": 14,
+          "child_seq": 9,
+          "actions": 1,
+          "planning": 2,
+          "completed": 0
+        },
+        "model": "qwen3-vl:8b-instruct",
+        "text_model": "qwen3-vl:8b-instruct"
+      }
+    }
+  },
+  "no_cover_date_or_timezone_line": true,
+  "all_page_visual_qa_required": true,
+  "check_only": false,
+  "markdown": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_full_report_20261028\\final_001\\report.md",
+  "markdown_sha256": "76e9226578f96afee40393f03e6819ae0a4f3c97d941a9d5348926f8cfcd669f",
+  "docx": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\tmp\\week6_full_report_20261028\\final_001\\Week6_实验报告_完整验收版.docx",
+  "changed_existing_parts": [
+    "docProps/core.xml",
+    "word/document.xml",
+    "word/_rels/document.xml.rels"
+  ],
+  "docx_sha256": "f5f94c393b5f15b36da3e26db870590aef4633c28b7f8f8bda0bdc54ce2eebbb",
+  "expected_pdf_name": "Week6_实验报告_完整验收版.pdf",
+  "rendered": false
+}

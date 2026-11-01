@@ -1,0 +1,41 @@
+{
+  "schema": "week6.semantic_repair_feedback.producer_assertion_fix.single_test.v1",
+  "receipts": [
+    {
+      "command": [
+        "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+        "-m",
+        "ruff",
+        "check",
+        "tests/test_week6_semantic_repair_feedback.py"
+      ],
+      "launcher_pid": 75064,
+      "actual_wait_exit_code": 0,
+      "started_at_utc": "2026-10-28T11:12:17.171775+00:00",
+      "elapsed_seconds": 0.20400000002700835
+    },
+    {
+      "command": [
+        "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+        "-X",
+        "utf8",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_week6_semantic_repair_feedback.py::test_system_repair_does_not_grant_an_extra_transport_request",
+        "--basetemp",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\semantic_repair_feedback_001\\producer_assertion_repair_002\\single_test_validation_001\\pytest_tmp"
+      ],
+      "launcher_pid": 67816,
+      "actual_wait_exit_code": 0,
+      "started_at_utc": "2026-10-28T11:12:17.385543+00:00",
+      "elapsed_seconds": 5.062000000034459
+    }
+  ],
+  "pin_count": 263,
+  "pins_unchanged": true,
+  "only_new_test_differs_from_failed_formal": true,
+  "production_and_auditor_unchanged": true,
+  "not_a_formal_semantic_or_full_suite_pass_claim": true,
+  "actual_external_model_gui_calls": 0
+}

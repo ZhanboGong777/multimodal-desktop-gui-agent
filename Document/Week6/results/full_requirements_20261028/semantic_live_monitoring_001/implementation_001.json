@@ -1,0 +1,76 @@
+{
+  "schema": "week6.semantic_live_monitoring.implementation.v1",
+  "recorded_utc": "2026-10-28T10:22:47.259073+00:00",
+  "status": "implementation_and_narrow_cpu_passed_pending_unified_freeze_full_validation_and_live_acceptance",
+  "report_ready": false,
+  "scope_change_authorized": {
+    "path": "Document/Week6/results/full_requirements_20261028/semantic_live_monitoring_001/scope_and_source_before_001.json",
+    "sha256": "28afdb109ad7b346829651209713197e1626d11284ba33d4672d22d12746a73b"
+  },
+  "changes": [
+    "RunMonitor optional on_status observer runs after successful journal append and snapshot replacement, with an isolated scalar/list snapshot copy.",
+    "Actual TaskRunner semantic children forward saved status to the root while the child is executing; global action/planning offsets are fixed for that child and counters retain their high-water values.",
+    "Root remains executing with child_<stage> detail; child terminal status does not finish the root or add semantic-goal completion. Only the outer verified ledger supplies subgoals_completed.",
+    "Existing ordinary observer callbacks remain chained. Ordinary Exception becomes a fixed status_observer_failed observer_failures diagnostic and warning; it is not retried or echoed with raw private exception text.",
+    "KeyboardInterrupt/SystemExit are deliberately not swallowed. Cancellation remains a runtime cancellation/exit, not a telemetry fault rescued into success.",
+    "Semantic root status elapsed time now uses the monitor default independent monotonic clock, matching TaskRunner. Business self.clock, deadlines and budgets were not changed. Historical monitor timestamps/elapsed values remain untouched."
+  ],
+  "unchanged_contracts": [
+    "Legacy status field sets and write_failures codes; observer diagnostics are separate property/log diagnostics.",
+    "Stage checks, caller final, input dispatch/unknown accounting, retry decisions, input and model budgets.",
+    "Status reader stale threshold and directory selection; no background heartbeat, polling thread, model call or desktop access is introduced."
+  ],
+  "limits": [
+    "Status is event-driven. A long blocked model or bridge operation can still make the last record stale after 30 seconds; no heartbeat is claimed.",
+    "actions_used is telemetry, not an independent semantic-success or input-receipt proof. An unknown attempt remains visible without earning stage credit.",
+    "Callbacks and additional persistence have real wall-time overhead. Independent monitor timing prevents consumption of execution-clock fixture reads, not zero overhead.",
+    "No new actual desktop proof is supplied by these CPU tests. Same-final-source normal/transient runs and full regression are still required."
+  ],
+  "source_after": [
+    {
+      "source": "src/gui_agent/runtime/monitoring.py",
+      "snapshot": {
+        "path": "Document/Week6/results/full_requirements_20261028/semantic_live_monitoring_001/source_after/src/gui_agent/runtime/monitoring.py.txt",
+        "sha256": "fdfd51964074385e683c20b952c156bd252fdc32dc49b2e7b04849a00ab8be5f"
+      },
+      "sha256": "fdfd51964074385e683c20b952c156bd252fdc32dc49b2e7b04849a00ab8be5f"
+    },
+    {
+      "source": "src/gui_agent/planning/semantic_workflow.py",
+      "snapshot": {
+        "path": "Document/Week6/results/full_requirements_20261028/semantic_live_monitoring_001/source_after/src/gui_agent/planning/semantic_workflow.py.txt",
+        "sha256": "5380ddb6923d7ad449a8ca41c198c8ecf841856c8cfb8725bdf72a91b678c31a"
+      },
+      "sha256": "5380ddb6923d7ad449a8ca41c198c8ecf841856c8cfb8725bdf72a91b678c31a"
+    },
+    {
+      "source": "tests/test_week6_semantic_live_monitoring.py",
+      "snapshot": {
+        "path": "Document/Week6/results/full_requirements_20261028/semantic_live_monitoring_001/source_after/tests/test_week6_semantic_live_monitoring.py.txt",
+        "sha256": "b188bb0ea5aad26ede8ee2638f18acbc3d7e25eb825a5cd1ea0e0ee2a1e496f5"
+      },
+      "sha256": "b188bb0ea5aad26ede8ee2638f18acbc3d7e25eb825a5cd1ea0e0ee2a1e496f5"
+    }
+  ],
+  "validation": {
+    "path": "Document/Week6/results/full_requirements_20261028/semantic_live_monitoring_001/cpu_validation_002/validation.json",
+    "sha256": "7a41d68f4ac3dc03b60e53d10b2525f2c877faa474f9b1aa1f06b4493be84fd6"
+  },
+  "actual_pytest_stdout": {
+    "path": "Document/Week6/results/full_requirements_20261028/semantic_live_monitoring_001/cpu_validation_002/pytest.stdout.txt",
+    "sha256": "3e9bf7fbe41edd101bbd2bfc49215be2207000681ca106c898b79aead1597273"
+  },
+  "actual_pytest_result": "87 passed in 21.02s",
+  "actual_pytest_wait": 0,
+  "actual_ruff_wait": 0,
+  "retained_first_validation": {
+    "path": "Document/Week6/results/full_requirements_20261028/semantic_live_monitoring_001/cpu_validation_001/validation.json",
+    "sha256": "d77190136c497e5799fb586b495ac97e69a09f4b9ea02739bc0aabfcc3bb3d75"
+  },
+  "retained_first_result": "85 passed in 18.45s, followed by Ruff exit1 for three unbound closure variables; fixed in second validation, original outputs retained.",
+  "operations": {
+    "real_model_calls": 0,
+    "gui_operations": 0,
+    "whole_suite_runs": 0
+  }
+}

@@ -1,0 +1,30 @@
+"""Preserve the actual read-only negative-diagnosis process result separately."""
+from datetime import datetime, timezone
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+import time
+
+HERE = Path(__file__).resolve().parent
+BASE = HERE.parents[1] / "week6-worktree/Document/Week6/results/full_requirements_20261028"
+OUT = BASE / "review/transient001_negative_reader_process_001"
+OUT.mkdir(exist_ok=False)
+command = ["D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe", "-X", "utf8", "-B",
+           str(HERE / "negative_evidence_audit_001.py")]
+started, timer = datetime.now(timezone.utc).isoformat(), time.monotonic()
+with (OUT / "stdout.txt").open("xb") as stdout, (OUT / "stderr.txt").open("xb") as stderr:
+    child = subprocess.Popen(command, stdout=stdout, stderr=stderr)
+    actual = child.wait()
+record = {"schema": "week6.transient001.negative_reader.actual_exit.v1", "command": command,
+    "pid": child.pid, "started_utc": started, "finished_utc": datetime.now(timezone.utc).isoformat(),
+    "elapsed_seconds": time.monotonic() - timer, "actual_reader_exit": actual,
+    "meaning": "Reader validation exit, distinct from actual experiment owner1 and both saved audit exits1.",
+    "files": {name: hashlib.sha256((OUT / name).read_bytes()).hexdigest() for name in ("stdout.txt", "stderr.txt")}}
+with (OUT / "receipt.json").open("x", encoding="utf-8", newline="\n") as stream:
+    json.dump(record, stream, ensure_ascii=False, indent=2)
+    stream.write("\n")
+with (OUT / "run_negative_reader_001.py.txt").open("xb") as stream:
+    stream.write(Path(__file__).read_bytes())
+print(json.dumps(record))
+raise SystemExit(actual)

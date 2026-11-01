@@ -1,0 +1,68 @@
+{
+  "schema": "week6.quoted_ocr_uncertainty.scope.v1",
+  "records": [
+    {
+      "path": "src/gui_agent/runtime/action_adapter.py",
+      "before_sha256": "9eb497fdf77843cf2cdfced4363cd09fe1b0b7466c6145f98c6687f270809c9f",
+      "after_sha256": "9fc5aae5013be1e5b698666aaaaa2c67fe8f4aa0f609ca76e27ca943514b094b"
+    },
+    {
+      "path": "tests/test_week6_quoted_target_consistency.py",
+      "before_sha256": "4e20f8915edfdb76889a4ebaacaeb8fa528d1892557deb2178f365a1e71b434a",
+      "after_sha256": "a3edda066cfd0b338819505847ee023dc83ca8704da3fff63e64e1bd251d45e7"
+    }
+  ],
+  "all_other283_pins_identical": true,
+  "all_original_action_adapter_ast_other_than_one_added_uncertainty_branch_identical": true,
+  "all_original19_tests_prefix_byte_identical": true,
+  "saved_native_counterexamples": [
+    {
+      "case": "transient_009",
+      "snapshot": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_009\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\obs-0001.json",
+      "snapshot_sha256": "b9a359d232f05b8d942a59177fed9d67d0ecb22a3f7477f21a4a69b2a505311f",
+      "saved_image_path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_009\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\monitor1_20261101_181852_990.png",
+      "saved_image_sha256": "e78dcf7eb5aa3aec01897818c243c47737613385d3cba6af4694ddcef2e1fd53",
+      "original_native_step": {
+        "step_id": "s1",
+        "description": "Select the 'BETA' project button.",
+        "action_type": "double_click",
+        "target_text": "ALPHA",
+        "arguments": {
+          "element_id": "obs-0001-e001"
+        },
+        "expected_result": "The 'BETA' project is selected.",
+        "status": "pending"
+      },
+      "preceding_guard_error": "quoted target conflict: obs-0001: description names 'BETA', but target_text 'ALPHA' and element 'obs-0001-e001' identify another readable target; refusing input without choosing a replacement",
+      "current_guard_error": "quoted target conflict: obs-0001: description names 'BETA', but target_text 'ALPHA' and element 'obs-0001-e001' identify another readable target; refusing input without choosing a replacement",
+      "same_native_target_current_resolved_point": null,
+      "step_and_ocr_not_rewritten": true
+    },
+    {
+      "case": "transient_010",
+      "snapshot": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_010\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\obs-0001.json",
+      "snapshot_sha256": "448082203f942409e235d6b93e9d042205037124f5bcb5861be305977377fa90",
+      "saved_image_path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_010\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\monitor1_20261101_184520_774.png",
+      "saved_image_sha256": "2c61e1c46cf7c72d230ad337d66e6b565d315610d6e3a3dd6d430c63909bdaa8",
+      "original_native_step": {
+        "step_id": "s1",
+        "description": "Select the 'BETA' project button.",
+        "action_type": "double_click",
+        "target_text": "BELA",
+        "arguments": {
+          "element_id": "obs-0001-e003"
+        },
+        "expected_result": "The 'BETA' project is selected, and the interface will update to allow theme selection.",
+        "status": "pending"
+      },
+      "preceding_guard_error": "quoted target conflict: obs-0001: description names 'BETA', but target_text 'BELA' and element 'obs-0001-e003' identify another readable target; refusing input without choosing a replacement",
+      "current_guard_error": null,
+      "same_native_target_current_resolved_point": {
+        "x": 1281,
+        "y": 1048
+      },
+      "step_and_ocr_not_rewritten": true
+    }
+  ],
+  "meaning": "Generic uncertainty allowance only for an absent ASCII alphabetic name of length4..160 one character edit from the already chosen readable witness. No exact named alternative may exist elsewhere; exact competing labels, dissimilar/short/numeric names still refuse. No target replacement, OCR rewrite, fuzzy target search or success credit; all original ID/text, fresh-frame, region, budget and task predicate guards unchanged. Counterfactual saved records only, no GUI/model calls or live acceptance."
+}

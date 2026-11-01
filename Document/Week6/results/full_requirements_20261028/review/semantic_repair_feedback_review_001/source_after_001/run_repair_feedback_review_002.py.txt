@@ -1,0 +1,87 @@
+"""Narrow independent CPU debug with real subprocess receipts, no live model/UI."""
+from __future__ import annotations
+
+import hashlib
+import json
+import re
+import subprocess
+import time
+from datetime import datetime, timezone
+from pathlib import Path
+
+import psutil
+
+ROOT = Path("C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree")
+OUT = ROOT / "Document/Week6/results/full_requirements_20261028/review/semantic_repair_feedback_review_001/cpu_validation_002"
+PYTHON = "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe"
+PATHS = [
+    "scripts/week6_audit_semantic_acceptance.py", "tests/test_week6_semantic_repair_feedback_review.py",
+    "src/gui_agent/planning/semantic_workflow.py", "src/gui_agent/planning/workflow_decomposer.py",
+    "src/gui_agent/planning/planner.py", "src/gui_agent/planning/prompts.py", "src/gui_agent/planning/schemas.py",
+    "src/gui_agent/runtime/runner.py", "src/gui_agent/runtime/action_adapter.py", "src/gui_agent/runtime/monitoring.py",
+    "src/gui_agent/models/base.py", "src/gui_agent/models/openai_compatible.py",
+    "tests/test_week6_automatic_decomposition.py", "tests/test_week6_rolling_actions.py",
+    "tests/test_week6_semantic_subtasks.py", "tests/test_week6_semantic_text_context.py",
+]
+
+
+def pins():
+    return {s: hashlib.sha256((ROOT / s).read_bytes()).hexdigest() for s in PATHS}
+
+
+def write(path, value):
+    path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf8")
+
+
+def run(name, command):
+    started = time.perf_counter()
+    start_utc = datetime.now(timezone.utc).isoformat()
+    with (OUT / f"{name}.stdout.txt").open("wb") as stdout, (OUT / f"{name}.stderr.txt").open("wb") as stderr:
+        process = subprocess.Popen(command, cwd=ROOT, stdout=stdout, stderr=stderr)
+        observed = {}
+        launcher = {"pid": process.pid}
+        try:
+            p = psutil.Process(process.pid)
+            launcher.update(p.as_dict(attrs=["pid", "create_time", "exe", "cmdline"]))
+        except psutil.Error:
+            pass
+        while process.poll() is None:
+            try:
+                for child in psutil.Process(process.pid).children(recursive=True):
+                    info = child.as_dict(attrs=["pid", "create_time", "exe", "cmdline"])
+                    observed[(info["pid"], info["create_time"])] = info
+            except psutil.Error:
+                pass
+            time.sleep(.1)
+        code = process.wait()
+    receipt = {"command": command, "started_utc": start_utc, "finished_utc": datetime.now(timezone.utc).isoformat(),
+               "elapsed_seconds": time.perf_counter() - started, "launcher": launcher,
+               "observed_descendants": list(observed.values()), "actual_child_exit_code": code}
+    write(OUT / f"{name}.receipt.json", receipt)
+    return receipt
+
+
+def main():
+    OUT.mkdir(exist_ok=False)
+    before = pins()
+    write(OUT / "source_pins_before.json", before)
+    ruff = run("ruff", [PYTHON, "-m", "ruff", "check", PATHS[0], PATHS[1]])
+    pytest = run("pytest", [PYTHON, "-X", "utf8", "-m", "pytest", "-q", PATHS[1],
+                            "--basetemp", str(OUT / "pytest_tmp"), "--tb=short"])
+    after = pins()
+    write(OUT / "source_pins_after.json", after)
+    stdout = (OUT / "pytest.stdout.txt").read_text(encoding="utf8")
+    summary = re.findall(r"(?:\d+ failed, )?\d+ passed[^\n]*", stdout)
+    audit = {"schema": "week6.independent.repair_feedback.narrow_cpu.v1", "focused_source_pin_count": len(before),
+             "focused_source_pins_unchanged": before == after,
+             "whole_repository_source_freeze_claimed": False,
+             "ruff": ruff, "pytest": pytest, "summary": summary[-1] if summary else None,
+             "model_gui_calls": 0, "full_regression": False,
+             "all_narrow_checks_passed": ruff["actual_child_exit_code"] == pytest["actual_child_exit_code"] == 0 and before == after}
+    write(OUT / "audit.json", audit)
+    print(json.dumps({"audit": str(OUT / "audit.json"), "sha256": hashlib.sha256((OUT / "audit.json").read_bytes()).hexdigest(),
+                      "passed": audit["all_narrow_checks_passed"], "summary": audit["summary"]}, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

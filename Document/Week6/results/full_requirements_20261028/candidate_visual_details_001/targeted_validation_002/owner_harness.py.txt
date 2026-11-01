@@ -1,0 +1,4 @@
+from pathlib import Path
+p=Path(__file__).with_name('validate_candidate_details_001.py')
+s=p.read_text('utf8').replace("'tests/test_models.py'", "'tests/test_model_config.py', 'tests/test_config.py'")
+exec(compile(s,str(__file__),'exec'))

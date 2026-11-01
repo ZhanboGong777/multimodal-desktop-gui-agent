@@ -1,0 +1,12 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "test-local",
+  "latency_ms": 0.0,
+  "usage": {},
+  "error": null,
+  "content_length": 532,
+  "content": "{\"status\": \"ready\", \"reason\": \"Two requested state changes\", \"subgoals\": [{\"goal_id\": \"ApplyPreference\", \"instruction\": \"Apply the requested preference.\", \"expect_text\": [\"Verified part 1\"], \"forbid_text\": []}, {\"goal_id\": \"VerifyConfig\", \"instruction\": \"Verify the resulting configuration.\", \"expect_text\": [\"Verified part 2\", \"Final accepted\"], \"forbid_text\": []}, {\"goal_id\": \"PersistConfig\", \"instruction\": \"Persist the verified configuration locally.\", \"expect_text\": [\"Final accepted\", \"Verified part 2\"], \"forbid_text\": []}]}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

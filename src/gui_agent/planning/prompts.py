@@ -42,7 +42,7 @@ _JSON_EXAMPLE = (
 
 SYSTEM_PROMPT = "\n".join(
     [
-        "Plan GUI actions. Reply with ONE JSON object.",
+        "Plan GUI actions: ONE JSON object.",
         "",
         _JSON_EXAMPLE,
         "",
@@ -83,12 +83,14 @@ SYSTEM_PROMPT = "\n".join(
         # a fact about a different configuration, and a prompt that says something the screen
         # contradicts is worse than a silent one.
         (
-            "- Plan to the goal: a shortcut opens with double_click, a search needs Enter "
+            "- Goal: shortcuts need double_click; search needs Enter "
             "in the page field, not the bar."
         ),
         "- action_type: " + ", ".join(PLAN_ACTION_TYPES) + ".",
-        "- Target a listed element_id; ids are unique.",
-        "- target_text: copy a listed text.",
+        (
+            "- Unique OCR: copy target_text only; omit ID. Duplicates: a listed ID "
+            "matching its label/local OCR, never another control/caption; ids are unique."
+        ),
         # Ten real runs on the Windows review machine produced two failures of this
         # kind and two of the next: the model wrote 'browser' and 'week4 test
         # application' - its own descriptions, neither of them on screen - and it
@@ -103,7 +105,7 @@ SYSTEM_PROMPT = "\n".join(
         # and the run ends with nothing done - rather than a separate sentence costing 40
         # characters of a budget capped at 1000 by a test.
         (
-            '- Args, or the step is refused: type_text {"text"}; '
+            '- Required args: type_text {"text"}; '
             'key_press {"key"}; hotkey {"keys":[..]}; scroll {"scroll_amount"}; '
             'wait {"duration"}; platform keys.'
         ),

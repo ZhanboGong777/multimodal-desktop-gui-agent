@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 12563.0,
+  "usage": {
+    "prompt_tokens": 1875,
+    "completion_tokens": 128,
+    "total_tokens": 2003
+  },
+  "error": null,
+  "content_length": 571,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"The previous goal 'prepare_report' is completed and verified by its expect_text. The remaining operation is 'review_and_commit', which must explicitly perform the review and commit actions to satisfy the final condition 'LOCAL COMPLETE'. Since the review is temporarily unavailable, retrying within预算\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Review the prepared BLUE report for project BETA and commit it locally.\",\n      \"expect_text\": [\"LOCAL COMPLETE\"],\n      \"forbid_text\": [],\n      \"goal_id\": \"review_and_commit\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

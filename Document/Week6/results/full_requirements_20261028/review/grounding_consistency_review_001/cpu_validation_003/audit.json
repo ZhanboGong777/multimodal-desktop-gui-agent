@@ -1,0 +1,82 @@
+{
+  "schema_version": "week6.grounding.independent_cpu_review.v1",
+  "reviewer": "/root/week6_replanning_review",
+  "started_utc": "2026-10-28T10:26:42.591494+00:00",
+  "finished_utc": "2026-10-28T10:26:53.193663+00:00",
+  "command": [
+    "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/test_week6_grounding_consistency_review.py",
+    "--basetemp=.pytest-tmp-grounding-consistency-review003",
+    "--tb=short",
+    "--junitxml=C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\grounding_consistency_review_001\\cpu_validation_003\\junit.xml"
+  ],
+  "actual_returncode": 0,
+  "wrapper_wall_seconds": 10.384496100014076,
+  "ruff_command": [
+    "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe",
+    "-m",
+    "ruff",
+    "check",
+    "tests/test_week6_grounding_consistency_review.py"
+  ],
+  "ruff_returncode": 0,
+  "collected_testcases": 26,
+  "failed_testcases": [],
+  "selected_source_before": {
+    "src/gui_agent/runtime/action_adapter.py": "222686942e4623d4743ac50e6da87599d4ba95d84ed9d1d855de089324a0eeda",
+    "src/gui_agent/runtime/runner.py": "91282ffc0cdc182dd6e727fb485ddc5d7244360200939c0521da56bcd8815511",
+    "src/gui_agent/runtime/monitoring.py": "fdfd51964074385e683c20b952c156bd252fdc32dc49b2e7b04849a00ab8be5f",
+    "src/gui_agent/runtime/visual_grounding.py": "3e12a9dc97d45a6d3635913adbb477d07fa6dde3e8f9798c3431557ac4f22bcd",
+    "src/gui_agent/planning/semantic_workflow.py": "5380ddb6923d7ad449a8ca41c198c8ecf841856c8cfb8725bdf72a91b678c31a",
+    "src/gui_agent/planning/workflow_decomposer.py": "d9881631677d4223c16669bee7a7780bb4c6014ffe9066a488ad37683bfbe826",
+    "src/gui_agent/planning/prompts.py": "58cdbe6220b5e1301360c24909e97fde6fd189395a4efbd0a735c76784b230b1",
+    "src/gui_agent/planning/planner.py": "afa72e8faa640d9c8127154f283828105fb0d53d2ea21ca1f36843ca0e18bb6d",
+    "src/gui_agent/runtime/schemas.py": "06aa355ba24ed50a6307d7fc84cd920dc91b81dc7d844ec68c461cb614b5f6f7",
+    "src/gui_agent/runtime/verification.py": "abc72375f2959fb765fb53dbf4bbf63401513e5cdfeaeb445d0c148b0be1cd4c",
+    "tests/test_week6_grounding_consistency_review.py": "e330220a730580d8364e4fdd70e638f0c6796eea50961923f0d1c2d369c94478",
+    "tests/test_runtime_runner.py": "34342b57f4bad8a65867c2299b53f041c15ae2eeb467404ba36d0929f58a6c85",
+    "tests/test_week6_semantic_subtasks.py": "a0fa608d2e893e4a3bf5072591edc5e7b24411a27807c9cef534eda7cfee66e5",
+    "tests/test_week6_automatic_decomposition.py": "b28ec24c5d06982f1160c3b110f706b0461113eabcd26f4c7d5b1365378000ad",
+    "tests/test_week6_rolling_actions.py": "fe669d6e50df3dc1e1b44b5aaa81b1c770a4c5b516a9df73cd120d047d9a9193",
+    "tests/test_week6_full_requirements_review.py": "448a5a6ecca04db745018acd2dd64a1994d3cbdc325056b20b9d4f25727cab33",
+    "scripts/week6_audit_semantic_acceptance.py": "2491b56a4d4cce826f8238f08b33daf71bd35dd80dcd3674385a8724871a1515"
+  },
+  "selected_source_after": {
+    "src/gui_agent/runtime/action_adapter.py": "222686942e4623d4743ac50e6da87599d4ba95d84ed9d1d855de089324a0eeda",
+    "src/gui_agent/runtime/runner.py": "91282ffc0cdc182dd6e727fb485ddc5d7244360200939c0521da56bcd8815511",
+    "src/gui_agent/runtime/monitoring.py": "fdfd51964074385e683c20b952c156bd252fdc32dc49b2e7b04849a00ab8be5f",
+    "src/gui_agent/runtime/visual_grounding.py": "3e12a9dc97d45a6d3635913adbb477d07fa6dde3e8f9798c3431557ac4f22bcd",
+    "src/gui_agent/planning/semantic_workflow.py": "5380ddb6923d7ad449a8ca41c198c8ecf841856c8cfb8725bdf72a91b678c31a",
+    "src/gui_agent/planning/workflow_decomposer.py": "d9881631677d4223c16669bee7a7780bb4c6014ffe9066a488ad37683bfbe826",
+    "src/gui_agent/planning/prompts.py": "58cdbe6220b5e1301360c24909e97fde6fd189395a4efbd0a735c76784b230b1",
+    "src/gui_agent/planning/planner.py": "afa72e8faa640d9c8127154f283828105fb0d53d2ea21ca1f36843ca0e18bb6d",
+    "src/gui_agent/runtime/schemas.py": "06aa355ba24ed50a6307d7fc84cd920dc91b81dc7d844ec68c461cb614b5f6f7",
+    "src/gui_agent/runtime/verification.py": "abc72375f2959fb765fb53dbf4bbf63401513e5cdfeaeb445d0c148b0be1cd4c",
+    "tests/test_week6_grounding_consistency_review.py": "e330220a730580d8364e4fdd70e638f0c6796eea50961923f0d1c2d369c94478",
+    "tests/test_runtime_runner.py": "34342b57f4bad8a65867c2299b53f041c15ae2eeb467404ba36d0929f58a6c85",
+    "tests/test_week6_semantic_subtasks.py": "a0fa608d2e893e4a3bf5072591edc5e7b24411a27807c9cef534eda7cfee66e5",
+    "tests/test_week6_automatic_decomposition.py": "b28ec24c5d06982f1160c3b110f706b0461113eabcd26f4c7d5b1365378000ad",
+    "tests/test_week6_rolling_actions.py": "fe669d6e50df3dc1e1b44b5aaa81b1c770a4c5b516a9df73cd120d047d9a9193",
+    "tests/test_week6_full_requirements_review.py": "448a5a6ecca04db745018acd2dd64a1994d3cbdc325056b20b9d4f25727cab33",
+    "scripts/week6_audit_semantic_acceptance.py": "2491b56a4d4cce826f8238f08b33daf71bd35dd80dcd3674385a8724871a1515"
+  },
+  "selected_source_unchanged": true,
+  "passed": true,
+  "operations": {
+    "model_calls": 0,
+    "gui_operations": 0,
+    "full_pytest_runs": 0
+  },
+  "scope": "Offline synthetic observations/model replies and CPU executors using real runtime. One pixel mapping is explicitly doubled. No real window success.",
+  "source_runner_sha256": "aa4fa7bfc823cdeb293e142e156522f2f4394b64d87f5d109d525ca2e66acbce",
+  "artifacts": {
+    "stdout.txt": "197a4135a50c0db7eb1c4e0022ec0705c60db825dd0f68426afa40c1948cee26",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "junit.xml": "57c81951034dcb99a3dbe54e025227c836126b7e94eb56699ec70edaff3f2e39",
+    "ruff.stdout.txt": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "ruff.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "reviewer": "Root",
+  "approved": true,
+  "case": "normal_030",
+  "operator_chronology_reviewed": true,
+  "stages": [
+    {
+      "stage_key": "1:1:ALPHA_REPORT_001",
+      "semantic_alignment_passed": true,
+      "rationale": "Native instruction asks to prepare GREEN for ALPHA. Original before has neither; exact model ALPHA and GREEN inputs cause the separate project_selected and theme_selected transitions. Fresh before-review PNG visibly confirms both and Draft ready. No review/commit input is credited to preparation."
+    },
+    {
+      "stage_key": "1:2:ALPHA_REVIEW_001",
+      "semantic_alignment_passed": true,
+      "rationale": "Native instruction is review only. Its fixed contract requires Review Complete, false on Draft ready. One exact Review report input produces review_accepted and visible Review complete, without local commit in this goal."
+    },
+    {
+      "stage_key": "1:3:ALPHA_COMMIT_001",
+      "semantic_alignment_passed": true,
+      "rationale": "Native instruction requests local commit. Before PNG still has Commit locally and no LOCAL COMPLETE. Its exact model input, retaining OCR description Commiyocally, clicks the visible Commit locally button and produces one local_commit event. Fresh caller-final PNG confirms ALPHA, GREEN and LOCAL COMPLETE."
+    }
+  ],
+  "actually_viewed_saved_original_pixels": [
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_030\\run\\automatic\\contract_before_001_001\\monitor1_20261101_155845_409.png",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_030\\run\\automatic\\contract_before_001_002\\monitor1_20261101_160059_287.png",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_030\\run\\automatic\\contract_before_001_003\\monitor1_20261101_160153_923.png",
+    "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_030\\run\\automatic\\caller_final_round_001\\monitor1_20261101_160257_036.png"
+  ],
+  "rejected_contract_count_reviewed": 0,
+  "rejected_contract_rationale": "No pre-input contract rejection in this case. All original prior failed attempts remain separate.",
+  "caveats": [
+    "One controlled local fixture, not a general desktop success rate.",
+    "Root is the sole operator and agent reviewer; this is not independent human sign-off.",
+    "The persistent lower-right uninstall notification was outside Lab controls and not clicked."
+  ]
+}

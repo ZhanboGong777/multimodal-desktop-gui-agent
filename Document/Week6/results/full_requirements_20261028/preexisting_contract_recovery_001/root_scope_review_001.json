@@ -1,0 +1,40 @@
+{
+  "schema": "week6.preexisting_contract.root_scope_review.v1",
+  "reviewer": "Root",
+  "scope_review_passed": true,
+  "prior_freeze_sha256": "8923137e9bf24e1b832afc91e0521f2b966fad374ecf3a7e7763e6b6b1fe20ee",
+  "manifest_sha256": "b2a67debbae48bc6393c9cce9d48a25135dc253348b00fba4f699b880494e38e",
+  "changed_existing_files": {
+    "scripts/week6_audit_semantic_acceptance.py": {
+      "before": "eb2e3c4ed8da2a6b7b347381e820c028a23af5c4bb45fb47ebd2160b02baa68d",
+      "after": "877a4b91c6c1614f5b34c05879cc43dd850a3913ee3de3085f48d99e64807a1e"
+    },
+    "src/gui_agent/planning/semantic_workflow.py": {
+      "before": "7e9f1556a4bf04c354518282657ee3c1b080dab6bf69c387ed5eb25a4453e8fd",
+      "after": "7fd066917d332410469e1080d15da23fddfde7f16a482d97c3e91b46016afc1d"
+    }
+  },
+  "new_test": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\tests\\test_week6_preexisting_contract_recovery.py",
+    "sha256": "1f68f351cce1b3de3770c335774e5a98896f1da7706d38965731ca65abb34415"
+  },
+  "production_ast_changed_only": [
+    "_logical_failure",
+    "SemanticWorkflowResult",
+    "SemanticWorkflowRunner"
+  ],
+  "run_ast_other_than_before_true_branch_equal": true,
+  "result_class_only_added_rejected_contract_ledger": true,
+  "auditor_other_top_level_logic_equal": true,
+  "new_rejection_does_not_enter_executed_or_completed_goal_ledger": true,
+  "accepted_execution_still_requires_false_fresh_before_and_confirmed_input": true,
+  "model_feedback_only_category_and_previous_model_goal_not_observed_pixels_ocr_paths": true,
+  "same_round_request_action_and_deadline_budgets": true,
+  "no_local_goal_or_id_rewrite": true,
+  "initial_narrow_check": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\preexisting_contract_recovery_001\\initial_narrow_check_001.json",
+    "sha256": "444d0ed8bd32a5e2cfa300ca387be13762f2320e5c2af0c3330f8072f3d16c90"
+  },
+  "live_success_claimed": false,
+  "full_regression_claimed": false
+}

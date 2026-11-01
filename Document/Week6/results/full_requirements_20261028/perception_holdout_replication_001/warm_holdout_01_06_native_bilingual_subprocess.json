@@ -1,0 +1,293 @@
+{
+  "fixture": "holdout_01",
+  "arm": "native_bilingual_subprocess",
+  "phase": "warm",
+  "repeat": 6,
+  "image_sha256": "f2159456d5fc587ff019ec1d30d36d06693fbc18f5cf0695d47c34c3e5e0f536",
+  "started_perf_counter": 674761.7550488,
+  "status": "completed",
+  "ended_perf_counter": 674762.0499194,
+  "engine_creation_ms": 0.001700012944638729,
+  "decode_ms": 2.0297999726608396,
+  "ocr_ms": 287.85249998327345,
+  "ui_ms": 4.9866000190377235,
+  "full_ms": 294.87059998791665,
+  "metrics": {
+    "tp": 5,
+    "fp": 2,
+    "fn": 3,
+    "precision": 0.7142857142857143,
+    "recall": 0.625,
+    "labels": [
+      {
+        "text": "Audio Settings",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9206081081081081
+      },
+      {
+        "text": "Input Level",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9012605042016807
+      },
+      {
+        "text": "Restore Audio",
+        "language": "en",
+        "matched": true,
+        "iou": 0.8884297520661157
+      },
+      {
+        "text": "Enable",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9545454545454546
+      },
+      {
+        "text": "Disable",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9574468085106383
+      },
+      {
+        "text": "声音设置",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "调整音量",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "静音",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      }
+    ]
+  },
+  "control_metrics": {
+    "tp": 6,
+    "fp": 1,
+    "fn": 0,
+    "iou_threshold": 0.8
+  },
+  "predictions": [
+    {
+      "text": "Audio Settings",
+      "bounding_box": {
+        "left": 42,
+        "top": 38,
+        "right": 151,
+        "bottom": 53
+      },
+      "confidence": 0.86,
+      "center": {
+        "x": 96,
+        "y": 45
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Input Level",
+      "bounding_box": {
+        "left": 43,
+        "top": 115,
+        "right": 109,
+        "bottom": 128
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 76,
+        "y": 121
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Restore Audio",
+      "bounding_box": {
+        "left": 43,
+        "top": 201,
+        "right": 129,
+        "bottom": 211
+      },
+      "confidence": 0.94,
+      "center": {
+        "x": 86,
+        "y": 206
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "声音 设置",
+      "bounding_box": {
+        "left": 668,
+        "top": 112,
+        "right": 727,
+        "bottom": 136
+      },
+      "confidence": 0.91,
+      "center": {
+        "x": 697,
+        "y": 124
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "调整 音量",
+      "bounding_box": {
+        "left": 668,
+        "top": 197,
+        "right": 729,
+        "bottom": 222
+      },
+      "confidence": 0.89,
+      "center": {
+        "x": 698,
+        "y": 209
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Enable",
+      "bounding_box": {
+        "left": 43,
+        "top": 305,
+        "right": 85,
+        "bottom": 315
+      },
+      "confidence": 0.86,
+      "center": {
+        "x": 64,
+        "y": 310
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Disable",
+      "bounding_box": {
+        "left": 257,
+        "top": 305,
+        "right": 302,
+        "bottom": 315
+      },
+      "confidence": 0.88,
+      "center": {
+        "x": 279,
+        "y": 310
+      },
+      "source": "ocr"
+    }
+  ],
+  "ui_candidates": [
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 656,
+        "top": 291,
+        "right": 811,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 733,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 244,
+        "top": 291,
+        "right": 399,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 321,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 30,
+        "top": 291,
+        "right": 185,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 656,
+        "top": 187,
+        "right": 811,
+        "bottom": 244
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 733,
+        "y": 215
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 30,
+        "top": 187,
+        "right": 185,
+        "bottom": 244
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 215
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 656,
+        "top": 101,
+        "right": 811,
+        "bottom": 158
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 733,
+        "y": 129
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 668,
+        "top": 306,
+        "right": 697,
+        "bottom": 320
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 682,
+        "y": 313
+      },
+      "source": "contour"
+    }
+  ],
+  "errors": []
+}

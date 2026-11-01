@@ -9,6 +9,7 @@ that reason.
 from __future__ import annotations
 
 import base64
+import json
 import os
 from collections.abc import Mapping, Sequence
 from pathlib import Path
@@ -72,6 +73,7 @@ class OpenAICompatibleClient(ModelClient):
         self,
         *,
         model_name: str | None = None,
+        text_model_name: str | None = None,
         base_url: str | None = None,
         api_key: str | None = None,
         timeout_seconds: float = 60.0,
@@ -80,6 +82,12 @@ class OpenAICompatibleClient(ModelClient):
         max_tokens: int | None = None,
         environ: Mapping[str, str] | None = None,
     ) -> None:
+        if text_model_name is not None and (
+            type(text_model_name) is not str or not text_model_name
+            or text_model_name != text_model_name.strip() or len(text_model_name) > 256
+        ):
+            raise ModelConfigError("text_model_name must be a nonblank model name without outer whitespace")
+        self.text_model_name = text_model_name
         env = os.environ if environ is None else environ
         self.api_key = api_key or env.get(API_KEY_ENV) or None
         self.base_url = base_url or env.get(BASE_URL_ENV) or None
@@ -144,14 +152,56 @@ class OpenAICompatibleClient(ModelClient):
                 {"type": "text", "text": text if isinstance(text, str) else str(text)},
                 {"type": "image_url", "image_url": {"url": data_url}},
             ]
+            # Only the planner's explicit, independently reproducible manifest
+            # enables detail images. Saved log messages contain hashes, not PNG
+            # bytes. No additional model dispatch or screenshot is performed.
+            try:
+                envelope = json.loads(text) if isinstance(text, str) else {}
+            except (ValueError, TypeError):
+                envelope = {}
+            context = envelope.get("context", {}) if isinstance(envelope, dict) else {}
+            if isinstance(context, dict) and "candidate_visual_details" in context:
+                from ..planning.target_bindings import candidate_visual_details
+
+                try:
+                    details, images = candidate_visual_details(context["target_bindings"], str(image_path))
+                    if details != context["candidate_visual_details"]:
+                        raise ValueError("visual detail manifest does not match original pixels")
+                except (OSError, KeyError, TypeError, ValueError) as exc:
+                    raise ModelError(f"invalid visual detail attachment: {exc}") from exc
+                if sum(len(payload) for payload in images) + Path(image_path).stat().st_size > MAX_IMAGE_BYTES:
+                    raise ModelError("original image and visual details exceed the image byte limit")
+                for region, crop_payload in zip(details["regions"], images, strict=True):
+                    caption = ("Original screenshot detail crop for current candidate " + region["element_id"]
+                               + "; original bounding_box=" + json.dumps(region["original_box"])
+                               + ". These are original pixels, not a new observation. Select a target only if "
+                               "you can identify it; coordinates remain in the full screenshot.")
+                    message["content"].extend([
+                        {"type": "text", "text": caption},
+                        {"type": "image_url", "image_url": {
+                            "url": "data:image/png;base64," + base64.b64encode(crop_payload).decode("ascii")}},
+                    ])
             break
         return payload
+
+    def model_for_request(
+        self, messages: Sequence[Mapping[str, Any]], *, image_path: str | None = None,
+    ) -> str:
+        # Inspect actual media arguments, never task words or model-generated
+        # role labels. Prebuilt OpenAI image parts also retain the visual model.
+        has_image = bool(image_path) or any(
+            isinstance(message.get("content"), list) and any(
+                isinstance(part, Mapping) and part.get("type") == "image_url"
+                for part in message["content"]
+            ) for message in messages
+        )
+        return self.model_name if has_image or self.text_model_name is None else self.text_model_name
 
     def complete(self, messages: Sequence[Mapping[str, Any]], **kwargs: Any) -> ModelResponse:
         client = self._ensure_client()
         payload = self.to_vision_messages(messages, kwargs.get("image_path"))
         request: dict[str, Any] = {
-            "model": self.model_name,
+            "model": self.model_for_request(messages, image_path=kwargs.get("image_path")),
             "messages": payload,
             "temperature": self.temperature,
         }
@@ -202,7 +252,7 @@ class OpenAICompatibleClient(ModelClient):
 
         return ModelResponse(
             content=content,
-            model_name=getattr(completion, "model", self.model_name),
+            model_name=getattr(completion, "model", request["model"]),
             provider=self.name,
             usage=usage,
             raw_response={"finish_reason": getattr(choices[0], "finish_reason", None)},

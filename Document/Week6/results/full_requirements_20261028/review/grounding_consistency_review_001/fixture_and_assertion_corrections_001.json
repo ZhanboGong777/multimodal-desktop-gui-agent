@@ -1,0 +1,136 @@
+{
+  "schema_version": "week6.grounding.independent_counterexample.correction.v1",
+  "reviewer": "/root/week6_replanning_review",
+  "initial_target": {
+    "cases": 25,
+    "passed": 22,
+    "failed": 3,
+    "actual_returncode": 1
+  },
+  "production_changed_for_these_corrections": false,
+  "changes": {
+    "fresh_scope": "Create valid synthetic white PNGs before invoking existing validate_frames; pixel identity is still explicitly doubled. The test must reach the fresh text/ID guard rather than fail on missing fixture files.",
+    "http_budget": "Require planning_calls=3 but actualHTTP/clientcalls=2; final planner request is rejected locally before HTTP. Both caps and zero inputs remain hard requirements.",
+    "receipt_before_journal": "Require cancelled, known0+unknown1=one actual executor attempt, no replay/final. Existing cancellation reconstructs persisted journal only.",
+    "receipt_after_journal": "Add a distinct extra case requiring cancelled, known1+unknown0=one actual executor attempt, no replay/final."
+  },
+  "historical_executed_runner_source_sha256": "e3fe1cfd49f338afa29c5cae2b13c12fa972a694327b9def13a97c0d803ffe56",
+  "current_runner_sha256": "91282ffc0cdc182dd6e727fb485ddc5d7244360200939c0521da56bcd8815511",
+  "unchanged_cancellation_methods_ast": {
+    "_finish": true,
+    "_abandon": true,
+    "_status": true
+  },
+  "historical_same_point_execution_rerun": false,
+  "proof_scope": "Actual first-run pending summary/dispatch journal plus identical preexisting cancellation methods; no historical run or physical Ctrl+C is fabricated.",
+  "files": [
+    {
+      "case": "receipt_before_journal",
+      "relative": "automatic_workflow_summary.json",
+      "present": true,
+      "sha256": "54da2f4079a7a6d7d406fea29b9ed67f24ed4240b8b39191e96e00db9c6203c2",
+      "destination": "Document\\Week6\\results\\full_requirements_20261028\\review\\grounding_consistency_review_001\\cpu_validation_001\\selected_failure_evidence\\receipt_before_journal\\automatic_workflow_summary.json"
+    },
+    {
+      "case": "receipt_before_journal",
+      "relative": "run_status.json",
+      "present": true,
+      "sha256": "1f3c91cb29e4ad63c055aa1d934060713796fcfc6d53057c305e063928f6a254",
+      "destination": "Document\\Week6\\results\\full_requirements_20261028\\review\\grounding_consistency_review_001\\cpu_validation_001\\selected_failure_evidence\\receipt_before_journal\\run_status.json"
+    },
+    {
+      "case": "receipt_before_journal",
+      "relative": "status_events.jsonl",
+      "present": true,
+      "sha256": "1e3f0e34e3f8a7b848e215e87d75c55e6e0a68ce9f0b906af68b6e1b803fc7c7",
+      "destination": "Document\\Week6\\results\\full_requirements_20261028\\review\\grounding_consistency_review_001\\cpu_validation_001\\selected_failure_evidence\\receipt_before_journal\\status_events.jsonl"
+    },
+    {
+      "case": "receipt_before_journal",
+      "relative": "goal_001_001_SetPreference/001_SetPreference/task_summary.json",
+      "present": true,
+      "sha256": "ff4363ee8b5c907d6d4c6b9476d961b01d69146c303686eb8ec559c2e9668127",
+      "destination": "Document\\Week6\\results\\full_requirements_20261028\\review\\grounding_consistency_review_001\\cpu_validation_001\\selected_failure_evidence\\receipt_before_journal\\goal_001_001_SetPreference\\001_SetPreference\\task_summary.json"
+    },
+    {
+      "case": "receipt_before_journal",
+      "relative": "goal_001_001_SetPreference/001_SetPreference/dispatch_intents.jsonl",
+      "present": true,
+      "sha256": "216aa0c012ba6e7fcfb627ff47ce1c53ed1f3fd1129651f0e4d3ed27cd07c7dc",
+      "destination": "Document\\Week6\\results\\full_requirements_20261028\\review\\grounding_consistency_review_001\\cpu_validation_001\\selected_failure_evidence\\receipt_before_journal\\goal_001_001_SetPreference\\001_SetPreference\\dispatch_intents.jsonl"
+    },
+    {
+      "case": "receipt_before_journal",
+      "relative": "goal_001_001_SetPreference/001_SetPreference/steps.jsonl",
+      "present": false
+    },
+    {
+      "case": "receipt_before_journal",
+      "relative": "goal_001_001_SetPreference/001_SetPreference/single_step_planning_limit.json",
+      "present": true,
+      "sha256": "41093f3cb26543d317cc9104eee4f125caebff61b48730ab15ac5bee0caafe07",
+      "destination": "Document\\Week6\\results\\full_requirements_20261028\\review\\grounding_consistency_review_001\\cpu_validation_001\\selected_failure_evidence\\receipt_before_journal\\goal_001_001_SetPreference\\001_SetPreference\\single_step_planning_limit.json"
+    },
+    {
+      "case": "receipt_before_journal",
+      "relative": "goal_001_001_SetPreference/001_SetPreference/semantic_goal_audit.json",
+      "present": true,
+      "sha256": "44ee15af122996ae74f59969e4eb4adf0db636cffd8fc6ea8e766f7540e81f3f",
+      "destination": "Document\\Week6\\results\\full_requirements_20261028\\review\\grounding_consistency_review_001\\cpu_validation_001\\selected_failure_evidence\\receipt_before_journal\\goal_001_001_SetPreference\\001_SetPreference\\semantic_goal_audit.json"
+    },
+    {
+      "case": "http_cap",
+      "relative": "automatic_workflow_summary.json",
+      "present": true,
+      "sha256": "863ff43fcd7298177c85279d37956d9a4dfd41ff0d6fcfd6ab9d2a8318140bf5",
+      "destination": "Document\\Week6\\results\\full_requirements_20261028\\review\\grounding_consistency_review_001\\cpu_validation_001\\selected_failure_evidence\\http_cap\\automatic_workflow_summary.json"
+    },
+    {
+      "case": "http_cap",
+      "relative": "run_status.json",
+      "present": true,
+      "sha256": "6b89a0e21ddf6121e7ae77d6cfe50b30544771c23c1eaacea696201ee98b8a9e",
+      "destination": "Document\\Week6\\results\\full_requirements_20261028\\review\\grounding_consistency_review_001\\cpu_validation_001\\selected_failure_evidence\\http_cap\\run_status.json"
+    },
+    {
+      "case": "http_cap",
+      "relative": "status_events.jsonl",
+      "present": true,
+      "sha256": "2a14c1339c551a6680c789c98b6095a30683362a8f2630831f37d401c0dbacb0",
+      "destination": "Document\\Week6\\results\\full_requirements_20261028\\review\\grounding_consistency_review_001\\cpu_validation_001\\selected_failure_evidence\\http_cap\\status_events.jsonl"
+    },
+    {
+      "case": "http_cap",
+      "relative": "goal_001_001_SetPreference/001_SetPreference/task_summary.json",
+      "present": true,
+      "sha256": "5cd90a18c0b1e4c4e56f9543728eef5d3ed0b80cb980c794981b7ecfd2e0950c",
+      "destination": "Document\\Week6\\results\\full_requirements_20261028\\review\\grounding_consistency_review_001\\cpu_validation_001\\selected_failure_evidence\\http_cap\\goal_001_001_SetPreference\\001_SetPreference\\task_summary.json"
+    },
+    {
+      "case": "http_cap",
+      "relative": "goal_001_001_SetPreference/001_SetPreference/dispatch_intents.jsonl",
+      "present": false
+    },
+    {
+      "case": "http_cap",
+      "relative": "goal_001_001_SetPreference/001_SetPreference/steps.jsonl",
+      "present": true,
+      "sha256": "974051acb1270f26fe6553bda7bf0f7f591242bbaab412509ee52b9273faff72",
+      "destination": "Document\\Week6\\results\\full_requirements_20261028\\review\\grounding_consistency_review_001\\cpu_validation_001\\selected_failure_evidence\\http_cap\\goal_001_001_SetPreference\\001_SetPreference\\steps.jsonl"
+    },
+    {
+      "case": "http_cap",
+      "relative": "goal_001_001_SetPreference/001_SetPreference/single_step_planning_limit.json",
+      "present": true,
+      "sha256": "381aad029a488f468bed1b8bd09113cc660e325c9cc9abb9f7979f23c455de9a",
+      "destination": "Document\\Week6\\results\\full_requirements_20261028\\review\\grounding_consistency_review_001\\cpu_validation_001\\selected_failure_evidence\\http_cap\\goal_001_001_SetPreference\\001_SetPreference\\single_step_planning_limit.json"
+    },
+    {
+      "case": "http_cap",
+      "relative": "goal_001_001_SetPreference/001_SetPreference/semantic_goal_audit.json",
+      "present": true,
+      "sha256": "f71f737c0d2159eb0017e88f0b7583809d4223cdaf0c4608082f35afca271157",
+      "destination": "Document\\Week6\\results\\full_requirements_20261028\\review\\grounding_consistency_review_001\\cpu_validation_001\\selected_failure_evidence\\http_cap\\goal_001_001_SetPreference\\001_SetPreference\\semantic_goal_audit.json"
+    }
+  ]
+}

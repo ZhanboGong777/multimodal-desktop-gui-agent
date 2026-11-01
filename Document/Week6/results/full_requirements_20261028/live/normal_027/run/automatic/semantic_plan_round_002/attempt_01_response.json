@@ -1,0 +1,16 @@
+{
+  "provider": "openai_compatible",
+  "model_name": "qwen3-vl:8b-instruct",
+  "latency_ms": 15031.0,
+  "usage": {
+    "prompt_tokens": 1871,
+    "completion_tokens": 165,
+    "total_tokens": 2036
+  },
+  "error": null,
+  "content_length": 742,
+  "content": "{\n  \"status\": \"ready\",\n  \"reason\": \"The previous goal 'review_report' failed due to missing expected text, but the caller request remains unchanged. The current plan focuses on completing the remaining operation: committing the GREEN report for project ALPHA locally. The final state requires 'LOCAL COMPLETE' to be visible, with no 'RE\",\n  \"subgoals\": [\n    {\n      \"instruction\": \"Commit the prepared GREEN report for project ALPHA locally using the visible commit controls.\",\n      \"expect_text\": [\"LOCAL COMPLETE\"],\n      \"forbid_text\": [\"Review Pending\", \"Review Failed\", \"Review Error\", \"Review Timeout\", \"Review Cancelled\", \"Review Not Started\", \"Review In Progress\", \"Review Unavailable\"],\n      \"goal_id\": \"commit_report\"\n    }\n  ]\n}",
+  "raw_response": {
+    "finish_reason": "stop"
+  }
+}

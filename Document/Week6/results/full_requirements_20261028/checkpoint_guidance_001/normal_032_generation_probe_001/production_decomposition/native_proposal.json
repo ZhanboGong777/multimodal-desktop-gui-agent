@@ -1,0 +1,48 @@
+{
+  "status": "ready",
+  "reason": "Plan outlines two distinct semantic objectives: first, prepare and review the GREEN report for project ALPHA; second, commit the report locally. Each step is explicitly named and preserves caller operations.",
+  "subgoals": [
+    {
+      "instruction": "Prepare a GREEN report for project ALPHA by selecting the project, choosing the GREEN theme, and generating the report using visible controls.",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN",
+        "Report Generated"
+      ],
+      "forbid_text": [
+        "ERROR",
+        "UNAVAILABLE",
+        "RETRY"
+      ],
+      "goal_id": "prepare_report"
+    },
+    {
+      "instruction": "Review the prepared GREEN report for project ALPHA by accessing the review interface and confirming review completion using visible controls.",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN",
+        "REVIEW COMPLETE"
+      ],
+      "forbid_text": [
+        "ERROR",
+        "UNAVAILABLE",
+        "RETRY"
+      ],
+      "goal_id": "review_report"
+    },
+    {
+      "instruction": "Commit the reviewed GREEN report for project ALPHA locally by selecting the commit option and confirming the local commit using visible controls.",
+      "expect_text": [
+        "Project ALPHA",
+        "Theme GREEN",
+        "LOCAL COMPLETE"
+      ],
+      "forbid_text": [
+        "ERROR",
+        "UNAVAILABLE",
+        "RETRY"
+      ],
+      "goal_id": "commit_report"
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "schema": "week6.target_bindings.readonly_provider_metadata.v1",
+  "records": [
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:11434/api/version",
+      "started_utc": "2026-10-28T12:41:39.210320+00:00",
+      "finished_utc": "2026-10-28T12:41:39.257164+00:00",
+      "http_status": 200,
+      "payload": {
+        "version": "0.34.4"
+      }
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:11434/api/tags",
+      "started_utc": "2026-10-28T12:41:39.257164+00:00",
+      "finished_utc": "2026-10-28T12:41:39.337689+00:00",
+      "http_status": 200,
+      "payload": {
+        "models": [
+          {
+            "name": "qwen2.5vl:7b",
+            "model": "qwen2.5vl:7b",
+            "modified_at": "2026-10-06T11:49:40.3644314+11:00",
+            "size": 5969245426,
+            "digest": "c82e67b1ceeeca8a1bbc93a7c3478934b42398d90d71ffc616b00c0f2b30e292",
+            "details": {
+              "parent_model": "qwen2.5vl:7b",
+              "format": "gguf",
+              "family": "qwen25vl",
+              "families": [
+                "qwen25vl"
+              ],
+              "parameter_size": "8.3B",
+              "quantization_level": "Q4_K_M",
+              "context_length": 128000,
+              "embedding_length": 3584
+            },
+            "capabilities": [
+              "completion",
+              "vision"
+            ]
+          },
+          {
+            "name": "llava:7b",
+            "model": "llava:7b",
+            "modified_at": "2026-09-27T02:10:33.4399384+10:00",
+            "size": 4733363377,
+            "digest": "8dd30f6b0cb19f555f2c7a7ebda861449ea2cc76bf1f44e262931f45fc81d081",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "llama",
+              "families": [
+                "llama",
+                "clip"
+              ],
+              "parameter_size": "7B",
+              "quantization_level": "Q4_0",
+              "context_length": 32768,
+              "embedding_length": 4096
+            },
+            "capabilities": [
+              "completion",
+              "vision"
+            ]
+          },
+          {
+            "name": "qwen2.5vl:3b",
+            "model": "qwen2.5vl:3b",
+            "modified_at": "2026-09-27T01:33:50.1051439+10:00",
+            "size": 3200627168,
+            "digest": "fb90415cde1ef08aa669ae74b082d49b158729b6db1ab183c941417d507e71a1",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen25vl",
+              "families": [
+                "qwen25vl"
+              ],
+              "parameter_size": "3.8B",
+              "quantization_level": "Q4_K_M",
+              "context_length": 128000,
+              "embedding_length": 2048
+            },
+            "capabilities": [
+              "completion",
+              "vision"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "inference_or_model_load_calls": 0,
+  "official_references": [
+    "https://docs.ollama.com/capabilities/structured-outputs",
+    "https://docs.ollama.com/api/openai-compatibility",
+    "https://github.com/ggml-org/llama.cpp/blob/master/grammars/README.md#json-schemas--gbnf"
+  ],
+  "design_limit": "Upstream documentation is not evidence of the exact installed grammar implementation. Use self-contained positive union branches, avoid documented unsupported conditionals/not/mixed union siblings, and validate native real-run output independently. Matching target text/ID candidates does not establish business-role correctness.",
+  "test_dependency_receipt": "schema_test_dependency_001/receipt.json"
+}

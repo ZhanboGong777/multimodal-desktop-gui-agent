@@ -1,0 +1,33 @@
+* text=auto
+.gitattributes text eol=lf
+.gitignore text eol=lf
+
+*.py text eol=lf
+*.toml text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.json text eol=lf
+*.jsonl text eol=lf
+*.svg text eol=lf
+*.sh text eol=lf
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary
+*.safetensors binary
+
+# Preserve the exact root README bytes pinned by the final Week 6 regression.
+/README.md -text -whitespace
+
+# Preserve hash-pinned raw requests, receipts and source snapshots byte for byte.
+/Document/Week6/results/full_requirements_20261028/** -text -whitespace
+
+# Keep the two CRLF test sources identical to their executed, hash-pinned bytes.
+/tests/test_week6_semantic_output_constraints.py -text -whitespace
+/tests/test_week6_semantic_text_context.py -text -whitespace

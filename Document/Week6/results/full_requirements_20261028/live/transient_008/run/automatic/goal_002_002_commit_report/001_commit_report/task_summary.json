@@ -1,0 +1,145 @@
+{
+  "run_id": "001_commit_report",
+  "case_id": "commit_report",
+  "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Commit the BLUE report for project BETA locally by selecting the commit option and confirming the commit using visible controls.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+  "status": "failed",
+  "steps": [
+    {
+      "index": 1,
+      "step_id": "s1",
+      "description": "Click the 'Commit locally' button to commit the report.",
+      "action_type": "click",
+      "observation_id": "obs-0002",
+      "resolved": {
+        "step_id": "s1",
+        "action": {
+          "action_type": "click",
+          "x": 1281,
+          "y": 1049,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Commit locally"
+        },
+        "element_id": "obs-0002-e004",
+        "screenshot_point": {
+          "x": 1281,
+          "y": 1049
+        },
+        "control_point": {
+          "x": 1281,
+          "y": 1049
+        },
+        "note": "text 'Commit locally' -> obs-0002-e004 (re-bound from obs-0001-e004 in an earlier frame)"
+      },
+      "action_result": {
+        "success": true,
+        "dry_run": false,
+        "error": null,
+        "action": {
+          "action_type": "click",
+          "x": 1281,
+          "y": 1049,
+          "start": null,
+          "end": null,
+          "text": null,
+          "key": null,
+          "keys": null,
+          "scroll_amount": null,
+          "duration": null,
+          "target_description": "Commit locally"
+        }
+      },
+      "verification": {
+        "outcome": "passed",
+        "method": "automatic",
+        "detail": "expected result observed: report",
+        "evidence": {
+          "observation_id": "obs-0003",
+          "changed": true,
+          "element_count": 25,
+          "expectation_tokens": [
+            "report",
+            "committed",
+            "locally"
+          ],
+          "expectation_hits": [
+            "report"
+          ]
+        }
+      },
+      "error": null,
+      "elapsed_ms": 22046.999999991385,
+      "after_observation_id": "obs-0003"
+    }
+  ],
+  "verification": {
+    "outcome": "inconclusive",
+    "method": "automatic",
+    "detail": "could not look at the screen to verify: RuntimeError: dedicated-window activation receipt missing",
+    "evidence": {}
+  },
+  "error": null,
+  "elapsed_ms": 237000.0,
+  "execute": true,
+  "model_name": "qwen3-vl:8b-instruct",
+  "provider": "openai_compatible",
+  "notes": [
+    "planned 1 steps from obs-0001",
+    "task verification: could not look at the screen to verify: RuntimeError: dedicated-window activation receipt missing",
+    "re-planning skipped: observation failed: dedicated-window activation receipt missing"
+  ],
+  "task_id": "commit_report",
+  "commit": "482895f",
+  "platform": "win32",
+  "os_version": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.4",
+  "screen": "screenshot 2560x1600, control 2560x1600",
+  "started_at": "2026-11-01T07:12:00.787058Z",
+  "finished_at": "2026-11-01T07:15:57.787058Z",
+  "planning_attempts": 1,
+  "model_requests": 7,
+  "planning_ms": 34718.99999999732,
+  "confirmation_ms": 14.999999999417923,
+  "execution_ms": 202266.00000000326,
+  "planner_ms": 29031.000000002678,
+  "planning_calls": 1,
+  "system_elapsed_ms": 236985.00000000058,
+  "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_008\\run\\automatic\\goal_002_002_commit_report\\001_commit_report",
+  "stop_reason": "re-planning skipped: observation failed: dedicated-window activation receipt missing",
+  "error_type": "",
+  "failed_step_id": null,
+  "recovery_records": [
+    {
+      "next_pass": 2,
+      "outcome": "observation_failed",
+      "observation_id": null,
+      "feedback": {
+        "previous_pass": 1,
+        "reason": "task_verification",
+        "failed_step_index": null,
+        "actions_used": 1,
+        "actions_remaining": 15,
+        "remaining_ms": 6283250.0,
+        "recent_steps": [
+          {
+            "index": 1,
+            "action_type": "click",
+            "attempted": true,
+            "succeeded": true,
+            "verification": "passed"
+          }
+        ],
+        "omitted_steps": 0,
+        "instruction": "Plan from the current observation; previous attempts do not prove success. Do not replay completed inputs to recreate an earlier state. Existing task checks and remaining budgets still apply."
+      },
+      "elapsed_ms": 90047.00000000594
+    }
+  ],
+  "unconfirmed_action_attempts": 0,
+  "action_count": 1
+}

@@ -1,0 +1,66 @@
+{
+  "schema": "week6.report.semantic_operation_review.v1",
+  "reviewer": "Root",
+  "approved": true,
+  "reviewed_utc": "2026-10-28T15:18:12.312308+00:00",
+  "source_freeze": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\receipt_envelope_001\\final_source_freeze_002.json",
+    "sha256": "70a6cde9ac0c20aa2d637d8a1747c09c33427a41c5bcb44202299da1009dbbb0"
+  },
+  "independent_audit": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal019_strict_audit_001.json",
+    "sha256": "61254d6585961ee19b7a9532acdca94ca337bda053f1e37cfa49806ab7d7b9ed"
+  },
+  "runtime": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_019\\run\\runtime_result.json",
+    "sha256": "473daa992c080c7a890f6c4d4dc40b9d492d5025f2c6d55438b6142d7bd130cb"
+  },
+  "container": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_019",
+  "stages": [
+    {
+      "stage_key": "1:1:prepare_report",
+      "native_instruction": "Prepare a GREEN report for project ALPHA in Week6 Local Lab.",
+      "independent_transitions": [
+        "project_selected",
+        "theme_selected"
+      ],
+      "semantic_alignment_passed": true,
+      "rationale": "The complete instruction requests preparing the ALPHA report with GREEN. Separate original native inputs001/002 select those parameters; independent project/theme events and inspected initial/draft-ready pixels agree. The whole fixed Project ALPHA + Theme GREEN condition was false before this goal and passed on two new goal observations afterwards. No review/commit operation is credited to this stage."
+    },
+    {
+      "stage_key": "1:2:review_commit",
+      "native_instruction": "Review the prepared report and commit it locally.",
+      "independent_transitions": [
+        "review_accepted",
+        "local_commit"
+      ],
+      "semantic_alignment_passed": true,
+      "rationale": "The instruction requests both review and local commit. The unchanged native double-click003 produces review_accepted, and input005 separately produces local_commit; inspected new pixels progress through Review complete to LOCAL COMPLETE with ALPHA/GREEN. Input004 actually clicks the Review complete title despite its misleading description and earns no business-transition credit. The original final step prediction failed and remains failed; pre-input gate_on_step_verification=false and the separately frozen LOCAL COMPLETE goal/caller checks are the success basis."
+    }
+  ],
+  "actually_viewed_saved_original_pixels": [
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_019\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\monitor1_20261029_020541_274.png",
+      "sha256": "39f6f42f13ffcf25a5454d810b055238442017db38dc6c88198a602a3aed4d1f"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_019\\run\\automatic\\goal_001_001_prepare_report\\001_prepare_report\\monitor1_20261029_020821_226.png",
+      "sha256": "da559aeb3c83b2ce44653a9b63db28cc92bfed7a573387922e4a8981f7f36999"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_019\\run\\automatic\\goal_001_002_review_commit\\001_review_commit\\monitor1_20261029_021030_843.png",
+      "sha256": "f039058200db982da2e73cd06e31ec6b4a664e7dda8891e2e1fcb80405c1b1f2"
+    },
+    {
+      "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_019\\run\\automatic\\goal_001_002_review_commit\\001_review_commit\\monitor1_20261029_021345_652.png",
+      "sha256": "ab810580de02b1ec1e787a6804902db331222690c680ad912ab54fa90fbe1d73"
+    }
+  ],
+  "caveats": [
+    "Controlled offline lab only, not arbitrary-application success rate.",
+    "Input004 noop and final raw step failed remain recorded.",
+    "Last commit has single-OCR support; not evidence of successful no-OCR visual targeting.",
+    "Review double-click ignored second physical click retained."
+  ],
+  "reviewer_kind": "Codex Root agent review, not human sign-off"
+}

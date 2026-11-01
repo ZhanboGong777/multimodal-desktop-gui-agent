@@ -1,0 +1,108 @@
+[
+  {
+    "round": 1,
+    "goal_id": "prepare_report",
+    "instruction": "Prepare the GREEN report for project ALPHA by selecting the correct project and theme, then save the draft locally.",
+    "expect_text": [
+      "Project ALPHA",
+      "Theme GREEN",
+      "Draft Saved"
+    ],
+    "forbid_text": [
+      "Review",
+      "Commit",
+      "Push",
+      "Sync",
+      "Online",
+      "External",
+      "Network",
+      "Connection Required"
+    ],
+    "status": "failed",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_024\\run\\automatic\\goal_001_001_prepare_report",
+    "verification": null,
+    "task_verification": {
+      "outcome": "failed",
+      "method": "automatic",
+      "detail": "expected on screen but not found: Project ALPHA, Draft Saved",
+      "evidence": {
+        "observation_id": "obs-0012",
+        "missing": [
+          "Project ALPHA",
+          "Draft Saved"
+        ],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    }
+  },
+  {
+    "round": 2,
+    "goal_id": "review_and_commit",
+    "instruction": "Review the GREEN report for project ALPHA and commit it locally using visible controls.",
+    "expect_text": [
+      "Project ALPHA",
+      "Theme GREEN",
+      "LOCAL COMPLETE"
+    ],
+    "forbid_text": [
+      "Review",
+      "Commit",
+      "Push",
+      "Sync",
+      "Online",
+      "External",
+      "Network",
+      "Connection Required"
+    ],
+    "status": "succeeded",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_024\\run\\automatic\\goal_002_001_review_and_commit",
+    "verification": {
+      "outcome": "passed",
+      "method": "automatic",
+      "detail": "all success rules matched against the current screen",
+      "evidence": {
+        "observation_id": "obs-0013",
+        "expect_text": [
+          "Project ALPHA",
+          "Theme GREEN",
+          "LOCAL COMPLETE"
+        ],
+        "forbid_text": [
+          "Review",
+          "Commit",
+          "Push",
+          "Sync",
+          "Online",
+          "External",
+          "Network",
+          "Connection Required"
+        ],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    },
+    "task_verification": {
+      "outcome": "passed",
+      "method": "automatic",
+      "detail": "all success rules matched against the current screen",
+      "evidence": {
+        "observation_id": "obs-0012",
+        "expect_text": [
+          "Project ALPHA",
+          "Theme GREEN",
+          "LOCAL COMPLETE"
+        ],
+        "forbid_text": [
+          "Review",
+          "Commit",
+          "Push",
+          "Sync",
+          "Online",
+          "External",
+          "Network",
+          "Connection Required"
+        ],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    }
+  }
+]

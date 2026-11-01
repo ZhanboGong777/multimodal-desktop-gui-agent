@@ -1,0 +1,178 @@
+[
+  {
+    "round": 1,
+    "goal_id": "prepare_report",
+    "instruction": "Prepare the BLUE report for project BETA by selecting the correct project and theme, then save the draft locally.",
+    "expect_text": [
+      "Project BETA",
+      "Theme BLUE",
+      "Draft Saved"
+    ],
+    "forbid_text": [
+      "Review Pending",
+      "Online Sync",
+      "Commit Failed",
+      "Network Error",
+      "Review Unavailable",
+      "Budget Exceeded",
+      "Changes Not Saved",
+      "Save Failed"
+    ],
+    "status": "failed",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_001_001_prepare_report",
+    "verification": null,
+    "task_verification": {
+      "outcome": "failed",
+      "method": "automatic",
+      "detail": "expected on screen but not found: Project BETA, Draft Saved",
+      "evidence": {
+        "observation_id": "obs-0012",
+        "missing": [
+          "Project BETA",
+          "Draft Saved"
+        ],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    }
+  },
+  {
+    "round": 2,
+    "goal_id": "review_report",
+    "instruction": "Review the BLUE report for project BETA using the visible controls, ensuring the review is completed locally without external sync.",
+    "expect_text": [
+      "Project BETA",
+      "Theme BLUE",
+      "Review Complete"
+    ],
+    "forbid_text": [
+      "Review Pending",
+      "Online Sync",
+      "Network Error",
+      "Review Unavailable",
+      "Budget Exceeded",
+      "Changes Not Saved",
+      "Save Failed",
+      "Commit Failed"
+    ],
+    "status": "succeeded",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_002_001_review_report",
+    "verification": {
+      "outcome": "passed",
+      "method": "automatic",
+      "detail": "all success rules matched against the current screen",
+      "evidence": {
+        "observation_id": "obs-0009",
+        "expect_text": [
+          "Project BETA",
+          "Theme BLUE",
+          "Review Complete"
+        ],
+        "forbid_text": [
+          "Review Pending",
+          "Online Sync",
+          "Network Error",
+          "Review Unavailable",
+          "Budget Exceeded",
+          "Changes Not Saved",
+          "Save Failed",
+          "Commit Failed"
+        ],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    },
+    "task_verification": {
+      "outcome": "passed",
+      "method": "automatic",
+      "detail": "all success rules matched against the current screen",
+      "evidence": {
+        "observation_id": "obs-0008",
+        "expect_text": [
+          "Project BETA",
+          "Theme BLUE",
+          "Review Complete"
+        ],
+        "forbid_text": [
+          "Review Pending",
+          "Online Sync",
+          "Network Error",
+          "Review Unavailable",
+          "Budget Exceeded",
+          "Changes Not Saved",
+          "Save Failed",
+          "Commit Failed"
+        ],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    }
+  },
+  {
+    "round": 2,
+    "goal_id": "commit_report",
+    "instruction": "Commit the reviewed BLUE report for project BETA locally using the visible controls, ensuring no external communication or sync occurs.",
+    "expect_text": [
+      "Project BETA",
+      "Theme BLUE",
+      "LOCAL COMPLETE"
+    ],
+    "forbid_text": [
+      "Review Pending",
+      "Online Sync",
+      "Network Error",
+      "Review Unavailable",
+      "Budget Exceeded",
+      "Changes Not Saved",
+      "Save Failed",
+      "Commit Failed"
+    ],
+    "status": "succeeded",
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_002\\run\\automatic\\goal_002_002_commit_report",
+    "verification": {
+      "outcome": "passed",
+      "method": "automatic",
+      "detail": "all success rules matched against the current screen",
+      "evidence": {
+        "observation_id": "obs-0005",
+        "expect_text": [
+          "Project BETA",
+          "Theme BLUE",
+          "LOCAL COMPLETE"
+        ],
+        "forbid_text": [
+          "Review Pending",
+          "Online Sync",
+          "Network Error",
+          "Review Unavailable",
+          "Budget Exceeded",
+          "Changes Not Saved",
+          "Save Failed",
+          "Commit Failed"
+        ],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    },
+    "task_verification": {
+      "outcome": "passed",
+      "method": "automatic",
+      "detail": "all success rules matched against the current screen",
+      "evidence": {
+        "observation_id": "obs-0004",
+        "expect_text": [
+          "Project BETA",
+          "Theme BLUE",
+          "LOCAL COMPLETE"
+        ],
+        "forbid_text": [
+          "Review Pending",
+          "Online Sync",
+          "Network Error",
+          "Review Unavailable",
+          "Budget Exceeded",
+          "Changes Not Saved",
+          "Save Failed",
+          "Commit Failed"
+        ],
+        "verification_source": "frozen_model_semantic_subtask_postconditions"
+      }
+    }
+  }
+]

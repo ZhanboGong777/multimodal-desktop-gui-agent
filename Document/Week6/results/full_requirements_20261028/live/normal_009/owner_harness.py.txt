@@ -1,0 +1,75 @@
+"""Own one explicitly named new live subprocess and retain its real exit."""
+from __future__ import annotations
+import argparse
+import hashlib
+import json
+import os
+import shutil
+import subprocess
+import time
+from datetime import UTC, datetime
+from pathlib import Path
+import psutil
+
+REPO=Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+PYTHON='D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe'
+BASE=REPO/'Document/Week6/results/full_requirements_20261028/live'
+
+def write(path,value):
+    with path.open('x',encoding='utf-8',newline='\n')as f:
+        f.write(json.dumps(value,ensure_ascii=False,indent=2)+'\n')
+
+def identity(p):
+    return {'pid':p.pid,'create_time':p.create_time(),'exe':p.exe(),'cmdline':p.cmdline()}
+
+def main():
+    ap=argparse.ArgumentParser()
+    ap.add_argument('--name',required=True)
+    ap.add_argument('--fixture-directory',type=Path,required=True)
+    ap.add_argument('--project',choices=['ALPHA','BETA'],required=True)
+    ap.add_argument('--colour',choices=['BLUE','GREEN'],required=True)
+    ap.add_argument('--mode',choices=['normal','transient'],required=True)
+    ap.add_argument('--config',type=Path,required=True)
+    ap.add_argument('--task-timeout',type=float,default=7200)
+    ap.add_argument('--model-timeout',type=float,default=900)
+    args=ap.parse_args()
+    if not args.name or any(c not in 'abcdefghijklmnopqrstuvwxyz0123456789_-'for c in args.name):
+        raise ValueError('Explicit safe run name required')
+    container=BASE/args.name
+    container.mkdir(parents=True,exist_ok=False)
+    shutil.copyfile(__file__,container/'owner_harness.py.txt')
+    batch=container/'run'
+    command=[PYTHON,str(REPO/'scripts/week6_semantic_acceptance.py'),
+             '--directory',str(batch),'--fixture-directory',str(args.fixture_directory),
+             '--project',args.project,'--colour',args.colour,'--mode',args.mode,
+             '--config',str(args.config),'--task-timeout',str(args.task_timeout),
+             '--model-timeout',str(args.model_timeout)]
+    env=os.environ.copy();env.update(PYTHONUTF8='1',PYTHONIOENCODING='utf-8')
+    owner=identity(psutil.Process())
+    started=datetime.now(UTC).isoformat();tick=time.monotonic()
+    write(container/'owner_claim.json',{'schema':'week6.semantic.live.claim.v1','owner':owner,
+          'started_utc':started,'command':command,'batch':str(batch)})
+    seen={}
+    with (container/'stdout.txt').open('x',encoding='utf-8')as log:
+        child=subprocess.Popen(command,cwd=REPO,env=env,stdout=log,stderr=subprocess.STDOUT)
+        launcher=identity(psutil.Process(child.pid))
+        write(container/'owner_start.json',{'owner':owner,'launcher':launcher,'command':command,
+              'started_utc':started,'owner_harness_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest()})
+        while child.poll()is None:
+            try:
+                for p in psutil.Process(child.pid).children(recursive=True):
+                    key=(p.pid,p.create_time())
+                    if key not in seen:seen[key]=identity(p)
+            except(psutil.NoSuchProcess,psutil.AccessDenied):pass
+            time.sleep(.25)
+        code=child.wait()
+    write(container/'owner_receipt.json',{'schema':'week6.semantic.live.actual_exit.v1',
+          'owner':owner,'launcher':launcher,'observed_descendants':list(seen.values()),
+          'started_utc':started,'finished_utc':datetime.now(UTC).isoformat(),
+          'elapsed_seconds':time.monotonic()-tick,'child_exit_code':code,'command':command,
+          'owner_harness_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+          'meaning':'Actual subprocess.wait result; semantic acceptance is independently audited.'})
+    print(json.dumps({'container':str(container),'real_child_exit_code':code}))
+    return code
+
+if __name__=='__main__':raise SystemExit(main())

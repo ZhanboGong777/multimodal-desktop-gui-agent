@@ -1,0 +1,429 @@
+{
+  "schema_version": "week6.single_step_planning.v1",
+  "protocol_version": "week6.semantic_subtasks.v6",
+  "raw_step_verification_policy": "Raw model step predictions are advisory; the predeclared semantic subtask postconditions are mandatory.",
+  "original_max_steps": 4,
+  "applied_max_steps": 1,
+  "restored": true,
+  "calls": [
+    {
+      "max_steps": 1,
+      "returned_steps": 1,
+      "ok": true,
+      "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Review the prepared BLUE report for project BETA and commit it locally using the visible controls. This combines review and commit to ensure final state is captured with 'LOCAL COMPLETE'.\nComplete original caller request: In Week6 Local Lab, prepare a BLUE report for project BETA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+      "context": {
+        "platform": "win32",
+        "observation_id": "obs-0001",
+        "screen": "2560x1600",
+        "target_app": null,
+        "allowed_keys": {
+          "keys": [
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "a",
+            "b",
+            "backspace",
+            "c",
+            "d",
+            "delete",
+            "down",
+            "e",
+            "end",
+            "enter",
+            "esc",
+            "escape",
+            "f",
+            "f1",
+            "f10",
+            "f11",
+            "f12",
+            "f2",
+            "f3",
+            "f4",
+            "f5",
+            "f6",
+            "f7",
+            "f8",
+            "f9",
+            "g",
+            "h",
+            "home",
+            "i",
+            "j",
+            "k",
+            "l",
+            "left",
+            "m",
+            "n",
+            "o",
+            "p",
+            "pagedown",
+            "pageup",
+            "q",
+            "r",
+            "return",
+            "right",
+            "s",
+            "space",
+            "t",
+            "tab",
+            "u",
+            "up",
+            "v",
+            "w",
+            "x",
+            "y",
+            "z"
+          ],
+          "modifiers": [
+            "alt",
+            "cmd",
+            "command",
+            "control",
+            "ctrl",
+            "shift",
+            "super",
+            "win"
+          ],
+          "hotkey_separator": "+"
+        },
+        "limits": "at most 17 actions and 6886.09 s for the whole task",
+        "visible_text": "obs-0001-e000  'Project BETA'  conf=0.96  center=(1282,681)  box=(1168,663,1397,700)\nobs-0001-e001  'Draft ready'  conf=0.96  center=(1281,964)  box=(1188,946,1375,983)\nobs-0001-e002  'Review report'  conf=0.96  center=(1282,1094)  box=(1168,1077,1397,1112)\nobs-0001-e003  'Offline report preparation'  conf=0.95  center=(1280,586)  box=(1101,571,1460,602)\nobs-0001-e004  'Theme BLUE'  conf=0.95  center=(1281,775)  box=(1167,760,1396,790)\nobs-0001-e005  'Review unavailable. Please retry'  conf=0.95  center=(1278,870)  box=(1047,855,1509,886)\nobs-0001-e006  'Week6 Local Lab'  conf=0.91  center=(1281,485)  box=(1089,466,1474,505)\nobs-0001-e007  <unlabelled box>  conf=0.50  center=(1984,800)  box=(1409,0,2560,1600)\nobs-0001-e008  <unlabelled box>  conf=0.50  center=(1282,1092)  box=(1048,1034,1516,1151)\nobs-0001-e009  <unlabelled box>  conf=0.50  center=(1295,1063)  box=(1280,1047,1311,1079)\nobs-0001-e010  <unlabelled box>  conf=0.50  center=(1286,1054)  box=(1281,1048,1292,1060)",
+        "targeting_policy": {
+          "schema_version": "gui_agent.generation_targeting_policy.v1",
+          "instruction": "Generation guidance only; it grants neither input nor success authority. Use only candidates in the current target_bindings scope, including the final authorised subset. Use text-only targeting only when current OCR labels or adjacent OCR words can locate the target. If a target is visible in the screenshot but absent from OCR, choose its matching current ID yourself from target_bindings.anonymous_without_ocr_ids; never invent or replace an ID. If no matching allowed candidate is certain, return no steps and explain in errors.",
+          "generation_only": true
+        },
+        "success_rules": [],
+        "target_bindings": {
+          "schema_version": "gui_agent.target_bindings.v1",
+          "observation_id": "obs-0001",
+          "scope": "all_snapshot_candidates",
+          "min_confidence": 0.35,
+          "candidates": [
+            {
+              "element_id": "obs-0001-e000",
+              "text": "Project BETA",
+              "source": "ocr",
+              "confidence": 0.96,
+              "bounding_box": {
+                "left": 1168,
+                "top": 663,
+                "right": 1397,
+                "bottom": 700
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Project BETA"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e001",
+              "text": "Draft ready",
+              "source": "ocr",
+              "confidence": 0.96,
+              "bounding_box": {
+                "left": 1188,
+                "top": 946,
+                "right": 1375,
+                "bottom": 983
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Draft ready"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e002",
+              "text": "Review report",
+              "source": "ocr",
+              "confidence": 0.96,
+              "bounding_box": {
+                "left": 1168,
+                "top": 1077,
+                "right": 1397,
+                "bottom": 1112
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Review report"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e003",
+              "text": "Offline report preparation",
+              "source": "ocr",
+              "confidence": 0.95,
+              "bounding_box": {
+                "left": 1101,
+                "top": 571,
+                "right": 1460,
+                "bottom": 602
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Offline report preparation"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e004",
+              "text": "Theme BLUE",
+              "source": "ocr",
+              "confidence": 0.95,
+              "bounding_box": {
+                "left": 1167,
+                "top": 760,
+                "right": 1396,
+                "bottom": 790
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Theme BLUE"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e005",
+              "text": "Review unavailable. Please retry",
+              "source": "ocr",
+              "confidence": 0.95,
+              "bounding_box": {
+                "left": 1047,
+                "top": 855,
+                "right": 1509,
+                "bottom": 886
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Review unavailable. Please retry"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e006",
+              "text": "Week6 Local Lab",
+              "source": "ocr",
+              "confidence": 0.91,
+              "bounding_box": {
+                "left": 1089,
+                "top": 466,
+                "right": 1474,
+                "bottom": 505
+              },
+              "external_ocr_overlap": false,
+              "classification": "readable_label",
+              "compatible_texts": [
+                "Week6 Local Lab"
+              ],
+              "overlapping_ocr_ids": []
+            },
+            {
+              "element_id": "obs-0001-e007",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 1409,
+                "top": 0,
+                "right": 2560,
+                "bottom": 1600
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_mixed_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": [
+                "obs-0001-e003",
+                "obs-0001-e005",
+                "obs-0001-e006"
+              ]
+            },
+            {
+              "element_id": "obs-0001-e008",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 1048,
+                "top": 1034,
+                "right": 1516,
+                "bottom": 1151
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_with_single_ocr",
+              "compatible_texts": [
+                "Review report"
+              ],
+              "overlapping_ocr_ids": [
+                "obs-0001-e002"
+              ]
+            },
+            {
+              "element_id": "obs-0001-e009",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 1280,
+                "top": 1047,
+                "right": 1311,
+                "bottom": 1079
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_with_single_ocr",
+              "compatible_texts": [
+                "Review report"
+              ],
+              "overlapping_ocr_ids": [
+                "obs-0001-e002"
+              ]
+            },
+            {
+              "element_id": "obs-0001-e010",
+              "text": "",
+              "source": "contour",
+              "confidence": 0.5,
+              "bounding_box": {
+                "left": 1281,
+                "top": 1048,
+                "right": 1292,
+                "bottom": 1060
+              },
+              "external_ocr_overlap": false,
+              "classification": "anonymous_without_ocr",
+              "compatible_texts": [],
+              "overlapping_ocr_ids": []
+            }
+          ],
+          "labels": [
+            {
+              "text": "Project BETA",
+              "element_ids": [
+                "obs-0001-e000"
+              ]
+            },
+            {
+              "text": "Draft ready",
+              "element_ids": [
+                "obs-0001-e001"
+              ]
+            },
+            {
+              "text": "Review report",
+              "element_ids": [
+                "obs-0001-e002",
+                "obs-0001-e008",
+                "obs-0001-e009"
+              ]
+            },
+            {
+              "text": "Offline report preparation",
+              "element_ids": [
+                "obs-0001-e003"
+              ]
+            },
+            {
+              "text": "Theme BLUE",
+              "element_ids": [
+                "obs-0001-e004"
+              ]
+            },
+            {
+              "text": "Review unavailable. Please retry",
+              "element_ids": [
+                "obs-0001-e005"
+              ]
+            },
+            {
+              "text": "Week6 Local Lab",
+              "element_ids": [
+                "obs-0001-e006"
+              ]
+            }
+          ],
+          "anonymous_without_ocr_ids": [
+            "obs-0001-e010"
+          ]
+        },
+        "candidate_visual_details": {
+          "schema_version": "gui_agent.candidate_visual_details.v1",
+          "observation_id": "obs-0001",
+          "source_image_sha256": "66176c44627f265e97985cec09a0b458bc00501f2f3d17e9bda30b61ad281dd6",
+          "limits": {
+            "minimum_width": 96,
+            "minimum_height": 24,
+            "maximum_regions": 8,
+            "maximum_total_pixels": 1000000
+          },
+          "regions": [],
+          "omitted_region_count": 0,
+          "coordinate_space": "original_screenshot",
+          "generation_only": true
+        }
+      },
+      "image_path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_023\\run\\automatic\\goal_002_001_review_and_commit_report\\001_review_and_commit_report\\monitor1_20261101_215815_501.png",
+      "task_id": "review_and_commit_report",
+      "attempts": 1,
+      "model_requests": 1,
+      "parsed_plan": {
+        "task_id": "t1",
+        "instruction": "Review the prepared BLUE report for project BETA and commit it locally using the visible controls. This combines review and commit to ensure final state is captured with 'LOCAL COMPLETE'.",
+        "summary": "",
+        "steps": [
+          {
+            "step_id": "s1",
+            "description": "Attempt to review the report by clicking the 'Review report' button.",
+            "action_type": "click",
+            "target_text": "Review report",
+            "arguments": {
+              "element_id": "obs-0001-e002"
+            },
+            "expected_result": "The system may indicate review is unavailable or prompt for retry.",
+            "status": "pending"
+          }
+        ],
+        "assumptions": [],
+        "requires_confirmation": true,
+        "errors": [
+          "Review unavailable. Please retry. The review action cannot be completed as instructed. The task requires review and commit, but review is not available. Retry within budget as per instructions."
+        ]
+      },
+      "response": {
+        "provider": "openai_compatible",
+        "model_name": "qwen3-vl:8b-instruct",
+        "latency_ms": 33187.0,
+        "usage": {
+          "prompt_tokens": 7304,
+          "completion_tokens": 154,
+          "total_tokens": 7458
+        },
+        "error": null,
+        "content_length": 740,
+        "content": "{\"task_id\":\"t1\",\"instruction\":\"Review the prepared BLUE report for project BETA and commit it locally using the visible controls. This combines review and commit to ensure final state is captured with 'LOCAL COMPLETE'.\",\"steps\":[{\"step_id\":\"s1\",\"description\":\"Attempt to review the report by clicking the 'Review report' button.\",\"action_type\":\"click\",\"target_text\":\"Review report\",\"arguments\":{\"element_id\":\"obs-0001-e002\"},\"expected_result\":\"The system may indicate review is unavailable or prompt for retry.\",\"status\":\"pending\"}],\"errors\":[\"Review unavailable. Please retry. The review action cannot be completed as instructed. The task requires review and commit, but review is not available. Retry within budget as per instructions.\"]}",
+        "raw_response": {
+          "finish_reason": "stop"
+        }
+      },
+      "error": null
+    }
+  ],
+  "meaning": "At most one step per planning call; recovery calls retain the shared overall budgets.",
+  "restored_max_steps": 4
+}

@@ -1,0 +1,31 @@
+{
+  "schema": "week6.operation_outcome_guidance.scope.v1",
+  "root_reviewed": true,
+  "utc": "2026-11-01T11:21:17.333952+00:00",
+  "meaning": "Only the semantic generation system prompt receives leading generic outcome-sufficiency guidance. A goal instruction naming A then B cannot be credited by conditions establishing only A or availability of B. The model is asked to separate independently distinguishable operations or explicitly group all operations sharing an outcome. No application-specific phase list, operation parser, goal rewrite, predicate whitelist, verifier, action prompt, model, OCR or budget change. Existing guards and independent business-operation review remain required; guidance is not a semantic proof or guarantee.",
+  "changed_paths": [
+    "src/gui_agent/planning/semantic_workflow.py"
+  ],
+  "all_other285pins_identical": true,
+  "source_before_manifest": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\operation_outcome_guidance_001\\source_before_manifest.json",
+    "sha256": "99f1f35cfa64bfb354dd731381fe1829f5393933f4f7f82f906131da2da23a13"
+  },
+  "targeted_validation": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\operation_outcome_guidance_001\\targeted_validation_001\\validation.json",
+    "sha256": "fa9119ef675af6779d02c06daccbbc80c72c6e82eed06ee6791ace2ed6f63e7f"
+  },
+  "development_proposal": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\operation_outcome_guidance_001\\probe_root_review_001.json",
+    "sha256": "7ccdc2efd0bd66b01ab17a84d9a87363c725c58c9402b4a77ed60ddf851c630b"
+  },
+  "previous_semantic_negative": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\transient024_root_negative_review_001.json",
+    "sha256": "85dbd175fe1a750fbd52c4b6a5f3a0525f875412691930c77f35973fb1356d50"
+  },
+  "old_normal_acceptance_not_transferred": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\normal046_root_acceptance_001.json",
+    "sha256": "777beedbb06a49448faea8979851e1c3b22fbc4706c5e3c0dcf8aba566298bea"
+  },
+  "limits": "A native proposal can still be wrong. Fixed literals do not prove arbitrary business meaning; saved pixels, distinct application events and each original instruction must be reviewed after real execution."
+}

@@ -10,6 +10,7 @@ from __future__ import annotations
 import os
 import re
 import sys
+import threading
 import time
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Sequence
@@ -296,6 +297,8 @@ class TesseractOCREngine(OCREngine):
         profile: str = "native",
         scale: float = 2.0,
         tessdata_dir: str | Path | None = None,
+        transport: str = "subprocess",
+        library_path: str | Path | None = None,
     ) -> None:
         super().__init__(default_languages, default_min_confidence)
         if profile not in {"native", "screen"}:
@@ -311,6 +314,17 @@ class TesseractOCREngine(OCREngine):
         self.profile = profile
         self.scale = float(scale)
         self.tessdata_dir = tessdata_dir
+        if transport not in {"subprocess", "persistent"}:
+            raise ValueError("Tesseract transport must be subprocess or persistent")
+        self.transport = transport
+        self.library_path = library_path
+        self._persistent: Any = None
+        self._persistent_lock = threading.Lock()
+
+    def close(self) -> None:
+        """Release an optional persistent API; default subprocess has no handle."""
+        if self._persistent is not None:
+            self._persistent.close()
 
     def recognize(
         self,
@@ -350,7 +364,21 @@ class TesseractOCREngine(OCREngine):
         if config:
             options["config"] = " ".join(config)
         try:
-            data = pytesseract.image_to_data(image, **options)
+            if self.transport == "persistent":
+                from .tesseract_api import PersistentTesseract
+
+                with self._persistent_lock:
+                    if self._persistent is None:
+                        self._persistent = PersistentTesseract(self.library_path)
+                prepared_image = image if isinstance(image, Image.Image) else Image.fromarray(
+                    to_rgb_array(image))
+                data = self._persistent.image_to_data(
+                    prepared_image, language=language, tessdata_dir=self.tessdata_dir,
+                    psm=11 if self.profile == "screen" else 3,
+                    oem=1 if self.profile == "screen" else 3,
+                )
+            else:
+                data = pytesseract.image_to_data(image, **options)
         except Exception as exc:
             raise OcrError(f"Tesseract failed: {exc}") from exc
 
@@ -616,6 +644,8 @@ def create_ocr_engine(config: OcrConfig | None = None) -> EngineSelection:
         "profile": config.tesseract_profile,
         "scale": config.tesseract_scale,
         "tessdata_dir": config.tesseract_tessdata_dir,
+        "transport": config.tesseract_transport,
+        "library_path": config.tesseract_library_path,
     }
     # Only PaddleOCR has a document pipeline; Tesseract must not receive this.
     paddle_settings = {**settings, "use_doc_preprocessing": config.use_doc_preprocessing}

@@ -1,0 +1,293 @@
+{
+  "fixture": "holdout_03",
+  "arm": "screen_bilingual_persistent",
+  "phase": "warm",
+  "repeat": 2,
+  "image_sha256": "aa89c13330786ec4c46b4fafd70dee0b00cbdb46834e765f454744086ccfad00",
+  "started_perf_counter": 674780.3629254,
+  "status": "completed",
+  "ended_perf_counter": 674780.461814,
+  "engine_creation_ms": 0.001700012944638729,
+  "decode_ms": 1.7682999605312943,
+  "ocr_ms": 91.80890000425279,
+  "ui_ms": 5.309700034558773,
+  "full_ms": 98.8886000122875,
+  "metrics": {
+    "tp": 7,
+    "fp": 0,
+    "fn": 1,
+    "precision": 1.0,
+    "recall": 0.875,
+    "labels": [
+      {
+        "text": "Archive Browser",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9870967741935484
+      },
+      {
+        "text": "Entry Count",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9894736842105263
+      },
+      {
+        "text": "Extract Archive",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9916666666666667
+      },
+      {
+        "text": "Compress",
+        "language": "en",
+        "matched": true,
+        "iou": 0.9878048780487805
+      },
+      {
+        "text": "Verify",
+        "language": "en",
+        "matched": true,
+        "iou": 1.0
+      },
+      {
+        "text": "压缩文件",
+        "language": "zh",
+        "matched": true,
+        "iou": 1.0
+      },
+      {
+        "text": "解压内容",
+        "language": "zh",
+        "matched": false,
+        "iou": 0.0
+      },
+      {
+        "text": "校验",
+        "language": "zh",
+        "matched": true,
+        "iou": 0.6090225563909775
+      }
+    ]
+  },
+  "control_metrics": {
+    "tp": 6,
+    "fp": 1,
+    "fn": 0,
+    "iou_threshold": 0.8
+  },
+  "predictions": [
+    {
+      "text": "Archive Browser",
+      "bounding_box": {
+        "left": 42,
+        "top": 39,
+        "right": 195,
+        "bottom": 54
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 118,
+        "y": 46
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Entry Count",
+      "bounding_box": {
+        "left": 43,
+        "top": 116,
+        "right": 137,
+        "bottom": 133
+      },
+      "confidence": 0.96,
+      "center": {
+        "x": 90,
+        "y": 124
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "压缩文件",
+      "bounding_box": {
+        "left": 692,
+        "top": 116,
+        "right": 764,
+        "bottom": 134
+      },
+      "confidence": 0.94,
+      "center": {
+        "x": 728,
+        "y": 125
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Extract Archive",
+      "bounding_box": {
+        "left": 43,
+        "top": 202,
+        "right": 162,
+        "bottom": 215
+      },
+      "confidence": 0.9,
+      "center": {
+        "x": 102,
+        "y": 208
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Compress",
+      "bounding_box": {
+        "left": 43,
+        "top": 306,
+        "right": 124,
+        "bottom": 323
+      },
+      "confidence": 0.92,
+      "center": {
+        "x": 83,
+        "y": 314
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "Verify",
+      "bounding_box": {
+        "left": 256,
+        "top": 306,
+        "right": 301,
+        "bottom": 323
+      },
+      "confidence": 0.92,
+      "center": {
+        "x": 278,
+        "y": 314
+      },
+      "source": "ocr"
+    },
+    {
+      "text": "校验",
+      "bounding_box": {
+        "left": 692,
+        "top": 305,
+        "right": 730,
+        "bottom": 333
+      },
+      "confidence": 0.9,
+      "center": {
+        "x": 711,
+        "y": 319
+      },
+      "source": "ocr"
+    }
+  ],
+  "ui_candidates": [
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 680,
+        "top": 291,
+        "right": 835,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 757,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 244,
+        "top": 291,
+        "right": 399,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 321,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 30,
+        "top": 291,
+        "right": 185,
+        "bottom": 348
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 319
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 680,
+        "top": 187,
+        "right": 835,
+        "bottom": 244
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 757,
+        "y": 215
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 30,
+        "top": 187,
+        "right": 185,
+        "bottom": 244
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 107,
+        "y": 215
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 680,
+        "top": 101,
+        "right": 835,
+        "bottom": 158
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 757,
+        "y": 129
+      },
+      "source": "contour"
+    },
+    {
+      "text": "",
+      "bounding_box": {
+        "left": 692,
+        "top": 203,
+        "right": 765,
+        "bottom": 222
+      },
+      "confidence": 0.5,
+      "center": {
+        "x": 728,
+        "y": 212
+      },
+      "source": "contour"
+    }
+  ],
+  "errors": []
+}

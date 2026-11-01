@@ -1,0 +1,126 @@
+I001 [*] Import block is un-sorted or un-formatted
+  --> scripts\week6_audit_semantic_acceptance.py:26:1
+   |
+24 |   sys.path.insert(0, str(ROOT / "src"))
+25 |
+26 | / from gui_agent.models.base import ModelRequest
+27 | | from gui_agent.planning.parser import PlanParseError, parse_plan
+28 | | from gui_agent.planning.planner import (
+29 | |     _FORMAT_REPAIR_INSTRUCTION,
+30 | |     _INLINE_FORMAT_ERROR_CHARACTERS,
+31 | |     _INLINE_FORMAT_RESPONSE_CHARACTERS,
+32 | |     ACTION_OUTPUT_CONTRACT_VERSION,
+33 | |     _task_plan_response_format,
+34 | | )
+35 | | from gui_agent.planning.prompts import SYSTEM_PROMPT
+36 | | from gui_agent.planning.schemas import PlanStep
+37 | | from gui_agent.planning.semantic_workflow import (
+38 | |     _INLINE_CORRECTION_MAX_CHARACTERS,
+39 | |     SEMANTIC_CHECK_MAX_CHARACTERS,
+40 | |     SEMANTIC_CHECKS_PER_LIST,
+41 | |     SEMANTIC_DUPLICATE_POSTCONDITIONS_REPAIR,
+42 | |     SEMANTIC_GENERIC_REPAIR,
+43 | |     SEMANTIC_INPUT_MODALITY,
+44 | |     SEMANTIC_INSTRUCTION_MAX_CHARACTERS,
+45 | |     SEMANTIC_PREEXISTING_POSTCONDITIONS_REPAIR,
+46 | |     SEMANTIC_PROTOCOL_VERSION,
+47 | |     SEMANTIC_REASON_MAX_CHARACTERS,
+48 | |     SEMANTIC_REPAIR_POLICY_VERSION,
+49 | |     SEMANTIC_STEP_POLICY,
+50 | |     SEMANTIC_SYSTEM_PROMPT,
+51 | |     SemanticDecomposer,
+52 | |     SemanticPlan,
+53 | |     SemanticWorkflowResult,
+54 | |     _DuplicateSemanticPostconditionsError,
+55 | |     _PreexistingSemanticPostconditionsError,
+56 | |     _final_task,
+57 | |     _goal_task,
+58 | |     _initial_guard,
+59 | |     _semantic_response_format,
+60 | |     _unique_keys,
+61 | |     _validate_native_predicates,
+62 | | )
+63 | | from gui_agent.planning.workflow_decomposer import WorkflowRequest, _rolling_frame_guard
+64 | | from gui_agent.runtime.action_adapter import (
+65 | |     ActionAdapter,
+66 | |     ActionResolutionError,
+67 | |     validate_target_consistency,
+68 | | )
+69 | | from gui_agent.runtime.monitoring import read_run_status
+70 | | from gui_agent.runtime.observation import describe_elements
+71 | | from gui_agent.runtime.recorder import _mask_step
+72 | | from gui_agent.runtime.schemas import ObservationSnapshot
+73 | | from gui_agent.runtime.verification import Verifier
+74 | | from gui_agent.schemas import ActionResult
+   | |__________________________________________^
+help: Organize imports
+   |
+54 |     _DuplicateSemanticPostconditionsError,
+   -     _PreexistingSemanticPostconditionsError,
+55 |     _final_task,
+56 |     _goal_task,
+57 |     _initial_guard,
+58 +     _PreexistingSemanticPostconditionsError,
+59 |     _semantic_response_format,
+   |
+
+F811 Redefinition of unused `audit_reader` from line 11
+  --> tests\test_week6_semantic_preexisting_repair_hint.py:41:96
+   |
+41 | def test_existing_before_guard_gets_fixed_feedback_and_only_new_native_reply_can_run(tmp_path, audit_reader):
+   |                                                                                                ^^^^^^^^^^^^ `audit_reader` redefined here
+42 |     raw = already_true()
+43 |     runner, request, state, _, _ = lab(tmp_path, format_retries=1)
+   |
+  ::: tests\test_week6_semantic_preexisting_repair_hint.py:11:56
+   |
+ 9 | from test_week6_rolling_actions import options, plan
+10 | from test_week6_semantic_repair_feedback import run_sdk, system
+11 | from test_week6_semantic_repair_feedback_review import audit_reader  # noqa: F401
+   |                                                        ------------ previous definition of `audit_reader` here
+12 | from test_week6_semantic_subtasks import lab, proposal
+13 | from test_week6_semantic_text_context import _persist_synthetic_pixels
+   |
+help: Remove definition: `audit_reader`
+
+F811 Redefinition of unused `audit_reader` from line 11
+  --> tests\test_week6_semantic_preexisting_repair_hint.py:74:70
+   |
+74 | def test_typed_feedback_is_removed_after_a_different_error(tmp_path, audit_reader):
+   |                                                                      ^^^^^^^^^^^^ `audit_reader` redefined here
+75 |     runner, request, state, _, _ = lab(tmp_path, format_retries=2)
+76 |     _persist_synthetic_pixels(runner, tmp_path)
+   |
+  ::: tests\test_week6_semantic_preexisting_repair_hint.py:11:56
+   |
+ 9 | from test_week6_rolling_actions import options, plan
+10 | from test_week6_semantic_repair_feedback import run_sdk, system
+11 | from test_week6_semantic_repair_feedback_review import audit_reader  # noqa: F401
+   |                                                        ------------ previous definition of `audit_reader` here
+12 | from test_week6_semantic_subtasks import lab, proposal
+13 | from test_week6_semantic_text_context import _persist_synthetic_pixels
+   |
+help: Remove definition: `audit_reader`
+
+F811 Redefinition of unused `audit_reader` from line 11
+   --> tests\test_week6_semantic_preexisting_repair_hint.py:100:84
+    |
+ 99 | @pytest.mark.parametrize("mutation", ["system", "policy_digest", "error", "different_before"])
+100 | def test_independent_reader_rejects_unbound_hint_or_unreproducible_guard(tmp_path, audit_reader, mutation):
+    |                                                                                    ^^^^^^^^^^^^ `audit_reader` redefined here
+101 |     runner, request, state, _, _ = lab(tmp_path, format_retries=1)
+102 |     _persist_synthetic_pixels(runner, tmp_path)
+    |
+   ::: tests\test_week6_semantic_preexisting_repair_hint.py:11:56
+    |
+  9 | from test_week6_rolling_actions import options, plan
+ 10 | from test_week6_semantic_repair_feedback import run_sdk, system
+ 11 | from test_week6_semantic_repair_feedback_review import audit_reader  # noqa: F401
+    |                                                        ------------ previous definition of `audit_reader` here
+ 12 | from test_week6_semantic_subtasks import lab, proposal
+ 13 | from test_week6_semantic_text_context import _persist_synthetic_pixels
+    |
+help: Remove definition: `audit_reader`
+
+Found 4 errors.
+[*] 1 fixable with the `--fix` option.

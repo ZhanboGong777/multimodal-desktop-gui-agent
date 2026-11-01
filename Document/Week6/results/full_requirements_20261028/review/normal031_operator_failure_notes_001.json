@@ -1,0 +1,23 @@
+{
+  "utc": "2026-11-01T05:48:46.799078+00:00",
+  "accepted": false,
+  "failure_type": "operator bridge response timeout and late input after actual owner exit",
+  "actual_owner_exit": 1,
+  "owner_finished_utc": "2026-11-01T05:47:31.225690+00:00",
+  "runtime_confirmed_actions": 2,
+  "runtime_unconfirmed_action_attempts": 1,
+  "planning_calls": 4,
+  "model_requests": 4,
+  "late_input_003": {
+    "started_utc": "2026-11-01T05:47:53.866Z",
+    "dispatch_returned_utc": "2026-11-01T05:47:54.001Z",
+    "finished_utc": "2026-11-01T05:47:54.160Z",
+    "dispatch_known": true,
+    "business_state_after": "Review complete, Commit locally visible",
+    "counts_as_in_run_success": false
+  },
+  "original_failure_preserved": true,
+  "root_error": "Root dispatched the pending click without first checking the owner receipt after context restoration. Owner had already exited. No final task completion, no commit occurred.",
+  "semantic_limitation": "Original prepare_report predicted Saved Locally and was never verified. No semantic success credit.",
+  "new_attempt_justification": "A fresh fixture may be used only after original closure; same frozen source and budgets, no pending request replay, owner/launcher/child identity checked before each input."
+}

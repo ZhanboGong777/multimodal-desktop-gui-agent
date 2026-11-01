@@ -1,0 +1,68 @@
+{
+  "utc": "2026-11-01T07:10:42.338884+00:00",
+  "case": "transient_008",
+  "input": "input_004",
+  "operator_delay_seconds": 138.164843,
+  "original_bridge_wait_seconds": 180,
+  "original_bridge_remaining_seconds": 41.83515700000001,
+  "task_remaining_seconds": 6508.656000000003,
+  "owner_receipt_absent": true,
+  "same_owner_launcher_and_actual_child_alive": [
+    {
+      "pid": 14904,
+      "create_time": 1793516349.809383,
+      "exe": "D:\\anaconda\\python.exe",
+      "cmdline": [
+        "D:\\anaconda\\python.exe",
+        "C:/Users/联想/Documents/ChatGPT/Intern/tmp/week6_full_requirements_20261028/run_owned_role_models_001.py",
+        "--name",
+        "transient_008",
+        "--fixture-directory",
+        "C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/live/fixture_transient_008",
+        "--project",
+        "BETA",
+        "--colour",
+        "BLUE",
+        "--mode",
+        "transient",
+        "--model",
+        "qwen3-vl:8b-instruct",
+        "--text-model",
+        "qwen3-vl:8b-instruct",
+        "--config",
+        "C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/configs/week6_role_models.yaml"
+      ]
+    },
+    {
+      "pid": 40528,
+      "create_time": 1793516349.9704444,
+      "exe": "D:\\Developer\\multimodal-desktop-gui-agent\\.venv-week5\\Scripts\\python.exe",
+      "cmdline": [
+        "D:/Developer/multimodal-desktop-gui-agent/.venv-week5/Scripts/python.exe",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\scripts\\week6_semantic_acceptance.py",
+        "--directory",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\transient_008\\run",
+        "--fixture-directory",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\fixture_transient_008",
+        "--project",
+        "BETA",
+        "--colour",
+        "BLUE",
+        "--mode",
+        "transient",
+        "--config",
+        "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\configs\\week6_role_models.yaml",
+        "--task-timeout",
+        "7200",
+        "--model-timeout",
+        "900",
+        "--model",
+        "qwen3-vl:8b-instruct",
+        "--text-model",
+        "qwen3-vl:8b-instruct"
+      ]
+    }
+  ],
+  "fresh_sky_window_reobserved": 13438460,
+  "meaning": "The30s operator freshness heuristic rejected. Root reobserved the actual returned target window; Review unavailable/button unchanged. Original pinned bridge source waits180s; original request is still pending in live child_executing, within that unchanged deadline. No deadline/request/plan/receipt altered; original input may now be dispatched once."
+}

@@ -1,0 +1,58 @@
+usage: week6_agent_cli.py [-h]
+                          (--workflow WORKFLOW | --instruction INSTRUCTION)
+                          [--automatic-protocol {rolling_actions,observed_departure,semantic_subtasks}]
+                          [--workflow-id WORKFLOW_ID]
+                          [--expect-text EXPECT_TEXT]
+                          [--forbid-text FORBID_TEXT]
+                          [--model-requests MODEL_REQUESTS]
+                          [--max-subgoals MAX_SUBGOALS]
+                          [--decomposition-rounds DECOMPOSITION_ROUNDS]
+                          [--validate-only] [--config CONFIG] [--execute]
+                          [--provider {langchain,mock,openai_compatible}]
+                          [--model MODEL] [--base-url BASE_URL]
+                          [--max-actions MAX_ACTIONS]
+                          [--planning-attempts PLANNING_ATTEMPTS]
+                          [--task-timeout TASK_TIMEOUT]
+                          [--ocr-engine {tesseract,paddleocr}]
+                          [--ocr-min-confidence OCR_MIN_CONFIDENCE]
+                          [--output-directory OUTPUT_DIRECTORY]
+                          [--run-id RUN_ID]
+
+Decompose an overall request into verified semantic subtasks, or run an
+explicit workflow.
+
+options:
+  -h, --help            show this help message and exit
+  --workflow WORKFLOW   use an existing explicitly checked workflow
+  --instruction INSTRUCTION
+                        plan and execute this overall natural-language task
+                        under shared limits
+  --automatic-protocol {rolling_actions,observed_departure,semantic_subtasks}
+                        automatic mode: model-generated semantic subtasks
+                        (default), or legacy rolling/departure checks
+  --workflow-id WORKFLOW_ID
+  --expect-text EXPECT_TEXT
+                        caller-owned final required text
+  --forbid-text FORBID_TEXT
+                        caller-owned final forbidden text
+  --model-requests MODEL_REQUESTS
+                        shared HTTP request cap across all automatic planning
+  --max-subgoals MAX_SUBGOALS
+                        semantic/departure proposal limit; rolling_actions
+                        plans one next action
+  --decomposition-rounds DECOMPOSITION_ROUNDS
+                        bounded semantic revisions or fresh-screen departure
+                        rounds, 1..8
+  --validate-only       validate the spec without model, capture or input
+  --config CONFIG
+  --execute
+  --provider {langchain,mock,openai_compatible}
+  --model MODEL
+  --base-url BASE_URL
+  --max-actions MAX_ACTIONS
+  --planning-attempts PLANNING_ATTEMPTS
+  --task-timeout TASK_TIMEOUT
+  --ocr-engine {tesseract,paddleocr}
+  --ocr-min-confidence OCR_MIN_CONFIDENCE
+  --output-directory OUTPUT_DIRECTORY
+  --run-id RUN_ID

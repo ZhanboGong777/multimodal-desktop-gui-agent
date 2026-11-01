@@ -1,0 +1,29 @@
+{
+  "schema": "week6.message_refusal_explanation.scope.v1",
+  "root_reviewed": true,
+  "utc": "2026-11-01T09:15:18.824399+00:00",
+  "meaning": "Only existing _no_messages ValueError wording clarified: same regex/branch now explicitly includes local message-content composition and distinguishes verification text. No new accepted input or refused input, schema field, caller intent, native plan rewrite, task predicate, target, action, budget, model, protocol or prompt changed. Existing error prefix retained. One extra assertion in an existing end-to-end refusal test checks the message reaches native repair context. Offline checks do not establish native effectiveness.",
+  "records": [
+    {
+      "path": "src/gui_agent/planning/workflow_decomposer.py",
+      "before_sha256": "f9926fa49a553efbfddb27c3096db946a5eb9c346d028c89802b7054267aef2a",
+      "after_sha256": "fb64866eb0cc61f15bc4563b15a88c3e9e1b10502ad22407f8350cb6f9d1653b"
+    },
+    {
+      "path": "tests/test_week6_semantic_subtasks.py",
+      "before_sha256": "a75d082f467ef151163284a36eac64dcc2739ed3f925d9a10c5f76109eb47d30",
+      "after_sha256": "20c09aea6a10614780413e6921ad8225b777863938718dcd3c95a7c83769f3a2"
+    }
+  ],
+  "all_other283pins_identical": true,
+  "production_ast_except_error_constant_identical": true,
+  "prior_tests_unchanged_except_one_assertion": true,
+  "transient017_negative": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\transient017_root_acceptance_001.json",
+    "sha256": "15acf6892f44ae451fa8707a13250769f87dbf2cf514829f7687d9a9e5f3bdf4"
+  },
+  "transient018_negative": {
+    "path": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\review\\transient018_independent_process_001\\process_summary.json",
+    "sha256": "db5e5f2a297f2b98f7782aa11c74f1db69f0a624100b21df008d838347e0468d"
+  }
+}

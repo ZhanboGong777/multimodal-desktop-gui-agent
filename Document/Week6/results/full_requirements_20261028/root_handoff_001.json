@@ -1,0 +1,53 @@
+{
+  "schema": "week6.full_requirements.handoff.v1",
+  "superseded_by": "root_handoff_002.json",
+  "status": "in_progress",
+  "current_phase": "new_source_real_semantic_acceptance",
+  "branch": "codex/week6-full-requirements",
+  "system_version": "2.1.0",
+  "updated_utc": "2026-10-28T00:28:00+00:00",
+  "active_run": {
+    "container": "Document/Week6/results/full_requirements_20261028/live/normal_001",
+    "owner_pid": 88000,
+    "owner_create_time": 1793147048.3232036,
+    "launcher_pid": 77992,
+    "launcher_create_time": 1793147048.5699935,
+    "actual_runtime_pid": 83728,
+    "actual_runtime_create_time": 1793147048.5987513,
+    "exec_session": 89504,
+    "state_when_observed": "initial semantic model request pending; no task inputs dispatched",
+    "rule": "Inspect actual PID/create-time, original requests/receipts and owner receipt before diagnosing or starting another run. Never fabricate exit status or resend unknown input."
+  },
+  "fixture": {
+    "directory": "Document/Week6/results/full_requirements_20261028/live/fixture_normal_002",
+    "actual_pid": 84104,
+    "actual_create_time": 1793146879.536379,
+    "launcher_pid": 71704,
+    "launcher_create_time": 1793146879.478171,
+    "last_returned_sky_window": {"app": "process:D:\\anaconda\\python.exe", "id": 1058168, "title": "Week6 Local Lab"},
+    "selection_rule": "Refresh returned Sky selection/state before input; do not reconstruct a window from this record. Fixture hidden state is read only after task execution."
+  },
+  "source_freeze": "semantic_implementation_001/final_ruff_freeze_001/final_source_freeze.json",
+  "perception": {
+    "primary": "perception_holdout_primary_001/summary.json",
+    "replication": "perception_holdout_replication_001/summary.json",
+    "independent_raw_audit": "perception_result_audit_001.json",
+    "both_actual_exit_codes": [0, 0],
+    "formal_gates_passed": true,
+    "limits": "Eight independent frozen frames, correlated repetitions, cold initialization separately slower than the English native baseline; English 39/40 versus native 40/40, overall bilingual F1 improves."
+  },
+  "remaining": [
+    "Finish normal and transient real semantic model/Sky runs with actual exit and independent audit",
+    "Frozen real-frame four-arm perception check after explicit CPU quiet window",
+    "Frozen-code full pytest and Ruff owned validation",
+    "Engineering acceptance with all four requirement evidence gates",
+    "DOCX/PDF matching requested Week5 style, every page actually viewed",
+    "Fresh source/wheel/archive consistency and final delivery manifest"
+  ],
+  "notes": [
+    "No whole-task completion has been claimed.",
+    "The first fixture was redundantly launched after terminal output mojibake was misread as launch failure; its original launch was valid. It was closed before task input with actual checked PID/create-time and exit15. Preserve its setup records; no training/model run was stopped.",
+    "Do not touch unrelated C:/Users directories merely because their names look garbled.",
+    "Reports use output/docx/Week6_实验报告_文字修订版_修正.docx as style source; no cover date/timezone line. Original files and user PDF renames remain preserved."
+  ]
+}

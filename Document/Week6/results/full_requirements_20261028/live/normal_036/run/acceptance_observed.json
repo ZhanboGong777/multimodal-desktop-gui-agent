@@ -1,0 +1,213 @@
+{
+  "schema": "week6.semantic_live.observed_result.v1",
+  "status": "failed",
+  "runtime_pass": false,
+  "independent_pass": false,
+  "attribution_pass": false,
+  "source_unchanged": true,
+  "runtime_independent_gates_passed": false,
+  "semantic_audit_pending": true,
+  "meaning": "Observed evidence only. A separate read-only native-plan/semantic-goal audit and real owner exit receipt are required for final acceptance.",
+  "transition_attribution": [],
+  "input_receipts": [],
+  "state": {
+    "utc": "2026-11-01T08:01:39.536252+00:00",
+    "event": "started",
+    "stage": "project",
+    "project": "",
+    "colour": "",
+    "committed": false,
+    "review_attempts": 0,
+    "mode": "normal",
+    "events": 1
+  },
+  "independent_events": [
+    {
+      "utc": "2026-11-01T08:01:39.536252+00:00",
+      "event": "started",
+      "stage": "project",
+      "project": "",
+      "colour": "",
+      "committed": false,
+      "review_attempts": 0,
+      "mode": "normal",
+      "events": 1
+    }
+  ],
+  "automatic_result": {
+    "schema_version": "week6.semantic_workflow.v1",
+    "decomposition_protocol_mode": "semantic_subtasks",
+    "workflow_id": "semantic_lab",
+    "status": "failed",
+    "plans": [
+      {
+        "schema_version": "week6.semantic_subtasks.v6",
+        "input_modality": "caller_intent_only",
+        "image_attached": false,
+        "status": "ready",
+        "proposal": {
+          "status": "ready",
+          "reason": "Plan outlines two distinct semantic objectives: first, prepare and review the GREEN report for project ALPHA; second, commit the report locally. Each step is explicitly named and preserves caller operations without combining or omitting any.",
+          "subgoals": [
+            {
+              "instruction": "Prepare a GREEN report for project ALPHA by selecting the project, choosing the GREEN theme, and generating the report using visible controls.",
+              "expect_text": [
+                "Project ALPHA",
+                "Theme GREEN",
+                "Report Generated"
+              ],
+              "forbid_text": [
+                "Review unavailable",
+                "Connection error",
+                "Commit failed"
+              ],
+              "goal_id": "prepare_report"
+            },
+            {
+              "instruction": "Review the GREEN report for project ALPHA and commit it locally using visible controls. If review is temporarily unavailable, retry within budget.",
+              "expect_text": [
+                "Project ALPHA",
+                "Theme GREEN",
+                "LOCAL COMPLETE"
+              ],
+              "forbid_text": [
+                "Review unavailable",
+                "Connection error",
+                "Commit failed"
+              ],
+              "goal_id": "review_and_commit"
+            }
+          ]
+        },
+        "workflow": {
+          "workflow_id": "semantic_lab",
+          "instruction": "In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+          "subgoals": [
+            {
+              "case_id": "prepare_report",
+              "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Prepare a GREEN report for project ALPHA by selecting the project, choosing the GREEN theme, and generating the report using visible controls.\nComplete original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+              "target_app": null,
+              "preconditions": [],
+              "success_rules": [],
+              "verification": "automatic",
+              "expect_text": [
+                "Project ALPHA",
+                "Theme GREEN",
+                "Report Generated"
+              ],
+              "forbid_text": [
+                "Review unavailable",
+                "Connection error",
+                "Commit failed"
+              ],
+              "requires_processes": [],
+              "forbids_processes": [],
+              "must_exit_processes": [],
+              "risk": "medium",
+              "message_conversation": null,
+              "gate_on_step_verification": false
+            },
+            {
+              "case_id": "review_and_commit",
+              "instruction": "Complete ONLY the current semantic subtask, then stop for verification. Do not execute later objectives or repeat completed selections.\nCurrent semantic subtask: Review the GREEN report for project ALPHA and commit it locally using visible controls. If review is temporarily unavailable, retry within budget.\nComplete original caller request: In Week6 Local Lab, prepare a GREEN report for project ALPHA, review it and commit it locally. Use the visible controls. This is an offline test with no external communication. If review is temporarily unavailable, retry within budget.",
+              "target_app": null,
+              "preconditions": [],
+              "success_rules": [],
+              "verification": "automatic",
+              "expect_text": [
+                "Project ALPHA",
+                "Theme GREEN",
+                "LOCAL COMPLETE"
+              ],
+              "forbid_text": [
+                "Review unavailable",
+                "Connection error",
+                "Commit failed"
+              ],
+              "requires_processes": [],
+              "forbids_processes": [],
+              "must_exit_processes": [],
+              "risk": "medium",
+              "message_conversation": null,
+              "gate_on_step_verification": false
+            }
+          ],
+          "final_check": {
+            "case_id": "FINAL",
+            "instruction": "Independently read unchanged caller final predicates",
+            "target_app": null,
+            "preconditions": [],
+            "success_rules": [],
+            "verification": "automatic",
+            "expect_text": [
+              "Project ALPHA",
+              "Theme GREEN",
+              "LOCAL COMPLETE"
+            ],
+            "forbid_text": [],
+            "requires_processes": [],
+            "forbids_processes": [],
+            "must_exit_processes": [],
+            "risk": "low",
+            "message_conversation": null,
+            "gate_on_step_verification": true
+          }
+        },
+        "planning_calls": 1,
+        "model_requests": 1,
+        "elapsed_ms": 23657.00000000652,
+        "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_036\\run\\automatic\\semantic_plan_round_001",
+        "error": "Plan outlines two distinct semantic objectives: first, prepare and review the GREEN report for project ALPHA; second, commit the report locally. Each step is explicitly named and preserves caller operations without combining or omitting any."
+      }
+    ],
+    "goal_outcomes": [],
+    "rejected_goal_contracts": [],
+    "completed_subgoals": [],
+    "semantic_goals_total": 2,
+    "workflow_result": null,
+    "workflow_results": [],
+    "final_verification": null,
+    "final_observation_reference": "",
+    "total_actions": 0,
+    "planning_calls": 1,
+    "model_requests": 1,
+    "unconfirmed_action_attempts": 0,
+    "accounting_complete": true,
+    "elapsed_ms": 127843.99999999732,
+    "evidence_directory": "C:\\Users\\联想\\Documents\\ChatGPT\\Intern\\week6-worktree\\Document\\Week6\\results\\full_requirements_20261028\\live\\normal_036\\run\\automatic",
+    "error": "RuntimeError: dedicated-window activation receipt missing",
+    "notes": []
+  },
+  "status_reads": [
+    {
+      "schema": "week6.status_read.v1",
+      "trusted": true,
+      "age_seconds": 0.007,
+      "state": "finished",
+      "snapshot": {
+        "schema": "week6.run_status.semantic.v1",
+        "run_id": "e58d1193b1f84fb9bacaf309bc97b79c",
+        "case_id": "semantic_lab",
+        "execute": true,
+        "pid": 4340,
+        "process_identity": "windows:134379937105513172",
+        "seq": 5,
+        "event": "finished",
+        "stage": "finished",
+        "task_status": "failed",
+        "updated_at_utc": "2026-11-01T08:03:59.370296+00:00",
+        "elapsed_ms": 127843.99999999732,
+        "max_actions": 20,
+        "max_planning_attempts": 24,
+        "planning_pass": 1,
+        "actions_used": 0,
+        "subgoals_total": 2,
+        "subgoals_completed": 0,
+        "subgoal_id": null,
+        "detail_code": "",
+        "write_failures": []
+      },
+      "diagnostics": []
+    }
+  ]
+}

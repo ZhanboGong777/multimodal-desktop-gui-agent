@@ -1,0 +1,36 @@
+........................................................................ [  7%]
+........................................................................ [ 14%]
+........................................................................ [ 21%]
+.............................F.......................................... [ 28%]
+........................................................................ [ 35%]
+........................................................................ [ 42%]
+........................................................................ [ 49%]
+........................................................................ [ 56%]
+........................................................................ [ 63%]
+........................................................................ [ 70%]
+........................................................................ [ 77%]
+........................................................................ [ 84%]
+........................................................................ [ 91%]
+........................................................................ [ 98%]
+..................                                                       [100%]
+================================== FAILURES ===================================
+_____ test_non_message_planning_context_remains_the_complete_observation ______
+
+tmp_path = WindowsPath('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree/Document/Week6/results/full_requirements_20261028/target_bindings_001/root_affected_validation_001/pytest_tmp/test_non_message_planning_cont0')
+
+    def test_non_message_planning_context_remains_the_complete_observation(tmp_path):
+        from gui_agent.runtime.observation import describe_elements
+        runner, _, options, _, _, source = _approved_message_context(tmp_path)
+        task = TaskSpec(case_id="T02", instruction="search", target_app="browser", success_rules=["results"])
+        context = runner._context(source, task, options)
+>       assert set(context) == {"platform", "observation_id", "screen", "target_app", "allowed_keys", "limits", "visible_text", "success_rules"}
+E       AssertionError: assert {'allowed_key...s_rules', ...} == {'allowed_key...s_rules', ...}
+E         
+E         Extra items in the left set:
+E         'target_bindings'
+E         Use -v to get more diff
+
+tests\test_runtime_runner.py:2305: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_runtime_runner.py::test_non_message_planning_context_remains_the_complete_observation
+1 failed, 1025 passed in 177.31s (0:02:57)

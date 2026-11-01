@@ -1,0 +1,195 @@
+"""Recompute the precise prior-to-current source/test migration after real checks."""
+from __future__ import annotations
+
+import ast
+from copy import deepcopy
+from datetime import UTC, datetime
+from hashlib import sha256
+import json
+from pathlib import Path
+
+R = Path('C:/Users/联想/Documents/ChatGPT/Intern/week6-worktree')
+B = R/'Document/Week6/results/full_requirements_20261028'
+D = B/'observed_query_constraints_001'
+OLD = D/'source_before/code'
+
+
+def canon(node):
+    return ast.dump(node, include_attributes=False)
+
+
+def tree(path):
+    return ast.parse(path.read_text('utf-8'))
+
+
+def sha(path):
+    return sha256(path.read_bytes()).hexdigest()
+
+
+def fn(module, name):
+    return next(n for n in module.body if isinstance(n, ast.FunctionDef) and n.name == name)
+
+
+def assigned(node, name):
+    return isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == name for t in node.targets)
+
+
+def remove_import(module, name):
+    count = 0
+    for node in list(module.body):
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            kept = [a for a in node.names if a.name != name]
+            count += len(node.names)-len(kept)
+            node.names = kept
+            if not kept:
+                module.body.remove(node)
+    assert count == 1, (name, count)
+
+
+class RemoveQueryMetadata(ast.NodeTransformer):
+    def __init__(self, remove_assignment=False):
+        self.fields = 0
+        self.assignments = 0
+        self.remove_assignment = remove_assignment
+
+    def visit_Assign(self, node):
+        if self.remove_assignment and assigned(node, 'query_contract'):
+            assert canon(node.value) == canon(ast.parse('observed_query_contract(binding_data)', mode='eval').body)
+            self.assignments += 1
+            return None
+        return self.generic_visit(node)
+
+    def visit_Dict(self, node):
+        self.generic_visit(node)
+        pairs = []
+        for key, value in zip(node.keys, node.values):
+            if isinstance(key, ast.Constant) and key.value in {'observed_query_contract','observed_query_contract_sha256'}:
+                self.fields += 1
+            else:
+                pairs.append((key,value))
+        node.keys = [p[0] for p in pairs]
+        node.values = [p[1] for p in pairs]
+        return node
+
+
+def main():
+    prior_file = B/'visual_target_guidance_001/final_source_freeze_001.json'
+    prior = json.loads(prior_file.read_text('utf-8'))
+    paths = {R/'pyproject.toml'}
+    for folder in ('src','tests','scripts'):
+        paths.update((R/folder).rglob('*.py'))
+    paths.update(p for p in (R/'configs').rglob('*') if p.is_file())
+    pins = {p.relative_to(R).as_posix():sha(p) for p in sorted(paths)}
+    expected = {'src/gui_agent/planning/target_bindings.py','src/gui_agent/planning/planner.py',
+        'scripts/week6_audit_semantic_acceptance.py','tests/test_week6_target_bindings.py',
+        'tests/test_week6_target_bindings_review.py','tests/test_week6_observed_queries.py',
+        'tests/test_week6_observed_queries_review.py'}
+    changed = {n for n in set(pins)|set(prior['code_pins']) if pins.get(n)!=prior['code_pins'].get(n)}
+    assert changed == expected and len(pins) == 274
+    for path in ('README.md','requirements-dev.txt','.gitattributes'):
+        assert sha(R/path) == sha(D/'source_before/auxiliary'/path)
+    for n in ('src/gui_agent/runtime/runner.py','src/gui_agent/runtime/action_adapter.py',
+              'src/gui_agent/planning/parser.py','src/gui_agent/planning/prompts.py',
+              'src/gui_agent/perception/grounding.py','src/gui_agent/planning/semantic_workflow.py'):
+        assert pins[n] == prior['code_pins'][n]
+
+    name='src/gui_agent/planning/target_bindings.py'
+    a,z=tree(OLD/name),tree(R/name)
+    common=[n.name for n in a.body if isinstance(n,ast.FunctionDef) and n.name!='apply_target_bindings']
+    assert all(canon(fn(a,n))==canon(fn(z,n)) for n in common)
+    af,zf=fn(a,'apply_target_bindings'),fn(z,'apply_target_bindings')
+    def chunk(f):
+        start=next(i for i,n in enumerate(f.body) if assigned(n,'variants'))+1
+        end=next(i for i,n in enumerate(f.body) if assigned(n,'ids'))
+        return start,end
+    ai,aj=chunk(af);zi,zj=chunk(zf)
+    assert len(af.body[ai:aj])==1 and isinstance(af.body[ai],ast.Expr)
+    assert len(zf.body[zi:zj])==2 and assigned(zf.body[zi],'queries') and isinstance(zf.body[zi+1],ast.If)
+    assert canon(zf.body[zi+1].test)==canon(ast.Name(id='queries',ctx=ast.Load()))
+    af.body[ai:aj]=[];zf.body[zi:zj]=[]
+    assert canon(af)==canon(zf)
+    z.body.remove(fn(z,'observed_query_contract'))
+    for n in list(z.body):
+        if any(assigned(n,k) for k in ('OBSERVED_QUERY_CONTRACT_VERSION','_QUERY_LIMITS','_QUERY_TOKEN')):
+            z.body.remove(n)
+        elif assigned(n,'TARGET_BINDING_SCHEMA_VERSION'):
+            assert n.value.value=='gui_agent.target_binding_schema.v2'
+            n.value=ast.Constant(value='gui_agent.target_binding_schema.v1')
+    remove_import(z,'re');remove_import(z,'islice')
+    assert canon(a)==canon(z)
+
+    name='src/gui_agent/planning/planner.py'
+    a,z=tree(OLD/name),tree(R/name)
+    remove_import(z,'observed_query_contract')
+    transform=RemoveQueryMetadata(True);z=transform.visit(z)
+    assert (transform.fields,transform.assignments)==(2,1) and canon(a)==canon(z)
+
+    name='tests/test_week6_target_bindings.py'
+    a,z=tree(OLD/name),tree(R/name)
+    remove_import(z,'observed_query_contract')
+    old_positive=fn(a,'test_text_only_id_only_visual_and_nonpoint_paths_remain_native_choices')
+    new_positive=fn(z,old_positive.name)
+    op=old_positive.decorator_list[0].args[1].elts
+    np=new_positive.decorator_list[0].args[1].elts
+    assert [canon(n) for n in np]==[canon(n) for n in op[2:]]
+    new_positive.decorator_list=deepcopy(old_positive.decorator_list)
+    negative=fn(z,'test_unobserved_text_only_queries_are_not_generation_candidates')
+    assert len(negative.decorator_list[0].args[1].elts)==2
+    assert isinstance(negative.body[0],ast.Assert) and isinstance(negative.body[0].test,ast.UnaryOp)
+    z.body.remove(negative)
+    current=fn(z,'test_union_is_positive_self_contained_and_does_not_close_other_arguments')
+    assert isinstance(current.body[-1],ast.Assert) and isinstance(current.body[-1].test,ast.UnaryOp)
+    current.body[-1].test=current.body[-1].test.operand
+    transform=RemoveQueryMetadata();z=transform.visit(z)
+    assert transform.fields==2 and canon(a)==canon(z)
+
+    name='tests/test_week6_target_bindings_review.py'
+    a,z=tree(OLD/name),tree(R/name)
+    function='test_review_standard_json_schema_preserves_legacy_nonpoint_text_only_id_only_and_unknown_visual_paths'
+    af,zf=fn(a,function),fn(z,function)
+    expected_function=deepcopy(af)
+    expected_function.body=ast.parse('accepted = Draft202012Validator(_schema(_snapshot())).is_valid(_native(text=text, arguments=arguments, action=action))\nassert accepted is (text != "A multiword textual query")').body
+    assert canon(zf)==canon(expected_function)
+    z.body[z.body.index(zf)]=af
+    assert canon(a)==canon(z)
+
+    name='scripts/week6_audit_semantic_acceptance.py'
+    a,z=tree(OLD/name),tree(R/name)
+    def guards(module):
+        return [canon(n) for n in sorted((n for n in ast.walk(module) if isinstance(n,ast.Call)
+            and isinstance(n.func,ast.Name) and n.func.id=='require'),key=lambda n:(n.lineno,n.col_offset))]
+    original,current=guards(a),guards(z);position=0
+    for guard in current:
+        if position<len(original) and guard==original[position]:position+=1
+    assert len(original)==169 and position==169
+    z.body.remove(fn(z,'independent_observed_query_contract'))
+    z.body.remove(fn(z,'audit_observed_query_contract'))
+    z.body[z.body.index(fn(z,'audit_action_attempts'))]=fn(a,'audit_action_attempts')
+    remove_import(z,'re')
+    assert canon(a)==canon(z)
+    validation=json.loads((D/'root_affected_validation_001/validation.json').read_text('utf-8'))
+    assert validation['checks_passed'] is True
+    assert pins==json.loads((D/'root_affected_validation_001/tested_code_pins_after.json').read_text('utf-8'))
+    proofs=['migration_proof_001.json','source_delta_proof_001.json',
+        'producer_validation_001/audit.json','review_cpu_validation_001/validation.json',
+        'review_change_scope_audit_001.json']
+    review={'schema':'week6.observed_query_constraints.root_scope_review.v1',
+        'reviewed_utc':datetime.now(UTC).isoformat(),'reviewer':'Root Codex agent; not human sign-off',
+        'prior_freeze_sha256':sha(prior_file),'archive_sha256':sha(D/'source_before_manifest.json'),
+        'changed_paths':sorted(changed),'current_code_pins':pins,
+        'original_runtime_guards_unchanged':True,'original_auditor_require_guards_preserved_in_order':True,
+        'auditor_original_require_count':169,'auditor_current_require_count':len(current),
+        'legacy_test_migrations_recomputed':True,'helper_original_functions_AST_exact':common,
+        'helper_old_ID_visual_full_label_and_branch_factory_AST_exact':True,
+        'planner_only_query_metadata_addition_AST_recomputed':True,
+        'reviewed_proofs':[{'path':str(D/p),'sha256':sha(D/p)} for p in proofs],
+        'root_review_harness_sha256':sha(Path(__file__)),
+        'approved_for_fresh_experiment':True,'model_gui_acceptance':False,
+        'limits':'Finite generation sublanguage only. No proof of model selection, OS input or task success; fresh normal/transient remain required.'}
+    out=D/'root_scope_review_001.json'
+    with out.open('x',encoding='utf-8') as f:json.dump(review,f,ensure_ascii=False,indent=2)
+    print(json.dumps({'path':str(out),'sha256':sha(out),'pins':len(pins),'guards':len(current)}))
+
+
+if __name__=='__main__':
+    main()

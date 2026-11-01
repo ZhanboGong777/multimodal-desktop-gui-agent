@@ -1,0 +1,701 @@
+"""Independent CPU counterexamples for the new Week6 acceptance contract.
+
+All observations, model replies and executors below are offline doubles. These
+tests verify control flow and evidence boundaries; they do not establish real
+window success or the semantic adequacy of a live model's decomposition.
+"""
+
+from __future__ import annotations
+
+import importlib.util
+import json
+from pathlib import Path
+
+import pytest
+from test_week6_automatic_decomposition import _frame
+from test_week6_rolling_actions import options, plan
+from test_week6_semantic_subtasks import lab, proposal
+
+from gui_agent.planning import semantic_workflow as semantic
+from gui_agent.runtime.monitoring import read_run_status
+from gui_agent.runtime.schemas import ObservationSnapshot, VerificationResult
+
+
+def _audit_files(directory: Path):
+    return sorted(directory.glob("goal_*/001_*/semantic_goal_audit.json"))
+
+
+def test_review_bare_drag_is_a_primitive_name_not_a_semantic_objective():
+    with pytest.raises(ValueError, match="semantic|primitive"):
+        semantic.SemanticGoal(goal_id="BarePrimitive", instruction="drag", expect_text=["Changed"])
+
+
+@pytest.mark.parametrize("identity", ["id", "instruction", "checks"])
+def test_review_completed_objective_cannot_be_reintroduced_under_partial_renaming(identity):
+    original = json.loads(proposal())["subgoals"][0]
+    changed = {**original, "goal_id": "NewIdentity", "instruction": "Complete a renamed semantic objective",
+               "expect_text": ["New postcondition"]}
+    if identity == "id":
+        changed["goal_id"] = original["goal_id"].lower()
+    elif identity == "instruction":
+        changed["instruction"] = original["instruction"].upper()
+    else:
+        changed["expect_text"] = [text.upper() for text in original["expect_text"]]
+    parsed = semantic.SemanticPlan.model_validate(json.loads(proposal(changed)))
+    request = semantic.WorkflowRequest(instruction="Set preference and persist it", expect_text=["Final accepted"])
+    with pytest.raises(ValueError, match="completed"):
+        semantic.SemanticDecomposer()._validate(parsed, request, _frame("before", ["Pending"]),
+                                               [original], revision=True)
+
+
+def test_review_failed_semantic_goal_is_not_rescued_by_visible_caller_final(tmp_path):
+    native = json.loads(proposal())
+    native["subgoals"][1]["expect_text"] = ["Never observed objective result"]
+    runner, request, state, client, _ = lab(tmp_path,
+        responses=[json.dumps(native), plan(), plan()], rounds=3, goal_calls=1)
+    request.expect_text.append("Never observed objective result")
+    observe = runner.initial_observer
+
+    def final_appears_only_after_failed_goal(directory):
+        frame = observe(directory)
+        if directory.name.startswith("revision_observation_"):
+            extra = frame.elements[0].model_copy(update={
+                "element_id": f"{frame.observation_id}-e999", "text": "Never observed objective result"})
+            frame.elements.append(extra)
+        return frame
+
+    runner.initial_observer = final_appears_only_after_failed_goal
+    result = runner.run(request, options())
+    assert state.stage == 2
+    revision = json.loads((tmp_path / "semantic/revision_observation_001/observation.json").read_text("utf8"))
+    assert semantic.Verifier().check_task(semantic._final_task(request),
+        ObservationSnapshot.model_validate(revision)).passed
+    assert result.status != "succeeded" and result.final_verification is None
+    assert [entry["status"] for entry in result.goal_outcomes] == ["succeeded", "failed"]
+    assert [entry["goal_id"] for entry in result.completed_subgoals] == ["SetPreference"]
+    assert result.total_actions == state.attempts == 2
+    assert result.model_requests == result.planning_calls == len(client.calls) == 3
+    assert len(result.plans) == 1  # No post-hoc rewriting or retry of the failed plan.
+
+
+def test_review_raw_action_prediction_failure_does_not_rewrite_the_semantic_goal(tmp_path):
+    native_action = json.loads(plan())
+    native_action["steps"][0]["expected_result"] = "Model predicted text that never exists"
+    runner, request, state, client, _ = lab(tmp_path,
+        responses=[proposal(), json.dumps(native_action), json.dumps(native_action)])
+    result = runner.run(request, options())
+    assert result.status == "succeeded" and state.attempts == 2
+    assert result.planning_calls == len(client.calls) == 3
+    audits = [json.loads(path.read_text("utf8")) for path in _audit_files(tmp_path / "semantic")]
+    assert len(audits) == 2
+    for audit in audits:
+        assert audit["eligible_for_semantic_credit"]
+        assert audit["semantic_postcondition_verification"]["outcome"] == "passed"
+        assert audit["steps"][0]["verification"]["outcome"] == "failed"
+        assert audit["frozen_task"]["expect_text"] != [native_action["steps"][0]["expected_result"]]
+
+
+def test_review_delegate_verifier_cannot_supply_false_semantic_success(tmp_path):
+    native = json.loads(proposal())
+    native["subgoals"][0]["expect_text"] = ["Never observed objective result"]
+    runner, request, state, _, _ = lab(tmp_path,
+        responses=[json.dumps(native), plan()], goal_calls=1)
+    request.expect_text.append("Never observed objective result")
+    factory = runner.runner_factory
+
+    class LyingVerifier(semantic.Verifier):
+        def check_task(self, _task, observation):
+            return VerificationResult(outcome="passed", evidence={"observation_id": observation.observation_id})
+
+    def wrapped(task, index, directory, client):
+        child = factory(task, index, directory, client)
+        child.verifier = LyingVerifier()
+        return child
+
+    runner.runner_factory = wrapped
+    result = runner.run(request, options())
+    assert result.status != "succeeded" and not result.completed_subgoals
+    assert result.total_actions == state.attempts == 1
+
+
+def test_review_factory_cannot_replace_a_frozen_goal_with_preexisting_context(tmp_path):
+    runner, request, state, client, _ = lab(tmp_path)
+    factory = runner.runner_factory
+
+    def wrapped(task, index, directory, budgeted):
+        task.expect_text[:] = ["Advance control"]
+        return factory(task, index, directory, budgeted)
+
+    runner.runner_factory = wrapped
+    result = runner.run(request, options())
+    assert result.status != "succeeded" and not result.completed_subgoals
+    assert state.attempts == result.total_actions == 0
+    assert len(client.calls) == result.model_requests == result.planning_calls == 1
+
+
+def test_review_caller_owned_request_alias_is_not_a_way_to_change_final_mid_run(tmp_path):
+    runner, request, state, _, _ = lab(tmp_path)
+    original = request.model_copy(deep=True)
+
+    def callback(_event):
+        request.expect_text[:] = ["Never accepted by frozen caller request"]
+        request.forbid_text.clear()
+
+    result = runner.run(request, options(), on_decomposition=callback)
+    assert result.status == "succeeded" and state.attempts == 2
+    stored = json.loads((tmp_path / "semantic/semantic_request.json").read_text("utf8"))
+    assert stored["caller_request"] == original.model_dump(mode="json")
+    final = json.loads((tmp_path / "semantic/semantic_plan_round_001/compiled_workflow.json").read_text("utf8"))
+    assert final["workflow"]["final_check"]["expect_text"] == original.expect_text
+    assert final["workflow"]["final_check"]["forbid_text"] == original.forbid_text
+
+
+def test_review_decomposition_result_write_failure_preserves_consumed_counts(tmp_path, monkeypatch):
+    runner, request, state, client, _ = lab(tmp_path)
+    write = semantic._write_new_json
+
+    def fail_final_plan_record(path, value):
+        if path.name == "result.json" and path.parent.name.startswith("semantic_plan_round_"):
+            raise PermissionError("independent injected result persistence fault")
+        return write(path, value)
+
+    monkeypatch.setattr(semantic, "_write_new_json", fail_final_plan_record)
+    result = runner.run(request, options())
+    assert result.status != "succeeded" and state.attempts == 0
+    assert result.model_requests == result.planning_calls == len(client.calls) == 1
+    assert "persist" in result.error.lower() or "audit" in result.error.lower()
+
+
+@pytest.mark.parametrize("kind", ["goal_audit", "goal_ledger", "root_summary"])
+def test_review_post_input_persistence_failure_keeps_known_receipts_without_success(tmp_path, monkeypatch, kind):
+    runner, request, state, client, _ = lab(tmp_path)
+    if kind == "goal_audit":
+        original = semantic._write_new_json
+
+        def write(path, value):
+            if path.name == "semantic_goal_audit.json":
+                raise PermissionError("independent injected semantic goal audit fault")
+            return original(path, value)
+
+        monkeypatch.setattr(semantic, "_write_new_json", write)
+    else:
+        original = semantic._write_json
+        target = "semantic_goal_ledger.json" if kind == "goal_ledger" else "automatic_workflow_summary.json"
+
+        def write(path, value):
+            if path.name == target:
+                raise PermissionError("independent injected root record fault")
+            return original(path, value)
+
+        monkeypatch.setattr(semantic, "_write_json", write)
+    result = runner.run(request, options())
+    assert result.status != "succeeded"
+    assert result.total_actions == state.attempts > 0
+    assert result.model_requests == result.planning_calls == len(client.calls)
+    assert all(child.planner.max_steps == 7 and "plan" not in child.planner.__dict__ for child in state.children)
+
+
+def test_review_callback_keyboard_interrupt_does_not_erase_confirmed_inputs_or_replay(tmp_path):
+    runner, request, state, client, _ = lab(tmp_path, rounds=3)
+
+    def interrupt(event):
+        if event["actions"]:
+            raise KeyboardInterrupt
+
+    result = runner.run(request, options(), on_checkpoint=interrupt)
+    assert result.status == "cancelled"
+    assert result.total_actions == state.attempts == 1
+    assert result.model_requests == result.planning_calls == len(client.calls) == 2
+    assert len(result.plans) == 1 and not result.completed_subgoals
+    assert state.children[0].planner.max_steps == 7 and "plan" not in state.children[0].planner.__dict__
+
+
+def test_review_duplicate_json_keys_are_not_normalized_into_an_accepted_plan(tmp_path):
+    native = proposal().replace('"status": "ready"', '"status": "refused", "status": "ready"')
+    runner, request, state, client, _ = lab(tmp_path, responses=[native])
+    result = runner.run(request, options())
+    assert result.status != "succeeded" and state.attempts == 0 and not result.completed_subgoals
+    assert result.planning_calls == len(client.calls) == 1
+    saved = json.loads((tmp_path / "semantic/semantic_plan_round_001/attempt_01_response.json").read_text("utf8"))
+    assert saved["content"] == native
+    assert "duplicate" in result.plans[0].error.lower()
+
+
+def test_review_unsupported_schema_transport_does_not_spend_http_or_input(tmp_path):
+    runner, request, state, client, _ = lab(tmp_path)
+    client.supports_strict_json_schema = False
+    result = runner.run(request, options())
+    assert result.status != "succeeded" and state.attempts == 0
+    assert result.model_requests == result.planning_calls == len(client.calls) == 0
+
+
+def test_review_wait_receipt_alone_is_not_semantic_input_credit(tmp_path):
+    action = json.loads(plan())
+    action["steps"][0].update(action_type="wait", target_text="", arguments={"seconds": 0.01})
+    runner, request, state, _, _ = lab(tmp_path,
+        responses=[proposal(), json.dumps(action)], goal_calls=1)
+    result = runner.run(request, options())
+    assert state.stage == 1  # Even an independently changed screen does not make wait an OS input.
+    assert result.status != "succeeded" and not result.completed_subgoals
+    audit = json.loads(_audit_files(tmp_path / "semantic")[0].read_text("utf8"))
+    assert audit["confirmed_input_count"] == 0 and not audit["eligible_for_semantic_credit"]
+
+
+def test_review_two_primitive_steps_cannot_escape_the_one_step_planning_contract(tmp_path):
+    runner, request, state, client, _ = lab(tmp_path, responses=[proposal(), plan(2)])
+    result = runner.run(request, options())
+    assert result.status != "succeeded" and state.attempts == 0
+    assert result.planning_calls == result.model_requests == len(client.calls) == 2
+    assert state.children[0].planner.max_steps == 7 and "plan" not in state.children[0].planner.__dict__
+
+
+@pytest.mark.parametrize("reuse", ["time", "path", "id"])
+def test_review_child_reused_capture_provenance_stops_before_credit(tmp_path, reuse):
+    runner, request, state, client, _ = lab(tmp_path, rounds=3)
+    factory = runner.runner_factory
+
+    def wrapped(task, index, directory, budgeted):
+        child = factory(task, index, directory, budgeted)
+        capture, prior = child.observer.observe, []
+
+        def observe(**kwargs):
+            frame = capture(**kwargs)
+            if prior and state.attempts:
+                if reuse == "time":
+                    frame.captured_at = prior[0].captured_at
+                elif reuse == "path":
+                    frame.image_path = prior[0].image_path
+                else:
+                    frame.observation_id = prior[0].observation_id
+            prior.append(frame.model_copy(deep=True))
+            return frame
+
+        child.observer.observe = observe
+        return child
+
+    runner.runner_factory = wrapped
+    result = runner.run(request, options())
+    assert result.status != "succeeded" and not result.completed_subgoals
+    assert result.total_actions == state.attempts == 1
+    assert len(result.plans) == 1 and len(client.calls) == result.model_requests == 2
+
+
+def test_review_root_monitor_agrees_with_verified_goal_ledger_and_shared_counts(tmp_path):
+    runner, request, state, _, _ = lab(tmp_path)
+    result = runner.run(request, options())
+    assert result.status == "succeeded"
+    directory = tmp_path / "semantic"
+    status = read_run_status(directory)
+    final = status["snapshot"]
+    assert final["subgoals_total"] == final["subgoals_completed"] == len(result.completed_subgoals) == 2
+    assert final["actions_used"] == result.total_actions == state.attempts
+    assert final["planning_pass"] == result.planning_calls
+    events = [json.loads(line) for line in (directory / "status_events.jsonl").read_text("utf8").splitlines()]
+    active_ids = {entry["subgoal_id"] for entry in events if entry["subgoal_id"]}
+    assert active_ids == {"SetPreference", "PersistConfig"}
+    assert all(entry["subgoals_total"] >= entry["subgoals_completed"] for entry in events)
+    assert any(entry["subgoals_completed"] == 1 for entry in events)
+    assert final["event"] == "finished" and final["task_status"] == result.status
+
+
+def test_review_monitor_revision_keeps_confirmed_goal_count_monotonic(tmp_path):
+    original = json.loads(proposal())
+    original["subgoals"][1]["expect_text"] = ["Unobserved former objective"]
+    revised = proposal({"goal_id": "Remaining", "instruction": "Persist the remaining approved configuration",
+                        "expect_text": ["Verified part 3"], "forbid_text": []})
+    runner, request, state, _, _ = lab(tmp_path,
+        responses=[json.dumps(original), plan(), plan(), revised, plan()], rounds=2, goal_calls=1,
+        extra_text_at_stage={3: ["Unobserved former objective"]})
+    request.expect_text.extend(["Verified part 3", "Unobserved former objective"])
+    result = runner.run(request, options())
+    assert result.status == "succeeded" and state.attempts == 3
+    events = [json.loads(line) for line in (tmp_path / "semantic/status_events.jsonl").read_text("utf8").splitlines()]
+    completed = [event["subgoals_completed"] for event in events]
+    assert completed == sorted(completed) and completed[-1] == len(result.completed_subgoals) == 2
+    assert all(event["subgoals_total"] >= event["subgoals_completed"] for event in events)
+    assert events[-1]["actions_used"] == result.total_actions
+    assert events[-1]["planning_pass"] == result.planning_calls
+    saved = json.loads((tmp_path / "semantic/semantic_plan_round_002/attempt_01_request.json").read_text("utf8"))
+    assert "current_observation" not in saved["context"] and saved["image_path"] is None
+    failure = saved["context"]["failure"]
+    assert set(failure) == {"category", "failed_goal", "predicate_feedback", "required_revision"}
+    assert failure["category"] == "semantic_postconditions_unsatisfied"
+    assert failure["failed_goal"] == original["subgoals"][1]
+    assert failure["predicate_feedback"] == {
+        "missing_expected_text": ["Unobserved former objective"], "present_forbidden_text": None,
+        "present_expected_text": []}
+    assert "caller request has not changed" in failure["required_revision"]
+    assert all(set(entry) == {"goal_id", "instruction", "expect_text", "forbid_text"}
+               for entry in saved["context"]["completed_subgoals"])
+    archived = json.loads((tmp_path / "semantic/semantic_plan_round_002/context_source_archive.json").read_text("utf8"))
+    assert archived["failure"] == result.goal_outcomes[1]
+    assert archived["completed_subgoals"] == [result.completed_subgoals[0]]
+
+
+@pytest.fixture
+def audit_reader():
+    source = Path(__file__).resolve().parents[1] / "scripts/week6_audit_semantic_acceptance.py"
+    spec = importlib.util.spec_from_file_location("independent_semantic_live_auditor", source)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_audit_reader_rejects_cross_run_evidence_even_if_the_other_file_exists(tmp_path, audit_reader):
+    container = tmp_path / "selected"
+    (container / "run").mkdir(parents=True)
+    other = tmp_path / "other_run.json"
+    other.write_text('{"passed":true}', encoding="utf8")
+    evidence = audit_reader.Evidence(container)
+    with pytest.raises(audit_reader.AuditError, match="escaped"):
+        evidence.load(other)
+    assert evidence.files == {}
+
+
+def test_audit_reader_does_not_repair_duplicate_json_keys(tmp_path, audit_reader):
+    container = tmp_path / "selected"
+    (container / "run").mkdir(parents=True)
+    target = container / "run/record.json"
+    target.write_text('{"status":"failed","status":"succeeded"}', encoding="utf8")
+    with pytest.raises(audit_reader.AuditError, match="duplicate"):
+        audit_reader.Evidence(container).load(target)
+
+
+def test_audit_reader_detects_source_evidence_changes_during_one_read_session(tmp_path, audit_reader):
+    container = tmp_path / "selected"
+    (container / "run").mkdir(parents=True)
+    target = container / "run/record.json"
+    target.write_text('{"counter":1}', encoding="utf8")
+    evidence = audit_reader.Evidence(container)
+    assert evidence.load(target) == {"counter": 1}
+    target.write_text('{"counter":2}', encoding="utf8")
+    with pytest.raises(audit_reader.AuditError, match="changed_while"):
+        evidence.load(target)
+
+
+def test_audit_reader_requires_real_owner_receipt_before_reading_a_fixture(tmp_path, audit_reader):
+    container = tmp_path / "selected"
+    (container / "run").mkdir(parents=True)
+    (container / "run/acceptance_observed.json").write_text('{"runtime_pass":true}', encoding="utf8")
+    evidence = audit_reader.Evidence(container)
+    with pytest.raises(audit_reader.AuditError, match="missing_evidence:owner_claim"):
+        audit_reader.audit(container, tmp_path / "not_read_owner.py", tmp_path / "not_read_fixture", evidence)
+    assert not any("fixture" in name for name in evidence.files)
+
+
+@pytest.mark.parametrize("code", [None, False, 1, 15])
+def test_audit_reader_rejects_unknown_boolean_or_nonzero_child_exit(tmp_path, audit_reader, code):
+    container = tmp_path / "selected"
+    (container / "run").mkdir(parents=True)
+    for name, value in {
+        "owner_claim.json": {"schema": "week6.semantic.live.claim.v1"},
+        "owner_start.json": {},
+        "owner_receipt.json": {"schema": "week6.semantic.live.actual_exit.v1", "child_exit_code": code},
+    }.items():
+        (container / name).write_text(json.dumps(value), encoding="utf8")
+    (container / "stdout.txt").write_text("retained ended output", encoding="utf8")
+    with pytest.raises(audit_reader.AuditError, match="real_exit_zero"):
+        audit_reader.owner_audit(audit_reader.Evidence(container), tmp_path / "unread_owner.py", tmp_path / "unread_fixture")
+
+
+@pytest.mark.parametrize("large", [False, True])
+def test_audit_reader_v2_repair_keeps_full_archive_and_exact_context_binding(tmp_path, audit_reader, large):
+    container = tmp_path / "selected"
+    directory = container / "run/automatic/semantic_plan_round_001"
+    directory.mkdir(parents=True)
+    content = "original reply " * (200 if large else 2)
+    response_path = directory / "attempt_01_response.json"
+    response_path.write_text(json.dumps({"content": content}), encoding="utf8")
+    (directory / "attempt_01_error.json").write_text('{"error":"constraint rejected"}', encoding="utf8")
+    context = {"previous_response_record": str(response_path.resolve()),
+               "previous_response_characters": len(content), "constraint_error": "constraint rejected"}
+    if not large:
+        context["previous_response"] = content
+    evidence = audit_reader.Evidence(container)
+    audit_reader.audit_repair_context(evidence, directory, 2, context)
+    assert len(evidence.files) == 2
+    assert json.loads(response_path.read_text("utf8"))["content"] == content
+
+
+@pytest.mark.parametrize("tamper", ["path", "count", "large_inline", "error", "small_missing"])
+def test_audit_reader_v2_repair_rejects_unbound_or_silently_truncated_context(tmp_path, audit_reader, tamper):
+    container = tmp_path / "selected"
+    directory = container / "run/automatic/semantic_plan_round_001"
+    directory.mkdir(parents=True)
+    content = "original reply " * (200 if tamper == "large_inline" else 2)
+    response_path = directory / "attempt_01_response.json"
+    response_path.write_text(json.dumps({"content": content}), encoding="utf8")
+    (directory / "attempt_01_error.json").write_text('{"error":"constraint rejected"}', encoding="utf8")
+    context = {"previous_response_record": str(response_path.resolve()),
+               "previous_response_characters": len(content), "constraint_error": "constraint rejected",
+               "previous_response": content}
+    if tamper == "path":
+        context["previous_response_record"] = str(tmp_path / "another-run.json")
+    elif tamper == "count":
+        context["previous_response_characters"] -= 1
+    elif tamper == "error":
+        context["constraint_error"] = "a different rejection"
+    elif tamper == "small_missing":
+        context.pop("previous_response")
+    with pytest.raises(audit_reader.AuditError):
+        audit_reader.audit_repair_context(audit_reader.Evidence(container), directory, 2, context)
+
+
+def test_audit_reader_v2_mapping_separates_raw_whitespace_from_validated_instruction(audit_reader):
+    native = json.loads(proposal())
+    native["subgoals"][0]["instruction"] = "  Set the requested preference  "
+    parsed = semantic.SemanticPlan.model_validate(native)
+    request = semantic.WorkflowRequest(instruction="Set preference and persist it", expect_text=["Final accepted"])
+    tasks = [semantic._goal_task(goal, request) for goal in parsed.subgoals]
+    mapping = audit_reader.expected_native_mapping(native, parsed, tasks)
+    assert mapping[0]["native_instruction"] == "  Set the requested preference  "
+    assert mapping[0]["validated_instruction"] == "Set the requested preference"
+    assert mapping[0]["compiled_instruction"] == tasks[0].instruction
+
+
+def _text_binding_arguments():
+    frame = _frame("original", ["Original complete element evidence"])
+    frame.image_path = "/original/frame.png"
+    saved = {"input_modality": "caller_intent_only", "image_attached": False, "image_path": None,
+             "snapshot_image_path_provenance": frame.image_path,
+             "context": {"original_caller_request": {}, "minimum_objectives": 2, "maximum_objectives": 8,
+                         "revision": False, "completed_subgoals": [], "failure": None,
+                         "input_modality": "caller_intent_only", "image_attached": False}}
+    protocol = {"input_modality": "caller_intent_only", "image_attached": False,
+                "snapshot_image_path_provenance": frame.image_path, "snapshot_sent_to_model": False}
+    record = {"input_modality": "caller_intent_only", "image_attached": False}
+    return saved, protocol, record, frame, frame.model_dump(mode="json")
+
+
+def test_audit_reader_v5_intent_input_preserves_snapshot_only_in_archive(audit_reader):
+    saved, protocol, record, frame, archived = _text_binding_arguments()
+    audit_reader.audit_highlevel_intent_binding(saved, protocol, record, frame, archived)
+    call = {"kind": "semantic_decomposition", "image_path": None}
+    messages = [{"role": "user", "content": json.dumps({"instruction": "Original caller",
+        "context": saved["context"]})}]
+    audit_reader.audit_message_modality(call, messages)
+    assert "current_observation" not in saved["context"]
+    assert archived["image_path"] == frame.image_path
+
+
+@pytest.mark.parametrize("tamper", ["pixels", "flag", "modality", "provenance", "snapshot"])
+def test_audit_reader_v5_rejects_faked_intent_flags_or_dropped_archive_evidence(audit_reader, tamper):
+    saved, protocol, record, frame, archived = _text_binding_arguments()
+    if tamper == "pixels":
+        saved["image_path"] = frame.image_path
+    elif tamper == "flag":
+        saved["context"]["image_attached"] = True
+    elif tamper == "modality":
+        record["input_modality"] = "other"
+    elif tamper == "provenance":
+        saved["snapshot_image_path_provenance"] = "/another/frame.png"
+    else:
+        archived["elements"] = []
+    with pytest.raises(audit_reader.AuditError):
+        audit_reader.audit_highlevel_intent_binding(saved, protocol, record, frame, archived)
+
+
+@pytest.mark.parametrize("path", [None, "", "/another/frame.png"])
+def test_audit_reader_v3_lowlevel_cannot_drop_or_borrow_the_action_image(audit_reader, path):
+    frame = _frame("original", ["Actual current action target"])
+    frame.image_path = "/original/frame.png"
+    with pytest.raises(audit_reader.AuditError, match="actual_saved_image"):
+        audit_reader.audit_lowlevel_image_binding({"image_path": path}, frame)
+
+
+@pytest.mark.parametrize("kind,image_path,payload", [
+    ("semantic_decomposition", None, {"image_path": "/unexpected.png"}),
+    ("primitive_action_plan", "/actual.png", {"instruction": "Image missing"}),
+])
+def test_audit_reader_v3_preencoding_message_cannot_switch_modalities(audit_reader, kind, image_path, payload):
+    with pytest.raises(audit_reader.AuditError):
+        audit_reader.audit_message_modality({"kind": kind, "image_path": image_path},
+            [{"role": "user", "content": json.dumps(payload)}])
+
+
+@pytest.mark.parametrize("marker", ["[not specified]", "[UNKNOWN]", "<TBD>"])
+def test_review_v5_reserved_unresolved_literal_stops_before_observation_and_http(tmp_path, marker):
+    runner, request, state, client, _ = lab(tmp_path)
+    request.instruction += " " + marker
+    result = runner.run(request, options())
+    assert result.status == "needs_clarification" and not result.plans
+    assert state.captures == state.attempts == result.total_actions == result.model_requests == 0
+    assert not client.calls
+    preflight = json.loads((tmp_path / "semantic/semantic_preflight.json").read_text("utf8"))
+    assert not preflight["supported"] and "reserved" in preflight["issue"]
+    assert not (tmp_path / "semantic/initial_observation").exists()
+
+
+@pytest.mark.parametrize("tamper", ["whitespace", "unknown_predicate", "opposite_polarity"])
+def test_review_v6_predicted_source_changes_without_removing_runtime_or_conflict_checks(tmp_path, tamper):
+    native = json.loads(proposal())
+    goal = native["subgoals"][0]
+    if tamper == "whitespace":
+        goal["expect_text"] = [" Verified part 1 "]
+    elif tamper == "unknown_predicate":
+        goal["expect_text"] = ["Predicted future label"]
+    else:
+        goal["expect_text"], goal["forbid_text"] = [], ["Verified part 1"]
+    runner, request, state, client, _ = lab(tmp_path,
+        responses=[json.dumps(native), plan()], goal_calls=1)
+    result = runner.run(request, options())
+    assert result.status != "succeeded" and not result.completed_subgoals
+    if tamper == "unknown_predicate":
+        assert state.attempts == result.total_actions == 1 and len(state.children) == 1
+        assert result.planning_calls == result.model_requests == len(client.calls) == 2
+        audit = json.loads(_audit_files(tmp_path / "semantic")[0].read_text("utf8"))
+        assert audit["frozen_task"]["expect_text"] == ["Predicted future label"]
+        assert audit["semantic_postcondition_verification"]["outcome"] == "failed"
+        assert not audit["eligible_for_semantic_credit"]
+    else:
+        assert state.attempts == result.total_actions == 0 and not state.children
+        assert result.planning_calls == result.model_requests == len(client.calls) == 1
+        if tamper == "whitespace":
+            assert "stripping" in result.plans[0].error
+        else:
+            assert "conflicts with immutable caller final" in result.plans[0].error
+    saved = json.loads((tmp_path / "semantic/semantic_plan_round_001/attempt_01_response.json").read_text("utf8"))
+    assert saved["content"] == json.dumps(native)
+
+
+def test_review_v5_multiple_final_predicates_do_not_prove_multiple_stage_boundaries(tmp_path):
+    native = json.loads(proposal())
+    native["subgoals"][0]["expect_text"] = ["Verified part 2"]
+    native["subgoals"][1]["expect_text"] = ["Final accepted"]
+    runner, request, state, client, _ = lab(tmp_path,
+        responses=[json.dumps(native), plan(), plan()])
+    result = runner.run(request, options())
+    assert result.status == "blocked" and state.attempts == result.total_actions == 2
+    assert len(result.completed_subgoals) == 1 and len(client.calls) == 3
+    before = json.loads((tmp_path / "semantic/contract_before_001_002/observation.json").read_text("utf8"))
+    assert semantic.Verifier().check_task(semantic._final_task(request),
+        ObservationSnapshot.model_validate(before)).passed
+    assert result.final_verification is None  # No false second-stage credit from the now-complete screen.
+
+
+@pytest.mark.parametrize("tamper", ["snapshot", "completed", "failure", "archive_flag"])
+def test_audit_reader_v5_rejects_runtime_evidence_leaking_into_intent_context(audit_reader, tamper):
+    saved, protocol, record, frame, archived = _text_binding_arguments()
+    if tamper == "snapshot":
+        saved["context"]["current_observation"] = archived
+    elif tamper == "completed":
+        saved["context"]["completed_subgoals"] = [{"goal_id": "G", "instruction": "Configure",
+            "expect_text": ["Expected"], "forbid_text": [], "verification": {"observation_id": "hidden"}}]
+    elif tamper == "failure":
+        saved["context"]["failure"] = {"category": "failed", "observation": archived}
+    else:
+        protocol["snapshot_sent_to_model"] = True
+    with pytest.raises(audit_reader.AuditError):
+        audit_reader.audit_highlevel_intent_binding(saved, protocol, record, frame, archived)
+
+
+@pytest.mark.parametrize("tamper", [None, "pixels", "failure", "relative_escape"])
+def test_audit_reader_v5_archived_pixels_and_runtime_sources_are_independently_bound(tmp_path, audit_reader, tamper):
+    container = tmp_path / "selected"
+    directory = container / "run/automatic/semantic_plan_round_001"
+    directory.mkdir(parents=True)
+    image = container / "run/observed.png"
+    image.write_bytes(b"offline pixel provenance double")
+    frame = _frame("original", ["Observed evidence"])
+    frame.image_path = str(image)
+    (directory / "snapshot_archive.json").write_text(json.dumps(frame.model_dump(mode="json")), encoding="utf8")
+    (directory / "snapshot_pixels.png").write_bytes(image.read_bytes())
+    source = {"completed_subgoals": [], "failure": None, "snapshot_archive": "snapshot_archive.json",
+        "snapshot_pixels_archive": "snapshot_pixels.png", "snapshot_pixels_sha256": audit_reader.sha(image),
+        "snapshot_pixels_source_status": "copied_byte_exact", "sent_to_high_level_model": False}
+    if tamper == "pixels":
+        (directory / "snapshot_pixels.png").write_bytes(b"different pixels")
+    elif tamper == "failure":
+        source["failure"] = {"status": "failed"}
+    elif tamper == "relative_escape":
+        source["snapshot_pixels_archive"] = "../../observed.png"
+    (directory / "context_source_archive.json").write_text(json.dumps(source), encoding="utf8")
+    evidence = audit_reader.Evidence(container)
+    if tamper:
+        with pytest.raises(audit_reader.AuditError):
+            audit_reader.audit_snapshot_archive(evidence, directory, frame, [], None)
+    else:
+        assert audit_reader.audit_snapshot_archive(evidence, directory, frame, [], None) == frame.model_dump(mode="json")
+        assert len(evidence.files) == 4
+
+
+@pytest.mark.parametrize("tamper", [
+    "missing_array", "not_array", "not_string", "blank", "outer_whitespace", "too_long",
+    "too_many", "instruction_whitespace", "instruction_type", "extra_field",
+])
+def test_review_v6_raw_predictions_cannot_be_repaired_by_normalization(tmp_path, audit_reader, tamper):
+    native = json.loads(proposal())
+    goal = native["subgoals"][0]
+    if tamper == "missing_array":
+        del goal["forbid_text"]
+    elif tamper == "not_array":
+        goal["expect_text"] = "Verified part 1"
+    elif tamper == "not_string":
+        goal["expect_text"] = [True]
+    elif tamper == "blank":
+        goal["expect_text"] = ["   "]
+    elif tamper == "outer_whitespace":
+        goal["expect_text"] = [" Verified part 1 "]
+    elif tamper == "too_long":
+        goal["expect_text"] = ["X" * (semantic.SEMANTIC_CHECK_MAX_CHARACTERS + 1)]
+    elif tamper == "too_many":
+        goal["expect_text"] = [f"Independent state {index}" for index in range(semantic.SEMANTIC_CHECKS_PER_LIST + 1)]
+    elif tamper == "instruction_whitespace":
+        goal["instruction"] = " " + goal["instruction"] + " "
+    elif tamper == "instruction_type":
+        goal["instruction"] = 7
+    else:
+        goal["unattributed_field"] = "not part of the contract"
+    runner, request, state, client, _ = lab(tmp_path, responses=[json.dumps(native)])
+    with pytest.raises(audit_reader.AuditError):
+        audit_reader.audit_native_predicates(native, request)
+    result = runner.run(request, options())
+    assert result.status != "succeeded" and not state.children and not result.completed_subgoals
+    assert state.attempts == result.total_actions == 0
+    assert result.model_requests == result.planning_calls == len(client.calls) == 1
+    saved = json.loads((tmp_path / "semantic/semantic_plan_round_001/attempt_01_response.json").read_text("utf8"))
+    assert saved["content"] == json.dumps(native)
+
+
+@pytest.mark.parametrize("caller_final", ["Final accepted", "Caller-owned final status " + "X" * 201])
+def test_review_v6_one_caller_final_does_not_remove_distinct_goal_checks(tmp_path, audit_reader, caller_final):
+    native = json.loads(proposal())
+    prediction = "Exact State: value  7"
+    native["subgoals"][0]["expect_text"] = [prediction]
+    runner, request, state, client, _ = lab(tmp_path,
+        responses=[json.dumps(native), plan(), plan()],
+        extra_text_at_stage={1: [prediction], 2: [caller_final]})
+    request.expect_text = [caller_final]
+    audit_reader.audit_native_predicates(native, request)
+    result = runner.run(request, options())
+    assert result.status == "succeeded" and result.final_verification.passed
+    assert state.attempts == result.total_actions == 2
+    assert result.model_requests == result.planning_calls == len(client.calls) == 3
+    compiled = json.loads((tmp_path / "semantic/semantic_plan_round_001/compiled_workflow.json").read_text("utf8"))
+    assert compiled["workflow"]["final_check"]["expect_text"] == [caller_final]
+    assert compiled["workflow"]["subgoals"][0]["expect_text"] == [prediction]
+    protocol = json.loads((tmp_path / "semantic/semantic_plan_round_001/protocol.json").read_text("utf8"))
+    assert protocol["schema_version"] == "week6.semantic_subtasks.v6"
+    assert protocol["postcondition_source"] == "untrusted_model_prediction"
+    assert "predicate_pools" not in protocol
+    parsed = semantic.SemanticPlan.model_validate(native, strict=True)
+    assert parsed.model_dump(mode="json") == native  # Internal whitespace and casing stay exact.
+    for item, task in zip(native["subgoals"], state.tasks, strict=True):
+        assert task.expect_text == item["expect_text"] and task.forbid_text == item["forbid_text"]
+
+
+def test_review_v6_current_action_caption_alone_cannot_receive_progress_credit(tmp_path):
+    native = json.loads(proposal())
+    native["subgoals"][0]["expect_text"] = ["Advance control"]
+    runner, request, state, client, _ = lab(tmp_path, responses=[json.dumps(native)])
+    result = runner.run(request, options())
+    assert result.status != "succeeded" and not result.completed_subgoals and not state.children
+    assert state.attempts == result.total_actions == 0
+    assert result.model_requests == result.planning_calls == len(client.calls) == 1
+
+
+def test_review_v6_literal_substring_matching_does_not_resolve_negated_state_semantics():
+    request = semantic.WorkflowRequest(instruction="Persist configuration", expect_text=["Saved"])
+    frame = _frame("negated", ["Not saved"])
+    assert semantic.Verifier().check_task(semantic._final_task(request), frame).passed
+    # This documents the unchanged matcher limitation; it is not semantic evidence or GUI success.

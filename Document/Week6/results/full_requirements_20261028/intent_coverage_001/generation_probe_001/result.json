@@ -1,0 +1,45 @@
+{
+  "schema": "week6.intent_coverage.saved_messages_probe.v1",
+  "started_utc": "2026-11-01T05:28:51.393212+00:00",
+  "finished_utc": "2026-11-01T05:29:08.882799+00:00",
+  "elapsed_seconds": 17.485000000000582,
+  "http_status": 200,
+  "raw_response_sha256": "55f8ef94fffe892a502b21d01fe67085e6a7041f0e69967599320211fed45f5a",
+  "finish_reason": "stop",
+  "response_model": "gemma3:4b",
+  "usage": {
+    "prompt_tokens": 1783,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "completion_tokens": 92,
+    "total_tokens": 1875
+  },
+  "native_proposal": {
+    "status": "ready",
+    "reason": "Completed all steps to prepare, review, and commit the BLUE report for Project BETA locally.",
+    "subgoals": [
+      {
+        "instruction": "Prepare a BLUE report for project BETA, using visible controls. Ensure the report is saved locally.",
+        "expect_text": [
+          "Project BETA",
+          "Theme BLUE",
+          "LOCAL COMPLETE"
+        ],
+        "forbid_text": [],
+        "goal_id": "GOAL_1"
+      }
+    ]
+  },
+  "original_request_sha256": "4f004e22f48bcc29d070157bcc18833ce25195ffe93b88cf1701874036524645",
+  "current_source_and_readme_pins": {
+    "src/gui_agent/planning/semantic_workflow.py": "c030bcd3d5c67f4634c93625d9a3b839d2675727d843ae9f7ddaf89a9bc28ee1",
+    "README.md": "75571131da8053d9ddf0e28a8dae9688f86000758c7fd942879ef5150284cff0"
+  },
+  "source_and_readme_unchanged": true,
+  "only_system_generation_hint_changed": true,
+  "model_calls": 1,
+  "gui_captures": 0,
+  "gui_inputs": 0,
+  "task_acceptance_granted": false
+}

@@ -1,0 +1,22 @@
+{
+  "schema": "week6.live.bridge_diagnosis.v1",
+  "classification": "initial_observation_bridge_failure_before_model",
+  "computer_use_observation": {
+    "capture_attempts": 2,
+    "exact_error_both_attempts": "FrameArrived timed out: timed out waiting on channel",
+    "selection": "Exactly one current Week6 Local Lab window selected from Sky list_apps. Selection refreshed before the one permitted recovery retry.",
+    "activation_receipt_written": false,
+    "input_receipt_written": false,
+    "ui_input_after_failed_recovery": false
+  },
+  "runtime_evidence": "run/automatic/automatic_workflow_summary.json",
+  "owner_evidence": "owner_receipt.json",
+  "runtime_error": "RuntimeError: dedicated-window activation receipt missing",
+  "actual_owner_child_exit_code": 1,
+  "planning_calls": 0,
+  "model_requests": 0,
+  "actions": 0,
+  "unknown_inputs": 0,
+  "meaning": "The owner receipt and runtime record are original evidence. The two exact helper errors are recorded from the Computer Use tool results. No semantic-v4 model judgment was obtained; this is not counted as a semantic model-quality result.",
+  "next_action": "Await user foreground/capture recovery. Continue independent code verification. Do not reuse this ended run or fabricate activation/input receipts."
+}

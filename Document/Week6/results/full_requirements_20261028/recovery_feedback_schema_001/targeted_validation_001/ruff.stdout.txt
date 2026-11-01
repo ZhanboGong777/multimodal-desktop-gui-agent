@@ -1,0 +1,80 @@
+ISC004 Unparenthesized implicit string concatenation in collection
+   --> src\gui_agent\runtime\schemas.py:278:9
+    |
+276 |       # in this order. Saved records must round-trip without admitting free prose.
+277 |       instruction: Literal[
+278 | /         "Plan from the current observation; previous attempts do not prove success. "
+279 | |         "Do not replay completed inputs to recreate an earlier state. "
+280 | |         "Existing task checks and remaining budgets still apply.",
+    | |_________________________________________________________________^
+281 |           "Plan from the current observation; previous attempts do not prove success. "
+282 |           "Do not replay completed inputs to recreate an earlier state. "
+    |
+help: Did you forget a comma?
+help: Wrap implicitly concatenated strings in parentheses
+
+ISC004 Unparenthesized implicit string concatenation in collection
+   --> src\gui_agent\runtime\schemas.py:281:9
+    |
+279 |           "Do not replay completed inputs to recreate an earlier state. "
+280 |           "Existing task checks and remaining budgets still apply.",
+281 | /         "Plan from the current observation; previous attempts do not prove success. "
+282 | |         "Do not replay completed inputs to recreate an earlier state. "
+283 | |         "Existing task checks and remaining budgets still apply."
+284 | |         " The previous plan's target_text conflicted with its explicit element ID "
+285 | |         "or identified a container with ambiguous labels. No input was dispatched "
+286 | |         "for that rejected step. Use the current observation and select an ID "
+287 | |         "consistent with the same requested target; do not change the task goal.",
+    | |_________________________________________________________________________________^
+288 |           "Plan from the current observation; previous attempts do not prove success. "
+289 |           "Do not replay completed inputs to recreate an earlier state. "
+    |
+help: Did you forget a comma?
+help: Wrap implicitly concatenated strings in parentheses
+
+ISC004 Unparenthesized implicit string concatenation in collection
+   --> src\gui_agent\runtime\schemas.py:288:9
+    |
+286 |           "for that rejected step. Use the current observation and select an ID "
+287 |           "consistent with the same requested target; do not change the task goal.",
+288 | /         "Plan from the current observation; previous attempts do not prove success. "
+289 | |         "Do not replay completed inputs to recreate an earlier state. "
+290 | |         "Existing task checks and remaining budgets still apply."
+291 | |         " The rejected text-only target did not resolve to current OCR or adjacent words; "
+292 | |         "no input was dispatched for that step. Use only current allowed candidates. "
+293 | |         "If the target is visible in the screenshot without OCR, choose its matching "
+294 | |         "anonymous_without_ocr ID yourself; do not repeat unresolved text-only targeting. "
+295 | |         "If uncertain, return no steps with errors. Do not change the task goal.",
+    | |_________________________________________________________________________________^
+296 |           "Plan from the current observation; previous attempts do not prove success. "
+297 |           "Do not replay completed inputs to recreate an earlier state. "
+    |
+help: Did you forget a comma?
+help: Wrap implicitly concatenated strings in parentheses
+
+ISC004 Unparenthesized implicit string concatenation in collection
+   --> src\gui_agent\runtime\schemas.py:296:9
+    |
+294 |           "anonymous_without_ocr ID yourself; do not repeat unresolved text-only targeting. "
+295 |           "If uncertain, return no steps with errors. Do not change the task goal.",
+296 | /         "Plan from the current observation; previous attempts do not prove success. "
+297 | |         "Do not replay completed inputs to recreate an earlier state. "
+298 | |         "Existing task checks and remaining budgets still apply."
+299 | |         " The previous plan's target_text conflicted with its explicit element ID "
+300 | |         "or identified a container with ambiguous labels. No input was dispatched "
+301 | |         "for that rejected step. Use the current observation and select an ID "
+302 | |         "consistent with the same requested target; do not change the task goal."
+303 | |         " The rejected text-only target did not resolve to current OCR or adjacent words; "
+304 | |         "no input was dispatched for that step. Use only current allowed candidates. "
+305 | |         "If the target is visible in the screenshot without OCR, choose its matching "
+306 | |         "anonymous_without_ocr ID yourself; do not repeat unresolved text-only targeting. "
+307 | |         "If uncertain, return no steps with errors. Do not change the task goal.",
+    | |_________________________________________________________________________________^
+308 |       ] = (
+309 |           "Plan from the current observation; previous attempts do not prove success. "
+    |
+help: Did you forget a comma?
+help: Wrap implicitly concatenated strings in parentheses
+
+Found 4 errors.
+No fixes available (4 hidden fixes can be enabled with the `--unsafe-fixes` option).
